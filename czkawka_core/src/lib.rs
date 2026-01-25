@@ -9,4 +9,4 @@ pub mod re_exported {
 }
 
 pub const CZKAWKA_VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const TOOLS_NUMBER: usize = 13;
+pub const TOOLS_NUMBER: usize = 14;

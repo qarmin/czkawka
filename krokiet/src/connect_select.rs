@@ -81,6 +81,7 @@ fn set_select_buttons(app: &MainWindow) {
         | ActiveTab::InvalidSymlinks
         | ActiveTab::BrokenFiles
         | ActiveTab::BadExtensions
+        | ActiveTab::BadNames
         | ActiveTab::ExifRemover
         | ActiveTab::VideoOptimizer
         | ActiveTab::Settings

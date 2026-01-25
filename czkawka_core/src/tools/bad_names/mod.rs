@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
-
+use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
 use crate::flc;
@@ -131,6 +131,7 @@ impl Default for BadNamesParameters {
 pub struct BadNames {
     common_data: CommonToolData,
     information: Info,
+    files_to_check: Vec<FileEntry>,
     bad_names_files: Vec<BadNameEntry>,
     params: BadNamesParameters,
 }

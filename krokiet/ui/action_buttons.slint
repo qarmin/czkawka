@@ -37,6 +37,7 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> bad_names_model: [];
     in-out property <[MainListModel]> exif_remover_model: [];
     in-out property <[MainListModel]> video_optimizer_model: [];
 
@@ -62,6 +63,7 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.EmptyFiles && (GuiState.selected_results_empty_files > 0 || GuiState.selected_results_empty_files2 > 0)) ||
         (active_tab == ActiveTab.TemporaryFiles && (GuiState.selected_results_temporary_files > 0 || GuiState.selected_results_temporary_files2 > 0)) ||
         (active_tab == ActiveTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0)) ||
+        (active_tab == ActiveTab.BadNames && (GuiState.selected_results_bad_names > 0 || GuiState.selected_results_bad_names2 > 0)) ||
         (active_tab == ActiveTab.ExifRemover && (GuiState.selected_results_exif_remover > 0 || GuiState.selected_results_exif_remover2 > 0)) ||
         (active_tab == ActiveTab.VideoOptimizer && (GuiState.selected_results_video_optimizer > 0 || GuiState.selected_results_video_optimizer2 > 0))
     );
@@ -77,6 +79,7 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
         (active_tab == ActiveTab.BrokenFiles && broken_files_model.length > 0) ||
         (active_tab == ActiveTab.BadExtensions && bad_extensions_model.length > 0) ||
+        (active_tab == ActiveTab.BadNames && bad_names_model.length > 0) ||
         (active_tab == ActiveTab.ExifRemover && exif_remover_model.length > 0) ||
         (active_tab == ActiveTab.VideoOptimizer && video_optimizer_model.length > 0)
     );

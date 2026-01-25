@@ -29,7 +29,11 @@ impl Search for BadNames {
             if self.prepare_items(None).is_err() {
                 return;
             }
-            if self.find_bad_names(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+            if self.check_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                self.common_data.stopped_search = true;
+                return;
+            }
+            if self.look_for_bad_names_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
                 return;
             }

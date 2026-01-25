@@ -78,6 +78,7 @@ pub(crate) fn initialize_selection_struct() {
         ActiveTab::InvalidSymlinks,
         ActiveTab::BrokenFiles,
         ActiveTab::BadExtensions,
+        ActiveTab::BadNames,
         ActiveTab::ExifRemover,
         ActiveTab::VideoOptimizer,
     ];
@@ -351,6 +352,10 @@ pub(crate) mod checker {
                 app.global::<GuiState>().set_selected_results_bad_extensions(it1);
                 app.global::<GuiState>().set_selected_results_bad_extensions2(it2);
             }
+            ActiveTab::BadNames => {
+                app.global::<GuiState>().set_selected_results_bad_names(it1);
+                app.global::<GuiState>().set_selected_results_bad_names2(it2);
+            }
             ActiveTab::ExifRemover => {
                 app.global::<GuiState>().set_selected_results_exif_remover(it1);
                 app.global::<GuiState>().set_selected_results_exif_remover2(it2);
@@ -416,6 +421,10 @@ pub(crate) mod checker {
             ActiveTab::BadExtensions => (
                 app.global::<GuiState>().get_selected_results_bad_extensions(),
                 app.global::<GuiState>().get_selected_results_bad_extensions2(),
+            ),
+            ActiveTab::BadNames => (
+                app.global::<GuiState>().get_selected_results_bad_names(),
+                app.global::<GuiState>().get_selected_results_bad_names2(),
             ),
             ActiveTab::ExifRemover => (
                 app.global::<GuiState>().get_selected_results_exif_remover(),

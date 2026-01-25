@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use czkawka_core::common::traits::PrintResults;
 use czkawka_core::tools::bad_extensions::BadExtensions;
+use czkawka_core::tools::bad_names::BadNames;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;
 use czkawka_core::tools::duplicate::DuplicateFinder;
@@ -29,6 +30,7 @@ pub struct SharedModels {
     pub shared_same_invalid_symlinks: Option<InvalidSymlinks>,
     pub shared_broken_files_state: Option<BrokenFiles>,
     pub shared_bad_extensions_state: Option<BadExtensions>,
+    pub shared_bad_names_state: Option<BadNames>,
     pub shared_exif_remover_state: Option<ExifRemover>,
     pub shared_video_optimizer_state: Option<VideoOptimizer>,
 }
@@ -47,6 +49,7 @@ impl SharedModels {
             shared_same_invalid_symlinks: None,
             shared_broken_files_state: None,
             shared_bad_extensions_state: None,
+            shared_bad_names_state: None,
             shared_exif_remover_state: None,
             shared_video_optimizer_state: None,
         }
@@ -70,6 +73,7 @@ impl SharedModels {
             ActiveTab::InvalidSymlinks => self.shared_same_invalid_symlinks.as_ref().map(|x| x.save_all_in_one(cd, "results_invalid_symlinks")),
             ActiveTab::BrokenFiles => self.shared_broken_files_state.as_ref().map(|x| x.save_all_in_one(cd, "results_broken_files")),
             ActiveTab::BadExtensions => self.shared_bad_extensions_state.as_ref().map(|x| x.save_all_in_one(cd, "results_bad_extensions")),
+            ActiveTab::BadNames => self.shared_bad_names_state.as_ref().map(|x| x.save_all_in_one(cd, "results_bad_names")),
             ActiveTab::ExifRemover => self.shared_exif_remover_state.as_ref().map(|x| x.save_all_in_one(cd, "results_exif_remover")),
             ActiveTab::VideoOptimizer => self.shared_video_optimizer_state.as_ref().map(|x| x.save_all_in_one(cd, "results_video_optimizer")),
             ActiveTab::Settings | ActiveTab::About => panic!("Cannot save results for settings or about tab"),

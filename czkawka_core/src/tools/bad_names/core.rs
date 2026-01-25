@@ -20,13 +20,14 @@ impl BadNames {
         Self {
             common_data: CommonToolData::new(ToolType::BadNames),
             information: Info::default(),
+            files_to_check: Default::default(),
             bad_names_files: Default::default(),
             params,
         }
     }
 
-    #[fun_time(message = "find_bad_names", level = "debug")]
-    pub(crate) fn find_bad_names(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    #[fun_time(message = "check_files", level = "debug")]
+    pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let result = DirTraversalBuilder::new()
             .group_by(|_fe| ())
             .stop_flag(stop_flag)
@@ -37,33 +38,34 @@ impl BadNames {
 
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
-                let all_files: Vec<_> = grouped_file_entries.into_values().flatten().collect();
+                self.files_to_check = grouped_file_entries.into_values().flatten().collect();
                 self.common_data.text_messages.warnings.extend(warnings);
-                debug!("find_bad_names - Found {} files to check.", all_files.len());
+                debug!("check_files - Found {} files to check.", self.files_to_check.len());
 
-                self.check_files_for_bad_names(all_files, stop_flag, progress_sender)
+                WorkContinueStatus::Continue
             }
             DirTraversalResult::Stopped => WorkContinueStatus::Stop,
         }
     }
 
-    #[fun_time(message = "check_files_for_bad_names", level = "debug")]
-    fn check_files_for_bad_names(
-        &mut self,
-        files: Vec<crate::common::model::FileEntry>,
-        stop_flag: &Arc<AtomicBool>,
-        progress_sender: Option<&Sender<ProgressData>>,
-    ) -> WorkContinueStatus {
+    #[fun_time(message = "look_for_bad_names_files", level = "debug")]
+    pub(crate) fn look_for_bad_names_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        if self.files_to_check.is_empty() {
+            return WorkContinueStatus::Continue;
+        }
+
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::BadNamesChecking,
-            files.len(),
+            self.files_to_check.len(),
             self.get_test_type(),
-            files.iter().map(|item| item.size).sum::<u64>(),
+            self.files_to_check.iter().map(|item| item.size).sum::<u64>(),
         );
 
-        debug!("check_files_for_bad_names - started checking for bad names");
-        let bad_names_files: Vec<BadNameEntry> = files
+        let files_to_check = std::mem::take(&mut self.files_to_check);
+
+        debug!("look_for_bad_names_files - started checking for bad names");
+        let bad_names_files: Vec<BadNameEntry> = files_to_check
             .into_par_iter()
             .filter_map(|file_entry| {
                 if check_if_stop_received(stop_flag) {
@@ -85,7 +87,7 @@ impl BadNames {
             })
             .collect();
 
-        debug!("check_files_for_bad_names - ended checking for bad names");
+        debug!("look_for_bad_names_files - ended checking for bad names");
         progress_handler.join_thread();
 
         if check_if_stop_received(stop_flag) {

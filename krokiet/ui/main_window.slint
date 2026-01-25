@@ -70,6 +70,7 @@ export component MainWindow inherits Window {
     in-out property <[MainListModel]> invalid_symlinks_model: [];
     in-out property <[MainListModel]> broken_files_model: [];
     in-out property <[MainListModel]> bad_extensions_model: [];
+    in-out property <[MainListModel]> bad_names_model: [];
     in-out property <[MainListModel]> exif_remover_model: [];
     in-out property <[MainListModel]> video_optimizer_model: [];
 
@@ -107,6 +108,7 @@ export component MainWindow inherits Window {
                         invalid_symlinks_model <=> root.invalid_symlinks_model;
                         broken_files_model <=> root.broken_files_model;
                         bad_extensions_model <=> root.bad_extensions_model;
+                        bad_names_model <=> root.bad_names_model;
                         exif_remover_model <=> root.exif_remover_model;
                         video_optimizer_model <=> root.video_optimizer_model;
 
@@ -155,6 +157,7 @@ export component MainWindow inherits Window {
             invalid_symlinks_model <=> root.invalid_symlinks_model;
             broken_files_model <=> root.broken_files_model;
             bad_extensions_model <=> root.bad_extensions_model;
+            bad_names_model <=> root.bad_names_model;
             exif_remover_model <=> root.exif_remover_model;
             video_optimizer_model <=> root.video_optimizer_model;
 

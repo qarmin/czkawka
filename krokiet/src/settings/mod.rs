@@ -526,6 +526,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
         settings.set_exif_remover_column_size(fnm(&[sel_px, size_px, name_px, path_px, 300.0, mod_px], "exif_remover"));
         settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, 160.0, mod_px], "video_optimizer"));
+        settings.set_bad_names_column_size(fnm(&[sel_px, name_px, path_px, 50.0], "bad_names"));
     }
 
     // Clear text
@@ -654,6 +655,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         ("bad_extensions".to_string(), settings.get_bad_extensions_column_size().iter().collect::<Vec<_>>()),
         ("exif_remover".to_string(), settings.get_exif_remover_column_size().iter().collect::<Vec<_>>()),
         ("video_optimizer".to_string(), settings.get_video_optimizer_column_size().iter().collect::<Vec<_>>()),
+        ("bad_names".to_string(), settings.get_bad_names_column_size().iter().collect::<Vec<_>>()),
     ]);
     assert_eq!(column_sizes.len(), TOOLS_NUMBER);
 
