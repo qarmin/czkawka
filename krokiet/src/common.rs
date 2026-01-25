@@ -598,8 +598,8 @@ impl ActiveTab {
             Self::EmptyFolders
             | Self::EmptyFiles
             | Self::BrokenFiles
-            | Self::BigFiles |
-            Self::TemporaryFiles
+            | Self::BigFiles
+            | Self::TemporaryFiles
             | Self::InvalidSymlinks
             | Self::BadExtensions
             | Self::BadNames

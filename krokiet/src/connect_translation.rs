@@ -221,6 +221,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_bad_extensions_text(flk!("tool_bad_extensions").into());
     translation.set_tool_exif_remover_text(flk!("tool_exif_remover").into());
     translation.set_tool_video_optimizer_text(flk!("tool_video_optimizer").into());
+    translation.set_tool_bad_names_text(flk!("tool_bad_names").into());
     translation.set_sort_by_full_name_text(flk!("sort_by_full_name").into());
     translation.set_sort_by_selection_text(flk!("sort_by_selection").into());
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
@@ -364,6 +365,9 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_load_tabs_sizes_at_startup_text(flk!("settings_load_tabs_sizes_at_startup").into());
     translation.set_settings_load_windows_size_at_startup_text(flk!("settings_load_windows_size_at_startup").into());
     translation.set_settings_limit_lines_of_messages_text(flk!("settings_limit_lines_of_messages").into());
+    translation.set_settings_play_audio_on_scan_completion_text(flk!("settings_play_audio_on_scan_completion_text").into());
+    translation.set_settings_audio_feature_hint_text(flk!("settings_audio_feature_hint_text").into());
+    translation.set_settings_audio_env_variable_hint_text(flk!("settings_audio_env_variable_hint_text").into());
     translation.set_settings_cache_number_size_text("".into());
     translation.set_settings_video_thumbnails_number_size_text("".into());
     translation.set_settings_log_number_size_text("".into());

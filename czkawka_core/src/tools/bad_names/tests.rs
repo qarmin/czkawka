@@ -165,7 +165,7 @@ mod tests2 {
         assert!(issues.uppercase_extension);
         assert!(issues.emoji_used);
         assert!(issues.space_at_start_or_end);
-        assert!(issues.non_ascii_name.is_some());
+        assert!(issues.non_ascii_name);
     }
 
     // Unit tests for check_file_name and generate_fixed_name
@@ -190,7 +190,7 @@ mod tests2 {
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
-            if let Some(_issues) = check_file_name(path, &check_params) {
+            if let Some(_issues) = check_file_name(path, check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
                         errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
@@ -227,7 +227,7 @@ mod tests2 {
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
-            if let Some(_issues) = check_file_name(path, &check_params) {
+            if let Some(_issues) = check_file_name(path, check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
                         errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
@@ -264,7 +264,7 @@ mod tests2 {
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
-            if let Some(_issues) = check_file_name(path, &check_params) {
+            if let Some(_issues) = check_file_name(path, check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
                         errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
@@ -301,7 +301,7 @@ mod tests2 {
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
-            if let Some(_issues) = check_file_name(path, &check_params) {
+            if let Some(_issues) = check_file_name(path, check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
                         errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
@@ -344,7 +344,7 @@ mod tests2 {
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
-            if let Some(_issues) = check_file_name(path, &check_params) {
+            if let Some(_issues) = check_file_name(path, check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
                         errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
@@ -386,7 +386,7 @@ mod tests2 {
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
-            if let Some(_issues) = check_file_name(path, &check_params) {
+            if let Some(_issues) = check_file_name(path, check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
                         errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
@@ -423,7 +423,7 @@ mod tests2 {
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
-            if let Some(_issues) = check_file_name(path, &check_params) {
+            if let Some(_issues) = check_file_name(path, check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
                         errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));
@@ -465,7 +465,7 @@ mod tests2 {
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
-            if let Some(_issues) = check_file_name(path, &check_params) {
+            if let Some(_issues) = check_file_name(path, check_params) {
                 if let Some(new_name) = generate_fixed_name(path, &fix_params) {
                     if new_name != expected_output {
                         errors.push(format!("Input: '{input}', Expected: '{expected_output}', Got: '{new_name}'"));

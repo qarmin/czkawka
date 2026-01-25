@@ -73,7 +73,7 @@ impl BadNames {
                 }
 
                 let size = file_entry.size;
-                let result = check_file_name(&file_entry.path, &self.params.checked_issues).map(|issues| BadNameEntry {
+                let result = check_file_name(&file_entry.path, self.params.checked_issues).map(|issues| BadNameEntry {
                     path: file_entry.path,
                     modified_date: file_entry.modified_date,
                     size: file_entry.size,
@@ -141,7 +141,7 @@ impl BadNames {
     }
 }
 
-pub fn check_file_name(path: &Path, checked_issues: &NameIssues) -> Option<NameIssues> {
+pub fn check_file_name(path: &Path, checked_issues: NameIssues) -> Option<NameIssues> {
     let file_name = path.file_name()?.to_string_lossy();
     let mut issues = NameIssues::none();
 

@@ -34,16 +34,16 @@ impl AudioPlayer {
                     let buf_reader = BufReader::new(cursor);
                     match Decoder::new(buf_reader) {
                         Ok(_) => {
-                            log::info!("Loaded custom audio file from: {}", custom_path);
+                            log::info!("Loaded custom audio file from: {custom_path}");
                             return data;
                         }
                         Err(e) => {
-                            log::error!("Failed to decode custom audio file from {}: {}", custom_path, e);
+                            log::error!("Failed to decode custom audio file from {custom_path}: {e}");
                         }
                     }
                 }
                 Err(e) => {
-                    log::error!("Failed to read custom audio file from {}: {}", custom_path, e);
+                    log::error!("Failed to read custom audio file from {custom_path}: {e}");
                 }
             }
         }
@@ -57,7 +57,7 @@ impl AudioPlayer {
             let audio_data = self.audio_data.clone();
             std::thread::spawn(move || {
                 if let Err(e) = Self::play_audio_blocking(&audio_data) {
-                    log::error!("Failed to play scan completion audio: {}", e);
+                    log::error!("Failed to play scan completion audio: {e}");
                 }
             });
         }
@@ -69,13 +69,13 @@ impl AudioPlayer {
 
     #[cfg(feature = "audio")]
     fn play_audio_blocking(audio_data: &[u8]) -> Result<(), String> {
-        let stream_handle = OutputStreamBuilder::open_default_stream().map_err(|e| format!("Failed to get audio output stream: {}", e))?;
+        let stream_handle = OutputStreamBuilder::open_default_stream().map_err(|e| format!("Failed to get audio output stream: {e}"))?;
 
-        let sink = Sink::connect_new(&stream_handle.mixer());
+        let sink = Sink::connect_new(stream_handle.mixer());
 
         let cursor = Cursor::new(audio_data.to_vec());
         let buf_reader = BufReader::new(cursor);
-        let source = Decoder::new(buf_reader).map_err(|e| format!("Failed to decode audio: {}", e))?;
+        let source = Decoder::new(buf_reader).map_err(|e| format!("Failed to decode audio: {e}"))?;
 
         sink.append(source);
 
