@@ -59,6 +59,11 @@ pub struct ScanData {
     pub audio_player: Arc<AudioPlayer>,
 }
 
+pub struct MessagesData {
+    pub critical: Option<String>,
+    pub messages: String,
+}
+
 pub(crate) fn connect_scan_button(
     app: &MainWindow,
     progress_sender: Sender<ProgressData>,
