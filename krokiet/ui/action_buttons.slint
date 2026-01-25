@@ -182,7 +182,18 @@ export component ActionButtons inherits HorizontalLayout {
         icon: @image-url("../icons/krokiet_rename.svg");
         colorize-icon: true;
         clicked => {
-            show_action_popup(PopupRequest.Rename);
+            show_action_popup(PopupRequest.RenameBadExtension);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.BadNames: rename_button_bad_names := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.rename_button_text;
+        icon: @image-url("../icons/krokiet_rename.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.RenameBadFileName);
         }
     }
 

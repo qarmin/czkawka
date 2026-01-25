@@ -85,7 +85,7 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow, shared_models: Arc<Mut
                 base.push_str(format!("\n{}", flk!("rust_hardlink_confirmation_number_simple", items = res.checked_items_number)).as_str());
                 translation.set_hardlink_confirmation_text(base.into());
             }
-            PopupRequest::Rename => {
+            PopupRequest::RenameBadExtension | PopupRequest::RenameBadFileName => {
                 let mut base = flk!("rust_rename_confirmation");
                 base.push_str(format!("\n{}", flk!("rust_rename_confirmation_number_simple", items = res.checked_items_number)).as_str());
                 translation.set_rename_confirmation_text(base.into());

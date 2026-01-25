@@ -3,12 +3,10 @@ import { Translations } from "translations.slint";
 import { PopupBase } from "popup_base.slint";
 import { PopupCenteredText } from "popup_centered_text.slint";
 
-export component PopupRenameFiles inherits Rectangle {
+export component PopupRenameBadFileNames inherits Rectangle {
     out property <length> popup_width: 500px;
     out property <length> popup_height: 150px;
     callback show_popup();
-
-    in-out property <string> folder_name: "";
 
     popup_window := PopupBase {
         width: popup_width;

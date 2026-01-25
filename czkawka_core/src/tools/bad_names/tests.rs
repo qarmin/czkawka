@@ -220,6 +220,11 @@ mod tests2 {
             ("config.Json", "config.json"),
             ("readme.Md", "readme.md"),
             ("Makefile.Mk", "Makefile.mk"),
+            ("abc.cde.TXT", "abc.cde.txt"),
+            ("file.backup.PDF", "file.backup.pdf"),
+            ("my.file.name.JPG", "my.file.name.jpg"),
+            ("test.1.2.3.Zip", "test.1.2.3.zip"),
+            ("document.v2.0.Doc", "document.v2.0.doc"),
         ];
 
         for (input, expected_output) in test_cases {
@@ -265,6 +270,9 @@ mod tests2 {
             ("star⭐✨.txt", "star.txt"),
             ("food🍕🍔🍟.jpg", "food.jpg"),
             ("weather☀️🌧️⛈️.csv", "weather.csv"),
+            ("test😀.backup.txt", "test.backup.txt"),
+            ("my.file🎉.doc", "my.file.doc"),
+            ("archive.v1.2🔥.zip", "archive.v1.2.zip"),
         ];
 
         for (input, expected_output) in test_cases {
@@ -310,6 +318,10 @@ mod tests2 {
             (" music .mp3", "music.mp3"),
             ("readme . md ", "readme.md"),
             ("  archive  . zip ", "archive.zip"),
+            (" abc.cde.txt", "abc.cde.txt"),
+            ("abc.cde .txt", "abc.cde.txt"),
+            (" my.file.name .doc", "my.file.name.doc"),
+            ("  test.1.2  . pdf ", "test.1.2.pdf"),
         ];
 
         for (input, expected_output) in test_cases {
