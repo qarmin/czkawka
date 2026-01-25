@@ -251,8 +251,8 @@ fn fix_non_ascii(s: &str, method: CharsetFixMethod) -> String {
                     deunicode::deunicode_char(c).map_or_else(
                         || vec![' '],
                         |s| {
-                            let chars: Vec<char> = s.chars().collect();
-                            if chars.is_empty() || chars.first().is_some_and(|c| c.is_ascii_graphic()) {
+                            let chars: Vec<char> = s.chars().filter(|ch| ch.is_ascii_graphic() && *ch != ' ').collect();
+                            if chars.is_empty() {
                                 vec![' ']
                             } else {
                                 chars

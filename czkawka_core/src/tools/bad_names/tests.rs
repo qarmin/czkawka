@@ -186,6 +186,10 @@ mod tests2 {
             ("file.Jpg", "file.jpg"),
             ("document.PDF", "document.pdf"),
             ("image.PnG", "image.png"),
+            ("video.MP4", "video.mp4"),
+            ("archive.ZIP", "archive.zip"),
+            ("data.CSV", "data.csv"),
+            ("presentation.PPTX", "presentation.pptx"),
         ];
 
         for (input, expected_output) in test_cases {
@@ -223,7 +227,21 @@ mod tests2 {
         };
 
         let mut errors = Vec::new();
-        let test_cases = [("tëst.txt", "test.txt"), ("café.pdf", "cafe.pdf"), ("Kraków.doc", "Krakow.doc")];
+        let test_cases = [
+            ("tëst.txt", "test.txt"),
+            ("café.pdf", "cafe.pdf"),
+            ("Kraków.doc", "Krakow.doc"),
+            ("Łódź.txt", "Lodz.txt"),
+            ("naïve.doc", "naive.doc"),
+            ("résumé.pdf", "resume.pdf"),
+            ("São Paulo.txt", "Sao Paulo.txt"),
+            ("Zürich.doc", "Zurich.doc"),
+            ("Москва.txt", "Moskva.txt"),
+            ("日本.txt", "RiBen.txt"),
+            ("über.pdf", "uber.pdf"),
+            ("señor.txt", "senor.txt"),
+            ("Ærø.doc", "AEro.doc"),
+        ];
 
         for (input, expected_output) in test_cases {
             let path = Path::new(input);
@@ -461,6 +479,9 @@ mod tests2 {
             ("file .JPG", "file.jpg"),
             ("  café☕  .Pdf  ", "cafe.pdf"),
             ("test@ëmoji😀.PNG", "test_emoji.png"),
+            (" Kraków🎉.Doc ", "Krakow.doc"),
+            ("  résumé  .PDF  ", "resume.pdf"),
+            (" über@file😊 .Txt ", "uber_file.txt"),
         ];
 
         for (input, expected_output) in test_cases {
