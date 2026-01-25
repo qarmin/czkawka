@@ -473,6 +473,15 @@ export component SettingsList inherits VerticalLayout {
             }
 
             HeaderText {
+                text <=> Translations.settings_similar_music_tool_text;
+            }
+
+            CheckBoxComponent {
+                name <=> Translations.settings_delete_outdated_entries_text;
+                model <=> Settings.similar_music_delete_outdated_entries;
+            }
+
+            HeaderText {
                 text <=> Translations.settings_video_thumbnails_header_text;
             }
 
@@ -523,15 +532,6 @@ export component SettingsList inherits VerticalLayout {
                     color: ColorPalette.hint_color;
                     wrap: TextWrap.word-wrap;
                 }
-            }
-
-            HeaderText {
-                text <=> Translations.settings_similar_music_tool_text;
-            }
-
-            CheckBoxComponent {
-                name <=> Translations.settings_delete_outdated_entries_text;
-                model <=> Settings.similar_music_delete_outdated_entries;
             }
 
             HeaderText {

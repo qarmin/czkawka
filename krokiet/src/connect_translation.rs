@@ -265,11 +265,18 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_broken_files_video_info_text(flk!("subsettings_broken_files_video_info").into());
     translation.set_subsettings_bad_names_issues_text(flk!("subsettings_bad_names_issues").into());
     translation.set_subsettings_bad_names_uppercase_extension_text(flk!("subsettings_bad_names_uppercase_extension").into());
+    translation.set_subsettings_bad_names_uppercase_extension_hint_text(flk!("subsettings_bad_names_uppercase_extension_hint").into());
     translation.set_subsettings_bad_names_emoji_used_text(flk!("subsettings_bad_names_emoji_used").into());
+    translation.set_subsettings_bad_names_emoji_used_hint_text(flk!("subsettings_bad_names_emoji_used_hint").into());
     translation.set_subsettings_bad_names_space_at_start_end_text(flk!("subsettings_bad_names_space_at_start_end").into());
+    translation.set_subsettings_bad_names_space_at_start_end_hint_text(flk!("subsettings_bad_names_space_at_start_end_hint").into());
     translation.set_subsettings_bad_names_non_ascii_text(flk!("subsettings_bad_names_non_ascii").into());
+    translation.set_subsettings_bad_names_non_ascii_hint_text(flk!("subsettings_bad_names_non_ascii_hint").into());
     translation.set_subsettings_bad_names_restricted_charset_text(flk!("subsettings_bad_names_restricted_charset").into());
+    translation.set_subsettings_bad_names_restricted_charset_hint_text(flk!("subsettings_bad_names_restricted_charset_hint").into());
+    translation.set_subsettings_bad_names_allowed_chars_text(flk!("subsettings_bad_names_allowed_chars").into());
     translation.set_subsettings_bad_names_remove_duplicated_text(flk!("subsettings_bad_names_remove_duplicated").into());
+    translation.set_subsettings_bad_names_remove_duplicated_hint_text(flk!("subsettings_bad_names_remove_duplicated_hint").into());
     translation.set_subsettings_video_optimizer_mode_text(flk!("subsettings_video_optimizer_mode").into());
     translation.set_subsettings_video_optimizer_crop_type_text(flk!("subsettings_video_optimizer_crop_type").into());
     translation.set_subsettings_video_optimizer_black_pixel_threshold_text(flk!("subsettings_video_optimizer_black_pixel_threshold").into());

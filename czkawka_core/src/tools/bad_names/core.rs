@@ -172,10 +172,10 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
     }
 
     if let Some(allowed_chars) = &checked_issues.restricted_charset_allowed {
-        stem = stem.chars().filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c)).collect();
+        stem = deunicode::deunicode(&stem).chars().filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c)).collect();
 
         if let Some(ref mut ext) = extension {
-            *ext = ext.chars().filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c)).collect();
+            *ext = deunicode::deunicode(ext).chars().filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c)).collect();
         }
     }
 
