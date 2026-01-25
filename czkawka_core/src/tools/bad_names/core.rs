@@ -140,127 +140,68 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
     let mut stem = path.file_stem()?.to_string_lossy().to_string();
     let mut extension = path.extension().map(|e| e.to_string_lossy().to_string());
 
-    let mut has_issues = false;
-
-    // Check and fix uppercase extension
     if checked_issues.uppercase_extension
         && let Some(ref mut ext) = extension
         && ext.chars().any(|c| c.is_uppercase())
     {
-        has_issues = true;
         *ext = ext.to_lowercase();
     }
 
-    // Check and fix emoji
     if checked_issues.emoji_used {
-        let original_stem_len = stem.len();
         stem = stem.chars().filter(|c| !is_emoji(*c)).collect();
-        if stem.len() != original_stem_len {
-            has_issues = true;
-        }
 
         if let Some(ref mut ext) = extension {
-            let original_ext_len = ext.len();
             *ext = ext.chars().filter(|c| !is_emoji(*c)).collect();
-            if ext.len() != original_ext_len {
-                has_issues = true;
-            }
         }
     }
 
-    // Check and fix spaces at start or end
     if checked_issues.space_at_start_or_end {
-        let trimmed_stem = stem.trim();
-        if trimmed_stem != stem {
-            has_issues = true;
-            stem = trimmed_stem.to_string();
-        }
+        stem = stem.trim().to_string();
 
         if let Some(ref mut ext) = extension {
-            let trimmed_ext = ext.trim();
-            if trimmed_ext != ext.as_str() {
-                has_issues = true;
-                *ext = trimmed_ext.to_string();
-            }
+            *ext = ext.trim().to_string();
         }
     }
 
-    // Check and fix non-ascii graphical (ascii_graphical + space only)
     if checked_issues.non_ascii_graphical {
-        let original_stem = stem.clone();
-        stem = stem.chars().filter(|c| is_ascii_graphical_or_space(*c)).collect();
-        if stem != original_stem {
-            has_issues = true;
-        }
+        stem = deunicode::deunicode(&stem);
 
         if let Some(ref mut ext) = extension {
-            let original_ext = ext.clone();
-            *ext = ext.chars().filter(|c| is_ascii_graphical_or_space(*c)).collect();
-            if ext != &original_ext {
-                has_issues = true;
-            }
+            *ext = deunicode::deunicode(ext);
         }
     }
 
-    // Check and fix restricted charset
     if let Some(allowed_chars) = &checked_issues.restricted_charset_allowed {
-        let original_stem = stem.clone();
         stem = stem
             .chars()
             .filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c))
             .collect();
-        if stem != original_stem {
-            has_issues = true;
-        }
 
         if let Some(ref mut ext) = extension {
-            let original_ext = ext.clone();
             *ext = ext
                 .chars()
                 .filter(|c| is_alphanumeric(*c) || allowed_chars.contains(c))
                 .collect();
-            if ext != &original_ext {
-                has_issues = true;
-            }
         }
     }
 
-    // Check and fix duplicated non-alphanumeric chars
     if checked_issues.remove_duplicated_non_alphanumeric {
-        let original_stem = stem.clone();
         stem = remove_duplicated_non_alphanumeric(&stem);
-        if stem != original_stem {
-            has_issues = true;
-        }
 
         if let Some(ref mut ext) = extension {
-            let original_ext = ext.clone();
             *ext = remove_duplicated_non_alphanumeric(ext);
-            if ext != &original_ext {
-                has_issues = true;
-            }
         }
     }
 
-    // If no issues found, return None
-    if !has_issues {
-        return None;
-    }
-
-    // Construct new file name
     let new_name = if let Some(ext) = extension {
         if ext.is_empty() { stem } else { format!("{stem}.{ext}") }
     } else {
         stem
     };
 
-    // Return new name only if it's different from original
     if new_name != file_name.as_ref() as &str { Some(new_name) } else { None }
 }
 
-fn is_ascii_graphical_or_space(c: char) -> bool {
-    c.is_ascii_graphic() || c == ' '
-}
 
 fn is_alphanumeric(c: char) -> bool {
     c.is_ascii_alphanumeric()
@@ -297,6 +238,7 @@ fn is_emoji(c: char) -> bool {
         0x23F0 |
         0x23F3 |
         0x25FD..=0x25FE |
+        0x2600..=0x2604 |
         0x2614..=0x2615 |
         0x2648..=0x2653 |
         0x267F |
@@ -304,7 +246,7 @@ fn is_emoji(c: char) -> bool {
         0x26A1 |
         0x26AA..=0x26AB |
         0x26BD..=0x26BE |
-        0x26C4..=0x26C5 |
+        0x26C4..=0x26C8 |
         0x26CE |
         0x26D4 |
         0x26EA |
@@ -318,6 +260,7 @@ fn is_emoji(c: char) -> bool {
         0x274C |
         0x274E |
         0x2753..=0x2757 |
+        0x2763..=0x2764 |
         0x2795..=0x2797 |
         0x27B0 |
         0x27BF |

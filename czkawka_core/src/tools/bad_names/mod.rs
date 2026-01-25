@@ -49,7 +49,7 @@ impl NameIssues {
             emoji_used: true,
             space_at_start_or_end: true,
             non_ascii_graphical: true,
-            restricted_charset_allowed: Some(Vec::new()),
+            restricted_charset_allowed: Some(vec!['_', '-', ' ', '.']),
             remove_duplicated_non_alphanumeric: true,
         }
     }
