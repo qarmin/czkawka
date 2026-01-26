@@ -1,3 +1,4 @@
+use std::fs::metadata;
 use std::path::Path;
 
 use czkawka_core::common::image::{check_if_can_display_image, get_dynamic_image_from_path};
@@ -30,6 +31,12 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
         }
 
         if !check_if_can_display_image(&image_path) {
+            set_preview_visible(&gui_state, None);
+            return;
+        }
+
+        // Video Thumbnails files can be empty if generation failed or thumbnails are disabled
+        if metadata(&image_path).map_or(false, |m|m.len() == 0) {
             set_preview_visible(&gui_state, None);
             return;
         }
