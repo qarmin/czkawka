@@ -17,6 +17,7 @@ pub mod pre_scan;
 pub mod process_utils;
 pub mod progress_data;
 pub mod progress_stop_handler;
+pub mod temporal_segmentation;
 pub mod tool_data;
 pub mod traits;
 pub mod video_utils;
