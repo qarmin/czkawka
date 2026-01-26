@@ -205,7 +205,7 @@ impl VideoOptimizer {
             CurrentStage::VideoOptimizerCreatingThumbnails,
             self.video_transcode_result_entries.len(),
             self.get_test_type(),
-            0,
+            self.video_transcode_result_entries.iter().map(|e| e.size).sum(),
         );
 
         let Some(config_cache_path) = get_config_cache_path() else {
@@ -242,15 +242,16 @@ impl VideoOptimizer {
                     Ok(thumbnail_path) => {
                         entry.thumbnail_path = Some(thumbnail_path);
                         progress_handler.increase_items(1);
-                        None
+                        Some(None)
                     }
                     Err(e) => {
                         progress_handler.increase_items(1);
-                        Some(e)
+                        Some(Some(e))
                     }
                 }
             })
             .while_some()
+            .flatten()
             .collect::<Vec<String>>();
 
         self.common_data.text_messages.warnings.extend(errors);
@@ -274,7 +275,7 @@ impl VideoOptimizer {
             CurrentStage::VideoOptimizerCreatingThumbnails,
             self.video_crop_result_entries.len(),
             self.get_test_type(),
-            0,
+            self.video_crop_result_entries.iter().map(|e| e.size).sum(),
         );
 
         let Some(config_cache_path) = get_config_cache_path() else {
@@ -313,15 +314,16 @@ impl VideoOptimizer {
                     Ok(thumbnail_path) => {
                         entry.thumbnail_path = Some(thumbnail_path);
                         progress_handler.increase_items(1);
-                        None
+                        Some(None)
                     }
                     Err(e) => {
                         progress_handler.increase_items(1);
-                        Some(e)
+                        Some(Some(e))
                     }
                 }
             })
             .while_some()
+            .flatten()
             .collect::<Vec<String>>();
 
         self.common_data.text_messages.warnings.extend(errors);
