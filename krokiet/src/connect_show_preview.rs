@@ -23,8 +23,7 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
 
         if !((active_tab == ActiveTab::SimilarImages && settings.get_similar_images_show_image_preview())
             || (active_tab == ActiveTab::DuplicateFiles && settings.get_duplicate_image_preview())
-            || ((active_tab == ActiveTab::SimilarVideos || active_tab == ActiveTab::VideoOptimizer) && settings.get_video_thumbnails_preview())
-        )
+            || ((active_tab == ActiveTab::SimilarVideos || active_tab == ActiveTab::VideoOptimizer) && settings.get_video_thumbnails_preview()))
         {
             set_preview_visible(&gui_state, None);
             return;
@@ -36,7 +35,7 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
         }
 
         // Video Thumbnails files can be empty if generation failed or thumbnails are disabled
-        if metadata(&image_path).map_or(false, |m|m.len() == 0) {
+        if metadata(&image_path).is_ok_and(|m| m.len() == 0) {
             set_preview_visible(&gui_state, None);
             return;
         }

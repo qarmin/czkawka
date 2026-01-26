@@ -39,7 +39,6 @@ rust_created_thumbnails = Created thumbnails for { $items_stats } videos
 rust_checked_files = Checked { $items_stats } file ({ $size_stats })
 rust_checked_files_bad_extensions = Checked { $items_stats } file
 rust_checked_files_bad_names = Checked { $items_stats } file
-rust_checked_images = Checked { $items_stats } images ({ $size_stats })
 rust_checked_videos = Checked { $items_stats } videos ({ $size_stats })
 rust_analyzed_partial_hash = Analyzed partial hash of { $items_stats } files ({ $size_stats })
 rust_analyzed_full_hash = Analyzed full hash of { $items_stats } files ({ $size_stats })

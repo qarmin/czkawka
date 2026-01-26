@@ -155,14 +155,6 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
         }
     }
 
-    if checked_issues.space_at_start_or_end {
-        stem = stem.trim().to_string();
-
-        if let Some(ref mut ext) = extension {
-            *ext = ext.trim().to_string();
-        }
-    }
-
     if checked_issues.non_ascii_graphical {
         stem = deunicode::deunicode(&stem);
 
@@ -184,6 +176,14 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
 
         if let Some(ref mut ext) = extension {
             *ext = remove_duplicated_non_alphanumeric(ext);
+        }
+    }
+
+    if checked_issues.space_at_start_or_end {
+        stem = stem.trim().to_string();
+
+        if let Some(ref mut ext) = extension {
+            *ext = ext.trim().to_string();
         }
     }
 
