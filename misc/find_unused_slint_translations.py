@@ -58,6 +58,28 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 folder = sys.argv[1]
+
+# Validate and sanitize the folder path
+from pathlib import Path
+
+try:
+    # Resolve to absolute path and normalize (removes .., ., etc.)
+    folder_path = Path(folder).resolve()
+    
+    # Check if the path exists and is a directory
+    if not folder_path.exists():
+        print(f"Error: The specified folder does not exist: {folder}")
+        sys.exit(1)
+    
+    if not folder_path.is_dir():
+        print(f"Error: The specified path is not a directory: {folder}")
+        sys.exit(1)
+    
+    # Convert back to string for use in the script
+    folder = str(folder_path)
+except (OSError, ValueError, RuntimeError) as e:
+    print(f"Error: Invalid folder path: {e}")
+    sys.exit(1)
 rust_translation_content = open(f"{folder}/src/connect_translation.rs", "r", encoding="utf-8").read()
 
 missing_in_slint = []
