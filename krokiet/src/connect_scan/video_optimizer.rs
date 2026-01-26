@@ -158,6 +158,7 @@ fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (Mod
         format!("{}x{}", fe.width, fe.height).into(),
         "-".into(),
         get_dt_timestamp_string(fe.modified_date).into(),
+        fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default().into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);
@@ -203,6 +204,7 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<Share
         format!("{}x{}", fe.width, fe.height).into(),
         dim_string.into(),
         get_dt_timestamp_string(fe.modified_date).into(),
+        fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default().into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);

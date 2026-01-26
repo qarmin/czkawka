@@ -330,8 +330,9 @@ pub enum StrDataVideoOptimizer {
     Dimensions,
     NewDimensions,
     ModificationDate,
+    PreviewPath,
 }
-pub const MAX_STR_DATA_VIDEO_OPTIMIZER: usize = StrDataVideoOptimizer::ModificationDate as usize + 1;
+pub const MAX_STR_DATA_VIDEO_OPTIMIZER: usize = StrDataVideoOptimizer::PreviewPath as usize + 1;
 
 pub(crate) enum SortIdx {
     StrIdx(i32),
@@ -436,7 +437,7 @@ impl ActiveTab {
                 StrDataExifRemover::Size => SortIdx::IntIdxPair(IntDataExifRemover::SizePart1 as i32, IntDataExifRemover::SizePart2 as i32),
             },
             Self::VideoOptimizer => match StrDataVideoOptimizer::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for VideoOptimizer")) {
-                StrDataVideoOptimizer::Name | StrDataVideoOptimizer::Path | StrDataVideoOptimizer::Codec => SortIdx::StrIdx(str_idx),
+                StrDataVideoOptimizer::Name | StrDataVideoOptimizer::Path | StrDataVideoOptimizer::Codec | StrDataVideoOptimizer::PreviewPath => SortIdx::StrIdx(str_idx),
                 StrDataVideoOptimizer::ModificationDate => {
                     SortIdx::IntIdxPair(IntDataVideoOptimizer::ModificationDatePart1 as i32, IntDataVideoOptimizer::ModificationDatePart2 as i32)
                 }
