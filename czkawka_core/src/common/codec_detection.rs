@@ -227,9 +227,10 @@ impl CodecDetector {
             }
         }
         
-        // Default to true for unknown formats (let NVDEC decide)
-        // This prevents false negatives for new/uncommon supported formats
-        true
+        // Default to false for unknown formats (safer approach)
+        // This prevents runtime failures from attempting GPU decode on unsupported formats
+        // Unknown formats will fall back to CPU decoding
+        false
     }
 
     /// Get maximum resolution supported by NVDEC for a given GPU generation
@@ -472,8 +473,8 @@ mod tests {
     // Hypothetical issue: Test empty pixel format
     #[test]
     fn test_empty_pixel_format() {
-        // Empty pixel format should default to supported (conservative)
-        assert!(CodecDetector::is_pixel_format_supported(""));
+        // Empty pixel format should default to unsupported (safer approach)
+        assert!(!CodecDetector::is_pixel_format_supported(""));
     }
 
     // Test serialization/deserialization

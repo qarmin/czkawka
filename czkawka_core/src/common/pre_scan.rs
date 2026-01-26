@@ -87,6 +87,15 @@ pub struct VideoTranscodeInfo {
     pub estimated_time: Duration,
 }
 
+/// Estimated ratio of transcoded file size to original (H.264 typically ~50-70% of original)
+const TRANSCODE_SIZE_RATIO: f64 = 0.6;
+
+/// Estimated time multiplier for transcoding (roughly 1.2x realtime on modern CPU)
+const TRANSCODE_TIME_MULTIPLIER: f64 = 1.2;
+
+/// Default assumed video duration in seconds when unknown
+const DEFAULT_VIDEO_DURATION_SECS: f64 = 60.0;
+
 impl VideoTranscodeInfo {
     /// Create new transcode info from path and codec info
     pub fn new(
@@ -95,12 +104,12 @@ impl VideoTranscodeInfo {
         codec_info: &VideoCodecInfo,
         file_size: u64,
     ) -> Self {
-        // Estimate transcode size (H.264 typically ~50-70% of original for same quality)
-        let estimated_transcode_size = (file_size as f64 * 0.6) as u64;
+        // Estimate transcode size using predefined ratio
+        let estimated_transcode_size = (file_size as f64 * TRANSCODE_SIZE_RATIO) as u64;
 
-        // Estimate transcode time (rough: ~1x realtime on modern CPU)
-        let duration = codec_info.duration.unwrap_or(60.0);
-        let estimated_time = Duration::from_secs_f64(duration * 1.2);
+        // Estimate transcode time using predefined multiplier
+        let duration = codec_info.duration.unwrap_or(DEFAULT_VIDEO_DURATION_SECS);
+        let estimated_time = Duration::from_secs_f64(duration * TRANSCODE_TIME_MULTIPLIER);
 
         Self {
             path,
@@ -320,15 +329,28 @@ fn format_size(bytes: u64) -> String {
     }
 }
 
-/// Format duration as human-readable string
+/// Format duration as human-readable string with proper grammar
 fn format_duration(duration: Duration) -> String {
     let secs = duration.as_secs();
     if secs < 60 {
-        format!("{} seconds", secs)
+        if secs == 1 {
+            "1 second".to_string()
+        } else {
+            format!("{} seconds", secs)
+        }
     } else if secs < 3600 {
-        format!("{} minutes", secs / 60)
+        let minutes = secs / 60;
+        if minutes == 1 {
+            "1 minute".to_string()
+        } else {
+            format!("{} minutes", minutes)
+        }
     } else {
-        format!("{} hours {} minutes", secs / 3600, (secs % 3600) / 60)
+        let hours = secs / 3600;
+        let minutes = (secs % 3600) / 60;
+        let hours_str = if hours == 1 { "1 hour" } else { &format!("{} hours", hours) };
+        let minutes_str = if minutes == 1 { "1 minute" } else { &format!("{} minutes", minutes) };
+        format!("{} {}", hours_str, minutes_str)
     }
 }
 
@@ -523,13 +545,15 @@ mod tests {
     #[test]
     fn test_format_duration() {
         assert_eq!(format_duration(Duration::from_secs(0)), "0 seconds");
+        assert_eq!(format_duration(Duration::from_secs(1)), "1 second");
         assert_eq!(format_duration(Duration::from_secs(30)), "30 seconds");
         assert_eq!(format_duration(Duration::from_secs(59)), "59 seconds");
-        assert_eq!(format_duration(Duration::from_secs(60)), "1 minutes");
+        assert_eq!(format_duration(Duration::from_secs(60)), "1 minute");
         assert_eq!(format_duration(Duration::from_secs(120)), "2 minutes");
-        assert_eq!(format_duration(Duration::from_secs(3600)), "1 hours 0 minutes");
-        assert_eq!(format_duration(Duration::from_secs(3660)), "1 hours 1 minutes");
+        assert_eq!(format_duration(Duration::from_secs(3600)), "1 hour 0 minutes");
+        assert_eq!(format_duration(Duration::from_secs(3660)), "1 hour 1 minute");
         assert_eq!(format_duration(Duration::from_secs(7200)), "2 hours 0 minutes");
+        assert_eq!(format_duration(Duration::from_secs(7261)), "2 hours 1 minute");
     }
 
     #[test]
