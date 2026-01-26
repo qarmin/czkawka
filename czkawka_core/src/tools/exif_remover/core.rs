@@ -147,10 +147,9 @@ impl ExifRemover {
                 progress_handler.increase_size(size);
 
                 match res {
-                    Ok(tags) if !tags.is_empty() => {
+                    Ok(tags) => {
                         file_entry.exif_tags = tags.into_iter().map(|(name, code, group)| ExifTagInfo { name, code, group }).collect();
                     }
-                    Ok(_) => {}
                     Err(e) => {
                         file_entry.error = Some(format!("Failed to extract Exif data for file \"{}\": {}", file_entry.path.to_string_lossy(), e));
                     }
