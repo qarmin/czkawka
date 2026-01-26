@@ -1,11 +1,14 @@
 pub mod basic_gui_cli;
 pub mod cache;
+pub mod codec_detection;
 pub mod config_cache_path;
 pub mod consts;
+pub mod decoder_strategy;
 pub mod dir_traversal;
 pub mod directories;
 pub mod extensions;
 pub mod ffmpeg_utils;
+pub mod gpu_detection;
 pub mod image;
 pub mod items;
 pub mod logger;

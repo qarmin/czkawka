@@ -12,6 +12,8 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::{Cropdetect, VideoHash};
 
+use crate::common::decoder_strategy::{DecoderStrategy, ScanMode};
+use crate::common::gpu_detection::HWAccelType;
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
@@ -91,6 +93,12 @@ pub struct SimilarVideosParameters {
     pub generate_thumbnails: bool,
     pub thumbnail_video_percentage_from_start: u8,
     pub generate_thumbnail_grid_instead_of_single: bool,
+    // GPU acceleration settings
+    pub decoder_strategy: DecoderStrategy,
+    pub hwaccel_type: HWAccelType,
+    pub gpu_device_id: i32,
+    // Temporal segmentation settings
+    pub scan_mode: ScanMode,
 }
 
 pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
@@ -127,7 +135,70 @@ impl SimilarVideosParameters {
             generate_thumbnails,
             thumbnail_video_percentage_from_start,
             generate_thumbnail_grid_instead_of_single,
+            // Default GPU acceleration settings
+            decoder_strategy: DecoderStrategy::default(),
+            hwaccel_type: HWAccelType::default(),
+            gpu_device_id: 0,
+            // Default scan mode
+            scan_mode: ScanMode::default(),
         }
+    }
+
+    /// Create parameters with full GPU acceleration and scan mode configuration
+    #[allow(clippy::too_many_arguments)]
+    pub fn with_gpu_settings(
+        tolerance: i32,
+        exclude_videos_with_same_size: bool,
+        ignore_hard_links: bool,
+        skip_forward_amount: u32,
+        duration: u32,
+        crop_detect: Cropdetect,
+        generate_thumbnails: bool,
+        thumbnail_video_percentage_from_start: u8,
+        generate_thumbnail_grid_instead_of_single: bool,
+        decoder_strategy: DecoderStrategy,
+        hwaccel_type: HWAccelType,
+        gpu_device_id: i32,
+        scan_mode: ScanMode,
+    ) -> Self {
+        assert!((0..=MAX_TOLERANCE).contains(&tolerance));
+        assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
+        assert!(ALLOWED_VID_HASH_DURATION.contains(&duration));
+        Self {
+            tolerance,
+            exclude_videos_with_same_size,
+            ignore_hard_links,
+            skip_forward_amount,
+            duration,
+            crop_detect,
+            generate_thumbnails,
+            thumbnail_video_percentage_from_start,
+            generate_thumbnail_grid_instead_of_single,
+            decoder_strategy,
+            hwaccel_type,
+            gpu_device_id,
+            scan_mode,
+        }
+    }
+
+    /// Set the decoder strategy
+    pub fn set_decoder_strategy(&mut self, strategy: DecoderStrategy) {
+        self.decoder_strategy = strategy;
+    }
+
+    /// Set the hardware acceleration type
+    pub fn set_hwaccel_type(&mut self, hwaccel_type: HWAccelType) {
+        self.hwaccel_type = hwaccel_type;
+    }
+
+    /// Set the GPU device ID
+    pub fn set_gpu_device_id(&mut self, device_id: i32) {
+        self.gpu_device_id = device_id;
+    }
+
+    /// Set the scan mode
+    pub fn set_scan_mode(&mut self, scan_mode: ScanMode) {
+        self.scan_mode = scan_mode;
     }
 }
 
