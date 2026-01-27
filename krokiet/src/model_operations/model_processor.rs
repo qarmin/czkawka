@@ -311,9 +311,6 @@ impl ModelProcessor {
                 items_size
             }
         };
-        base_progress.bytes_to_check = size_idx
-            .map(|size_idx| simpler_model.iter().map(|(_idx, m)| if m.checked { m.get_size(size_idx) } else { 0 }).sum())
-            .unwrap_or_default();
         let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
 
         let start_time = std::time::Instant::now();

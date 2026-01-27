@@ -1,7 +1,6 @@
 import os
 import sys
 import re
-from pathlib import Path
 
 excluded = ["theme_changed"]  # Executed from Slint
 

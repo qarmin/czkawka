@@ -1,7 +1,6 @@
 import re
-import os
 from pathlib import Path
-from typing import Set, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 
 def extract_settings_properties(settings_file: Path) -> Dict[str, str]:
