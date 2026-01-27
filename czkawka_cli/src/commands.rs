@@ -161,7 +161,8 @@ pub struct DuplicatesArgs {
         long,
         default_value = "BLAKE3",
         value_parser = parse_hash_type,
-        help = "Hash type (BLAKE3, CRC32, XXH3)"
+        help = "Hash type (BLAKE3, CRC32, XXH3)",
+        long_help = "Hash algorithm used to calculate file hashes. BLAKE3 is recommended for most cases (fast and secure), CRC32 is faster but less reliable, XXH3 is very fast but not cryptographically secure."
     )]
     pub hash_type: HashType,
     #[clap(flatten)]
@@ -182,11 +183,11 @@ pub struct EmptyFoldersArgs {
 pub struct BiggestFilesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
-    #[clap(short, long, default_value = "50", help = "Number of files to be shown")]
+    #[clap(short, long, default_value = "50", help = "Number of files to be shown", long_help = "Number of biggest (or smallest with -J flag) files to display in results")]
     pub number_of_files: usize,
     #[clap(flatten)]
     pub delete_method: SDMethod,
-    #[clap(short = 'J', long, help = "Finds the smallest files instead the biggest")]
+    #[clap(short = 'J', long, help = "Finds the smallest files instead the biggest", long_help = "Switch mode to find smallest files instead of biggest ones")]
     pub smallest_mode: bool,
 }
 
@@ -231,7 +232,7 @@ pub struct SimilarImagesArgs {
     )]
     pub maximal_file_size: u64,
     #[clap(
-        short,
+        short = 's',
         long,
         default_value = "5",
         value_parser = clap::value_parser!(u32).range(0..=40),
@@ -250,7 +251,8 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "Gradient",
         value_parser = parse_similar_hash_algorithm,
-        help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient, Median)"
+        help = "Hash algorithm (Mean, Gradient, Blockhash, VertGradient, DoubleGradient, Median)",
+        long_help = "Perceptual hash algorithm used to compare images. Gradient (default) works well for most cases, Mean is faster but less accurate, Blockhash is good for finding very similar images, VertGradient/DoubleGradient provide different matching characteristics, Median is robust against color changes."
     )]
     pub hash_alg: HashAlg,
     #[clap(
@@ -258,7 +260,8 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "Nearest",
         value_parser = parse_similar_image_filter,
-        help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Gaussian, Catmullrom)"
+        help = "Image resize filter (Lanczos3, Nearest, Triangle, Gaussian, CatmullRom)",
+        long_help = "Filter algorithm used when resizing images for comparison. Lanczos3 provides highest quality but is slower, Nearest is fastest but lowest quality, Triangle/Gaussian/CatmullRom offer different quality-speed tradeoffs."
     )]
     pub image_filter: FilterType,
     #[clap(
@@ -266,7 +269,8 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "16",
         value_parser = parse_image_hash_size,
-        help = "Hash size (allowed: 8, 16, 32, 64)"
+        help = "Hash size (8, 16, 32, 64)",
+        long_help = "Size of the perceptual hash. Larger values provide more detailed comparison but require higher max_difference values. 8 is fastest and least detailed, 64 is slowest but most detailed. Recommended: 8 or 16 for typical use."
     )]
     pub hash_size: u8,
 }
@@ -279,9 +283,9 @@ pub struct SameMusicArgs {
     pub reference_directories: ReferenceDirectories,
     #[clap(flatten)]
     pub delete_method: DMethod,
-    #[clap(short, long, help = "Approximate comparison of music tags.")]
+    #[clap(short, long, help = "Approximate comparison of music tags", long_help = "Use approximate comparison when comparing music tags (allows small differences in tag values)")]
     pub approximate_comparison: bool,
-    #[clap(short, long, help = "Compare fingerprints only with similar titles.")]
+    #[clap(short, long, help = "Compare fingerprints only with similar titles", long_help = "When using audio content comparison, only compare files that have similar titles to reduce false positives and speed up the process")]
     pub compare_fingerprints_only_with_similar_titles: bool,
     #[clap(
         short = 'z',
@@ -324,8 +328,8 @@ pub struct SameMusicArgs {
         long,
         value_parser = parse_minimum_segment_duration,
         default_value = "10.0",
-        help = "Maximum size in bytes",
-        long_help = "Minimum segment duration, smaller value will finds also shorter similar segments, which may increase false positives number"
+        help = "Minimum segment duration in seconds",
+        long_help = "Minimum duration of audio segment to compare in seconds. Smaller values will find shorter similar segments but may increase false positives. Values should be between 0.0 and 3600.0"
     )]
     pub minimum_segment_duration: f32,
     #[clap(
@@ -333,8 +337,8 @@ pub struct SameMusicArgs {
         long,
         value_parser = parse_maximum_difference,
         default_value = "2.0",
-        help = "Maximum difference between segments",
-        long_help = "Maximum difference between segments, 0.0 will find only identical segments, 10.0 will find also segments which are almost not similar at all"
+        help = "Maximum difference between audio segments",
+        long_help = "Maximum allowed difference between audio segments (0.0-10.0). Value 0.0 will find only identical segments, while 10.0 will find segments that are barely similar. Lower values mean stricter matching."
     )]
     pub maximum_difference: f64,
 }
@@ -447,7 +451,7 @@ pub struct SimilarVideosArgs {
         default_value = "letterbox",
         value_parser = parse_crop_detect,
         help = "Crop detect method (none, letterbox, motion)",
-        long_help = "Method to crop video frames",
+        long_help = "Method to detect and crop black bars from video frames before comparison. 'none' disables cropping, 'letterbox' removes static black bars, 'motion' uses motion detection to find content area."
     )]
     pub crop_detect: Cropdetect,
     #[clap(
@@ -456,7 +460,7 @@ pub struct SimilarVideosArgs {
         default_value = "10",
         value_parser = parse_scan_duration,
         help = "Scan duration in seconds",
-        long_help = "Duration of scanning video in seconds.",
+        long_help = "Duration of video scanning in seconds. Longer duration provides more accurate results but takes more time. Allowed values are predefined in the application."
     )]
     pub scan_duration: u32,
 }
@@ -469,38 +473,38 @@ pub struct BadExtensionsArgs {
 
 #[derive(Debug, clap::Args)]
 pub struct CommonCliItems {
-    #[clap(short = 'T', long, default_value = "0", help = "Limits thread number, 0(default) will use all available threads")]
+    #[clap(short = 'T', long, default_value = "0", help = "Number of threads to use (0 = all available)", long_help = "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.")]
     pub thread_number: usize,
     #[clap(
         short,
         long,
         required = true,
-        help = "Directorie(s) to search",
-        long_help = "List of directorie(s) which will be searched(absolute path) - this directories are not set as reference folders"
+        help = "Directory(ies) to search",
+        long_help = "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders."
     )]
     pub directories: Vec<PathBuf>,
     #[clap(
         short,
         long,
-        help = "Excluded directorie(s)",
-        long_help = "List of directorie(s) which will be excluded from search(absolute path)"
+        help = "Excluded directory(ies)",
+        long_help = "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored."
     )]
     pub excluded_directories: Vec<PathBuf>,
     #[clap(
         short = 'E',
         long,
         help = "Excluded item(s)",
-        long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)"
+        long_help = "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible."
     )]
     pub excluded_items: Vec<String>,
     #[clap(
         short = 'x',
         long,
         help = "Allowed file extension(s)",
-        long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typical extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")\n "
+        long_help = "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,tta,wma,webm)"
     )]
     pub allowed_extensions: Vec<String>,
-    #[clap(short = 'P', long, help = "Excluded file extension(s)", long_help = "List of extensions, that will be removed from search.\n ")]
+    #[clap(short = 'P', long, help = "Excluded file extension(s)", long_help = "List of file extensions to exclude from search.")]
     pub excluded_extensions: Vec<String>,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
@@ -508,24 +512,24 @@ pub struct CommonCliItems {
     pub json_compact_file_to_save: JsonCompactFileToSave,
     #[clap(flatten)]
     pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(short = 'R', long, help = "Prevents from recursive check of folders")]
+    #[clap(short = 'R', long, help = "Prevents recursive check of folders", long_help = "Disables recursive directory traversal. Only files in the top-level directories will be scanned.")]
     pub not_recursive: bool,
     #[cfg(target_family = "unix")]
-    #[clap(short = 'X', long, help = "Exclude files on other filesystems")]
+    #[clap(short = 'X', long, help = "Exclude files on other filesystems", long_help = "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)")]
     pub exclude_other_filesystems: bool,
     #[clap(flatten)]
     pub do_not_print: DoNotPrint,
-    #[clap(short = 'W', long, help = "Ignore error code when files are found")]
+    #[clap(short = 'W', long, help = "Ignore error code when files are found", long_help = "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.")]
     pub ignore_error_code_on_found: bool,
-    #[clap(short = 'H', long, help = "Disable cache")]
+    #[clap(short = 'H', long, help = "Disable cache", long_help = "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.")]
     pub disable_cache: bool,
 }
 
 #[derive(Debug, clap::Args, Clone, Copy)]
 pub struct DoNotPrint {
-    #[clap(short = 'N', long, help = "Do not print the results to the console")]
+    #[clap(short = 'N', long, help = "Do not print results to console", long_help = "Suppresses printing of search results to the console. Useful when only saving results to files.")]
     pub do_not_print_results: bool,
-    #[clap(short = 'M', long, help = "Do not print info/warnings/errors from the program to console")]
+    #[clap(short = 'M', long, help = "Do not print messages to console", long_help = "Suppresses all informational messages, warnings, and errors from being printed to console.")]
     pub do_not_print_messages: bool,
 }
 
@@ -536,30 +540,30 @@ pub struct DMethod {
         long,
         default_value = "NONE",
         value_parser = parse_delete_method,
-        help = "Delete method (AEN, AEO, ON, OO, AEB, AES, OE, OS, HARD)",
-        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nAEB - All files except the biggest,\nAES - All files except the smallest,\nOB - Only 1 file, the biggest,\nOS - Only 1 file, the smallest\nHARD - create hard link\nNONE - not delete files"
+        help = "Delete method (AEN, AEO, ON, OO, AEB, AES, OB, OS, HARD)",
+        long_help = "Method for selecting which files to delete from duplicate groups:\nAEN - All files Except Newest (keeps newest)\nAEO - All files Except Oldest (keeps oldest)\nON - Only 1 file, the Newest (deletes all but newest)\nOO - Only 1 file, the Oldest (deletes all but oldest)\nAEB - All files Except Biggest (keeps biggest)\nAES - All files Except Smallest (keeps smallest)\nOB - Only 1 file, the Biggest (deletes all but biggest)\nOS - Only 1 file, the Smallest (deletes all but smallest)\nHARD - create hard links to save space\nNONE - do not delete files (default)"
     )]
     pub delete_method: DeleteMethod,
-    #[clap(short = 'Q', long, help = "Do nothing and print the operation that would happen.")]
+    #[clap(short = 'Q', long, help = "Dry run - preview operations", long_help = "Performs a dry run showing what operations would be performed without actually executing them.")]
     pub dry_run: bool,
-    #[clap(short = 'y', long, help = "Remove items to trash")]
+    #[clap(short = 'y', long, help = "Move items to trash", long_help = "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.")]
     pub move_to_trash: bool,
 }
 
 // Simple delete method - delete files or not
 #[derive(Debug, clap::Args, Clone, Copy)]
 pub struct SDMethod {
-    #[clap(short = 'D', long, help = "Delete found items")]
+    #[clap(short = 'D', long, help = "Delete found items", long_help = "Automatically delete all found items matching the criteria.")]
     pub delete_files: bool,
-    #[clap(short = 'Q', long, help = "Do nothing and print the operation that would happen.")]
+    #[clap(short = 'Q', long, help = "Dry run - preview operations", long_help = "Performs a dry run showing what operations would be performed without actually executing them.")]
     pub dry_run: bool,
-    #[clap(short = 'y', long, help = "Remove items to trash")]
+    #[clap(short = 'y', long, help = "Move items to trash", long_help = "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.")]
     pub move_to_trash: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct FileToSave {
-    #[clap(short, long, value_name = "file-name", help = "Saves the results into the formatted txt file")]
+    #[clap(short, long, value_name = "file-name", help = "Save results to formatted text file", long_help = "Saves the search results into a human-readable formatted text file.")]
     pub file_to_save: Option<PathBuf>,
 }
 
@@ -568,39 +572,39 @@ pub struct ReferenceDirectories {
     #[clap(
         short,
         long,
-        help = "Reference directorie(s) to search",
-        long_help = "List of directorie(s) which will be searched(absolute path) - this directories are set as reference folders, so will not be visible in the results"
+        help = "Reference directory(ies)",
+        long_help = "List of reference directory(ies) to search (absolute paths). Files in these directories will be scanned but won't appear in the results (useful for comparing against a known good set of files)."
     )]
     pub reference_directories: Vec<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct JsonCompactFileToSave {
-    #[clap(short = 'C', long, value_name = "json-file-name", help = "Saves the results into the compact json file")]
+    #[clap(short = 'C', long, value_name = "json-file-name", help = "Save results to compact JSON file", long_help = "Saves the search results into a compact (minified) JSON file without extra whitespace.")]
     pub compact_file_to_save: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct JsonPrettyFileToSave {
-    #[clap(short, long, value_name = "pretty-json-file-name", help = "Saves the results into the pretty json file")]
+    #[clap(short, long, value_name = "pretty-json-file-name", help = "Save results to pretty JSON file", long_help = "Saves the search results into a pretty-printed (indented) JSON file for better readability.")]
     pub pretty_file_to_save: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct AllowHardLinks {
-    #[clap(short = 'L', long, help = "Do not ignore hard links")]
+    #[clap(short = 'L', long, help = "Do not ignore hard links", long_help = "Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once.")]
     pub allow_hard_links: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct CaseSensitiveNameComparison {
-    #[clap(short = 'l', long, help = "Use case sensitive name comparison")]
+    #[clap(short = 'l', long, help = "Use case-sensitive name comparison", long_help = "Enables case-sensitive file name comparison. By default, comparisons are case-insensitive (e.g., 'File.txt' equals 'file.txt').")]
     pub case_sensitive_name_comparison: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct IgnoreSameSize {
-    #[clap(short = 'J', long, help = "Ignore files with the same size, leaving only one file of each size")]
+    #[clap(short = 'J', long, help = "Ignore files with same size", long_help = "Groups files by size and keeps only one file from each size group, ignoring files with identical sizes (useful for quick deduplication based solely on file size).")]
     pub ignore_same_size: bool,
 }
 
