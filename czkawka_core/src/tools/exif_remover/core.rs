@@ -9,7 +9,7 @@ use fun_time::fun_time;
 use little_exif::filetype::FileExtension;
 use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
-use log::{debug, error, info};
+use log::{debug, error};
 use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
@@ -197,24 +197,24 @@ impl ExifRemover {
 
     #[fun_time(message = "fix_files", level = "debug")]
     pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: ExifTagsFixerParams) {
-        info!("Starting EXIF tags removal on {} files.", self.exif_files.len());
-
-        let
-        self.exif_files.par_iter_mut().for_each(|entry| {
-            if check_if_stop_received(stop_flag) {
-                return;
-            }
-
-            let exif_data_to_remove: Vec<(u16, String)> = entry.exif_tags.iter().map(|item_tag| (item_tag.code, item_tag.group.clone())).collect();
-            match clean_exif_tags(&entry.path.to_string_lossy(), &exif_data_to_remove, fix_params.override_file) {
-                Ok(_number_removed_tags) => {}
-                Err(e) => {
-                    entry.error = Some(format!("Failed to clean EXIF tags for file \"{}\": {}", entry.path.to_string_lossy(), e));
+        let warnings: Vec<_> = mem::take(&mut self.exif_files)
+            .into_par_iter()
+            .map(|entry| {
+                if check_if_stop_received(stop_flag) {
+                    return None;
                 }
-            }
-        });
 
-        self.common_data.text_messages.errors.extend(self.exif_files.iter().filter_map(|e| e.error.clone()));
+                let exif_data_to_remove: Vec<(u16, String)> = entry.exif_tags.iter().map(|item_tag| (item_tag.code, item_tag.group.clone())).collect();
+                match clean_exif_tags(&entry.path.to_string_lossy(), &exif_data_to_remove, fix_params.override_file) {
+                    Ok(_number_removed_tags) => Some(None),
+                    Err(e) => Some(Some(format!("Failed to clean EXIF tags for file \"{}\": {}", entry.path.to_string_lossy(), e))),
+                }
+            })
+            .while_some()
+            .flatten()
+            .collect();
+
+        self.common_data.text_messages.warnings.extend(warnings);
     }
 }
 

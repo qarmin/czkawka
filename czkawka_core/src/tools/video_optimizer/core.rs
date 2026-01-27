@@ -372,40 +372,32 @@ impl VideoOptimizer {
                     unreachable!("VideoTranscode mode should have VideoTranscode fix_params(caller is responsible for that)");
                 };
 
-                let mut transcode_errors = Vec::new();
-                self.video_transcode_result_entries = mem::take(&mut self.video_transcode_result_entries)
+                let transcode_warnings: Vec<_> = mem::take(&mut self.video_transcode_result_entries)
                     .into_par_iter()
-                    .map(|mut entry| {
+                    .map(|entry| {
                         if check_if_stop_received(stop_flag) {
                             return None;
                         }
 
                         match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
-                            Ok(_new_size) => {}
-                            Err(e) => {
-                                transcode_errors.push(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e));
-                            }
+                            Ok(_new_size) => Some(None),
+                            Err(e) => Some(Some(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e))),
                         }
-
-                        Some(entry)
                     })
                     .while_some()
+                    .flatten()
                     .collect();
 
-                self.common_data
-                    .text_messages
-                    .errors
-                    .extend(transcode_errors);
+                self.common_data.text_messages.warnings.extend(transcode_warnings);
             }
             VideoOptimizerParameters::VideoCrop(_) => {
                 let VideoOptimizerFixParams::VideoCrop(video_crop_params) = fix_params else {
                     unreachable!("VideoCrop mode should have VideoCrop fix_params(caller is responsible for that)");
                 };
 
-                let mut crop_errors = Vec::new();
-                self.video_crop_result_entries = mem::take(&mut self.video_crop_result_entries)
+                let crop_warnings: Vec<_> = mem::take(&mut self.video_crop_result_entries)
                     .into_par_iter()
-                    .map(|mut entry| {
+                    .map(|entry| {
                         if check_if_stop_received(stop_flag) {
                             return None;
                         }
@@ -415,21 +407,15 @@ impl VideoOptimizer {
                         entry_crop_params.crop_rectangle = (left, top, right, bottom);
 
                         match fix_video_crop(&entry.path, &entry_crop_params, stop_flag) {
-                            Ok(()) => {}
-                            Err(e) => {
-                                crop_errors.push(format!("Failed to crop video \"{}\": {}", entry.path.to_string_lossy(), e));
-                            }
+                            Ok(()) => Some(None),
+                            Err(e) => Some(Some(format!("Failed to crop video \"{}\": {}", entry.path.to_string_lossy(), e))),
                         }
-
-                        Some(entry)
                     })
                     .while_some()
+                    .flatten()
                     .collect();
 
-                self.common_data
-                    .text_messages
-                    .errors
-                    .extend(crop_errors);
+                self.common_data.text_messages.warnings.extend(crop_warnings);
             }
         }
     }
