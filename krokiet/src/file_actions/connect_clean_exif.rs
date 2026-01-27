@@ -47,7 +47,15 @@ impl ModelProcessor {
                 )
             };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(clean_fnc)), MessageType::CleanExif, false);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(clean_fnc)),
+                MessageType::CleanExif,
+                false,
+            );
         });
     }
 }

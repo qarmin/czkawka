@@ -45,7 +45,15 @@ impl ModelProcessor {
 
             let rm_fnc = move |data: &SimplerSingleMainListModel| rename_single_extension_item(data, path_idx, name_idx, ext_idx);
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(rm_fnc)), MessageType::Rename, false);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(rm_fnc)),
+                MessageType::Rename,
+                false,
+            );
         });
     }
     fn rename_bad_file_names(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
@@ -58,7 +66,15 @@ impl ModelProcessor {
 
             let rm_fnc = move |data: &SimplerSingleMainListModel| rename_single_file_name_item(data, path_idx, name_idx, new_name_idx);
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(rm_fnc)), MessageType::Rename, false);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(rm_fnc)),
+                MessageType::Rename,
+                false,
+            );
         });
     }
 }
@@ -137,7 +153,11 @@ mod tests {
     use crate::{ActiveTab, SingleMainListModel};
 
     impl ModelProcessor {
-        pub(crate) fn process_rename_test(&self, progress_sender: Sender<ProgressData>, model: ModelRc<SingleMainListModel>) -> Option<(Vec<SingleMainListModel>, Vec<String>, usize, usize)> {
+        pub(crate) fn process_rename_test(
+            &self,
+            progress_sender: Sender<ProgressData>,
+            model: ModelRc<SingleMainListModel>,
+        ) -> Option<(Vec<SingleMainListModel>, Vec<String>, usize, usize)> {
             let items_queued_to_delete = model.iter().filter(|e| e.checked).count();
             if items_queued_to_delete == 0 {
                 return None; // No items to delete
@@ -155,13 +175,13 @@ mod tests {
                 items_queued_to_delete,
                 progress_sender,
                 &Arc::default(),
-                rm_fnc,
+                &ProcessFunction::Simple(Box::new(rm_fnc)),
                 MessageType::Rename,
                 self.active_tab.get_int_size_opt_idx(),
                 false,
             );
 
-            let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(output);
+            let (new_simple_model, errors, items_deleted) = Self::remove_processed_items_from_model(output);
 
             Some((new_simple_model.to_vec_model(), errors, items_queued_to_delete, items_deleted))
         }

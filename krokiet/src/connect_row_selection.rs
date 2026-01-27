@@ -8,7 +8,7 @@ use log::{error, trace};
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::common::{connect_i32_into_u64, split_u64_into_i32s};
-use crate::{ActiveTab, Callabler, GuiState, SingleMainListModel, MainWindow};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, SingleMainListModel};
 
 const SELECTED_ROWS_LIMIT: usize = 1000;
 

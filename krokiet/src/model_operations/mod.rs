@@ -4,7 +4,7 @@ use slint::{ComponentHandle, Model, ModelRc};
 
 use crate::connect_row_selection::checker::get_number_of_enabled_items;
 use crate::simpler_model::SimplerSingleMainListModel;
-use crate::{GuiState, SingleMainListModel, MainWindow};
+use crate::{GuiState, MainWindow, SingleMainListModel};
 
 pub type ProcessingResult = Vec<(usize, SimplerSingleMainListModel, Option<Result<(), String>>)>;
 

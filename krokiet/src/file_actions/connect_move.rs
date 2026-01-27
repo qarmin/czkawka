@@ -55,7 +55,15 @@ impl ModelProcessor {
 
             let mlt_fnc = move |data: &SimplerSingleMainListModel| move_single_item(data, path_idx, name_idx, &output_folder, preserve_structure, copy_mode);
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(mlt_fnc)), MessageType::Move, false);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(mlt_fnc)),
+                MessageType::Move,
+                false,
+            );
         });
     }
 }

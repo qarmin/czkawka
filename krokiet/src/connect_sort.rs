@@ -5,7 +5,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 use crate::common::{SortIdx, connect_i32_into_u64};
 use crate::connect_row_selection::recalculate_small_selection_if_needed;
 use crate::connect_translation::translate_sort_mode;
-use crate::{ActiveTab, Callabler, GuiState, SingleMainListModel, MainWindow, SortColumnMode, SortMode, SortModel};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, SingleMainListModel, SortColumnMode, SortMode, SortModel};
 
 pub(crate) fn connect_sort_column(app: &MainWindow) {
     let a = app.as_weak();
@@ -95,7 +95,7 @@ pub(crate) fn set_sort_buttons(app: &MainWindow) {
 
 mod sorts {
     use super::{
-        ActiveTab, SingleMainListModel, Model, ModelRc, VecModel, common_sort_function, convert_group_header_into_rc_model, group_by_header, recalculate_small_selection_if_needed,
+        ActiveTab, Model, ModelRc, SingleMainListModel, VecModel, common_sort_function, convert_group_header_into_rc_model, group_by_header, recalculate_small_selection_if_needed,
     };
 
     pub(super) fn reverse_sort(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab) -> ModelRc<SingleMainListModel> {
@@ -135,7 +135,12 @@ mod sorts {
     }
 }
 
-fn common_sort_function<T: Ord>(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab, sort_function: impl Fn(&SingleMainListModel) -> T, reverse: bool) -> ModelRc<SingleMainListModel> {
+fn common_sort_function<T: Ord>(
+    model: &ModelRc<SingleMainListModel>,
+    active_tab: ActiveTab,
+    sort_function: impl Fn(&SingleMainListModel) -> T,
+    reverse: bool,
+) -> ModelRc<SingleMainListModel> {
     if !active_tab.get_is_header_mode() {
         let mut items = model.iter().collect::<Vec<_>>();
         items.sort_by_cached_key(&sort_function);

@@ -1,5 +1,5 @@
 import { Button } from "std-widgets.slint";
-import { ActiveTab, BottomPanelVisibility, SingleMainListModel, PopupRequest } from "common.slint";
+import { ActiveTab, BottomPanelVisibility, PopupRequest, SingleMainListModel } from "common.slint";
 import { GuiState } from "gui_state.slint";
 import { Translations } from "translations.slint";
 import { Settings } from "settings.slint";
@@ -219,8 +219,7 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    // TODO - implement softlink action
-    if false && lists_enabled && GuiState.tool_with_groups: hardlink_button := Button {
+    if lists_enabled && GuiState.tool_with_groups: hardlink_button := Button {
         height: parent.height;
         enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.hardlink_button_text;
@@ -231,8 +230,7 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    // TODO - implement softlink action
-    if false && lists_enabled && GuiState.tool_with_groups: softlink_button := Button {
+    if lists_enabled && GuiState.tool_with_groups: softlink_button := Button {
         height: parent.height;
         enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.softlink_button_text;

@@ -44,7 +44,15 @@ impl ModelProcessor {
                 )
             };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(dlt_fnc)), MessageType::Delete, false);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(dlt_fnc)),
+                MessageType::Delete,
+                false,
+            );
         });
     }
 }
@@ -105,13 +113,13 @@ mod tests {
                 items_queued_to_delete,
                 progress_sender,
                 &Arc::default(),
-                dlt_fnc,
+                &ProcessFunction::Simple(Box::new(dlt_fnc)),
                 MessageType::Delete,
                 self.active_tab.get_int_size_opt_idx(),
                 false,
             );
 
-            let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(output);
+            let (new_simple_model, errors, items_deleted) = Self::remove_processed_items_from_model(output);
 
             Some((new_simple_model.to_vec_model(), errors, items_queued_to_delete, items_deleted))
         }

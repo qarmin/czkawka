@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use num_enum::TryFromPrimitive;
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
-use crate::{ActiveTab, ExcludedPathsModel, IncludedPathsModel, SingleMainListModel, MainWindow, Settings};
+use crate::{ActiveTab, ExcludedPathsModel, IncludedPathsModel, MainWindow, Settings, SingleMainListModel};
 
 // Int model is used to store data in unchanged(* except that we need to split u64 into two i32) form and is used to sort/select data
 // Str model is used to display data in gui

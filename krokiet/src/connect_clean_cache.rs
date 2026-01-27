@@ -70,7 +70,7 @@ pub(crate) fn connect_clean_cache(app: &MainWindow, cache_size_task_sender: std:
                             );
                             let size_reduced = stats.total_size_before.saturating_sub(stats.total_size_after);
                             let size_stats_text = flk!("rust_cache_size_reduced", size = format_size(size_reduced, BINARY));
-                            let time_text = flk!("rust_cache_time_elapsed", seconds = elapsed);
+                            let time_text = flk!("rust_cache_time_elapsed", time = elapsed);
 
                             let slint_result = CacheCleaningResult {
                                 processed_files_text: processed_files_text.into(),
@@ -83,7 +83,7 @@ pub(crate) fn connect_clean_cache(app: &MainWindow, cache_size_task_sender: std:
                             gui_state.set_cache_cleaning_result(slint_result);
                         }
                         Err(e) => {
-                            let time_text = flk!("rust_cache_time_elapsed", seconds = elapsed);
+                            let time_text = flk!("rust_cache_time_elapsed", time = elapsed);
                             let slint_result = CacheCleaningResult {
                                 processed_files_text: "".into(),
                                 entries_stats_text: "".into(),

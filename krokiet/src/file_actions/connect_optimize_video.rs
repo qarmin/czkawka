@@ -138,7 +138,15 @@ impl ModelProcessor {
                 )
             };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(optimize_fnc)), MessageType::OptimizeVideo, true);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(optimize_fnc)),
+                MessageType::OptimizeVideo,
+                true,
+            );
         });
     }
 
@@ -191,7 +199,15 @@ impl ModelProcessor {
                 )
             };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(crop_fnc)), MessageType::OptimizeVideo, true);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(crop_fnc)),
+                MessageType::OptimizeVideo,
+                true,
+            );
         });
     }
 }

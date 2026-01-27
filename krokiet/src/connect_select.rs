@@ -3,7 +3,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 use crate::common::connect_i32_into_u64;
 use crate::connect_row_selection::checker::change_number_of_enabled_items;
 use crate::connect_translation::translate_select_mode;
-use crate::{ActiveTab, Callabler, GuiState, SingleMainListModel, MainWindow, SelectMode, SelectModel};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, SelectMode, SelectModel, SingleMainListModel};
 
 type SelectionResult = (u64, u64, ModelRc<SingleMainListModel>);
 

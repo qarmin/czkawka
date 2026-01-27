@@ -60,7 +60,11 @@ pub trait ToSimplerVec {
 impl ToSimplerVec for ModelRc<SingleMainListModel> {
     fn to_simpler_enumerated_vec(self) -> Vec<(usize, SimplerSingleMainListModel)> {
         let vec_model = self.as_any().downcast_ref::<VecModel<SingleMainListModel>>().expect("Only VecModel is supported");
-        vec_model.iter().enumerate().map(|(index, model)| (index, SimplerSingleMainListModel::from(&model))).collect()
+        vec_model
+            .iter()
+            .enumerate()
+            .map(|(index, model)| (index, SimplerSingleMainListModel::from(&model)))
+            .collect()
     }
 }
 

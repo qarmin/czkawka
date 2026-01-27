@@ -47,7 +47,7 @@ use crate::connect_scan::video_optimizer::scan_video_optimizer;
 use crate::settings::model::{BasicSettings, ComboBoxItems, SettingsCustom};
 use crate::settings::{collect_base_settings, collect_combo_box_settings, collect_settings};
 use crate::shared_models::SharedModels;
-use crate::{ActiveTab, GuiState, SingleMainListModel, MainWindow, ProgressToSend, flk};
+use crate::{ActiveTab, GuiState, MainWindow, ProgressToSend, SingleMainListModel, flk};
 
 pub struct ScanData {
     pub progress_sender: Sender<ProgressData>,
