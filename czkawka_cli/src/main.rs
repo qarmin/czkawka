@@ -12,7 +12,7 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::set_number_of_threads;
 use czkawka_core::common::tool_data::{CommonData, DeleteMethod};
-use czkawka_core::common::traits::{AllTraits, PrintResults, Search};
+use czkawka_core::common::traits::{AllTraits, FixingItems, PrintResults, Search};
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
 use czkawka_core::tools::bad_names::{BadNames, BadNamesParameters, NameFixerParams, NameIssues};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
@@ -20,6 +20,7 @@ use czkawka_core::tools::broken_files::{BrokenFiles, BrokenFilesParameters, Chec
 use czkawka_core::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters};
 use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
+use czkawka_core::tools::exif_remover::{ExifRemover, ExifRemoverParameters, ExifTagsFixerParams};
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
@@ -29,8 +30,8 @@ use czkawka_core::tools::video_optimizer::{VideoCropParams, VideoCroppingMechani
 use log::{debug, error, info};
 
 use crate::commands::{
-    Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs,
-    SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs,
+    Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, ExifRemoverArgs,
+    InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs,
 };
 use crate::progress::connect_progress;
 
@@ -80,6 +81,7 @@ fn main() {
             Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_flag, &progress_sender),
             Commands::BadNames(bad_names_args) => bad_names(bad_names_args, &stop_flag, &progress_sender),
             Commands::VideoOptimizer(video_optimizer_args) => video_optimizer(video_optimizer_args, &stop_flag, &progress_sender),
+            Commands::ExifRemover(exif_remover_args) => exif_remover(exif_remover_args, &stop_flag, &progress_sender),
         })
         .expect("Failed to spawn calculation thread");
 
@@ -401,9 +403,8 @@ fn bad_names(bad_names: BadNamesArgs, stop_flag: &Arc<AtomicBool>, progress_send
 
     // Fix names if requested
     if fix_names {
-        use czkawka_core::common::traits::FixingItems;
         let fix_params = NameFixerParams::default();
-        let () = tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+        tool.fix_items(stop_flag, Some(progress_sender), fix_params);
     }
 
     save_and_write_results_to_writer(&tool, &common_cli_items)
@@ -463,7 +464,6 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
 
     // Fix videos if requested
     if fix_videos {
-        use czkawka_core::common::traits::FixingItems;
         use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoTranscodeFixParams};
 
         let fix_params = if mode == "transcode" {
@@ -490,7 +490,32 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             })
         };
 
-        let () = tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+        tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+    }
+
+    save_and_write_results_to_writer(&tool, &common_cli_items)
+}
+
+fn exif_remover(exif_remover: ExifRemoverArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
+    let ExifRemoverArgs {
+        common_cli_items,
+        ignored_tags,
+        fix_exif,
+        override_file,
+    } = exif_remover;
+
+    let ignored_tags_vec = ignored_tags.map(|s| s.split(',').map(|tag| tag.trim().to_string()).collect()).unwrap_or_default();
+
+    let params = ExifRemoverParameters::new(ignored_tags_vec);
+    let mut tool = ExifRemover::new(params);
+
+    set_common_settings(&mut tool, &common_cli_items, None);
+
+    tool.search(stop_flag, Some(progress_sender));
+
+    if fix_exif {
+        let fix_params = ExifTagsFixerParams { override_file };
+        tool.fix_items(stop_flag, Some(progress_sender), fix_params);
     }
 
     save_and_write_results_to_writer(&tool, &common_cli_items)

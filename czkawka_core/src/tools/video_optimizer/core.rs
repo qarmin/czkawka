@@ -184,7 +184,7 @@ impl VideoOptimizer {
 
         self.save_video_crop_cache(&vec_file_entry, &params, loaded_hash_map);
 
-        vec_file_entry.retain(|e| e.error.is_none() && e.new_image_dimensions == (0, 0, 0, 0));
+        vec_file_entry.retain(|e| e.error.is_none() && e.new_image_dimensions != (0, 0, 0, 0));
 
         self.video_crop_result_entries = vec_file_entry;
         self.information.number_of_videos_to_crop = self.video_crop_result_entries.len();
@@ -372,6 +372,7 @@ impl VideoOptimizer {
                     unreachable!("VideoTranscode mode should have VideoTranscode fix_params(caller is responsible for that)");
                 };
 
+                let mut transcode_errors = Vec::new();
                 self.video_transcode_result_entries = mem::take(&mut self.video_transcode_result_entries)
                     .into_par_iter()
                     .map(|mut entry| {
@@ -382,7 +383,7 @@ impl VideoOptimizer {
                         match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
                             Ok(_new_size) => {}
                             Err(e) => {
-                                entry.error = Some(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e));
+                                transcode_errors.push(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e));
                             }
                         }
 
@@ -394,13 +395,14 @@ impl VideoOptimizer {
                 self.common_data
                     .text_messages
                     .errors
-                    .extend(self.video_transcode_result_entries.iter().filter_map(|e| e.error.clone()));
+                    .extend(transcode_errors);
             }
             VideoOptimizerParameters::VideoCrop(_) => {
                 let VideoOptimizerFixParams::VideoCrop(video_crop_params) = fix_params else {
                     unreachable!("VideoCrop mode should have VideoCrop fix_params(caller is responsible for that)");
                 };
 
+                let mut crop_errors = Vec::new();
                 self.video_crop_result_entries = mem::take(&mut self.video_crop_result_entries)
                     .into_par_iter()
                     .map(|mut entry| {
@@ -415,7 +417,7 @@ impl VideoOptimizer {
                         match fix_video_crop(&entry.path, &entry_crop_params, stop_flag) {
                             Ok(()) => {}
                             Err(e) => {
-                                entry.error = Some(format!("Failed to crop video \"{}\": {}", entry.path.to_string_lossy(), e));
+                                crop_errors.push(format!("Failed to crop video \"{}\": {}", entry.path.to_string_lossy(), e));
                             }
                         }
 
@@ -427,7 +429,7 @@ impl VideoOptimizer {
                 self.common_data
                     .text_messages
                     .errors
-                    .extend(self.video_crop_result_entries.iter().filter_map(|e| e.error.clone()));
+                    .extend(crop_errors);
             }
         }
     }

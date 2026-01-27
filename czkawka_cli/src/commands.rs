@@ -106,6 +106,12 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka video-optimizer -d /home/rafal -f results.txt"
     )]
     VideoOptimizer(VideoOptimizerArgs),
+    #[clap(
+        name = "exif-remover",
+        about = "Finds and removes EXIF tags from images",
+        after_help = "EXAMPLE:\n    czkawka exif-remover -d /home/rafal -f results.txt"
+    )]
+    ExifRemover(ExifRemoverArgs),
 }
 
 #[derive(Debug, clap::Args)]
@@ -579,7 +585,7 @@ pub struct VideoOptimizerArgs {
     #[clap(short = 't', long, help = "Generate thumbnails", long_help = "Generate video thumbnails for preview")]
     pub generate_thumbnails: bool,
     #[clap(
-        short = 'p',
+        short = 'V',
         long,
         default_value = "10",
         value_parser = clap::value_parser!(u8).range(1..=99),
@@ -673,6 +679,28 @@ pub struct VideoOptimizerArgs {
         long_help = "Maximum video height in pixels when limit_video_size is enabled. Only for transcode mode with -F flag."
     )]
     pub max_height: u32,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct ExifRemoverArgs {
+    #[clap(flatten)]
+    pub common_cli_items: CommonCliItems,
+    #[clap(
+        short = 'i',
+        long,
+        help = "Ignored EXIF tags (comma-separated)",
+        long_help = "Comma-separated list of EXIF tag names to ignore (not remove). Example: 'Orientation,DateTime,Software'"
+    )]
+    pub ignored_tags: Option<String>,
+    #[clap(short = 'F', long, help = "Remove EXIF tags", long_help = "Actually remove EXIF tags from files")]
+    pub fix_exif: bool,
+    #[clap(
+        short = 'o',
+        long,
+        help = "Override original files",
+        long_help = "Override original files instead of creating backup files with '_cleaned' suffix"
+    )]
+    pub override_file: bool,
 }
 
 #[derive(Debug, clap::Args)]
@@ -1175,4 +1203,5 @@ EXAMPLES:
     {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
     {bin} ext -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
     {bin} bad-names -d /home/rafal -u -j -w -n -f results.txt
-    {bin} video-optimizer -d /home/rafal -m transcode -f results.txt"#;
+    {bin} video-optimizer -d /home/rafal -m transcode -f results.txt
+    {bin} exif-remover -d /home/rafal -x IMAGE -f results.txt"#;

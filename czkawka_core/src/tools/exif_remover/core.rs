@@ -199,6 +199,7 @@ impl ExifRemover {
     pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: ExifTagsFixerParams) {
         info!("Starting EXIF tags removal on {} files.", self.exif_files.len());
 
+        let
         self.exif_files.par_iter_mut().for_each(|entry| {
             if check_if_stop_received(stop_flag) {
                 return;
@@ -212,6 +213,8 @@ impl ExifRemover {
                 }
             }
         });
+
+        self.common_data.text_messages.errors.extend(self.exif_files.iter().filter_map(|e| e.error.clone()));
     }
 }
 
