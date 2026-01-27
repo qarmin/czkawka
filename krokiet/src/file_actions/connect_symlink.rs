@@ -7,8 +7,8 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
-use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
+use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
+use crate::simpler_model::{SimplerSingleMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow};
 
 pub(crate) fn connect_symlink(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
@@ -34,9 +34,9 @@ impl ModelProcessor {
             let path_idx = self.active_tab.get_str_path_idx();
             let name_idx = self.active_tab.get_str_name_idx();
 
-            let symlink_fnc = move |data: &SimplerMainListModel| symlink_single_item(&format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]));
+            let symlink_fnc = move |data: &SimplerSingleMainListModel| symlink_single_item(&format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]));
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, symlink_fnc, MessageType::Symlink, false);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(symlink_fnc)), MessageType::Symlink, false);
         });
     }
 }

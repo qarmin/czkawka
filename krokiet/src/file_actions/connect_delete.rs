@@ -7,8 +7,8 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
-use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
+use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
+use crate::simpler_model::{SimplerSingleMainListModel, ToSimplerVec};
 use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
 
 pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
@@ -36,7 +36,7 @@ impl ModelProcessor {
             let path_idx = self.active_tab.get_str_path_idx();
             let name_idx = self.active_tab.get_str_name_idx();
 
-            let dlt_fnc = move |data: &SimplerMainListModel| {
+            let dlt_fnc = move |data: &SimplerSingleMainListModel| {
                 remove_single_item(
                     &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
                     is_empty_folder_tab,
@@ -44,7 +44,7 @@ impl ModelProcessor {
                 )
             };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, dlt_fnc, MessageType::Delete, false);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(dlt_fnc)), MessageType::Delete, false);
         });
     }
 }
@@ -92,7 +92,7 @@ mod tests {
 
             let path_idx = 0;
             let name_idx = 0;
-            let dlt_fnc = move |data: &SimplerMainListModel| {
+            let dlt_fnc = move |data: &SimplerSingleMainListModel| {
                 remove_single_item(
                     &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
                     is_empty_folder_tab,

@@ -13,13 +13,13 @@ use slint::{ComponentHandle, ModelRc, VecModel, Weak};
 use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
 use crate::model_operations::ProcessingResult;
-use crate::simpler_model::{SimplerMainListModel, ToSlintModel};
+use crate::simpler_model::{SimplerSingleMainListModel, ToSlintModel};
 use crate::{ActiveTab, GuiState, MainListModel, MainWindow, flk, model_operations};
 // This is quite ugly workaround for Slint strange limitation, where model cannot be passed to another thread
 // This was needed by me, because I wanted to process deletion without blocking main gui thread, with additional sending progress about entire operation.
 // After trying different solutions, looks that the simplest and quite not really efficient solution is to convert slint model, to simpler model, which can be passed to another thread.
 // Models are converted multiple times, so this have some big overhead
-// ModelRc<MainListModel> --cloning when iterating + converting--> SimplerMainListModel --conversion before setting to model--> ModelRc<MainListModel> --cloning when iterating to remove useless items--> ModelRc<MainListModel>
+// ModelRc<MainListModel> --cloning when iterating + converting--> SimplerSingleMainListModel --conversion before setting to model--> ModelRc<MainListModel> --cloning when iterating to remove useless items--> ModelRc<MainListModel>
 
 pub struct ModelProcessor {
     pub active_tab: ActiveTab,
@@ -83,6 +83,15 @@ impl MessageType {
     }
 }
 
+pub enum ProcessFunction {
+    // Takes as argument reference to one item on list, it is used by simple processing functions
+    // that operates on single item only lik deleting file, renaming file, etc
+    Simple(Box<dyn Fn(&SimplerSingleMainListModel) -> Result<(), String> + Send + Sync + 'static>),
+    // // Takes as argument function that is responsible for processing two related items on list
+    // // It is used to e.g. hardlink 2 files together
+    Related(Box<dyn Fn((&SimplerSingleMainListModel, &SimplerSingleMainListModel)) -> Result<(), String> + Send + Sync + 'static>),
+}
+
 impl ModelProcessor {
     pub fn new(active_tab: ActiveTab) -> Self {
         Self { active_tab }
@@ -93,11 +102,11 @@ impl ModelProcessor {
         model_operations::remove_single_items_in_groups(items, have_header)
     }
 
-    pub(crate) fn remove_deleted_items_from_model(results: ProcessingResult) -> (Vec<SimplerMainListModel>, Vec<String>, usize) {
+    pub(crate) fn remove_deleted_items_from_model(results: ProcessingResult) -> (Vec<SimplerSingleMainListModel>, Vec<String>, usize) {
         let mut errors = Vec::new();
         let mut items_deleted = 0;
 
-        let new_model: Vec<SimplerMainListModel> = results
+        let new_model: Vec<SimplerSingleMainListModel> = results
             .into_iter()
             .filter_map(|(_idx, item, delete_res)| match delete_res {
                 Some(Ok(())) => {
@@ -116,11 +125,11 @@ impl ModelProcessor {
     }
 
     pub(crate) fn process_items(
-        items_simplified: Vec<(usize, SimplerMainListModel)>,
+        items_simplified: Vec<(usize, SimplerSingleMainListModel)>,
         items_queued_to_delete: usize,
         sender: Sender<ProgressData>,
         stop_flag: &Arc<AtomicBool>,
-        process_function: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
+        process_function: ProcessFunction,
         message_type: MessageType,
         size_idx: Option<usize>,
         force_single_threaded: bool,
@@ -129,33 +138,43 @@ impl ModelProcessor {
         let size = Arc::new(AtomicU64::new(0));
         let delayed_sender = DelayedSender::new(sender, Duration::from_millis(100));
 
-        let fnc = |(idx, data): (usize, SimplerMainListModel)| {
-            if !data.checked {
-                return (idx, data, None);
+        let mut output: Vec<_> = match process_function {
+            ProcessFunction::Simple(ref process_simple) => {
+                let fnc = |(idx, data): (usize, SimplerSingleMainListModel)| {
+                    if !data.checked {
+                        return (idx, data, None);
+                    }
+
+                    // Stop requested, so just return items
+                    if stop_flag.load(Ordering::Relaxed) {
+                        return (idx, data, None);
+                    }
+
+                    let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
+                    let size = size.fetch_add(size_idx.map(|size_idx| data.get_size(size_idx)).unwrap_or_default(), Ordering::Relaxed);
+                    let mut progress = message_type.get_base_progress();
+                    progress.entries_to_check = items_queued_to_delete;
+                    progress.entries_checked = rm_idx;
+                    progress.bytes_checked = size;
+                    delayed_sender.send(progress);
+
+                    let res = process_simple(&data);
+
+                    (idx, data, Some(res))
+                };
+
+                if force_single_threaded {
+                    items_simplified.into_iter().map(fnc).collect()
+                } else {
+                    items_simplified.into_par_iter().map(fnc).collect()
+                }
             }
-
-            // Stop requested, so just return items
-            if stop_flag.load(Ordering::Relaxed) {
-                return (idx, data, None);
+            ProcessFunction::Related(ref process_rel) => {
+                // let grouped_items = items_simplified.into_iter().map()
             }
-
-            let rm_idx = rm_idx.fetch_add(1, Ordering::Relaxed);
-            let size = size.fetch_add(size_idx.map(|size_idx| data.get_size(size_idx)).unwrap_or_default(), Ordering::Relaxed);
-            let mut progress = message_type.get_base_progress();
-            progress.entries_to_check = items_queued_to_delete;
-            progress.entries_checked = rm_idx;
-            progress.bytes_checked = size;
-            delayed_sender.send(progress);
-
-            let res = process_function(&data);
-            (idx, data, Some(res))
         };
 
-        let mut output: Vec<_> = if force_single_threaded {
-            items_simplified.into_iter().map(fnc).collect()
-        } else {
-            items_simplified.into_par_iter().map(fnc).collect()
-        };
+
         output.sort_by_key(|(idx, _, _)| *idx);
 
         output
@@ -166,8 +185,8 @@ impl ModelProcessor {
         weak_app: &Weak<MainWindow>,
         stop_flag: Arc<AtomicBool>,
         progress_sender: &Sender<ProgressData>,
-        simpler_model: Vec<(usize, SimplerMainListModel)>,
-        dlt_fnc: impl Fn(&SimplerMainListModel) -> Result<(), String> + Send + Sync + 'static,
+        simpler_model: Vec<(usize, SimplerSingleMainListModel)>,
+        process_fnc: ProcessFunction,
         message_type: MessageType,
         force_single_threaded: bool,
     ) {
@@ -207,7 +226,7 @@ impl ModelProcessor {
             items_queued_to_delete,
             progress_sender.clone(),
             &stop_flag,
-            dlt_fnc,
+            process_fnc,
             message_type,
             size_idx,
             force_single_threaded,

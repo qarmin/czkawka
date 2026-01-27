@@ -4,7 +4,7 @@ use crate::MainListModel;
 use crate::common::connect_i32_into_u64;
 
 #[derive(Clone)]
-pub struct SimplerMainListModel {
+pub struct SimplerSingleMainListModel {
     pub checked: bool,
     pub filled_header_row: bool,
     pub header_row: bool,
@@ -13,7 +13,7 @@ pub struct SimplerMainListModel {
     pub val_str: Vec<String>,
 }
 
-impl SimplerMainListModel {
+impl SimplerSingleMainListModel {
     pub(crate) fn get_size(&self, size_idx: usize) -> u64 {
         connect_i32_into_u64(self.val_int[size_idx], self.val_int[size_idx + 1])
     }
@@ -22,13 +22,13 @@ impl SimplerMainListModel {
     #[allow(dead_code)] // TODO - rust with some version shows this
     pub(crate) fn debug_print(&self) {
         println!(
-            "SimplerMainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",
+            "SimplerSingleMainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",
             self.checked, self.filled_header_row, self.header_row, self.selected_row, self.val_int, self.val_str
         );
     }
 }
 
-impl From<&MainListModel> for SimplerMainListModel {
+impl From<&MainListModel> for SimplerSingleMainListModel {
     fn from(model: &MainListModel) -> Self {
         Self {
             checked: model.checked,
@@ -40,8 +40,8 @@ impl From<&MainListModel> for SimplerMainListModel {
         }
     }
 }
-impl From<SimplerMainListModel> for MainListModel {
-    fn from(val: SimplerMainListModel) -> Self {
+impl From<SimplerSingleMainListModel> for MainListModel {
+    fn from(val: SimplerSingleMainListModel) -> Self {
         Self {
             checked: val.checked,
             filled_header_row: val.filled_header_row,
@@ -54,20 +54,20 @@ impl From<SimplerMainListModel> for MainListModel {
 }
 
 pub trait ToSimplerVec {
-    fn to_simpler_enumerated_vec(self) -> Vec<(usize, SimplerMainListModel)>;
+    fn to_simpler_enumerated_vec(self) -> Vec<(usize, SimplerSingleMainListModel)>;
 }
 
 impl ToSimplerVec for ModelRc<MainListModel> {
-    fn to_simpler_enumerated_vec(self) -> Vec<(usize, SimplerMainListModel)> {
+    fn to_simpler_enumerated_vec(self) -> Vec<(usize, SimplerSingleMainListModel)> {
         let vec_model = self.as_any().downcast_ref::<VecModel<MainListModel>>().expect("Only VecModel is supported");
-        vec_model.iter().enumerate().map(|(index, model)| (index, SimplerMainListModel::from(&model))).collect()
+        vec_model.iter().enumerate().map(|(index, model)| (index, SimplerSingleMainListModel::from(&model))).collect()
     }
 }
 
 pub trait ToSlintModel {
     fn to_vec_model(self) -> Vec<MainListModel>;
 }
-impl ToSlintModel for Vec<SimplerMainListModel> {
+impl ToSlintModel for Vec<SimplerSingleMainListModel> {
     fn to_vec_model(self) -> Vec<MainListModel> {
         self.into_iter().map(|model| model.into()).collect()
     }
@@ -77,7 +77,7 @@ pub trait DebugPrintSimplerModel {
     #[expect(dead_code)]
     fn debug_print_simpler_models(&self);
 }
-impl DebugPrintSimplerModel for Vec<SimplerMainListModel> {
+impl DebugPrintSimplerModel for Vec<SimplerSingleMainListModel> {
     #[expect(clippy::print_stdout)]
     fn debug_print_simpler_models(&self) {
         println!("=====================START DEBUG PRINT SIMPLER MODELS=====================");

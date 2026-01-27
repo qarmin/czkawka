@@ -7,8 +7,8 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
-use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
+use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
+use crate::simpler_model::{SimplerSingleMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow, Settings};
 
 pub(crate) fn connect_clean(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
@@ -38,7 +38,7 @@ impl ModelProcessor {
             let tag_groups_idx = self.active_tab.get_exif_tag_groups_idx();
             let tag_u16_idx = self.active_tab.get_exif_tag_u16_idx();
 
-            let clean_fnc = move |data: &SimplerMainListModel| {
+            let clean_fnc = move |data: &SimplerSingleMainListModel| {
                 clean_exif_single_file(
                     &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
                     &data.val_str[tag_groups_idx].split(',').map(|s| s.to_string()).collect::<Vec<_>>(),
@@ -47,7 +47,7 @@ impl ModelProcessor {
                 )
             };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, clean_fnc, MessageType::CleanExif, false);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(clean_fnc)), MessageType::CleanExif, false);
         });
     }
 }

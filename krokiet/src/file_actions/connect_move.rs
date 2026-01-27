@@ -7,8 +7,8 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
-use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
+use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
+use crate::simpler_model::{SimplerSingleMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub(crate) fn connect_move(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
@@ -53,14 +53,14 @@ impl ModelProcessor {
             let path_idx = self.active_tab.get_str_path_idx();
             let name_idx = self.active_tab.get_str_name_idx();
 
-            let mlt_fnc = move |data: &SimplerMainListModel| move_single_item(data, path_idx, name_idx, &output_folder, preserve_structure, copy_mode);
+            let mlt_fnc = move |data: &SimplerSingleMainListModel| move_single_item(data, path_idx, name_idx, &output_folder, preserve_structure, copy_mode);
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, mlt_fnc, MessageType::Move, false);
+            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, ProcessFunction::Simple(Box::new(mlt_fnc)), MessageType::Move, false);
         });
     }
 }
 
-fn move_single_item(data: &SimplerMainListModel, path_idx: usize, name_idx: usize, output_folder: &str, preserve_structure: bool, copy_mode: bool) -> Result<(), String> {
+fn move_single_item(data: &SimplerSingleMainListModel, path_idx: usize, name_idx: usize, output_folder: &str, preserve_structure: bool, copy_mode: bool) -> Result<(), String> {
     let path = &data.val_str[path_idx];
     let name = &data.val_str[name_idx];
 

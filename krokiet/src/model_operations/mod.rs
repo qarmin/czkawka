@@ -3,10 +3,10 @@ pub mod model_processor;
 use slint::{ComponentHandle, Model, ModelRc};
 
 use crate::connect_row_selection::checker::get_number_of_enabled_items;
-use crate::simpler_model::SimplerMainListModel;
+use crate::simpler_model::SimplerSingleMainListModel;
 use crate::{GuiState, MainListModel, MainWindow};
 
-pub type ProcessingResult = Vec<(usize, SimplerMainListModel, Option<Result<(), String>>)>;
+pub type ProcessingResult = Vec<(usize, SimplerSingleMainListModel, Option<Result<(), String>>)>;
 
 impl MainListModel {
     #[allow(clippy::allow_attributes)]
