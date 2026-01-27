@@ -1,17 +1,17 @@
 ## Version ?.?.? - ??
 ### New version blockers
-- sym/hardlinks in Krokiet(not 100% sure if I will be able to do it)
 - updating to slint 1.15, which fixes some bugs
 - update to stable 0.11 gtk-rs
-- crash when selecting items in non-header modes
 
 ### Breaking changes
 #### Users
 - Czkawka gui config file converted from custom format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
 - In broken files mode, type of file is no longer saved to cache, so old cache files are incompatible with new version and should be regenerated from scratch
+- Similarity Preset(enum) argument in similar images mode, was changed into "Max Difference" integer argument(0-40)
 
 #### Devs
 - Public api functions, were changed a little avoid unnecessary cloning/using reference of copyable types
+- Similarity name was changed to difference
 
 ### Core
 - Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#1623](https://github.com/qarmin/czkawka/pull/1623)

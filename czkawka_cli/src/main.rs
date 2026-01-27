@@ -21,7 +21,6 @@ use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
-use czkawka_core::tools::similar_images::core::return_similarity_from_similarity_preset;
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
@@ -207,7 +206,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         reference_directories,
         minimal_file_size,
         maximal_file_size,
-        similarity_preset,
+        max_difference,
         hash_alg,
         image_filter,
         hash_size,
@@ -216,9 +215,8 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         ignore_same_size,
     } = similar_images;
 
-    let similarity = return_similarity_from_similarity_preset(similarity_preset, hash_size);
     let params = SimilarImagesParameters::new(
-        similarity,
+        max_difference,
         hash_size,
         hash_alg,
         image_filter,

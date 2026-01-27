@@ -10,7 +10,6 @@ use czkawka_core::common::tool_data::DeleteMethod;
 use czkawka_core::re_exported::{Cropdetect, FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::same_music::MusicSimilarity;
-use czkawka_core::tools::similar_images::SimilarityPreset;
 use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_SKIP_FORWARD_AMOUNT, crop_detect_from_str_opt};
 
 #[cfg(not(feature = "no_colors"))]
@@ -152,7 +151,7 @@ pub struct DuplicatesArgs {
         default_value = "HASH",
         value_parser = parse_checking_method_duplicate,
         help = "Search method (NAME, SIZE, HASH)",
-        long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file"
+        long_help = "Methods to search files.\nNAME - Fast but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file"
     )]
     pub search_method: CheckingMethod,
     #[clap(flatten)]
@@ -234,12 +233,12 @@ pub struct SimilarImagesArgs {
     #[clap(
         short,
         long,
-        default_value = "High",
-        value_parser = parse_similar_images_similarity,
-        help = "Similarity level (Minimal, VerySmall, Small, Medium, High, VeryHigh, Original)",
-        long_help = "Methods to choose similarity level of images which will be considered as duplicated."
+        default_value = "5",
+        value_parser = clap::value_parser!(u32).range(0..=40),
+        help = "Maximum difference between images (0-40)",
+        long_help = "Maximum difference between images to be considered as similar (0-40). Lower values mean more strict matching. For hash_size 8, values up to 10 are recommended, for hash_size 16 up to 20 are recommended."
     )]
-    pub similarity_preset: SimilarityPreset,
+    pub max_difference: u32,
     #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
@@ -259,7 +258,7 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "Nearest",
         value_parser = parse_similar_image_filter,
-        help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)"
+        help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Gaussian, Catmullrom)"
     )]
     pub image_filter: FilterType,
     #[clap(
@@ -729,19 +728,6 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
         "ob" => Ok(DeleteMethod::OneBiggest),
         "os" => Ok(DeleteMethod::OneSmallest),
         _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO, HARD, AEB, AES, OB, OS)"),
-    }
-}
-
-fn parse_similar_images_similarity(src: &str) -> Result<SimilarityPreset, &'static str> {
-    match src.to_lowercase().replace('_', "").as_str() {
-        "minimal" => Ok(SimilarityPreset::Minimal),
-        "verysmall" => Ok(SimilarityPreset::VerySmall),
-        "small" => Ok(SimilarityPreset::Small),
-        "medium" => Ok(SimilarityPreset::Medium),
-        "high" => Ok(SimilarityPreset::High),
-        "veryhigh" => Ok(SimilarityPreset::VeryHigh),
-        "original" => Ok(SimilarityPreset::Original),
-        _ => Err("Couldn't parse the image similarity preset (allowed: Minimal, VerySmall, Small, Medium, High, VeryHigh, Original)"),
     }
 }
 
