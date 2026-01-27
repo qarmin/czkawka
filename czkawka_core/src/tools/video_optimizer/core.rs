@@ -363,7 +363,7 @@ impl VideoOptimizer {
     }
 
     #[fun_time(message = "fix_files", level = "debug")]
-    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: VideoOptimizerFixParams) -> WorkContinueStatus {
+    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: VideoOptimizerFixParams) {
         match self.params.clone() {
             VideoOptimizerParameters::VideoTranscode(_) => {
                 info!("Starting optimization of {} video files", self.video_transcode_result_entries.len());
@@ -373,6 +373,7 @@ impl VideoOptimizer {
                 };
 
                 // TODO this should use same mechanism as deleting files - this currently do not save progress to CLI
+                // TODO this should return errors/warnings - video_transcode_result_entries can be removed
                 self.video_transcode_result_entries = mem::take(&mut self.video_transcode_result_entries)
                     .into_par_iter()
                     .map(|mut entry| {
@@ -391,24 +392,12 @@ impl VideoOptimizer {
                     })
                     .while_some()
                     .collect();
-
-                // TODO save errors/warnings to text messages
-
-                let successful_files = self.video_transcode_result_entries.iter().filter(|e| e.error.is_none() && !e.codec.is_empty()).count();
-                let failed_files = self.video_transcode_result_entries.iter().filter(|e| e.error.is_some()).count();
-
-                self.information.number_of_processed_files = successful_files;
-                self.information.number_of_failed_files = failed_files;
-
-                debug!("Optimization complete - Processed: {successful_files}, Failed: {failed_files}");
             }
             VideoOptimizerParameters::VideoCrop(_) => {
                 // TODO: Implement video cropping logic
                 info!("Video crop mode - logic not yet implemented for {} files", self.video_crop_result_entries.len());
             }
         }
-
-        WorkContinueStatus::Continue
     }
 }
 

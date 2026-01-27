@@ -103,22 +103,18 @@ impl BadNames {
     }
 
     #[fun_time(message = "fix_bad_names", level = "debug")]
-    pub fn fix_bad_names(&mut self, _fix_params: NameFixerParams, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
-        let mut fixed_count = 0;
+    pub fn fix_bad_names(&mut self, _fix_params: NameFixerParams, stop_flag: &Arc<AtomicBool>) {
         let mut failed_renames = Vec::new();
 
         for entry in &self.bad_names_files {
             if check_if_stop_received(stop_flag) {
-                return WorkContinueStatus::Stop;
+                return;
             }
 
             let new_path = entry.path.with_file_name(&entry.new_name);
 
             match fs::rename(&entry.path, &new_path) {
-                Ok(()) => {
-                    fixed_count += 1;
-                    debug!("Renamed {:?} to {:?}", entry.path, new_path);
-                }
+                Ok(()) => {}
                 Err(e) => {
                     failed_renames.push(format!("Failed to rename {:?}: {}", entry.path, e));
                 }
@@ -128,9 +124,6 @@ impl BadNames {
         if !failed_renames.is_empty() {
             self.common_data.text_messages.warnings.extend(failed_renames);
         }
-
-        debug!("Fixed {fixed_count} file names");
-        WorkContinueStatus::Continue
     }
 }
 

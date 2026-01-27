@@ -196,7 +196,7 @@ impl ExifRemover {
     }
 
     #[fun_time(message = "fix_files", level = "debug")]
-    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: ExifTagsFixerParams) -> WorkContinueStatus {
+    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: ExifTagsFixerParams) {
         info!("Starting EXIF tags removal on {} files.", self.exif_files.len());
 
         self.exif_files.par_iter_mut().for_each(|entry| {
@@ -212,8 +212,6 @@ impl ExifRemover {
                 }
             }
         });
-
-        WorkContinueStatus::Continue
     }
 }
 

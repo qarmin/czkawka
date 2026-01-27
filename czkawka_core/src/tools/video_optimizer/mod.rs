@@ -94,8 +94,6 @@ pub struct VideoCropFixParams {
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Info {
-    pub number_of_processed_files: usize,
-    pub number_of_failed_files: usize,
     pub scanning_time: Duration,
 }
 

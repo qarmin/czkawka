@@ -14,6 +14,7 @@ use czkawka_core::common::set_number_of_threads;
 use czkawka_core::common::tool_data::{CommonData, DeleteMethod};
 use czkawka_core::common::traits::{AllTraits, PrintResults, Search};
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
+use czkawka_core::tools::bad_names::{BadNames, BadNamesParameters, NameFixerParams, NameIssues};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
 use czkawka_core::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters};
@@ -27,8 +28,8 @@ use czkawka_core::tools::temporary::Temporary;
 use log::{debug, error, info};
 
 use crate::commands::{
-    Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SDMethod,
-    SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs,
+    Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs,
+    SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs,
 };
 use crate::progress::connect_progress;
 
@@ -76,6 +77,7 @@ fn main() {
             Commands::BrokenFiles(broken_files_args) => broken_files(broken_files_args, &stop_flag, &progress_sender),
             Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_flag, &progress_sender),
             Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_flag, &progress_sender),
+            Commands::BadNames(bad_names_args) => bad_names(bad_names_args, &stop_flag, &progress_sender),
         })
         .expect("Failed to spawn calculation thread");
 
@@ -352,6 +354,55 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>
     set_common_settings(&mut tool, &common_cli_items, None);
 
     tool.search(stop_flag, Some(progress_sender));
+
+    save_and_write_results_to_writer(&tool, &common_cli_items)
+}
+
+fn bad_names(bad_names: BadNamesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
+    let BadNamesArgs {
+        common_cli_items,
+        delete_method,
+        uppercase_extension,
+        emoji_used,
+        space_at_start_or_end,
+        non_ascii_graphical,
+        restricted_charset,
+        remove_duplicated_non_alphanumeric,
+        fix_names,
+    } = bad_names;
+
+    // Parse restricted charset if provided
+    let restricted_charset_allowed = restricted_charset.and_then(|s| {
+        if s.trim().is_empty() {
+            None
+        } else {
+            Some(s.split(',').filter_map(|c| c.trim().chars().next()).collect())
+        }
+    });
+
+    let name_issues = NameIssues {
+        uppercase_extension,
+        emoji_used,
+        space_at_start_or_end,
+        non_ascii_graphical,
+        restricted_charset_allowed,
+        remove_duplicated_non_alphanumeric,
+    };
+
+    let params = BadNamesParameters::new(name_issues);
+    let mut tool = BadNames::new(params);
+
+    set_common_settings(&mut tool, &common_cli_items, None);
+    set_simple_delete(&mut tool, delete_method);
+
+    tool.search(stop_flag, Some(progress_sender));
+
+    // Fix names if requested
+    if fix_names {
+        use czkawka_core::common::traits::FixingItems;
+        let fix_params = NameFixerParams::default();
+        let () = tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+    }
 
     save_and_write_results_to_writer(&tool, &common_cli_items)
 }

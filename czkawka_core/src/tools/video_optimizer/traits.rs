@@ -28,8 +28,8 @@ impl DeletingItems for VideoOptimizer {
 impl FixingItems for VideoOptimizer {
     type FixParams = VideoOptimizerFixParams;
     #[fun_time(message = "fix_items", level = "debug")]
-    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) -> WorkContinueStatus {
-        self.fix_files(stop_flag, progress_sender, fix_params)
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) {
+        self.fix_files(stop_flag, progress_sender, fix_params);
     }
 }
 
@@ -181,6 +181,7 @@ impl CommonData for VideoOptimizer {
     }
 
     fn found_any_broken_files(&self) -> bool {
-        self.information.number_of_failed_files > 0
+        // self.information.number_of_failed_files > 0 // TODO - self
+        false
     }
 }

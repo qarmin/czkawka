@@ -94,6 +94,12 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka ext -d /home/czokolada/ -f results.txt"
     )]
     BadExtensions(BadExtensionsArgs),
+    #[clap(
+        name = "bad-names",
+        about = "Finds files with bad names",
+        after_help = "EXAMPLE:\n    czkawka bad-names -d /home/rafal -f results.txt"
+    )]
+    BadNames(BadNamesArgs),
 }
 
 #[derive(Debug, clap::Args)]
@@ -183,11 +189,22 @@ pub struct EmptyFoldersArgs {
 pub struct BiggestFilesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
-    #[clap(short, long, default_value = "50", help = "Number of files to be shown", long_help = "Number of biggest (or smallest with -J flag) files to display in results")]
+    #[clap(
+        short,
+        long,
+        default_value = "50",
+        help = "Number of files to be shown",
+        long_help = "Number of biggest (or smallest with -J flag) files to display in results"
+    )]
     pub number_of_files: usize,
     #[clap(flatten)]
     pub delete_method: SDMethod,
-    #[clap(short = 'J', long, help = "Finds the smallest files instead the biggest", long_help = "Switch mode to find smallest files instead of biggest ones")]
+    #[clap(
+        short = 'J',
+        long,
+        help = "Finds the smallest files instead the biggest",
+        long_help = "Switch mode to find smallest files instead of biggest ones"
+    )]
     pub smallest_mode: bool,
 }
 
@@ -283,9 +300,19 @@ pub struct SameMusicArgs {
     pub reference_directories: ReferenceDirectories,
     #[clap(flatten)]
     pub delete_method: DMethod,
-    #[clap(short, long, help = "Approximate comparison of music tags", long_help = "Use approximate comparison when comparing music tags (allows small differences in tag values)")]
+    #[clap(
+        short,
+        long,
+        help = "Approximate comparison of music tags",
+        long_help = "Use approximate comparison when comparing music tags (allows small differences in tag values)"
+    )]
     pub approximate_comparison: bool,
-    #[clap(short, long, help = "Compare fingerprints only with similar titles", long_help = "When using audio content comparison, only compare files that have similar titles to reduce false positives and speed up the process")]
+    #[clap(
+        short,
+        long,
+        help = "Compare fingerprints only with similar titles",
+        long_help = "When using audio content comparison, only compare files that have similar titles to reduce false positives and speed up the process"
+    )]
     pub compare_fingerprints_only_with_similar_titles: bool,
     #[clap(
         short = 'z',
@@ -472,8 +499,66 @@ pub struct BadExtensionsArgs {
 }
 
 #[derive(Debug, clap::Args)]
+pub struct BadNamesArgs {
+    #[clap(flatten)]
+    pub common_cli_items: CommonCliItems,
+    #[clap(flatten)]
+    pub delete_method: SDMethod,
+    #[clap(
+        short = 'u',
+        long,
+        help = "Check for uppercase extensions",
+        long_help = "Detects files with uppercase extensions (e.g., .JPG instead of .jpg)"
+    )]
+    pub uppercase_extension: bool,
+    #[clap(short = 'j', long, help = "Check for emoji in filenames", long_help = "Detects files with emoji characters in their names")]
+    pub emoji_used: bool,
+    #[clap(
+        short = 'w',
+        long,
+        help = "Check for spaces at start or end",
+        long_help = "Detects files with spaces at the beginning or end of their names"
+    )]
+    pub space_at_start_or_end: bool,
+    #[clap(
+        short = 'n',
+        long,
+        help = "Check for non-ASCII characters",
+        long_help = "Detects files with non-ASCII graphical characters in their names"
+    )]
+    pub non_ascii_graphical: bool,
+    #[clap(
+        short = 'r',
+        long,
+        help = "Restricted charset (comma-separated)",
+        long_help = "Comma-separated list of allowed special characters. Any other characters will be flagged as problematic. Example: '_,-, ,.' for underscore, dash, space, and dot"
+    )]
+    pub restricted_charset: Option<String>,
+    #[clap(
+        short = 'a',
+        long,
+        help = "Check for duplicated non-alphanumeric characters",
+        long_help = "Detects files with duplicated non-alphanumeric characters (e.g., 'file__name' or 'file..txt')"
+    )]
+    pub remove_duplicated_non_alphanumeric: bool,
+    #[clap(
+        short = 'F',
+        long,
+        help = "Fix bad names automatically",
+        long_help = "Automatically rename files to fix detected naming issues"
+    )]
+    pub fix_names: bool,
+}
+
+#[derive(Debug, clap::Args)]
 pub struct CommonCliItems {
-    #[clap(short = 'T', long, default_value = "0", help = "Number of threads to use (0 = all available)", long_help = "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage.")]
+    #[clap(
+        short = 'T',
+        long,
+        default_value = "0",
+        help = "Number of threads to use (0 = all available)",
+        long_help = "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage."
+    )]
     pub thread_number: usize,
     #[clap(
         short,
@@ -512,24 +597,54 @@ pub struct CommonCliItems {
     pub json_compact_file_to_save: JsonCompactFileToSave,
     #[clap(flatten)]
     pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(short = 'R', long, help = "Prevents recursive check of folders", long_help = "Disables recursive directory traversal. Only files in the top-level directories will be scanned.")]
+    #[clap(
+        short = 'R',
+        long,
+        help = "Prevents recursive check of folders",
+        long_help = "Disables recursive directory traversal. Only files in the top-level directories will be scanned."
+    )]
     pub not_recursive: bool,
     #[cfg(target_family = "unix")]
-    #[clap(short = 'X', long, help = "Exclude files on other filesystems", long_help = "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)")]
+    #[clap(
+        short = 'X',
+        long,
+        help = "Exclude files on other filesystems",
+        long_help = "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)"
+    )]
     pub exclude_other_filesystems: bool,
     #[clap(flatten)]
     pub do_not_print: DoNotPrint,
-    #[clap(short = 'W', long, help = "Ignore error code when files are found", long_help = "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings.")]
+    #[clap(
+        short = 'W',
+        long,
+        help = "Ignore error code when files are found",
+        long_help = "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings."
+    )]
     pub ignore_error_code_on_found: bool,
-    #[clap(short = 'H', long, help = "Disable cache", long_help = "Disables the cache system. This will make scanning slower but ensures fresh results without cached data.")]
+    #[clap(
+        short = 'H',
+        long,
+        help = "Disable cache",
+        long_help = "Disables the cache system. This will make scanning slower but ensures fresh results without cached data."
+    )]
     pub disable_cache: bool,
 }
 
 #[derive(Debug, clap::Args, Clone, Copy)]
 pub struct DoNotPrint {
-    #[clap(short = 'N', long, help = "Do not print results to console", long_help = "Suppresses printing of search results to the console. Useful when only saving results to files.")]
+    #[clap(
+        short = 'N',
+        long,
+        help = "Do not print results to console",
+        long_help = "Suppresses printing of search results to the console. Useful when only saving results to files."
+    )]
     pub do_not_print_results: bool,
-    #[clap(short = 'M', long, help = "Do not print messages to console", long_help = "Suppresses all informational messages, warnings, and errors from being printed to console.")]
+    #[clap(
+        short = 'M',
+        long,
+        help = "Do not print messages to console",
+        long_help = "Suppresses all informational messages, warnings, and errors from being printed to console."
+    )]
     pub do_not_print_messages: bool,
 }
 
@@ -544,9 +659,19 @@ pub struct DMethod {
         long_help = "Method for selecting which files to delete from duplicate groups:\nAEN - All files Except Newest (keeps newest)\nAEO - All files Except Oldest (keeps oldest)\nON - Only 1 file, the Newest (deletes all but newest)\nOO - Only 1 file, the Oldest (deletes all but oldest)\nAEB - All files Except Biggest (keeps biggest)\nAES - All files Except Smallest (keeps smallest)\nOB - Only 1 file, the Biggest (deletes all but biggest)\nOS - Only 1 file, the Smallest (deletes all but smallest)\nHARD - create hard links to save space\nNONE - do not delete files (default)"
     )]
     pub delete_method: DeleteMethod,
-    #[clap(short = 'Q', long, help = "Dry run - preview operations", long_help = "Performs a dry run showing what operations would be performed without actually executing them.")]
+    #[clap(
+        short = 'Q',
+        long,
+        help = "Dry run - preview operations",
+        long_help = "Performs a dry run showing what operations would be performed without actually executing them."
+    )]
     pub dry_run: bool,
-    #[clap(short = 'y', long, help = "Move items to trash", long_help = "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.")]
+    #[clap(
+        short = 'y',
+        long,
+        help = "Move items to trash",
+        long_help = "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered."
+    )]
     pub move_to_trash: bool,
 }
 
@@ -555,15 +680,31 @@ pub struct DMethod {
 pub struct SDMethod {
     #[clap(short = 'D', long, help = "Delete found items", long_help = "Automatically delete all found items matching the criteria.")]
     pub delete_files: bool,
-    #[clap(short = 'Q', long, help = "Dry run - preview operations", long_help = "Performs a dry run showing what operations would be performed without actually executing them.")]
+    #[clap(
+        short = 'Q',
+        long,
+        help = "Dry run - preview operations",
+        long_help = "Performs a dry run showing what operations would be performed without actually executing them."
+    )]
     pub dry_run: bool,
-    #[clap(short = 'y', long, help = "Move items to trash", long_help = "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered.")]
+    #[clap(
+        short = 'y',
+        long,
+        help = "Move items to trash",
+        long_help = "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered."
+    )]
     pub move_to_trash: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct FileToSave {
-    #[clap(short, long, value_name = "file-name", help = "Save results to formatted text file", long_help = "Saves the search results into a human-readable formatted text file.")]
+    #[clap(
+        short,
+        long,
+        value_name = "file-name",
+        help = "Save results to formatted text file",
+        long_help = "Saves the search results into a human-readable formatted text file."
+    )]
     pub file_to_save: Option<PathBuf>,
 }
 
@@ -580,31 +721,58 @@ pub struct ReferenceDirectories {
 
 #[derive(Debug, clap::Args)]
 pub struct JsonCompactFileToSave {
-    #[clap(short = 'C', long, value_name = "json-file-name", help = "Save results to compact JSON file", long_help = "Saves the search results into a compact (minified) JSON file without extra whitespace.")]
+    #[clap(
+        short = 'C',
+        long,
+        value_name = "json-file-name",
+        help = "Save results to compact JSON file",
+        long_help = "Saves the search results into a compact (minified) JSON file without extra whitespace."
+    )]
     pub compact_file_to_save: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct JsonPrettyFileToSave {
-    #[clap(short, long, value_name = "pretty-json-file-name", help = "Save results to pretty JSON file", long_help = "Saves the search results into a pretty-printed (indented) JSON file for better readability.")]
+    #[clap(
+        short,
+        long,
+        value_name = "pretty-json-file-name",
+        help = "Save results to pretty JSON file",
+        long_help = "Saves the search results into a pretty-printed (indented) JSON file for better readability."
+    )]
     pub pretty_file_to_save: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct AllowHardLinks {
-    #[clap(short = 'L', long, help = "Do not ignore hard links", long_help = "Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once.")]
+    #[clap(
+        short = 'L',
+        long,
+        help = "Do not ignore hard links",
+        long_help = "Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once."
+    )]
     pub allow_hard_links: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct CaseSensitiveNameComparison {
-    #[clap(short = 'l', long, help = "Use case-sensitive name comparison", long_help = "Enables case-sensitive file name comparison. By default, comparisons are case-insensitive (e.g., 'File.txt' equals 'file.txt').")]
+    #[clap(
+        short = 'l',
+        long,
+        help = "Use case-sensitive name comparison",
+        long_help = "Enables case-sensitive file name comparison. By default, comparisons are case-insensitive (e.g., 'File.txt' equals 'file.txt')."
+    )]
     pub case_sensitive_name_comparison: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct IgnoreSameSize {
-    #[clap(short = 'J', long, help = "Ignore files with same size", long_help = "Groups files by size and keeps only one file from each size group, ignoring files with identical sizes (useful for quick deduplication based solely on file size).")]
+    #[clap(
+        short = 'J',
+        long,
+        help = "Ignore files with same size",
+        long_help = "Groups files by size and keeps only one file from each size group, ignoring files with identical sizes (useful for quick deduplication based solely on file size)."
+    )]
     pub ignore_same_size: bool,
 }
 
@@ -850,4 +1018,5 @@ EXAMPLES:
     {bin} music -d /home/rafal -e /home/rafal/Pulpit -z \"artist,year,ARTISTALBUM,ALBUM___tiTlE\"  -f results.txt
     {bin} symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
     {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
-    {bin} ext -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt"#;
+    {bin} ext -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
+    {bin} bad-names -d /home/rafal -u -j -w -n -f results.txt"#;
