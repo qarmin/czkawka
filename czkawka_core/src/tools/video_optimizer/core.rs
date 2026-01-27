@@ -17,7 +17,7 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, generate_thumbnail};
 use crate::tools::video_optimizer::{
-    Info, VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
+    Info, VideoCropEntry, VideoCropParams, VideoCropSingleFixParams, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
 };
 
 mod video_converter;
@@ -403,8 +403,13 @@ impl VideoOptimizer {
                         }
 
                         let (left, top, right, bottom) = entry.new_image_dimensions;
-                        let mut entry_crop_params = video_crop_params;
-                        entry_crop_params.crop_rectangle = (left, top, right, bottom);
+                        let entry_crop_params = VideoCropSingleFixParams {
+                            overwrite_original: video_crop_params.overwrite_original,
+                            target_codec: video_crop_params.target_codec,
+                            quality: video_crop_params.quality,
+                            crop_rectangle: (left, top, right, bottom),
+                            crop_mechanism: video_crop_params.crop_mechanism,
+                        };
 
                         match fix_video_crop(&entry.path, &entry_crop_params, stop_flag) {
                             Ok(()) => Some(None),

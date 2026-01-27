@@ -5,7 +5,7 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
-use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
+use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropSingleFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
 use slint::{ComponentHandle, Weak};
 
 use crate::common::IntDataVideoOptimizer;
@@ -189,7 +189,7 @@ impl ModelProcessor {
                     &stop_flag_clone,
                     &full_path,
                     original_size,
-                    VideoCropFixParams {
+                    VideoCropSingleFixParams {
                         overwrite_original: overwrite_files,
                         target_codec: requested_codec,
                         quality,
@@ -226,12 +226,12 @@ fn optimize_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _origin
 }
 
 #[cfg(not(test))]
-fn crop_single_video(stop_flag: &Arc<AtomicBool>, full_path: &str, _original_size: u64, params: VideoCropFixParams) -> Result<(), String> {
+fn crop_single_video(stop_flag: &Arc<AtomicBool>, full_path: &str, _original_size: u64, params: VideoCropSingleFixParams) -> Result<(), String> {
     czkawka_core::tools::video_optimizer::core::fix_video_crop(std::path::Path::new(full_path), &params, stop_flag)
 }
 
 #[cfg(test)]
-fn crop_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _params: VideoCropFixParams) -> Result<(), String> {
+fn crop_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _params: VideoCropSingleFixParams) -> Result<(), String> {
     if video_path.contains("test_error") {
         return Err(format!("Test error for item: {video_path}"));
     }

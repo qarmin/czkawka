@@ -42,8 +42,7 @@ pub struct Info {
 }
 
 #[derive(Clone, Debug, Default, Copy)]
-pub struct BadExtensionsFixParams {
-}
+pub struct BadExtensionsFixParams {}
 
 #[derive(Clone)]
 pub struct BadExtensionsParameters {

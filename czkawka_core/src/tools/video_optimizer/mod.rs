@@ -66,6 +66,18 @@ pub enum VideoOptimizerMode {
     VideoCrop,
 }
 
+impl std::str::FromStr for VideoOptimizerMode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "transcode" | "videotranscode" => Ok(Self::VideoTranscode),
+            "crop" | "videocrop" => Ok(Self::VideoCrop),
+            _ => Err(format!("Invalid video optimizer mode: '{s}'. Allowed values: transcode, crop")),
+        }
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VideoOptimizerFixParams {
     VideoTranscode(VideoTranscodeFixParams),
@@ -84,11 +96,19 @@ pub struct VideoTranscodeFixParams {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct VideoCropFixParams {
+pub struct VideoCropSingleFixParams {
     pub overwrite_original: bool,
     pub target_codec: Option<VideoCodec>,
     pub quality: Option<u32>,
     pub crop_rectangle: (u32, u32, u32, u32),
+    pub crop_mechanism: VideoCroppingMechanism,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub struct VideoCropFixParams {
+    pub overwrite_original: bool,
+    pub target_codec: Option<VideoCodec>,
+    pub quality: Option<u32>,
     pub crop_mechanism: VideoCroppingMechanism,
 }
 
@@ -125,7 +145,17 @@ pub struct VideoCropParams {
 }
 
 impl VideoTranscodeParams {
-    pub fn new() -> Self {
+    pub fn new(excluded_codecs: Vec<String>, generate_thumbnails: bool, thumbnail_video_percentage_from_start: u8, generate_thumbnail_grid_instead_of_single: bool) -> Self {
+        Self {
+            excluded_codecs,
+            generate_thumbnails,
+            thumbnail_video_percentage_from_start,
+            generate_thumbnail_grid_instead_of_single,
+        }
+    }
+}
+impl Default for VideoTranscodeParams {
+    fn default() -> Self {
         Self {
             excluded_codecs: vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
             generate_thumbnails: false,
@@ -134,14 +164,18 @@ impl VideoTranscodeParams {
         }
     }
 }
-impl Default for VideoTranscodeParams {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 impl VideoCropParams {
-    pub fn with_custom_params(crop_detect: VideoCroppingMechanism, black_pixel_threshold: u8, black_bar_min_percentage: u8, max_samples: usize, min_crop_size: u32) -> Self {
+    pub fn with_custom_params(
+        crop_detect: VideoCroppingMechanism,
+        black_pixel_threshold: u8,
+        black_bar_min_percentage: u8,
+        max_samples: usize,
+        min_crop_size: u32,
+        generate_thumbnails: bool,
+        thumbnail_video_percentage_from_start: u8,
+        generate_thumbnail_grid_instead_of_single: bool,
+    ) -> Self {
         assert!(black_pixel_threshold <= 128, "black_pixel_threshold must be 0-128, got {black_pixel_threshold}");
         assert!(
             (50..=100).contains(&black_bar_min_percentage),
@@ -156,9 +190,9 @@ impl VideoCropParams {
             black_bar_min_percentage,
             max_samples,
             min_crop_size,
-            generate_thumbnails: false,
-            thumbnail_video_percentage_from_start: 10,
-            generate_thumbnail_grid_instead_of_single: false,
+            generate_thumbnails,
+            thumbnail_video_percentage_from_start,
+            generate_thumbnail_grid_instead_of_single,
         }
     }
 }

@@ -9,7 +9,7 @@ use log::error;
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_utils::{VideoMetadata, extract_frame_ffmpeg};
-use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
+use crate::tools::video_optimizer::{VideoCropEntry, VideoCropParams, VideoCropSingleFixParams, VideoCroppingMechanism};
 
 const MIN_SAMPLES: usize = 3;
 const MIN_SAMPLE_INTERVAL: f32 = 0.1;
@@ -399,7 +399,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     Some(entry)
 }
 
-pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
+pub fn fix_video_crop(video_path: &Path, params: &VideoCropSingleFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
     if stop_flag.load(Ordering::Relaxed) {
         return Err("Video processing was stopped by user".to_string());
     }

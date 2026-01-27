@@ -206,7 +206,6 @@ impl BadExtensions {
 
     #[fun_time(message = "fix_bad_extensions", level = "debug")]
     pub fn fix_bad_extensions(&mut self, _fix_params: super::BadExtensionsFixParams, stop_flag: &Arc<AtomicBool>) {
-
         let warnings: Vec<_> = mem::take(&mut self.bad_extensions_files)
             .into_par_iter()
             .map(|entry| {

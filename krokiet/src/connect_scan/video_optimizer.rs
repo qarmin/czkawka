@@ -24,19 +24,18 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
             let video_optimizer_mode = sd.combo_box_items.video_optimizer_mode.value;
             let params = if video_optimizer_mode == VideoOptimizerMode::VideoCrop {
                 let crop_detect = sd.combo_box_items.video_optimizer_crop_type.value;
-                let mut params = VideoCropParams::with_custom_params(
+                let params = VideoCropParams::with_custom_params(
                     crop_detect,
                     sd.custom_settings.video_optimizer_black_pixel_threshold,
                     sd.custom_settings.video_optimizer_black_bar_min_percentage,
                     sd.custom_settings.video_optimizer_max_samples,
                     sd.custom_settings.video_optimizer_min_crop_size,
+                    sd.custom_settings.video_thumbnails_generate,
+                    sd.custom_settings.video_thumbnails_percentage,
+                    sd.custom_settings.video_thumbnails_generate_grid,
                 );
-                params.generate_thumbnails = sd.custom_settings.video_thumbnails_generate;
-                params.thumbnail_video_percentage_from_start = sd.custom_settings.video_thumbnails_percentage;
-                params.generate_thumbnail_grid_instead_of_single = sd.custom_settings.video_thumbnails_generate_grid;
                 VideoOptimizerParameters::VideoCrop(params)
             } else {
-                let mut params = VideoTranscodeParams::new();
                 let excluded_codecs: Vec<String> = sd
                     .custom_settings
                     .video_optimizer_excluded_codecs
@@ -44,10 +43,12 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
                     .map(|s| s.trim().to_lowercase())
                     .filter(|s| !s.is_empty())
                     .collect();
-                params.excluded_codecs = excluded_codecs;
-                params.generate_thumbnails = sd.custom_settings.video_thumbnails_generate;
-                params.thumbnail_video_percentage_from_start = sd.custom_settings.video_thumbnails_percentage;
-                params.generate_thumbnail_grid_instead_of_single = sd.custom_settings.video_thumbnails_generate_grid;
+                let params = VideoTranscodeParams::new(
+                    excluded_codecs,
+                    sd.custom_settings.video_thumbnails_generate,
+                    sd.custom_settings.video_thumbnails_percentage,
+                    sd.custom_settings.video_thumbnails_generate_grid,
+                );
                 VideoOptimizerParameters::VideoTranscode(params)
             };
 

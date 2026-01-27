@@ -573,20 +573,25 @@ pub struct BadNamesArgs {
 pub struct VideoOptimizerArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
-    #[clap(
-        short = 'm',
-        long,
-        default_value = "transcode",
-        value_parser = parse_video_optimizer_mode,
-        help = "Optimizer mode (transcode, crop)",
-        long_help = "Mode of video optimization: 'transcode' for codec conversion, 'crop' for removing black bars"
-    )]
-    pub mode: String,
+    #[clap(subcommand)]
+    pub mode: VideoOptimizerMode,
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum VideoOptimizerMode {
+    #[clap(name = "transcode", about = "Transcode videos to different codec")]
+    Transcode(TranscodeArgs),
+    #[clap(name = "crop", about = "Crop black bars from videos")]
+    Crop(CropArgs),
+}
+
+#[derive(Debug, clap::Args)]
+pub struct TranscodeArgs {
     #[clap(
         short = 'c',
         long,
         help = "Excluded video codecs (comma-separated)",
-        long_help = "Comma-separated list of video codecs to exclude from transcoding (e.g., 'h265,av1,vp9'). Only applies to transcode mode."
+        long_help = "Comma-separated list of video codecs to exclude from transcoding (e.g., 'h265,av1,vp9')"
     )]
     pub excluded_codecs: Option<String>,
     #[clap(short = 't', long, help = "Generate thumbnails", long_help = "Generate video thumbnails for preview")]
@@ -602,50 +607,14 @@ pub struct VideoOptimizerArgs {
     pub thumbnail_percentage: u8,
     #[clap(short = 'g', long, help = "Generate thumbnail grid", long_help = "Generate a grid of thumbnails instead of single thumbnail")]
     pub thumbnail_grid: bool,
-    #[clap(
-        short = 'k',
-        long,
-        default_value = "32",
-        value_parser = clap::value_parser!(u8).range(0..=128),
-        help = "Black pixel threshold (0-128, crop mode)",
-        long_help = "Threshold for considering a pixel as black when detecting black bars (0-128). Lower values are stricter. Only for crop mode."
-    )]
-    pub black_pixel_threshold: u8,
-    #[clap(
-        short = 'b',
-        long,
-        default_value = "90",
-        value_parser = clap::value_parser!(u8).range(50..=100),
-        help = "Black bar minimum percentage (50-100, crop mode)",
-        long_help = "Minimum percentage of black pixels in a line to consider it a black bar (50-100%). Only for crop mode."
-    )]
-    pub black_bar_percentage: u8,
-    #[clap(
-        short = 's',
-        long,
-        default_value = "20",
-        value_parser = parse_max_samples,
-        help = "Maximum samples (5-1000, crop mode)",
-        long_help = "Maximum number of video frames to sample when detecting black bars (5-1000). Only for crop mode."
-    )]
-    pub max_samples: usize,
-    #[clap(
-        short = 'z',
-        long,
-        default_value = "10",
-        value_parser = parse_min_crop_size,
-        help = "Minimum crop size (1-1000, crop mode)",
-        long_help = "Minimum size in pixels for crop area to be considered (1-1000). Only for crop mode."
-    )]
-    pub min_crop_size: u32,
-    #[clap(short = 'F', long, help = "Fix/optimize videos", long_help = "Actually perform the optimization/cropping on found videos")]
+    #[clap(short = 'F', long, help = "Fix/optimize videos", long_help = "Actually perform the transcoding on found videos")]
     pub fix_videos: bool,
     #[clap(
         long,
         default_value = "h265",
         value_parser = parse_video_codec,
         help = "Target codec (h264, h265, av1, vp9)",
-        long_help = "Target video codec for transcoding (h264, h265, av1, vp9). Only for transcode mode with -F flag."
+        long_help = "Target video codec for transcoding (h264, h265, av1, vp9). Only used with -F flag."
     )]
     pub target_codec: String,
     #[clap(
@@ -653,29 +622,21 @@ pub struct VideoOptimizerArgs {
         default_value = "23",
         value_parser = clap::value_parser!(u32).range(0..=51),
         help = "Encoding quality (0-51)",
-        long_help = "Video encoding quality (0-51). Lower values mean better quality. 23 is default for h264/h265, 30 for av1/vp9. Only for transcode mode with -F flag."
+        long_help = "Video encoding quality (0-51). Lower values mean better quality. 23 is default for h264/h265, 30 for av1/vp9."
     )]
     pub quality: u32,
-    #[clap(
-        long,
-        help = "Fail if result not smaller",
-        long_help = "Fail the optimization if resulting file is not smaller than original. Only for transcode mode with -F flag."
-    )]
+    #[clap(long, help = "Fail if result not smaller", long_help = "Fail the optimization if resulting file is not smaller than original")]
     pub fail_if_not_smaller: bool,
-    #[clap(
-        long,
-        help = "Overwrite original files",
-        long_help = "Overwrite original video files with optimized versions. Only with -F flag."
-    )]
+    #[clap(long, help = "Overwrite original files", long_help = "Overwrite original video files with optimized versions")]
     pub overwrite_original: bool,
-    #[clap(long, help = "Limit video size", long_help = "Limit maximum video dimensions. Only for transcode mode with -F flag.")]
+    #[clap(long, help = "Limit video size", long_help = "Limit maximum video dimensions")]
     pub limit_video_size: bool,
     #[clap(
         long,
         default_value = "1920",
         value_parser = clap::value_parser!(u32),
         help = "Maximum video width",
-        long_help = "Maximum video width in pixels when limit_video_size is enabled. Only for transcode mode with -F flag."
+        long_help = "Maximum video width in pixels when limit_video_size is enabled"
     )]
     pub max_width: u32,
     #[clap(
@@ -683,9 +644,89 @@ pub struct VideoOptimizerArgs {
         default_value = "1080",
         value_parser = clap::value_parser!(u32),
         help = "Maximum video height",
-        long_help = "Maximum video height in pixels when limit_video_size is enabled. Only for transcode mode with -F flag."
+        long_help = "Maximum video height in pixels when limit_video_size is enabled"
     )]
     pub max_height: u32,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct CropArgs {
+    #[clap(
+        short = 'm',
+        long,
+        default_value = "blackbars",
+        value_parser = parse_crop_mechanism,
+        help = "Crop detection mechanism (blackbars, staticcontent)",
+        long_help = "Mechanism for detecting areas to crop: 'blackbars' for removing black bars, 'staticcontent' for detecting static content areas"
+    )]
+    pub crop_mechanism: String,
+    #[clap(
+        short = 'k',
+        long,
+        default_value = "32",
+        value_parser = clap::value_parser!(u8).range(0..=128),
+        help = "Black pixel threshold (0-128)",
+        long_help = "Threshold for considering a pixel as black when detecting black bars (0-128). Lower values are stricter."
+    )]
+    pub black_pixel_threshold: u8,
+    #[clap(
+        short = 'b',
+        long,
+        default_value = "90",
+        value_parser = clap::value_parser!(u8).range(50..=100),
+        help = "Black bar minimum percentage (50-100)",
+        long_help = "Minimum percentage of black pixels in a line to consider it a black bar (50-100%)"
+    )]
+    pub black_bar_percentage: u8,
+    #[clap(
+        short = 's',
+        long,
+        default_value = "20",
+        value_parser = parse_max_samples,
+        help = "Maximum samples (5-1000)",
+        long_help = "Maximum number of video frames to sample when detecting black bars (5-1000)"
+    )]
+    pub max_samples: usize,
+    #[clap(
+        short = 'z',
+        long,
+        default_value = "10",
+        value_parser = parse_min_crop_size,
+        help = "Minimum crop size (1-1000)",
+        long_help = "Minimum size in pixels for crop area to be considered (1-1000)"
+    )]
+    pub min_crop_size: u32,
+    #[clap(short = 't', long, help = "Generate thumbnails", long_help = "Generate video thumbnails for preview")]
+    pub generate_thumbnails: bool,
+    #[clap(
+        short = 'V',
+        long,
+        default_value = "10",
+        value_parser = clap::value_parser!(u8).range(1..=99),
+        help = "Thumbnail position percentage (1-99)",
+        long_help = "Percentage from start of video where thumbnail should be taken (1-99%)"
+    )]
+    pub thumbnail_percentage: u8,
+    #[clap(short = 'g', long, help = "Generate thumbnail grid", long_help = "Generate a grid of thumbnails instead of single thumbnail")]
+    pub thumbnail_grid: bool,
+    #[clap(short = 'F', long, help = "Fix/crop videos", long_help = "Actually perform the cropping on found videos")]
+    pub fix_videos: bool,
+    #[clap(long, help = "Overwrite original files", long_help = "Overwrite original video files with cropped versions")]
+    pub overwrite_original: bool,
+    #[clap(
+        long,
+        value_parser = parse_video_codec,
+        help = "Target codec (h264, h265, av1, vp9)",
+        long_help = "Optional: Also transcode to different codec while cropping. Only used with -F flag."
+    )]
+    pub target_codec: Option<String>,
+    #[clap(
+        long,
+        value_parser = clap::value_parser!(u32).range(0..=51),
+        help = "Encoding quality (0-51)",
+        long_help = "Video encoding quality when transcoding (0-51). Only used when target_codec is specified."
+    )]
+    pub quality: Option<u32>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -1047,13 +1088,6 @@ fn parse_checking_method_same_music(src: &str) -> Result<CheckingMethod, &'stati
     }
 }
 
-fn parse_video_optimizer_mode(src: &str) -> Result<String, &'static str> {
-    match src.to_ascii_lowercase().as_str() {
-        "transcode" | "crop" => Ok(src.to_ascii_lowercase()),
-        _ => Err("Couldn't parse the video optimizer mode (allowed: transcode, crop)"),
-    }
-}
-
 fn parse_video_codec(src: &str) -> Result<String, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "h264" | "h265" | "av1" | "vp9" => Ok(src.to_ascii_lowercase()),
@@ -1184,6 +1218,13 @@ fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {
     Ok(similarity)
 }
 
+fn parse_crop_mechanism(src: &str) -> Result<String, String> {
+    match src.to_lowercase().as_str() {
+        "blackbars" | "staticcontent" => Ok(src.to_lowercase()),
+        _ => Err("Invalid crop mechanism. Allowed values: blackbars, staticcontent".to_string()),
+    }
+}
+
 const HELP_TEMPLATE: &str = r#"
 {bin} {version}
 
@@ -1210,5 +1251,6 @@ EXAMPLES:
     {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
     {bin} ext -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
     {bin} bad-names -d /home/rafal -u -j -w -n -f results.txt
-    {bin} video-optimizer -d /home/rafal -m transcode -f results.txt
+    {bin} video-optimizer -d /home/rafal transcode -c h264 -f results.txt
+    {bin} video-optimizer -d /home/rafal crop -m blackbars -f results.txt
     {bin} exif-remover -d /home/rafal -x IMAGE -f results.txt"#;
