@@ -421,16 +421,6 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
     let extension = video_path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
     let temp_output = video_path.with_extension(format!("czkawka_cropped_{crop_type_suffix}.{extension}"));
 
-    // log::debug!(
-    //     "Cropping video: {} -> {}, crop: {}x{}+{}+{}",
-    //     video_path.display(),
-    //     temp_output.display(),
-    //     crop_width,
-    //     crop_height,
-    //     left,
-    //     top
-    // );
-
     let mut command = Command::new("ffmpeg");
     command.arg("-i").arg(video_path).arg("-vf").arg(format!("crop={crop_width}:{crop_height}:{left}:{top}"));
 

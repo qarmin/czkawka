@@ -181,7 +181,9 @@ impl CommonData for VideoOptimizer {
     }
 
     fn found_any_broken_files(&self) -> bool {
-        // self.information.number_of_failed_files > 0 // TODO - self
-        false
+        match &self.params {
+            VideoOptimizerParameters::VideoTranscode(_) => self.information.number_of_videos_to_transcode > 0,
+            VideoOptimizerParameters::VideoCrop(_) => self.information.number_of_videos_to_crop > 0,
+        }
     }
 }

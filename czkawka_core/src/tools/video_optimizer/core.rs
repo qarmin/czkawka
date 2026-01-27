@@ -130,6 +130,7 @@ impl VideoOptimizer {
         entries.retain(|e| e.error.is_none() && !params.excluded_codecs.contains(&e.codec));
 
         self.video_transcode_result_entries = entries;
+        self.information.number_of_videos_to_transcode = self.video_transcode_result_entries.len();
 
         if self.create_transcode_thumbnails(progress_sender, stop_flag, &params) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
@@ -186,6 +187,7 @@ impl VideoOptimizer {
         vec_file_entry.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
 
         self.video_crop_result_entries = vec_file_entry;
+        self.information.number_of_videos_to_crop = self.video_crop_result_entries.len();
 
         if self.create_crop_thumbnails(progress_sender, stop_flag, &params) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
@@ -366,14 +368,10 @@ impl VideoOptimizer {
     pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: VideoOptimizerFixParams) {
         match self.params.clone() {
             VideoOptimizerParameters::VideoTranscode(_) => {
-                info!("Starting optimization of {} video files", self.video_transcode_result_entries.len());
-
                 let VideoOptimizerFixParams::VideoTranscode(video_transcode_params) = fix_params else {
                     unreachable!("VideoTranscode mode should have VideoTranscode fix_params(caller is responsible for that)");
                 };
 
-                // TODO this should use same mechanism as deleting files - this currently do not save progress to CLI
-                // TODO this should return errors/warnings - video_transcode_result_entries can be removed
                 self.video_transcode_result_entries = mem::take(&mut self.video_transcode_result_entries)
                     .into_par_iter()
                     .map(|mut entry| {
@@ -384,7 +382,7 @@ impl VideoOptimizer {
                         match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
                             Ok(_new_size) => {}
                             Err(e) => {
-                                entry.error = Some(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e)); // TODO
+                                entry.error = Some(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e));
                             }
                         }
 
@@ -392,10 +390,46 @@ impl VideoOptimizer {
                     })
                     .while_some()
                     .collect();
+
+
+                self.common_data.text_messages.errors.extend(self.video_transcode_result_entries.iter().map(|e| e.error.clone()).flatten());
             }
             VideoOptimizerParameters::VideoCrop(_) => {
-                // TODO: Implement video cropping logic
-                info!("Video crop mode - logic not yet implemented for {} files", self.video_crop_result_entries.len());
+                let VideoOptimizerFixParams::VideoCrop(video_crop_params) = fix_params else {
+                    unreachable!("VideoCrop mode should have VideoCrop fix_params(caller is responsible for that)");
+                };
+
+                self.video_crop_result_entries = mem::take(&mut self.video_crop_result_entries)
+                    .into_par_iter()
+                    .map(|mut entry| {
+                        if check_if_stop_received(stop_flag) {
+                            return None;
+                        }
+
+                        if let Some((left, top, right, bottom)) = entry.new_image_dimensions {
+                            let mut entry_crop_params = video_crop_params;
+                            entry_crop_params.crop_rectangle = (left, top, right, bottom);
+
+                            match fix_video_crop(&entry.path, &entry_crop_params, stop_flag) {
+                                Ok(()) => {
+                                }
+                                Err(e) => {
+                                    entry.error = Some(format!("Failed to crop video \"{}\": {}", entry.path.to_string_lossy(), e));
+                                }
+                            }
+                        } else {
+                            entry.error = Some(format!(
+                                "Failed to crop video \"{}\": No crop dimensions found during analysis",
+                                entry.path.to_string_lossy()
+                            ));
+                        }
+
+                        Some(entry)
+                    })
+                    .while_some()
+                    .collect();
+
+                self.common_data.text_messages.errors.extend(self.video_crop_result_entries.iter().map(|e| e.error.clone()).flatten());
             }
         }
     }

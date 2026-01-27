@@ -25,11 +25,14 @@ use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
+use czkawka_core::tools::video_optimizer::{
+    VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeParams,
+};
 use log::{debug, error, info};
 
 use crate::commands::{
     Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs,
-    SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs,
+    SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs,
 };
 use crate::progress::connect_progress;
 
@@ -78,6 +81,7 @@ fn main() {
             Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_flag, &progress_sender),
             Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_flag, &progress_sender),
             Commands::BadNames(bad_names_args) => bad_names(bad_names_args, &stop_flag, &progress_sender),
+            Commands::VideoOptimizer(video_optimizer_args) => video_optimizer(video_optimizer_args, &stop_flag, &progress_sender),
         })
         .expect("Failed to spawn calculation thread");
 
@@ -402,6 +406,96 @@ fn bad_names(bad_names: BadNamesArgs, stop_flag: &Arc<AtomicBool>, progress_send
         use czkawka_core::common::traits::FixingItems;
         let fix_params = NameFixerParams::default();
         let () = tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+    }
+
+    save_and_write_results_to_writer(&tool, &common_cli_items)
+}
+
+fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
+    let VideoOptimizerArgs {
+        common_cli_items,
+        mode,
+        excluded_codecs,
+        generate_thumbnails,
+        thumbnail_percentage,
+        thumbnail_grid,
+        black_pixel_threshold,
+        black_bar_percentage,
+        max_samples,
+        min_crop_size,
+        fix_videos,
+        target_codec,
+        quality,
+        fail_if_not_smaller,
+        overwrite_original,
+        limit_video_size,
+        max_width,
+        max_height,
+    } = video_optimizer;
+
+    let params = if mode == "transcode" {
+        let excluded_codecs_vec = excluded_codecs
+            .map(|s| s.split(',').map(|c| c.trim().to_string()).collect())
+            .unwrap_or_else(|| vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()]);
+
+        VideoOptimizerParameters::VideoTranscode(VideoTranscodeParams {
+            excluded_codecs: excluded_codecs_vec,
+            generate_thumbnails,
+            thumbnail_video_percentage_from_start: thumbnail_percentage,
+            generate_thumbnail_grid_instead_of_single: thumbnail_grid,
+        })
+    } else {
+        // crop mode
+        let crop_mechanism = VideoCroppingMechanism::BlackBars;
+        VideoOptimizerParameters::VideoCrop(VideoCropParams::with_custom_params(
+            crop_mechanism,
+            black_pixel_threshold,
+            black_bar_percentage,
+            max_samples,
+            min_crop_size,
+        ))
+    };
+
+    let mut tool = VideoOptimizer::new(params);
+
+    set_common_settings(&mut tool, &common_cli_items, None);
+
+    tool.search(stop_flag, Some(progress_sender));
+
+    // Fix videos if requested
+    if fix_videos {
+        use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoTranscodeFixParams};
+        use czkawka_core::common::traits::FixingItems;
+
+        let fix_params = if mode == "transcode" {
+            let codec = target_codec.parse::<VideoCodec>().unwrap_or(VideoCodec::H265);
+            VideoOptimizerFixParams::VideoTranscode(VideoTranscodeFixParams {
+                codec,
+                quality,
+                fail_if_not_smaller,
+                overwrite_original,
+                limit_video_size,
+                max_width,
+                max_height,
+            })
+        } else {
+            // crop mode
+            let target_codec_parsed = if !target_codec.is_empty() {
+                target_codec.parse::<VideoCodec>().ok()
+            } else {
+                None
+            };
+
+            VideoOptimizerFixParams::VideoCrop(VideoCropFixParams {
+                overwrite_original,
+                target_codec: target_codec_parsed,
+                quality: Some(quality),
+                crop_rectangle: (0, 0, 0, 0),
+                crop_mechanism: VideoCroppingMechanism::BlackBars,
+            })
+        };
+
+        let _ = tool.fix_items(stop_flag, Some(progress_sender), fix_params);
     }
 
     save_and_write_results_to_writer(&tool, &common_cli_items)

@@ -100,6 +100,12 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka bad-names -d /home/rafal -f results.txt"
     )]
     BadNames(BadNamesArgs),
+    #[clap(
+        name = "video-optimizer",
+        about = "Optimizes video files (transcode or crop)",
+        after_help = "EXAMPLE:\n    czkawka video-optimizer -d /home/rafal -f results.txt"
+    )]
+    VideoOptimizer(VideoOptimizerArgs),
 }
 
 #[derive(Debug, clap::Args)]
@@ -551,6 +557,144 @@ pub struct BadNamesArgs {
 }
 
 #[derive(Debug, clap::Args)]
+pub struct VideoOptimizerArgs {
+    #[clap(flatten)]
+    pub common_cli_items: CommonCliItems,
+    #[clap(
+        short = 'm',
+        long,
+        default_value = "transcode",
+        value_parser = parse_video_optimizer_mode,
+        help = "Optimizer mode (transcode, crop)",
+        long_help = "Mode of video optimization: 'transcode' for codec conversion, 'crop' for removing black bars"
+    )]
+    pub mode: String,
+    #[clap(
+        short = 'c',
+        long,
+        help = "Excluded video codecs (comma-separated)",
+        long_help = "Comma-separated list of video codecs to exclude from transcoding (e.g., 'h265,av1,vp9'). Only applies to transcode mode."
+    )]
+    pub excluded_codecs: Option<String>,
+    #[clap(
+        short = 't',
+        long,
+        help = "Generate thumbnails",
+        long_help = "Generate video thumbnails for preview"
+    )]
+    pub generate_thumbnails: bool,
+    #[clap(
+        short = 'p',
+        long,
+        default_value = "10",
+        value_parser = clap::value_parser!(u8).range(1..=99),
+        help = "Thumbnail position percentage (1-99)",
+        long_help = "Percentage from start of video where thumbnail should be taken (1-99%)"
+    )]
+    pub thumbnail_percentage: u8,
+    #[clap(
+        short = 'g',
+        long,
+        help = "Generate thumbnail grid",
+        long_help = "Generate a grid of thumbnails instead of single thumbnail"
+    )]
+    pub thumbnail_grid: bool,
+    #[clap(
+        short = 'k',
+        long,
+        default_value = "32",
+        value_parser = clap::value_parser!(u8).range(0..=128),
+        help = "Black pixel threshold (0-128, crop mode)",
+        long_help = "Threshold for considering a pixel as black when detecting black bars (0-128). Lower values are stricter. Only for crop mode."
+    )]
+    pub black_pixel_threshold: u8,
+    #[clap(
+        short = 'b',
+        long,
+        default_value = "90",
+        value_parser = clap::value_parser!(u8).range(50..=100),
+        help = "Black bar minimum percentage (50-100, crop mode)",
+        long_help = "Minimum percentage of black pixels in a line to consider it a black bar (50-100%). Only for crop mode."
+    )]
+    pub black_bar_percentage: u8,
+    #[clap(
+        short = 's',
+        long,
+        default_value = "20",
+        value_parser = parse_max_samples,
+        help = "Maximum samples (5-1000, crop mode)",
+        long_help = "Maximum number of video frames to sample when detecting black bars (5-1000). Only for crop mode."
+    )]
+    pub max_samples: usize,
+    #[clap(
+        short = 'z',
+        long,
+        default_value = "10",
+        value_parser = parse_min_crop_size,
+        help = "Minimum crop size (1-1000, crop mode)",
+        long_help = "Minimum size in pixels for crop area to be considered (1-1000). Only for crop mode."
+    )]
+    pub min_crop_size: u32,
+    #[clap(
+        short = 'F',
+        long,
+        help = "Fix/optimize videos",
+        long_help = "Actually perform the optimization/cropping on found videos"
+    )]
+    pub fix_videos: bool,
+    #[clap(
+        long,
+        default_value = "h265",
+        value_parser = parse_video_codec,
+        help = "Target codec (h264, h265, av1, vp9)",
+        long_help = "Target video codec for transcoding (h264, h265, av1, vp9). Only for transcode mode with -F flag."
+    )]
+    pub target_codec: String,
+    #[clap(
+        long,
+        default_value = "23",
+        value_parser = clap::value_parser!(u32).range(0..=51),
+        help = "Encoding quality (0-51)",
+        long_help = "Video encoding quality (0-51). Lower values mean better quality. 23 is default for h264/h265, 30 for av1/vp9. Only for transcode mode with -F flag."
+    )]
+    pub quality: u32,
+    #[clap(
+        long,
+        help = "Fail if result not smaller",
+        long_help = "Fail the optimization if resulting file is not smaller than original. Only for transcode mode with -F flag."
+    )]
+    pub fail_if_not_smaller: bool,
+    #[clap(
+        long,
+        help = "Overwrite original files",
+        long_help = "Overwrite original video files with optimized versions. Only with -F flag."
+    )]
+    pub overwrite_original: bool,
+    #[clap(
+        long,
+        help = "Limit video size",
+        long_help = "Limit maximum video dimensions. Only for transcode mode with -F flag."
+    )]
+    pub limit_video_size: bool,
+    #[clap(
+        long,
+        default_value = "1920",
+        value_parser = clap::value_parser!(u32),
+        help = "Maximum video width",
+        long_help = "Maximum video width in pixels when limit_video_size is enabled. Only for transcode mode with -F flag."
+    )]
+    pub max_width: u32,
+    #[clap(
+        long,
+        default_value = "1080",
+        value_parser = clap::value_parser!(u32),
+        help = "Maximum video height",
+        long_help = "Maximum video height in pixels when limit_video_size is enabled. Only for transcode mode with -F flag."
+    )]
+    pub max_height: u32,
+}
+
+#[derive(Debug, clap::Args)]
 pub struct CommonCliItems {
     #[clap(
         short = 'T',
@@ -887,6 +1031,36 @@ fn parse_checking_method_same_music(src: &str) -> Result<CheckingMethod, &'stati
     }
 }
 
+fn parse_video_optimizer_mode(src: &str) -> Result<String, &'static str> {
+    match src.to_ascii_lowercase().as_str() {
+        "transcode" | "crop" => Ok(src.to_ascii_lowercase()),
+        _ => Err("Couldn't parse the video optimizer mode (allowed: transcode, crop)"),
+    }
+}
+
+fn parse_video_codec(src: &str) -> Result<String, &'static str> {
+    match src.to_ascii_lowercase().as_str() {
+        "h264" | "h265" | "av1" | "vp9" => Ok(src.to_ascii_lowercase()),
+        _ => Err("Couldn't parse the video codec (allowed: h264, h265, av1, vp9)"),
+    }
+}
+
+fn parse_max_samples(src: &str) -> Result<usize, String> {
+    match src.parse::<usize>() {
+        Ok(val) if (5..=1000).contains(&val) => Ok(val),
+        Ok(_) => Err("Maximum samples must be between 5 and 1000".to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+fn parse_min_crop_size(src: &str) -> Result<u32, String> {
+    match src.parse::<u32>() {
+        Ok(val) if (1..=1000).contains(&val) => Ok(val),
+        Ok(_) => Err("Minimum crop size must be between 1 and 1000".to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "none" => Ok(DeleteMethod::None),
@@ -1019,4 +1193,5 @@ EXAMPLES:
     {bin} symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
     {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
     {bin} ext -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
-    {bin} bad-names -d /home/rafal -u -j -w -n -f results.txt"#;
+    {bin} bad-names -d /home/rafal -u -j -w -n -f results.txt
+    {bin} video-optimizer -d /home/rafal -m transcode -f results.txt"#;
