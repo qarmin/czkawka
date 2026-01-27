@@ -41,6 +41,10 @@ pub struct Info {
     pub scanning_time: Duration,
 }
 
+#[derive(Clone, Debug, Default, Copy)]
+pub struct BadExtensionsFixParams {
+}
+
 #[derive(Clone)]
 pub struct BadExtensionsParameters {
     pub include_files_without_extension: bool,

@@ -13,7 +13,7 @@ use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::set_number_of_threads;
 use czkawka_core::common::tool_data::{CommonData, DeleteMethod};
 use czkawka_core::common::traits::{AllTraits, FixingItems, PrintResults, Search};
-use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
+use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsFixParams, BadExtensionsParameters};
 use czkawka_core::tools::bad_names::{BadNames, BadNamesParameters, NameFixerParams, NameIssues};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
@@ -28,6 +28,7 @@ use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters
 use czkawka_core::tools::temporary::Temporary;
 use czkawka_core::tools::video_optimizer::{VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeParams};
 use log::{debug, error, info};
+use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoTranscodeFixParams};
 
 use crate::commands::{
     Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, ExifRemoverArgs,
@@ -350,7 +351,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
 }
 
 fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    let BadExtensionsArgs { common_cli_items } = bad_extensions;
+    let BadExtensionsArgs { common_cli_items, fix_extensions } = bad_extensions;
 
     let params = BadExtensionsParameters::new();
     let mut tool = BadExtensions::new(params);
@@ -358,6 +359,11 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>
     set_common_settings(&mut tool, &common_cli_items, None);
 
     tool.search(stop_flag, Some(progress_sender));
+
+    if fix_extensions {
+        let fix_params = BadExtensionsFixParams { rename_to_proper_extension: true };
+        tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+    }
 
     save_and_write_results_to_writer(&tool, &common_cli_items)
 }
@@ -375,13 +381,11 @@ fn bad_names(bad_names: BadNamesArgs, stop_flag: &Arc<AtomicBool>, progress_send
         fix_names,
     } = bad_names;
 
-    // Parse restricted charset if provided
     let restricted_charset_allowed = restricted_charset.and_then(|s| {
-        if s.trim().is_empty() {
-            None
-        } else {
-            Some(s.split(',').filter_map(|c| c.trim().chars().next()).collect())
-        }
+        let mut items: Vec<_> = s.chars().collect();
+        items.sort_unstable();
+        items.dedup();
+        if items.is_empty() { None } else { Some(items) }
     });
 
     let name_issues = NameIssues {
@@ -401,7 +405,6 @@ fn bad_names(bad_names: BadNamesArgs, stop_flag: &Arc<AtomicBool>, progress_send
 
     tool.search(stop_flag, Some(progress_sender));
 
-    // Fix names if requested
     if fix_names {
         let fix_params = NameFixerParams::default();
         tool.fix_items(stop_flag, Some(progress_sender), fix_params);
@@ -445,7 +448,6 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             generate_thumbnail_grid_instead_of_single: thumbnail_grid,
         })
     } else {
-        // crop mode
         let crop_mechanism = VideoCroppingMechanism::BlackBars;
         VideoOptimizerParameters::VideoCrop(VideoCropParams::with_custom_params(
             crop_mechanism,
@@ -464,7 +466,6 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
 
     // Fix videos if requested
     if fix_videos {
-        use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoTranscodeFixParams};
 
         let fix_params = if mode == "transcode" {
             let codec = target_codec.parse::<VideoCodec>().unwrap_or(VideoCodec::H265);
@@ -478,7 +479,6 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
                 max_height,
             })
         } else {
-            // crop mode
             let target_codec_parsed = if !target_codec.is_empty() { target_codec.parse::<VideoCodec>().ok() } else { None };
 
             VideoOptimizerFixParams::VideoCrop(VideoCropFixParams {

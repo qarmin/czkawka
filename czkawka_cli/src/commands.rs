@@ -508,6 +508,13 @@ pub struct SimilarVideosArgs {
 pub struct BadExtensionsArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
+    #[clap(
+        short = 'F',
+        long,
+        help = "Fix bad extensions",
+        long_help = "Automatically rename files to use proper extensions based on their detected file type"
+    )]
+    pub fix_extensions: bool,
 }
 
 #[derive(Debug, clap::Args)]
@@ -543,7 +550,7 @@ pub struct BadNamesArgs {
         short = 'r',
         long,
         help = "Restricted charset (comma-separated)",
-        long_help = "Comma-separated list of allowed special characters. Any other characters will be flagged as problematic. Example: '_,-, ,.' for underscore, dash, space, and dot"
+        long_help = "List of allowed special characters. Any other characters will be flagged as problematic. Example: '_- .' for underscore, dash, space, and dot"
     )]
     pub restricted_charset: Option<String>,
     #[clap(

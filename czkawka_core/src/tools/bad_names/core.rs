@@ -1,7 +1,7 @@
-use std::fs;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::{fs, mem};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -104,26 +104,25 @@ impl BadNames {
 
     #[fun_time(message = "fix_bad_names", level = "debug")]
     pub fn fix_bad_names(&mut self, _fix_params: NameFixerParams, stop_flag: &Arc<AtomicBool>) {
-        let mut failed_renames = Vec::new();
-
-        for entry in &self.bad_names_files {
-            if check_if_stop_received(stop_flag) {
-                return;
-            }
-
-            let new_path = entry.path.with_file_name(&entry.new_name);
-
-            match fs::rename(&entry.path, &new_path) {
-                Ok(()) => {}
-                Err(e) => {
-                    failed_renames.push(format!("Failed to rename {:?}: {}", entry.path, e));
+        let warnings: Vec<_> = mem::take(&mut self.bad_names_files)
+            .into_par_iter()
+            .map(|entry| {
+                if check_if_stop_received(stop_flag) {
+                    return None;
                 }
-            }
-        }
 
-        if !failed_renames.is_empty() {
-            self.common_data.text_messages.warnings.extend(failed_renames);
-        }
+                let new_path = entry.path.with_file_name(&entry.new_name);
+
+                match fs::rename(&entry.path, &new_path) {
+                    Ok(()) => Some(None),
+                    Err(e) => Some(Some(format!("Failed to rename {:?}: {}", entry.path, e))),
+                }
+            })
+            .while_some()
+            .flatten()
+            .collect();
+
+        self.common_data.text_messages.warnings.extend(warnings);
     }
 }
 
