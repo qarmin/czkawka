@@ -184,7 +184,7 @@ impl VideoOptimizer {
 
         self.save_video_crop_cache(&vec_file_entry, &params, loaded_hash_map);
 
-        vec_file_entry.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
+        vec_file_entry.retain(|e| e.error.is_none() && e.new_image_dimensions == (0, 0, 0, 0));
 
         self.video_crop_result_entries = vec_file_entry;
         self.information.number_of_videos_to_crop = self.video_crop_result_entries.len();
@@ -236,7 +236,7 @@ impl VideoOptimizer {
                     &entry.path,
                     entry.size,
                     entry.modified_date,
-                    entry.duration,
+                    Some(entry.duration),
                     &thumbnails_dir,
                     thumbnail_video_percentage_from_start,
                     generate_grid_instead_of_single,
@@ -306,7 +306,7 @@ impl VideoOptimizer {
                     &entry.path,
                     entry.size,
                     entry.modified_date,
-                    entry.duration,
+                    Some(entry.duration),
                     &thumbnails_dir,
                     thumbnail_video_percentage_from_start,
                     generate_grid_instead_of_single,
@@ -391,8 +391,10 @@ impl VideoOptimizer {
                     .while_some()
                     .collect();
 
-
-                self.common_data.text_messages.errors.extend(self.video_transcode_result_entries.iter().map(|e| e.error.clone()).flatten());
+                self.common_data
+                    .text_messages
+                    .errors
+                    .extend(self.video_transcode_result_entries.iter().filter_map(|e| e.error.clone()));
             }
             VideoOptimizerParameters::VideoCrop(_) => {
                 let VideoOptimizerFixParams::VideoCrop(video_crop_params) = fix_params else {
@@ -406,22 +408,15 @@ impl VideoOptimizer {
                             return None;
                         }
 
-                        if let Some((left, top, right, bottom)) = entry.new_image_dimensions {
-                            let mut entry_crop_params = video_crop_params;
-                            entry_crop_params.crop_rectangle = (left, top, right, bottom);
+                        let (left, top, right, bottom) = entry.new_image_dimensions;
+                        let mut entry_crop_params = video_crop_params;
+                        entry_crop_params.crop_rectangle = (left, top, right, bottom);
 
-                            match fix_video_crop(&entry.path, &entry_crop_params, stop_flag) {
-                                Ok(()) => {
-                                }
-                                Err(e) => {
-                                    entry.error = Some(format!("Failed to crop video \"{}\": {}", entry.path.to_string_lossy(), e));
-                                }
+                        match fix_video_crop(&entry.path, &entry_crop_params, stop_flag) {
+                            Ok(()) => {}
+                            Err(e) => {
+                                entry.error = Some(format!("Failed to crop video \"{}\": {}", entry.path.to_string_lossy(), e));
                             }
-                        } else {
-                            entry.error = Some(format!(
-                                "Failed to crop video \"{}\": No crop dimensions found during analysis",
-                                entry.path.to_string_lossy()
-                            ));
                         }
 
                         Some(entry)
@@ -429,7 +424,10 @@ impl VideoOptimizer {
                     .while_some()
                     .collect();
 
-                self.common_data.text_messages.errors.extend(self.video_crop_result_entries.iter().map(|e| e.error.clone()).flatten());
+                self.common_data
+                    .text_messages
+                    .errors
+                    .extend(self.video_crop_result_entries.iter().filter_map(|e| e.error.clone()));
             }
         }
     }

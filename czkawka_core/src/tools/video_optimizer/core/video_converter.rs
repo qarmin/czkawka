@@ -22,8 +22,13 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
         return entry;
     };
 
+    let Some(duration) = metadata.duration else {
+        entry.error = Some(format!("Failed to get video duration for file \"{}\"", entry.path.to_string_lossy()));
+        return entry;
+    };
+
     entry.codec = current_codec;
-    entry.duration = metadata.duration;
+    entry.duration = duration;
     match (metadata.width, metadata.height) {
         (Some(width), Some(height)) => {
             entry.width = width;

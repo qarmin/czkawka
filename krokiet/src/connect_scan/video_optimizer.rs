@@ -95,7 +95,7 @@ fn write_video_optimizer_transcode_results(
     stopped_search: bool,
 ) {
     let scanning_time_str = format_time(info.scanning_time);
-    let items_found = info.number_of_processed_files;
+    let items_found = info.number_of_videos_to_transcode;
 
     let items = Rc::new(VecModel::default());
 
@@ -126,7 +126,7 @@ fn write_video_optimizer_crop_results(
     stopped_search: bool,
 ) {
     let scanning_time_str = format_time(info.scanning_time);
-    let items_found = info.number_of_processed_files;
+    let items_found = info.number_of_videos_to_crop;
 
     let items = Rc::new(VecModel::default());
 
@@ -171,7 +171,7 @@ fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (Mod
 
 fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let (left, top, right, bottom) = fe.new_image_dimensions.expect("new_image_dimensions should be Some in crop mode");
+    let (left, top, right, bottom) = fe.new_image_dimensions;
 
     let (_width, _height, pixels_diff, dim_string) = if left > right || top > bottom {
         error!(

@@ -327,7 +327,7 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
         return Err(());
     };
 
-    entry.duration = Some(duration);
+    entry.duration = duration;
 
     let fps = metadata.fps.unwrap_or(25.0);
 
@@ -372,7 +372,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
         VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, &first_frame, params, &entry.path) {
             Some(Ok(Some(rectangle))) => {
                 rectangle.validate_image_size(width, height);
-                entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
+                entry.new_image_dimensions = (rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
             }
             Some(Ok(None)) => { // No black bars
             }
@@ -385,7 +385,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
         VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, &first_frame, params, &entry.path) {
             Some(Ok(Some(rectangle))) => {
                 rectangle.validate_image_size(width, height);
-                entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
+                entry.new_image_dimensions = (rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
             }
             Some(Ok(None)) => {}
             Some(Err(e)) => {

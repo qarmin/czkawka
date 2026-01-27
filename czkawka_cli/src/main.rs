@@ -25,9 +25,7 @@ use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
-use czkawka_core::tools::video_optimizer::{
-    VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeParams,
-};
+use czkawka_core::tools::video_optimizer::{VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeParams};
 use log::{debug, error, info};
 
 use crate::commands::{
@@ -434,9 +432,10 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
     } = video_optimizer;
 
     let params = if mode == "transcode" {
-        let excluded_codecs_vec = excluded_codecs
-            .map(|s| s.split(',').map(|c| c.trim().to_string()).collect())
-            .unwrap_or_else(|| vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()]);
+        let excluded_codecs_vec = excluded_codecs.map_or_else(
+            || vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
+            |s| s.split(',').map(|c| c.trim().to_string()).collect(),
+        );
 
         VideoOptimizerParameters::VideoTranscode(VideoTranscodeParams {
             excluded_codecs: excluded_codecs_vec,
@@ -464,8 +463,8 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
 
     // Fix videos if requested
     if fix_videos {
-        use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoTranscodeFixParams};
         use czkawka_core::common::traits::FixingItems;
+        use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoTranscodeFixParams};
 
         let fix_params = if mode == "transcode" {
             let codec = target_codec.parse::<VideoCodec>().unwrap_or(VideoCodec::H265);
@@ -480,11 +479,7 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             })
         } else {
             // crop mode
-            let target_codec_parsed = if !target_codec.is_empty() {
-                target_codec.parse::<VideoCodec>().ok()
-            } else {
-                None
-            };
+            let target_codec_parsed = if !target_codec.is_empty() { target_codec.parse::<VideoCodec>().ok() } else { None };
 
             VideoOptimizerFixParams::VideoCrop(VideoCropFixParams {
                 overwrite_original,
@@ -495,7 +490,7 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             })
         };
 
-        let _ = tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+        let () = tool.fix_items(stop_flag, Some(progress_sender), fix_params);
     }
 
     save_and_write_results_to_writer(&tool, &common_cli_items)

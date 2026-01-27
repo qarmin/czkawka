@@ -576,12 +576,7 @@ pub struct VideoOptimizerArgs {
         long_help = "Comma-separated list of video codecs to exclude from transcoding (e.g., 'h265,av1,vp9'). Only applies to transcode mode."
     )]
     pub excluded_codecs: Option<String>,
-    #[clap(
-        short = 't',
-        long,
-        help = "Generate thumbnails",
-        long_help = "Generate video thumbnails for preview"
-    )]
+    #[clap(short = 't', long, help = "Generate thumbnails", long_help = "Generate video thumbnails for preview")]
     pub generate_thumbnails: bool,
     #[clap(
         short = 'p',
@@ -592,12 +587,7 @@ pub struct VideoOptimizerArgs {
         long_help = "Percentage from start of video where thumbnail should be taken (1-99%)"
     )]
     pub thumbnail_percentage: u8,
-    #[clap(
-        short = 'g',
-        long,
-        help = "Generate thumbnail grid",
-        long_help = "Generate a grid of thumbnails instead of single thumbnail"
-    )]
+    #[clap(short = 'g', long, help = "Generate thumbnail grid", long_help = "Generate a grid of thumbnails instead of single thumbnail")]
     pub thumbnail_grid: bool,
     #[clap(
         short = 'k',
@@ -635,12 +625,7 @@ pub struct VideoOptimizerArgs {
         long_help = "Minimum size in pixels for crop area to be considered (1-1000). Only for crop mode."
     )]
     pub min_crop_size: u32,
-    #[clap(
-        short = 'F',
-        long,
-        help = "Fix/optimize videos",
-        long_help = "Actually perform the optimization/cropping on found videos"
-    )]
+    #[clap(short = 'F', long, help = "Fix/optimize videos", long_help = "Actually perform the optimization/cropping on found videos")]
     pub fix_videos: bool,
     #[clap(
         long,
@@ -670,11 +655,7 @@ pub struct VideoOptimizerArgs {
         long_help = "Overwrite original video files with optimized versions. Only with -F flag."
     )]
     pub overwrite_original: bool,
-    #[clap(
-        long,
-        help = "Limit video size",
-        long_help = "Limit maximum video dimensions. Only for transcode mode with -F flag."
-    )]
+    #[clap(long, help = "Limit video size", long_help = "Limit maximum video dimensions. Only for transcode mode with -F flag.")]
     pub limit_video_size: bool,
     #[clap(
         long,

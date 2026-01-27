@@ -173,7 +173,7 @@ pub struct VideoTranscodeEntry {
     pub codec: String,
     pub width: u32,
     pub height: u32,
-    pub duration: Option<f64>,
+    pub duration: f64,
 
     #[serde(skip)] // Saving it to cache is bad idea, because cache can be moved to another locations
     pub thumbnail_path: Option<PathBuf>,
@@ -189,8 +189,8 @@ pub struct VideoCropEntry {
     pub codec: String,
     pub width: u32,
     pub height: u32,
-    pub new_image_dimensions: Option<(u32, u32, u32, u32)>,
-    pub duration: Option<f64>,
+    pub new_image_dimensions: (u32, u32, u32, u32),
+    pub duration: f64,
 
     #[serde(skip)] // Saving it to cache is bad idea, because cache can be moved to another locations
     pub thumbnail_path: Option<PathBuf>,
@@ -230,7 +230,7 @@ impl FileEntry {
             codec: String::new(),
             width: 0,
             height: 0,
-            duration: None,
+            duration: 0.0,
             thumbnail_path: None,
         }
     }
@@ -244,8 +244,8 @@ impl FileEntry {
             codec: String::new(),
             width: 0,
             height: 0,
-            new_image_dimensions: None,
-            duration: None,
+            new_image_dimensions: (0, 0, 0, 0),
+            duration: 0.0,
             thumbnail_path: None,
         }
     }
