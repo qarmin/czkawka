@@ -71,7 +71,7 @@ mod tests {
     use slint::{Model, ModelRc, VecModel};
 
     use super::*;
-    use crate::MainListModel;
+    use crate::SingleMainListModel;
     use crate::simpler_model::ToSlintModel;
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
 
@@ -80,8 +80,8 @@ mod tests {
             &self,
             remove_to_trash: bool,
             progress_sender: Sender<ProgressData>,
-            model: ModelRc<MainListModel>,
-        ) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+            model: ModelRc<SingleMainListModel>,
+        ) -> Option<(Vec<SingleMainListModel>, Vec<String>, usize, usize)> {
             let is_empty_folder_tab = self.active_tab == ActiveTab::EmptyFolders;
 
             let items_queued_to_delete = model.iter().filter(|e| e.checked).count();

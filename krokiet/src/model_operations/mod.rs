@@ -4,11 +4,11 @@ use slint::{ComponentHandle, Model, ModelRc};
 
 use crate::connect_row_selection::checker::get_number_of_enabled_items;
 use crate::simpler_model::SimplerSingleMainListModel;
-use crate::{GuiState, MainListModel, MainWindow};
+use crate::{GuiState, SingleMainListModel, MainWindow};
 
 pub type ProcessingResult = Vec<(usize, SimplerSingleMainListModel, Option<Result<(), String>>)>;
 
-impl MainListModel {
+impl SingleMainListModel {
     #[allow(clippy::allow_attributes)]
     #[expect(clippy::print_stdout)]
     #[allow(dead_code)] // TODO - rust with some version shows this
@@ -16,7 +16,7 @@ impl MainListModel {
         let val_int: Vec<i32> = self.val_int.iter().collect();
         let val_str: Vec<String> = self.val_str.iter().map(|e| e.to_string()).collect();
         println!(
-            "MainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",
+            "SingleMainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",
             self.checked, self.filled_header_row, self.header_row, self.selected_row, val_int, val_str
         );
     }
@@ -26,7 +26,7 @@ pub trait DebugPrintModelRc {
     #[expect(dead_code)]
     fn debug_print_model_rc(&self);
 }
-impl DebugPrintModelRc for ModelRc<MainListModel> {
+impl DebugPrintModelRc for ModelRc<SingleMainListModel> {
     #[expect(clippy::print_stdout)]
     fn debug_print_model_rc(&self) {
         println!("=====================START DEBUG PRINT RC MODELS=====================");
@@ -40,7 +40,7 @@ impl DebugPrintModelRc for ModelRc<MainListModel> {
 
 // TODO - tests
 // Removes orphan items in groups
-pub(crate) fn remove_single_items_in_groups(mut items: Vec<MainListModel>, have_header: bool) -> Vec<MainListModel> {
+pub(crate) fn remove_single_items_in_groups(mut items: Vec<SingleMainListModel>, have_header: bool) -> Vec<SingleMainListModel> {
     // When have header, we must also throw out orphaned items
     if have_header && !items.is_empty() {
         // First row must be header
@@ -71,7 +71,7 @@ pub(crate) fn remove_single_items_in_groups(mut items: Vec<MainListModel>, have_
             let header_step = if is_filled_header { 1 } else { 2 };
 
             let mut last_header = 0;
-            let mut new_items: Vec<MainListModel> = Vec::new();
+            let mut new_items: Vec<SingleMainListModel> = Vec::new();
             for i in 1..items.len() {
                 if items[i].header_row {
                     if i - last_header > header_step {
@@ -100,7 +100,7 @@ pub struct CheckedGroupItemsInfo {
     pub number_of_groups_with_all_items_checked: u64,
 }
 
-fn get_checked_group_info_from_model(model: &ModelRc<MainListModel>) -> CheckedItemsInfo {
+fn get_checked_group_info_from_model(model: &ModelRc<SingleMainListModel>) -> CheckedItemsInfo {
     if model.iter().next().is_none() {
         // Here I could panic, but i think that it is still possible to go here, without doing anything wrong
         return CheckedItemsInfo {

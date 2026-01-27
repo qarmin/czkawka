@@ -2,7 +2,7 @@ import { HorizontalBox, LineEdit, Palette, VerticalBox } from "std-widgets.slint
 import { FontSizes } from "fonts.slint";
 import { LeftSidePanel } from "left_side_panel.slint";
 import { MainList } from "main_lists.slint";
-import { ActiveTab, MainListModel, PopupRequest, ProgressToSend } from "common.slint";
+import { ActiveTab, SingleMainListModel, PopupRequest, ProgressToSend } from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
 import { Settings } from "settings.slint";
@@ -60,20 +60,20 @@ export component MainWindow inherits Window {
         all_progress: 20,
         step_name: "Cache",
     };
-    in-out property <[MainListModel]> duplicate_files_model: [];
-    in-out property <[MainListModel]> empty_folder_model: [];
-    in-out property <[MainListModel]> big_files_model: [];
-    in-out property <[MainListModel]> empty_files_model: [];
-    in-out property <[MainListModel]> temporary_files_model: [];
-    in-out property <[MainListModel]> similar_images_model: [];
-    in-out property <[MainListModel]> similar_videos_model: [];
-    in-out property <[MainListModel]> similar_music_model: [];
-    in-out property <[MainListModel]> invalid_symlinks_model: [];
-    in-out property <[MainListModel]> broken_files_model: [];
-    in-out property <[MainListModel]> bad_extensions_model: [];
-    in-out property <[MainListModel]> bad_names_model: [];
-    in-out property <[MainListModel]> exif_remover_model: [];
-    in-out property <[MainListModel]> video_optimizer_model: [];
+    in-out property <[SingleMainListModel]> duplicate_files_model: [];
+    in-out property <[SingleMainListModel]> empty_folder_model: [];
+    in-out property <[SingleMainListModel]> big_files_model: [];
+    in-out property <[SingleMainListModel]> empty_files_model: [];
+    in-out property <[SingleMainListModel]> temporary_files_model: [];
+    in-out property <[SingleMainListModel]> similar_images_model: [];
+    in-out property <[SingleMainListModel]> similar_videos_model: [];
+    in-out property <[SingleMainListModel]> similar_music_model: [];
+    in-out property <[SingleMainListModel]> invalid_symlinks_model: [];
+    in-out property <[SingleMainListModel]> broken_files_model: [];
+    in-out property <[SingleMainListModel]> bad_extensions_model: [];
+    in-out property <[SingleMainListModel]> bad_names_model: [];
+    in-out property <[SingleMainListModel]> exif_remover_model: [];
+    in-out property <[SingleMainListModel]> video_optimizer_model: [];
 
     VerticalBox {
         HorizontalBox {

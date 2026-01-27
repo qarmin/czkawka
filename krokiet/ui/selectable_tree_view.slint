@@ -1,12 +1,12 @@
 import { CheckBox, ListView, ScrollView, VerticalBox } from "std-widgets.slint";
 import { ColorPalette } from "color_palette.slint";
-import { MainListModel, SortColumnMode } from "common.slint";
+import { SingleMainListModel, SortColumnMode } from "common.slint";
 import { Callabler } from "callabler.slint";
 import { FontSizes } from "fonts.slint";
 
 export component SelectableTableView inherits Rectangle {
     in property <[string]> columns;
-    in-out property <[MainListModel]> values: [
+    in-out property <[SingleMainListModel]> values: [
         {checked: false, selected_row: false, header_row: true, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,

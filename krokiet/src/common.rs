@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use num_enum::TryFromPrimitive;
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
-use crate::{ActiveTab, ExcludedPathsModel, IncludedPathsModel, MainListModel, MainWindow, Settings};
+use crate::{ActiveTab, ExcludedPathsModel, IncludedPathsModel, SingleMainListModel, MainWindow, Settings};
 
 // Int model is used to store data in unchanged(* except that we need to split u64 into two i32) form and is used to sort/select data
 // Str model is used to display data in gui
@@ -610,7 +610,7 @@ impl ActiveTab {
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
-    pub(crate) fn get_tool_model(self, app: &MainWindow) -> ModelRc<MainListModel> {
+    pub(crate) fn get_tool_model(self, app: &MainWindow) -> ModelRc<SingleMainListModel> {
         match self {
             Self::EmptyFolders => app.get_empty_folder_model(),
             Self::SimilarImages => app.get_similar_images_model(),
@@ -630,7 +630,7 @@ impl ActiveTab {
         }
     }
 
-    pub(crate) fn set_tool_model(self, app: &MainWindow, model: ModelRc<MainListModel>) {
+    pub(crate) fn set_tool_model(self, app: &MainWindow, model: ModelRc<SingleMainListModel>) {
         match self {
             Self::EmptyFolders => app.set_empty_folder_model(model),
             Self::SimilarImages => app.set_similar_images_model(model),

@@ -1,5 +1,5 @@
 import { SelectableTableView } from "selectable_tree_view.slint";
-import { ActiveTab, MainListModel } from "common.slint";
+import { ActiveTab, SingleMainListModel } from "common.slint";
 import { SettingsList } from "settings_list.slint";
 import { GuiState } from "gui_state.slint";
 import { About } from "about.slint";
@@ -10,32 +10,32 @@ export component MainList {
 
     in-out property <bool> working: false;
 
-    in-out property <[MainListModel]> duplicate_files_model: [];
-    in-out property <[MainListModel]> empty_folder_model: [
+    in-out property <[SingleMainListModel]> duplicate_files_model: [];
+    in-out property <[SingleMainListModel]> empty_folder_model: [
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
         {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
-    in-out property <[MainListModel]> big_files_model: [];
-    in-out property <[MainListModel]> empty_files_model: [
+    in-out property <[SingleMainListModel]> big_files_model: [];
+    in-out property <[SingleMainListModel]> empty_files_model: [
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
         {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
-    in-out property <[MainListModel]> temporary_files_model: [];
-    in-out property <[MainListModel]> similar_images_model: [
+    in-out property <[SingleMainListModel]> temporary_files_model: [];
+    in-out property <[SingleMainListModel]> similar_images_model: [
         {checked: false, selected_row: false, header_row: true, filled_header_row: false, val_str: ["Original", "500KB", "100x100", "kropkarz", "/Xd1", "24.10.2023"], val_int: []},
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["Similar", "500KB", "100x100", "witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
         {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["Similar", "500KB", "100x100", "lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
-    in-out property <[MainListModel]> similar_videos_model: [];
-    in-out property <[MainListModel]> similar_music_model: [];
-    in-out property <[MainListModel]> invalid_symlinks_model: [];
-    in-out property <[MainListModel]> broken_files_model: [];
-    in-out property <[MainListModel]> bad_extensions_model: [];
-    in-out property <[MainListModel]> bad_names_model: [];
-    in-out property <[MainListModel]> exif_remover_model: [];
-    in-out property <[MainListModel]> video_optimizer_model: [];
+    in-out property <[SingleMainListModel]> similar_videos_model: [];
+    in-out property <[SingleMainListModel]> similar_music_model: [];
+    in-out property <[SingleMainListModel]> invalid_symlinks_model: [];
+    in-out property <[SingleMainListModel]> broken_files_model: [];
+    in-out property <[SingleMainListModel]> bad_extensions_model: [];
+    in-out property <[SingleMainListModel]> bad_names_model: [];
+    in-out property <[SingleMainListModel]> exif_remover_model: [];
+    in-out property <[SingleMainListModel]> video_optimizer_model: [];
 
     callback changed_active_tab();
 

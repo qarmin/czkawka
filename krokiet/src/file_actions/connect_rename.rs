@@ -134,10 +134,10 @@ mod tests {
     use super::*;
     use crate::simpler_model::ToSlintModel;
     use crate::test_common::{create_model_from_model_vec, get_model_vec};
-    use crate::{ActiveTab, MainListModel};
+    use crate::{ActiveTab, SingleMainListModel};
 
     impl ModelProcessor {
-        pub(crate) fn process_rename_test(&self, progress_sender: Sender<ProgressData>, model: ModelRc<MainListModel>) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+        pub(crate) fn process_rename_test(&self, progress_sender: Sender<ProgressData>, model: ModelRc<SingleMainListModel>) -> Option<(Vec<SingleMainListModel>, Vec<String>, usize, usize)> {
             let items_queued_to_delete = model.iter().filter(|e| e.checked).count();
             if items_queued_to_delete == 0 {
                 return None; // No items to delete

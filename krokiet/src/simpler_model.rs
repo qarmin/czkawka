@@ -1,6 +1,6 @@
 use slint::{Model, ModelRc, SharedString, VecModel};
 
-use crate::MainListModel;
+use crate::SingleMainListModel;
 use crate::common::connect_i32_into_u64;
 
 #[derive(Clone)]
@@ -28,8 +28,8 @@ impl SimplerSingleMainListModel {
     }
 }
 
-impl From<&MainListModel> for SimplerSingleMainListModel {
-    fn from(model: &MainListModel) -> Self {
+impl From<&SingleMainListModel> for SimplerSingleMainListModel {
+    fn from(model: &SingleMainListModel) -> Self {
         Self {
             checked: model.checked,
             filled_header_row: model.filled_header_row,
@@ -40,7 +40,7 @@ impl From<&MainListModel> for SimplerSingleMainListModel {
         }
     }
 }
-impl From<SimplerSingleMainListModel> for MainListModel {
+impl From<SimplerSingleMainListModel> for SingleMainListModel {
     fn from(val: SimplerSingleMainListModel) -> Self {
         Self {
             checked: val.checked,
@@ -57,18 +57,18 @@ pub trait ToSimplerVec {
     fn to_simpler_enumerated_vec(self) -> Vec<(usize, SimplerSingleMainListModel)>;
 }
 
-impl ToSimplerVec for ModelRc<MainListModel> {
+impl ToSimplerVec for ModelRc<SingleMainListModel> {
     fn to_simpler_enumerated_vec(self) -> Vec<(usize, SimplerSingleMainListModel)> {
-        let vec_model = self.as_any().downcast_ref::<VecModel<MainListModel>>().expect("Only VecModel is supported");
+        let vec_model = self.as_any().downcast_ref::<VecModel<SingleMainListModel>>().expect("Only VecModel is supported");
         vec_model.iter().enumerate().map(|(index, model)| (index, SimplerSingleMainListModel::from(&model))).collect()
     }
 }
 
 pub trait ToSlintModel {
-    fn to_vec_model(self) -> Vec<MainListModel>;
+    fn to_vec_model(self) -> Vec<SingleMainListModel>;
 }
 impl ToSlintModel for Vec<SimplerSingleMainListModel> {
-    fn to_vec_model(self) -> Vec<MainListModel> {
+    fn to_vec_model(self) -> Vec<SingleMainListModel> {
         self.into_iter().map(|model| model.into()).collect()
     }
 }

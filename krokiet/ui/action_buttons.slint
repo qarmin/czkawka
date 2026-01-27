@@ -1,5 +1,5 @@
 import { Button } from "std-widgets.slint";
-import { ActiveTab, BottomPanelVisibility, MainListModel, PopupRequest } from "common.slint";
+import { ActiveTab, BottomPanelVisibility, SingleMainListModel, PopupRequest } from "common.slint";
 import { GuiState } from "gui_state.slint";
 import { Translations } from "translations.slint";
 import { Settings } from "settings.slint";
@@ -26,20 +26,20 @@ export component ActionButtons inherits HorizontalLayout {
     callback show_sort_popup(length, length);
     callback show_action_popup(PopupRequest);
 
-    in-out property <[MainListModel]> duplicate_files_model: [];
-    in-out property <[MainListModel]> empty_folder_model: [];
-    in-out property <[MainListModel]> big_files_model: [];
-    in-out property <[MainListModel]> empty_files_model: [];
-    in-out property <[MainListModel]> temporary_files_model: [];
-    in-out property <[MainListModel]> similar_images_model: [];
-    in-out property <[MainListModel]> similar_videos_model: [];
-    in-out property <[MainListModel]> similar_music_model: [];
-    in-out property <[MainListModel]> invalid_symlinks_model: [];
-    in-out property <[MainListModel]> broken_files_model: [];
-    in-out property <[MainListModel]> bad_extensions_model: [];
-    in-out property <[MainListModel]> bad_names_model: [];
-    in-out property <[MainListModel]> exif_remover_model: [];
-    in-out property <[MainListModel]> video_optimizer_model: [];
+    in-out property <[SingleMainListModel]> duplicate_files_model: [];
+    in-out property <[SingleMainListModel]> empty_folder_model: [];
+    in-out property <[SingleMainListModel]> big_files_model: [];
+    in-out property <[SingleMainListModel]> empty_files_model: [];
+    in-out property <[SingleMainListModel]> temporary_files_model: [];
+    in-out property <[SingleMainListModel]> similar_images_model: [];
+    in-out property <[SingleMainListModel]> similar_videos_model: [];
+    in-out property <[SingleMainListModel]> similar_music_model: [];
+    in-out property <[SingleMainListModel]> invalid_symlinks_model: [];
+    in-out property <[SingleMainListModel]> broken_files_model: [];
+    in-out property <[SingleMainListModel]> bad_extensions_model: [];
+    in-out property <[SingleMainListModel]> bad_names_model: [];
+    in-out property <[SingleMainListModel]> exif_remover_model: [];
+    in-out property <[SingleMainListModel]> video_optimizer_model: [];
 
     property <ActiveTab> active_tab: GuiState.active_tab;
 

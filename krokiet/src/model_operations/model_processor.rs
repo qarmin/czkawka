@@ -14,12 +14,12 @@ use crate::connect_row_selection::checker::set_number_of_enabled_items;
 use crate::connect_row_selection::reset_selection;
 use crate::model_operations::ProcessingResult;
 use crate::simpler_model::{SimplerSingleMainListModel, ToSlintModel};
-use crate::{ActiveTab, GuiState, MainListModel, MainWindow, flk, model_operations};
+use crate::{ActiveTab, GuiState, SingleMainListModel, MainWindow, flk, model_operations};
 // This is quite ugly workaround for Slint strange limitation, where model cannot be passed to another thread
 // This was needed by me, because I wanted to process deletion without blocking main gui thread, with additional sending progress about entire operation.
 // After trying different solutions, looks that the simplest and quite not really efficient solution is to convert slint model, to simpler model, which can be passed to another thread.
 // Models are converted multiple times, so this have some big overhead
-// ModelRc<MainListModel> --cloning when iterating + converting--> SimplerSingleMainListModel --conversion before setting to model--> ModelRc<MainListModel> --cloning when iterating to remove useless items--> ModelRc<MainListModel>
+// ModelRc<SingleMainListModel> --cloning when iterating + converting--> SimplerSingleMainListModel --conversion before setting to model--> ModelRc<SingleMainListModel> --cloning when iterating to remove useless items--> ModelRc<SingleMainListModel>
 
 pub struct ModelProcessor {
     pub active_tab: ActiveTab,
@@ -97,7 +97,7 @@ impl ModelProcessor {
         Self { active_tab }
     }
 
-    pub(crate) fn remove_single_items_in_groups(&self, items: Vec<MainListModel>) -> Vec<MainListModel> {
+    pub(crate) fn remove_single_items_in_groups(&self, items: Vec<SingleMainListModel>) -> Vec<SingleMainListModel> {
         let have_header = self.active_tab.get_is_header_mode();
         model_operations::remove_single_items_in_groups(items, have_header)
     }
