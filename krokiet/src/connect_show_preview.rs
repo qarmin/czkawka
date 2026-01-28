@@ -76,17 +76,9 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
             };
 
             if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 {
-                // Draw red rectangle on Image, where will be cropped
-
-
-
-
-
+                // Draw crop rectangle via helper (2px thickness, red)
+                img_to_use = draw_crop_rectangle_on_image(img_to_use, crop_left, crop_top, crop_right, crop_bottom, 2);
                 timer.checkpoint("cropping image");
-
-                cropped_image
-            } else {
-                img_to_use
             };
 
             let slint_image = convert_into_slint_image(&img_to_use);
@@ -137,4 +129,62 @@ fn load_image(image_path: &Path) -> Option<(Timer, DynamicImage)> {
     debug_timer.checkpoint("loading image");
 
     Some((debug_timer, img))
+}
+
+// New helper function to draw a rectangular border indicating crop area.
+fn draw_crop_rectangle_on_image(img: DynamicImage, crop_left: i32, crop_top: i32, crop_right: i32, crop_bottom: i32, thickness: u32) -> DynamicImage {
+    // Convert to RGBA buffer to allow pixel manipulation
+    let mut buf: ImageBufferRgba = img.to_rgba8();
+    let (width, height) = (buf.width(), buf.height());
+
+    // Clamp coordinates to image bounds and convert to u32
+    let l = (crop_left.max(0) as u32).min(width.saturating_sub(1));
+    let t = (crop_top.max(0) as u32).min(height.saturating_sub(1));
+    let r = (crop_right.max(0) as u32).min(width.saturating_sub(1));
+    let b = (crop_bottom.max(0) as u32).min(height.saturating_sub(1));
+
+    // If coords invalid after clamping, just return original image
+    if l <= r && t <= b {
+        let red = image::Rgba([255u8, 0u8, 0u8, 255u8]);
+
+        // Draw horizontal lines (top and bottom) with thickness
+        for i in 0..thickness {
+            let y_top = t.saturating_add(i);
+            if y_top <= b {
+                for x in l..=r {
+                    buf.put_pixel(x, y_top, red);
+                }
+            }
+
+            if b.saturating_sub(i) >= t {
+                let y_bottom = b.saturating_sub(i);
+                if y_bottom != y_top {
+                    for x in l..=r {
+                        buf.put_pixel(x, y_bottom, red);
+                    }
+                }
+            }
+        }
+
+        // Draw vertical lines (left and right) with thickness
+        for i in 0..thickness {
+            let x_left = l.saturating_add(i);
+            if x_left <= r {
+                for y in t..=b {
+                    buf.put_pixel(x_left, y, red);
+                }
+            }
+
+            if r.saturating_sub(i) >= l {
+                let x_right = r.saturating_sub(i);
+                if x_right != x_left {
+                    for y in t..=b {
+                        buf.put_pixel(x_right, y, red);
+                    }
+                }
+            }
+        }
+    }
+
+    DynamicImage::ImageRgba8(buf)
 }
