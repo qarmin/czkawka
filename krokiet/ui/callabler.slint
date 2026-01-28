@@ -1,4 +1,4 @@
-import { SelectMode, SortColumnMode, SortMode } from "common.slint";
+import { ActiveTab, SelectMode, SortColumnMode, SortMode } from "common.slint";
 import { Palette } from "std-widgets.slint";
 import { Settings } from "settings.slint";
 
@@ -8,6 +8,7 @@ export global Callabler {
     callback added_manual_paths(bool, string);
 
     // Row selecting
+    callback reset_selection(ActiveTab);
     callback change_number_of_checked_items(int);
 
     callback row_select_all();
@@ -22,13 +23,15 @@ export global Callabler {
     // Right click or middle click opener
     callback open_item(string);
     callback open_parent(string);
+    callback open_selected_item(ActiveTab);
 
     callback delete_selected_items();
     callback select_items(SelectMode);
     callback sort_items(SortMode);
 
     // Preview
-    callback load_image_preview(string, int, int, int, int);
+    // Parameters: path, crop_left, crop_top, crop_right, crop_bottom, original_width, original_height
+    callback load_image_preview(string, int, int, int, int, int, int);
 
     // Settings
     callback changed_settings_preset();

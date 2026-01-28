@@ -165,7 +165,9 @@ fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (Mod
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
     let dimension = fe.width as i32 * fe.height as i32; // Video dimension, limited to 16K vs 16K, so no overflow
-    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension, 0, 0, 0, 0, 0];
+    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension, 0,
+        fe.width as i32,
+        fe.height as i32, 0, 0, 0, 0];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
@@ -218,6 +220,8 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<Share
         size_split.1,
         dimension,
         pixels_diff as i32,
+        fe.width as i32,
+        fe.height as i32,
         left as i32,
         top as i32,
         right as i32,

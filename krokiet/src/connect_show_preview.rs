@@ -14,8 +14,8 @@ pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 pub(crate) fn connect_show_preview(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>()
-        .on_load_image_preview(move |image_path, crop_left, crop_top, crop_right, crop_bottom| {
-            error!("{} {} {} {} - {}", crop_left, crop_top, crop_right, crop_bottom, image_path);
+        .on_load_image_preview(move |image_path, crop_left, crop_top, crop_right, crop_bottom, orig_width, orig_height| {
+            error!("{} {} {} {} - {} - {}x{}", crop_left, crop_top, crop_right, crop_bottom, image_path, orig_width, orig_height);
 
             let app = a.upgrade().expect("Failed to upgrade app :(");
 
@@ -50,13 +50,12 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
 
             let path = Path::new(image_path.as_str());
 
-            let mut scale_factor = 1.0;
             // Looks that resizing image before sending it to GUI is faster than resizing it in Slint
             // Additionally it fixes issues with
             if let Some((mut timer, img)) = load_image(path) {
                 let mut img_to_use = if img.width() > 1024 || img.height() > 1024 {
                     let bigger_side = img.width().max(img.height());
-                    scale_factor = bigger_side as f32 / 1024.0;
+                    let scale_factor = bigger_side as f32 / 1024.0;
                     let new_width = (img.width() as f32 / scale_factor) as u32;
                     let new_height = (img.height() as f32 / scale_factor) as u32;
 
@@ -79,8 +78,8 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
                     img.into_rgba8()
                 };
 
-                if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 {
-                    img_to_use = draw_crop_rectangle_on_image(img_to_use, crop_left, crop_top, crop_right, crop_bottom, 2, scale_factor);
+                if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 && orig_width > 0 && orig_height >0 {
+                    img_to_use = draw_crop_rectangle_on_image(img_to_use, crop_left, crop_top, crop_right, crop_bottom, 2, orig_width as u32, orig_height as u32);
                     timer.checkpoint("cropping image");
                 }
 
@@ -133,13 +132,14 @@ fn load_image(image_path: &Path) -> Option<(Timer, DynamicImage)> {
     Some((debug_timer, img))
 }
 
-fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_top: i32, crop_right: i32, crop_bottom: i32, thickness: u32, scale_factor: f32) -> ImageBufferRgba {
+fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_top: i32, crop_right: i32, crop_bottom: i32, thickness: u32, width: u32, height: u32) -> ImageBufferRgba {
+    let scale_factor = width as f32 / buf.width() as f32;
+    println!("scale_factor: {}", scale_factor);
+
     let crop_left = (crop_left as f32 / scale_factor).round() as i32;
     let crop_top = (crop_top as f32 / scale_factor).round() as i32;
     let crop_right = (crop_right as f32 / scale_factor).round() as i32;
     let crop_bottom = (crop_bottom as f32 / scale_factor).round() as i32;
-
-    let (width, height) = (buf.width(), buf.height());
 
     let l = (crop_left.max(0) as u32).min(width.saturating_sub(1));
     let t = (crop_top.max(0) as u32).min(height.saturating_sub(1));
@@ -157,20 +157,20 @@ fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_t
     let red_pixel = image::Rgba([255u8, 0u8, 0u8, 255u8]);
 
     for th in (-(thickness as i32 / 2))..(thickness as i32 / 2) {
-        let top_y = t as i32 - th;
-        let bottom_y = b as i32 + th;
-        let left_x = l as i32 - th;
-        let right_x = r as i32 + th;
+        let top_y = ((t as i32 + th) as u32).clamp(0, height - 1);
+        let bottom_y = ((b as i32 + th) as u32).clamp(0, height - 1);
+        let left_x = ((l as i32 + th) as u32).clamp(0, width  - 1);
+        let right_x = ((r as i32 + th) as u32).clamp(0, width  - 1);
 
 
         for x in left_x..=right_x {
             for y in [top_y, bottom_y] {
-                buf.put_pixel(x as u32, y as u32, red_pixel);
+                buf.put_pixel(x, y, red_pixel);
             }
         }
         for y in top_y..=bottom_y {
             for x in [left_x, right_x] {
-                buf.put_pixel(x as u32, y as u32, red_pixel);
+                buf.put_pixel(x, y, red_pixel);
             }
         }
     }

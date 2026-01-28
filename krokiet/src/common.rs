@@ -313,6 +313,8 @@ pub enum IntDataVideoOptimizer {
     SizePart2,
     PixelCount,
     DiffInPixels,
+    Width,
+    Height,
     RectLeft,
     RectTop,
     RectRight,

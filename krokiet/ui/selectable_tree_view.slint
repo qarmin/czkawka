@@ -18,7 +18,10 @@ export component SelectableTableView inherits Rectangle {
     in-out property <int> parentPathIdx;
     in-out property <int> fileNameIdx;
     in-out property <int> previewImageIdx;
+    // Indexes into val_int for top-left crop and original dimensions
     in-out property <int> topLeftCropIdx;
+    in-out property <int> originalWidthIdx: -1;
+    in-out property <int> originalHeightIdx: -1;
     in-out property <int> start_shift_idx: -1;
     in-out property <int> last_selected_idx: -1;
     out property <length> item_height: 23px;
@@ -40,7 +43,7 @@ export component SelectableTableView inherits Rectangle {
                 spacing: 5px;
                 for title[idx] in root.columns: HorizontalLayout {
                     width: root.column_sizes[idx];
-                    
+
                     TouchArea {
                         pointer-event(event) => {
                             if (!sort_available) {
@@ -220,7 +223,7 @@ export component SelectableTableView inherits Rectangle {
             if (!modifiers.shift) {
                 start_shift_idx = last_selected_idx;
             }
-            
+
             Callabler.row_select_items_with_shift(start_shift_idx, last_selected_idx);
             if (start_shift_idx == last_selected_idx) {
                 showPreview(last_selected_idx);
@@ -242,7 +245,7 @@ export component SelectableTableView inherits Rectangle {
             if (!modifiers.shift) {
                 start_shift_idx = last_selected_idx;
             }
-            
+
             Callabler.row_select_items_with_shift(start_shift_idx, last_selected_idx);
             if (start_shift_idx == last_selected_idx) {
                 showPreview(last_selected_idx);
@@ -279,7 +282,7 @@ export component SelectableTableView inherits Rectangle {
     }
     public function pressed_key(event: KeyEvent) {
         // debug("Key pressed: " + event.text + "  CTRL - " + (event.modifiers.control ? "true" : "false") + "  SHIFT - " + (event.modifiers.shift ? "true" : "false") + " ALT - " + (event.modifiers.alt ? "true" : "false"));
-        
+
         if ((event.text == "a" || event.text == "A") && event.modifiers.control && !event.modifiers.shift && !event.modifiers.alt && !event.modifiers.meta) {
             Callabler.row_select_all();
         }
@@ -288,7 +291,7 @@ export component SelectableTableView inherits Rectangle {
     function showPreview(idx: int) {
         if (root.previewImageIdx != -1) {
             if (root.topLeftCropIdx == -1) {
-                Callabler.load_image_preview(root.values[idx].val_str[root.previewImageIdx], -1, -1, -1, -1);
+                Callabler.load_image_preview(root.values[idx].val_str[root.previewImageIdx], -1, -1, -1, -1, -1, -1);
             } else {
                 Callabler.load_image_preview(
                     root.values[idx].val_str[root.previewImageIdx],
@@ -296,11 +299,13 @@ export component SelectableTableView inherits Rectangle {
                     root.values[idx].val_int[root.topLeftCropIdx+1],
                     root.values[idx].val_int[root.topLeftCropIdx+2],
                     root.values[idx].val_int[root.topLeftCropIdx+3],
+                    root.values[idx].val_int[root.originalWidthIdx],
+                    root.values[idx].val_int[root.originalHeightIdx],
                 );
             }
         } else {
             if (root.topLeftCropIdx == -1) {
-                Callabler.load_image_preview(root.values[idx].val_str[root.parentPathIdx] + "/" + root.values[idx].val_str[root.fileNameIdx], -1, -1, -1, -1);
+                Callabler.load_image_preview(root.values[idx].val_str[root.parentPathIdx] + "/" + root.values[idx].val_str[root.fileNameIdx], -1, -1, -1, -1, -1, -1);
             } else {
                 Callabler.load_image_preview(
                     root.values[idx].val_str[root.parentPathIdx] + "/" + root.values[idx].val_str[root.fileNameIdx],
@@ -308,13 +313,15 @@ export component SelectableTableView inherits Rectangle {
                     root.values[idx].val_int[root.topLeftCropIdx+1],
                     root.values[idx].val_int[root.topLeftCropIdx+2],
                     root.values[idx].val_int[root.topLeftCropIdx+3],
+                    root.values[idx].val_int[root.originalWidthIdx],
+                    root.values[idx].val_int[root.originalHeightIdx],
                 );
             }
         }
     }
 
     function hidePreview() {
-        Callabler.load_image_preview("NOT_AVAILABLE.NOT_AVAILABLE", -1, -1, -1, -1);
+        Callabler.load_image_preview("NOT_AVAILABLE.NOT_AVAILABLE", -1, -1, -1, -1, -1, -1);
     }
 
     focus_item := FocusScope {
