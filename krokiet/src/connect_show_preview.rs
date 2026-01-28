@@ -13,7 +13,7 @@ pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 
 pub(crate) fn connect_show_preview(app: &MainWindow) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_load_image_preview(move |image_path| {
+    app.global::<Callabler>().on_load_image_preview(move |image_path, crop_left, crop_top, crop_right, crop_bottom| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
         let settings = app.global::<Settings>();
@@ -50,7 +50,7 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
         // Looks that resizing image before sending it to GUI is faster than resizing it in Slint
         // Additionally it fixes issues with
         if let Some((mut timer, img)) = load_image(path) {
-            let img_to_use = if img.width() > 1024 || img.height() > 1024 {
+            let mut img_to_use = if img.width() > 1024 || img.height() > 1024 {
                 let bigger_side = img.width().max(img.height());
                 let scale_factor = bigger_side as f32 / 1024.0;
                 let new_width = (img.width() as f32 / scale_factor) as u32;
@@ -73,6 +73,20 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
                 }
             } else {
                 img
+            };
+
+            if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 {
+                // Draw red rectangle on Image, where will be cropped
+
+
+
+
+
+                timer.checkpoint("cropping image");
+
+                cropped_image
+            } else {
+                img_to_use
             };
 
             let slint_image = convert_into_slint_image(&img_to_use);
