@@ -15,6 +15,8 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>()
         .on_load_image_preview(move |image_path, crop_left, crop_top, crop_right, crop_bottom| {
+            error!("{} {} {} {} - {}", crop_left, crop_top, crop_right, crop_bottom, image_path);
+
             let app = a.upgrade().expect("Failed to upgrade app :(");
 
             let settings = app.global::<Settings>();
@@ -140,6 +142,7 @@ fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_t
 
     if l <= r && t <= b {
         let red = image::Rgba([255u8, 0u8, 0u8, 255u8]);
+
 
         for i in 0..thickness {
             let y_top = t.saturating_add(i);
