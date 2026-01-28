@@ -704,11 +704,9 @@ pub(crate) fn connect_i32_into_u64(part1: i32, part2: i32) -> u64 {
     ((part1 as u64) << 32) | (part2 as u64 & 0xFFFF_FFFF)
 }
 
-
 pub(crate) fn create_model_from_model_vec<T: Clone + 'static>(model_vec: &[T]) -> ModelRc<T> {
     ModelRc::new(VecModel::from(model_vec.to_owned()))
 }
-
 
 #[cfg(test)]
 mod test {

@@ -208,10 +208,11 @@ fn group_by_header(model: &ModelRc<SingleMainListModel>) -> Vec<(SingleMainListM
 mod tests {
     use slint::Model;
 
+    use crate::common::create_model_from_model_vec;
     use crate::connect_row_selection::initialize_selection_struct;
     use crate::connect_sort::sorts::{reverse_sort, sort_by_full_name, sort_selection};
     use crate::connect_sort::{convert_group_header_into_rc_model, group_by_header};
-    use crate::test_common::{create_model_from_model_vec, get_model_vec};
+    use crate::test_common::get_model_vec;
     use crate::{ActiveTab, SingleMainListModel};
 
     #[test]

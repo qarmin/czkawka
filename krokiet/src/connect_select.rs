@@ -224,7 +224,8 @@ fn find_header_idx_and_deselect_all(old_data: &mut [SingleMainListModel]) -> Vec
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_common::{create_model_from_model_vec, get_model_vec};
+    use crate::common::create_model_from_model_vec;
+    use crate::test_common::get_model_vec;
 
     #[test]
     fn find_header_idx_returns_correct_indices_for_headers() {

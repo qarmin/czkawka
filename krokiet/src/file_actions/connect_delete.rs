@@ -80,8 +80,9 @@ mod tests {
 
     use super::*;
     use crate::SingleMainListModel;
+    use crate::common::create_model_from_model_vec;
     use crate::simpler_model::ToSlintModel;
-    use crate::test_common::{create_model_from_model_vec, get_model_vec};
+    use crate::test_common::get_model_vec;
 
     impl ModelProcessor {
         pub(crate) fn process_deletion_test(

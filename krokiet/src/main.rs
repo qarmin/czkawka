@@ -39,6 +39,7 @@ use crate::connect_stop::connect_stop_button;
 use crate::connect_tab_changed::connect_tab_changed;
 use crate::connect_translation::connect_translations;
 use crate::create_calculate_task_size::create_calculate_task_size;
+use crate::set_initial_scroll_list_data_indexes::set_initial_scroll_list_data_indexes;
 // TODO - at start this should be used, to be sure that rust models are in sync with slint models
 // currently I need to do this manually - https://github.com/slint-ui/slint/issues/7632
 // use crate::set_initial_gui_info::set_initial_gui_infos;
@@ -67,12 +68,12 @@ mod file_actions;
 mod localizer_krokiet;
 mod model_operations;
 mod set_initial_gui_info;
+mod set_initial_scroll_list_data_indexes;
 mod settings;
 mod shared_models;
 mod simpler_model;
 #[cfg(test)]
 mod test_common;
-mod set_initial_scroll_list_data_indexes;
 
 slint::include_modules!();
 

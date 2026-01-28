@@ -1,5 +1,3 @@
-use slint::{ModelRc, VecModel};
-
 use crate::SingleMainListModel;
 
 pub(crate) fn get_main_list_model() -> SingleMainListModel {

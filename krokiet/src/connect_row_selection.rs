@@ -715,7 +715,8 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Sin
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_common::{create_model_from_model_vec, get_model_vec};
+    use crate::common::create_model_from_model_vec;
+    use crate::test_common::get_model_vec;
 
     #[test]
     fn rows_deselect_all_by_mode_with_exceeded_limit() {
