@@ -76,7 +76,7 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
                     img.into_rgba8()
                 };
 
-                if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 && orig_width > 0 && orig_height >0 {
+                if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 && orig_width > 0 && orig_height > 0 {
                     img_to_use = draw_crop_rectangle_on_image(img_to_use, crop_left, crop_top, crop_right, crop_bottom, orig_width as u32, orig_height as u32);
                     timer.checkpoint("cropping image");
                 }
@@ -130,7 +130,15 @@ fn load_image(image_path: &Path) -> Option<(Timer, DynamicImage)> {
     Some((debug_timer, img))
 }
 
-fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_top: i32, crop_right: i32, crop_bottom: i32, original_width: u32, _original_height: u32) -> ImageBufferRgba {
+fn draw_crop_rectangle_on_image(
+    mut buf: ImageBufferRgba,
+    crop_left: i32,
+    crop_top: i32,
+    crop_right: i32,
+    crop_bottom: i32,
+    original_width: u32,
+    _original_height: u32,
+) -> ImageBufferRgba {
     let width = buf.width();
     let height = buf.height();
 
@@ -150,7 +158,7 @@ fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_t
         return buf;
     }
 
-    let thickness = (( r - l).min( b - t ) / 50).max(2);
+    let thickness = ((r - l).min(b - t) / 50).max(2);
 
     #[inline]
     fn get_pixel_color(x: u32, y: u32) -> Rgba<u8> {
@@ -171,9 +179,8 @@ fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_t
     for th in (-(thickness as i32 / 2))..(thickness as i32 / 2) {
         let top_y = ((t as i32 + th) as u32).clamp(0, height - 1);
         let bottom_y = ((b as i32 + th) as u32).clamp(0, height - 1);
-        let left_x = ((l as i32 + th) as u32).clamp(0, width  - 1);
-        let right_x = ((r as i32 + th) as u32).clamp(0, width  - 1);
-
+        let left_x = ((l as i32 + th) as u32).clamp(0, width - 1);
+        let right_x = ((r as i32 + th) as u32).clamp(0, width - 1);
 
         for x in left_x..=right_x {
             for y in [top_y, bottom_y] {

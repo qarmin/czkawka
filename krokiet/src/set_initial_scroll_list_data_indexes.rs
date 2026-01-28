@@ -1,6 +1,10 @@
 use slint::ComponentHandle;
 
-use crate::common::{StrDataBadExtensions, StrDataBadNames, StrDataBigFiles, StrDataBrokenFiles, StrDataDuplicateFiles, StrDataEmptyFiles, StrDataEmptyFolders, StrDataExifRemover, StrDataInvalidSymlinks, StrDataSimilarImages, StrDataSimilarMusic, StrDataSimilarVideos, StrDataTemporaryFiles, StrDataVideoOptimizer, create_model_from_model_vec, IntDataVideoOptimizer};
+use crate::common::{
+    IntDataVideoOptimizer, StrDataBadExtensions, StrDataBadNames, StrDataBigFiles, StrDataBrokenFiles, StrDataDuplicateFiles, StrDataEmptyFiles, StrDataEmptyFolders,
+    StrDataExifRemover, StrDataInvalidSymlinks, StrDataSimilarImages, StrDataSimilarMusic, StrDataSimilarVideos, StrDataTemporaryFiles, StrDataVideoOptimizer,
+    create_model_from_model_vec,
+};
 use crate::{GuiState, MainWindow};
 
 type DataType = [i32; 6];
