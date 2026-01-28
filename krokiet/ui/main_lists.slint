@@ -46,9 +46,9 @@ export component MainList {
         columns <=> Settings.duplicates_column_name;
         column_sizes <=> Settings.duplicates_column_size;
         values <=> duplicate_files_model;
-        parentPathIdx: 3;
-        fileNameIdx: 2;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.duplicate_data_idx[0];
+        fileNameIdx: GuiState.duplicate_data_idx[1];
+        previewImageIdx: GuiState.duplicate_data_idx[2];
         sort_available: !working;
     }
 
@@ -59,9 +59,9 @@ export component MainList {
         columns <=> Settings.empty_folders_column_name;
         column_sizes <=> Settings.empty_folders_column_size;
         values <=> empty_folder_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.empty_folders_data_idx[0];
+        fileNameIdx: GuiState.empty_folders_data_idx[1];
+        previewImageIdx: GuiState.empty_folders_data_idx[2];
         sort_available: !working;
     }
 
@@ -72,9 +72,9 @@ export component MainList {
         columns <=> Settings.big_files_column_name;
         column_sizes <=> Settings.big_files_column_size;
         values <=> big_files_model;
-        parentPathIdx: 3;
-        fileNameIdx: 2;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.big_files_data_idx[0];
+        fileNameIdx: GuiState.big_files_data_idx[1];
+        previewImageIdx: GuiState.big_files_data_idx[2];
         sort_available: !working;
     }
 
@@ -85,9 +85,9 @@ export component MainList {
         columns <=> Settings.empty_files_column_name;
         column_sizes <=> Settings.empty_files_column_size;
         values <=> empty_files_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.empty_files_data_idx[0];
+        fileNameIdx: GuiState.empty_files_data_idx[1];
+        previewImageIdx: GuiState.empty_files_data_idx[2];
         sort_available: !working;
     }
 
@@ -98,9 +98,9 @@ export component MainList {
         columns <=> Settings.temporary_files_column_name;
         column_sizes <=> Settings.temporary_files_column_size;
         values <=> temporary_files_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.temporary_files_data_idx[0];
+        fileNameIdx: GuiState.temporary_files_data_idx[1];
+        previewImageIdx: GuiState.temporary_files_data_idx[2];
         sort_available: !working;
     }
 
@@ -111,9 +111,9 @@ export component MainList {
         columns <=> Settings.similar_images_column_name;
         column_sizes <=> Settings.similar_images_column_size;
         values <=> similar_images_model;
-        parentPathIdx: 5;
-        fileNameIdx: 4;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.similar_images_data_idx[0];
+        fileNameIdx: GuiState.similar_images_data_idx[1];
+        previewImageIdx: GuiState.similar_images_data_idx[2];
         sort_available: !working;
     }
 
@@ -124,9 +124,9 @@ export component MainList {
         columns <=> Settings.similar_videos_column_name;
         column_sizes <=> Settings.similar_videos_column_size;
         values <=> similar_videos_model;
-        parentPathIdx: 3;
-        fileNameIdx: 2;
-        previewImageIdx: 10;
+        parentPathIdx: GuiState.similar_videos_data_idx[0];
+        fileNameIdx: GuiState.similar_videos_data_idx[1];
+        previewImageIdx: GuiState.similar_videos_data_idx[2];
         sort_available: !working;
     }
 
@@ -137,9 +137,9 @@ export component MainList {
         columns <=> Settings.similar_music_column_name;
         column_sizes <=> Settings.similar_music_column_size;
         values <=> similar_music_model;
-        parentPathIdx: 9;
-        fileNameIdx: 2;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.similar_music_data_idx[0];
+        fileNameIdx: GuiState.similar_music_data_idx[1];
+        previewImageIdx: GuiState.similar_music_data_idx[2];
         sort_available: !working;
     }
 
@@ -150,9 +150,9 @@ export component MainList {
         columns <=> Settings.invalid_symlink_column_name;
         column_sizes <=> Settings.invalid_symlink_column_size;
         values <=> invalid_symlinks_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.invalid_symlink_data_idx[0];
+        fileNameIdx: GuiState.invalid_symlink_data_idx[1];
+        previewImageIdx: GuiState.invalid_symlink_data_idx[2];
         sort_available: !working;
     }
 
@@ -163,9 +163,9 @@ export component MainList {
         columns <=> Settings.broken_files_column_name;
         column_sizes <=> Settings.broken_files_column_size;
         values <=> broken_files_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.broken_files_data_idx[0];
+        fileNameIdx: GuiState.broken_files_data_idx[1];
+        previewImageIdx: GuiState.broken_files_data_idx[2];
         sort_available: !working;
     }
 
@@ -176,9 +176,9 @@ export component MainList {
         columns <=> Settings.bad_extensions_column_name;
         column_sizes <=> Settings.bad_extensions_column_size;
         values <=> bad_extensions_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.bad_extensions_data_idx[0];
+        fileNameIdx: GuiState.bad_extensions_data_idx[1];
+        previewImageIdx: GuiState.bad_extensions_data_idx[2];
         sort_available: !working;
     }
 
@@ -189,9 +189,9 @@ export component MainList {
         columns <=> Settings.exif_remover_column_name;
         column_sizes <=> Settings.exif_remover_column_size;
         values <=> exif_remover_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.exif_remover_data_idx[0];
+        fileNameIdx: GuiState.exif_remover_data_idx[1];
+        previewImageIdx: GuiState.exif_remover_data_idx[2];
         sort_available: !working;
     }
 
@@ -202,9 +202,9 @@ export component MainList {
         columns <=> Settings.video_optimizer_column_name;
         column_sizes <=> Settings.video_optimizer_column_size;
         values <=> video_optimizer_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: 8;
+        parentPathIdx: GuiState.video_optimizer_data_idx[0];
+        fileNameIdx: GuiState.video_optimizer_data_idx[1];
+        previewImageIdx: GuiState.video_optimizer_data_idx[2];
         sort_available: !working;
     }
 
@@ -215,9 +215,9 @@ export component MainList {
         columns <=> Settings.bad_names_column_name;
         column_sizes <=> Settings.bad_names_column_size;
         values <=> bad_names_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.bad_names_data_idx[0];
+        fileNameIdx: GuiState.bad_names_data_idx[1];
+        previewImageIdx: GuiState.bad_names_data_idx[2];
         sort_available: !working;
     }
 

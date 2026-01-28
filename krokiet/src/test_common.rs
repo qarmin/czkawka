@@ -15,6 +15,3 @@ pub(crate) fn get_main_list_model() -> SingleMainListModel {
 pub(crate) fn get_model_vec(items: usize) -> Vec<SingleMainListModel> {
     (0..items).map(|_| get_main_list_model()).collect::<Vec<_>>()
 }
-pub(crate) fn create_model_from_model_vec<T: Clone + 'static>(model_vec: &[T]) -> ModelRc<T> {
-    ModelRc::new(VecModel::from(model_vec.to_owned()))
-}

@@ -72,6 +72,7 @@ mod shared_models;
 mod simpler_model;
 #[cfg(test)]
 mod test_common;
+mod set_initial_scroll_list_data_indexes;
 
 slint::include_modules!();
 
@@ -118,6 +119,8 @@ fn main() {
 
     // Disabled for now, due invalid settings model at start
     // set_initial_gui_infos(&app);
+
+    set_initial_scroll_list_data_indexes(&app);
 
     let original_preset_idx = base_settings.default_preset;
     set_initial_settings_to_gui(&app, &base_settings, &custom_settings, cli_args, preset_to_load);

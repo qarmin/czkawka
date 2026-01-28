@@ -86,6 +86,22 @@ export global GuiState {
     in-out property <int> selected_results_bad_names: 0;
     in-out property <int> selected_results_bad_names2: 0;
 
+    // Data index arrays for lists: [parentPathIdx, fileNameIdx, previewImageIdx]
+    in-out property <[int]> duplicate_data_idx: [3, 2, -1];
+    in-out property <[int]> empty_folders_data_idx: [2, 1, -1];
+    in-out property <[int]> big_files_data_idx: [3, 2, -1];
+    in-out property <[int]> empty_files_data_idx: [2, 1, -1];
+    in-out property <[int]> temporary_files_data_idx: [2, 1, -1];
+    in-out property <[int]> similar_images_data_idx: [5, 4, -1];
+    in-out property <[int]> similar_videos_data_idx: [3, 2, 10];
+    in-out property <[int]> similar_music_data_idx: [9, 2, -1];
+    in-out property <[int]> invalid_symlink_data_idx: [2, 1, -1];
+    in-out property <[int]> broken_files_data_idx: [2, 1, -1];
+    in-out property <[int]> bad_extensions_data_idx: [2, 1, -1];
+    in-out property <[int]> exif_remover_data_idx: [2, 1, -1];
+    in-out property <[int]> video_optimizer_data_idx: [2, 1, 8];
+    in-out property <[int]> bad_names_data_idx: [2, 1, -1];
+
     in-out property <bool> cache_cleaning_is_cleaning: false;
     in-out property <bool> cache_cleaning_finished: false;
     in-out property <CacheCleaningProgress> cache_cleaning_progress: {
