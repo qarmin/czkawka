@@ -4,7 +4,7 @@ use std::path::Path;
 use czkawka_core::common::image::{check_if_can_display_image, get_dynamic_image_from_path};
 use czkawka_core::helpers::debug_timer::Timer;
 use fast_image_resize::{FilterType, ResizeAlg, ResizeOptions, Resizer};
-use image::{DynamicImage, RgbaImage};
+use image::{DynamicImage, Rgba, RgbaImage};
 use log::{debug, error};
 use slint::ComponentHandle;
 
@@ -15,8 +15,6 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>()
         .on_load_image_preview(move |image_path, crop_left, crop_top, crop_right, crop_bottom, orig_width, orig_height| {
-            error!("{} {} {} {} - {} - {}x{}", crop_left, crop_top, crop_right, crop_bottom, image_path, orig_width, orig_height);
-
             let app = a.upgrade().expect("Failed to upgrade app :(");
 
             let settings = app.global::<Settings>();
@@ -79,7 +77,7 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
                 };
 
                 if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 && orig_width > 0 && orig_height >0 {
-                    img_to_use = draw_crop_rectangle_on_image(img_to_use, crop_left, crop_top, crop_right, crop_bottom, 2, orig_width as u32, orig_height as u32);
+                    img_to_use = draw_crop_rectangle_on_image(img_to_use, crop_left, crop_top, crop_right, crop_bottom, orig_width as u32, orig_height as u32);
                     timer.checkpoint("cropping image");
                 }
 
@@ -132,9 +130,11 @@ fn load_image(image_path: &Path) -> Option<(Timer, DynamicImage)> {
     Some((debug_timer, img))
 }
 
-fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_top: i32, crop_right: i32, crop_bottom: i32, thickness: u32, width: u32, height: u32) -> ImageBufferRgba {
-    let scale_factor = width as f32 / buf.width() as f32;
-    println!("scale_factor: {}", scale_factor);
+fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_top: i32, crop_right: i32, crop_bottom: i32, original_width: u32, _original_height: u32) -> ImageBufferRgba {
+    let width = buf.width();
+    let height = buf.height();
+
+    let scale_factor = original_width as f32 / buf.width() as f32;
 
     let crop_left = (crop_left as f32 / scale_factor).round() as i32;
     let crop_top = (crop_top as f32 / scale_factor).round() as i32;
@@ -146,15 +146,27 @@ fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_t
     let r = (crop_right.max(0) as u32).min(width.saturating_sub(1));
     let b = (crop_bottom.max(0) as u32).min(height.saturating_sub(1));
 
-    println!("l: {} t: {} r: {} b: {}", l, t, r, b);
-    println!("width: {} height: {}", width, height);
-
     if l > r || t > b {
         return buf;
     }
-    // println!("Cropping rectangle at: {} {} {} {}", left_x, top_y, right_x, bottom_y);
 
-    let red_pixel = image::Rgba([255u8, 0u8, 0u8, 255u8]);
+    let thickness = (( r - l).min( b - t ) / 50).max(2);
+
+    #[inline]
+    fn get_pixel_color(x: u32, y: u32) -> Rgba<u8> {
+        match (x + y) % 9 {
+            0 => Rgba([127u8, 0u8, 0u8, 255u8]),
+            1 => Rgba([0u8, 127u8, 0u8, 255u8]),
+            2 => Rgba([0u8, 0u8, 127u8, 255u8]),
+            3 => Rgba([255u8, 255u8, 0u8, 255u8]),
+            4 => Rgba([0u8, 255u8, 255u8, 255u8]),
+            5 => Rgba([255u8, 0u8, 255u8, 255u8]),
+            6 => Rgba([255u8, 255u8, 255u8, 255u8]),
+            7 => Rgba([128u8, 0u8, 128u8, 255u8]),
+            8 => Rgba([0u8, 0u8, 0u8, 255u8]),
+            _ => Rgba([1u8, 2u8, 3u8, 255u8]),
+        }
+    }
 
     for th in (-(thickness as i32 / 2))..(thickness as i32 / 2) {
         let top_y = ((t as i32 + th) as u32).clamp(0, height - 1);
@@ -165,12 +177,12 @@ fn draw_crop_rectangle_on_image(mut buf: ImageBufferRgba, crop_left: i32, crop_t
 
         for x in left_x..=right_x {
             for y in [top_y, bottom_y] {
-                buf.put_pixel(x, y, red_pixel);
+                buf.put_pixel(x, y, get_pixel_color(x, y));
             }
         }
         for y in top_y..=bottom_y {
             for x in [left_x, right_x] {
-                buf.put_pixel(x, y, red_pixel);
+                buf.put_pixel(x, y, get_pixel_color(x, y));
             }
         }
     }
