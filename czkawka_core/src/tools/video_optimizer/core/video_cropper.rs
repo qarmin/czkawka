@@ -9,7 +9,7 @@ use log::error;
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_utils::{VideoMetadata, extract_frame_ffmpeg};
-use crate::tools::video_optimizer::{VideoCropEntry, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism};
+use crate::tools::video_optimizer::{VideoCropEntry, VideoCropParams, VideoCropSingleFixParams, VideoCroppingMechanism};
 
 const MIN_SAMPLES: usize = 3;
 const MIN_SAMPLE_INTERVAL: f32 = 0.1;
@@ -327,7 +327,7 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
         return Err(());
     };
 
-    entry.duration = Some(duration);
+    entry.duration = duration;
 
     let fps = metadata.fps.unwrap_or(25.0);
 
@@ -372,7 +372,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
         VideoCroppingMechanism::BlackBars => match analyze_black_bars(duration as f32, &get_frame, stop_flag, &first_frame, params, &entry.path) {
             Some(Ok(Some(rectangle))) => {
                 rectangle.validate_image_size(width, height);
-                entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
+                entry.new_image_dimensions = (rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
             }
             Some(Ok(None)) => { // No black bars
             }
@@ -385,7 +385,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
         VideoCroppingMechanism::StaticContent => match analyze_static_image_parts(duration as f32, &get_frame, stop_flag, &first_frame, params, &entry.path) {
             Some(Ok(Some(rectangle))) => {
                 rectangle.validate_image_size(width, height);
-                entry.new_image_dimensions = Some((rectangle.left, rectangle.top, rectangle.right, rectangle.bottom));
+                entry.new_image_dimensions = (rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
             }
             Some(Ok(None)) => {}
             Some(Err(e)) => {
@@ -399,7 +399,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     Some(entry)
 }
 
-pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
+pub fn fix_video_crop(video_path: &Path, params: &VideoCropSingleFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
     if stop_flag.load(Ordering::Relaxed) {
         return Err("Video processing was stopped by user".to_string());
     }
@@ -420,16 +420,6 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropFixParams, stop_flag:
 
     let extension = video_path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
     let temp_output = video_path.with_extension(format!("czkawka_cropped_{crop_type_suffix}.{extension}"));
-
-    // log::debug!(
-    //     "Cropping video: {} -> {}, crop: {}x{}+{}+{}",
-    //     video_path.display(),
-    //     temp_output.display(),
-    //     crop_width,
-    //     crop_height,
-    //     left,
-    //     top
-    // );
 
     let mut command = Command::new("ffmpeg");
     command.arg("-i").arg(video_path).arg("-vf").arg(format!("crop={crop_width}:{crop_height}:{left}:{top}"));

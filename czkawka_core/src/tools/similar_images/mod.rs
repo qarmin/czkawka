@@ -36,7 +36,7 @@ pub struct ImagesEntry {
     pub height: u32,
     pub modified_date: u64,
     pub hash: ImHash,
-    pub similarity: u32,
+    pub difference: u32,
 }
 
 impl ResultEntry for ImagesEntry {
@@ -60,7 +60,7 @@ impl FileEntry {
             width: 0,
             height: 0,
             hash: Vec::new(),
-            similarity: 0,
+            difference: 0,
         }
     }
 }
@@ -91,7 +91,7 @@ impl bk_tree::Metric<ImHash> for Hamming {
 
 #[derive(Clone)]
 pub struct SimilarImagesParameters {
-    pub similarity: u32,
+    pub max_difference: u32,
     pub hash_size: u8,
     pub hash_alg: HashAlg,
     pub image_filter: FilterType,
@@ -100,10 +100,10 @@ pub struct SimilarImagesParameters {
 }
 
 impl SimilarImagesParameters {
-    pub fn new(similarity: u32, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType, exclude_images_with_same_size: bool, ignore_hard_links: bool) -> Self {
+    pub fn new(max_difference: u32, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType, exclude_images_with_same_size: bool, ignore_hard_links: bool) -> Self {
         assert!([8, 16, 32, 64].contains(&hash_size));
         Self {
-            similarity,
+            max_difference,
             hash_size,
             hash_alg,
             image_filter,

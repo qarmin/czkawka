@@ -1,5 +1,5 @@
 import { SelectableTableView } from "selectable_tree_view.slint";
-import { ActiveTab, MainListModel } from "common.slint";
+import { ActiveTab, SingleMainListModel } from "common.slint";
 import { SettingsList } from "settings_list.slint";
 import { GuiState } from "gui_state.slint";
 import { About } from "about.slint";
@@ -10,32 +10,32 @@ export component MainList {
 
     in-out property <bool> working: false;
 
-    in-out property <[MainListModel]> duplicate_files_model: [];
-    in-out property <[MainListModel]> empty_folder_model: [
+    in-out property <[SingleMainListModel]> duplicate_files_model: [];
+    in-out property <[SingleMainListModel]> empty_folder_model: [
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
         {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
-    in-out property <[MainListModel]> big_files_model: [];
-    in-out property <[MainListModel]> empty_files_model: [
+    in-out property <[SingleMainListModel]> big_files_model: [];
+    in-out property <[SingleMainListModel]> empty_files_model: [
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
         {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
-    in-out property <[MainListModel]> temporary_files_model: [];
-    in-out property <[MainListModel]> similar_images_model: [
+    in-out property <[SingleMainListModel]> temporary_files_model: [];
+    in-out property <[SingleMainListModel]> similar_images_model: [
         {checked: false, selected_row: false, header_row: true, filled_header_row: false, val_str: ["Original", "500KB", "100x100", "kropkarz", "/Xd1", "24.10.2023"], val_int: []},
         {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["Similar", "500KB", "100x100", "witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
         {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["Similar", "500KB", "100x100", "lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
-    in-out property <[MainListModel]> similar_videos_model: [];
-    in-out property <[MainListModel]> similar_music_model: [];
-    in-out property <[MainListModel]> invalid_symlinks_model: [];
-    in-out property <[MainListModel]> broken_files_model: [];
-    in-out property <[MainListModel]> bad_extensions_model: [];
-    in-out property <[MainListModel]> bad_names_model: [];
-    in-out property <[MainListModel]> exif_remover_model: [];
-    in-out property <[MainListModel]> video_optimizer_model: [];
+    in-out property <[SingleMainListModel]> similar_videos_model: [];
+    in-out property <[SingleMainListModel]> similar_music_model: [];
+    in-out property <[SingleMainListModel]> invalid_symlinks_model: [];
+    in-out property <[SingleMainListModel]> broken_files_model: [];
+    in-out property <[SingleMainListModel]> bad_extensions_model: [];
+    in-out property <[SingleMainListModel]> bad_names_model: [];
+    in-out property <[SingleMainListModel]> exif_remover_model: [];
+    in-out property <[SingleMainListModel]> video_optimizer_model: [];
 
     callback changed_active_tab();
 
@@ -46,9 +46,12 @@ export component MainList {
         columns <=> Settings.duplicates_column_name;
         column_sizes <=> Settings.duplicates_column_size;
         values <=> duplicate_files_model;
-        parentPathIdx: 3;
-        fileNameIdx: 2;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.duplicate_data_idx[0];
+        fileNameIdx: GuiState.duplicate_data_idx[1];
+        previewImageIdx: GuiState.duplicate_data_idx[2];
+        topLeftCropIdx: GuiState.duplicate_data_idx[3];
+        originalWidthIdx: GuiState.duplicate_data_idx[4];
+        originalHeightIdx: GuiState.duplicate_data_idx[5];
         sort_available: !working;
     }
 
@@ -59,9 +62,12 @@ export component MainList {
         columns <=> Settings.empty_folders_column_name;
         column_sizes <=> Settings.empty_folders_column_size;
         values <=> empty_folder_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.empty_folders_data_idx[0];
+        fileNameIdx: GuiState.empty_folders_data_idx[1];
+        previewImageIdx: GuiState.empty_folders_data_idx[2];
+        topLeftCropIdx: GuiState.empty_folders_data_idx[3];
+        originalWidthIdx: GuiState.empty_folders_data_idx[4];
+        originalHeightIdx: GuiState.empty_folders_data_idx[5];
         sort_available: !working;
     }
 
@@ -72,9 +78,12 @@ export component MainList {
         columns <=> Settings.big_files_column_name;
         column_sizes <=> Settings.big_files_column_size;
         values <=> big_files_model;
-        parentPathIdx: 3;
-        fileNameIdx: 2;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.big_files_data_idx[0];
+        fileNameIdx: GuiState.big_files_data_idx[1];
+        previewImageIdx: GuiState.big_files_data_idx[2];
+        topLeftCropIdx: GuiState.big_files_data_idx[3];
+        originalWidthIdx: GuiState.big_files_data_idx[4];
+        originalHeightIdx: GuiState.big_files_data_idx[5];
         sort_available: !working;
     }
 
@@ -85,9 +94,12 @@ export component MainList {
         columns <=> Settings.empty_files_column_name;
         column_sizes <=> Settings.empty_files_column_size;
         values <=> empty_files_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.empty_files_data_idx[0];
+        fileNameIdx: GuiState.empty_files_data_idx[1];
+        previewImageIdx: GuiState.empty_files_data_idx[2];
+        topLeftCropIdx: GuiState.empty_files_data_idx[3];
+        originalWidthIdx: GuiState.empty_files_data_idx[4];
+        originalHeightIdx: GuiState.empty_files_data_idx[5];
         sort_available: !working;
     }
 
@@ -98,9 +110,12 @@ export component MainList {
         columns <=> Settings.temporary_files_column_name;
         column_sizes <=> Settings.temporary_files_column_size;
         values <=> temporary_files_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.temporary_files_data_idx[0];
+        fileNameIdx: GuiState.temporary_files_data_idx[1];
+        previewImageIdx: GuiState.temporary_files_data_idx[2];
+        topLeftCropIdx: GuiState.temporary_files_data_idx[3];
+        originalWidthIdx: GuiState.temporary_files_data_idx[4];
+        originalHeightIdx: GuiState.temporary_files_data_idx[5];
         sort_available: !working;
     }
 
@@ -111,9 +126,12 @@ export component MainList {
         columns <=> Settings.similar_images_column_name;
         column_sizes <=> Settings.similar_images_column_size;
         values <=> similar_images_model;
-        parentPathIdx: 5;
-        fileNameIdx: 4;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.similar_images_data_idx[0];
+        fileNameIdx: GuiState.similar_images_data_idx[1];
+        previewImageIdx: GuiState.similar_images_data_idx[2];
+        topLeftCropIdx: GuiState.similar_images_data_idx[3];
+        originalWidthIdx: GuiState.similar_images_data_idx[4];
+        originalHeightIdx: GuiState.similar_images_data_idx[5];
         sort_available: !working;
     }
 
@@ -124,9 +142,12 @@ export component MainList {
         columns <=> Settings.similar_videos_column_name;
         column_sizes <=> Settings.similar_videos_column_size;
         values <=> similar_videos_model;
-        parentPathIdx: 3;
-        fileNameIdx: 2;
-        previewImageIdx: 10;
+        parentPathIdx: GuiState.similar_videos_data_idx[0];
+        fileNameIdx: GuiState.similar_videos_data_idx[1];
+        previewImageIdx: GuiState.similar_videos_data_idx[2];
+        topLeftCropIdx: GuiState.similar_videos_data_idx[3];
+        originalWidthIdx: GuiState.similar_videos_data_idx[4];
+        originalHeightIdx: GuiState.similar_videos_data_idx[5];
         sort_available: !working;
     }
 
@@ -137,9 +158,12 @@ export component MainList {
         columns <=> Settings.similar_music_column_name;
         column_sizes <=> Settings.similar_music_column_size;
         values <=> similar_music_model;
-        parentPathIdx: 9;
-        fileNameIdx: 2;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.similar_music_data_idx[0];
+        fileNameIdx: GuiState.similar_music_data_idx[1];
+        previewImageIdx: GuiState.similar_music_data_idx[2];
+        topLeftCropIdx: GuiState.similar_music_data_idx[3];
+        originalWidthIdx: GuiState.similar_music_data_idx[4];
+        originalHeightIdx: GuiState.similar_music_data_idx[5];
         sort_available: !working;
     }
 
@@ -150,9 +174,12 @@ export component MainList {
         columns <=> Settings.invalid_symlink_column_name;
         column_sizes <=> Settings.invalid_symlink_column_size;
         values <=> invalid_symlinks_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.invalid_symlink_data_idx[0];
+        fileNameIdx: GuiState.invalid_symlink_data_idx[1];
+        previewImageIdx: GuiState.invalid_symlink_data_idx[2];
+        topLeftCropIdx: GuiState.invalid_symlink_data_idx[3];
+        originalWidthIdx: GuiState.invalid_symlink_data_idx[4];
+        originalHeightIdx: GuiState.invalid_symlink_data_idx[5];
         sort_available: !working;
     }
 
@@ -163,9 +190,12 @@ export component MainList {
         columns <=> Settings.broken_files_column_name;
         column_sizes <=> Settings.broken_files_column_size;
         values <=> broken_files_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.broken_files_data_idx[0];
+        fileNameIdx: GuiState.broken_files_data_idx[1];
+        previewImageIdx: GuiState.broken_files_data_idx[2];
+        topLeftCropIdx: GuiState.broken_files_data_idx[3];
+        originalWidthIdx: GuiState.broken_files_data_idx[4];
+        originalHeightIdx: GuiState.broken_files_data_idx[5];
         sort_available: !working;
     }
 
@@ -176,9 +206,12 @@ export component MainList {
         columns <=> Settings.bad_extensions_column_name;
         column_sizes <=> Settings.bad_extensions_column_size;
         values <=> bad_extensions_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.bad_extensions_data_idx[0];
+        fileNameIdx: GuiState.bad_extensions_data_idx[1];
+        previewImageIdx: GuiState.bad_extensions_data_idx[2];
+        topLeftCropIdx: GuiState.bad_extensions_data_idx[3];
+        originalWidthIdx: GuiState.bad_extensions_data_idx[4];
+        originalHeightIdx: GuiState.bad_extensions_data_idx[5];
         sort_available: !working;
     }
 
@@ -189,9 +222,12 @@ export component MainList {
         columns <=> Settings.exif_remover_column_name;
         column_sizes <=> Settings.exif_remover_column_size;
         values <=> exif_remover_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.exif_remover_data_idx[0];
+        fileNameIdx: GuiState.exif_remover_data_idx[1];
+        previewImageIdx: GuiState.exif_remover_data_idx[2];
+        topLeftCropIdx: GuiState.exif_remover_data_idx[3];
+        originalWidthIdx: GuiState.exif_remover_data_idx[4];
+        originalHeightIdx: GuiState.exif_remover_data_idx[5];
         sort_available: !working;
     }
 
@@ -202,9 +238,12 @@ export component MainList {
         columns <=> Settings.video_optimizer_column_name;
         column_sizes <=> Settings.video_optimizer_column_size;
         values <=> video_optimizer_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.video_optimizer_data_idx[0];
+        fileNameIdx: GuiState.video_optimizer_data_idx[1];
+        previewImageIdx: GuiState.video_optimizer_data_idx[2];
+        topLeftCropIdx: GuiState.video_optimizer_data_idx[3];
+        originalWidthIdx: GuiState.video_optimizer_data_idx[4];
+        originalHeightIdx: GuiState.video_optimizer_data_idx[5];
         sort_available: !working;
     }
 
@@ -215,9 +254,12 @@ export component MainList {
         columns <=> Settings.bad_names_column_name;
         column_sizes <=> Settings.bad_names_column_size;
         values <=> bad_names_model;
-        parentPathIdx: 2;
-        fileNameIdx: 1;
-        previewImageIdx: -1;
+        parentPathIdx: GuiState.bad_names_data_idx[0];
+        fileNameIdx: GuiState.bad_names_data_idx[1];
+        previewImageIdx: GuiState.bad_names_data_idx[2];
+        topLeftCropIdx: GuiState.bad_names_data_idx[3];
+        originalWidthIdx: GuiState.bad_names_data_idx[4];
+        originalHeightIdx: GuiState.bad_names_data_idx[5];
         sort_available: !working;
     }
 

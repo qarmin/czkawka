@@ -1,7 +1,7 @@
-use std::fs;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::{fs, mem};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -103,34 +103,26 @@ impl BadNames {
     }
 
     #[fun_time(message = "fix_bad_names", level = "debug")]
-    pub fn fix_bad_names(&mut self, _fix_params: NameFixerParams, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
-        let mut fixed_count = 0;
-        let mut failed_renames = Vec::new();
-
-        for entry in &self.bad_names_files {
-            if check_if_stop_received(stop_flag) {
-                return WorkContinueStatus::Stop;
-            }
-
-            let new_path = entry.path.with_file_name(&entry.new_name);
-
-            match fs::rename(&entry.path, &new_path) {
-                Ok(()) => {
-                    fixed_count += 1;
-                    debug!("Renamed {:?} to {:?}", entry.path, new_path);
+    pub fn fix_bad_names(&mut self, _fix_params: NameFixerParams, stop_flag: &Arc<AtomicBool>) {
+        let warnings: Vec<_> = mem::take(&mut self.bad_names_files)
+            .into_par_iter()
+            .map(|entry| {
+                if check_if_stop_received(stop_flag) {
+                    return None;
                 }
-                Err(e) => {
-                    failed_renames.push(format!("Failed to rename {:?}: {}", entry.path, e));
+
+                let new_path = entry.path.with_file_name(&entry.new_name);
+
+                match fs::rename(&entry.path, &new_path) {
+                    Ok(()) => Some(None),
+                    Err(e) => Some(Some(format!("Failed to rename {:?}: {}", entry.path, e))),
                 }
-            }
-        }
+            })
+            .while_some()
+            .flatten()
+            .collect();
 
-        if !failed_renames.is_empty() {
-            self.common_data.text_messages.warnings.extend(failed_renames);
-        }
-
-        debug!("Fixed {fixed_count} file names");
-        WorkContinueStatus::Continue
+        self.common_data.text_messages.warnings.extend(warnings);
     }
 }
 
@@ -155,14 +147,6 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
         }
     }
 
-    if checked_issues.space_at_start_or_end {
-        stem = stem.trim().to_string();
-
-        if let Some(ref mut ext) = extension {
-            *ext = ext.trim().to_string();
-        }
-    }
-
     if checked_issues.non_ascii_graphical {
         stem = deunicode::deunicode(&stem);
 
@@ -184,6 +168,14 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
 
         if let Some(ref mut ext) = extension {
             *ext = remove_duplicated_non_alphanumeric(ext);
+        }
+    }
+
+    if checked_issues.space_at_start_or_end {
+        stem = stem.trim().to_string();
+
+        if let Some(ref mut ext) = extension {
+            *ext = ext.trim().to_string();
         }
     }
 

@@ -28,8 +28,8 @@ impl DeletingItems for VideoOptimizer {
 impl FixingItems for VideoOptimizer {
     type FixParams = VideoOptimizerFixParams;
     #[fun_time(message = "fix_items", level = "debug")]
-    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) -> WorkContinueStatus {
-        self.fix_files(stop_flag, progress_sender, fix_params)
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) {
+        self.fix_files(stop_flag, progress_sender, fix_params);
     }
 }
 
@@ -97,11 +97,8 @@ impl PrintResults for VideoOptimizer {
 
                 for entry in &self.video_crop_result_entries {
                     if !entry.codec.is_empty() {
-                        let new_image_dimensions: String = if let Some((lt, rt, rb, lb)) = entry.new_image_dimensions {
-                            format!("  New dimensions: LT:{lt}, RT:{rt}, RB:{rb}, LB:{lb}")
-                        } else {
-                            String::new()
-                        };
+                        let (lt, rt, rb, lb) = entry.new_image_dimensions;
+                        let new_image_dimensions = format!("  New dimensions: LT:{lt}, RT:{rt}, RB:{rb}, LB:{lb}");
                         writeln!(
                             writer,
                             "\"{}\" - Codec: {} - Dimensions: {}x{} - Size: {}{new_image_dimensions}",
@@ -181,6 +178,9 @@ impl CommonData for VideoOptimizer {
     }
 
     fn found_any_broken_files(&self) -> bool {
-        self.information.number_of_failed_files > 0
+        match &self.params {
+            VideoOptimizerParameters::VideoTranscode(_) => self.information.number_of_videos_to_transcode > 0,
+            VideoOptimizerParameters::VideoCrop(_) => self.information.number_of_videos_to_crop > 0,
+        }
     }
 }

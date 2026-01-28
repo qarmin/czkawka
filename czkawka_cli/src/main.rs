@@ -12,24 +12,26 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::set_number_of_threads;
 use czkawka_core::common::tool_data::{CommonData, DeleteMethod};
-use czkawka_core::common::traits::{AllTraits, PrintResults, Search};
-use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
+use czkawka_core::common::traits::{AllTraits, FixingItems, PrintResults, Search};
+use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsFixParams, BadExtensionsParameters};
+use czkawka_core::tools::bad_names::{BadNames, BadNamesParameters, NameFixerParams, NameIssues};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
 use czkawka_core::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters};
 use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
+use czkawka_core::tools::exif_remover::{ExifRemover, ExifRemoverParameters, ExifTagsFixerParams};
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
-use czkawka_core::tools::similar_images::core::return_similarity_from_similarity_preset;
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
+use czkawka_core::tools::video_optimizer::{VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeParams};
 use log::{debug, error, info};
 
 use crate::commands::{
-    Args, BadExtensionsArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, InvalidSymlinksArgs, SDMethod,
-    SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs,
+    Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, ExifRemoverArgs,
+    InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs,
 };
 use crate::progress::connect_progress;
 
@@ -77,6 +79,9 @@ fn main() {
             Commands::BrokenFiles(broken_files_args) => broken_files(broken_files_args, &stop_flag, &progress_sender),
             Commands::SimilarVideos(similar_videos_args) => similar_videos(similar_videos_args, &stop_flag, &progress_sender),
             Commands::BadExtensions(bad_extensions_args) => bad_extensions(bad_extensions_args, &stop_flag, &progress_sender),
+            Commands::BadNames(bad_names_args) => bad_names(bad_names_args, &stop_flag, &progress_sender),
+            Commands::VideoOptimizer(video_optimizer_args) => video_optimizer(video_optimizer_args, &stop_flag, &progress_sender),
+            Commands::ExifRemover(exif_remover_args) => exif_remover(exif_remover_args, &stop_flag, &progress_sender),
         })
         .expect("Failed to spawn calculation thread");
 
@@ -207,7 +212,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         reference_directories,
         minimal_file_size,
         maximal_file_size,
-        similarity_preset,
+        max_difference,
         hash_alg,
         image_filter,
         hash_size,
@@ -216,9 +221,8 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         ignore_same_size,
     } = similar_images;
 
-    let similarity = return_similarity_from_similarity_preset(similarity_preset, hash_size);
     let params = SimilarImagesParameters::new(
-        similarity,
+        max_difference,
         hash_size,
         hash_alg,
         image_filter,
@@ -346,7 +350,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
 }
 
 fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    let BadExtensionsArgs { common_cli_items } = bad_extensions;
+    let BadExtensionsArgs { common_cli_items, fix_extensions } = bad_extensions;
 
     let params = BadExtensionsParameters::new();
     let mut tool = BadExtensions::new(params);
@@ -354,6 +358,187 @@ fn bad_extensions(bad_extensions: BadExtensionsArgs, stop_flag: &Arc<AtomicBool>
     set_common_settings(&mut tool, &common_cli_items, None);
 
     tool.search(stop_flag, Some(progress_sender));
+
+    if fix_extensions {
+        let fix_params = BadExtensionsFixParams {};
+        tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+    }
+
+    save_and_write_results_to_writer(&tool, &common_cli_items)
+}
+
+fn bad_names(bad_names: BadNamesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
+    let BadNamesArgs {
+        common_cli_items,
+        delete_method,
+        uppercase_extension,
+        emoji_used,
+        space_at_start_or_end,
+        non_ascii_graphical,
+        restricted_charset,
+        remove_duplicated_non_alphanumeric,
+        fix_names,
+    } = bad_names;
+
+    let restricted_charset_allowed = restricted_charset.and_then(|s| {
+        let mut items: Vec<_> = s.chars().collect();
+        items.sort_unstable();
+        items.dedup();
+        if items.is_empty() { None } else { Some(items) }
+    });
+
+    let name_issues = NameIssues {
+        uppercase_extension,
+        emoji_used,
+        space_at_start_or_end,
+        non_ascii_graphical,
+        restricted_charset_allowed,
+        remove_duplicated_non_alphanumeric,
+    };
+
+    let params = BadNamesParameters::new(name_issues);
+    let mut tool = BadNames::new(params);
+
+    set_common_settings(&mut tool, &common_cli_items, None);
+    set_simple_delete(&mut tool, delete_method);
+
+    tool.search(stop_flag, Some(progress_sender));
+
+    if fix_names {
+        let fix_params = NameFixerParams::default();
+        tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+    }
+
+    save_and_write_results_to_writer(&tool, &common_cli_items)
+}
+
+fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
+    use czkawka_core::common::traits::FixingItems;
+    use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoTranscodeFixParams};
+
+    use crate::commands::{CropArgs, TranscodeArgs, VideoOptimizerMode as CliVideoOptimizerMode};
+
+    let VideoOptimizerArgs { common_cli_items, mode } = video_optimizer;
+
+    match mode {
+        CliVideoOptimizerMode::Transcode(transcode_args) => {
+            let TranscodeArgs {
+                excluded_codecs,
+                generate_thumbnails,
+                thumbnail_percentage,
+                thumbnail_grid,
+                fix_videos,
+                target_codec,
+                quality,
+                fail_if_not_smaller,
+                overwrite_original,
+                limit_video_size,
+                max_width,
+                max_height,
+            } = transcode_args;
+
+            let excluded_codecs_vec = excluded_codecs.map_or_else(
+                || vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
+                |s| s.split(',').map(|c| c.trim().to_string()).collect(),
+            );
+
+            let params = VideoOptimizerParameters::VideoTranscode(VideoTranscodeParams::new(excluded_codecs_vec, generate_thumbnails, thumbnail_percentage, thumbnail_grid));
+
+            let mut tool = VideoOptimizer::new(params);
+            set_common_settings(&mut tool, &common_cli_items, None);
+            tool.search(stop_flag, Some(progress_sender));
+
+            if fix_videos {
+                let codec = target_codec.parse::<VideoCodec>().unwrap_or(VideoCodec::H265);
+                let fix_params = VideoOptimizerFixParams::VideoTranscode(VideoTranscodeFixParams {
+                    codec,
+                    quality,
+                    fail_if_not_smaller,
+                    overwrite_original,
+                    limit_video_size,
+                    max_width,
+                    max_height,
+                });
+                tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+            }
+
+            save_and_write_results_to_writer(&tool, &common_cli_items)
+        }
+        CliVideoOptimizerMode::Crop(crop_args) => {
+            let CropArgs {
+                crop_mechanism,
+                black_pixel_threshold,
+                black_bar_percentage,
+                max_samples,
+                min_crop_size,
+                generate_thumbnails,
+                thumbnail_percentage,
+                thumbnail_grid,
+                fix_videos,
+                overwrite_original,
+                target_codec,
+                quality,
+            } = crop_args;
+
+            #[expect(clippy::match_same_arms)]
+            let crop_mech = match crop_mechanism.as_str() {
+                "blackbars" => VideoCroppingMechanism::BlackBars,
+                "staticcontent" => VideoCroppingMechanism::StaticContent,
+                _ => VideoCroppingMechanism::BlackBars,
+            };
+
+            let params = VideoOptimizerParameters::VideoCrop(VideoCropParams::with_custom_params(
+                crop_mech,
+                black_pixel_threshold,
+                black_bar_percentage,
+                max_samples,
+                min_crop_size,
+                generate_thumbnails,
+                thumbnail_percentage,
+                thumbnail_grid,
+            ));
+
+            let mut tool = VideoOptimizer::new(params);
+            set_common_settings(&mut tool, &common_cli_items, None);
+            tool.search(stop_flag, Some(progress_sender));
+
+            if fix_videos {
+                let target_codec_parsed = target_codec.and_then(|s| s.parse::<VideoCodec>().ok());
+                let fix_params = VideoOptimizerFixParams::VideoCrop(VideoCropFixParams {
+                    overwrite_original,
+                    target_codec: target_codec_parsed,
+                    quality,
+                    crop_mechanism: crop_mech,
+                });
+                tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+            }
+
+            save_and_write_results_to_writer(&tool, &common_cli_items)
+        }
+    }
+}
+
+fn exif_remover(exif_remover: ExifRemoverArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
+    let ExifRemoverArgs {
+        common_cli_items,
+        ignored_tags,
+        fix_exif,
+        override_file,
+    } = exif_remover;
+
+    let ignored_tags_vec = ignored_tags.map(|s| s.split(',').map(|tag| tag.trim().to_string()).collect()).unwrap_or_default();
+
+    let params = ExifRemoverParameters::new(ignored_tags_vec);
+    let mut tool = ExifRemover::new(params);
+
+    set_common_settings(&mut tool, &common_cli_items, None);
+
+    tool.search(stop_flag, Some(progress_sender));
+
+    if fix_exif {
+        let fix_params = ExifTagsFixerParams { override_file };
+        tool.fix_items(stop_flag, Some(progress_sender), fix_params);
+    }
 
     save_and_write_results_to_writer(&tool, &common_cli_items)
 }

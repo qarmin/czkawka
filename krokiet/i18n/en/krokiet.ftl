@@ -39,7 +39,6 @@ rust_created_thumbnails = Created thumbnails for { $items_stats } videos
 rust_checked_files = Checked { $items_stats } file ({ $size_stats })
 rust_checked_files_bad_extensions = Checked { $items_stats } file
 rust_checked_files_bad_names = Checked { $items_stats } file
-rust_checked_images = Checked { $items_stats } images ({ $size_stats })
 rust_checked_videos = Checked { $items_stats } videos ({ $size_stats })
 rust_analyzed_partial_hash = Analyzed partial hash of { $items_stats } files ({ $size_stats })
 rust_analyzed_full_hash = Analyzed full hash of { $items_stats } files ({ $size_stats })
@@ -125,7 +124,10 @@ rust_rename_confirmation_number_simple = { $items } items selected.
 rust_cache_processed_files = Processed { $files } cache files
 rust_cache_entries_stats = Removed { $removed } entries out of all { $all }, { $left } left
 rust_cache_size_reduced = Reduced cache files size by { $size }
-rust_cache_time_elapsed = Time elapsed: { $seconds }
+rust_cache_time_elapsed = Time elapsed: { $time }
+
+rust_symlink_failed = Failed to symlink {$name} to {$target}, reason {$reason}
+rust_hardlink_failed = Failed to hardlink { $name } to { $target }, reason { $reason }
 
 # Slint translations, but in arrays
 

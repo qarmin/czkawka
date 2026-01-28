@@ -235,7 +235,7 @@ impl SimilarImages {
         for (child_hash, (parent_hash, similarity)) in hashes_similarity {
             let mut vec_fe = all_hashed_images[&child_hash].clone();
             for fe in &mut vec_fe {
-                fe.similarity = similarity;
+                fe.difference = similarity;
             }
             collected_similar_images
                 .get_mut(&parent_hash)
@@ -412,7 +412,7 @@ impl SimilarImages {
             return WorkContinueStatus::Continue;
         }
 
-        let tolerance = self.get_params().similarity;
+        let tolerance = self.get_params().max_difference;
 
         // Results
         let mut collected_similar_images: IndexMap<ImHash, Vec<ImagesEntry>> = Default::default();
@@ -698,7 +698,7 @@ mod tests {
         SimilarImagesParameters {
             hash_alg: HashAlg::Gradient,
             hash_size: 8,
-            similarity: 0,
+            max_difference: 0,
             image_filter: FilterType::Lanczos3,
             exclude_images_with_same_size: false,
             ignore_hard_links: false,
@@ -747,7 +747,7 @@ mod tests {
     fn test_compare_tolerance_0_normal_mode() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 0;
+            parameters.max_difference = 0;
             let mut similar_images = SimilarImages::new(parameters);
 
             let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
@@ -777,7 +777,7 @@ mod tests {
     fn test_simple_normal_one_group() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 1;
+            parameters.max_difference = 1;
             let mut similar_images = SimilarImages::new(parameters);
 
             let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
@@ -793,7 +793,7 @@ mod tests {
     #[test]
     fn test_2000_hashes() {
         let mut parameters = get_default_parameters();
-        parameters.similarity = 10;
+        parameters.max_difference = 10;
         let mut similar_images = SimilarImages::new(parameters);
 
         for i in 0..2000 {
@@ -813,7 +813,7 @@ mod tests {
     fn test_simple_normal_one_group_extended() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 2;
+            parameters.max_difference = 2;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(false);
 
@@ -833,7 +833,7 @@ mod tests {
     fn test_simple_normal_one_group_extended2() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 222222;
+            parameters.max_difference = 222222;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(false);
 
@@ -853,7 +853,7 @@ mod tests {
     fn test_simple_referenced_same_group() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 0;
+            parameters.max_difference = 0;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(true);
             // Not using special method, because it validates if path exists
@@ -873,7 +873,7 @@ mod tests {
     fn test_simple_referenced_group_extended() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 0;
+            parameters.max_difference = 0;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(true);
             // Not using special method, because it validates if path exists
@@ -894,7 +894,7 @@ mod tests {
     fn test_simple_referenced_group_extended2() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 0;
+            parameters.max_difference = 0;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(true);
             // Not using special method, because it validates if path exists
@@ -919,7 +919,7 @@ mod tests {
     fn test_simple_normal_too_small_similarity() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 1;
+            parameters.max_difference = 1;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(false);
 
@@ -939,7 +939,7 @@ mod tests {
     fn test_simple_normal_union_of_similarity() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 4;
+            parameters.max_difference = 4;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(false);
 
@@ -968,7 +968,7 @@ mod tests {
     fn test_reference_similarity_only_one() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 1;
+            parameters.max_difference = 1;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(true);
             // Not using special method, because it validates if path exists
@@ -992,7 +992,7 @@ mod tests {
     fn test_reference_too_small_similarity() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 1;
+            parameters.max_difference = 1;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(true);
             // Not using special method, because it validates if path exists
@@ -1013,7 +1013,7 @@ mod tests {
     fn test_reference_minimal() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 1;
+            parameters.max_difference = 1;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(true);
             // Not using special method, because it validates if path exists
@@ -1047,7 +1047,7 @@ mod tests {
     fn test_reference_same() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 1;
+            parameters.max_difference = 1;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(true);
             // Not using special method, because it validates if path exists
@@ -1069,7 +1069,7 @@ mod tests {
     fn test_reference_union() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
-            parameters.similarity = 10;
+            parameters.max_difference = 10;
             let mut similar_images = SimilarImages::new(parameters);
             similar_images.set_use_reference_folders(true);
             // Not using special method, because it validates if path exists
@@ -1133,7 +1133,7 @@ mod tests {
             height: 100,
             modified_date: 0,
             hash,
-            similarity: 0,
+            difference: 0,
         }
     }
 }

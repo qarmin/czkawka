@@ -7,8 +7,8 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
-use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
+use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
+use crate::simpler_model::{SimplerSingleMainListModel, ToSimplerVec};
 use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
 
 pub(crate) fn connect_delete_button(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
@@ -36,7 +36,7 @@ impl ModelProcessor {
             let path_idx = self.active_tab.get_str_path_idx();
             let name_idx = self.active_tab.get_str_name_idx();
 
-            let dlt_fnc = move |data: &SimplerMainListModel| {
+            let dlt_fnc = move |data: &SimplerSingleMainListModel| {
                 remove_single_item(
                     &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
                     is_empty_folder_tab,
@@ -44,7 +44,15 @@ impl ModelProcessor {
                 )
             };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, dlt_fnc, MessageType::Delete, false);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(dlt_fnc)),
+                MessageType::Delete,
+                false,
+            );
         });
     }
 }
@@ -71,17 +79,18 @@ mod tests {
     use slint::{Model, ModelRc, VecModel};
 
     use super::*;
-    use crate::MainListModel;
+    use crate::SingleMainListModel;
+    use crate::common::create_model_from_model_vec;
     use crate::simpler_model::ToSlintModel;
-    use crate::test_common::{create_model_from_model_vec, get_model_vec};
+    use crate::test_common::get_model_vec;
 
     impl ModelProcessor {
         pub(crate) fn process_deletion_test(
             &self,
             remove_to_trash: bool,
             progress_sender: Sender<ProgressData>,
-            model: ModelRc<MainListModel>,
-        ) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+            model: ModelRc<SingleMainListModel>,
+        ) -> Option<(Vec<SingleMainListModel>, Vec<String>, usize, usize)> {
             let is_empty_folder_tab = self.active_tab == ActiveTab::EmptyFolders;
 
             let items_queued_to_delete = model.iter().filter(|e| e.checked).count();
@@ -92,7 +101,7 @@ mod tests {
 
             let path_idx = 0;
             let name_idx = 0;
-            let dlt_fnc = move |data: &SimplerMainListModel| {
+            let dlt_fnc = move |data: &SimplerSingleMainListModel| {
                 remove_single_item(
                     &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
                     is_empty_folder_tab,
@@ -105,13 +114,13 @@ mod tests {
                 items_queued_to_delete,
                 progress_sender,
                 &Arc::default(),
-                dlt_fnc,
+                &ProcessFunction::Simple(Box::new(dlt_fnc)),
                 MessageType::Delete,
                 self.active_tab.get_int_size_opt_idx(),
                 false,
             );
 
-            let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(output);
+            let (new_simple_model, errors, items_deleted) = Self::remove_processed_items_from_model(output);
 
             Some((new_simple_model.to_vec_model(), errors, items_queued_to_delete, items_deleted))
         }

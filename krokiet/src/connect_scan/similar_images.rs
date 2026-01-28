@@ -57,7 +57,7 @@ pub(crate) fn scan_similar_images(a: Weak<MainWindow>, sd: ScanData) {
             };
 
             for (_first_entry, vec_fe) in &mut vector {
-                vec_fe.par_sort_unstable_by_key(|e| (e.similarity, u64::MAX - e.size));
+                vec_fe.par_sort_unstable_by_key(|e| (e.difference, u64::MAX - e.size));
             }
             vector.sort_by_key(|(_header, vc)| u64::MAX - vc.iter().map(|e| e.size).sum::<u64>()); // Also sorts by size, to show the biggest groups first
 
@@ -117,7 +117,7 @@ fn write_similar_images_results(
 fn prepare_data_model_similar_images(fe: ImagesEntry, hash_size: u8) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
     let data_model_str_arr: [SharedString; MAX_STR_DATA_SIMILAR_IMAGES] = [
-        get_string_from_similarity(fe.similarity, hash_size).into(),
+        get_string_from_similarity(fe.difference, hash_size).into(),
         format_size(fe.size, BINARY).into(),
         format!("{}x{}", fe.width, fe.height).into(),
         file.into(),

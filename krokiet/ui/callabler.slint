@@ -30,7 +30,8 @@ export global Callabler {
     callback sort_items(SortMode);
 
     // Preview
-    callback load_image_preview(string);
+    // Parameters: path, crop_left, crop_top, crop_right, crop_bottom, original_width, original_height
+    callback load_image_preview(string, int, int, int, int, int, int);
 
     // Settings
     callback changed_settings_preset();
@@ -52,8 +53,6 @@ export global Callabler {
     callback softlink_items();
 
     // Only Slint
-    callback open_select_popup();
-
     callback open_config_folder();
     callback open_cache_folder();
 

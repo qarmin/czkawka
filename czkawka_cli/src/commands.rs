@@ -10,7 +10,6 @@ use czkawka_core::common::tool_data::DeleteMethod;
 use czkawka_core::re_exported::{Cropdetect, FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::same_music::MusicSimilarity;
-use czkawka_core::tools::similar_images::SimilarityPreset;
 use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_SKIP_FORWARD_AMOUNT, crop_detect_from_str_opt};
 
 #[cfg(not(feature = "no_colors"))]
@@ -95,6 +94,24 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka ext -d /home/czokolada/ -f results.txt"
     )]
     BadExtensions(BadExtensionsArgs),
+    #[clap(
+        name = "bad-names",
+        about = "Finds files with bad names",
+        after_help = "EXAMPLE:\n    czkawka bad-names -d /home/rafal -f results.txt"
+    )]
+    BadNames(BadNamesArgs),
+    #[clap(
+        name = "video-optimizer",
+        about = "Optimizes video files (transcode or crop)",
+        after_help = "EXAMPLE:\n    czkawka video-optimizer -d /home/rafal -f results.txt"
+    )]
+    VideoOptimizer(VideoOptimizerArgs),
+    #[clap(
+        name = "exif-remover",
+        about = "Finds and removes EXIF tags from images",
+        after_help = "EXAMPLE:\n    czkawka exif-remover -d /home/rafal -f results.txt"
+    )]
+    ExifRemover(ExifRemoverArgs),
 }
 
 #[derive(Debug, clap::Args)]
@@ -152,7 +169,7 @@ pub struct DuplicatesArgs {
         default_value = "HASH",
         value_parser = parse_checking_method_duplicate,
         help = "Search method (NAME, SIZE, HASH)",
-        long_help = "Methods to search files.\nNAME - Fast but but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file"
+        long_help = "Methods to search files.\nNAME - Fast but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file"
     )]
     pub search_method: CheckingMethod,
     #[clap(flatten)]
@@ -162,7 +179,8 @@ pub struct DuplicatesArgs {
         long,
         default_value = "BLAKE3",
         value_parser = parse_hash_type,
-        help = "Hash type (BLAKE3, CRC32, XXH3)"
+        help = "Hash type (BLAKE3, CRC32, XXH3)",
+        long_help = "Hash algorithm used to calculate file hashes. BLAKE3 is recommended for most cases (fast and secure), CRC32 is faster but less reliable, XXH3 is very fast but not cryptographically secure."
     )]
     pub hash_type: HashType,
     #[clap(flatten)]
@@ -183,11 +201,22 @@ pub struct EmptyFoldersArgs {
 pub struct BiggestFilesArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
-    #[clap(short, long, default_value = "50", help = "Number of files to be shown")]
+    #[clap(
+        short,
+        long,
+        default_value = "50",
+        help = "Number of files to be shown",
+        long_help = "Number of biggest (or smallest with -J flag) files to display in results"
+    )]
     pub number_of_files: usize,
     #[clap(flatten)]
     pub delete_method: SDMethod,
-    #[clap(short = 'J', long, help = "Finds the smallest files instead the biggest")]
+    #[clap(
+        short = 'J',
+        long,
+        help = "Finds the smallest files instead the biggest",
+        long_help = "Switch mode to find smallest files instead of biggest ones"
+    )]
     pub smallest_mode: bool,
 }
 
@@ -232,14 +261,14 @@ pub struct SimilarImagesArgs {
     )]
     pub maximal_file_size: u64,
     #[clap(
-        short,
+        short = 's',
         long,
-        default_value = "High",
-        value_parser = parse_similar_images_similarity,
-        help = "Similarity level (Minimal, VerySmall, Small, Medium, High, VeryHigh, Original)",
-        long_help = "Methods to choose similarity level of images which will be considered as duplicated."
+        default_value = "5",
+        value_parser = clap::value_parser!(u32).range(0..=40),
+        help = "Maximum difference between images (0-40)",
+        long_help = "Maximum difference between images to be considered as similar (0-40). Lower values mean more strict matching. For hash_size 8, values up to 10 are recommended, for hash_size 16 up to 20 are recommended."
     )]
-    pub similarity_preset: SimilarityPreset,
+    pub max_difference: u32,
     #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(flatten)]
@@ -251,7 +280,8 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "Gradient",
         value_parser = parse_similar_hash_algorithm,
-        help = "Hash algorithm (allowed: Mean, Gradient, Blockhash, VertGradient, DoubleGradient, Median)"
+        help = "Hash algorithm (Mean, Gradient, Blockhash, VertGradient, DoubleGradient, Median)",
+        long_help = "Perceptual hash algorithm used to compare images. Gradient (default) works well for most cases, Mean is faster but less accurate, Blockhash is good for finding very similar images, VertGradient/DoubleGradient provide different matching characteristics, Median is robust against color changes."
     )]
     pub hash_alg: HashAlg,
     #[clap(
@@ -259,7 +289,8 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "Nearest",
         value_parser = parse_similar_image_filter,
-        help = "Hash algorithm (allowed: Lanczos3, Nearest, Triangle, Faussian, Catmullrom)"
+        help = "Image resize filter (Lanczos3, Nearest, Triangle, Gaussian, CatmullRom)",
+        long_help = "Filter algorithm used when resizing images for comparison. Lanczos3 provides highest quality but is slower, Nearest is fastest but lowest quality, Triangle/Gaussian/CatmullRom offer different quality-speed tradeoffs."
     )]
     pub image_filter: FilterType,
     #[clap(
@@ -267,7 +298,8 @@ pub struct SimilarImagesArgs {
         long,
         default_value = "16",
         value_parser = parse_image_hash_size,
-        help = "Hash size (allowed: 8, 16, 32, 64)"
+        help = "Hash size (8, 16, 32, 64)",
+        long_help = "Size of the perceptual hash. Larger values provide more detailed comparison but require higher max_difference values. 8 is fastest and least detailed, 64 is slowest but most detailed. Recommended: 8 or 16 for typical use."
     )]
     pub hash_size: u8,
 }
@@ -280,9 +312,19 @@ pub struct SameMusicArgs {
     pub reference_directories: ReferenceDirectories,
     #[clap(flatten)]
     pub delete_method: DMethod,
-    #[clap(short, long, help = "Approximate comparison of music tags.")]
+    #[clap(
+        short,
+        long,
+        help = "Approximate comparison of music tags",
+        long_help = "Use approximate comparison when comparing music tags (allows small differences in tag values)"
+    )]
     pub approximate_comparison: bool,
-    #[clap(short, long, help = "Compare fingerprints only with similar titles.")]
+    #[clap(
+        short,
+        long,
+        help = "Compare fingerprints only with similar titles",
+        long_help = "When using audio content comparison, only compare files that have similar titles to reduce false positives and speed up the process"
+    )]
     pub compare_fingerprints_only_with_similar_titles: bool,
     #[clap(
         short = 'z',
@@ -325,8 +367,8 @@ pub struct SameMusicArgs {
         long,
         value_parser = parse_minimum_segment_duration,
         default_value = "10.0",
-        help = "Maximum size in bytes",
-        long_help = "Minimum segment duration, smaller value will finds also shorter similar segments, which may increase false positives number"
+        help = "Minimum segment duration in seconds",
+        long_help = "Minimum duration of audio segment to compare in seconds. Smaller values will find shorter similar segments but may increase false positives. Values should be between 0.0 and 3600.0"
     )]
     pub minimum_segment_duration: f32,
     #[clap(
@@ -334,8 +376,8 @@ pub struct SameMusicArgs {
         long,
         value_parser = parse_maximum_difference,
         default_value = "2.0",
-        help = "Maximum difference between segments",
-        long_help = "Maximum difference between segments, 0.0 will find only identical segments, 10.0 will find also segments which are almost not similar at all"
+        help = "Maximum difference between audio segments",
+        long_help = "Maximum allowed difference between audio segments (0.0-10.0). Value 0.0 will find only identical segments, while 10.0 will find segments that are barely similar. Lower values mean stricter matching."
     )]
     pub maximum_difference: f64,
 }
@@ -448,7 +490,7 @@ pub struct SimilarVideosArgs {
         default_value = "letterbox",
         value_parser = parse_crop_detect,
         help = "Crop detect method (none, letterbox, motion)",
-        long_help = "Method to crop video frames",
+        long_help = "Method to detect and crop black bars from video frames before comparison. 'none' disables cropping, 'letterbox' removes static black bars, 'motion' uses motion detection to find content area."
     )]
     pub crop_detect: Cropdetect,
     #[clap(
@@ -457,7 +499,7 @@ pub struct SimilarVideosArgs {
         default_value = "10",
         value_parser = parse_scan_duration,
         help = "Scan duration in seconds",
-        long_help = "Duration of scanning video in seconds.",
+        long_help = "Duration of video scanning in seconds. Longer duration provides more accurate results but takes more time. Allowed values are predefined in the application."
     )]
     pub scan_duration: u32,
 }
@@ -466,42 +508,289 @@ pub struct SimilarVideosArgs {
 pub struct BadExtensionsArgs {
     #[clap(flatten)]
     pub common_cli_items: CommonCliItems,
+    #[clap(
+        short = 'F',
+        long,
+        help = "Fix bad extensions",
+        long_help = "Automatically rename files to use proper extensions based on their detected file type"
+    )]
+    pub fix_extensions: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct BadNamesArgs {
+    #[clap(flatten)]
+    pub common_cli_items: CommonCliItems,
+    #[clap(flatten)]
+    pub delete_method: SDMethod,
+    #[clap(
+        short = 'u',
+        long,
+        help = "Check for uppercase extensions",
+        long_help = "Detects files with uppercase extensions (e.g., .JPG instead of .jpg)"
+    )]
+    pub uppercase_extension: bool,
+    #[clap(short = 'j', long, help = "Check for emoji in filenames", long_help = "Detects files with emoji characters in their names")]
+    pub emoji_used: bool,
+    #[clap(
+        short = 'w',
+        long,
+        help = "Check for spaces at start or end",
+        long_help = "Detects files with spaces at the beginning or end of their names"
+    )]
+    pub space_at_start_or_end: bool,
+    #[clap(
+        short = 'n',
+        long,
+        help = "Check for non-ASCII characters",
+        long_help = "Detects files with non-ASCII graphical characters in their names"
+    )]
+    pub non_ascii_graphical: bool,
+    #[clap(
+        short = 'r',
+        long,
+        help = "Restricted charset (comma-separated)",
+        long_help = "List of allowed special characters. Any other characters will be flagged as problematic. Example: '_- .' for underscore, dash, space, and dot"
+    )]
+    pub restricted_charset: Option<String>,
+    #[clap(
+        short = 'a',
+        long,
+        help = "Check for duplicated non-alphanumeric characters",
+        long_help = "Detects files with duplicated non-alphanumeric characters (e.g., 'file__name' or 'file..txt')"
+    )]
+    pub remove_duplicated_non_alphanumeric: bool,
+    #[clap(
+        short = 'F',
+        long,
+        help = "Fix bad names automatically",
+        long_help = "Automatically rename files to fix detected naming issues"
+    )]
+    pub fix_names: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct VideoOptimizerArgs {
+    #[clap(flatten)]
+    pub common_cli_items: CommonCliItems,
+    #[clap(subcommand)]
+    pub mode: VideoOptimizerMode,
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum VideoOptimizerMode {
+    #[clap(name = "transcode", about = "Transcode videos to different codec")]
+    Transcode(TranscodeArgs),
+    #[clap(name = "crop", about = "Crop black bars from videos")]
+    Crop(CropArgs),
+}
+
+#[derive(Debug, clap::Args)]
+pub struct TranscodeArgs {
+    #[clap(
+        short = 'c',
+        long,
+        help = "Excluded video codecs (comma-separated)",
+        long_help = "Comma-separated list of video codecs to exclude from transcoding (e.g., 'h265,av1,vp9')"
+    )]
+    pub excluded_codecs: Option<String>,
+    #[clap(short = 't', long, help = "Generate thumbnails", long_help = "Generate video thumbnails for preview")]
+    pub generate_thumbnails: bool,
+    #[clap(
+        short = 'V',
+        long,
+        default_value = "10",
+        value_parser = clap::value_parser!(u8).range(1..=99),
+        help = "Thumbnail position percentage (1-99)",
+        long_help = "Percentage from start of video where thumbnail should be taken (1-99%)"
+    )]
+    pub thumbnail_percentage: u8,
+    #[clap(short = 'g', long, help = "Generate thumbnail grid", long_help = "Generate a grid of thumbnails instead of single thumbnail")]
+    pub thumbnail_grid: bool,
+    #[clap(short = 'F', long, help = "Fix/optimize videos", long_help = "Actually perform the transcoding on found videos")]
+    pub fix_videos: bool,
+    #[clap(
+        long,
+        default_value = "h265",
+        value_parser = parse_video_codec,
+        help = "Target codec (h264, h265, av1, vp9)",
+        long_help = "Target video codec for transcoding (h264, h265, av1, vp9). Only used with -F flag."
+    )]
+    pub target_codec: String,
+    #[clap(
+        long,
+        default_value = "23",
+        value_parser = clap::value_parser!(u32).range(0..=51),
+        help = "Encoding quality (0-51)",
+        long_help = "Video encoding quality (0-51). Lower values mean better quality. 23 is default for h264/h265, 30 for av1/vp9."
+    )]
+    pub quality: u32,
+    #[clap(long, help = "Fail if result not smaller", long_help = "Fail the optimization if resulting file is not smaller than original")]
+    pub fail_if_not_smaller: bool,
+    #[clap(long, help = "Overwrite original files", long_help = "Overwrite original video files with optimized versions")]
+    pub overwrite_original: bool,
+    #[clap(long, help = "Limit video size", long_help = "Limit maximum video dimensions")]
+    pub limit_video_size: bool,
+    #[clap(
+        long,
+        default_value = "1920",
+        value_parser = clap::value_parser!(u32),
+        help = "Maximum video width",
+        long_help = "Maximum video width in pixels when limit_video_size is enabled"
+    )]
+    pub max_width: u32,
+    #[clap(
+        long,
+        default_value = "1080",
+        value_parser = clap::value_parser!(u32),
+        help = "Maximum video height",
+        long_help = "Maximum video height in pixels when limit_video_size is enabled"
+    )]
+    pub max_height: u32,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct CropArgs {
+    #[clap(
+        short = 'm',
+        long,
+        default_value = "blackbars",
+        value_parser = parse_crop_mechanism,
+        help = "Crop detection mechanism (blackbars, staticcontent)",
+        long_help = "Mechanism for detecting areas to crop: 'blackbars' for removing black bars, 'staticcontent' for detecting static content areas"
+    )]
+    pub crop_mechanism: String,
+    #[clap(
+        short = 'k',
+        long,
+        default_value = "32",
+        value_parser = clap::value_parser!(u8).range(0..=128),
+        help = "Black pixel threshold (0-128)",
+        long_help = "Threshold for considering a pixel as black when detecting black bars (0-128). Lower values are stricter."
+    )]
+    pub black_pixel_threshold: u8,
+    #[clap(
+        short = 'b',
+        long,
+        default_value = "90",
+        value_parser = clap::value_parser!(u8).range(50..=100),
+        help = "Black bar minimum percentage (50-100)",
+        long_help = "Minimum percentage of black pixels in a line to consider it a black bar (50-100%)"
+    )]
+    pub black_bar_percentage: u8,
+    #[clap(
+        short = 's',
+        long,
+        default_value = "20",
+        value_parser = parse_max_samples,
+        help = "Maximum samples (5-1000)",
+        long_help = "Maximum number of video frames to sample when detecting black bars (5-1000)"
+    )]
+    pub max_samples: usize,
+    #[clap(
+        short = 'z',
+        long,
+        default_value = "10",
+        value_parser = parse_min_crop_size,
+        help = "Minimum crop size (1-1000)",
+        long_help = "Minimum size in pixels for crop area to be considered (1-1000)"
+    )]
+    pub min_crop_size: u32,
+    #[clap(short = 't', long, help = "Generate thumbnails", long_help = "Generate video thumbnails for preview")]
+    pub generate_thumbnails: bool,
+    #[clap(
+        short = 'V',
+        long,
+        default_value = "10",
+        value_parser = clap::value_parser!(u8).range(1..=99),
+        help = "Thumbnail position percentage (1-99)",
+        long_help = "Percentage from start of video where thumbnail should be taken (1-99%)"
+    )]
+    pub thumbnail_percentage: u8,
+    #[clap(short = 'g', long, help = "Generate thumbnail grid", long_help = "Generate a grid of thumbnails instead of single thumbnail")]
+    pub thumbnail_grid: bool,
+    #[clap(short = 'F', long, help = "Fix/crop videos", long_help = "Actually perform the cropping on found videos")]
+    pub fix_videos: bool,
+    #[clap(long, help = "Overwrite original files", long_help = "Overwrite original video files with cropped versions")]
+    pub overwrite_original: bool,
+    #[clap(
+        long,
+        value_parser = parse_video_codec,
+        help = "Target codec (h264, h265, av1, vp9)",
+        long_help = "Optional: Also transcode to different codec while cropping. Only used with -F flag."
+    )]
+    pub target_codec: Option<String>,
+    #[clap(
+        long,
+        value_parser = clap::value_parser!(u32).range(0..=51),
+        help = "Encoding quality (0-51)",
+        long_help = "Video encoding quality when transcoding (0-51). Only used when target_codec is specified."
+    )]
+    pub quality: Option<u32>,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct ExifRemoverArgs {
+    #[clap(flatten)]
+    pub common_cli_items: CommonCliItems,
+    #[clap(
+        short = 'i',
+        long,
+        help = "Ignored EXIF tags (comma-separated)",
+        long_help = "Comma-separated list of EXIF tag names to ignore (not remove). Example: 'Orientation,DateTime,Software'"
+    )]
+    pub ignored_tags: Option<String>,
+    #[clap(short = 'F', long, help = "Remove EXIF tags", long_help = "Actually remove EXIF tags from files")]
+    pub fix_exif: bool,
+    #[clap(
+        short = 'o',
+        long,
+        help = "Override original files",
+        long_help = "Override original files instead of creating backup files with '_cleaned' suffix"
+    )]
+    pub override_file: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct CommonCliItems {
-    #[clap(short = 'T', long, default_value = "0", help = "Limits thread number, 0(default) will use all available threads")]
+    #[clap(
+        short = 'T',
+        long,
+        default_value = "0",
+        help = "Number of threads to use (0 = all available)",
+        long_help = "Limits the number of threads used for scanning. Value 0 (default) will use all available CPU threads. Lower values can reduce CPU usage."
+    )]
     pub thread_number: usize,
     #[clap(
         short,
         long,
         required = true,
-        help = "Directorie(s) to search",
-        long_help = "List of directorie(s) which will be searched(absolute path) - this directories are not set as reference folders"
+        help = "Directory(ies) to search",
+        long_help = "List of directory(ies) to search (absolute paths). These directories will be scanned but not set as reference folders."
     )]
     pub directories: Vec<PathBuf>,
     #[clap(
         short,
         long,
-        help = "Excluded directorie(s)",
-        long_help = "List of directorie(s) which will be excluded from search(absolute path)"
+        help = "Excluded directory(ies)",
+        long_help = "List of directory(ies) to exclude from search (absolute paths). Files in these directories will be completely ignored."
     )]
     pub excluded_directories: Vec<PathBuf>,
     #[clap(
         short = 'E',
         long,
         help = "Excluded item(s)",
-        long_help = "List of excluded item(s) which contains * wildcard(may be slow, so use -e where possible)"
+        long_help = "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible."
     )]
     pub excluded_items: Vec<String>,
     #[clap(
         short = 'x',
         long,
         help = "Allowed file extension(s)",
-        long_help = "List of checked files with provided extension(s). There are also helpful macros which allow to easy use a typical extensions like:\nIMAGE(\"jpg,kra,gif,png,bmp,tiff,hdr,svg\"),\nTEXT(\"txt,doc,docx,odt,rtf\"),\nVIDEO(\"mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts\") or\nMUSIC(\"mp3,flac,ogg,tta,wma,webm\")\n "
+        long_help = "List of file extensions to check. Helpful macros are available: IMAGE (jpg,kra,gif,png,bmp,tiff,hdr,svg), TEXT (txt,doc,docx,odt,rtf), VIDEO (mp4,flv,mkv,webm,vob,ogv,gifv,avi,mov,wmv,mpg,m4v,m4p,mpeg,3gp,m2ts), MUSIC (mp3,flac,ogg,tta,wma,webm)"
     )]
     pub allowed_extensions: Vec<String>,
-    #[clap(short = 'P', long, help = "Excluded file extension(s)", long_help = "List of extensions, that will be removed from search.\n ")]
+    #[clap(short = 'P', long, help = "Excluded file extension(s)", long_help = "List of file extensions to exclude from search.")]
     pub excluded_extensions: Vec<String>,
     #[clap(flatten)]
     pub file_to_save: FileToSave,
@@ -509,24 +798,54 @@ pub struct CommonCliItems {
     pub json_compact_file_to_save: JsonCompactFileToSave,
     #[clap(flatten)]
     pub json_pretty_file_to_save: JsonPrettyFileToSave,
-    #[clap(short = 'R', long, help = "Prevents from recursive check of folders")]
+    #[clap(
+        short = 'R',
+        long,
+        help = "Prevents recursive check of folders",
+        long_help = "Disables recursive directory traversal. Only files in the top-level directories will be scanned."
+    )]
     pub not_recursive: bool,
     #[cfg(target_family = "unix")]
-    #[clap(short = 'X', long, help = "Exclude files on other filesystems")]
+    #[clap(
+        short = 'X',
+        long,
+        help = "Exclude files on other filesystems",
+        long_help = "Prevents scanning files on different filesystems (useful to avoid scanning mounted drives, network shares, etc.)"
+    )]
     pub exclude_other_filesystems: bool,
     #[clap(flatten)]
     pub do_not_print: DoNotPrint,
-    #[clap(short = 'W', long, help = "Ignore error code when files are found")]
+    #[clap(
+        short = 'W',
+        long,
+        help = "Ignore error code when files are found",
+        long_help = "Suppresses error exit code when duplicate/similar files are found. Useful for scripts that should continue regardless of findings."
+    )]
     pub ignore_error_code_on_found: bool,
-    #[clap(short = 'H', long, help = "Disable cache")]
+    #[clap(
+        short = 'H',
+        long,
+        help = "Disable cache",
+        long_help = "Disables the cache system. This will make scanning slower but ensures fresh results without cached data."
+    )]
     pub disable_cache: bool,
 }
 
 #[derive(Debug, clap::Args, Clone, Copy)]
 pub struct DoNotPrint {
-    #[clap(short = 'N', long, help = "Do not print the results to the console")]
+    #[clap(
+        short = 'N',
+        long,
+        help = "Do not print results to console",
+        long_help = "Suppresses printing of search results to the console. Useful when only saving results to files."
+    )]
     pub do_not_print_results: bool,
-    #[clap(short = 'M', long, help = "Do not print info/warnings/errors from the program to console")]
+    #[clap(
+        short = 'M',
+        long,
+        help = "Do not print messages to console",
+        long_help = "Suppresses all informational messages, warnings, and errors from being printed to console."
+    )]
     pub do_not_print_messages: bool,
 }
 
@@ -537,30 +856,56 @@ pub struct DMethod {
         long,
         default_value = "NONE",
         value_parser = parse_delete_method,
-        help = "Delete method (AEN, AEO, ON, OO, AEB, AES, OE, OS, HARD)",
-        long_help = "Methods to delete the files.\nAEN - All files except the newest,\nAEO - All files except the oldest,\nON - Only 1 file, the newest,\nOO - Only 1 file, the oldest\nAEB - All files except the biggest,\nAES - All files except the smallest,\nOB - Only 1 file, the biggest,\nOS - Only 1 file, the smallest\nHARD - create hard link\nNONE - not delete files"
+        help = "Delete method (AEN, AEO, ON, OO, AEB, AES, OB, OS, HARD)",
+        long_help = "Method for selecting which files to delete from duplicate groups:\nAEN - All files Except Newest (keeps newest)\nAEO - All files Except Oldest (keeps oldest)\nON - Only 1 file, the Newest (deletes all but newest)\nOO - Only 1 file, the Oldest (deletes all but oldest)\nAEB - All files Except Biggest (keeps biggest)\nAES - All files Except Smallest (keeps smallest)\nOB - Only 1 file, the Biggest (deletes all but biggest)\nOS - Only 1 file, the Smallest (deletes all but smallest)\nHARD - create hard links to save space\nNONE - do not delete files (default)"
     )]
     pub delete_method: DeleteMethod,
-    #[clap(short = 'Q', long, help = "Do nothing and print the operation that would happen.")]
+    #[clap(
+        short = 'Q',
+        long,
+        help = "Dry run - preview operations",
+        long_help = "Performs a dry run showing what operations would be performed without actually executing them."
+    )]
     pub dry_run: bool,
-    #[clap(short = 'y', long, help = "Remove items to trash")]
+    #[clap(
+        short = 'y',
+        long,
+        help = "Move items to trash",
+        long_help = "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered."
+    )]
     pub move_to_trash: bool,
 }
 
 // Simple delete method - delete files or not
 #[derive(Debug, clap::Args, Clone, Copy)]
 pub struct SDMethod {
-    #[clap(short = 'D', long, help = "Delete found items")]
+    #[clap(short = 'D', long, help = "Delete found items", long_help = "Automatically delete all found items matching the criteria.")]
     pub delete_files: bool,
-    #[clap(short = 'Q', long, help = "Do nothing and print the operation that would happen.")]
+    #[clap(
+        short = 'Q',
+        long,
+        help = "Dry run - preview operations",
+        long_help = "Performs a dry run showing what operations would be performed without actually executing them."
+    )]
     pub dry_run: bool,
-    #[clap(short = 'y', long, help = "Remove items to trash")]
+    #[clap(
+        short = 'y',
+        long,
+        help = "Move items to trash",
+        long_help = "Instead of permanently deleting files, move them to the system trash/recycle bin where they can be recovered."
+    )]
     pub move_to_trash: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct FileToSave {
-    #[clap(short, long, value_name = "file-name", help = "Saves the results into the formatted txt file")]
+    #[clap(
+        short,
+        long,
+        value_name = "file-name",
+        help = "Save results to formatted text file",
+        long_help = "Saves the search results into a human-readable formatted text file."
+    )]
     pub file_to_save: Option<PathBuf>,
 }
 
@@ -569,39 +914,66 @@ pub struct ReferenceDirectories {
     #[clap(
         short,
         long,
-        help = "Reference directorie(s) to search",
-        long_help = "List of directorie(s) which will be searched(absolute path) - this directories are set as reference folders, so will not be visible in the results"
+        help = "Reference directory(ies)",
+        long_help = "List of reference directory(ies) to search (absolute paths). Files in these directories will be scanned but won't appear in the results (useful for comparing against a known good set of files)."
     )]
     pub reference_directories: Vec<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct JsonCompactFileToSave {
-    #[clap(short = 'C', long, value_name = "json-file-name", help = "Saves the results into the compact json file")]
+    #[clap(
+        short = 'C',
+        long,
+        value_name = "json-file-name",
+        help = "Save results to compact JSON file",
+        long_help = "Saves the search results into a compact (minified) JSON file without extra whitespace."
+    )]
     pub compact_file_to_save: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct JsonPrettyFileToSave {
-    #[clap(short, long, value_name = "pretty-json-file-name", help = "Saves the results into the pretty json file")]
+    #[clap(
+        short,
+        long,
+        value_name = "pretty-json-file-name",
+        help = "Save results to pretty JSON file",
+        long_help = "Saves the search results into a pretty-printed (indented) JSON file for better readability."
+    )]
     pub pretty_file_to_save: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct AllowHardLinks {
-    #[clap(short = 'L', long, help = "Do not ignore hard links")]
+    #[clap(
+        short = 'L',
+        long,
+        help = "Do not ignore hard links",
+        long_help = "Treats hard links as separate files rather than ignoring them. By default, hard links are detected and only counted once."
+    )]
     pub allow_hard_links: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct CaseSensitiveNameComparison {
-    #[clap(short = 'l', long, help = "Use case sensitive name comparison")]
+    #[clap(
+        short = 'l',
+        long,
+        help = "Use case-sensitive name comparison",
+        long_help = "Enables case-sensitive file name comparison. By default, comparisons are case-insensitive (e.g., 'File.txt' equals 'file.txt')."
+    )]
     pub case_sensitive_name_comparison: bool,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct IgnoreSameSize {
-    #[clap(short = 'J', long, help = "Ignore files with the same size, leaving only one file of each size")]
+    #[clap(
+        short = 'J',
+        long,
+        help = "Ignore files with same size",
+        long_help = "Groups files by size and keeps only one file from each size group, ignoring files with identical sizes (useful for quick deduplication based solely on file size)."
+    )]
     pub ignore_same_size: bool,
 }
 
@@ -716,6 +1088,29 @@ fn parse_checking_method_same_music(src: &str) -> Result<CheckingMethod, &'stati
     }
 }
 
+fn parse_video_codec(src: &str) -> Result<String, &'static str> {
+    match src.to_ascii_lowercase().as_str() {
+        "h264" | "h265" | "av1" | "vp9" => Ok(src.to_ascii_lowercase()),
+        _ => Err("Couldn't parse the video codec (allowed: h264, h265, av1, vp9)"),
+    }
+}
+
+fn parse_max_samples(src: &str) -> Result<usize, String> {
+    match src.parse::<usize>() {
+        Ok(val) if (5..=1000).contains(&val) => Ok(val),
+        Ok(_) => Err("Maximum samples must be between 5 and 1000".to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+fn parse_min_crop_size(src: &str) -> Result<u32, String> {
+    match src.parse::<u32>() {
+        Ok(val) if (1..=1000).contains(&val) => Ok(val),
+        Ok(_) => Err("Minimum crop size must be between 1 and 1000".to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "none" => Ok(DeleteMethod::None),
@@ -729,19 +1124,6 @@ fn parse_delete_method(src: &str) -> Result<DeleteMethod, &'static str> {
         "ob" => Ok(DeleteMethod::OneBiggest),
         "os" => Ok(DeleteMethod::OneSmallest),
         _ => Err("Couldn't parse the delete method (allowed: AEN, AEO, ON, OO, HARD, AEB, AES, OB, OS)"),
-    }
-}
-
-fn parse_similar_images_similarity(src: &str) -> Result<SimilarityPreset, &'static str> {
-    match src.to_lowercase().replace('_', "").as_str() {
-        "minimal" => Ok(SimilarityPreset::Minimal),
-        "verysmall" => Ok(SimilarityPreset::VerySmall),
-        "small" => Ok(SimilarityPreset::Small),
-        "medium" => Ok(SimilarityPreset::Medium),
-        "high" => Ok(SimilarityPreset::High),
-        "veryhigh" => Ok(SimilarityPreset::VeryHigh),
-        "original" => Ok(SimilarityPreset::Original),
-        _ => Err("Couldn't parse the image similarity preset (allowed: Minimal, VerySmall, Small, Medium, High, VeryHigh, Original)"),
     }
 }
 
@@ -836,6 +1218,13 @@ fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {
     Ok(similarity)
 }
 
+fn parse_crop_mechanism(src: &str) -> Result<String, String> {
+    match src.to_lowercase().as_str() {
+        "blackbars" | "staticcontent" => Ok(src.to_lowercase()),
+        _ => Err("Invalid crop mechanism. Allowed values: blackbars, staticcontent".to_string()),
+    }
+}
+
 const HELP_TEMPLATE: &str = r#"
 {bin} {version}
 
@@ -860,4 +1249,8 @@ EXAMPLES:
     {bin} music -d /home/rafal -e /home/rafal/Pulpit -z \"artist,year,ARTISTALBUM,ALBUM___tiTlE\"  -f results.txt
     {bin} symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
     {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
-    {bin} ext -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt"#;
+    {bin} ext -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
+    {bin} bad-names -d /home/rafal -u -j -w -n -f results.txt
+    {bin} video-optimizer -d /home/rafal transcode -c h264 -f results.txt
+    {bin} video-optimizer -d /home/rafal crop -m blackbars -f results.txt
+    {bin} exif-remover -d /home/rafal -x IMAGE -f results.txt"#;

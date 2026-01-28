@@ -62,6 +62,8 @@ fix:
     python3 misc/find_unused_fluent_translations.py krokiet
     python3 misc/find_unused_fluent_translations.py czkawka_core
     python3 misc/find_unused_slint_translations.py krokiet
+    python3 misc/find_unused_callbacks.py krokiet
+    # python3 misc/find_unused_settings_properties.py
 
     cargo +nightly fmt
     cargo clippy --fix --allow-dirty --allow-staged --all-features --all-targets

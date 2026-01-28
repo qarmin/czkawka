@@ -539,7 +539,7 @@ fn compute_similar_images(sf: SimilarImages, entry_info: &Entry, text_view_error
         if sf.get_use_reference() {
             let vec_struct_similar: Vec<(ImagesEntry, Vec<ImagesEntry>)> = sf.get_similar_images_referenced().clone();
             for (base_file_entry, mut vec_file_entry) in vec_struct_similar {
-                vec_file_entry.sort_by_key(|e| e.similarity);
+                vec_file_entry.sort_by_key(|e| e.difference);
 
                 // Header
                 let (directory, file) = split_path(&base_file_entry.path);
@@ -564,7 +564,7 @@ fn compute_similar_images(sf: SimilarImages, entry_info: &Entry, text_view_error
                         file_entry.size,
                         file_entry.modified_date,
                         &format!("{}x{}", file_entry.width, file_entry.height),
-                        file_entry.similarity,
+                        file_entry.difference,
                         hash_size,
                         false,
                         true,
@@ -574,7 +574,7 @@ fn compute_similar_images(sf: SimilarImages, entry_info: &Entry, text_view_error
         } else {
             let vec_struct_similar = sf.get_similar_images().clone();
             for mut vec_file_entry in vec_struct_similar {
-                vec_file_entry.sort_by_key(|e| e.similarity);
+                vec_file_entry.sort_by_key(|e| e.difference);
 
                 similar_images_add_to_list_store(&list_store, "", "", 0, 0, "", 0, 0, true, false);
                 for file_entry in &vec_file_entry {
@@ -586,7 +586,7 @@ fn compute_similar_images(sf: SimilarImages, entry_info: &Entry, text_view_error
                         file_entry.size,
                         file_entry.modified_date,
                         &format!("{}x{}", file_entry.width, file_entry.height),
-                        file_entry.similarity,
+                        file_entry.difference,
                         hash_size,
                         false,
                         false,

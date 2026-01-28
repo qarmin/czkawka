@@ -1,5 +1,5 @@
 
-![krokiet_logo](https://github.com/user-attachments/assets/567a7a38-d754-4a79-86b5-3cc898dbbade)
+![krokiet_logo](https://github.com/user-attachments/assets/f5e4b290-d001-4cf4-9f52-dab65a30e441)
 
 Krokiet is a new Czkawka frontend written in Slint.
 

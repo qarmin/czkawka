@@ -7,8 +7,8 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
-use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
+use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
+use crate::simpler_model::{SimplerSingleMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow};
 
 pub(crate) fn connect_hardlink(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
@@ -34,25 +34,35 @@ impl ModelProcessor {
             let path_idx = self.active_tab.get_str_path_idx();
             let name_idx = self.active_tab.get_str_name_idx();
 
-            let hardlink_fnc = move |data: &SimplerMainListModel| hardlink_single_item(&format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]));
-
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, hardlink_fnc, MessageType::Hardlink, false);
+            let hardlink_fnc = move |original: &SimplerSingleMainListModel, derived: &SimplerSingleMainListModel| {
+                hardlink_single_item(
+                    &format!("{}{MAIN_SEPARATOR}{}", original.val_str[path_idx], original.val_str[name_idx]),
+                    &format!("{}{MAIN_SEPARATOR}{}", derived.val_str[path_idx], derived.val_str[name_idx]),
+                )
+            };
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Related(Box::new(hardlink_fnc)),
+                MessageType::Hardlink,
+                false,
+            );
         });
     }
 }
 
 #[cfg(not(test))]
-#[expect(clippy::unnecessary_wraps)]
-fn hardlink_single_item(_full_path: &str) -> Result<(), String> {
-    // TODO - this is harder, because we need to know "original" and "link" paths, not only 1 path like in delete mode
-
-    Ok(())
+fn hardlink_single_item(original_path: &str, derived_path: &str) -> Result<(), String> {
+    czkawka_core::common::make_hard_link(original_path, derived_path)
+        .map_err(|e| crate::flk!("rust_hardlink_failed", name = original_path, target = derived_path, reason = e.to_string()))
 }
 
 #[cfg(test)]
-fn hardlink_single_item(full_path: &str) -> Result<(), String> {
-    if full_path.contains("test_error") {
-        return Err(format!("Test error for item: {full_path}"));
+fn hardlink_single_item(original_path: &str, _derived_path: &str) -> Result<(), String> {
+    if original_path.contains("test_error") {
+        return Err(format!("Test error for item: {original_path}"));
     }
     Ok(())
 }
