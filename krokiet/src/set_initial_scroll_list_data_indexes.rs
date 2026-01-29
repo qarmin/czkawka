@@ -12,7 +12,7 @@ type DataType = [i32; 6];
 pub(crate) fn set_initial_scroll_list_data_indexes(app: &MainWindow) {
     let gs = app.global::<GuiState>();
 
-    // [Parent Idx, File Name Idx, (Additional)Preview Idx]
+    // [Parent Idx, File Name Idx, (Additional)Preview Idx, Rect Left Idx, Width Idx, Height Idx]
     // Preview Idx is set only if there is non-standard preview like video
 
     let duplicate_data: DataType = [StrDataDuplicateFiles::Path as i32, StrDataDuplicateFiles::Name as i32, -1, -1, -1, -1];
