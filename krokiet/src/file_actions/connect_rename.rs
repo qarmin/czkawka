@@ -29,7 +29,7 @@ pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressD
             ActiveTab::BadNames => {
                 processor.rename_bad_file_names(progress_sender, weak_app, stop_flag);
             }
-            _ => panic!("{active_tab:?} is not supported for renaming bad extensions"),
+            _ => panic!("{active_tab:?} is not supported for renaming bad extensions/bad file names"),
         }
     });
 }

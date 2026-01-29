@@ -48,8 +48,7 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
 
             let path = Path::new(image_path.as_str());
 
-            // Looks that resizing image before sending it to GUI is faster than resizing it in Slint
-            // Additionally it fixes issues with
+            // Looks that resizing image before sending it to GUI works better that letting Slint do it automatically
             if let Some((mut timer, img)) = load_image(path) {
                 let mut img_to_use = if img.width() > 1024 || img.height() > 1024 {
                     let bigger_side = img.width().max(img.height());
@@ -172,7 +171,7 @@ fn draw_crop_rectangle_on_image(
             6 => Rgba([255u8, 255u8, 255u8, 255u8]),
             7 => Rgba([128u8, 0u8, 128u8, 255u8]),
             8 => Rgba([0u8, 0u8, 0u8, 255u8]),
-            _ => Rgba([1u8, 2u8, 3u8, 255u8]),
+            _ => unreachable!("Modulo 9 should always be in 0..8"),
         }
     }
 

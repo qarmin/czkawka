@@ -48,15 +48,15 @@ impl MessageType {
             Self::CleanExif => flk!("rust_no_exif_cleaned"),
         }
     }
-    fn get_summary_message(self, deleted: usize, failed: usize, total: usize) -> String {
+    fn get_summary_message(self, processed: usize, failed: usize, total: usize) -> String {
         match self {
-            Self::Delete => flk!("rust_delete_summary", deleted = deleted, failed = failed, total = total),
-            Self::Rename => flk!("rust_rename_summary", renamed = deleted, failed = failed, total = total),
-            Self::Move => flk!("rust_move_summary", moved = deleted, failed = failed, total = total),
-            Self::Hardlink => flk!("rust_hardlink_summary", hardlinked = deleted, failed = failed, total = total),
-            Self::Symlink => flk!("rust_symlink_summary", symlinked = deleted, failed = failed, total = total),
-            Self::OptimizeVideo => flk!("rust_optimize_video_summary", optimized = deleted, failed = failed, total = total),
-            Self::CleanExif => flk!("rust_clean_exif_summary", cleaned = deleted, failed = failed, total = total),
+            Self::Delete => flk!("rust_delete_summary", deleted = processed, failed = failed, total = total),
+            Self::Rename => flk!("rust_rename_summary", renamed = processed, failed = failed, total = total),
+            Self::Move => flk!("rust_move_summary", moved = processed, failed = failed, total = total),
+            Self::Hardlink => flk!("rust_hardlink_summary", hardlinked = processed, failed = failed, total = total),
+            Self::Symlink => flk!("rust_symlink_summary", symlinked = processed, failed = failed, total = total),
+            Self::OptimizeVideo => flk!("rust_optimize_video_summary", optimized = processed, failed = failed, total = total),
+            Self::CleanExif => flk!("rust_clean_exif_summary", cleaned = processed, failed = failed, total = total),
         }
     }
     fn get_base_progress(self) -> ProgressData {
@@ -108,7 +108,7 @@ impl ModelProcessor {
 
         let new_model: Vec<SimplerSingleMainListModel> = results
             .into_iter()
-            .filter_map(|(_idx, item, delete_res)| match delete_res {
+            .filter_map(|(_idx, item, process_res)| match process_res {
                 Some(Ok(())) => {
                     items_processed += 1;
                     None
@@ -171,6 +171,11 @@ impl ModelProcessor {
             }
             ProcessFunction::Related(process_rel) => {
                 // Grouping items by headers
+
+                if let Some((_first_idx, first_item)) = items_simplified.first() {
+                    assert!(first_item.header_row, "In related processing function, first item must be header row");
+                }
+
                 let mut grouped_results: Vec<Vec<_>> = Vec::new();
                 for (idx, item) in items_simplified {
                     if item.header_row {
@@ -285,7 +290,7 @@ impl ModelProcessor {
 
         let size_idx = self.active_tab.get_int_size_opt_idx();
 
-        // Sending progress data about how many items are queued to delete
+        // Sending progress data about how many items are queued to process
         let mut base_progress = message_type.get_base_progress();
         base_progress.entries_to_check = items_queued_to_process;
         base_progress.bytes_to_check = match &process_fnc {
@@ -336,7 +341,7 @@ impl ModelProcessor {
         );
         let errors_len = errors.len();
 
-        // Sending progress data at the end of deletion, to indicate that deletion is finished
+        // Sending progress data at the end of processing, to indicate that processing is finished
         base_progress.entries_checked = items_processed + errors_len;
 
         let _ = progress_sender.send(base_progress).map_err(|e| error!("Failed to send progress data: {e}"));
@@ -360,6 +365,6 @@ impl ModelProcessor {
                 stop_flag.store(false, Ordering::Relaxed);
                 app.invoke_processing_ended(message_type.get_summary_message(items_processed, errors_len, items_queued_to_process).into());
             })
-            .expect("Failed to update app after deletion");
+            .expect("Failed to update app after processing");
     }
 }

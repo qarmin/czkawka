@@ -35,6 +35,15 @@ valr bin:
     valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes target/release/{{bin}}
 
 
+#  echo '-1' | sudo tee /proc/sys/kernel/perf_event_paranoid
+samply bin:
+    cargo build --bin {{bin}}
+    samply record target/debug/{{bin}}
+
+samplyrd bin:
+    cargo build --bin {{bin}} --profile rdebug
+    samply record target/rdebug/{{bin}}
+
 ## Other
 
 setup_sanitizer:

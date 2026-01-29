@@ -376,7 +376,7 @@ impl DuplicateFinder {
             for (size, vec_file_entry) in loaded_hash_map {
                 if size >= self.get_params().minimal_prehash_cache_file_size {
                     for file_entry in vec_file_entry {
-                        save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
+                        save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
                     }
                 }
             }
@@ -385,7 +385,7 @@ impl DuplicateFinder {
                 if size >= self.get_params().minimal_prehash_cache_file_size {
                     for vec_file_entry in hash_map.into_values() {
                         for file_entry in vec_file_entry {
-                            save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
+                            save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
                         }
                     }
                 }
