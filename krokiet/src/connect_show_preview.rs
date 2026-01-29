@@ -157,7 +157,7 @@ fn draw_crop_rectangle_on_image(
         return buf;
     }
 
-    let thickness = ((r - l).min(b - t) / 50).max(2);
+    let thickness = (width.max(height) / 50).max(2);
 
     #[inline]
     fn get_pixel_color(x: u32, y: u32) -> Rgba<u8> {

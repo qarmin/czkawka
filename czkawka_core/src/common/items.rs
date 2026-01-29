@@ -10,12 +10,10 @@ pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["/proc", "/dev", "/sys", "/s
 #[cfg(not(target_family = "unix"))]
 pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 
-#[cfg(target_family = "unix")]
-// Only macos
+#[cfg(all(target_family = "unix", target_os = "macos"))]
 pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,/Users/*/Library/Caches/*";
 
-#[cfg(target_family = "unix")]
-// Not macos
+#[cfg(all(target_family = "unix", not(target_os = "macos")))]
 pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*,/home/*/.var/app/,/home/*/.*";
 
 #[cfg(not(target_family = "unix"))]
