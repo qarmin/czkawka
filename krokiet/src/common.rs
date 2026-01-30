@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use num_enum::TryFromPrimitive;
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
-use crate::{ActiveTab, ExcludedPathsModel, IncludedPathsModel, MainListModel, MainWindow, Settings};
+use crate::{ActiveTab, ExcludedPathsModel, IncludedPathsModel, MainWindow, Settings, SingleMainListModel};
 
 // Int model is used to store data in unchanged(* except that we need to split u64 into two i32) form and is used to sort/select data
 // Str model is used to display data in gui
@@ -313,6 +313,8 @@ pub enum IntDataVideoOptimizer {
     SizePart2,
     PixelCount,
     DiffInPixels,
+    Width,
+    Height,
     RectLeft,
     RectTop,
     RectRight,
@@ -330,8 +332,9 @@ pub enum StrDataVideoOptimizer {
     Dimensions,
     NewDimensions,
     ModificationDate,
+    PreviewPath,
 }
-pub const MAX_STR_DATA_VIDEO_OPTIMIZER: usize = StrDataVideoOptimizer::ModificationDate as usize + 1;
+pub const MAX_STR_DATA_VIDEO_OPTIMIZER: usize = StrDataVideoOptimizer::PreviewPath as usize + 1;
 
 pub(crate) enum SortIdx {
     StrIdx(i32),
@@ -436,7 +439,7 @@ impl ActiveTab {
                 StrDataExifRemover::Size => SortIdx::IntIdxPair(IntDataExifRemover::SizePart1 as i32, IntDataExifRemover::SizePart2 as i32),
             },
             Self::VideoOptimizer => match StrDataVideoOptimizer::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for VideoOptimizer")) {
-                StrDataVideoOptimizer::Name | StrDataVideoOptimizer::Path | StrDataVideoOptimizer::Codec => SortIdx::StrIdx(str_idx),
+                StrDataVideoOptimizer::Name | StrDataVideoOptimizer::Path | StrDataVideoOptimizer::Codec | StrDataVideoOptimizer::PreviewPath => SortIdx::StrIdx(str_idx),
                 StrDataVideoOptimizer::ModificationDate => {
                     SortIdx::IntIdxPair(IntDataVideoOptimizer::ModificationDatePart1 as i32, IntDataVideoOptimizer::ModificationDatePart2 as i32)
                 }
@@ -609,7 +612,7 @@ impl ActiveTab {
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }
     }
-    pub(crate) fn get_tool_model(self, app: &MainWindow) -> ModelRc<MainListModel> {
+    pub(crate) fn get_tool_model(self, app: &MainWindow) -> ModelRc<SingleMainListModel> {
         match self {
             Self::EmptyFolders => app.get_empty_folder_model(),
             Self::SimilarImages => app.get_similar_images_model(),
@@ -629,7 +632,7 @@ impl ActiveTab {
         }
     }
 
-    pub(crate) fn set_tool_model(self, app: &MainWindow, model: ModelRc<MainListModel>) {
+    pub(crate) fn set_tool_model(self, app: &MainWindow, model: ModelRc<SingleMainListModel>) {
         match self {
             Self::EmptyFolders => app.set_empty_folder_model(model),
             Self::SimilarImages => app.set_similar_images_model(model),
@@ -701,6 +704,10 @@ pub(crate) fn split_u64_into_i32s(value: u64) -> (i32, i32) {
 
 pub(crate) fn connect_i32_into_u64(part1: i32, part2: i32) -> u64 {
     ((part1 as u64) << 32) | (part2 as u64 & 0xFFFF_FFFF)
+}
+
+pub(crate) fn create_model_from_model_vec<T: Clone + 'static>(model_vec: &[T]) -> ModelRc<T> {
+    ModelRc::new(VecModel::from(model_vec.to_owned()))
 }
 
 #[cfg(test)]

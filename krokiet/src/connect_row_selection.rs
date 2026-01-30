@@ -8,7 +8,7 @@ use log::{error, trace};
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::common::{connect_i32_into_u64, split_u64_into_i32s};
-use crate::{ActiveTab, Callabler, GuiState, MainListModel, MainWindow};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, SingleMainListModel};
 
 const SELECTED_ROWS_LIMIT: usize = 1000;
 
@@ -40,7 +40,7 @@ pub(crate) fn reset_selection(app: &MainWindow, active_tab: ActiveTab, reset_all
 
 // E.g. when sorting things, selected rows in vector, may be invalid
 // So we need to recalculate them
-pub(crate) fn recalculate_small_selection_if_needed(model: &ModelRc<MainListModel>, active_tab: ActiveTab) {
+pub(crate) fn recalculate_small_selection_if_needed(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab) {
     let mut lock = get_write_selection_lock();
     let keys = lock.keys().cloned().collect::<Vec<_>>();
     let selection = lock
@@ -453,7 +453,7 @@ pub(crate) mod checker {
 // Deselect
 //
 
-fn rows_deselect_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+fn rows_deselect_all_by_mode(selection: &mut SelectionData, model: &ModelRc<SingleMainListModel>) -> Option<ModelRc<SingleMainListModel>> {
     let new_model = if selection.exceeded_limit {
         Some(rows_deselect_all_selected_by_replacing_models(model))
     } else if !selection.selected_rows.is_empty() {
@@ -471,7 +471,7 @@ fn rows_deselect_all_by_mode(selection: &mut SelectionData, model: &ModelRc<Main
     new_model
 }
 
-fn rows_deselect_all_selected_one_by_one(model: &ModelRc<MainListModel>, selection: &SelectionData) {
+fn rows_deselect_all_selected_one_by_one(model: &ModelRc<SingleMainListModel>, selection: &SelectionData) {
     for id in &selection.selected_rows {
         let mut model_data = model
             .row_data(*id)
@@ -482,7 +482,7 @@ fn rows_deselect_all_selected_one_by_one(model: &ModelRc<MainListModel>, selecti
     }
 }
 
-fn rows_deselect_all_selected_by_replacing_models(model: &ModelRc<MainListModel>) -> ModelRc<MainListModel> {
+fn rows_deselect_all_selected_by_replacing_models(model: &ModelRc<SingleMainListModel>) -> ModelRc<SingleMainListModel> {
     let new_model = model
         .iter()
         .map(|mut row| {
@@ -496,7 +496,7 @@ fn rows_deselect_all_selected_by_replacing_models(model: &ModelRc<MainListModel>
 //
 // Select All
 //
-fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<SingleMainListModel>) -> Option<ModelRc<SingleMainListModel>> {
     let new_model = if model.row_count() - selection.number_of_selected_rows > 100 {
         rows_select_all_by_replacing_models(selection, model)
     } else {
@@ -522,7 +522,7 @@ fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<MainLi
     new_model
 }
 
-fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
+fn rows_select_all_one_by_one(model: &ModelRc<SingleMainListModel>) {
     let items_to_update = model.iter().filter(|e| !e.selected_row && !e.header_row).count();
     trace!("[FAST][ONE_BY_ONE] select all {}/{} items", items_to_update, model.row_count());
     for id in 0..model.row_count() {
@@ -543,7 +543,7 @@ fn rows_select_all_one_by_one(model: &ModelRc<MainListModel>) {
     }
 }
 
-fn rows_select_all_by_replacing_models(selection: &SelectionData, model: &ModelRc<MainListModel>) -> Option<ModelRc<MainListModel>> {
+fn rows_select_all_by_replacing_models(selection: &SelectionData, model: &ModelRc<SingleMainListModel>) -> Option<ModelRc<SingleMainListModel>> {
     // May happen with simple models, but for more advanced with header rows, we need something like "selection.all_items_selected"
     if selection.number_of_selected_rows == model.row_count() {
         trace!(
@@ -567,7 +567,7 @@ fn rows_select_all_by_replacing_models(selection: &SelectionData, model: &ModelR
 //
 // Reverse selection and selecting
 //
-fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &ModelRc<MainListModel>, id: usize) {
+fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &ModelRc<SingleMainListModel>, id: usize) {
     let mut model_data = model
         .row_data(id)
         .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
@@ -596,7 +596,7 @@ fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &Mode
     }
 }
 
-fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<MainListModel>, indexes: (usize, usize)) -> Option<ModelRc<MainListModel>> {
+fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<SingleMainListModel>, indexes: (usize, usize)) -> Option<ModelRc<SingleMainListModel>> {
     let (smaller_idx, bigger_idx) = if indexes.0 < indexes.1 { (indexes.0, indexes.1) } else { (indexes.1, indexes.0) };
 
     if bigger_idx - smaller_idx > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
@@ -671,7 +671,7 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Ma
     }
 }
 
-fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<MainListModel>) -> (u64, u64, Option<ModelRc<MainListModel>>) {
+fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<SingleMainListModel>) -> (u64, u64, Option<ModelRc<SingleMainListModel>>) {
     let (mut checked_items, mut unchecked_items) = (0, 0);
 
     if selection.exceeded_limit {
@@ -715,7 +715,8 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Mai
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_common::{create_model_from_model_vec, get_model_vec};
+    use crate::common::create_model_from_model_vec;
+    use crate::test_common::get_model_vec;
 
     #[test]
     fn rows_deselect_all_by_mode_with_exceeded_limit() {

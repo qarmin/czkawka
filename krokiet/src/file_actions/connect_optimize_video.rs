@@ -5,13 +5,13 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
-use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
+use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropSingleFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
 use slint::{ComponentHandle, Weak};
 
 use crate::common::IntDataVideoOptimizer;
-use crate::model_operations::model_processor::{MessageType, ModelProcessor};
+use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
 use crate::settings::collect_combo_box_settings;
-use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
+use crate::simpler_model::{SimplerSingleMainListModel, ToSimplerVec};
 use crate::{Callabler, GuiState, MainWindow, Settings};
 
 pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
@@ -112,7 +112,7 @@ impl ModelProcessor {
             let codec_idx = self.active_tab.get_str_video_codec_idx();
 
             let stop_flag_clone = stop_flag.clone();
-            let optimize_fnc = move |data: &SimplerMainListModel| {
+            let optimize_fnc = move |data: &SimplerSingleMainListModel| {
                 let file_codec = &data.val_str[codec_idx];
                 if codec_str == *file_codec {
                     return Ok(()); // No need to transcode if codec is the same
@@ -138,7 +138,15 @@ impl ModelProcessor {
                 )
             };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, optimize_fnc, MessageType::OptimizeVideo, true);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(optimize_fnc)),
+                MessageType::OptimizeVideo,
+                true,
+            );
         });
     }
 
@@ -168,7 +176,7 @@ impl ModelProcessor {
             let quality = if requested_codec.is_some() { Some(video_quality as u32) } else { None };
 
             let stop_flag_clone = stop_flag.clone();
-            let crop_fnc = move |data: &SimplerMainListModel| {
+            let crop_fnc = move |data: &SimplerSingleMainListModel| {
                 let full_path = format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]);
                 let original_size = data.get_size(size_idx);
 
@@ -181,7 +189,7 @@ impl ModelProcessor {
                     &stop_flag_clone,
                     &full_path,
                     original_size,
-                    VideoCropFixParams {
+                    VideoCropSingleFixParams {
                         overwrite_original: overwrite_files,
                         target_codec: requested_codec,
                         quality,
@@ -191,7 +199,15 @@ impl ModelProcessor {
                 )
             };
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, crop_fnc, MessageType::OptimizeVideo, true);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(crop_fnc)),
+                MessageType::OptimizeVideo,
+                true,
+            );
         });
     }
 }
@@ -210,12 +226,12 @@ fn optimize_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _origin
 }
 
 #[cfg(not(test))]
-fn crop_single_video(stop_flag: &Arc<AtomicBool>, full_path: &str, _original_size: u64, params: VideoCropFixParams) -> Result<(), String> {
+fn crop_single_video(stop_flag: &Arc<AtomicBool>, full_path: &str, _original_size: u64, params: VideoCropSingleFixParams) -> Result<(), String> {
     czkawka_core::tools::video_optimizer::core::fix_video_crop(std::path::Path::new(full_path), &params, stop_flag)
 }
 
 #[cfg(test)]
-fn crop_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _params: VideoCropFixParams) -> Result<(), String> {
+fn crop_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _params: VideoCropSingleFixParams) -> Result<(), String> {
     if video_path.contains("test_error") {
         return Err(format!("Test error for item: {video_path}"));
     }

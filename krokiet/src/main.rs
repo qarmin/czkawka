@@ -31,13 +31,15 @@ use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_row_selection::connect_row_selections;
 use crate::connect_save::connect_save;
 use crate::connect_scan::connect_scan_button;
-use crate::connect_select::{connect_select, connect_showing_proper_select_buttons};
+use crate::connect_select::connect_select;
 use crate::connect_show_confirmation::connect_show_confirmation;
 use crate::connect_show_preview::connect_show_preview;
-use crate::connect_size_of_config_cache::connect_size_of_config_cache;
-use crate::connect_sort::{connect_showing_proper_sort_buttons, connect_sort, connect_sort_column};
+use crate::connect_sort::{connect_sort, connect_sort_column};
 use crate::connect_stop::connect_stop_button;
+use crate::connect_tab_changed::connect_tab_changed;
 use crate::connect_translation::connect_translations;
+use crate::create_calculate_task_size::create_calculate_task_size;
+use crate::set_initial_scroll_list_data_indexes::set_initial_scroll_list_data_indexes;
 // TODO - at start this should be used, to be sure that rust models are in sync with slint models
 // currently I need to do this manually - https://github.com/slint-ui/slint/issues/7632
 // use crate::set_initial_gui_info::set_initial_gui_infos;
@@ -57,14 +59,16 @@ mod connect_scan;
 mod connect_select;
 mod connect_show_confirmation;
 mod connect_show_preview;
-mod connect_size_of_config_cache;
 mod connect_sort;
 mod connect_stop;
+mod connect_tab_changed;
 mod connect_translation;
+mod create_calculate_task_size;
 mod file_actions;
 mod localizer_krokiet;
 mod model_operations;
 mod set_initial_gui_info;
+mod set_initial_scroll_list_data_indexes;
 mod settings;
 mod shared_models;
 mod simpler_model;
@@ -117,6 +121,8 @@ fn main() {
     // Disabled for now, due invalid settings model at start
     // set_initial_gui_infos(&app);
 
+    set_initial_scroll_list_data_indexes(&app);
+
     let original_preset_idx = base_settings.default_preset;
     set_initial_settings_to_gui(&app, &base_settings, &custom_settings, cli_args, preset_to_load);
 
@@ -130,7 +136,6 @@ fn main() {
     connect_translations(&app);
     connect_changing_settings_preset(&app);
     connect_select(&app);
-    connect_showing_proper_select_buttons(&app);
     connect_move(&app, progress_sender.clone(), stop_flag.clone());
     connect_rename(&app, progress_sender.clone(), stop_flag.clone());
     connect_optimize_video(&app, progress_sender.clone(), stop_flag.clone());
@@ -141,9 +146,10 @@ fn main() {
     connect_row_selections(&app);
     connect_sort(&app);
     connect_sort_column(&app);
-    connect_showing_proper_sort_buttons(&app);
-    let cache_size_task_sender = connect_size_of_config_cache(&app);
-    connect_clean_cache(&app, cache_size_task_sender);
+    let (task_sender, task_receiver) = std::sync::mpsc::channel();
+    connect_tab_changed(&app, task_sender.clone());
+    create_calculate_task_size(task_receiver);
+    connect_clean_cache(&app, task_sender);
     connect_show_confirmation(&app, Arc::clone(&shared_models));
 
     clear_outdated_video_thumbnails(&app);

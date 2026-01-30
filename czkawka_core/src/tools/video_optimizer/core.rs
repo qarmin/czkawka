@@ -17,7 +17,7 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, generate_thumbnail};
 use crate::tools::video_optimizer::{
-    Info, VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
+    Info, VideoCropEntry, VideoCropParams, VideoCropSingleFixParams, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
 };
 
 mod video_converter;
@@ -130,6 +130,7 @@ impl VideoOptimizer {
         entries.retain(|e| e.error.is_none() && !params.excluded_codecs.contains(&e.codec));
 
         self.video_transcode_result_entries = entries;
+        self.information.number_of_videos_to_transcode = self.video_transcode_result_entries.len();
 
         if self.create_transcode_thumbnails(progress_sender, stop_flag, &params) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
@@ -183,9 +184,10 @@ impl VideoOptimizer {
 
         self.save_video_crop_cache(&vec_file_entry, &params, loaded_hash_map);
 
-        vec_file_entry.retain(|e| e.error.is_none() && e.new_image_dimensions.is_some());
+        vec_file_entry.retain(|e| e.error.is_none() && e.new_image_dimensions != (0, 0, 0, 0));
 
         self.video_crop_result_entries = vec_file_entry;
+        self.information.number_of_videos_to_crop = self.video_crop_result_entries.len();
 
         if self.create_crop_thumbnails(progress_sender, stop_flag, &params) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
@@ -205,7 +207,7 @@ impl VideoOptimizer {
             CurrentStage::VideoOptimizerCreatingThumbnails,
             self.video_transcode_result_entries.len(),
             self.get_test_type(),
-            0,
+            self.video_transcode_result_entries.iter().map(|e| e.size).sum(),
         );
 
         let Some(config_cache_path) = get_config_cache_path() else {
@@ -234,7 +236,7 @@ impl VideoOptimizer {
                     &entry.path,
                     entry.size,
                     entry.modified_date,
-                    entry.duration,
+                    Some(entry.duration),
                     &thumbnails_dir,
                     thumbnail_video_percentage_from_start,
                     generate_grid_instead_of_single,
@@ -242,15 +244,16 @@ impl VideoOptimizer {
                     Ok(thumbnail_path) => {
                         entry.thumbnail_path = Some(thumbnail_path);
                         progress_handler.increase_items(1);
-                        None
+                        Some(None)
                     }
                     Err(e) => {
                         progress_handler.increase_items(1);
-                        Some(e)
+                        Some(Some(e))
                     }
                 }
             })
             .while_some()
+            .flatten()
             .collect::<Vec<String>>();
 
         self.common_data.text_messages.warnings.extend(errors);
@@ -274,7 +277,7 @@ impl VideoOptimizer {
             CurrentStage::VideoOptimizerCreatingThumbnails,
             self.video_crop_result_entries.len(),
             self.get_test_type(),
-            0,
+            self.video_crop_result_entries.iter().map(|e| e.size).sum(),
         );
 
         let Some(config_cache_path) = get_config_cache_path() else {
@@ -303,7 +306,7 @@ impl VideoOptimizer {
                     &entry.path,
                     entry.size,
                     entry.modified_date,
-                    entry.duration,
+                    Some(entry.duration),
                     &thumbnails_dir,
                     thumbnail_video_percentage_from_start,
                     generate_grid_instead_of_single,
@@ -313,15 +316,16 @@ impl VideoOptimizer {
                     Ok(thumbnail_path) => {
                         entry.thumbnail_path = Some(thumbnail_path);
                         progress_handler.increase_items(1);
-                        None
+                        Some(None)
                     }
                     Err(e) => {
                         progress_handler.increase_items(1);
-                        Some(e)
+                        Some(Some(e))
                     }
                 }
             })
             .while_some()
+            .flatten()
             .collect::<Vec<String>>();
 
         self.common_data.text_messages.warnings.extend(errors);
@@ -361,52 +365,64 @@ impl VideoOptimizer {
     }
 
     #[fun_time(message = "fix_files", level = "debug")]
-    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: VideoOptimizerFixParams) -> WorkContinueStatus {
+    pub(crate) fn fix_files(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: VideoOptimizerFixParams) {
         match self.params.clone() {
             VideoOptimizerParameters::VideoTranscode(_) => {
-                info!("Starting optimization of {} video files", self.video_transcode_result_entries.len());
-
                 let VideoOptimizerFixParams::VideoTranscode(video_transcode_params) = fix_params else {
                     unreachable!("VideoTranscode mode should have VideoTranscode fix_params(caller is responsible for that)");
                 };
 
-                // TODO this should use same mechanism as deleting files - this currently do not save progress to CLI
-                self.video_transcode_result_entries = mem::take(&mut self.video_transcode_result_entries)
+                let transcode_warnings: Vec<_> = mem::take(&mut self.video_transcode_result_entries)
                     .into_par_iter()
-                    .map(|mut entry| {
+                    .map(|entry| {
                         if check_if_stop_received(stop_flag) {
                             return None;
                         }
 
                         match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
-                            Ok(_new_size) => {}
-                            Err(e) => {
-                                entry.error = Some(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e)); // TODO
-                            }
+                            Ok(_new_size) => Some(None),
+                            Err(e) => Some(Some(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e))),
                         }
-
-                        Some(entry)
                     })
                     .while_some()
+                    .flatten()
                     .collect();
 
-                // TODO save errors/warnings to text messages
-
-                let successful_files = self.video_transcode_result_entries.iter().filter(|e| e.error.is_none() && !e.codec.is_empty()).count();
-                let failed_files = self.video_transcode_result_entries.iter().filter(|e| e.error.is_some()).count();
-
-                self.information.number_of_processed_files = successful_files;
-                self.information.number_of_failed_files = failed_files;
-
-                debug!("Optimization complete - Processed: {successful_files}, Failed: {failed_files}");
+                self.common_data.text_messages.warnings.extend(transcode_warnings);
             }
             VideoOptimizerParameters::VideoCrop(_) => {
-                // TODO: Implement video cropping logic
-                info!("Video crop mode - logic not yet implemented for {} files", self.video_crop_result_entries.len());
+                let VideoOptimizerFixParams::VideoCrop(video_crop_params) = fix_params else {
+                    unreachable!("VideoCrop mode should have VideoCrop fix_params(caller is responsible for that)");
+                };
+
+                let crop_warnings: Vec<_> = mem::take(&mut self.video_crop_result_entries)
+                    .into_par_iter()
+                    .map(|entry| {
+                        if check_if_stop_received(stop_flag) {
+                            return None;
+                        }
+
+                        let (left, top, right, bottom) = entry.new_image_dimensions;
+                        let entry_crop_params = VideoCropSingleFixParams {
+                            overwrite_original: video_crop_params.overwrite_original,
+                            target_codec: video_crop_params.target_codec,
+                            quality: video_crop_params.quality,
+                            crop_rectangle: (left, top, right, bottom),
+                            crop_mechanism: video_crop_params.crop_mechanism,
+                        };
+
+                        match fix_video_crop(&entry.path, &entry_crop_params, stop_flag) {
+                            Ok(()) => Some(None),
+                            Err(e) => Some(Some(format!("Failed to crop video \"{}\": {}", entry.path.to_string_lossy(), e))),
+                        }
+                    })
+                    .while_some()
+                    .flatten()
+                    .collect();
+
+                self.common_data.text_messages.warnings.extend(crop_warnings);
             }
         }
-
-        WorkContinueStatus::Continue
     }
 }
 

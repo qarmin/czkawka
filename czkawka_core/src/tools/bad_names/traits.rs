@@ -101,8 +101,8 @@ impl DeletingItems for BadNames {
 impl FixingItems for BadNames {
     type FixParams = NameFixerParams;
     #[fun_time(message = "fix_items", level = "debug")]
-    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) -> WorkContinueStatus {
-        self.fix_bad_names(fix_params, stop_flag)
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) {
+        self.fix_bad_names(fix_params, stop_flag);
     }
 }
 

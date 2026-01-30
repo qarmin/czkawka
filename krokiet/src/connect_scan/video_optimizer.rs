@@ -24,19 +24,18 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
             let video_optimizer_mode = sd.combo_box_items.video_optimizer_mode.value;
             let params = if video_optimizer_mode == VideoOptimizerMode::VideoCrop {
                 let crop_detect = sd.combo_box_items.video_optimizer_crop_type.value;
-                let mut params = VideoCropParams::with_custom_params(
+                let params = VideoCropParams::with_custom_params(
                     crop_detect,
                     sd.custom_settings.video_optimizer_black_pixel_threshold,
                     sd.custom_settings.video_optimizer_black_bar_min_percentage,
                     sd.custom_settings.video_optimizer_max_samples,
                     sd.custom_settings.video_optimizer_min_crop_size,
+                    sd.custom_settings.video_thumbnails_generate,
+                    sd.custom_settings.video_thumbnails_percentage,
+                    sd.custom_settings.video_thumbnails_generate_grid,
                 );
-                params.generate_thumbnails = sd.custom_settings.video_thumbnails_generate;
-                params.thumbnail_video_percentage_from_start = sd.custom_settings.video_thumbnails_percentage;
-                params.generate_thumbnail_grid_instead_of_single = sd.custom_settings.video_thumbnails_generate_grid;
                 VideoOptimizerParameters::VideoCrop(params)
             } else {
-                let mut params = VideoTranscodeParams::new();
                 let excluded_codecs: Vec<String> = sd
                     .custom_settings
                     .video_optimizer_excluded_codecs
@@ -44,10 +43,12 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
                     .map(|s| s.trim().to_lowercase())
                     .filter(|s| !s.is_empty())
                     .collect();
-                params.excluded_codecs = excluded_codecs;
-                params.generate_thumbnails = sd.custom_settings.video_thumbnails_generate;
-                params.thumbnail_video_percentage_from_start = sd.custom_settings.video_thumbnails_percentage;
-                params.generate_thumbnail_grid_instead_of_single = sd.custom_settings.video_thumbnails_generate_grid;
+                let params = VideoTranscodeParams::new(
+                    excluded_codecs,
+                    sd.custom_settings.video_thumbnails_generate,
+                    sd.custom_settings.video_thumbnails_percentage,
+                    sd.custom_settings.video_thumbnails_generate_grid,
+                );
                 VideoOptimizerParameters::VideoTranscode(params)
             };
 
@@ -95,7 +96,7 @@ fn write_video_optimizer_transcode_results(
     stopped_search: bool,
 ) {
     let scanning_time_str = format_time(info.scanning_time);
-    let items_found = info.number_of_processed_files;
+    let items_found = info.number_of_videos_to_transcode;
 
     let items = Rc::new(VecModel::default());
 
@@ -126,7 +127,7 @@ fn write_video_optimizer_crop_results(
     stopped_search: bool,
 ) {
     let scanning_time_str = format_time(info.scanning_time);
-    let items_found = info.number_of_processed_files;
+    let items_found = info.number_of_videos_to_crop;
 
     let items = Rc::new(VecModel::default());
 
@@ -158,19 +159,33 @@ fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (Mod
         format!("{}x{}", fe.width, fe.height).into(),
         "-".into(),
         get_dt_timestamp_string(fe.modified_date).into(),
+        fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default().into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
     let dimension = fe.width as i32 * fe.height as i32; // Video dimension, limited to 16K vs 16K, so no overflow
-    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [modification_split.0, modification_split.1, size_split.0, size_split.1, dimension, 0, 0, 0, 0, 0];
+    let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
+        modification_split.0,
+        modification_split.1,
+        size_split.0,
+        size_split.1,
+        dimension,
+        0,
+        fe.width as i32,
+        fe.height as i32,
+        0,
+        0,
+        0,
+        0,
+    ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
 }
 
 fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let (left, top, right, bottom) = fe.new_image_dimensions.expect("new_image_dimensions should be Some in crop mode");
+    let (left, top, right, bottom) = fe.new_image_dimensions;
 
     let (_width, _height, pixels_diff, dim_string) = if left > right || top > bottom {
         error!(
@@ -203,6 +218,7 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<Share
         format!("{}x{}", fe.width, fe.height).into(),
         dim_string.into(),
         get_dt_timestamp_string(fe.modified_date).into(),
+        fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default().into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);
@@ -215,6 +231,8 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<Share
         size_split.1,
         dimension,
         pixels_diff as i32,
+        fe.width as i32,
+        fe.height as i32,
         left as i32,
         top as i32,
         right as i32,

@@ -5,7 +5,7 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 use crate::common::{SortIdx, connect_i32_into_u64};
 use crate::connect_row_selection::recalculate_small_selection_if_needed;
 use crate::connect_translation::translate_sort_mode;
-use crate::{ActiveTab, Callabler, GuiState, MainListModel, MainWindow, SortColumnMode, SortMode, SortModel};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, SingleMainListModel, SortColumnMode, SortMode, SortModel};
 
 pub(crate) fn connect_sort_column(app: &MainWindow) {
     let a = app.as_weak();
@@ -17,7 +17,7 @@ pub(crate) fn connect_sort_column(app: &MainWindow) {
         let idx = active_tab.get_str_int_sort_idx(column_idx);
         let new_model = match idx {
             SortIdx::StrIdx(str_idx) => {
-                let sort_function = |e: &MainListModel| {
+                let sort_function = |e: &SingleMainListModel| {
                     e.val_str
                         .iter()
                         .nth(str_idx as usize)
@@ -27,7 +27,7 @@ pub(crate) fn connect_sort_column(app: &MainWindow) {
                 common_sort_function(&model, active_tab, sort_function, sort_column_mode == SortColumnMode::Descending)
             }
             SortIdx::IntIdx(int_idx) => {
-                let sort_function = |e: &MainListModel| {
+                let sort_function = |e: &SingleMainListModel| {
                     e.val_int
                         .iter()
                         .nth(int_idx as usize)
@@ -37,7 +37,7 @@ pub(crate) fn connect_sort_column(app: &MainWindow) {
                 common_sort_function(&model, active_tab, sort_function, sort_column_mode == SortColumnMode::Descending)
             }
             SortIdx::IntIdxPair(int_idx1, int_idx2) => {
-                let sort_function = |e: &MainListModel| {
+                let sort_function = |e: &SingleMainListModel| {
                     let items = e.val_int.iter().collect::<Vec<_>>();
                     connect_i32_into_u64(items[int_idx1 as usize], items[int_idx2 as usize])
                 };
@@ -46,10 +46,10 @@ pub(crate) fn connect_sort_column(app: &MainWindow) {
             }
             SortIdx::Selection => {
                 if sort_column_mode == SortColumnMode::Ascending {
-                    let sort_function = |e: &MainListModel| e.checked;
+                    let sort_function = |e: &SingleMainListModel| e.checked;
                     common_sort_function(&model, active_tab, sort_function, false)
                 } else {
-                    let sort_function = |e: &MainListModel| !e.checked;
+                    let sort_function = |e: &SingleMainListModel| !e.checked;
                     common_sort_function(&model, active_tab, sort_function, false)
                 }
             }
@@ -60,6 +60,8 @@ pub(crate) fn connect_sort_column(app: &MainWindow) {
 }
 
 pub(crate) fn connect_sort(app: &MainWindow) {
+    set_sort_buttons(app);
+
     let a = app.as_weak();
     app.global::<Callabler>().on_sort_items(move |sort_mode| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -76,16 +78,7 @@ pub(crate) fn connect_sort(app: &MainWindow) {
     });
 }
 
-pub(crate) fn connect_showing_proper_sort_buttons(app: &MainWindow) {
-    set_sort_buttons(app);
-    let a = app.as_weak();
-    app.global::<Callabler>().on_tab_changed(move || {
-        let app = a.upgrade().expect("Failed to upgrade app :(");
-        set_sort_buttons(&app);
-    });
-}
-
-fn set_sort_buttons(app: &MainWindow) {
+pub(crate) fn set_sort_buttons(app: &MainWindow) {
     let mut base_buttons = vec![SortMode::FullName, SortMode::Reverse, SortMode::Selection];
     base_buttons.reverse();
 
@@ -102,10 +95,10 @@ fn set_sort_buttons(app: &MainWindow) {
 
 mod sorts {
     use super::{
-        ActiveTab, MainListModel, Model, ModelRc, VecModel, common_sort_function, convert_group_header_into_rc_model, group_by_header, recalculate_small_selection_if_needed,
+        ActiveTab, Model, ModelRc, SingleMainListModel, VecModel, common_sort_function, convert_group_header_into_rc_model, group_by_header, recalculate_small_selection_if_needed,
     };
 
-    pub(super) fn reverse_sort(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
+    pub(super) fn reverse_sort(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab) -> ModelRc<SingleMainListModel> {
         if !active_tab.get_is_header_mode() {
             let mut items = model.iter().collect::<Vec<_>>();
             items.reverse();
@@ -124,14 +117,14 @@ mod sorts {
         new_model
     }
 
-    pub(super) fn sort_selection(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
-        let sort_function = |e: &MainListModel| !e.selected_row;
+    pub(super) fn sort_selection(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab) -> ModelRc<SingleMainListModel> {
+        let sort_function = |e: &SingleMainListModel| !e.selected_row;
 
         common_sort_function(model, active_tab, sort_function, false)
     }
 
-    pub(super) fn sort_by_full_name(model: &ModelRc<MainListModel>, active_tab: ActiveTab) -> ModelRc<MainListModel> {
-        let sort_function = |e: &MainListModel| {
+    pub(super) fn sort_by_full_name(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab) -> ModelRc<SingleMainListModel> {
+        let sort_function = |e: &SingleMainListModel| {
             let name_idx = active_tab.get_str_name_idx();
             let path_idx = active_tab.get_str_path_idx();
             let items = e.val_str.iter().collect::<Vec<_>>();
@@ -142,7 +135,12 @@ mod sorts {
     }
 }
 
-fn common_sort_function<T: Ord>(model: &ModelRc<MainListModel>, active_tab: ActiveTab, sort_function: impl Fn(&MainListModel) -> T, reverse: bool) -> ModelRc<MainListModel> {
+fn common_sort_function<T: Ord>(
+    model: &ModelRc<SingleMainListModel>,
+    active_tab: ActiveTab,
+    sort_function: impl Fn(&SingleMainListModel) -> T,
+    reverse: bool,
+) -> ModelRc<SingleMainListModel> {
     if !active_tab.get_is_header_mode() {
         let mut items = model.iter().collect::<Vec<_>>();
         items.sort_by_cached_key(&sort_function);
@@ -167,7 +165,7 @@ fn common_sort_function<T: Ord>(model: &ModelRc<MainListModel>, active_tab: Acti
     new_model
 }
 
-fn convert_group_header_into_rc_model(grouped: Vec<(MainListModel, Vec<MainListModel>)>, model_size: usize) -> ModelRc<MainListModel> {
+fn convert_group_header_into_rc_model(grouped: Vec<(SingleMainListModel, Vec<SingleMainListModel>)>, model_size: usize) -> ModelRc<SingleMainListModel> {
     let mut items = Vec::with_capacity(model_size);
     for (header, group) in grouped {
         items.push(header);
@@ -176,11 +174,11 @@ fn convert_group_header_into_rc_model(grouped: Vec<(MainListModel, Vec<MainListM
     ModelRc::new(VecModel::from(items))
 }
 
-fn group_by_header(model: &ModelRc<MainListModel>) -> Vec<(MainListModel, Vec<MainListModel>)> {
-    let mut grouped_items: Vec<(MainListModel, Vec<MainListModel>)> = Vec::new();
+fn group_by_header(model: &ModelRc<SingleMainListModel>) -> Vec<(SingleMainListModel, Vec<SingleMainListModel>)> {
+    let mut grouped_items: Vec<(SingleMainListModel, Vec<SingleMainListModel>)> = Vec::new();
 
-    let mut current_header: Option<MainListModel> = None;
-    let mut current_group: Vec<MainListModel> = Vec::new();
+    let mut current_header: Option<SingleMainListModel> = None;
+    let mut current_group: Vec<SingleMainListModel> = Vec::new();
     for item in model.iter() {
         if item.header_row {
             if let Some(header) = current_header.take() {
@@ -210,11 +208,12 @@ fn group_by_header(model: &ModelRc<MainListModel>) -> Vec<(MainListModel, Vec<Ma
 mod tests {
     use slint::Model;
 
+    use crate::common::create_model_from_model_vec;
     use crate::connect_row_selection::initialize_selection_struct;
     use crate::connect_sort::sorts::{reverse_sort, sort_by_full_name, sort_selection};
     use crate::connect_sort::{convert_group_header_into_rc_model, group_by_header};
-    use crate::test_common::{create_model_from_model_vec, get_model_vec};
-    use crate::{ActiveTab, MainListModel};
+    use crate::test_common::get_model_vec;
+    use crate::{ActiveTab, SingleMainListModel};
 
     #[test]
     fn group_by_header_splits_items_into_groups_correctly() {
@@ -307,7 +306,7 @@ mod tests {
     #[test]
     fn convert_group_header_into_rc_model_handles_empty_groups() {
         initialize_selection_struct();
-        let grouped: Vec<(MainListModel, Vec<MainListModel>)> = Vec::new();
+        let grouped: Vec<(SingleMainListModel, Vec<SingleMainListModel>)> = Vec::new();
 
         let combined_model = convert_group_header_into_rc_model(grouped, 0);
 

@@ -3,13 +3,15 @@ use slint::{ComponentHandle, Model, ModelRc, VecModel};
 use crate::common::connect_i32_into_u64;
 use crate::connect_row_selection::checker::change_number_of_enabled_items;
 use crate::connect_translation::translate_select_mode;
-use crate::{ActiveTab, Callabler, GuiState, MainListModel, MainWindow, SelectMode, SelectModel};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, SelectMode, SelectModel, SingleMainListModel};
 
-type SelectionResult = (u64, u64, ModelRc<MainListModel>);
+type SelectionResult = (u64, u64, ModelRc<SingleMainListModel>);
 
 // TODO optimize this, not sure if it is possible to not copy entire model to just select item
 // https://github.com/slint-ui/slint/discussions/4595
 pub(crate) fn connect_select(app: &MainWindow) {
+    set_select_buttons(app);
+
     let a = app.as_weak();
     app.global::<Callabler>().on_select_items(move |select_mode| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
@@ -42,16 +44,7 @@ enum Property {
     Resolution,
 }
 
-pub(crate) fn connect_showing_proper_select_buttons(app: &MainWindow) {
-    set_select_buttons(app);
-    let a = app.as_weak();
-    app.global::<Callabler>().on_tab_changed(move || {
-        let app = a.upgrade().expect("Failed to upgrade app :(");
-        set_select_buttons(&app);
-    });
-}
-
-fn set_select_buttons(app: &MainWindow) {
+pub(crate) fn set_select_buttons(app: &MainWindow) {
     let active_tab = app.global::<GuiState>().get_active_tab();
     let mut base_buttons = vec![SelectMode::SelectAll, SelectMode::UnselectAll, SelectMode::InvertSelection];
 
@@ -102,7 +95,7 @@ fn set_select_buttons(app: &MainWindow) {
     app.global::<GuiState>().set_select_results_list(ModelRc::new(VecModel::from(new_select_model)));
 }
 
-fn extract_comparable_field(model: &MainListModel, property: Property, active_tab: ActiveTab) -> u64 {
+fn extract_comparable_field(model: &SingleMainListModel, property: Property, active_tab: ActiveTab) -> u64 {
     let mut val_ints = model.val_int.iter();
     let mut val_strs = model.val_str.iter();
     match property {
@@ -121,7 +114,7 @@ fn extract_comparable_field(model: &MainListModel, property: Property, active_ta
     }
 }
 
-fn select_by_property(model: &ModelRc<MainListModel>, active_tab: ActiveTab, property: Property, increasing_order: bool) -> SelectionResult {
+fn select_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab, property: Property, increasing_order: bool) -> SelectionResult {
     let mut checked_items = 0;
 
     let is_header_mode = active_tab.get_is_header_mode();
@@ -168,7 +161,7 @@ fn select_by_property(model: &ModelRc<MainListModel>, active_tab: ActiveTab, pro
     (checked_items, 0, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn select_all(model: &ModelRc<MainListModel>) -> SelectionResult {
+fn select_all(model: &ModelRc<SingleMainListModel>) -> SelectionResult {
     let mut checked_items = 0;
     let mut old_data = model.iter().collect::<Vec<_>>();
     for x in &mut old_data {
@@ -182,7 +175,7 @@ fn select_all(model: &ModelRc<MainListModel>) -> SelectionResult {
     (checked_items, 0, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn deselect_all(model: &ModelRc<MainListModel>) -> SelectionResult {
+fn deselect_all(model: &ModelRc<SingleMainListModel>) -> SelectionResult {
     let mut unchecked_items = 0;
     let mut old_data = model.iter().collect::<Vec<_>>();
     for x in &mut old_data {
@@ -194,7 +187,7 @@ fn deselect_all(model: &ModelRc<MainListModel>) -> SelectionResult {
     (0, unchecked_items, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn invert_selection(model: &ModelRc<MainListModel>) -> SelectionResult {
+fn invert_selection(model: &ModelRc<SingleMainListModel>) -> SelectionResult {
     let mut checked_items = 0;
     let mut unchecked_items = 0;
     let mut old_data = model.iter().collect::<Vec<_>>();
@@ -212,7 +205,7 @@ fn invert_selection(model: &ModelRc<MainListModel>) -> SelectionResult {
     (checked_items, unchecked_items, ModelRc::new(VecModel::from(old_data)))
 }
 
-fn find_header_idx_and_deselect_all(old_data: &mut [MainListModel]) -> Vec<usize> {
+fn find_header_idx_and_deselect_all(old_data: &mut [SingleMainListModel]) -> Vec<usize> {
     let mut header_idx = old_data
         .iter()
         .enumerate()
@@ -231,7 +224,8 @@ fn find_header_idx_and_deselect_all(old_data: &mut [MainListModel]) -> Vec<usize
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_common::{create_model_from_model_vec, get_model_vec};
+    use crate::common::create_model_from_model_vec;
+    use crate::test_common::get_model_vec;
 
     #[test]
     fn find_header_idx_returns_correct_indices_for_headers() {

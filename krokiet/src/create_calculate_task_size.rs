@@ -1,3 +1,4 @@
+use std::sync::mpsc::{Receiver, Sender};
 use std::{fs, thread};
 
 use czkawka_core::common::config_cache_path::get_config_cache_path;
@@ -6,7 +7,7 @@ use humansize::{BINARY, format_size};
 use log::{error, info};
 use slint::ComponentHandle;
 
-use crate::{ActiveTab, Callabler, GuiState, MainWindow, Translations, flk};
+use crate::{MainWindow, Translations, flk};
 #[derive(Debug, Copy, Clone)]
 pub struct SizeCountResult {
     pub video_thumbnails_size_bytes: u64,
@@ -106,7 +107,7 @@ fn update_translations_with_sizes(app: &MainWindow, res: SizeCountResult) {
     );
 }
 
-fn request_and_update_cache_sizes(app_weak: slint::Weak<MainWindow>, task_sender: std::sync::mpsc::Sender<std::sync::mpsc::Sender<SizeCountResult>>) {
+pub(crate) fn request_and_update_cache_sizes(app_weak: slint::Weak<MainWindow>, task_sender: std::sync::mpsc::Sender<std::sync::mpsc::Sender<SizeCountResult>>) {
     thread::spawn(move || {
         let (result_sender, result_receiver) = std::sync::mpsc::channel();
 
@@ -132,26 +133,8 @@ pub fn update_cache_sizes(app: &MainWindow, task_sender: &std::sync::mpsc::Sende
     request_and_update_cache_sizes(app.as_weak(), task_sender.clone());
 }
 
-pub(crate) fn connect_size_of_config_cache(app: &MainWindow) -> std::sync::mpsc::Sender<std::sync::mpsc::Sender<SizeCountResult>> {
-    let a = app.as_weak();
-
-    let (task_sender, task_receiver) = std::sync::mpsc::channel();
-
+pub(crate) fn create_calculate_task_size(task_receiver: Receiver<Sender<SizeCountResult>>) {
     let _join_handler = std::thread::spawn(move || {
         cache_size_count_task(&task_receiver);
     });
-
-    let task_sender_clone = task_sender.clone();
-    app.global::<Callabler>().on_tab_changed(move || {
-        let a_cloned = a.clone();
-        let app = a_cloned.upgrade().expect("Failed to upgrade app :(");
-        let active_tab = app.global::<GuiState>().get_active_tab();
-        if active_tab != ActiveTab::Settings {
-            return;
-        }
-
-        request_and_update_cache_sizes(a.clone(), task_sender_clone.clone());
-    });
-
-    task_sender
 }

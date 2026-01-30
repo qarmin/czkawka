@@ -7,8 +7,8 @@ use czkawka_core::common::progress_data::ProgressData;
 use slint::{ComponentHandle, Weak};
 
 use crate::common::StrDataBadNames;
-use crate::model_operations::model_processor::{MessageType, ModelProcessor};
-use crate::simpler_model::{SimplerMainListModel, ToSimplerVec};
+use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
+use crate::simpler_model::{SimplerSingleMainListModel, ToSimplerVec};
 use crate::{ActiveTab, Callabler, GuiState, MainWindow};
 
 pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
@@ -29,7 +29,7 @@ pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressD
             ActiveTab::BadNames => {
                 processor.rename_bad_file_names(progress_sender, weak_app, stop_flag);
             }
-            _ => panic!("{active_tab:?} is not supported for renaming bad extensions"),
+            _ => panic!("{active_tab:?} is not supported for renaming bad extensions/bad file names"),
         }
     });
 }
@@ -43,9 +43,17 @@ impl ModelProcessor {
             let name_idx = self.active_tab.get_str_name_idx();
             let ext_idx = self.active_tab.get_str_proper_extension();
 
-            let rm_fnc = move |data: &SimplerMainListModel| rename_single_extension_item(data, path_idx, name_idx, ext_idx);
+            let rm_fnc = move |data: &SimplerSingleMainListModel| rename_single_extension_item(data, path_idx, name_idx, ext_idx);
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, rm_fnc, MessageType::Rename, false);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(rm_fnc)),
+                MessageType::Rename,
+                false,
+            );
         });
     }
     fn rename_bad_file_names(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
@@ -56,15 +64,23 @@ impl ModelProcessor {
             let name_idx = self.active_tab.get_str_name_idx();
             let new_name_idx = StrDataBadNames::NewName as usize;
 
-            let rm_fnc = move |data: &SimplerMainListModel| rename_single_file_name_item(data, path_idx, name_idx, new_name_idx);
+            let rm_fnc = move |data: &SimplerSingleMainListModel| rename_single_file_name_item(data, path_idx, name_idx, new_name_idx);
 
-            self.process_and_update_gui_state(&weak_app, stop_flag, &progress_sender, simpler_model, rm_fnc, MessageType::Rename, false);
+            self.process_and_update_gui_state(
+                &weak_app,
+                stop_flag,
+                &progress_sender,
+                simpler_model,
+                &ProcessFunction::Simple(Box::new(rm_fnc)),
+                MessageType::Rename,
+                false,
+            );
         });
     }
 }
 
 #[cfg(not(test))]
-fn rename_single_file_name_item(data: &SimplerMainListModel, path_idx: usize, name_idx: usize, new_file_name_idx: usize) -> Result<(), String> {
+fn rename_single_file_name_item(data: &SimplerSingleMainListModel, path_idx: usize, name_idx: usize, new_file_name_idx: usize) -> Result<(), String> {
     use std::path::MAIN_SEPARATOR;
     let folder = &data.val_str[path_idx];
     let file_name = &data.val_str[name_idx];
@@ -86,7 +102,7 @@ fn rename_single_file_name_item(data: &SimplerMainListModel, path_idx: usize, na
 }
 
 #[cfg(not(test))]
-fn rename_single_extension_item(data: &SimplerMainListModel, path_idx: usize, name_idx: usize, ext_idx: usize) -> Result<(), String> {
+fn rename_single_extension_item(data: &SimplerSingleMainListModel, path_idx: usize, name_idx: usize, ext_idx: usize) -> Result<(), String> {
     use std::path::MAIN_SEPARATOR;
     let folder = &data.val_str[path_idx];
     let file_name = &data.val_str[name_idx];
@@ -109,7 +125,7 @@ fn rename_single_extension_item(data: &SimplerMainListModel, path_idx: usize, na
 }
 
 #[cfg(test)]
-fn rename_single_extension_item(data: &SimplerMainListModel, path_idx: usize, _name_idx: usize, _ext_idx: usize) -> Result<(), String> {
+fn rename_single_extension_item(data: &SimplerSingleMainListModel, path_idx: usize, _name_idx: usize, _ext_idx: usize) -> Result<(), String> {
     let full_path = &data.val_str[path_idx];
     if full_path.contains("test_error") {
         return Err(format!("Test error for item: {full_path}"));
@@ -118,7 +134,7 @@ fn rename_single_extension_item(data: &SimplerMainListModel, path_idx: usize, _n
 }
 
 #[cfg(test)]
-fn rename_single_file_name_item(data: &SimplerMainListModel, path_idx: usize, _name_idx: usize, _file_name: usize) -> Result<(), String> {
+fn rename_single_file_name_item(data: &SimplerSingleMainListModel, path_idx: usize, _name_idx: usize, _file_name: usize) -> Result<(), String> {
     let full_path = &data.val_str[path_idx];
     if full_path.contains("test_error") {
         return Err(format!("Test error for item: {full_path}"));
@@ -132,12 +148,17 @@ mod tests {
     use slint::{Model, ModelRc, VecModel};
 
     use super::*;
+    use crate::common::create_model_from_model_vec;
     use crate::simpler_model::ToSlintModel;
-    use crate::test_common::{create_model_from_model_vec, get_model_vec};
-    use crate::{ActiveTab, MainListModel};
+    use crate::test_common::get_model_vec;
+    use crate::{ActiveTab, SingleMainListModel};
 
     impl ModelProcessor {
-        pub(crate) fn process_rename_test(&self, progress_sender: Sender<ProgressData>, model: ModelRc<MainListModel>) -> Option<(Vec<MainListModel>, Vec<String>, usize, usize)> {
+        pub(crate) fn process_rename_test(
+            &self,
+            progress_sender: Sender<ProgressData>,
+            model: ModelRc<SingleMainListModel>,
+        ) -> Option<(Vec<SingleMainListModel>, Vec<String>, usize, usize)> {
             let items_queued_to_delete = model.iter().filter(|e| e.checked).count();
             if items_queued_to_delete == 0 {
                 return None; // No items to delete
@@ -148,20 +169,20 @@ mod tests {
             let name_idx = 0;
             let ext_idx = 0;
 
-            let rm_fnc = move |data: &SimplerMainListModel| rename_single_extension_item(data, path_idx, name_idx, ext_idx);
+            let rm_fnc = move |data: &SimplerSingleMainListModel| rename_single_extension_item(data, path_idx, name_idx, ext_idx);
 
             let output = Self::process_items(
                 simplified_model,
                 items_queued_to_delete,
                 progress_sender,
                 &Arc::default(),
-                rm_fnc,
+                &ProcessFunction::Simple(Box::new(rm_fnc)),
                 MessageType::Rename,
                 self.active_tab.get_int_size_opt_idx(),
                 false,
             );
 
-            let (new_simple_model, errors, items_deleted) = Self::remove_deleted_items_from_model(output);
+            let (new_simple_model, errors, items_deleted) = Self::remove_processed_items_from_model(output);
 
             Some((new_simple_model.to_vec_model(), errors, items_queued_to_delete, items_deleted))
         }

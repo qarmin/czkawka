@@ -9,8 +9,8 @@ use fun_time::fun_time;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
-use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
-use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, Info};
+use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, FixingItems, PrintResults, Search};
+use crate::tools::bad_extensions::{BadExtensions, BadExtensionsFixParams, BadExtensionsParameters, Info};
 
 impl AllTraits for BadExtensions {}
 
@@ -47,6 +47,15 @@ impl DeletingItems for BadExtensions {
             DeleteMethod::None => WorkContinueStatus::Continue,
             _ => unreachable!(),
         }
+    }
+}
+
+impl FixingItems for BadExtensions {
+    type FixParams = BadExtensionsFixParams;
+
+    #[fun_time(message = "fix_items", level = "debug")]
+    fn fix_items(&mut self, stop_flag: &Arc<AtomicBool>, _progress_sender: Option<&Sender<ProgressData>>, fix_params: Self::FixParams) {
+        self.fix_bad_extensions(fix_params, stop_flag);
     }
 }
 

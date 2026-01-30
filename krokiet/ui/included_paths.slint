@@ -20,12 +20,14 @@ export component IncludedPaths {
                 width: size_referenced_path;
                 font-size: FontSizes.normal;
                 horizontal-alignment: center;
+                font-weight: FontSizes.bold_weight;
             }
 
             Text {
                 font-size: FontSizes.normal;
                 horizontal-stretch: 1.0;
                 text <=> Translations.path_text;
+                font-weight: FontSizes.bold_weight;
             }
         }
 
@@ -124,6 +126,7 @@ export component ExcludedPaths {
             Text {
                 text <=> Translations.path_text;
                 font-size: FontSizes.normal;
+                font-weight: FontSizes.bold_weight;
             }
         }
 

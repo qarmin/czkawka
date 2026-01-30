@@ -125,7 +125,7 @@ export component ToolSettings {
             SliderWrapper {
                 text: Translations.subsettings_images_max_difference_text;
                 end_text: "(" + round(Settings.similar_images_sub_current_similarity) + "/" + round(Settings.similar_images_sub_max_similarity) + ")";
-                end_text_size: 40px;
+                end_text_size: 45px;
                 maximum <=> Settings.similar_images_sub_max_similarity;
                 value <=> Settings.similar_images_sub_current_similarity;
             }
@@ -211,7 +211,7 @@ export component ToolSettings {
             SliderWrapper {
                 text: Translations.subsettings_videos_max_difference_text;
                 end_text: "(" + round(Settings.similar_videos_sub_current_similarity) + "/" + round(Settings.similar_videos_sub_max_similarity) + ")";
-                end_text_size: 40px;
+                end_text_size: 45px;
                 maximum <=> Settings.similar_videos_sub_max_similarity;
                 value <=> Settings.similar_videos_sub_current_similarity;
             }
@@ -219,7 +219,7 @@ export component ToolSettings {
             SliderWrapper {
                 text: Translations.subsettings_videos_skip_forward_amount_text;
                 end_text: "(" + round(Settings.similar_videos_skip_forward_amount) + "/" + round(Settings.similar_videos_skip_forward_amount_max) + ")";
-                end_text_size: 55px;
+                end_text_size: 60px;
                 maximum <=> Settings.similar_videos_skip_forward_amount_max;
                 minimum <=> Settings.similar_videos_skip_forward_amount_min;
                 value <=> Settings.similar_videos_skip_forward_amount;
@@ -228,7 +228,7 @@ export component ToolSettings {
             SliderWrapper {
                 text: Translations.subsettings_videos_vid_hash_duration_text;
                 end_text: "(" + round(Settings.similar_videos_vid_hash_duration) + "/" + round(Settings.similar_videos_vid_hash_duration_max) + ")";
-                end_text_size: 40px;
+                end_text_size: 45px;
                 maximum <=> Settings.similar_videos_vid_hash_duration_max;
                 minimum <=> Settings.similar_videos_vid_hash_duration_min;
                 value <=> Settings.similar_videos_vid_hash_duration;
@@ -302,7 +302,7 @@ export component ToolSettings {
                 SliderWrapper {
                     text: Translations.subsettings_music_max_difference_text;
                     end_text: "(" + round(Settings.similar_music_sub_maximum_difference_value) + "/" + round(Settings.similar_music_sub_maximum_difference_max) + ")";
-                    end_text_size: 40px;
+                    end_text_size: 45px;
                     maximum <=> Settings.similar_music_sub_maximum_difference_max;
                     value <=> Settings.similar_music_sub_maximum_difference_value;
                 }
@@ -310,7 +310,7 @@ export component ToolSettings {
                 SliderWrapper {
                     text: Translations.subsettings_music_minimal_fragment_duration_text;
                     end_text: round(Settings.similar_music_sub_minimal_fragment_duration_value);
-                    end_text_size: 40px;
+                    end_text_size: 45px;
                     maximum <=> Settings.similar_music_sub_minimal_fragment_duration_max;
                     value <=> Settings.similar_music_sub_minimal_fragment_duration_value;
                 }

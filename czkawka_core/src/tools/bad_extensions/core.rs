@@ -203,4 +203,31 @@ impl BadExtensions {
 
         (all_available_extensions, valid_extensions)
     }
+
+    #[fun_time(message = "fix_bad_extensions", level = "debug")]
+    pub fn fix_bad_extensions(&mut self, _fix_params: super::BadExtensionsFixParams, stop_flag: &Arc<AtomicBool>) {
+        let warnings: Vec<_> = mem::take(&mut self.bad_extensions_files)
+            .into_par_iter()
+            .map(|entry| {
+                if check_if_stop_received(stop_flag) {
+                    return None;
+                }
+
+                let new_path = entry.path.with_extension(&entry.proper_extension);
+
+                if new_path.exists() {
+                    return Some(Some(format!("Cannot rename {:?} to {:?}: target file already exists", entry.path, new_path)));
+                }
+
+                match std::fs::rename(&entry.path, &new_path) {
+                    Ok(()) => Some(None),
+                    Err(e) => Some(Some(format!("Failed to rename {:?} to {:?}: {}", entry.path, new_path, e))),
+                }
+            })
+            .while_some()
+            .flatten()
+            .collect();
+
+        self.common_data.text_messages.warnings.extend(warnings);
+    }
 }

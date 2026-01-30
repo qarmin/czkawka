@@ -47,7 +47,7 @@ use crate::connect_scan::video_optimizer::scan_video_optimizer;
 use crate::settings::model::{BasicSettings, ComboBoxItems, SettingsCustom};
 use crate::settings::{collect_base_settings, collect_combo_box_settings, collect_settings};
 use crate::shared_models::SharedModels;
-use crate::{ActiveTab, GuiState, MainListModel, MainWindow, ProgressToSend, flk};
+use crate::{ActiveTab, GuiState, MainWindow, ProgressToSend, SingleMainListModel, flk};
 
 pub struct ScanData {
     pub progress_sender: Sender<ProgressData>,
@@ -148,8 +148,8 @@ fn reset_selection_at_end(app: &MainWindow, active_tab: ActiveTab) {
     set_number_of_enabled_items(app, active_tab, 0);
 }
 
-fn insert_data_to_model(items: &Rc<VecModel<MainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, filled_header_row: Option<bool>) {
-    let main = MainListModel {
+fn insert_data_to_model(items: &Rc<VecModel<SingleMainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, filled_header_row: Option<bool>) {
+    let main = SingleMainListModel {
         checked: false,
         header_row: filled_header_row.is_some(),
         filled_header_row: filled_header_row.unwrap_or(false),

@@ -86,7 +86,7 @@ impl PrintResults for SimilarImages {
                         file_entry.width,
                         file_entry.height,
                         format_size(file_entry.size, BINARY),
-                        get_string_from_similarity(file_entry.similarity, self.get_params().hash_size)
+                        get_string_from_similarity(file_entry.difference, self.get_params().hash_size)
                     )?;
                 }
                 writeln!(writer)?;
@@ -104,7 +104,7 @@ impl PrintResults for SimilarImages {
                     file_entry.width,
                     file_entry.height,
                     format_size(file_entry.size, BINARY),
-                    get_string_from_similarity(file_entry.similarity, self.get_params().hash_size)
+                    get_string_from_similarity(file_entry.difference, self.get_params().hash_size)
                 )?;
                 for file_entry in vec_file_entry {
                     writeln!(
@@ -114,7 +114,7 @@ impl PrintResults for SimilarImages {
                         file_entry.width,
                         file_entry.height,
                         format_size(file_entry.size, BINARY),
-                        get_string_from_similarity(file_entry.similarity, self.get_params().hash_size)
+                        get_string_from_similarity(file_entry.difference, self.get_params().hash_size)
                     )?;
                 }
                 writeln!(writer)?;
