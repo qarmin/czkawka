@@ -196,6 +196,5 @@ fn draw_crop_rectangle_on_image(
         }
     }
 
-
     buf
 }
