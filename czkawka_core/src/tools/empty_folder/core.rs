@@ -185,7 +185,9 @@ impl EmptyFolder {
 
             if let Some(parent_path) = &d.parent_path {
                 let cf = parent_path.clone();
-                d = folder_entries.get_mut(&cf).unwrap_or_else(|| panic!("Folder {cf} not found in folder_entries (cannot panic, because we first added parent folders)"));
+                d = folder_entries
+                    .get_mut(&cf)
+                    .unwrap_or_else(|| panic!("Folder {cf} not found in folder_entries (cannot panic, because we first added parent folders)"));
                 if d.is_empty == FolderEmptiness::No {
                     break; // Already set as non empty, so one of child already set it to non empty
                 }

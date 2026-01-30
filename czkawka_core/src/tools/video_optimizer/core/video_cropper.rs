@@ -211,7 +211,11 @@ where
 }
 
 fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: RgbImage) -> RgbImage {
-    assert_eq!(img_original.dimensions(), consumed_temp_img.dimensions(), "Image dimensions do not match for diffing (critical algorithm error, please report an issue)");
+    assert_eq!(
+        img_original.dimensions(),
+        consumed_temp_img.dimensions(),
+        "Image dimensions do not match for diffing (critical algorithm error, please report an issue)"
+    );
     img_original.pixels().zip(consumed_temp_img.pixels_mut()).for_each(|(img_original_pixel, consumed_pixel)| {
         consumed_pixel
             .0
