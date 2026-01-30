@@ -4127,6 +4127,7 @@ dependencies = [
  "log",
  "num_enum",
  "open",
+ "rand 0.8.5",
  "rayon",
  "rfd",
  "rodio",

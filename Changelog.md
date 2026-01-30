@@ -39,6 +39,7 @@
 - Fixed regression, where results were not printed by default to terminal - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Added dry_run and move_to_trash options to all tools - [#1685](https://github.com/qarmin/czkawka/pull/1685)
 - Fixed non binded `--excluded-extensions` - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Added new video optimizer, exif remover and bad names modes - [#1760](https://github.com/qarmin/czkawka/pull/1760)
 
 ### GTK GUI
 - Sort button is restored and crashes when sorting are fixed(probably) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
@@ -70,8 +71,8 @@
 - Modification date is displayed in local time instead of UTC - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added new menu, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added configurable and hidden under `audio` feature flag, sound of ending scan - [#1754](https://github.com/qarmin/czkawka/pull/1754)
-- Fixed problem with not updating sort options, due invalid multiple connection to single callback - []()
-- Added ability to create hardlinks/symlinks - []()
+- Fixed problem with not updating sort options, due invalid multiple connection to single callback - [#1760](https://github.com/qarmin/czkawka/pull/1760)
+- Added ability to create hardlinks/symlinks - [#1760](https://github.com/qarmin/czkawka/pull/1760)
 - Added shortest/longest path selection modes - [#1738](https://github.com/qarmin/czkawka/pull/1738)
 
 ### External
