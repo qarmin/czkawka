@@ -543,7 +543,7 @@ pub fn get_string_from_similarity(similarity: u32, hash_size: u8) -> String {
         16 => 1,
         32 => 2,
         64 => 3,
-        _ => panic!("Invalid hash size {hash_size}"),
+        _ => panic!("Invalid hash size {hash_size} (caller is responsible for validating this)"),
     };
 
     if similarity == 0 {
@@ -561,7 +561,7 @@ pub fn get_string_from_similarity(similarity: u32, hash_size: u8) -> String {
     } else if similarity <= SIMILAR_VALUES[index_preset][5] {
         flc!("core_similarity_minimal")
     } else {
-        panic!("Invalid similarity value {similarity} for hash size {hash_size} (index {index_preset})");
+        panic!("Invalid similarity value {similarity} for hash size {hash_size} (index {index_preset}) (caller is responsible for validating this)");
     }
 }
 
@@ -572,7 +572,7 @@ pub fn return_similarity_from_similarity_preset(similarity_preset: SimilarityPre
         16 => 1,
         32 => 2,
         64 => 3,
-        _ => panic!(),
+        _ => panic!("Invalid hash size {hash_size} (caller is responsible for validating this)"),
     };
     match similarity_preset {
         SimilarityPreset::Original => 0,
@@ -582,7 +582,7 @@ pub fn return_similarity_from_similarity_preset(similarity_preset: SimilarityPre
         SimilarityPreset::Small => SIMILAR_VALUES[index_preset][3],
         SimilarityPreset::VerySmall => SIMILAR_VALUES[index_preset][4],
         SimilarityPreset::Minimal => SIMILAR_VALUES[index_preset][5],
-        SimilarityPreset::None => panic!(""),
+        SimilarityPreset::None => panic!("Invalid similarity preset None (caller is responsible for validating this)"),
     }
 }
 

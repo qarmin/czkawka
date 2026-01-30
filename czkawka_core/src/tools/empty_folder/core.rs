@@ -174,7 +174,7 @@ impl EmptyFolder {
     pub(crate) fn set_as_not_empty_folder(folder_entries: &mut IndexMap<String, FolderEntry>, current_folder: &str) {
         let mut d = folder_entries
             .get_mut(current_folder)
-            .unwrap_or_else(|| panic!("Folder {current_folder} not found in folder_entries"));
+            .unwrap_or_else(|| panic!("Folder {current_folder} not found in folder_entries (cannot panic, because we first added parent folders)"));
         if d.is_empty == FolderEmptiness::No {
             return; // Already set as non empty by one of its child
         }
@@ -185,7 +185,7 @@ impl EmptyFolder {
 
             if let Some(parent_path) = &d.parent_path {
                 let cf = parent_path.clone();
-                d = folder_entries.get_mut(&cf).unwrap_or_else(|| panic!("Folder {cf} not found in folder_entries"));
+                d = folder_entries.get_mut(&cf).unwrap_or_else(|| panic!("Folder {cf} not found in folder_entries (cannot panic, because we first added parent folders)"));
                 if d.is_empty == FolderEmptiness::No {
                     break; // Already set as non empty, so one of child already set it to non empty
                 }
