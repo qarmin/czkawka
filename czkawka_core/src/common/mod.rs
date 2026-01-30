@@ -165,11 +165,7 @@ pub fn remove_folder_if_contains_only_empty_folders<P: AsRef<Path>>(path: P, rem
 pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
         if let Err(e) = trash_delete(&full_path) {
-            return Err(flc!(
-                "core_error_moving_to_trash",
-                file = full_path.as_ref().to_string_lossy().to_string(),
-                error = e.to_string()
-            ));
+            return Err(flc!("core_error_moving_to_trash", file = full_path.as_ref().to_string_lossy().to_string(), error = e));
         }
     } else {
         if let Err(e) = fs::remove_file(&full_path) {
@@ -185,7 +181,7 @@ pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -
 pub fn remove_single_folder(full_path: &str, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
         if let Err(e) = trash_delete(full_path) {
-            return Err(flc!("core_error_moving_to_trash", file = full_path, error = e.to_string()));
+            return Err(flc!("core_error_moving_to_trash", file = full_path, error = e));
         }
     } else {
         if let Err(e) = fs::remove_dir_all(full_path) {
