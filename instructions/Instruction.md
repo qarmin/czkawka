@@ -594,7 +594,7 @@ Detects videos with black bars or static content that can be cropped.
   - Black bars detection - finds letterbox/pillarbox black borders
   - Static content detection - finds unchanging areas at edges
 - Calculates optimal crop rectangle for each video
-- Shows crop dimensions and percentage of video that can be removed
+- Shows crop dimensions of video that can be removed
 
 **Additional features**
 - Can generate thumbnails for preview (single frame or grid)
