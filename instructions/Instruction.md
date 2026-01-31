@@ -1,15 +1,128 @@
 # Instruction
 
-- [GUI](#gui-gtk)
+- [GUI Krokiet](#gui-krokiet)
+- [GUI GTK](#gui-gtk)
 - [CLI](#cli)
+- [Common Workflows](#common-workflows)
 - [Config / Cache files](#configcache-files)
 - [Tips, tricks and known bugs](#tips-tricks-and-known-bugs)
 - [Tools](#tools)
 
-Czkawka for now contains three independent frontends - the terminal app and two graphical apps which share the core module.
+Czkawka contains three independent frontends - the terminal app (CLI) and two graphical apps (Krokiet and GTK) which share the core module.
+
+**Krokiet** is the new primary GUI written in Slint, providing a consistent cross-platform experience with better performance and fewer bugs.
+
+**GTK** is the older GUI that is still maintained but will eventually be replaced by Krokiet.
+
+## GUI Krokiet
+<img src="https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6" width="800" />
+
+Krokiet is the new Czkawka frontend written in Slint. It provides a modern, consistent interface across all platforms (Linux, Windows, macOS) and is designed to be more performant and stable than the GTK version.
+
+### Main Interface Structure
+
+The Krokiet interface consists of several key areas:
+
+1. **Left Side Panel** - Tool selector with tabs for each scanning mode (Duplicates, Empty Files, Similar Images, etc.)
+2. **Top Bar** - Contains scan button, settings button, and status information
+3. **Directory Selection Panel** - Area to add/remove included and excluded directories, set file filters
+4. **Results Area** - Displays scan results in a table/list format
+5. **Bottom Panel** - Action buttons for working with results (Select, Delete, Move, etc.)
+6. **Right Side Panel** - Preview area for images and additional information
+
+### Key Features
+
+**Reference Folders**
+After adding directories, you can mark them as "Reference Folders" by right-clicking and selecting the option. Files in reference folders:
+- Are used for comparison but cannot be modified or deleted
+- Appear in scan results but action buttons won't affect them
+- Useful when comparing new files against a trusted backup or master collection
+
+**Tab Navigation**
+- Each tool has its own tab in the left panel
+- Settings tab allows customization of scan parameters
+- About tab shows application information and licenses
+
+### Tool-Specific Screens
+
+Each tool has its own interface with specific options:
+
+**Duplicate Files**
+- Hash method selection (Name, Size, Hash)
+- Hash type selection (Blake3, SHA256, etc.)
+- Minimal file size filter
+- Delete method selection
+- Check method (Hash, HashMB, Size, Name, SizeName)
+
+**Similar Images**
+- Similarity threshold slider
+- Hash algorithm selection (Gradient, Mean, VertGradient, Blockhash, DoubleGradient)
+- Hash size selection (8x8, 16x16, 32x32, 64x64)
+- Resize algorithm selection
+- Image preview panel showing compared images
+
+**Similar Videos**
+- Similarity tolerance slider
+- Video preview with thumbnails
+- Frame extraction settings
+
+**Video Optimizer**
+- Mode selection (Transcode/Crop)
+- Codec exclusion list for transcode mode
+- Black bar detection settings for crop mode
+- Thumbnail generation options
+
+**EXIF Remover**
+- List of EXIF tags found in images
+- Tag filtering options
+- Preview of tags to be removed
+
+**Bad Names**
+- Checkboxes for different name issues to detect
+- Preview of suggested new names
+- Batch rename functionality
+
+### Workflow Operations
+
+The bottom panel contains action buttons that vary by tool:
+
+- **Select** - Manual selection tools (All, None, Invert, Custom)
+- **Delete** - Remove selected files
+- **Move** - Move files to another location
+- **Symlink/Hardlink** - Create links instead of duplicates
+- **Save** - Export results to file (JSON, CSV)
+- **Sort** - Sort results by various criteria
+
+### Settings Screen
+
+Accessible via the settings button, contains multiple subsections:
+
+**General Settings**
+- Language selection
+- UI scale factor
+- Theme selection (Light/Dark)
+- Audio notification settings
+
+**Performance Settings**
+- Thread count configuration
+- Cache behavior settings
+- Memory limits
+
+**Tool-Specific Settings**
+Each tool has its own settings page with advanced options:
+- Cache management (enable/disable, clear old entries)
+- Scan depth limits
+- Excluded items lists
+- Algorithm-specific parameters
+
+### Translations
+
+Krokiet supports multiple languages with UI text fully translatable. Language can be changed in Settings → General → Language.
 
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/148281103-13c00d08-7881-43e8-b6e3-5178473bce85.png" width="800" />
+
+**Note**: GTK GUI is the older interface that is still maintained but will eventually be replaced by Krokiet. For new users, we recommend using Krokiet.
 
 ### GUI overview
 The GUI is built from different pieces:
@@ -64,6 +177,101 @@ If you want to get more detailed info about certain tool, just add after its nam
 By default, all tools only write about results to console, but it is possible with specific arguments to delete some files/arguments or save it to file.
 
 App returns exit code 0 when everything is ok, 1 when some error occurred and 11 when some files were found.
+
+## Common Workflows
+
+This section describes typical workflows for common tasks using Czkawka.
+
+### Finding and Removing Duplicates
+
+**Scenario**: You want to find and remove duplicate files from your Downloads folder, but keep files from your Documents folder as reference.
+
+**Steps (Krokiet)**:
+1. Open Krokiet and select the **Duplicate Files** tab from the left panel
+2. Click **Add Directory** in the Directory Selection Panel
+3. Add your Downloads folder to included directories
+4. Add your Documents folder to included directories
+5. Right-click on Documents folder and select **Mark as Reference Folder** - files here won't be deleted
+6. In tool settings, set:
+   - Check method: **Hash** (most reliable)
+   - Hash type: **Blake3** (fastest for most cases)
+   - Minimal file size: **1 KB** (skip very small files)
+7. Click **Scan** button in the top bar
+8. Wait for the scan to complete
+9. Review results in the Results Area
+10. Use **Select** button to choose files to remove:
+    - **All** - selects all but one file in each group
+    - **Custom** - allows advanced selection rules
+11. Click **Delete** to remove selected duplicates
+12. Confirm the deletion when prompted
+
+**Steps (GTK)**:
+1. Open Czkawka GTK and select **Duplicate Files** tab
+2. In the directories panel (6), add Downloads folder to included directories
+3. Add Documents folder and mark it as Reference Folder (right-click → Mark as Reference)
+4. In settings (button 7), configure:
+   - Check Method: **Hash**
+   - Hash Type: **Blake3**
+5. Click **Search** button
+6. After scan completes, use bottom panel buttons (4) to select duplicates
+7. Click **Delete** button and confirm
+
+### Finding Similar Images
+
+**Scenario**: You have multiple folders with photos and want to find similar images (different sizes, minor edits).
+
+**Steps (Krokiet)**:
+1. Select **Similar Images** tab
+2. Add all photo directories to included directories
+3. Set similarity threshold (lower = more strict):
+   - **0-5**: Nearly identical images only
+   - **6-15**: Similar images with minor differences
+   - **16-30**: Images with noticeable differences
+4. Choose hash algorithm:
+   - **Gradient**: Good for most photos (recommended)
+   - **Mean**: Fast, less accurate
+   - **Blockhash**: Good for resized images
+5. Select hash size:
+   - **8x8**: Fastest, less precise
+   - **16x16**: Balanced (recommended)
+   - **32x32/64x64**: Most precise, slower
+6. Click **Scan**
+7. Use image preview panel to compare similar images visually
+8. Select images to delete or move
+9. Use **Delete** or **Move** action
+
+### Finding Large Files
+
+**Scenario**: Disk space is running low, you want to find the largest files.
+
+**Steps**:
+1. Select **Big Files** tab
+2. Add directories to scan
+3. Set how many files to display (e.g., 50 largest files)
+4. Choose mode: **Largest** files
+5. Click **Scan**
+6. Review results sorted by size
+7. Manually review and delete or move large files you don't need
+
+
+### Working with Reference Folders
+
+**Scenario**: You want to compare your working files against a master/backup collection without risking deletion of the master files.
+
+**Use Cases**:
+- Comparing current photos against backed-up originals
+- Checking if work files are already in archive
+- Finding duplicates without touching the reference collection
+
+**How to Use**:
+1. Add both your working directory and reference directory to included directories
+2. Right-click on the reference directory
+3. Select **Mark as Reference Folder**
+4. Files in reference folders will:
+   - Appear in scan results for comparison
+   - Cannot be selected for deletion or modification
+   - Show with a different indicator in results
+5. Proceed with scan and operations - reference files are protected
 
 ## Config/Cache files
 Currently, Czkawka stores few config and cache files on disk:
