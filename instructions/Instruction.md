@@ -23,75 +23,17 @@ Krokiet is the new Czkawka frontend written in Slint. It provides a modern, cons
 
 The Krokiet interface consists of several key areas:
 
-1. **Left Side Panel** - Tool selector with tabs for each scanning mode (Duplicates, Empty Files, Similar Images, etc.)
-2. **Top Bar** - Contains scan button, settings button, and status information
-3. **Directory Selection Panel** - Area to add/remove included and excluded directories, set file filters
-4. **Results Area** - Displays scan results in a table/list format
-5. **Bottom Panel** - Action buttons for working with results (Select, Delete, Move, etc.)
+1. **Left Side Panel** - Tool selector with tabs for each scanning mode (Duplicates, Empty Files, Similar Images, etc.) and settings/tool subsettings
+2. **Results Area** - Displays scan results in a table/list format
+3. **Button Area** - Contains scan, select, sort, save and action buttons
+4. **Result Labels** - Shows summary of results (number of groups, files, total size)
+5. **Directory Selection Panel** - Area to add/remove included and excluded paths
 6. **Right Side Panel** - Preview area for images and additional information
 
-### Key Features
+### Legend
 
-**Reference Folders**
-After adding directories, you can mark them as "Reference Folders" by right-clicking and selecting the option. Files in reference folders:
-- Are used for comparison but cannot be modified or deleted
-- Appear in scan results but action buttons won't affect them
-- Useful when comparing new files against a trusted backup or master collection
-
-**Tab Navigation**
-- Each tool has its own tab in the left panel
-- Settings tab allows customization of scan parameters
-- About tab shows application information and licenses
-
-### Tool-Specific Screens
-
-Each tool has its own interface with specific options:
-
-**Duplicate Files**
-- Hash method selection (Name, Size, Hash)
-- Hash type selection (Blake3, SHA256, etc.)
-- Minimal file size filter
-- Delete method selection
-- Check method (Hash, HashMB, Size, Name, SizeName)
-
-**Similar Images**
-- Similarity threshold slider
-- Hash algorithm selection (Gradient, Mean, VertGradient, Blockhash, DoubleGradient)
-- Hash size selection (8x8, 16x16, 32x32, 64x64)
-- Resize algorithm selection
-- Image preview panel showing compared images
-
-**Similar Videos**
-- Similarity tolerance slider
-- Video preview with thumbnails
-- Frame extraction settings
-
-**Video Optimizer**
-- Mode selection (Transcode/Crop)
-- Codec exclusion list for transcode mode
-- Black bar detection settings for crop mode
-- Thumbnail generation options
-
-**EXIF Remover**
-- List of EXIF tags found in images
-- Tag filtering options
-- Preview of tags to be removed
-
-**Bad Names**
-- Checkboxes for different name issues to detect
-- Preview of suggested new names
-- Batch rename functionality
-
-### Workflow Operations
-
-The bottom panel contains action buttons that vary by tool:
-
-- **Select** - Manual selection tools (All, None, Invert, Custom)
-- **Delete** - Remove selected files
-- **Move** - Move files to another location
-- **Symlink/Hardlink** - Create links instead of duplicates
-- **Save** - Export results to file (JSON, CSV)
-- **Sort** - Sort results by various criteria
+**Reference Paths**
+After adding directories or files, you can mark them as "Reference Paths" by selecting checkbox next to them. Reference files or files in reference folders are used for comparison but cannot be modified or deleted.
 
 ### Settings Screen
 
@@ -117,7 +59,7 @@ Each tool has its own settings page with advanced options:
 
 ### Translations
 
-Krokiet supports multiple languages with UI text fully translatable. Language can be changed in Settings → General → Language.
+Krokiet have full support for multiple languages in GUI. Language can be changed in Settings → General → Language.
 
 ## GUI GTK
 <img src="https://user-images.githubusercontent.com/41945903/148281103-13c00d08-7881-43e8-b6e3-5178473bce85.png" width="800" />
