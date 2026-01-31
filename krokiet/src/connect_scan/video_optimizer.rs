@@ -132,7 +132,7 @@ fn write_video_optimizer_crop_results(
     let items = Rc::new(VecModel::default());
 
     for fe in video_crop_entries {
-        let Some((data_model_str, data_model_int)) = prepare_data_model_video_optimizer_crop(fe) else{
+        let Some((data_model_str, data_model_int)) = prepare_data_model_video_optimizer_crop(fe) else {
             continue;
         };
         insert_data_to_model(&items, data_model_str, data_model_int, None);
