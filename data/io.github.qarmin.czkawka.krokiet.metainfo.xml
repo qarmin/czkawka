@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>com.github.qarmin.krokiet</id>
   <name>Krokiet</name>
-  <summary>Krokiet — multi functional app to find duplicates, empty folders, similar images, broken files etc.</summary>
+  <summary>Krokiet — find duplicate files, similar images and many more</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <description>
@@ -20,7 +20,6 @@
     <release version="10.0.0" date="2025-08-18"/>
   </releases>
   <content_rating type="oars-1.0"/>
-  <developer_name>Rafał Mikrut</developer_name>
     <developer id="io.github.qarmin">
       <name>Rafał Mikrut</name>
   </developer>
