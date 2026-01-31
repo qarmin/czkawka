@@ -137,7 +137,7 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
         return Err(format!("ffmpeg failed with status: {} - {stderr} - command {command:?} ", output.status));
     }
 
-    let img = image::load_from_memory(&output.stdout).map_err(|e| format!("Failed to load image: {e}"))?;
+    let img = image::load_from_memory(&output.stdout).map_err(|e| format!("Failed to image frame: {e}"))?;
 
     Ok(img.into_rgb8())
 }
