@@ -132,7 +132,9 @@ fn write_video_optimizer_crop_results(
     let items = Rc::new(VecModel::default());
 
     for fe in video_crop_entries {
-        let (data_model_str, data_model_int) = prepare_data_model_video_optimizer_crop(fe);
+        let Some((data_model_str, data_model_int)) = prepare_data_model_video_optimizer_crop(fe) else{
+            continue;
+        };
         insert_data_to_model(&items, data_model_str, data_model_int, None);
     }
 
@@ -183,7 +185,7 @@ fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (Mod
     (data_model_str, data_model_int)
 }
 
-fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> Option<(ModelRc<SharedString>, ModelRc<i32>)> {
     let (directory, file) = split_path(&fe.path);
     let (left, top, right, bottom) = fe.new_image_dimensions;
 
@@ -196,8 +198,7 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<Share
             right,
             bottom
         );
-        // TODO - this should never happens
-        (-1, -1, 0, "-".to_string())
+        return None;
     } else {
         let new_width = (right - left) as i32;
         let new_height = (bottom - top) as i32;
@@ -239,5 +240,5 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> (ModelRc<Share
         bottom as i32,
     ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
-    (data_model_str, data_model_int)
+    Some((data_model_str, data_model_int))
 }
