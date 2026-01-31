@@ -80,14 +80,8 @@ slint::include_modules!();
 fn main() {
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
-    setup_logger(false, "krokiet", filtering_messages);
-    print_version_mode("Krokiet");
-    print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
-    print_krokiet_features();
 
-    create_default_settings_files();
     let (base_settings, custom_settings, preset_to_load) = load_initial_settings_from_file(cli_args.as_ref());
-
     if base_settings.use_manual_application_scale {
         // SAFETY:
         // set_var is safe when using on single threaded context
@@ -95,6 +89,13 @@ fn main() {
             std::env::set_var("SLINT_SCALE_FACTOR", format!("{:.2}", base_settings.manual_application_scale));
         }
     }
+
+    setup_logger(false, "krokiet", filtering_messages);
+    print_version_mode("Krokiet");
+    print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
+    print_krokiet_features();
+
+    create_default_settings_files();
 
     let app = match MainWindow::new() {
         Ok(app) => app,

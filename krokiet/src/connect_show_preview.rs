@@ -157,7 +157,7 @@ fn draw_crop_rectangle_on_image(
         return buf;
     }
 
-    let thickness = (width.max(height) / 50).max(2);
+    let thickness = (width.max(height) / 150).max(2);
 
     #[inline]
     fn get_pixel_color(x: u32, y: u32) -> Rgba<u8> {
@@ -178,19 +178,30 @@ fn draw_crop_rectangle_on_image(
     for side in [-1, 1] {
         for th in 0..(thickness as i32 / 2) {
             let th_val = side * th;
-            let top_y = ((t as i32 + th_val) as u32).clamp(0, height - 1);
-            let bottom_y = ((b as i32 + th_val) as u32).clamp(0, height - 1);
-            let left_x = ((l as i32 + th_val) as u32).clamp(0, width - 1);
-            let right_x = ((r as i32 + th_val) as u32).clamp(0, width - 1);
+
+            let top_y = (t as i32 + th_val) as u32;
+            let bottom_y = (b as i32 - th_val) as u32;
+            let left_x = (l as i32) as u32;
+            let right_x = (r as i32) as u32;
 
             for x in left_x..=right_x {
                 for y in [top_y, bottom_y] {
-                    buf.put_pixel(x, y, get_pixel_color(x, y));
+                    if (0..height).contains(&y) && (0..width).contains(&x) {
+                        buf.put_pixel(x, y, get_pixel_color(x, y));
+                    }
                 }
             }
+
+            let top_y = (t as i32) as u32;
+            let bottom_y = (b as i32) as u32;
+            let left_x = (l as i32 + th_val) as u32;
+            let right_x = (r as i32 - th_val) as u32;
+
             for y in top_y..=bottom_y {
                 for x in [left_x, right_x] {
-                    buf.put_pixel(x, y, get_pixel_color(x, y));
+                    if (0..height).contains(&y) && (0..width).contains(&x) {
+                        buf.put_pixel(x, y, get_pixel_color(x, y));
+                    }
                 }
             }
         }

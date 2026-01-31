@@ -43,7 +43,7 @@ impl Rectangle {
     fn validate(&self) {
         assert!(
             self.left <= self.right && self.top <= self.bottom,
-            "Invalid rectangle coordinates: top={}, bottom={}, left={}, right={}. Expected: left <= right && top <= bottom",
+            "Invalid rectangle coordinates: top={}, bottom={}, left={}, right={}. Expected: left <= right && top <= bottom (critical algorithm error, please report an issue)",
             self.top,
             self.bottom,
             self.left,
@@ -53,7 +53,7 @@ impl Rectangle {
     fn validate_image_size(&self, width: u32, height: u32) {
         assert!(
             self.right <= width && self.bottom <= height,
-            "Rectangle exceeds image dimensions: image_width={}, image_height={}, rectangle_right={}, rectangle_bottom={}. Expected: right <= image_width && bottom <= image_height",
+            "Rectangle exceeds image dimensions: image_width={}, image_height={}, rectangle_right={}, rectangle_bottom={}. Expected: right <= image_width && bottom <= image_height (critical algorithm error, please report an issue)",
             width,
             height,
             self.right,
@@ -211,7 +211,11 @@ where
 }
 
 fn diff_between_dynamic_images(img_original: &RgbImage, mut consumed_temp_img: RgbImage) -> RgbImage {
-    assert_eq!(img_original.dimensions(), consumed_temp_img.dimensions(), "Image dimensions do not match for diffing");
+    assert_eq!(
+        img_original.dimensions(),
+        consumed_temp_img.dimensions(),
+        "Image dimensions do not match for diffing (critical algorithm error, please report an issue)"
+    );
     img_original.pixels().zip(consumed_temp_img.pixels_mut()).for_each(|(img_original_pixel, consumed_pixel)| {
         consumed_pixel
             .0

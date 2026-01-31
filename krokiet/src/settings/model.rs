@@ -399,51 +399,51 @@ pub(crate) fn default_hash_type() -> String {
 pub(crate) fn default_sub_hash_size() -> String {
     DEFAULT_HASH_SIZE.to_string()
 }
-fn default_window_width() -> u32 {
+pub(crate) fn default_window_width() -> u32 {
     DEFAULT_WINDOW_WIDTH
 }
-fn default_window_height() -> u32 {
+pub(crate) fn default_window_height() -> u32 {
     DEFAULT_WINDOW_HEIGHT
 }
-fn default_video_optimizer_mode() -> String {
+pub(crate) fn default_video_optimizer_mode() -> String {
     "transcode".to_string()
 }
-fn default_video_optimizer_crop_type() -> String {
+pub(crate) fn default_video_optimizer_crop_type() -> String {
     "blackbars".to_string()
 }
-fn default_video_optimizer_black_pixel_threshold() -> u8 {
+pub(crate) fn default_video_optimizer_black_pixel_threshold() -> u8 {
     20
 }
-fn default_video_optimizer_black_bar_min_percentage() -> u8 {
+pub(crate) fn default_video_optimizer_black_bar_min_percentage() -> u8 {
     90
 }
-fn default_video_optimizer_max_samples() -> usize {
+pub(crate) fn default_video_optimizer_max_samples() -> usize {
     60
 }
-fn default_video_optimizer_min_crop_size() -> u32 {
-    5
+pub(crate) fn default_video_optimizer_min_crop_size() -> u32 {
+    20
 }
-fn default_video_optimizer_video_codec() -> String {
+pub(crate) fn default_video_optimizer_video_codec() -> String {
     "h265".to_string()
 }
-fn default_video_optimizer_excluded_codecs() -> String {
+pub(crate) fn default_video_optimizer_excluded_codecs() -> String {
     "h265,av1,vp9".to_string()
 }
-fn default_video_optimizer_video_quality() -> u32 {
+pub(crate) fn default_video_optimizer_video_quality() -> u32 {
     23
 }
-fn default_video_optimizer_max_width() -> u32 {
+pub(crate) fn default_video_optimizer_max_width() -> u32 {
     1920
 }
-fn default_video_optimizer_max_height() -> u32 {
+pub(crate) fn default_video_optimizer_max_height() -> u32 {
     1920
 }
-fn default_video_optimizer_image_threshold() -> u8 {
+pub(crate) fn default_video_optimizer_image_threshold() -> u8 {
     1
 }
-fn default_manual_application_scale() -> f32 {
+pub(crate) fn default_manual_application_scale() -> f32 {
     1.0
 }
-fn default_use_manual_application_scale() -> bool {
+pub(crate) fn default_use_manual_application_scale() -> bool {
     false
 }

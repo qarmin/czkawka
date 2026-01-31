@@ -1,15 +1,65 @@
 # Instruction
 
-- [GUI](#gui-gtk)
+- [GUI Krokiet](#gui-krokiet)
+- [GUI GTK](#gui-gtk)
 - [CLI](#cli)
+- [Common Workflows](#common-workflows)
 - [Config / Cache files](#configcache-files)
 - [Tips, tricks and known bugs](#tips-tricks-and-known-bugs)
 - [Tools](#tools)
 
-Czkawka for now contains three independent frontends - the terminal app and two graphical apps which share the core module.
+Czkawka contains three independent frontends - the terminal app (CLI) and two graphical apps (Krokiet and GTK) which share the core module.
+
+**Krokiet** is the new primary GUI written in Slint, providing a consistent cross-platform experience with better performance and fewer bugs.
+
+**GTK** is the older GUI that is still maintained but will eventually be replaced by Krokiet.
+
+## GUI Krokiet
+<img src="https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6" alt="Krokiet main window" width="800" />
+
+Krokiet is the new Czkawka frontend written in Slint. It provides a modern, consistent interface across all platforms (Linux, Windows, macOS) and is designed to be more performant and stable than the GTK version.
+
+### Main Interface Structure
+
+The Krokiet interface consists of several key areas:
+
+1. **Left Side Panel** - Tool selector with tabs for each scanning mode (Duplicates, Empty Files, Similar Images, etc.)
+2. **Top Bar** - Contains scan button, settings button, and status information
+3. **Directory Selection Panel** - Area to add/remove included and excluded directories, set file filters
+4. **Results Area** - Displays scan results in a table/list format
+5. **Bottom Panel** - Action buttons for working with results (Select, Delete, Move, etc.)
+6. **Right Side Panel** - Preview area for images and additional information
+
+### Settings Screen
+
+Accessible via the settings button, contains multiple subsections:
+
+**General Settings**
+- Language selection
+- UI scale factor
+- Theme selection (Light/Dark)
+- Audio notification settings
+
+**Performance Settings**
+- Thread count configuration
+- Cache behavior settings
+- Memory limits
+
+**Tool-Specific Settings**
+Each tool has its own settings page with advanced options:
+- Cache management (enable/disable, clear old entries)
+- Scan depth limits
+- Excluded items lists
+- Algorithm-specific parameters
+
+### Translations
+
+Krokiet have full support for multiple languages in GUI. Language can be changed in Settings → General → Language.
 
 ## GUI GTK
-<img src="https://user-images.githubusercontent.com/41945903/148281103-13c00d08-7881-43e8-b6e3-5178473bce85.png" width="800" />
+<img src="https://user-images.githubusercontent.com/41945903/148281103-13c00d08-7881-43e8-b6e3-5178473bce85.png" alt="Czkawka GTK main window" width="800" />
+
+**Note**: GTK GUI is the older interface that is still maintained but will eventually be replaced by Krokiet. For new users, we recommend using Krokiet.
 
 ### GUI overview
 The GUI is built from different pieces:
@@ -21,7 +71,21 @@ The GUI is built from different pieces:
 - 6 - Panel with selecting specific directories to use or exclude. Also, here are specified allowed extensions and file sizes.
 - 7 - Buttons which opens About Window(shows info about app) and Settings in which scan can be customized
 
-<img src="https://user-images.githubusercontent.com/41945903/148279809-54ea8684-8bff-436b-af67-ff9859f468f2.png" width="800" />
+## Terminology (shared across CLI / GTK / Krokiet)
+
+This short glossary contains terms used consistently by all frontends (CLI, GTK and Krokiet).
+
+- Reference paths
+  - After adding directories or files, you can mark them as "Reference paths" (a path can be a file or a folder) by checking the checkbox next to them in the directory selection UI or using the CLI flag where available.
+  - Reference paths are used for comparison but are protected: they cannot be modified, moved or deleted by the automatic actions in the UI or by the CLI.
+  - Use cases: compare a working folder against a master backup, protect original files when removing duplicates, or use a dataset as read-only baseline.
+
+- Included / Excluded paths
+  - Included paths are scanned by the tools. Excluded paths are explicitly ignored during scans.
+
+- Configuration vs Cache
+  - Configuration files are frontend-specific (each frontend stores its own UI/settings files). Configuration is not shared between GTK, Krokiet and CLI by default(CLI doesn't even store config files).
+  - Cache files are shared across frontends and contain computed data (hashes, thumbnails, analysis results). Cache is placed in a shared cache directory so all frontends can reuse computed results.
 
 ### Translations
 GTK GUI is fully translatable.  
@@ -46,34 +110,134 @@ When using additional command line arguments, saving at exit option become disab
 
 Both relative and absolute path are supported, so user can use both `../home` and `/home`.
 
-After adding a path it is possible to mark one or more paths as a _Reference folder_. Files in the _Reference folder_ cannot be acted upon, e.g. selected, moved or removed. This behaviour can be useful if you want to leave a folder untouched, but still use it for comparison against others.
+After adding a path it is possible to mark one or more paths as a _Reference path_. Reference paths (files or folders) cannot be acted upon, e.g. selected, moved or removed. This behaviour can be useful if you want to leave a path untouched, but still use it for comparison against others.
 
 ## CLI
 Czkawka CLI frontend is great to automate some tasks like removing empty directories.
 
 To get general info how to use it just try to open czkawka_cli in console `czkawka_cli`
 
-<img src="https://user-images.githubusercontent.com/41945903/103018271-3d64ac80-4545-11eb-975c-2132f2ccf66f.png" width="800" />
+<img src="https://user-images.githubusercontent.com/41945903/103018271-3d64ac80-4545-11eb-975c-2132f2ccf66f.png" alt="CLI help example" width="800" />
 
 You should see a lot of examples how to use this app.
 
 If you want to get more detailed info about certain tool, just add after its name  `-h` or `--help` to get more details.
 
-<img src="https://user-images.githubusercontent.com/41945903/103018151-0a221d80-4545-11eb-97b2-d7d77b49c735.png" width="800" />
+<img src="https://user-images.githubusercontent.com/41945903/103018151-0a221d80-4545-11eb-97b2-d7d77b49c735.png" alt="CLI example 2" width="800" />
 
 By default, all tools only write about results to console, but it is possible with specific arguments to delete some files/arguments or save it to file.
 
 App returns exit code 0 when everything is ok, 1 when some error occurred and 11 when some files were found.
 
-## Config/Cache files
-Currently, Czkawka stores few config and cache files on disk:
-- `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
-- `cache_similar_image_SIZE_HASH_FILTER.bin/json` - stores cache data and hashes which may be used later without needing to compute image hash again. Each algorithms use its own file, because hashes are completely different in each.
-- `cache_broken_files.txt` - stores cache data of broken files
-- `cache_duplicates_HASH.txt` - stores cache data of duplicated files, to not suffer too big of a performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
-- `cache_similar_videos.bin/json` - stores cache data of video files.
+## Common Workflows
 
-It is possible to modify files with JSON extension(may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. Next file can be changed/modified. By default, cache files with `bin` extension are loaded, but if it is missing(can be renamed or removed), then data from json file is loaded if exists.
+This section describes typical workflows for common tasks using Czkawka.
+
+### Finding and Removing Duplicates
+
+**Scenario**: You want to find and remove duplicate files from your Downloads folder, but keep files from your Documents folder as reference.
+
+**Steps (Krokiet)**:
+1. Open Krokiet and select the **Duplicate Files** tab from the left panel
+2. Click **Add Directory** in the Directory Selection Panel
+3. Add your Downloads folder to included directories
+4. Add your Documents folder to included directories
+5. Right-click on Documents folder and select **Mark as Reference Path** - files here won't be deleted
+6. In tool settings, set:
+   - Check method: **Hash** (most reliable)
+   - Hash type: **Blake3** (fastest for most cases)
+   - Minimal file size: **1 KB** (skip very small files)
+7. Click **Scan** button in the top bar
+8. Wait for the scan to complete
+9. Review results in the Results Area
+10. Use **Select** button to choose files to remove:
+    - **All** - selects all but one file in each group
+    - **Custom** - allows advanced selection rules
+11. Click **Delete** to remove selected duplicates
+12. Confirm the deletion when prompted
+
+**Steps (GTK)**:
+1. Open Czkawka GTK and select **Duplicate Files** tab
+2. In the directories panel (6), add Downloads folder to included directories
+3. Add Documents folder and mark it as Reference Path (right-click → Mark as Reference)
+4. In settings (button 7), configure:
+   - Check Method: **Hash**
+   - Hash Type: **Blake3**
+5. Click **Search** button
+6. After scan completes, use bottom panel buttons (4) to select duplicates
+7. Click **Delete** button and confirm
+
+### Finding Similar Images
+
+**Scenario**: You have multiple folders with photos and want to find similar images (different sizes, minor edits).
+
+**Steps (Krokiet)**:
+1. Select **Similar Images** tab
+2. Add all photo directories to included directories
+3. Set similarity threshold (lower = more strict):
+   - **0-5**: Nearly identical images only
+   - **6-15**: Similar images with minor differences
+   - **16-30**: Images with noticeable differences
+4. Choose hash algorithm:
+   - **Gradient**: Good for most photos (recommended)
+   - **Mean**: Fast, less accurate
+   - **Blockhash**: Good for resized images
+5. Select hash size:
+   - **8x8**: Fastest, less precise
+   - **16x16**: Balanced (recommended)
+   - **32x32/64x64**: Most precise, slower
+6. Click **Scan**
+7. Use image preview panel to compare similar images visually
+8. Select images to delete or move
+9. Use **Delete** or **Move** action
+
+### Finding Large Files
+
+**Scenario**: Disk space is running low, you want to find the largest files.
+
+**Steps**:
+1. Select **Big Files** tab
+2. Add directories to scan
+3. Set how many files to display (e.g., 50 largest files)
+4. Choose mode: **Largest** files
+5. Click **Scan**
+6. Review results sorted by size
+7. Manually review and delete or move large files you don't need
+
+
+### Working with Reference Paths
+
+**Scenario**: You want to compare your working files against a master/backup collection without risking deletion of the master files.
+
+**Use Cases**:
+- Comparing current photos against backed-up originals
+- Checking if work files are already in archive
+- Finding duplicates without touching the reference collection
+
+**How to Use**:
+1. Add both your working directory and reference directory to included directories
+2. Right-click on the reference directory (or use CLI flag) and select **Mark as Reference Path**
+3. Files or folders marked as reference paths will:
+   - Appear in scan results for comparison
+   - Be protected from deletion or modification by automatic actions
+   - Be shown with a different indicator in the results if the UI supports it
+4. Proceed with scan and operations — reference paths are protected
+
+## Config/Cache files
+- **Configuration files (frontend-specific)**
+  - Configuration files are kept per frontend and are not automatically shared. Examples:
+    - `czkawka_gui_config.txt` — GTK GUI configuration stored under the user config directory
+    - Krokiet stores its own settings file (created under the user config directory) — do not rely on configuration being synchronized between frontends
+
+- **Cache files (shared across frontends)**
+  - Cache contains computed results (hashes, thumbnails, parsed metadata) and is shared by all frontends to avoid re-computation.
+  - Example cache files:
+    - `cache_similar_image_SIZE_HASH_FILTER.bin/json` — image hashes and cache
+    - `cache_broken_files.txt`
+    - `cache_duplicates_HASH.txt` — duplicates cache (only fully hashed files bigger than configured threshold are stored)
+    - `cache_similar_videos.bin/json`
+
+It is possible to modify files with JSON extension (may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. By default, cache files with `bin` extension are loaded, but if it is missing (can be renamed or removed), then data from json file is loaded if exists.
 
 Config files are located in this path:
 
@@ -192,72 +356,89 @@ Duplicate Finder allows you to search for files and group them according to a pr
       of the file to make sure they are identical.
 
 ### Empty Files
-Searching for empty files is easy and fast, because we only need to check the file metadata and its length.
+This tool finds files with zero bytes size.
+
+**Process**
+- Scans all files in specified directories
+- Checks file metadata for size
+- Files with size of 0 bytes are marked as empty
+
+This is a fast operation since it only requires reading file metadata without accessing file contents.
 
 ### Empty Directories
-At the start, a special entry is created for each directory, including its parent path (unless it is a folder directly selected by the user) and a flag indicating whether the directory is empty. Initially, all directories are assumed to be potentially empty.
+This tool finds directories that contain no files or subdirectories.
 
-First, user-defined folders are added to the pool of directories to be checked.
+**Process**
+- Creates an entry for each directory with its parent path and empty status flag
+- Initially marks all directories as potentially empty
+- Examines each directory:
+  - If it contains files or subdirectories → marks it as not empty
+  - Marks all parent directories (direct and indirect) as not empty
+- After processing, directories still marked as potentially empty are confirmed as empty
 
-Each folder is then examined to determine its status:
+**Example**
 
-- If it is a folder – it is added to the check queue as potentially empty (FolderEmptiness::Maybe). 
-- If it contains any files or subdirectories – it is marked as not empty (FolderEmptiness::No). In this case, all parent directories, both direct and indirect, are also marked as not empty.
+Consider four directories: `/cow/`, `/cow/ear/`, `/cow/ear/stack/`, `/cow/ear/flag/`
 
-Example
-
-Consider four folders that may be empty:
-/cow/, /cow/ear/, /cow/ear/stack/, /cow/ear/flag/.
-
-If /cow/ear/flag/ contains a file, then:
-
-- /cow/ear/flag/ is marked as not empty.
-- Its parent folders /cow/ear/ and /cow/ are also marked as not empty.
-- However, /cow/ear/stack/ may still be empty.
-
-Finally, all folders still marked as FolderEmptiness::Maybe are considered empty by default.
+If `/cow/ear/flag/` contains a file:
+- `/cow/ear/flag/` is marked as not empty
+- Parent directories `/cow/ear/` and `/cow/` are marked as not empty
+- `/cow/ear/stack/` may still be empty
 
 ### Big Files
-For each file within the given path, its size is read. Then, depending on the mode, a specified number of either the smallest or largest files are displayed.
+This tool finds the largest or smallest files in the specified directories.
+
+**Process**
+- Scans all files and reads their sizes
+- Sorts files by size
+- Returns a user-specified number of largest or smallest files
+
+Useful for finding large files that take up disk space or identifying unusually small files that may be incomplete downloads.
 
 ### Temporary Files
-Searching for temporary files is done by comparing their extensions against a predefined list.
+This tool finds temporary files based on a predefined list of common temporary file extensions and names.
 
-Currently, the following names and extensions are considered temporary:
+**Detected patterns**
+Files with the following extensions or names are considered temporary:
 ```
 ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download", ".partial"]
 ```
-This method removes only the most common temporary files. For more thorough cleanup, I recommend using BleachBit.
+
+This list covers the most common temporary files created by operating systems and applications. For more comprehensive system cleanup, consider using specialized tools like BleachBit.
 
 ### Invalid Symlinks
-To find invalid symlinks, we first need to identify all symlinks in the given path.
-
-Once symlinks are located, each one is checked to determine its target. If the target does not exist, the symlink is added to the list of invalid symlinks, as it points to a non-existent path.
-
-The second mode attempts to detect recursive symlinks. 
-However, this feature is currently non-functional and incorrectly reports an error related to a non-existent target. 
-The intended implementation works by counting the number of symlink jumps, and if a certain threshold (e.g., 20) is exceeded, the symlink is considered recursive.
-### Same Music
-Tags are limited to `artist`, `title`, `year`, `bitrate`, `genre`, and `length`.
+This tool finds broken symbolic links.
 
 **Process**
-- Collect all music files with one of the following extensions: `[".mp3", ".flac", ".m4a"]`
-- Read the tags for each file
+- Identifies all symlinks in the specified directories
+- For each symlink, checks if its target exists
+- Detects two types of errors:
+  - Non-existent target - symlink points to a file or directory that does not exist
+  - Infinite recursion - symlink chain exceeds maximum jump count (20), indicating a circular reference
 
-**Additionally in duplicate tags mode**
-- User selects tag groups that will be used to compare files
-- Tags like `artist` are simplified by:
-  - Removing all non-alphanumeric characters
-  - Converting text to lowercase
-  - Removing everything inside parentheses, but only if approximate comparison is selected (e.g., `bataty (feat. romba)` is treated as `bataty`)
-- Only non-empty tags are collected
+Both error types are reported in the results.
+### Same Music
+This tool finds duplicate or similar music files by comparing metadata tags or audio content.
 
-**Additionally in similar content mode**
-- If title-based comparison is selected, files are first grouped by simplified title to reduce the number of hashes that need to be calculated
-- A hash is generated for each file
-- Hashes are compared, respecting the user-defined similarity threshold and the minimum required length of matching fragments
+**Process**
+- Collects music files with extensions: `mp3`, `flac`, `m4a`
+- Reads metadata tags: `artist`, `title`, `year`, `bitrate`, `genre`, `length`
 
-After checking all tags, results are shown in a table.
+**Duplicate Tags Mode**
+- User selects which tag groups to compare (e.g., artist + title)
+- Tags are normalized:
+  - Removes non-alphanumeric characters
+  - Converts to lowercase
+  - Optionally removes text in parentheses for approximate comparison (e.g., `bataty (feat. romba)` → `bataty`)
+- Only files with non-empty tags are compared
+
+**Similar Content Mode**
+- Optionally groups files by simplified title first to reduce hash calculations
+- Generates audio hash for each file
+- Compares hashes using user-defined similarity threshold
+- Requires minimum matching fragment length
+
+Results show groups of files with matching tags or similar audio content.
 
 ### Similar Images
 
@@ -332,32 +513,39 @@ The faster comparison option ensures that each pair of results is compared only 
 - `Blockhash` is the only algorithm that does not resize images before hashing.
 - The `Nearest` resizing algorithm can be up to **five times faster** than other methods but may produce worse results.
 
-### **Similar Video Finder**
+### Similar Videos
 
-This tool works similarly to the **Similar Images** feature but is designed for video files.
+This tool finds similar videos using perceptual hashing, similar to the Similar Images feature.
 
-#### **Requirements and Limitations**
-- Requires **FFmpeg** to function; an error will be displayed if it is not found on the system
-- Currently, it only compares videos with **almost equal lengths**
+**Requirements**
+- Requires **FFmpeg** installed on the system
+- Currently only compares videos with similar lengths
 
-#### **Process Overview**
-  - Video files are gathered based on their extensions (`.mp4`, `.mpv`, `.avi`, etc.).
-  - Each file is processed using a hashing algorithm.
-  - The implementation is handled by an external library, but the process involves:
-    - Extracting several frames from video
-    - Generating perceptual hashes for each frame
-  - The generated hashes are stored in a cache file for future use, reducing redundant calculations
-  - Using the user-defined **similarity tolerance**, hashes are compared
-  - Groups of similar videos are returned as results
+**Process**
+- Collects video files based on their extensions (mp4, mkv, avi, mov, webm, etc.)
+- For each video:
+  - Extracts several frames
+  - Generates perceptual hashes for each frame
+- Stores hashes in cache file to avoid recalculating in future scans
+- Compares hashes using user-defined similarity tolerance
+- Groups similar videos in results
 
 ### Broken Files
-### **Corrupted or Invalid Files Finder**
+This tool detects corrupted or invalid files that cannot be properly opened.
 
-This tool detects files that are either corrupted or have an invalid extension.
+**Supported file types**
+- Images - jpg, jpeg, png, tiff, tif, tga, gif, bmp, ico, jfif, webp, exr, avif, and others
+- Audio - mp3, flac, wav, ogg, m4a, aac, and others
+- Video - mp4, mkv, avi, mov, webm, and others
+- Archives - zip, jar
+- Documents - pdf
 
-- Collected are pdf, audio, music and archive files
-- If an error occurs while opening a file, it is considered either **corrupted**(with some exceptions)
-- Since tool relies on external libraries, **false positives** may occur (e.g., [this issue](https://github.com/image-rs/jpeg-decoder/issues/130)), so it is recommended to manually open the file to confirm if it is truly broken
+**Process**
+- Files are collected based on their extensions
+- Each file is validated by attempting to open it with appropriate libraries
+- If an error occurs during opening, the file is marked as corrupted (with some exceptions to avoid false positives)
+
+**Note**: Since this tool relies on external libraries, false positives may occur (e.g., [this issue](https://github.com/image-rs/jpeg-decoder/issues/130)). It is recommended to manually verify files before deletion.
 
 ### Bad Extensions
 This mode allows finding files whose content does not match their extension.
@@ -374,3 +562,56 @@ It works as follows:
 In the **"Proper Extension"** column, the extension detected by the Infer library appears in parentheses, while extensions with the same MIME type are displayed outside.
 
 ![ABC](https://user-images.githubusercontent.com/41945903/167214811-7d811829-6dba-4da0-9788-9e2f780e7279.png)
+
+### Bad Names
+This tool finds files with problematic names that may cause issues on different operating systems or filesystems.
+
+It can detect multiple naming problems:
+- Uppercase extensions - e.g., `file.JPG` instead of `file.jpg`
+- Emoji in filenames - e.g., `document😀.txt`
+- Spaces at the start or end of filename - e.g., ` file.txt` or `file.txt `
+- Non-ASCII characters - e.g., `файл.txt`, `文档.doc`
+- Characters outside restricted charset - only specific characters are allowed (e.g., only `_`, `-`, ` `, `.`)
+- Duplicated non-alphanumeric characters - e.g., `file___name.txt`, `doc---final.pdf`
+
+Each check can be enabled or disabled independently. The tool suggests corrected filenames for all problematic files found.
+
+### EXIF Remover
+This tool finds image files containing EXIF metadata and allows selective removal of tags.
+
+**Process**
+- Scans image files with the following extensions: `jpg`, `jpeg`, `jfif`, `png`, `tiff`, `tif`, `avif`, `jxl`, `webp`, `heic`, `heif`
+- Reads EXIF metadata from each file
+- Lists all EXIF tags with their names, codes, and groups
+- User can specify tags to ignore (e.g., `Orientation`, `ColorSpace`)
+- Only files with non-ignored tags are shown in results
+
+This is useful for finding images with privacy-sensitive metadata like GPS coordinates, camera serial numbers, or editing software information.
+
+### Video Optimizer
+This tool helps optimize video files by detecting optimization opportunities. It operates in two modes:
+
+#### Transcode Mode
+Identifies videos that could be re-encoded to a more efficient codec.
+
+- Scans video files (e.g., `.mp4`, `.avi`, `.mkv`)
+- Checks current video codec
+- Lists videos not using excluded codecs (user-specified)
+- Common use: find videos using older codecs (H264) that could be converted to newer ones (H265, AV1) for better compression
+
+#### Crop Mode
+Detects videos with black bars or static content that can be cropped.
+
+- Scans video files
+- Analyzes multiple frames to detect black bars or static content
+- Supports two detection mechanisms:
+  - Black bars detection - finds letterbox/pillarbox black borders
+  - Static content detection - finds unchanging areas at edges
+- Calculates optimal crop rectangle for each video
+- Shows crop dimensions of video that can be removed
+
+**Additional features**
+- Can generate thumbnails for preview (single frame or grid)
+- Thumbnail position configurable (percentage from video start)
+- Supports minimum crop size threshold to avoid cropping too small areas
+
