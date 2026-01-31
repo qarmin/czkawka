@@ -96,6 +96,7 @@ fn main() {
         }
     }
 
+    info!("AA1");
     let app = match MainWindow::new() {
         Ok(app) => app,
         Err(e) => {
@@ -104,6 +105,7 @@ fn main() {
             return;
         }
     };
+    info!("AA2");
 
     #[cfg(feature = "audio")]
     app.global::<GuiState>().set_audio_feature_enabled(true);
@@ -112,6 +114,7 @@ fn main() {
     let stop_flag: Arc<AtomicBool> = Arc::default();
 
     zeroing_all_models(&app);
+    info!("AA3");
 
     let shared_models = SharedModels::new_shared();
 
@@ -123,9 +126,11 @@ fn main() {
 
     set_initial_scroll_list_data_indexes(&app);
 
+    info!("AA4");
     let original_preset_idx = base_settings.default_preset;
     set_initial_settings_to_gui(&app, &base_settings, &custom_settings, cli_args, preset_to_load);
 
+    info!("AA5");
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models), Arc::clone(&audio_player));
     connect_stop_button(&app, stop_flag.clone());
@@ -152,14 +157,17 @@ fn main() {
     connect_clean_cache(&app, task_sender);
     connect_show_confirmation(&app, Arc::clone(&shared_models));
 
+    info!("AA6");
     clear_outdated_video_thumbnails(&app);
 
     // Popups gather their size, after starting/closing popup at least once
     // This is simpler solution, than setting sizes of popups manually for each language
     app.invoke_initialize_popup_sizes();
 
+    info!("AA7");
     match app.run() {
         Ok(()) => {
+            info!("Application closed normally.");
             save_all_settings_to_file(&app, original_preset_idx);
         }
         Err(e) => {
