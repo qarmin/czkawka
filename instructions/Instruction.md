@@ -192,72 +192,89 @@ Duplicate Finder allows you to search for files and group them according to a pr
       of the file to make sure they are identical.
 
 ### Empty Files
-Searching for empty files is easy and fast, because we only need to check the file metadata and its length.
+This tool finds files with zero bytes size.
+
+**Process**
+- Scans all files in specified directories
+- Checks file metadata for size
+- Files with size of 0 bytes are marked as empty
+
+This is a fast operation since it only requires reading file metadata without accessing file contents.
 
 ### Empty Directories
-At the start, a special entry is created for each directory, including its parent path (unless it is a folder directly selected by the user) and a flag indicating whether the directory is empty. Initially, all directories are assumed to be potentially empty.
+This tool finds directories that contain no files or subdirectories.
 
-First, user-defined folders are added to the pool of directories to be checked.
+**Process**
+- Creates an entry for each directory with its parent path and empty status flag
+- Initially marks all directories as potentially empty
+- Examines each directory:
+  - If it contains files or subdirectories → marks it as not empty
+  - Marks all parent directories (direct and indirect) as not empty
+- After processing, directories still marked as potentially empty are confirmed as empty
 
-Each folder is then examined to determine its status:
+**Example**
 
-- If it is a folder – it is added to the check queue as potentially empty (FolderEmptiness::Maybe). 
-- If it contains any files or subdirectories – it is marked as not empty (FolderEmptiness::No). In this case, all parent directories, both direct and indirect, are also marked as not empty.
+Consider four directories: `/cow/`, `/cow/ear/`, `/cow/ear/stack/`, `/cow/ear/flag/`
 
-Example
-
-Consider four folders that may be empty:
-/cow/, /cow/ear/, /cow/ear/stack/, /cow/ear/flag/.
-
-If /cow/ear/flag/ contains a file, then:
-
-- /cow/ear/flag/ is marked as not empty.
-- Its parent folders /cow/ear/ and /cow/ are also marked as not empty.
-- However, /cow/ear/stack/ may still be empty.
-
-Finally, all folders still marked as FolderEmptiness::Maybe are considered empty by default.
+If `/cow/ear/flag/` contains a file:
+- `/cow/ear/flag/` is marked as not empty
+- Parent directories `/cow/ear/` and `/cow/` are marked as not empty
+- `/cow/ear/stack/` may still be empty
 
 ### Big Files
-For each file within the given path, its size is read. Then, depending on the mode, a specified number of either the smallest or largest files are displayed.
+This tool finds the largest or smallest files in the specified directories.
+
+**Process**
+- Scans all files and reads their sizes
+- Sorts files by size
+- Returns a user-specified number of largest or smallest files
+
+Useful for finding large files that take up disk space or identifying unusually small files that may be incomplete downloads.
 
 ### Temporary Files
-Searching for temporary files is done by comparing their extensions against a predefined list.
+This tool finds temporary files based on a predefined list of common temporary file extensions and names.
 
-Currently, the following names and extensions are considered temporary:
+**Detected patterns**
+Files with the following extensions or names are considered temporary:
 ```
 ["#", "thumbs.db", ".bak", "~", ".tmp", ".temp", ".ds_store", ".crdownload", ".part", ".cache", ".dmp", ".download", ".partial"]
 ```
-This method removes only the most common temporary files. For more thorough cleanup, I recommend using BleachBit.
+
+This list covers the most common temporary files created by operating systems and applications. For more comprehensive system cleanup, consider using specialized tools like BleachBit.
 
 ### Invalid Symlinks
-To find invalid symlinks, we first need to identify all symlinks in the given path.
-
-Once symlinks are located, each one is checked to determine its target. If the target does not exist, the symlink is added to the list of invalid symlinks, as it points to a non-existent path.
-
-The second mode attempts to detect recursive symlinks. 
-However, this feature is currently non-functional and incorrectly reports an error related to a non-existent target. 
-The intended implementation works by counting the number of symlink jumps, and if a certain threshold (e.g., 20) is exceeded, the symlink is considered recursive.
-### Same Music
-Tags are limited to `artist`, `title`, `year`, `bitrate`, `genre`, and `length`.
+This tool finds broken symbolic links.
 
 **Process**
-- Collect all music files with one of the following extensions: `[".mp3", ".flac", ".m4a"]`
-- Read the tags for each file
+- Identifies all symlinks in the specified directories
+- For each symlink, checks if its target exists
+- Detects two types of errors:
+  - Non-existent target - symlink points to a file or directory that does not exist
+  - Infinite recursion - symlink chain exceeds maximum jump count (20), indicating a circular reference
 
-**Additionally in duplicate tags mode**
-- User selects tag groups that will be used to compare files
-- Tags like `artist` are simplified by:
-  - Removing all non-alphanumeric characters
-  - Converting text to lowercase
-  - Removing everything inside parentheses, but only if approximate comparison is selected (e.g., `bataty (feat. romba)` is treated as `bataty`)
-- Only non-empty tags are collected
+Both error types are reported in the results.
+### Same Music
+This tool finds duplicate or similar music files by comparing metadata tags or audio content.
 
-**Additionally in similar content mode**
-- If title-based comparison is selected, files are first grouped by simplified title to reduce the number of hashes that need to be calculated
-- A hash is generated for each file
-- Hashes are compared, respecting the user-defined similarity threshold and the minimum required length of matching fragments
+**Process**
+- Collects music files with extensions: `mp3`, `flac`, `m4a`
+- Reads metadata tags: `artist`, `title`, `year`, `bitrate`, `genre`, `length`
 
-After checking all tags, results are shown in a table.
+**Duplicate Tags Mode**
+- User selects which tag groups to compare (e.g., artist + title)
+- Tags are normalized:
+  - Removes non-alphanumeric characters
+  - Converts to lowercase
+  - Optionally removes text in parentheses for approximate comparison (e.g., `bataty (feat. romba)` → `bataty`)
+- Only files with non-empty tags are compared
+
+**Similar Content Mode**
+- Optionally groups files by simplified title first to reduce hash calculations
+- Generates audio hash for each file
+- Compares hashes using user-defined similarity threshold
+- Requires minimum matching fragment length
+
+Results show groups of files with matching tags or similar audio content.
 
 ### Similar Images
 
@@ -332,32 +349,39 @@ The faster comparison option ensures that each pair of results is compared only 
 - `Blockhash` is the only algorithm that does not resize images before hashing.
 - The `Nearest` resizing algorithm can be up to **five times faster** than other methods but may produce worse results.
 
-### **Similar Video Finder**
+### Similar Videos
 
-This tool works similarly to the **Similar Images** feature but is designed for video files.
+This tool finds similar videos using perceptual hashing, similar to the Similar Images feature.
 
-#### **Requirements and Limitations**
-- Requires **FFmpeg** to function; an error will be displayed if it is not found on the system
-- Currently, it only compares videos with **almost equal lengths**
+**Requirements**
+- Requires **FFmpeg** installed on the system
+- Currently only compares videos with similar lengths
 
-#### **Process Overview**
-  - Video files are gathered based on their extensions (`.mp4`, `.mpv`, `.avi`, etc.).
-  - Each file is processed using a hashing algorithm.
-  - The implementation is handled by an external library, but the process involves:
-    - Extracting several frames from video
-    - Generating perceptual hashes for each frame
-  - The generated hashes are stored in a cache file for future use, reducing redundant calculations
-  - Using the user-defined **similarity tolerance**, hashes are compared
-  - Groups of similar videos are returned as results
+**Process**
+- Collects video files based on their extensions (mp4, mkv, avi, mov, webm, etc.)
+- For each video:
+  - Extracts several frames
+  - Generates perceptual hashes for each frame
+- Stores hashes in cache file to avoid recalculating in future scans
+- Compares hashes using user-defined similarity tolerance
+- Groups similar videos in results
 
 ### Broken Files
-### **Corrupted or Invalid Files Finder**
+This tool detects corrupted or invalid files that cannot be properly opened.
 
-This tool detects files that are either corrupted or have an invalid extension.
+**Supported file types**
+- Images - jpg, jpeg, png, tiff, tif, tga, gif, bmp, ico, jfif, webp, exr, avif, and others
+- Audio - mp3, flac, wav, ogg, m4a, aac, and others
+- Video - mp4, mkv, avi, mov, webm, and others
+- Archives - zip, jar
+- Documents - pdf
 
-- Collected are pdf, audio, music and archive files
-- If an error occurs while opening a file, it is considered either **corrupted**(with some exceptions)
-- Since tool relies on external libraries, **false positives** may occur (e.g., [this issue](https://github.com/image-rs/jpeg-decoder/issues/130)), so it is recommended to manually open the file to confirm if it is truly broken
+**Process**
+- Files are collected based on their extensions
+- Each file is validated by attempting to open it with appropriate libraries
+- If an error occurs during opening, the file is marked as corrupted (with some exceptions to avoid false positives)
+
+**Note**: Since this tool relies on external libraries, false positives may occur (e.g., [this issue](https://github.com/image-rs/jpeg-decoder/issues/130)). It is recommended to manually verify files before deletion.
 
 ### Bad Extensions
 This mode allows finding files whose content does not match their extension.
@@ -374,3 +398,56 @@ It works as follows:
 In the **"Proper Extension"** column, the extension detected by the Infer library appears in parentheses, while extensions with the same MIME type are displayed outside.
 
 ![ABC](https://user-images.githubusercontent.com/41945903/167214811-7d811829-6dba-4da0-9788-9e2f780e7279.png)
+
+### Bad Names
+This tool finds files with problematic names that may cause issues on different operating systems or filesystems.
+
+It can detect multiple naming problems:
+- Uppercase extensions - e.g., `file.JPG` instead of `file.jpg`
+- Emoji in filenames - e.g., `document😀.txt`
+- Spaces at the start or end of filename - e.g., ` file.txt` or `file.txt `
+- Non-ASCII characters - e.g., `файл.txt`, `文档.doc`
+- Characters outside restricted charset - only specific characters are allowed (e.g., only `_`, `-`, ` `, `.`)
+- Duplicated non-alphanumeric characters - e.g., `file___name.txt`, `doc---final.pdf`
+
+Each check can be enabled or disabled independently. The tool suggests corrected filenames for all problematic files found.
+
+### EXIF Remover
+This tool finds image files containing EXIF metadata and allows selective removal of tags.
+
+**Process**
+- Scans image files with the following extensions: `jpg`, `jpeg`, `jfif`, `png`, `tiff`, `tif`, `avif`, `jxl`, `webp`, `heic`, `heif`
+- Reads EXIF metadata from each file
+- Lists all EXIF tags with their names, codes, and groups
+- User can specify tags to ignore (e.g., `Orientation`, `ColorSpace`)
+- Only files with non-ignored tags are shown in results
+
+This is useful for finding images with privacy-sensitive metadata like GPS coordinates, camera serial numbers, or editing software information.
+
+### Video Optimizer
+This tool helps optimize video files by detecting optimization opportunities. It operates in two modes:
+
+#### Transcode Mode
+Identifies videos that could be re-encoded to a more efficient codec.
+
+- Scans video files (e.g., `.mp4`, `.avi`, `.mkv`)
+- Checks current video codec
+- Lists videos not using excluded codecs (user-specified)
+- Common use: find videos using older codecs (H264) that could be converted to newer ones (H265, AV1) for better compression
+
+#### Crop Mode
+Detects videos with black bars or static content that can be cropped.
+
+- Scans video files
+- Analyzes multiple frames to detect black bars or static content
+- Supports two detection mechanisms:
+  - Black bars detection - finds letterbox/pillarbox black borders
+  - Static content detection - finds unchanging areas at edges
+- Calculates optimal crop rectangle for each video
+- Shows crop dimensions and percentage of video that can be removed
+
+**Additional features**
+- Can generate thumbnails for preview (single frame or grid)
+- Thumbnail position configurable (percentage from video start)
+- Supports minimum crop size threshold to avoid cropping too small areas
+
