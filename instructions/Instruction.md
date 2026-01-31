@@ -15,7 +15,7 @@ Czkawka contains three independent frontends - the terminal app (CLI) and two gr
 **GTK** is the older GUI that is still maintained but will eventually be replaced by Krokiet.
 
 ## GUI Krokiet
-<img src="https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6" width="800" />
+<img src="https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6" alt="Krokiet main window" width="800" />
 
 Krokiet is the new Czkawka frontend written in Slint. It provides a modern, consistent interface across all platforms (Linux, Windows, macOS) and is designed to be more performant and stable than the GTK version.
 
@@ -23,17 +23,12 @@ Krokiet is the new Czkawka frontend written in Slint. It provides a modern, cons
 
 The Krokiet interface consists of several key areas:
 
-1. **Left Side Panel** - Tool selector with tabs for each scanning mode (Duplicates, Empty Files, Similar Images, etc.) and settings/tool subsettings
-2. **Results Area** - Displays scan results in a table/list format
-3. **Button Area** - Contains scan, select, sort, save and action buttons
-4. **Result Labels** - Shows summary of results (number of groups, files, total size)
-5. **Directory Selection Panel** - Area to add/remove included and excluded paths
+1. **Left Side Panel** - Tool selector with tabs for each scanning mode (Duplicates, Empty Files, Similar Images, etc.)
+2. **Top Bar** - Contains scan button, settings button, and status information
+3. **Directory Selection Panel** - Area to add/remove included and excluded directories, set file filters
+4. **Results Area** - Displays scan results in a table/list format
+5. **Bottom Panel** - Action buttons for working with results (Select, Delete, Move, etc.)
 6. **Right Side Panel** - Preview area for images and additional information
-
-### Legend
-
-**Reference Paths**
-After adding directories or files, you can mark them as "Reference Paths" by selecting checkbox next to them. Reference files or files in reference folders are used for comparison but cannot be modified or deleted.
 
 ### Settings Screen
 
@@ -62,7 +57,7 @@ Each tool has its own settings page with advanced options:
 Krokiet have full support for multiple languages in GUI. Language can be changed in Settings → General → Language.
 
 ## GUI GTK
-<img src="https://user-images.githubusercontent.com/41945903/148281103-13c00d08-7881-43e8-b6e3-5178473bce85.png" width="800" />
+<img src="https://user-images.githubusercontent.com/41945903/148281103-13c00d08-7881-43e8-b6e3-5178473bce85.png" alt="Czkawka GTK main window" width="800" />
 
 **Note**: GTK GUI is the older interface that is still maintained but will eventually be replaced by Krokiet. For new users, we recommend using Krokiet.
 
@@ -76,7 +71,21 @@ The GUI is built from different pieces:
 - 6 - Panel with selecting specific directories to use or exclude. Also, here are specified allowed extensions and file sizes.
 - 7 - Buttons which opens About Window(shows info about app) and Settings in which scan can be customized
 
-<img src="https://user-images.githubusercontent.com/41945903/148279809-54ea8684-8bff-436b-af67-ff9859f468f2.png" width="800" />
+## Terminology (shared across CLI / GTK / Krokiet)
+
+This short glossary contains terms used consistently by all frontends (CLI, GTK and Krokiet).
+
+- Reference paths
+  - After adding directories or files, you can mark them as "Reference paths" (a path can be a file or a folder) by checking the checkbox next to them in the directory selection UI or using the CLI flag where available.
+  - Reference paths are used for comparison but are protected: they cannot be modified, moved or deleted by the automatic actions in the UI or by the CLI.
+  - Use cases: compare a working folder against a master backup, protect original files when removing duplicates, or use a dataset as read-only baseline.
+
+- Included / Excluded paths
+  - Included paths are scanned by the tools. Excluded paths are explicitly ignored during scans.
+
+- Configuration vs Cache
+  - Configuration files are frontend-specific (each frontend stores its own UI/settings files). Configuration is not shared between GTK, Krokiet and CLI by default(CLI doesn't even store config files).
+  - Cache files are shared across frontends and contain computed data (hashes, thumbnails, analysis results). Cache is placed in a shared cache directory so all frontends can reuse computed results.
 
 ### Translations
 GTK GUI is fully translatable.  
@@ -101,20 +110,20 @@ When using additional command line arguments, saving at exit option become disab
 
 Both relative and absolute path are supported, so user can use both `../home` and `/home`.
 
-After adding a path it is possible to mark one or more paths as a _Reference folder_. Files in the _Reference folder_ cannot be acted upon, e.g. selected, moved or removed. This behaviour can be useful if you want to leave a folder untouched, but still use it for comparison against others.
+After adding a path it is possible to mark one or more paths as a _Reference path_. Reference paths (files or folders) cannot be acted upon, e.g. selected, moved or removed. This behaviour can be useful if you want to leave a path untouched, but still use it for comparison against others.
 
 ## CLI
 Czkawka CLI frontend is great to automate some tasks like removing empty directories.
 
 To get general info how to use it just try to open czkawka_cli in console `czkawka_cli`
 
-<img src="https://user-images.githubusercontent.com/41945903/103018271-3d64ac80-4545-11eb-975c-2132f2ccf66f.png" width="800" />
+<img src="https://user-images.githubusercontent.com/41945903/103018271-3d64ac80-4545-11eb-975c-2132f2ccf66f.png" alt="CLI help example" width="800" />
 
 You should see a lot of examples how to use this app.
 
 If you want to get more detailed info about certain tool, just add after its name  `-h` or `--help` to get more details.
 
-<img src="https://user-images.githubusercontent.com/41945903/103018151-0a221d80-4545-11eb-97b2-d7d77b49c735.png" width="800" />
+<img src="https://user-images.githubusercontent.com/41945903/103018151-0a221d80-4545-11eb-97b2-d7d77b49c735.png" alt="CLI example 2" width="800" />
 
 By default, all tools only write about results to console, but it is possible with specific arguments to delete some files/arguments or save it to file.
 
@@ -133,7 +142,7 @@ This section describes typical workflows for common tasks using Czkawka.
 2. Click **Add Directory** in the Directory Selection Panel
 3. Add your Downloads folder to included directories
 4. Add your Documents folder to included directories
-5. Right-click on Documents folder and select **Mark as Reference Folder** - files here won't be deleted
+5. Right-click on Documents folder and select **Mark as Reference Path** - files here won't be deleted
 6. In tool settings, set:
    - Check method: **Hash** (most reliable)
    - Hash type: **Blake3** (fastest for most cases)
@@ -150,7 +159,7 @@ This section describes typical workflows for common tasks using Czkawka.
 **Steps (GTK)**:
 1. Open Czkawka GTK and select **Duplicate Files** tab
 2. In the directories panel (6), add Downloads folder to included directories
-3. Add Documents folder and mark it as Reference Folder (right-click → Mark as Reference)
+3. Add Documents folder and mark it as Reference Path (right-click → Mark as Reference)
 4. In settings (button 7), configure:
    - Check Method: **Hash**
    - Hash Type: **Blake3**
@@ -196,7 +205,7 @@ This section describes typical workflows for common tasks using Czkawka.
 7. Manually review and delete or move large files you don't need
 
 
-### Working with Reference Folders
+### Working with Reference Paths
 
 **Scenario**: You want to compare your working files against a master/backup collection without risking deletion of the master files.
 
@@ -207,23 +216,28 @@ This section describes typical workflows for common tasks using Czkawka.
 
 **How to Use**:
 1. Add both your working directory and reference directory to included directories
-2. Right-click on the reference directory
-3. Select **Mark as Reference Folder**
-4. Files in reference folders will:
+2. Right-click on the reference directory (or use CLI flag) and select **Mark as Reference Path**
+3. Files or folders marked as reference paths will:
    - Appear in scan results for comparison
-   - Cannot be selected for deletion or modification
-   - Show with a different indicator in results
-5. Proceed with scan and operations - reference files are protected
+   - Be protected from deletion or modification by automatic actions
+   - Be shown with a different indicator in the results if the UI supports it
+4. Proceed with scan and operations — reference paths are protected
 
 ## Config/Cache files
-Currently, Czkawka stores few config and cache files on disk:
-- `czkawka_gui_config.txt` - stores configuration of GUI which may be loaded at startup
-- `cache_similar_image_SIZE_HASH_FILTER.bin/json` - stores cache data and hashes which may be used later without needing to compute image hash again. Each algorithms use its own file, because hashes are completely different in each.
-- `cache_broken_files.txt` - stores cache data of broken files
-- `cache_duplicates_HASH.txt` - stores cache data of duplicated files, to not suffer too big of a performance hit when saving/loading file, only already fully hashed files bigger than 5MB are stored. Similar files with replaced `Blake3` to e.g. `SHA256` may be shown, when support for new hashes will be introduced in Czkawka.
-- `cache_similar_videos.bin/json` - stores cache data of video files.
+- **Configuration files (frontend-specific)**
+  - Configuration files are kept per frontend and are not automatically shared. Examples:
+    - `czkawka_gui_config.txt` — GTK GUI configuration stored under the user config directory
+    - Krokiet stores its own settings file (created under the user config directory) — do not rely on configuration being synchronized between frontends
 
-It is possible to modify files with JSON extension(may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. Next file can be changed/modified. By default, cache files with `bin` extension are loaded, but if it is missing(can be renamed or removed), then data from json file is loaded if exists.
+- **Cache files (shared across frontends)**
+  - Cache contains computed results (hashes, thumbnails, parsed metadata) and is shared by all frontends to avoid re-computation.
+  - Example cache files:
+    - `cache_similar_image_SIZE_HASH_FILTER.bin/json` — image hashes and cache
+    - `cache_broken_files.txt`
+    - `cache_duplicates_HASH.txt` — duplicates cache (only fully hashed files bigger than configured threshold are stored)
+    - `cache_similar_videos.bin/json`
+
+It is possible to modify files with JSON extension (may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. By default, cache files with `bin` extension are loaded, but if it is missing (can be renamed or removed), then data from json file is loaded if exists.
 
 Config files are located in this path:
 
