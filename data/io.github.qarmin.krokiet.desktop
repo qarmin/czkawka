@@ -1,0 +1,14 @@
+[Desktop Entry]
+Categories=System;FileTools
+Exec=krokiet
+Icon=io.github.qarmin.krokiet
+StartupWMClass=krokiet
+Terminal=false
+TryExec=krokiet
+Type=Application
+
+Name=Krokiet
+
+Comment=Krokiet — multi-functional app to find duplicates, empty folders, similar files and many more.
+
+Keywords=Krokiet;duplicate;same;similar;cleaner;copy;copies;compare;files;krokiet
