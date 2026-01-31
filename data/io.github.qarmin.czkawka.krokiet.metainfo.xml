@@ -10,7 +10,7 @@
       Krokiet is a multi functional app to find duplicates, empty folders, similar images, broken files etc.
     </p>
   </description>
-  <launchable type="desktop-id">io.github.qarmin.krokiet.desktop</launchable>
+  <launchable type="desktop-id">io.github.qarmin.czkawka.krokiet.desktop</launchable>
   <screenshots>
     <screenshot type="default">
       <image>https://github.com/user-attachments/assets/f5e4b290-d001-4cf4-9f52-dab65a30e441</image>
