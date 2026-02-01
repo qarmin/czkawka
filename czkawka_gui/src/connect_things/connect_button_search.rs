@@ -65,8 +65,15 @@ use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIM
 //! - Invalid user input falls back to sensible defaults with logging
 //! - Combo box selection failures use index 0 as default
 
-/// Helper function to send messages to the result channel with proper error handling
-/// If the channel is closed (e.g., GUI closed), log the error instead of panicking
+/// Helper function to send messages to the result channel with proper error handling.
+///
+/// This function is designed for worker thread contexts where channel closure is an expected
+/// scenario (e.g., when the GUI is closed mid-search), not a critical error requiring panic.
+/// The error is logged for debugging purposes but doesn't interrupt the worker thread's cleanup.
+///
+/// # Arguments
+/// * `sender` - The crossbeam channel sender
+/// * `msg` - The message to send containing search results
 fn send_result_message(sender: &Sender<Message>, msg: Message) {
     if let Err(e) = sender.send(msg) {
         log::error!("Failed to send result message (receiver likely closed): {}", e);
@@ -82,7 +89,25 @@ fn get_combo_box_index_or_default(combo_box: &gtk4::ComboBox, context: &str) -> 
     })
 }
 
-/// Helper function to parse numeric input from entry with logging on failure
+/// Helper function to parse numeric input from entry fields with logging on failure.
+///
+/// This function attempts to parse user input from GTK Entry widgets. If parsing fails
+/// (e.g., invalid format, out of range), it logs the invalid input and returns a sensible default.
+/// This prevents the application from crashing on malformed user input.
+///
+/// # Type Parameters
+/// * `T` - Any type that implements `FromStr` (e.g., u64, usize, f64)
+///
+/// # Arguments
+/// * `entry` - The GTK Entry widget containing the text to parse
+/// * `field_name` - Human-readable field name for logging
+/// * `default` - Default value to return if parsing fails
+///
+/// # Examples
+/// ```ignore
+/// let count = parse_entry_value(&entry_file_count, "file count", 50usize);
+/// let size = parse_entry_value(&entry_min_size, "minimum size", 0u64);
+/// ```
 fn parse_entry_value<T: std::str::FromStr>(entry: &gtk4::Entry, field_name: &str, default: T) -> T {
     let text = entry.text();
     text.as_str().parse::<T>().unwrap_or_else(|_| {
