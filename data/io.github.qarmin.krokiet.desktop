@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=System;FileTools
 Exec=krokiet
-Icon=io.github.qarmin.czkawka.krokiet
+Icon=io.github.qarmin.krokiet
 StartupWMClass=krokiet
 Terminal=false
 TryExec=krokiet

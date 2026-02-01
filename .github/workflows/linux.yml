@@ -297,7 +297,7 @@ jobs:
           ci_tester/target/release/ci_tester target/debug/czkawka_cli
 
   android:
-    #if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
