@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.qarmin.czkawka.krokiet</id>
+  <id>io.github.qarmin.krokiet</id>
   <name>Krokiet</name>
   <summary>Multi functional app to find duplicates, similar images and many more</summary>
   <metadata_license>CC0-1.0</metadata_license>
@@ -20,7 +20,7 @@
       <li>Invalid symlinks</li>
     </ul>
   </description>
-  <launchable type="desktop-id">io.github.qarmin.czkawka.krokiet.desktop</launchable>
+  <launchable type="desktop-id">io.github.qarmin.krokiet.desktop</launchable>
   <screenshots>
     <screenshot type="default">
       <image>https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6</image>
