@@ -310,4 +310,4 @@ jobs:
       - name: Check for Android
         run: |
           cd czkawka_core
-          cargo check --target aarch64-linux-android --features "blake3_pure"
+          cargo check --target aarch64-linux-android --features "blake_pure"
