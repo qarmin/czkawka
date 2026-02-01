@@ -83,7 +83,6 @@ nom-exif = "2.1.0"
 # EXIF data cleaning
 little_exif = "0.6.20"
 
-trash = "5.1"
 dunce = "1.0.5"
 
 os_info = { version = "3", default-features = false }
@@ -101,6 +100,9 @@ deunicode = "1.6.2"
 glibc_musl_version = "0.1.0"
 
 rand = "0.9.2"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+trash = "5.1"
 
 [target.'cfg(windows)'.dependencies]
 file-id = "0.2.2"

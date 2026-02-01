@@ -128,26 +128,48 @@ pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> R
     Ok(())
 }
 
+/// A wrapper around `trash::delete`. Note that for platforms that do not have native trash support
+/// (Android, iOS), this function will always return an [`Error`].
+fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
+    let path = path.as_ref();
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        trash::delete(path).map_err(|err| err.to_string())
+    }
+
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    {
+        Err("trash is not supported on this platform".to_string())
+    }
+}
+
+/// Remove the folder if it only contains empty folders/is empty. If `remove_to_trash` is set, the folder
+/// will instead be sent to the system's recycle bin/trash equivalent rather than being deleted.
+///
+/// Note: if used on Android or iOS platforms, ensure `remove_to_trash` is false, as trash is not supported
+/// and will always return an [`Error`].
 pub fn remove_folder_if_contains_only_empty_folders<P: AsRef<Path>>(path: P, remove_to_trash: bool) -> Result<(), String> {
     check_if_folder_contains_only_empty_folders(&path)?;
 
     let path = path.as_ref();
 
     if remove_to_trash {
-        trash::delete(path).map_err(|e| format!("Cannot move folder \"{}\" to trash, reason {e}", path.to_string_lossy()))
+        trash_delete(path).map_err(|e| format!("Cannot move folder \"{}\" to trash, reason {e}", path.to_string_lossy()))
     } else {
         fs::remove_dir_all(path).map_err(|e| format!("Cannot remove directory \"{}\", reason {e}", path.to_string_lossy()))
     }
 }
 
+/// Remove a single file. If `remove_to_trash` is set, the folder will instead be sent to the system's
+/// recycle bin/trash equivalent rather than being deleted.
+///
+/// Note: if used on Android or iOS platforms, ensure `remove_to_trash` is false, as trash is not supported
+/// and will always return an [`Error`].
 pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
-        if let Err(e) = trash::delete(&full_path) {
-            return Err(flc!(
-                "core_error_moving_to_trash",
-                file = full_path.as_ref().to_string_lossy().to_string(),
-                error = e.to_string()
-            ));
+        if let Err(e) = trash_delete(&full_path) {
+            return Err(flc!("core_error_moving_to_trash", file = full_path.as_ref().to_string_lossy().to_string(), error = e));
         }
     } else {
         if let Err(e) = fs::remove_file(&full_path) {
@@ -157,10 +179,15 @@ pub fn remove_single_file<P: AsRef<Path>>(full_path: P, remove_to_trash: bool) -
     Ok(())
 }
 
+/// Remove a single folder recursively. If `remove_to_trash` is set, the folder will instead be sent to the system's
+/// recycle bin/trash equivalent rather than being deleted.
+///
+/// Note: if used on Android or iOS platforms, ensure `remove_to_trash` is false, as trash is not supported
+/// and will always return an [`Error`].
 pub fn remove_single_folder(full_path: &str, remove_to_trash: bool) -> Result<(), String> {
     if remove_to_trash {
-        if let Err(e) = trash::delete(full_path) {
-            return Err(flc!("core_error_moving_to_trash", file = full_path, error = e.to_string()));
+        if let Err(e) = trash_delete(full_path) {
+            return Err(flc!("core_error_moving_to_trash", file = full_path, error = e));
         }
     } else {
         if let Err(e) = fs::remove_dir_all(full_path) {
