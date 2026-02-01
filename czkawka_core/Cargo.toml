@@ -123,6 +123,7 @@ default = []
 heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
+blake_pure = ["blake3/pure"]
 
 [lints]
 workspace = true
