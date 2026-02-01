@@ -45,6 +45,36 @@ use crate::opening_selecting_records::{
     select_function_always_true, select_function_duplicates, select_function_same_music, select_function_similar_images, select_function_similar_videos,
 };
 
+//! # Result Computation and UI Update Module
+//!
+//! This module receives search results from worker threads and updates the GTK UI accordingly.
+//!
+//! ## Threading Model
+//!
+//! All functions in this module run on the GTK main thread via `glib::spawn_future_local()`.
+//! Results are received from worker threads via crossbeam channels and processed asynchronously.
+//!
+//! ## Result Processing Flow
+//!
+//! 1. Worker thread completes search and sends Message via result_sender
+//! 2. Main thread's async loop polls with `try_recv()` (non-blocking)
+//! 3. Message is matched to appropriate compute_* function
+//! 4. Results are formatted and inserted into GTK ListStore
+//! 5. UI elements (buttons, progress, etc.) are updated
+//!
+//! ## Thread Safety Notes
+//!
+//! - **GUI State**: All GUI operations use `Rc<RefCell<T>>` - single-threaded only
+//! - **RefCell Borrows**: Must ensure no overlapping mutable borrows within same scope
+//! - **Channel Safety**: Uses `try_recv()` to avoid blocking main thread
+//! - **Tool Results**: Owned by Message, safely moved between threads
+//!
+//! ## Performance Optimizations
+//!
+//! - Large result sets sorted in parallel with Rayon
+//! - Conditional sorting (only if ≥2 items)
+//! - Results grouped by similarity/hash before display
+
 // Helper functions for deduplication
 
 fn handle_stopped_search<T: CommonData>(tool: &T, entry_info: &Entry) -> bool {

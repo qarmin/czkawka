@@ -39,6 +39,32 @@ use crate::notebook_enums::NotebookMainEnum;
 use crate::taskbar_progress::tbp_flags::TBPF_NOPROGRESS;
 use crate::{DEFAULT_MAXIMAL_FILE_SIZE, DEFAULT_MINIMAL_CACHE_SIZE, DEFAULT_MINIMAL_FILE_SIZE, flg};
 
+//! # Search Button Connection Module
+//!
+//! This module handles the main search operations for all 11 supported tools.
+//!
+//! ## Threading Model
+//!
+//! Each search operation spawns a dedicated worker thread with the following characteristics:
+//! - Stack size: `DEFAULT_THREAD_SIZE` from czkawka_core
+//! - Communication: Via crossbeam channels (unbounded)
+//! - Cancellation: Via `Arc<AtomicBool>` stop flag shared with worker
+//! - Progress: Sent via dedicated progress channel, polled on main thread
+//! - Results: Sent via result channel, processed on main thread via glib::spawn_future_local
+//!
+//! ## Thread Safety
+//!
+//! - **Main Thread**: All GTK UI operations, result processing
+//! - **Worker Threads**: File scanning, hashing, comparison operations
+//! - **Synchronization**: Channels for communication, AtomicBool for cancellation
+//! - **GUI State**: GuiData uses `Rc<RefCell<T>>` - not thread-safe (GTK runs on single thread)
+//!
+//! ## Error Handling
+//!
+//! - Channel send failures are logged but don't panic (GUI may close during search)
+//! - Invalid user input falls back to sensible defaults with logging
+//! - Combo box selection failures use index 0 as default
+
 /// Helper function to send messages to the result channel with proper error handling
 /// If the channel is closed (e.g., GUI closed), log the error instead of panicking
 fn send_result_message(sender: &Sender<Message>, msg: Message) {
