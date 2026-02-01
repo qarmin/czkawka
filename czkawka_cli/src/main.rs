@@ -574,7 +574,7 @@ fn save_and_write_results_to_writer<T: CommonData + PrintResults>(component: &T,
     }
 
     let mut cli_output = CliOutput {
-        found_any_files: component.found_any_broken_files(),
+        found_any_files: component.found_any_items(),
         ignored_error_code_on_found: common_cli_items.ignore_error_code_on_found,
         output: String::new(),
     };

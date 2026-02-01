@@ -134,7 +134,7 @@ impl CommonData for BrokenFiles {
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
     }
-    fn found_any_broken_files(&self) -> bool {
+    fn found_any_items(&self) -> bool {
         self.information.number_of_broken_files > 0
     }
 }

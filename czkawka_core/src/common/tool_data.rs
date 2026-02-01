@@ -132,7 +132,7 @@ pub trait CommonData {
     fn get_test_type(&self) -> (ToolType, CheckingMethod) {
         (self.get_cd().tool_type, self.get_check_method())
     }
-    fn found_any_broken_files(&self) -> bool;
+    fn found_any_items(&self) -> bool;
 
     fn get_tool_type(&self) -> ToolType {
         self.get_cd().tool_type
@@ -563,7 +563,7 @@ mod tests {
         fn get_cd_mut(&mut self) -> &mut CommonToolData {
             &mut self.common_data
         }
-        fn found_any_broken_files(&self) -> bool {
+        fn found_any_items(&self) -> bool {
             false
         }
     }
