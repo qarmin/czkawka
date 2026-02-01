@@ -87,6 +87,15 @@ fn get_row_color(is_header: bool) -> &'static str {
     if is_header { HEADER_ROW_COLOR } else { MAIN_ROW_COLOR }
 }
 
+/// Helper function to get combo box active index with fallback to default
+/// Returns the active index or 0 if no selection (which shouldn't happen in normal use)
+fn get_combo_box_index_or_default(combo_box: &gtk4::ComboBox, context: &str) -> usize {
+    combo_box.active().map(|i| i as usize).unwrap_or_else(|| {
+        log::warn!("No active selection in {}, using default (0)", context);
+        0
+    })
+}
+
 pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Receiver<Message>) {
     let combo_box_image_hash_size = gui_data.main_notebook.combo_box_image_hash_size.clone();
     let buttons_search = gui_data.bottom_buttons.buttons_search.clone();
@@ -120,7 +129,7 @@ pub(crate) fn connect_compute_results(gui_data: &GuiData, result_receiver: Recei
 
                 taskbar_state.borrow().hide();
 
-                let hash_size_index = combo_box_image_hash_size.active().expect("Failed to get active item") as usize;
+                let hash_size_index = get_combo_box_index_or_default(&combo_box_image_hash_size, "image hash size");
                 let hash_size = IMAGES_HASH_SIZE_COMBO_BOX[hash_size_index] as u8;
 
                 let msg_type = msg.get_message_type();

@@ -74,9 +74,13 @@ fn progress_save_load_cache(gui_data: &GuiData, item: &ProgressData) {
             flg!("progress_prehash_cache_saving")
         }
         CurrentStage::ExifRemoverCacheLoading | CurrentStage::ExifRemoverCacheSaving | CurrentStage::ExifRemoverExtractingTags | CurrentStage::CleaningExif => {
-            panic!("Exif remover not implemented in gtk version")
+            log::warn!("Exif remover progress stage received but not implemented in GTK version: {:?}", item.sstage);
+            return; // Skip unsupported tool progress updates
         }
-        _ => panic!("Invalid stage {:?}", item.sstage),
+        _ => {
+            log::warn!("Unexpected progress stage received: {:?}", item.sstage);
+            return; // Skip unexpected stages instead of panicking
+        }
     };
 
     label_stage.set_text(&text);
