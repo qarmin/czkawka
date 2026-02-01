@@ -18,6 +18,9 @@
       <li>Temporary files</li>
       <li>Big files</li>
       <li>Invalid symlinks</li>
+      <li>Bad names</li>
+      <li>Videos that can be optimized/cropped</li>
+      <li>Exif tags</li>
     </ul>
   </description>
   <launchable type="desktop-id">io.github.qarmin.czkawka.krokiet.desktop</launchable>
@@ -36,8 +39,8 @@
     <release version="10.0.0" date="2025-08-18"/>
   </releases>
   <content_rating type="oars-1.0"/>
-    <developer id="io.github.qarmin">
-      <name>Rafał Mikrut</name>
+  <developer id="io.github.qarmin">
+    <name>Rafał Mikrut</name>
   </developer>
   <url type="homepage">https://github.com/qarmin/czkawka</url>
   <url type="bugtracker">https://github.com/qarmin/czkawka/issues</url>
