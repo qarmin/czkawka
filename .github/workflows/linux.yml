@@ -300,7 +300,7 @@ jobs:
   # No need to check it on every commit, because android build is not officially supported
   # But it is good to have it checked in master branch during merge
   android:
-    if: ${{ github.ref == 'refs/heads/master' }}
+    #if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
