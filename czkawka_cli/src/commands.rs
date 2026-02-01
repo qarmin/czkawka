@@ -385,7 +385,9 @@ pub struct SameMusicArgs {
 fn parse_maximum_difference(src: &str) -> Result<f64, String> {
     match src.parse::<f64>() {
         Ok(maximum_difference) => {
-            if maximum_difference <= 0.0 {
+            if !maximum_difference.is_finite() {
+                Err("Maximum difference must be a finite number (not NaN or infinity)".to_string())
+            } else if maximum_difference <= 0.0 {
                 Err("Maximum difference must be bigger than 0".to_string())
             } else if maximum_difference >= 10.0 {
                 Err("Maximum difference must be smaller than 10.0".to_string())
@@ -399,7 +401,9 @@ fn parse_maximum_difference(src: &str) -> Result<f64, String> {
 fn parse_minimum_segment_duration(src: &str) -> Result<f32, String> {
     match src.parse::<f32>() {
         Ok(minimum_segment_duration) => {
-            if minimum_segment_duration <= 0.0 {
+            if !minimum_segment_duration.is_finite() {
+                Err("Minimum segment duration must be a finite number (not NaN or infinity)".to_string())
+            } else if minimum_segment_duration <= 0.0 {
                 Err("Minimum segment duration must be bigger than 0".to_string())
             } else if minimum_segment_duration >= 3600.0 {
                 Err("Minimum segment duration must be smaller than 3600(greater values not have much sense)".to_string())
@@ -980,7 +984,11 @@ pub struct IgnoreSameSize {
 impl FileToSave {
     pub(crate) fn file_name(&self) -> Option<&str> {
         if let Some(file_name) = &self.file_to_save {
-            return file_name.to_str();
+            let result = file_name.to_str();
+            if result.is_none() {
+                log::error!("Failed to convert file path to UTF-8 string: {file_name:?}");
+            }
+            return result;
         }
 
         None
@@ -989,7 +997,11 @@ impl FileToSave {
 impl JsonCompactFileToSave {
     pub(crate) fn file_name(&self) -> Option<&str> {
         if let Some(file_name) = &self.compact_file_to_save {
-            return file_name.to_str();
+            let result = file_name.to_str();
+            if result.is_none() {
+                log::error!("Failed to convert file path to UTF-8 string: {file_name:?}");
+            }
+            return result;
         }
 
         None
@@ -998,7 +1010,11 @@ impl JsonCompactFileToSave {
 impl JsonPrettyFileToSave {
     pub(crate) fn file_name(&self) -> Option<&str> {
         if let Some(file_name) = &self.pretty_file_to_save {
-            return file_name.to_str();
+            let result = file_name.to_str();
+            if result.is_none() {
+                log::error!("Failed to convert file path to UTF-8 string: {file_name:?}");
+            }
+            return result;
         }
 
         None

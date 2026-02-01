@@ -449,7 +449,13 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             tool.search(stop_flag, Some(progress_sender));
 
             if fix_videos {
-                let codec = target_codec.parse::<VideoCodec>().unwrap_or(VideoCodec::H265);
+                let codec = match target_codec.parse::<VideoCodec>() {
+                    Ok(codec) => codec,
+                    Err(_) => {
+                        log::warn!("Invalid target codec '{target_codec}', defaulting to H265");
+                        VideoCodec::H265
+                    }
+                };
                 let fix_params = VideoOptimizerFixParams::VideoTranscode(VideoTranscodeFixParams {
                     codec,
                     quality,
