@@ -11,6 +11,7 @@ use czkawka_core::re_exported::{Cropdetect, FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::same_music::MusicSimilarity;
 use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_SKIP_FORWARD_AMOUNT, crop_detect_from_str_opt};
+use czkawka_core::tools::video_optimizer::VideoCodec;
 
 #[cfg(not(feature = "no_colors"))]
 pub const CLAP_STYLING: Styles = Styles::styled()
@@ -616,7 +617,7 @@ pub struct TranscodeArgs {
         help = "Target codec (h264, h265, av1, vp9)",
         long_help = "Target video codec for transcoding (h264, h265, av1, vp9). Only used with -F flag."
     )]
-    pub target_codec: String,
+    pub target_codec: VideoCodec,
     #[clap(
         long,
         default_value = "23",
@@ -719,7 +720,7 @@ pub struct CropArgs {
         help = "Target codec (h264, h265, av1, vp9)",
         long_help = "Optional: Also transcode to different codec while cropping. Only used with -F flag."
     )]
-    pub target_codec: Option<String>,
+    pub target_codec: Option<VideoCodec>,
     #[clap(
         long,
         value_parser = clap::value_parser!(u32).range(0..=51),
@@ -1088,9 +1089,12 @@ fn parse_checking_method_same_music(src: &str) -> Result<CheckingMethod, &'stati
     }
 }
 
-fn parse_video_codec(src: &str) -> Result<String, &'static str> {
+fn parse_video_codec(src: &str) -> Result<VideoCodec, &'static str> {
     match src.to_ascii_lowercase().as_str() {
-        "h264" | "h265" | "av1" | "vp9" => Ok(src.to_ascii_lowercase()),
+        "h264" => Ok(VideoCodec::H264),
+        "h265" => Ok(VideoCodec::H265),
+        "av1" => Ok(VideoCodec::Av1),
+        "vp9" => Ok(VideoCodec::Vp9),
         _ => Err("Couldn't parse the video codec (allowed: h264, h265, av1, vp9)"),
     }
 }

@@ -26,7 +26,9 @@ use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
-use czkawka_core::tools::video_optimizer::{VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeParams};
+use czkawka_core::tools::video_optimizer::{
+    VideoCropFixParams, VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeFixParams, VideoTranscodeParams,
+};
 use log::{debug, error, info};
 
 use crate::commands::{
@@ -413,9 +415,6 @@ fn bad_names(bad_names: BadNamesArgs, stop_flag: &Arc<AtomicBool>, progress_send
 }
 
 fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    use czkawka_core::common::traits::FixingItems;
-    use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoTranscodeFixParams};
-
     use crate::commands::{CropArgs, TranscodeArgs, VideoOptimizerMode as CliVideoOptimizerMode};
 
     let VideoOptimizerArgs { common_cli_items, mode } = video_optimizer;
@@ -449,9 +448,8 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             tool.search(stop_flag, Some(progress_sender));
 
             if fix_videos {
-                let codec = target_codec.parse::<VideoCodec>().unwrap_or(VideoCodec::H265);
                 let fix_params = VideoOptimizerFixParams::VideoTranscode(VideoTranscodeFixParams {
-                    codec,
+                    codec: target_codec,
                     quality,
                     fail_if_not_smaller,
                     overwrite_original,
@@ -503,10 +501,9 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             tool.search(stop_flag, Some(progress_sender));
 
             if fix_videos {
-                let target_codec_parsed = target_codec.and_then(|s| s.parse::<VideoCodec>().ok());
                 let fix_params = VideoOptimizerFixParams::VideoCrop(VideoCropFixParams {
                     overwrite_original,
-                    target_codec: target_codec_parsed,
+                    target_codec,
                     quality,
                     crop_mechanism: crop_mech,
                 });

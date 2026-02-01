@@ -296,9 +296,6 @@ jobs:
 
           ci_tester/target/release/ci_tester target/debug/czkawka_cli
 
-  # TODO - currently not working
-  # No need to check it on every commit, because android build is not officially supported
-  # But it is good to have it checked in master branch during merge
   android:
     #if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-22.04
@@ -312,5 +309,5 @@ jobs:
 
       - name: Check for Android
         run: |
-          cd czkawka_core;
-          cargo check --target aarch64-linux-android;
+          cd czkawka_core
+          cargo check --target aarch64-linux-android --features "blake3_pure"
