@@ -1,13 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.github.qarmin.krokiet</id>
+  <id>io.github.qarmin.krokiet</id>
   <name>Krokiet</name>
-  <summary>Krokiet — find duplicate files, similar images and many more</summary>
+  <summary>Multi functional app to find duplicates, similar images and many more</summary>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>MIT</project_license>
+  <project_license>GPL-3.0-only</project_license>
   <description>
     <p>
-      Krokiet is a multi functional app to find duplicates, empty folders, similar images, broken files etc.
+      Krokiet is a multi functional that findsduplicates, empty folders, similar images, broken files etc.
+      - duplicates
+      - empty folders
+      - similar images
+      - broken files
+      - temporary files
+      - empty files
+      - big files
+      - invalid symlinks
+      - similar music files
+      - similar videos
+      - videos that could be cropped/optimized
+      - exif tags in files
     </p>
   </description>
   <launchable type="desktop-id">io.github.qarmin.czkawka.krokiet.desktop</launchable>
