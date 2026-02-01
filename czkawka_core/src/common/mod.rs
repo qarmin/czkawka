@@ -140,6 +140,7 @@ fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
 
     #[cfg(any(target_os = "android", target_os = "ios"))]
     {
+        let _path = path;
         Err("trash is not supported on this platform".to_string())
     }
 }
