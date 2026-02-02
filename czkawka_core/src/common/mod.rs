@@ -166,7 +166,7 @@ fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
         trash::delete(path).map_err(|err| err.to_string())
     }
 
-    // #[cfg(feature = "xdg_portal_trash")]
+    #[cfg(feature = "xdg_portal_trash")]
     {
         use std::os::fd::AsFd;
         let file = std::fs::File::open(path)
