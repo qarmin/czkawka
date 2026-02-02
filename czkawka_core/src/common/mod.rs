@@ -24,10 +24,8 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::Duration;
 use std::{fs, io, thread};
-
 use items::SingleExcludedItem;
 use log::debug;
-
 use crate::common::consts::DEFAULT_WORKER_THREAD_SIZE;
 use crate::flc;
 
@@ -35,6 +33,36 @@ static NUMBER_OF_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync:
 static ALL_AVAILABLE_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::sync::LazyLock::new(|| Mutex::new(None));
 
 const MAX_SYMLINK_HARDLINK_ATTEMPTS: u8 = 5;
+
+
+#[cfg(feature = "xdg_portal_trash")]
+thread_local! {
+    static TOKIO_RT: std::cell::RefCell<Option<Result<tokio::runtime::Runtime, String>>> = std::cell::RefCell::new(None);
+}
+
+#[cfg(feature = "xdg_portal_trash")]
+fn with_runtime<F, R>(f: F) -> Result<R, String>
+where
+    F: FnOnce(&tokio::runtime::Runtime) -> Result<R, String>,
+{
+    TOKIO_RT.with(|cell| {
+        let mut opt = cell.borrow_mut();
+
+        if opt.is_none() {
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .map_err(|e| format!("Failed to build Tokio runtime: {e}"));
+
+            *opt = Some(rt);
+        }
+
+        match opt.as_ref().expect("Tokio runtime is initialized before") {
+            Ok(rt) => f(rt),
+            Err(e) => Err(e.clone()),
+        }
+    })
+}
 
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.lock().expect("Cannot fail").expect("Should be set before get");
@@ -133,9 +161,26 @@ pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> R
 fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
     let path = path.as_ref();
 
-    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    #[cfg(not(any(target_os = "android", target_os = "ios", feature = "xdg_portal_trash")))]
     {
         trash::delete(path).map_err(|err| err.to_string())
+    }
+
+    // #[cfg(feature = "xdg_portal_trash")]
+    {
+        use std::os::fd::AsFd;
+        let file = std::fs::File::open(path)
+            .map_err(|e| format!("Cannot open file descriptor for trashing: {e}"))?;
+
+        with_runtime(|rt| {
+            rt.block_on(async {
+                ashpd::desktop::trash::trash_file(&file.as_fd())
+                    .await
+                    .map_err(|e| format!("Cannot move file to trash: {e}"))
+            })
+        })?;
+
+        Ok(())
     }
 
     #[cfg(any(target_os = "android", target_os = "ios"))]

@@ -101,6 +101,9 @@ glibc_musl_version = "0.1.0"
 
 rand = "0.9.2"
 
+ashpd = { version = "0.12.1", optional = true }
+tokio = { version = "1.49.0", optional = true }
+
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 trash = "5.1"
 
@@ -124,6 +127,7 @@ heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
 blake_pure = ["blake3/pure"]
+xdg_portal_trash = ["ashpd", "tokio"] # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
 
 [lints]
 workspace = true
