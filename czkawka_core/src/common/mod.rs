@@ -19,13 +19,16 @@ pub mod video_utils;
 
 use std::cmp::Ordering;
 use std::ffi::OsString;
+use std::fs::OpenOptions;
 use std::io::Error;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::Duration;
 use std::{fs, io, thread};
+
 use items::SingleExcludedItem;
 use log::debug;
+
 use crate::common::consts::DEFAULT_WORKER_THREAD_SIZE;
 use crate::flc;
 
@@ -34,10 +37,9 @@ static ALL_AVAILABLE_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::s
 
 const MAX_SYMLINK_HARDLINK_ATTEMPTS: u8 = 5;
 
-
 #[cfg(feature = "xdg_portal_trash")]
 thread_local! {
-    static TOKIO_RT: std::cell::RefCell<Option<Result<tokio::runtime::Runtime, String>>> = std::cell::RefCell::new(None);
+    static TOKIO_RT: std::cell::RefCell<Option<Result<tokio::runtime::Runtime, String>>> = const { std::cell::RefCell::new(None) };
 }
 
 #[cfg(feature = "xdg_portal_trash")]
@@ -169,16 +171,9 @@ fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
     #[cfg(feature = "xdg_portal_trash")]
     {
         use std::os::fd::AsFd;
-        let file = std::fs::File::open(path)
-            .map_err(|e| format!("Cannot open file descriptor for trashing: {e}"))?;
+        let file = OpenOptions::new().write(true).read(true).open(path).map_err(|err| err.to_string())?;
 
-        with_runtime(|rt| {
-            rt.block_on(async {
-                ashpd::desktop::trash::trash_file(&file.as_fd())
-                    .await
-                    .map_err(|e| format!("Cannot move file to trash: {e}"))
-            })
-        })?;
+        with_runtime(|rt| rt.block_on(async move { ashpd::desktop::trash::trash_file(&file.as_fd()).await.map_err(|e| e.to_string()) }))?;
 
         Ok(())
     }
