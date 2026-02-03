@@ -34,7 +34,6 @@ pub(crate) fn scan_similar_images(a: Weak<MainWindow>, sd: ScanData) {
                 hash_alg,
                 resize_algorithm,
                 sd.custom_settings.similar_images_sub_ignore_same_size,
-                sd.custom_settings.similar_images_hide_hard_links,
             );
             let mut tool = SimilarImages::new(params);
 

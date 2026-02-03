@@ -23,7 +23,6 @@ pub(crate) fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
             let params = SimilarVideosParameters::new(
                 sd.custom_settings.similar_videos_sub_similarity,
                 sd.custom_settings.similar_videos_sub_ignore_same_size,
-                sd.custom_settings.similar_videos_hide_hard_links,
                 sd.custom_settings.similar_videos_skip_forward_amount,
                 sd.custom_settings.similar_videos_vid_hash_duration,
                 sd.combo_box_items.videos_crop_detect.value,

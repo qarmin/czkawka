@@ -131,7 +131,6 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
     let params = DuplicateFinderParameters::new(
         search_method,
         hash_type,
-        !allow_hard_links.allow_hard_links,
         use_prehash_cache,
         minimal_cached_file_size,
         minimal_prehash_cache_file_size,
@@ -142,6 +141,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
+    tool.set_hide_hard_links(allow_hard_links.allow_hard_links);
     set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
@@ -223,19 +223,13 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         ignore_same_size,
     } = similar_images;
 
-    let params = SimilarImagesParameters::new(
-        max_difference,
-        hash_size,
-        hash_alg,
-        image_filter,
-        ignore_same_size.ignore_same_size,
-        !allow_hard_links.allow_hard_links,
-    );
+    let params = SimilarImagesParameters::new(max_difference, hash_size, hash_alg, image_filter, ignore_same_size.ignore_same_size);
     let mut tool = SimilarImages::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
+    tool.set_hide_hard_links(allow_hard_links.allow_hard_links);
     set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
@@ -331,7 +325,6 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     let params = SimilarVideosParameters::new(
         tolerance,
         ignore_same_size.ignore_same_size,
-        !allow_hard_links.allow_hard_links,
         skip_forward_amount,
         scan_duration,
         crop_detect,
@@ -344,6 +337,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
+    tool.set_hide_hard_links(allow_hard_links.allow_hard_links);
     set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));

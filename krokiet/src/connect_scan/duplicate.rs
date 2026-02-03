@@ -26,7 +26,6 @@ pub(crate) fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
             let params = DuplicateFinderParameters::new(
                 check_method,
                 hash_type,
-                sd.custom_settings.duplicate_hide_hard_links,
                 sd.custom_settings.duplicate_use_prehash,
                 sd.custom_settings.duplicate_minimal_hash_cache_size as u64,
                 sd.custom_settings.duplicate_minimal_prehash_cache_size as u64,

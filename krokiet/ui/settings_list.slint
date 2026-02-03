@@ -396,6 +396,15 @@ export component SettingsList inherits VerticalLayout {
                 hint_text <=> Translations.settings_delete_outdated_cache_entries_hint_text;
             }
 
+            CheckBoxComponent {
+                name <=> Translations.settings_hide_hard_links_text;
+                model <=> Settings.hide_hard_links;
+            }
+
+            HintText {
+                hint_text <=> Translations.settings_hide_hard_links_hint_text;
+            }
+
             ThreadSliderComponent {
                 name <=> Translations.settings_thread_number_text;
                 maximum_number <=> GuiState.maximum_threads;
@@ -418,10 +427,6 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.duplicate_image_preview;
             }
 
-            CheckBoxComponent {
-                name <=> Translations.settings_duplicate_hide_hard_links_text;
-                model <=> Settings.duplicate_hide_hard_links;
-            }
 
             TextComponent {
                 name <=> Translations.settings_duplicate_minimal_hash_cache_size_text;
@@ -448,10 +453,6 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.similar_images_show_image_preview;
             }
 
-            CheckBoxComponent {
-                name <=> Translations.settings_similar_images_hide_hard_links_text;
-                model <=> Settings.similar_images_hide_hard_links;
-            }
 
 
             HeaderText {
@@ -463,10 +464,6 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.video_thumbnails_preview;
             }
 
-            CheckBoxComponent {
-                name <=> Translations.settings_similar_videos_hide_hard_links_text;
-                model <=> Settings.similar_videos_hide_hard_links;
-            }
 
             HeaderText {
                 text <=> Translations.settings_video_thumbnails_header_text;

@@ -84,7 +84,6 @@ pub struct Info {
 pub struct DuplicateFinderParameters {
     pub check_method: CheckingMethod,
     pub hash_type: HashType,
-    pub ignore_hard_links: bool,
     pub use_prehash_cache: bool,
     pub minimal_cache_file_size: u64,
     pub minimal_prehash_cache_file_size: u64,
@@ -95,7 +94,6 @@ impl DuplicateFinderParameters {
     pub fn new(
         check_method: CheckingMethod,
         hash_type: HashType,
-        ignore_hard_links: bool,
         use_prehash_cache: bool,
         minimal_cache_file_size: u64,
         minimal_prehash_cache_file_size: u64,
@@ -104,7 +102,6 @@ impl DuplicateFinderParameters {
         Self {
             check_method,
             hash_type,
-            ignore_hard_links,
             use_prehash_cache,
             minimal_cache_file_size,
             minimal_prehash_cache_file_size,

@@ -334,15 +334,14 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_application_scale_hint_text(flk!("settings_application_scale_hint_text").into());
     translation.set_settings_restart_required_scale_text(flk!("settings_restart_required_scale_text").into());
     translation.set_settings_use_manual_application_scale_text(flk!("settings_use_manual_application_scale_text").into());
-    translation.set_settings_duplicate_hide_hard_links_text(flk!("settings_duplicate_hide_hard_links").into());
     translation.set_settings_duplicate_minimal_hash_cache_size_text(flk!("settings_duplicate_minimal_hash_cache_size").into());
     translation.set_settings_duplicate_use_prehash_text(flk!("settings_duplicate_use_prehash").into());
     translation.set_settings_duplicate_minimal_prehash_cache_size_text(flk!("settings_duplicate_minimal_prehash_cache_size").into());
     translation.set_settings_delete_outdated_cache_entries_text(flk!("settings_delete_outdated_cache_entries").into());
     translation.set_settings_delete_outdated_cache_entries_hint_text(flk!("settings_delete_outdated_cache_entries_hint").into());
+    translation.set_settings_hide_hard_links_text(flk!("settings_hide_hard_links").into());
+    translation.set_settings_hide_hard_links_hint_text(flk!("settings_hide_hard_links_hint").into());
     translation.set_settings_similar_images_show_image_preview_text(flk!("settings_similar_images_show_image_preview").into());
-    translation.set_settings_similar_images_hide_hard_links_text(flk!("settings_similar_images_hide_hard_links").into());
-    translation.set_settings_similar_videos_hide_hard_links_text(flk!("settings_similar_videos_hide_hard_links").into());
     translation.set_settings_open_config_folder_text(flk!("settings_open_config_folder").into());
     translation.set_settings_open_cache_folder_text(flk!("settings_open_cache_folder").into());
     translation.set_settings_language_text(flk!("settings_language").into());

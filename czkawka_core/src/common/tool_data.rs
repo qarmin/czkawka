@@ -37,6 +37,7 @@ pub struct CommonToolData {
     pub(crate) use_reference_folders: bool,
     pub(crate) dry_run: bool,
     pub(crate) move_to_trash: bool,
+    pub(crate) hide_hard_links: bool,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -113,6 +114,7 @@ impl CommonToolData {
             use_reference_folders: false,
             dry_run: false,
             move_to_trash: false,
+            hide_hard_links: false,
         }
     }
 }
@@ -136,6 +138,13 @@ pub trait CommonData {
 
     fn get_tool_type(&self) -> ToolType {
         self.get_cd().tool_type
+    }
+
+    fn set_hide_hard_links(&mut self, hide_hard_links: bool) {
+        self.get_cd_mut().hide_hard_links = hide_hard_links;
+    }
+    fn get_hide_hard_links(&self) -> bool {
+        self.get_cd().hide_hard_links
     }
 
     fn set_dry_run(&mut self, dry_run: bool) {
