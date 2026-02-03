@@ -13,6 +13,7 @@ use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use indexmap::IndexMap;
 use log::{debug, error};
+use crate::flc;
 use once_cell::sync::Lazy;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
@@ -215,7 +216,7 @@ where
                 Err(e) => {
                     text_messages
                         .warnings
-                        .push(format!("Failed to load data from cache file {}, reason {e}", cache_file.to_string_lossy()));
+                        .push(flc!("core_failed_to_load_data_from_cache", file = cache_file.to_string_lossy(), reason = e.to_string()).into());
                     error!("Failed to load cache from file {} - {e}", cache_file.to_string_lossy());
                     return (text_messages, None);
                 }
@@ -228,7 +229,7 @@ where
                 Err(e) => {
                     text_messages
                         .warnings
-                        .push(format!("Failed to load data from json cache file {}, reason {e}", cache_file_json.to_string_lossy()));
+                        .push(flc!("core_failed_to_load_data_from_json_cache", file = cache_file_json.to_string_lossy(), reason = e.to_string()).into());
                     debug!("Failed to load cache from file {} - {e}", cache_file_json.to_string_lossy());
                     return (text_messages, None);
                 }

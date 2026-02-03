@@ -102,7 +102,7 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
     if video_transcode_params.overwrite_original {
         fs::rename(&temp_output, video_path).map_err(|e| {
             let _ = fs::remove_file(&temp_output);
-            format!("Failed to replace file \"{video_path}\" with optimized version: {e}")
+            flc!("core_failed_to_replace_with_optimized", file = video_path, reason = e.to_string()).to_string()
         })?;
         return Ok(());
     }

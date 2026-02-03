@@ -87,3 +87,6 @@ core_failed_to_get_video_codec = Failed to get video codec for file "{ $file }"
 core_failed_to_get_video_duration = Failed to get video duration for file "{ $file }"
 core_failed_to_get_video_dimensions = Failed to get video dimensions for file "{ $file }"
 core_frame_dimensions_mismatch = Frame dimensions for timestamp { $timestamp } do not match the first frame dimensions ({ $first_w }x{ $first_h })
+core_failed_to_load_data_from_cache = Failed to load data from cache file { $file }, reason { $reason }
+core_failed_to_load_data_from_json_cache = Failed to load data from json cache file { $file }, reason { $reason }
+core_failed_to_replace_with_optimized = Failed to replace file "{ $file }" with optimized version: { $reason }
