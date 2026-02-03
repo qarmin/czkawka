@@ -20,6 +20,7 @@ use rawler::rawsource::RawSource;
 
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::create_crash_message;
+use crate::flc;
 use crate::helpers::debug_timer::Timer;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
@@ -52,22 +53,22 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
         let img = if HEIC_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             #[cfg(feature = "heif")]
             {
-                get_dynamic_image_from_heic(path).map_err(|e| format!("Cannot open heic file \"{path}\": {e}"))
+                get_dynamic_image_from_heic(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
             }
             #[cfg(not(feature = "heif"))]
             {
-                decode_normal_image(path).map_err(|e| format!("Cannot open image file \"{path}\": {e}"))
+                decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
             }
         } else if JXL_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
-            get_jxl_image(path).map_err(|e| format!("Cannot open jxl image file \"{path}\": {e}"))
+            get_jxl_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
         } else if RAW_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
-            get_raw_image(path).map_err(|e| format!("Cannot open raw image file \"{path}\": {e}"))
+            get_raw_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
         } else {
-            decode_normal_image(path).map_err(|e| format!("Cannot open image file \"{path}\": {e}"))
+            decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
         }?;
 
         if img.width() == 0 || img.height() == 0 {
-            return Err(format!("Image has zero width or height \"{path}\""));
+            return Err(flc!("core_image_zero_dimensions", path = path));
         }
         if img.width() as u64 * img.height() as u64 > MAXIMUM_IMAGE_PIXELS as u64 {
             return Err(format!(
@@ -84,7 +85,7 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
         match res {
             Ok(t) => {
                 if t.width() == 0 || t.height() == 0 {
-                    return Err(format!("Image has zero width or height \"{path}\""));
+                    return Err(flc!("core_image_zero_dimensions", path = path));
                 }
 
                 let rotation = get_rotation_from_exif(path).unwrap_or(None);
@@ -99,7 +100,7 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
                     Some(ExifOrientation::Rotate270CW) => Ok(t.rotate270()),
                 }
             }
-            Err(e) => Err(format!("Cannot open image file \"{path}\": {e}")),
+            Err(e) => Err(flc!("core_image_open_failed", path = path, reason = e)),
         }
     } else {
         let message = create_crash_message("Image-rs or libraw-rs or jxl-oxide", path, "https://github.com/image-rs/image/issues");

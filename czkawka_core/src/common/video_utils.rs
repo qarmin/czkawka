@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
 use crate::common::process_utils::disable_windows_console_window;
 use crate::common::progress_stop_handler::check_if_stop_received;
+use crate::flc;
 
 pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
 
@@ -27,7 +28,7 @@ pub struct VideoMetadata {
 
 impl VideoMetadata {
     pub fn from_path(path: &Path) -> Result<Self, String> {
-        let info = ffprobe(path).map_err(|e| format!("Failed to read video properties: {e}"))?;
+        let info = ffprobe(path).map_err(|e| flc!("core_failed_to_read_video_properties", reason = e.to_string()))?;
 
         let mut metadata = Self::default();
 
@@ -50,7 +51,7 @@ impl VideoMetadata {
                 && w >= 0
             {
                 if w > VIDEO_RESOLUTION_LIMIT as i64 {
-                    return Err(format!("Video width {w} exceeds the limit of {VIDEO_RESOLUTION_LIMIT}"));
+                    return Err(flc!("core_video_width_exceeds_limit", width = w, limit = VIDEO_RESOLUTION_LIMIT));
                 }
                 metadata.width = Some(w as u32);
             }
@@ -58,7 +59,7 @@ impl VideoMetadata {
                 && h >= 0
             {
                 if h > VIDEO_RESOLUTION_LIMIT as i64 {
-                    return Err(format!("Video height {h} exceeds the limit of {VIDEO_RESOLUTION_LIMIT}"));
+                    return Err(flc!("core_video_height_exceeds_limit", height = h, limit = VIDEO_RESOLUTION_LIMIT));
                 }
                 metadata.height = Some(h as u32);
             }
@@ -130,14 +131,19 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .output()
-        .map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
+        .map_err(|e| flc!("core_failed_to_execute_ffmpeg", reason = e.to_string()))?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).replace("\r\n", "\n").replace("\n", " ");
-        return Err(format!("ffmpeg failed with status: {} - {stderr} - command {command:?} ", output.status));
+        return Err(flc!(
+            "core_ffmpeg_failed_with_status",
+            status = output.status.to_string(),
+            stderr = stderr,
+            command = format!("{:?}", command)
+        ));
     }
 
-    let img = image::load_from_memory(&output.stdout).map_err(|e| format!("Failed to image frame: {e}"))?;
+    let img = image::load_from_memory(&output.stdout).map_err(|e| flc!("core_failed_to_load_image_frame", reason = e.to_string()))?;
 
     Ok(img.into_rgb8())
 }
@@ -190,7 +196,7 @@ pub fn generate_thumbnail(
                 Ok(img) => imgs.push(img),
                 Err(e) => {
                     let _ = fs::write(&thumbnail_path, b"");
-                    return Err(format!("Failed to extract frame at {ft} seconds from \"{}\": {e}", video_path.to_string_lossy()));
+                    return Err(flc!("core_failed_to_extract_frame", time = ft, file = video_path.to_string_lossy(), reason = e));
                 }
             }
         }
@@ -216,14 +222,14 @@ pub fn generate_thumbnail(
 
         if let Err(e) = new_thumbnail.save(&thumbnail_path) {
             let _ = fs::write(&thumbnail_path, b"");
-            return Err(format!("Failed to save thumbnail for \"{}\": {e}", video_path.to_string_lossy()));
+            return Err(flc!("core_failed_to_save_thumbnail", file = video_path.to_string_lossy(), reason = e.to_string()));
         }
     } else {
         match extract_frame_ffmpeg(video_path, seek_time as f32, Some((max_width, max_height))) {
             Ok(img) => {
                 if let Err(e) = img.save(&thumbnail_path) {
                     let _ = fs::write(&thumbnail_path, b"");
-                    return Err(format!("Failed to save thumbnail for \"{}\": {e}", video_path.to_string_lossy()));
+                    return Err(flc!("core_failed_to_save_thumbnail", file = video_path.to_string_lossy(), reason = e.to_string()));
                 }
             }
             Err(e) => {

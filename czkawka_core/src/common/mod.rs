@@ -105,18 +105,18 @@ pub fn set_number_of_threads(thread_number: usize) {
 pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> Result<(), String> {
     let path = path.as_ref();
     if !path.is_dir() {
-        return Err(format!("Trying to remove folder \"{}\" which is not a directory", path.to_string_lossy()));
+        return Err(flc!("core_not_directory_remove", path = path.to_string_lossy()));
     }
 
     let mut entries_to_check = Vec::new();
     let Ok(initial_entry) = path.read_dir() else {
-        return Err(format!("Cannot read directory \"{}\"", path.to_string_lossy()));
+        return Err(flc!("core_cannot_read_directory", path = path.to_string_lossy()));
     };
     for entry in initial_entry {
         if let Ok(entry) = entry {
             entries_to_check.push(entry);
         } else {
-            return Err(format!("Cannot read entry from directory \"{}\"", path.to_string_lossy()));
+            return Err(flc!("core_cannot_read_entry_from_directory", path = path.to_string_lossy()));
         }
     }
     loop {
@@ -124,32 +124,28 @@ pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> R
             break;
         };
         let Some(file_type) = entry.file_type().ok() else {
-            return Err(format!(
-                "Folder contains file with unknown type \"{}\" inside \"{}\"",
-                entry.path().to_string_lossy(),
-                path.to_string_lossy()
+            return Err(flc!(
+                "core_unknown_directory_entry",
+                entry = entry.path().to_string_lossy().to_string(),
+                path = path.to_string_lossy()
             ));
         };
 
         if !file_type.is_dir() {
-            return Err(format!("Folder contains file \"{}\" inside \"{}\"", entry.path().to_string_lossy(), path.to_string_lossy()));
+            return Err(flc!(
+                "core_folder_contains_file_inside",
+                entry = entry.path().to_string_lossy().to_string(),
+                folder = path.to_string_lossy()
+            ));
         }
         let Ok(internal_read_dir) = entry.path().read_dir() else {
-            return Err(format!(
-                "Cannot read directory \"{}\" inside \"{}\"",
-                entry.path().to_string_lossy(),
-                path.to_string_lossy()
-            ));
+            return Err(flc!("core_cannot_read_directory", path = path.to_string_lossy().to_string()));
         };
         for internal_elements in internal_read_dir {
             if let Ok(internal_element) = internal_elements {
                 entries_to_check.push(internal_element);
             } else {
-                return Err(format!(
-                    "Cannot read entry from directory \"{}\" inside \"{}\"",
-                    entry.path().to_string_lossy(),
-                    path.to_string_lossy()
-                ));
+                return Err(flc!("core_cannot_read_entry_from_directory", path = path.to_string_lossy().to_string()));
             }
         }
     }

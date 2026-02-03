@@ -41,3 +41,34 @@ core_error_moving_to_trash = Error while moving "{ $file }" to the trash: { $err
 core_error_removing = Error while removing "{ $file }": { $error }
 
 core_no_similarity_method_selected = Cannot find similar music files without a selected similarity method
+
+# Errors added by localization changes
+core_failed_to_spawn_command = Failed to spawn command: { $reason }
+core_failed_to_check_process_status = Failed to check process status: { $reason }
+core_failed_to_wait_for_process = Failed to wait for process: { $reason }
+core_failed_to_read_video_properties = Failed to read video properties: { $reason }
+core_failed_to_execute_ffmpeg = Failed to execute ffmpeg: { $reason }
+core_ffmpeg_failed_with_status = ffmpeg failed with status { $status }: { $stderr } (command: { $command })
+core_failed_to_load_image_frame = Failed to load image frame: { $reason }
+core_failed_to_extract_frame = Failed to extract frame at { $time } seconds from "{ $file }": { $reason }
+core_failed_to_save_thumbnail = Failed to save thumbnail for "{ $file }": { $reason }
+core_failed_get_frame_at_timestamp = Failed to get frame at timestamp { $timestamp } from "{ $file }": { $reason }
+core_failed_get_frame_from_file = Failed to get frame from "{ $file }" at timestamp { $timestamp }: { $reason }
+core_invalid_crop_rectangle = Invalid crop rectangle: left={ $left }, top={ $top }, right={ $right }, bottom={ $bottom }
+core_failed_to_crop_video_file = Failed to crop video file "{ $file }": { $reason }
+core_cropped_video_not_created = Cropped video file was not created: { $temp }
+core_unable_check_hash_of_file = Unable to check hash of file "{ $file }", reason { $reason }
+core_error_checking_hash_of_file = Error happened when checking hash of file "{ $file }", reason { $reason }
+core_image_zero_dimensions = Image has zero width or height "{ $path }"
+core_image_open_failed = Cannot open image file "{ $path }": { $reason }
+core_not_directory_remove = Trying to remove folder "{ $path }" which is not a directory
+core_cannot_read_directory = Cannot read directory "{ $path }"
+core_cannot_read_entry_from_directory = Cannot read entry from directory "{ $path }"
+core_folder_contains_file_inside = Folder contains file "{ $entry }" inside "{ $folder }"
+core_unknown_directory_entry = Unable to determine file type of directory entry "{ $entry }" inside "{ $path }"
+core_video_width_exceeds_limit = Video width { $width } exceeds the limit of { $limit }
+core_video_height_exceeds_limit = Video height { $height } exceeds the limit of { $limit }
+core_failed_to_process_video = Failed to process video file { $file }: { $reason }
+core_optimized_file_larger = Optimized file { $optimized } (size: { $new_size }) is not smaller than original { $original } (size: { $original_size })
+core_unknown_codec = Unknown codec: { $codec }
+core_invalid_video_optimizer_mode = Invalid video optimizer mode: '{ $mode }'. Allowed values: transcode, crop

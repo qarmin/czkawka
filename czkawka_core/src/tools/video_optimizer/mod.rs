@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
+use crate::flc;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VideoCodec {
@@ -50,7 +51,7 @@ impl std::str::FromStr for VideoCodec {
             "h265" | "libx265" => Ok(Self::H265),
             "av1" | "libaom-av1" => Ok(Self::Av1),
             "vp9" | "libvpx-vp9" => Ok(Self::Vp9),
-            _ => Err(format!("Unknown codec: {codec}")),
+            _ => Err(flc!("core_unknown_codec", codec = codec)),
         }
     }
 }
@@ -73,7 +74,7 @@ impl std::str::FromStr for VideoOptimizerMode {
         match s.to_lowercase().as_str() {
             "transcode" | "videotranscode" => Ok(Self::VideoTranscode),
             "crop" | "videocrop" => Ok(Self::VideoCrop),
-            _ => Err(format!("Invalid video optimizer mode: '{s}'. Allowed values: transcode, crop")),
+            _ => Err(flc!("core_invalid_video_optimizer_mode", mode = s)),
         }
     }
 }

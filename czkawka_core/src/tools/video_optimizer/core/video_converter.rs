@@ -6,6 +6,7 @@ use std::sync::atomic::AtomicBool;
 
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_utils::VideoMetadata;
+use crate::flc;
 use crate::tools::video_optimizer::{VideoTranscodeEntry, VideoTranscodeFixParams};
 
 pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
@@ -73,7 +74,7 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
         }
         Some(Err(e)) => {
             let _ = fs::remove_file(&temp_output);
-            return Err(format!("Failed to process video file {video_path}: {e}"));
+            return Err(flc!("core_failed_to_process_video", file = video_path, reason = e));
         }
         Some(Ok(_)) => {
             // Command succeeded, continue with validation
@@ -89,10 +90,12 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
 
     if video_transcode_params.fail_if_not_smaller && new_size >= original_size {
         let _ = fs::remove_file(&temp_output);
-        return Err(format!(
-            "Optimized file({}) ({new_size} bytes) is larger than original({}) ({original_size} bytes)",
-            temp_output.to_string_lossy(),
-            video_path
+        return Err(flc!(
+            "core_optimized_file_larger",
+            optimized = temp_output.to_string_lossy(),
+            new_size = new_size,
+            original = video_path,
+            original_size = original_size
         ));
     }
 
