@@ -22,8 +22,8 @@ use glib::Bytes;
 use gtk4::gdk_pixbuf::Colorspace;
 use gtk4::prelude::*;
 use gtk4::{ListStore, Scale, ScrollType, TextView, TreeView, Widget};
-use image::codecs::jpeg::JpegEncoder;
-use image::{DynamicImage, GenericImageView, RgbaImage};
+use image::codecs::png::PngEncoder;
+use image::{DynamicImage, GenericImageView, ImageEncoder, RgbaImage};
 use log::debug;
 use resvg::tiny_skia;
 use resvg::usvg::{Options, Tree};
@@ -759,10 +759,14 @@ pub(crate) fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]
     image.set_from_pixbuf(Some(&pixbuf));
 }
 
-pub(crate) fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Result<Pixbuf, String> {
+pub(crate) fn get_pixbuf_from_dynamic_image(dynamic_image: DynamicImage) -> Result<Pixbuf, String> {
     let mut output = Vec::new();
-    JpegEncoder::new(&mut output)
-        .encode_image(dynamic_image)
+    let width = dynamic_image.width();
+    let height = dynamic_image.height();
+    let rgba = dynamic_image.into_rgba8();
+    let encoder = PngEncoder::new(&mut output);
+    encoder
+        .write_image(&rgba, width, height, image::ExtendedColorType::Rgba8)
         .map_err(|e| format!("Failed to encode image: {e}"))?;
     Pixbuf::from_read(BufReader::new(Cursor::new(output))).map_err(|e| format!("Failed to create Pixbuf from DynamicImage: {e}"))
 }

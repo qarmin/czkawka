@@ -512,7 +512,7 @@ fn show_preview(
                     }
                 };
 
-                match get_pixbuf_from_dynamic_image(&image) {
+                match get_pixbuf_from_dynamic_image(image) {
                     Ok(t) => t,
                     Err(e) => {
                         add_text_to_text_view(text_view_errors, flg!("preview_image_opening_failure", name = file_name, reason = e).as_str());
