@@ -181,11 +181,11 @@ where
             }
         };
         if tmp_frame.dimensions() != first_frame.dimensions() {
-            return Some(Err(format!(
-                "Frame dimensions for timestamp {} do not match the first frame dimensions ({}x{})",
-                timestamp,
-                first_frame.width(),
-                first_frame.height()
+            return Some(Err(flc!(
+                "core_frame_dimensions_mismatch",
+                timestamp = timestamp,
+                first_w = first_frame.width(),
+                first_h = first_frame.height()
             )));
         }
 
@@ -272,11 +272,11 @@ where
             }
         };
         if tmp_frame.dimensions() != first_frame.dimensions() {
-            return Some(Err(format!(
-                "Frame dimensions for timestamp {} do not match the first frame dimensions ({}x{})",
-                timestamp,
-                first_frame.width(),
-                first_frame.height()
+            return Some(Err(flc!(
+                "core_frame_dimensions_mismatch",
+                timestamp = timestamp,
+                first_w = first_frame.width(),
+                first_h = first_frame.height()
             )));
         }
         let dynamic_image_diff: RgbImage = diff_between_dynamic_images(first_frame, tmp_frame);

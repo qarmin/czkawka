@@ -13,18 +13,18 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     let metadata = match VideoMetadata::from_path(&entry.path) {
         Ok(metadata) => metadata,
         Err(e) => {
-            entry.error = Some(format!("Failed to get video metadata for file \"{}\": {}", entry.path.to_string_lossy(), e));
+            entry.error = Some(flc!("core_failed_to_get_video_metadata", file = entry.path.to_string_lossy(), reason = e));
             return entry;
         }
     };
 
     let Some(current_codec) = metadata.codec.clone() else {
-        entry.error = Some(format!("Failed to get video codec for file \"{}\"", entry.path.to_string_lossy()));
+        entry.error = Some(flc!("core_failed_to_get_video_codec", file = entry.path.to_string_lossy()));
         return entry;
     };
 
     let Some(duration) = metadata.duration else {
-        entry.error = Some(format!("Failed to get video duration for file \"{}\"", entry.path.to_string_lossy()));
+        entry.error = Some(flc!("core_failed_to_get_video_duration", file = entry.path.to_string_lossy()));
         return entry;
     };
 
@@ -36,7 +36,7 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
             entry.height = height;
         }
         _ => {
-            entry.error = Some(format!("Failed to get video dimensions for file \"{}\"", entry.path.to_string_lossy()));
+            entry.error = Some(flc!("core_failed_to_get_video_dimensions", file = entry.path.to_string_lossy()));
             return entry;
         }
     }

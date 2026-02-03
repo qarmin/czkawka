@@ -101,10 +101,7 @@ impl VideoMetadata {
 pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values: Option<(u32, u32)>) -> Result<RgbImage, String> {
     // This function returns strange status 234, when path contains non default UTF-8 characters, not sure why
     if !video_path.exists() {
-        return Err(format!(
-            "Video file does not exist(could be removed between scan/later steps): \"{}\"",
-            video_path.to_string_lossy()
-        ));
+        return Err(flc!("core_video_file_does_not_exist", path = video_path.to_string_lossy()));
     }
 
     let mut command = Command::new("ffmpeg");
@@ -206,10 +203,7 @@ pub fn generate_thumbnail(
 
         if imgs.iter().any(|img| img.height() != first_img.height() || img.width() != first_img.width()) {
             let _ = fs::write(&thumbnail_path, b"");
-            return Err(format!(
-                "Failed to generate thumbnail for \"{}\": extracted frames have different dimensions",
-                video_path.to_string_lossy()
-            ));
+            return Err(flc!("core_failed_to_generate_thumbnail_frames_different_dimensions", file = video_path.to_string_lossy()));
         }
         let mut new_thumbnail = RgbImage::new(first_img.width() * tiles_size as u32, first_img.height() * tiles_size as u32);
         for (idx, img) in imgs.iter().enumerate() {
@@ -217,7 +211,7 @@ pub fn generate_thumbnail(
             let y = (idx / tiles_size) as u32 * img.height();
             new_thumbnail
                 .copy_from(img, x, y)
-                .map_err(|e| format!("Failed to generate thumbnail for \"{}\": {e}", video_path.to_string_lossy()))?;
+                .map_err(|e| flc!("core_failed_to_generate_thumbnail", file = video_path.to_string_lossy(), reason = e.to_string()))?;
         }
 
         if let Err(e) = new_thumbnail.save(&thumbnail_path) {
@@ -234,7 +228,12 @@ pub fn generate_thumbnail(
             }
             Err(e) => {
                 let _ = fs::write(&thumbnail_path, b"");
-                return Err(format!("Failed to extract frame at {seek_time} seconds from \"{}\" - {e}", video_path.to_string_lossy()));
+                return Err(flc!(
+                    "core_failed_to_extract_frame_at_seek_time",
+                    time = seek_time,
+                    file = video_path.to_string_lossy(),
+                    reason = e
+                ));
             }
         }
     }

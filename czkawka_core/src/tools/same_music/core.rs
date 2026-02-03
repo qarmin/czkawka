@@ -30,6 +30,7 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
+use crate::flc;
 use crate::tools::same_music::{GroupedFilesToCheck, Info, MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
 
 impl SameMusic {
@@ -423,7 +424,7 @@ impl SameMusic {
                     }
                     let mut segments = match match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration) {
                         Ok(segments) => segments,
-                        Err(e) => return Some(Err(format!("Error while comparing fingerprints: {e}"))),
+                        Err(e) => return Some(Err(flc!("core_error_comparing_fingerprints", reason = e.to_string()))),
                     };
                     segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
                     if segments.is_empty() { None } else { Some(Ok((e_string, e_entry))) }
