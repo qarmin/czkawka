@@ -82,15 +82,15 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
             config_folder.to_string_lossy(),
             cache_folder.to_string_lossy()
         ));
-        if !config_folder.exists() {
-            if let Err(e) = fs::create_dir_all(&config_folder) {
-                warnings.push(format!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy()));
-            }
+        if !config_folder.exists()
+            && let Err(e) = fs::create_dir_all(&config_folder)
+        {
+            warnings.push(format!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy()));
         }
-        if !cache_folder.exists() {
-            if let Err(e) = fs::create_dir_all(&cache_folder) {
-                warnings.push(format!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy()));
-            }
+        if !cache_folder.exists()
+            && let Err(e) = fs::create_dir_all(&cache_folder)
+        {
+            warnings.push(format!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy()));
         }
         Some(ConfigCachePath { config_folder, cache_folder })
     } else {

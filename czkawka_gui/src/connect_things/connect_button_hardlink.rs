@@ -146,10 +146,10 @@ fn hardlink_symlink(
     let mut current_selected_index = 0;
     loop {
         if model.get::<bool>(&current_iter, column_header) {
-            if let Some(current_symhardlink_data) = current_symhardlink_data {
-                if !current_symhardlink_data.files_to_symhardlink.is_empty() {
-                    vec_symhardlink_data.push(current_symhardlink_data);
-                }
+            if let Some(current_symhardlink_data) = current_symhardlink_data
+                && !current_symhardlink_data.files_to_symhardlink.is_empty()
+            {
+                vec_symhardlink_data.push(current_symhardlink_data);
             }
 
             current_symhardlink_data = None;
@@ -176,20 +176,20 @@ fn hardlink_symlink(
             if current_selected_index != selected_rows.len() - 1 {
                 current_selected_index += 1;
             } else {
-                if let Some(current_symhardlink_data) = current_symhardlink_data {
-                    if !current_symhardlink_data.files_to_symhardlink.is_empty() {
-                        vec_symhardlink_data.push(current_symhardlink_data);
-                    }
+                if let Some(current_symhardlink_data) = current_symhardlink_data
+                    && !current_symhardlink_data.files_to_symhardlink.is_empty()
+                {
+                    vec_symhardlink_data.push(current_symhardlink_data);
                 }
                 break; // There is no more selected items, so we just end checking
             }
         }
 
         if !model.iter_next(&mut current_iter) {
-            if let Some(current_symhardlink_data) = current_symhardlink_data {
-                if !current_symhardlink_data.files_to_symhardlink.is_empty() {
-                    vec_symhardlink_data.push(current_symhardlink_data);
-                }
+            if let Some(current_symhardlink_data) = current_symhardlink_data
+                && !current_symhardlink_data.files_to_symhardlink.is_empty()
+            {
+                vec_symhardlink_data.push(current_symhardlink_data);
             }
 
             break;

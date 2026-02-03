@@ -680,25 +680,25 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
     }
 
     for tag in tagged_file.tags() {
-        if track_title.is_empty() {
-            if let Some(tag_value) = tag.get_string(&ItemKey::TrackTitle) {
-                track_title = tag_value.to_string();
-            }
+        if track_title.is_empty()
+            && let Some(tag_value) = tag.get_string(&ItemKey::TrackTitle)
+        {
+            track_title = tag_value.to_string();
         }
-        if track_artist.is_empty() {
-            if let Some(tag_value) = tag.get_string(&ItemKey::TrackArtist) {
-                track_artist = tag_value.to_string();
-            }
+        if track_artist.is_empty()
+            && let Some(tag_value) = tag.get_string(&ItemKey::TrackArtist)
+        {
+            track_artist = tag_value.to_string();
         }
-        if year.is_empty() {
-            if let Some(tag_value) = tag.get_string(&ItemKey::Year) {
-                year = tag_value.to_string();
-            }
+        if year.is_empty()
+            && let Some(tag_value) = tag.get_string(&ItemKey::Year)
+        {
+            year = tag_value.to_string();
         }
-        if genre.is_empty() {
-            if let Some(tag_value) = tag.get_string(&ItemKey::Genre) {
-                genre = tag_value.to_string();
-            }
+        if genre.is_empty()
+            && let Some(tag_value) = tag.get_string(&ItemKey::Genre)
+        {
+            genre = tag_value.to_string();
         }
     }
 

@@ -536,10 +536,10 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
     }
 
     // Last step, remove orphan header if exists
-    if let Some(mut iter) = model.iter_first() {
-        if !model.iter_next(&mut iter) {
-            model.clear();
-        }
+    if let Some(mut iter) = model.iter_first()
+        && !model.iter_next(&mut iter)
+    {
+        model.clear();
     }
 }
 

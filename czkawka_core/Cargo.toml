@@ -3,7 +3,7 @@ name = "czkawka_core"
 version = "10.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
-rust-version = "1.85.0"
+rust-version = "1.92.0"
 description = "Core of Czkawka app"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
@@ -92,7 +92,7 @@ file-rotate = "0.8.0"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 deunicode = "1.6.2"
 
-fast_image_resize = "=5.1.4" # TODO, greater versions uses unstable features, that were stabilized after 1.85.0
+fast_image_resize = "6.0.0" # TODO, greater versions uses unstable features, that were stabilized after 1.92.0
 
 [target.'cfg(windows)'.dependencies]
 file-id = "0.2.2"

@@ -193,20 +193,20 @@ pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientatio
         }
         let exif_iter: ExifIter = parser.parse(ms)?;
         for exif_entry in exif_iter {
-            if exif_entry.tag() == Some(ExifTag::Orientation) {
-                if let Some(value) = exif_entry.get_value() {
-                    return match value.to_string().as_str() {
-                        "1" => Ok(Some(ExifOrientation::Normal)),
-                        "2" => Ok(Some(ExifOrientation::MirrorHorizontal)),
-                        "3" => Ok(Some(ExifOrientation::Rotate180)),
-                        "4" => Ok(Some(ExifOrientation::MirrorVertical)),
-                        "5" => Ok(Some(ExifOrientation::MirrorHorizontalAndRotate270CW)),
-                        "6" => Ok(Some(ExifOrientation::Rotate90CW)),
-                        "7" => Ok(Some(ExifOrientation::MirrorHorizontalAndRotate90CW)),
-                        "8" => Ok(Some(ExifOrientation::Rotate270CW)),
-                        _ => Ok(None),
-                    };
-                }
+            if exif_entry.tag() == Some(ExifTag::Orientation)
+                && let Some(value) = exif_entry.get_value()
+            {
+                return match value.to_string().as_str() {
+                    "1" => Ok(Some(ExifOrientation::Normal)),
+                    "2" => Ok(Some(ExifOrientation::MirrorHorizontal)),
+                    "3" => Ok(Some(ExifOrientation::Rotate180)),
+                    "4" => Ok(Some(ExifOrientation::MirrorVertical)),
+                    "5" => Ok(Some(ExifOrientation::MirrorHorizontalAndRotate270CW)),
+                    "6" => Ok(Some(ExifOrientation::Rotate90CW)),
+                    "7" => Ok(Some(ExifOrientation::MirrorHorizontalAndRotate90CW)),
+                    "8" => Ok(Some(ExifOrientation::Rotate270CW)),
+                    _ => Ok(None),
+                };
             }
         }
         Ok(None)

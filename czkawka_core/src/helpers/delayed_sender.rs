@@ -34,11 +34,11 @@ impl<T: Send + 'static> DelayedSender<T> {
                 if stop_flag_clone.load(std::sync::atomic::Ordering::Relaxed) {
                     break;
                 }
-                if let Some(last_send_time) = last_send_time {
-                    if last_send_time.elapsed() < wait_time {
-                        thread::sleep(duration_between_checks);
-                        continue;
-                    }
+                if let Some(last_send_time) = last_send_time
+                    && last_send_time.elapsed() < wait_time
+                {
+                    thread::sleep(duration_between_checks);
+                    continue;
                 }
 
                 let Some(value) = slot_clone.lock().expect("Failed to lock slot in DelayedSender").take() else {

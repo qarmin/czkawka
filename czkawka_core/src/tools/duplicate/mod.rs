@@ -151,10 +151,10 @@ fn filter_hard_links(vec_file_entry: &[FileEntry]) -> Vec<FileEntry> {
     let mut inodes: HashSet<u64> = HashSet::with_capacity(vec_file_entry.len());
     let mut identical: Vec<FileEntry> = Vec::with_capacity(vec_file_entry.len());
     for f in vec_file_entry {
-        if let Ok(meta) = fs::metadata(&f.path) {
-            if !inodes.insert(meta.ino()) {
-                continue;
-            }
+        if let Ok(meta) = fs::metadata(&f.path)
+            && !inodes.insert(meta.ino())
+        {
+            continue;
         }
         identical.push(f.clone());
     }

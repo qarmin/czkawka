@@ -52,10 +52,10 @@ pub(crate) fn opening_middle_mouse_function(gesture_click: &GestureClick, _numbe
         .expect("Widget is not TreeView");
 
     let nt_object = get_notebook_object_from_tree_view(&tree_view);
-    if let Some(column_header) = nt_object.column_header {
-        if gesture_click.current_button() == 2 {
-            reverse_selection(&tree_view, column_header, nt_object.column_selection);
-        }
+    if let Some(column_header) = nt_object.column_header
+        && gesture_click.current_button() == 2
+    {
+        reverse_selection(&tree_view, column_header, nt_object.column_selection);
     }
 }
 
@@ -132,10 +132,10 @@ fn common_mark_function(tree_view: &gtk4::TreeView, column_selection: i32, colum
     let model = get_list_store(tree_view);
 
     for tree_path in selected_rows.iter().rev() {
-        if let Some(column_header) = column_header {
-            if model.get::<bool>(&model.iter(tree_path).expect("Using invalid tree_path"), column_header) {
-                continue;
-            }
+        if let Some(column_header) = column_header
+            && model.get::<bool>(&model.iter(tree_path).expect("Using invalid tree_path"), column_header)
+        {
+            continue;
         }
         let value = !tree_model.get::<bool>(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_selection);
         model.set_value(&tree_model.iter(tree_path).expect("Invalid tree_path"), column_selection as u32, &value.to_value());
