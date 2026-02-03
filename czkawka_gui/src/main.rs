@@ -31,7 +31,7 @@ use connect_things::connect_settings::*;
 use connect_things::connect_show_hide_ui::*;
 use connect_things::connect_similar_image_size_change::*;
 use crossbeam_channel::{Receiver, Sender, unbounded};
-use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
+use czkawka_core::common::config_cache_path::{get_config_cache_path, print_infos_and_warnings, set_config_cache_path};
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::{get_number_of_threads, set_number_of_threads};
@@ -45,6 +45,7 @@ use log::info;
 
 use crate::compute_results::*;
 use crate::connect_things::connect_button_sort::connect_button_sort;
+use crate::connect_things::connect_krokiet_info_dialog::show_krokiet_info_dialog;
 use crate::connect_things::connect_popovers_select::connect_popover_select;
 use crate::connect_things::connect_popovers_sort::connect_popover_sort;
 use crate::connect_things::connect_same_music_mode_changed::connect_same_music_change_mode;
@@ -79,19 +80,33 @@ fn main() {
     print_version_mode("Czkawka gtk");
     print_infos_and_warnings(infos, warnings);
 
+    let exists_outdated_czkawka_dialog = get_config_cache_path().is_some_and(|cache_config| {
+        let file_path = cache_config.cache_folder.join("flatpak_czkawka_outdated.txt");
+        let exists = file_path.exists();
+        if !exists {
+            let _ = std::fs::write(
+                file_path,
+                "This file indicates that user has seen info dialog about deprecation of flatpak version of Czkawka.",
+            );
+        }
+        exists
+    });
+
+    let needs_to_open_dialog_about_krokiet = !(exists_outdated_czkawka_dialog || option_env!("CZKAWKA_DONT_ANNOY_ME").as_ref().is_some_and(|x| !x.is_empty()));
+
     let application = Application::new(None::<String>, ApplicationFlags::HANDLES_OPEN | ApplicationFlags::HANDLES_COMMAND_LINE);
 
     #[cfg(target_os = "linux")]
     glib::set_prgname(Some("com.github.qarmin.czkawka"));
 
     application.connect_command_line(move |app, cmdline| {
-        build_ui(app, &cmdline.arguments());
+        build_ui(app, &cmdline.arguments(), needs_to_open_dialog_about_krokiet);
         ExitCode::new(0)
     });
     application.run_with_args(&env::args().collect::<Vec<_>>());
 }
 
-fn build_ui(application: &Application, arguments: &[OsString]) {
+fn build_ui(application: &Application, arguments: &[OsString], needs_to_open_dialog_about_krokiet: bool) {
     let gui_data: GuiData = GuiData::new_with_application(application);
 
     let (result_sender, result_receiver) = unbounded();
@@ -146,6 +161,11 @@ fn build_ui(application: &Application, arguments: &[OsString]) {
     let window_main = gui_data.window_main.clone();
     let taskbar_state = gui_data.taskbar_state.clone();
     let used_additional_arguments = arguments.len() > 1;
+
+    if needs_to_open_dialog_about_krokiet {
+        show_krokiet_info_dialog(&window_main);
+    }
+
     window_main.connect_close_request(move |_| {
         // Not save configuration when using non default arguments
         if !used_additional_arguments {

@@ -90,7 +90,8 @@ where
 {
     let check_file = |file_entry: &T| {
         let file_entry_path_str = file_entry.get_path().to_string_lossy();
-        if let Some(used_file) = used_files.get(file_entry_path_str.as_ref()) {
+        let file_entry_path_str: &str = file_entry_path_str.as_ref();
+        if let Some(used_file) = used_files.get(file_entry_path_str) {
             if file_entry.get_size() != used_file.get_size() {
                 return false;
             }
@@ -137,7 +138,8 @@ where
 
     let check_file = |file_entry: &T| {
         let file_entry_path_str = file_entry.get_path().to_string_lossy();
-        if let Some((size, modification_date)) = used_files.get(file_entry_path_str.as_ref()) {
+        let file_entry_path_str: &str = file_entry_path_str.as_ref();
+        if let Some((size, modification_date)) = used_files.get(file_entry_path_str) {
             if file_entry.get_size() != *size {
                 return false;
             }

@@ -29,9 +29,9 @@ bitflags = "2.6"
 lofty = "0.22"
 
 # Needed by broken files
-zip = { version = "4.0", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
+zip = { version = "7.2", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 audio_checker = "0.1"
-lopdf = "0.37.0"
+lopdf = "0.39.0"
 
 # Needed by audio similarity feature
 rusty-chromaprint = "0.3"
@@ -101,7 +101,7 @@ file-id = "0.2.2"
 rustc_version = "0.4"
 
 [dev-dependencies]
-criterion =  { version = "0.7", default-features = false, features = [] }
+criterion =  { version = "0.8", default-features = false, features = [] }
 
 [[bench]]
 name = "hash_calculation_benchmark"
