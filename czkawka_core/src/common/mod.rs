@@ -37,12 +37,12 @@ static ALL_AVAILABLE_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::s
 
 const MAX_SYMLINK_HARDLINK_ATTEMPTS: u8 = 5;
 
-#[cfg(feature = "xdg_portal_trash")]
+#[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
 thread_local! {
     static TOKIO_RT: std::cell::RefCell<Option<Result<tokio::runtime::Runtime, String>>> = const { std::cell::RefCell::new(None) };
 }
 
-#[cfg(feature = "xdg_portal_trash")]
+#[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
 fn with_runtime<F, R>(f: F) -> Result<R, String>
 where
     F: FnOnce(&tokio::runtime::Runtime) -> Result<R, String>,
@@ -159,16 +159,18 @@ pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> R
 }
 
 /// A wrapper around `trash::delete`. Note that for platforms that do not have native trash support
-/// (Android, iOS), this function will always return an [`Error`].
+/// (Android, iOS), this function will always return an [`Error`]. When the `xdg_portal_trash` feature is
+/// enabled, the portal-based implementation will only be used on Linux; on other desktop OSes the
+/// regular `trash::delete` fallback will be used instead.
 fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
     let path = path.as_ref();
 
-    #[cfg(not(any(target_os = "android", target_os = "ios", feature = "xdg_portal_trash")))]
+    #[cfg(not(any(target_os = "android", target_os = "ios", all(feature = "xdg_portal_trash", target_os = "linux"))))]
     {
         trash::delete(path).map_err(|err| err.to_string())
     }
 
-    #[cfg(feature = "xdg_portal_trash")]
+    #[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
     {
         use std::os::fd::AsFd;
         let file = OpenOptions::new().write(true).read(true).open(path).map_err(|err| err.to_string())?;

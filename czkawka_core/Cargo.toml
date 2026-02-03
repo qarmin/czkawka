@@ -127,7 +127,8 @@ heif = ["dep:libheif-rs", "dep:libheif-sys"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
 blake_pure = ["blake3/pure"]
-xdg_portal_trash = ["ashpd", "tokio"] # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
-
+# Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
+# No-op on other OSes
+xdg_portal_trash = ["ashpd", "tokio"]
 [lints]
 workspace = true
