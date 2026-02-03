@@ -13,7 +13,6 @@ use fun_time::fun_time;
 use humansize::{BINARY, format_size};
 use indexmap::IndexMap;
 use log::{debug, error};
-use crate::flc;
 use once_cell::sync::Lazy;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
@@ -22,6 +21,7 @@ use crate::common::cache::cleaning::{should_clean_cache, update_cleaning_timesta
 use crate::common::config_cache_path::open_cache_folder;
 use crate::common::tool_data::CommonData;
 use crate::common::traits::ResultEntry;
+use crate::flc;
 use crate::helpers::messages::Messages;
 
 pub(crate) const CACHE_VERSION: u8 = 100;
@@ -59,7 +59,7 @@ where
             if let Err(e) = options.serialize_into(writer, &hashmap_to_save) {
                 text_messages
                     .warnings
-                    .push(format!("Cannot write data to cache file \"{}\", reason {e}", cache_file.to_string_lossy()));
+                    .push(flc!("core_failed_to_write_data_to_cache", file = cache_file.to_string_lossy(), reason = e.to_string()));
                 debug!("Failed to save cache to file \"{}\" - {e}", cache_file.to_string_lossy());
                 return text_messages;
             }
@@ -70,7 +70,7 @@ where
             if let Err(e) = serde_json::to_writer(writer, &hashmap_to_save) {
                 text_messages
                     .warnings
-                    .push(format!("Cannot write data to cache file \"{}\", reason {e}", cache_file_json.to_string_lossy()));
+                    .push(flc!("core_failed_to_write_data_to_cache", file = cache_file_json.to_string_lossy(), reason = e.to_string()));
                 debug!("Failed to save cache to file \"{}\" - {e}", cache_file_json.to_string_lossy());
                 return text_messages;
             }
@@ -81,7 +81,7 @@ where
             );
         }
 
-        text_messages.messages.push(format!("Properly saved to file {} cache entries.", hashmap.len()));
+        text_messages.messages.push(flc!("core_properly_saved_cache_entries", count = hashmap.len()));
         debug!("Properly saved to file {} cache entries.", hashmap.len());
     } else {
         debug!("Failed to save cache to file {cache_file_name} because not exists");
@@ -216,7 +216,7 @@ where
                 Err(e) => {
                     text_messages
                         .warnings
-                        .push(flc!("core_failed_to_load_data_from_cache", file = cache_file.to_string_lossy(), reason = e.to_string()).into());
+                        .push(flc!("core_failed_to_load_data_from_cache", file = cache_file.to_string_lossy(), reason = e.to_string()));
                     error!("Failed to load cache from file {} - {e}", cache_file.to_string_lossy());
                     return (text_messages, None);
                 }
@@ -227,9 +227,11 @@ where
             vec_loaded_entries = match serde_json::from_reader(reader) {
                 Ok(t) => t,
                 Err(e) => {
-                    text_messages
-                        .warnings
-                        .push(flc!("core_failed_to_load_data_from_json_cache", file = cache_file_json.to_string_lossy(), reason = e.to_string()).into());
+                    text_messages.warnings.push(flc!(
+                        "core_failed_to_load_data_from_json_cache",
+                        file = cache_file_json.to_string_lossy(),
+                        reason = e.to_string()
+                    ));
                     debug!("Failed to load cache from file {} - {e}", cache_file_json.to_string_lossy());
                     return (text_messages, None);
                 }

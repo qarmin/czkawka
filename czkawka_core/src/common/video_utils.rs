@@ -186,7 +186,7 @@ pub fn generate_thumbnail(
         let mut imgs = Vec::new();
         for ft in frame_times {
             if check_if_stop_received(stop_flag) {
-                return Err(String::from("Thumbnail generation was stopped by user"));
+                return Err(flc!("core_thumbnail_generation_stopped_by_user"));
             }
 
             match extract_frame_ffmpeg(video_path, ft, Some((max_width, max_height))) {

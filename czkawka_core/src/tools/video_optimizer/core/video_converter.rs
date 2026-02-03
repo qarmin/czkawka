@@ -70,7 +70,7 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
     match run_command_interruptible(command, stop_flag) {
         None => {
             let _ = fs::remove_file(&temp_output);
-            return Err(String::from("Video processing was stopped by user"));
+            return Err(flc!("core_video_processing_stopped_by_user"));
         }
         Some(Err(e)) => {
             let _ = fs::remove_file(&temp_output);
@@ -102,7 +102,7 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
     if video_transcode_params.overwrite_original {
         fs::rename(&temp_output, video_path).map_err(|e| {
             let _ = fs::remove_file(&temp_output);
-            flc!("core_failed_to_replace_with_optimized", file = video_path, reason = e.to_string()).to_string()
+            flc!("core_failed_to_replace_with_optimized", file = video_path, reason = e.to_string())
         })?;
         return Ok(());
     }

@@ -90,3 +90,7 @@ core_frame_dimensions_mismatch = Frame dimensions for timestamp { $timestamp } d
 core_failed_to_load_data_from_cache = Failed to load data from cache file { $file }, reason { $reason }
 core_failed_to_load_data_from_json_cache = Failed to load data from json cache file { $file }, reason { $reason }
 core_failed_to_replace_with_optimized = Failed to replace file "{ $file }" with optimized version: { $reason }
+core_failed_to_write_data_to_cache = Cannot write data to cache file "{ $file }", reason { $reason }
+core_properly_saved_cache_entries = Properly saved to file { $count } cache entries.
+core_video_processing_stopped_by_user = Video processing was stopped by user
+core_thumbnail_generation_stopped_by_user = Thumbnail generation was stopped by user
