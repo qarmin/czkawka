@@ -19,7 +19,6 @@ pub mod video_utils;
 
 use std::cmp::Ordering;
 use std::ffi::OsString;
-use std::fs::OpenOptions;
 use std::io::Error;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -173,7 +172,7 @@ fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
     #[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
     {
         use std::os::fd::AsFd;
-        let file = OpenOptions::new().write(true).read(true).open(path).map_err(|err| err.to_string())?;
+        let file = std::fs::OpenOptions::new().write(true).read(true).open(path).map_err(|err| err.to_string())?;
 
         with_runtime(|rt| rt.block_on(async move { ashpd::desktop::trash::trash_file(&file.as_fd()).await.map_err(|e| e.to_string()) }))?;
 

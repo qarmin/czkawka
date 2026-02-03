@@ -34,8 +34,6 @@ pub(crate) fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
-            tool.set_delete_outdated_cache(sd.custom_settings.similar_videos_delete_outdated_entries);
-
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);

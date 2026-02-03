@@ -387,6 +387,15 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.ignore_other_filesystems;
             }
 
+            CheckBoxComponent {
+                name <=> Translations.settings_delete_outdated_cache_entries_text;
+                model <=> Settings.delete_outdated_cache_entries;
+            }
+
+            HintText {
+                hint_text <=> Translations.settings_delete_outdated_cache_entries_hint_text;
+            }
+
             ThreadSliderComponent {
                 name <=> Translations.settings_thread_number_text;
                 maximum_number <=> GuiState.maximum_threads;
@@ -429,10 +438,6 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.duplicate_minimal_prehash_cache_size;
             }
 
-            CheckBoxComponent {
-                name <=> Translations.settings_duplicate_delete_outdated_entries_text;
-                model <=> Settings.duplicate_delete_outdated_entries;
-            }
 
             HeaderText {
                 text <=> Translations.settings_similar_images_tool_text;
@@ -448,10 +453,6 @@ export component SettingsList inherits VerticalLayout {
                 model <=> Settings.similar_images_hide_hard_links;
             }
 
-            CheckBoxComponent {
-                name <=> Translations.settings_delete_outdated_entries_text;
-                model <=> Settings.similar_images_delete_outdated_entries;
-            }
 
             HeaderText {
                 text <=> Translations.settings_similar_videos_tool_text;
@@ -465,20 +466,6 @@ export component SettingsList inherits VerticalLayout {
             CheckBoxComponent {
                 name <=> Translations.settings_similar_videos_hide_hard_links_text;
                 model <=> Settings.similar_videos_hide_hard_links;
-            }
-
-            CheckBoxComponent {
-                name <=> Translations.settings_delete_outdated_entries_text;
-                model <=> Settings.similar_videos_delete_outdated_entries;
-            }
-
-            HeaderText {
-                text <=> Translations.settings_similar_music_tool_text;
-            }
-
-            CheckBoxComponent {
-                name <=> Translations.settings_delete_outdated_entries_text;
-                model <=> Settings.similar_music_delete_outdated_entries;
             }
 
             HeaderText {

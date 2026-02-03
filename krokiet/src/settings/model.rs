@@ -76,21 +76,15 @@ pub struct SettingsCustom {
     #[serde(default = "minimal_prehash_cache_size")]
     pub duplicate_minimal_prehash_cache_size: i32,
     #[serde(default = "ttrue")]
-    pub duplicate_delete_outdated_entries: bool,
+    pub delete_outdated_cache_entries: bool,
     #[serde(default = "ttrue")]
     pub similar_images_hide_hard_links: bool,
     #[serde(default = "ttrue")]
     pub similar_images_show_image_preview: bool,
     #[serde(default = "ttrue")]
-    pub similar_images_delete_outdated_entries: bool,
-    #[serde(default = "ttrue")]
-    pub similar_videos_delete_outdated_entries: bool,
-    #[serde(default = "ttrue")]
     pub video_thumbnails_preview: bool,
     #[serde(default = "ttrue")]
     pub video_thumbnails_unused_thumbnails: bool,
-    #[serde(default = "ttrue")]
-    pub similar_music_delete_outdated_entries: bool,
     #[serde(default = "default_sub_hash_size")]
     pub similar_images_sub_hash_size: String,
     #[serde(default = "default_hash_type")]

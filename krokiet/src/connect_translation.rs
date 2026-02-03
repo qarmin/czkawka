@@ -338,10 +338,10 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_duplicate_minimal_hash_cache_size_text(flk!("settings_duplicate_minimal_hash_cache_size").into());
     translation.set_settings_duplicate_use_prehash_text(flk!("settings_duplicate_use_prehash").into());
     translation.set_settings_duplicate_minimal_prehash_cache_size_text(flk!("settings_duplicate_minimal_prehash_cache_size").into());
-    translation.set_settings_duplicate_delete_outdated_entries_text(flk!("settings_duplicate_delete_outdated_entries").into());
+    translation.set_settings_delete_outdated_cache_entries_text(flk!("settings_delete_outdated_cache_entries").into());
+    translation.set_settings_delete_outdated_cache_entries_hint_text(flk!("settings_delete_outdated_cache_entries_hint").into());
     translation.set_settings_similar_images_show_image_preview_text(flk!("settings_similar_images_show_image_preview").into());
     translation.set_settings_similar_images_hide_hard_links_text(flk!("settings_similar_images_hide_hard_links").into());
-    translation.set_settings_delete_outdated_entries_text(flk!("settings_delete_outdated_entries").into());
     translation.set_settings_similar_videos_hide_hard_links_text(flk!("settings_similar_videos_hide_hard_links").into());
     translation.set_settings_open_config_folder_text(flk!("settings_open_config_folder").into());
     translation.set_settings_open_cache_folder_text(flk!("settings_open_cache_folder").into());
@@ -360,7 +360,6 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_video_thumbnails_generate_grid_text(flk!("settings_video_thumbnails_generate_grid").into());
     translation.set_settings_video_thumbnails_generate_grid_hint_text(flk!("settings_video_thumbnails_generate_grid_hint").into());
     translation.set_settings_similar_images_tool_text(flk!("settings_similar_images_tool").into());
-    translation.set_settings_similar_music_tool_text(flk!("settings_similar_music_tool").into());
     translation.set_settings_general_settings_text(flk!("settings_general_settings").into());
     translation.set_settings_settings_text(flk!("settings_settings").into());
     translation.set_popup_save_title_text(flk!("popup_save_title").into());

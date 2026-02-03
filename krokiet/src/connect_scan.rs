@@ -192,4 +192,5 @@ where
     component.set_exclude_other_filesystems(custom_settings.ignore_other_file_systems);
     component.set_use_cache(custom_settings.use_cache);
     component.set_save_also_as_json(custom_settings.save_also_as_json);
+    component.set_delete_outdated_cache(custom_settings.delete_outdated_cache_entries);
 }

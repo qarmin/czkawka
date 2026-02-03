@@ -152,6 +152,8 @@ export global Translations {
     in-out property <string> settings_save_as_json_text: "Also save cache as JSON file";
     in-out property <string> settings_move_to_trash_text: "Move deleted files to trash";
     in-out property <string> settings_ignore_other_filesystems_text: "Ignore other filesystems (only Linux)";
+    in-out property <string> settings_delete_outdated_cache_entries_text: "Delete automatically outdated cache entries";
+    in-out property <string> settings_delete_outdated_cache_entries_hint_text: "When enabled, the app will verify during cache loading (at most once per week) whether the cached records still point to existing and unmodified files/data";
     in-out property <string> settings_thread_number_text: "Thread number";
     in-out property <string> settings_restart_required_text: "---You need to restart app to apply changes in thread number---";
     in-out property <string> settings_restart_required_scale_text: "---You need to restart app to apply changes in app scale---";
@@ -163,10 +165,8 @@ export global Translations {
     in-out property <string> settings_duplicate_minimal_hash_cache_size_text: "Minimal size of cached files - Hash (KB)";
     in-out property <string> settings_duplicate_use_prehash_text: "Use prehash";
     in-out property <string> settings_duplicate_minimal_prehash_cache_size_text: "Minimal size of cached files - Prehash (KB)";
-    in-out property <string> settings_duplicate_delete_outdated_entries_text: "Delete automatically outdated entries";
     in-out property <string> settings_similar_images_show_image_preview_text: "Image preview";
     in-out property <string> settings_similar_images_hide_hard_links_text: "Hide hard links";
-    in-out property <string> settings_delete_outdated_entries_text: "Delete automatically outdated entries";
     in-out property <string> settings_similar_videos_hide_hard_links_text: "Hide hard links";
     in-out property <string> settings_similar_videos_preview_text: "Image preview";
     in-out property <string> settings_open_config_folder_text: "Open config folder";
@@ -186,7 +186,6 @@ export global Translations {
     in-out property <string> settings_video_thumbnails_generate_grid_text: "Generate thumbnail grid instead of single image";
     in-out property <string> settings_video_thumbnails_generate_grid_hint_text: "Generating multiple images in grid is a lot slower than generating single thumbnail";
     in-out property <string> settings_similar_images_tool_text: "Similar Images tool";
-    in-out property <string> settings_similar_music_tool_text: "Similar Music tool";
     in-out property <string> settings_general_settings_text: "General Settings";
     in-out property <string> settings_global_settings_text: "Global Settings";
     in-out property <string> settings_settings_text: "Settings";

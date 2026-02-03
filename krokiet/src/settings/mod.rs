@@ -402,17 +402,14 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_duplicate_use_prehash(custom_settings.duplicate_use_prehash);
     settings.set_duplicate_minimal_hash_cache_size(custom_settings.duplicate_minimal_hash_cache_size.to_string().into());
     settings.set_duplicate_minimal_prehash_cache_size(custom_settings.duplicate_minimal_prehash_cache_size.to_string().into());
-    settings.set_duplicate_delete_outdated_entries(custom_settings.duplicate_delete_outdated_entries);
+    settings.set_delete_outdated_cache_entries(custom_settings.delete_outdated_cache_entries);
     settings.set_duplicates_sub_name_case_sensitive(custom_settings.duplicates_sub_name_case_sensitive);
     settings.set_similar_images_hide_hard_links(custom_settings.similar_images_hide_hard_links);
     settings.set_similar_images_show_image_preview(custom_settings.similar_images_show_image_preview);
-    settings.set_similar_images_delete_outdated_entries(custom_settings.similar_images_delete_outdated_entries);
     settings.set_similar_videos_hide_hard_links(custom_settings.similar_videos_hide_hard_links);
-    settings.set_similar_videos_delete_outdated_entries(custom_settings.similar_videos_delete_outdated_entries);
     settings.set_video_thumbnails_preview(custom_settings.video_thumbnails_preview);
     settings.set_video_thumbnails_unused_thumbnails(custom_settings.video_thumbnails_unused_thumbnails);
     settings.set_similar_music_compare_fingerprints_only_with_similar_titles(custom_settings.similar_music_compare_fingerprints_only_with_similar_titles);
-    settings.set_similar_music_delete_outdated_entries(custom_settings.similar_music_delete_outdated_entries);
 
     set_combobox_custom_settings_items(&settings, custom_settings);
 
@@ -578,20 +575,17 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         .get_duplicate_minimal_prehash_cache_size()
         .parse::<i32>()
         .unwrap_or(DEFAULT_MINIMUM_PREHASH_CACHE_SIZE);
-    let duplicate_delete_outdated_entries = settings.get_duplicate_delete_outdated_entries();
+    let delete_outdated_cache_entries = settings.get_delete_outdated_cache_entries();
     let duplicates_sub_name_case_sensitive = settings.get_duplicates_sub_name_case_sensitive();
 
     let similar_images_hide_hard_links = settings.get_similar_images_hide_hard_links();
     let similar_images_show_image_preview = settings.get_similar_images_show_image_preview();
-    let similar_images_delete_outdated_entries = settings.get_similar_images_delete_outdated_entries();
 
     let similar_videos_hide_hard_links = settings.get_similar_videos_hide_hard_links();
-    let similar_videos_delete_outdated_entries = settings.get_similar_videos_delete_outdated_entries();
     let video_thumbnails_preview = settings.get_video_thumbnails_preview();
     let video_thumbnails_unused_thumbnails = settings.get_video_thumbnails_unused_thumbnails();
 
     let similar_music_compare_fingerprints_only_with_similar_titles = settings.get_similar_music_compare_fingerprints_only_with_similar_titles();
-    let similar_music_delete_outdated_entries = settings.get_similar_music_delete_outdated_entries();
 
     let similar_images_sub_hash_size = combo_box_items.hash_size.config_name.clone();
     let similar_images_sub_hash_alg = combo_box_items.image_hash_alg.config_name.clone();
@@ -711,14 +705,11 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         duplicate_use_prehash,
         duplicate_minimal_hash_cache_size,
         duplicate_minimal_prehash_cache_size,
-        duplicate_delete_outdated_entries,
+        delete_outdated_cache_entries,
         similar_images_hide_hard_links,
         similar_images_show_image_preview,
-        similar_images_delete_outdated_entries,
-        similar_videos_delete_outdated_entries,
         video_thumbnails_preview,
         video_thumbnails_unused_thumbnails,
-        similar_music_delete_outdated_entries,
         similar_images_sub_hash_size,
         similar_images_sub_hash_alg,
         similar_images_sub_resize_algorithm,
