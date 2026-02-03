@@ -83,7 +83,11 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
 
     let metadata = fs::metadata(&temp_output).map_err(|e| {
         let _ = fs::remove_file(&temp_output);
-        format!("Failed to get metadata of optimized file \"{}\": {}", temp_output.to_string_lossy(), e)
+        flc!(
+            "core_failed_to_get_metadata_of_optimized_file",
+            file = temp_output.to_string_lossy(),
+            reason = e.to_string()
+        )
     })?;
 
     let new_size = metadata.len();

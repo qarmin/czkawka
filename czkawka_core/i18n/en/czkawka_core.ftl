@@ -42,7 +42,6 @@ core_error_removing = Error while removing "{ $file }": { $error }
 
 core_no_similarity_method_selected = Cannot find similar music files without a selected similarity method
 
-# Errors added by localization changes
 core_failed_to_spawn_command = Failed to spawn command: { $reason }
 core_failed_to_check_process_status = Failed to check process status: { $reason }
 core_failed_to_wait_for_process = Failed to wait for process: { $reason }
@@ -94,3 +93,12 @@ core_failed_to_write_data_to_cache = Cannot write data to cache file "{ $file }"
 core_properly_saved_cache_entries = Properly saved to file { $count } cache entries.
 core_video_processing_stopped_by_user = Video processing was stopped by user
 core_thumbnail_generation_stopped_by_user = Thumbnail generation was stopped by user
+core_failed_to_optimize_video = Failed to optimize video "{ $file }": { $reason }
+core_failed_to_crop_video = Failed to crop video "{ $file }": { $reason }
+core_failed_to_get_metadata_of_optimized_file = Failed to get metadata of optimized file "{ $file }": { $reason }
+core_cannot_create_config_folder = Cannot create config folder "{ $folder }", reason { $reason }
+core_cannot_create_cache_folder = Cannot create cache folder "{ $folder }", reason { $reason }
+core_cannot_create_or_open_cache_file = Cannot create or open cache file "{ $file }", reason { $reason }
+core_cannot_set_config_cache_path = Cannot set config/cache path - config and cache will not be used.
+core_invalid_extension_contains_space = { $extension } is not a valid extension because it contains empty space inside
+core_invalid_extension_contains_dot = { $extension } is not a valid extension because it contains dot inside

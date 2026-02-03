@@ -6,6 +6,8 @@ use directories_next::ProjectDirs;
 use log::{info, warn};
 use once_cell::sync::OnceCell;
 
+use crate::flc;
+
 static CONFIG_CACHE_PATH: OnceCell<Option<ConfigCachePath>> = OnceCell::new();
 
 #[derive(Debug, Clone)]
@@ -108,16 +110,16 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
         if !config_folder.exists()
             && let Err(e) = fs::create_dir_all(&config_folder)
         {
-            warnings.push(format!("Cannot create config folder \"{}\", reason {e}", config_folder.to_string_lossy()));
+            warnings.push(flc!("core_cannot_create_config_folder", folder = config_folder.to_string_lossy(), reason = e.to_string()));
         }
         if !cache_folder.exists()
             && let Err(e) = fs::create_dir_all(&cache_folder)
         {
-            warnings.push(format!("Cannot create cache folder \"{}\", reason {e}", cache_folder.to_string_lossy()));
+            warnings.push(flc!("core_cannot_create_cache_folder", folder = cache_folder.to_string_lossy(), reason = e.to_string()));
         }
         Some(ConfigCachePath { config_folder, cache_folder })
     } else {
-        warnings.push("Cannot set config/cache path - config and cache will not be used.".to_string());
+        warnings.push(flc!("core_cannot_set_config_cache_path"));
         None
     };
 
@@ -150,7 +152,7 @@ pub(crate) fn open_cache_folder(
         file_handler_default = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file) {
             Ok(t) => t,
             Err(e) => {
-                warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file.to_string_lossy()));
+                warnings.push(flc!("core_cannot_create_or_open_cache_file", file = cache_file.to_string_lossy(), reason = e.to_string()));
                 return None;
             }
         });
@@ -158,7 +160,11 @@ pub(crate) fn open_cache_folder(
             file_handler_json = Some(match OpenOptions::new().truncate(true).write(true).create(true).open(&cache_file_json) {
                 Ok(t) => t,
                 Err(e) => {
-                    warnings.push(format!("Cannot create or open cache file \"{}\", reason {e}", cache_file_json.to_string_lossy()));
+                    warnings.push(flc!(
+                        "core_cannot_create_or_open_cache_file",
+                        file = cache_file_json.to_string_lossy(),
+                        reason = e.to_string()
+                    ));
                     return None;
                 }
             });
