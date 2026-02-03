@@ -117,13 +117,13 @@ fn hardlink_symlink(
     let mut vec_tree_path_to_remove: Vec<TreePath> = Vec::new(); // List of hardlinked files without its root
     let mut vec_symhardlink_data: Vec<SymHardlinkData> = Vec::new();
 
-    let current_iter: TreeIter = match model.iter_first() {
+    let mut current_iter: TreeIter = match model.iter_first() {
         Some(t) => t,
         None => return, // No records
     };
 
     let mut selected_rows = Vec::new();
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         loop {
             if model.get::<bool>(&iter, column_selection) {
                 if !model.get::<bool>(&iter, column_header) {
@@ -132,7 +132,7 @@ fn hardlink_symlink(
                     panic!("Header row shouldn't be selected, please report bug.");
                 }
             }
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
         }
@@ -153,7 +153,7 @@ fn hardlink_symlink(
             }
 
             current_symhardlink_data = None;
-            assert!(model.iter_next(&current_iter), "HEADER, shouldn't be a last item.");
+            assert!(model.iter_next(&mut current_iter), "HEADER, shouldn't be a last item.");
             continue;
         }
 
@@ -185,7 +185,7 @@ fn hardlink_symlink(
             }
         }
 
-        if !model.iter_next(&current_iter) {
+        if !model.iter_next(&mut current_iter) {
             if let Some(current_symhardlink_data) = current_symhardlink_data {
                 if !current_symhardlink_data.files_to_symhardlink.is_empty() {
                     vec_symhardlink_data.push(current_symhardlink_data);
@@ -263,11 +263,11 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
 
     let mut selected_values_in_group = 0;
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         loop {
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
 
@@ -305,11 +305,11 @@ pub async fn check_if_changing_one_item_in_group_and_continue(tree_view: &gtk4::
 pub(crate) fn check_if_anything_is_selected_async(tree_view: &gtk4::TreeView, column_header: i32, column_selection: i32) -> bool {
     let model = get_list_store(tree_view);
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         loop {
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
 

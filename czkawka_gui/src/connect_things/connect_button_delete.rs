@@ -212,7 +212,7 @@ pub async fn check_if_deleting_all_files_in_group(
 
     let mut selected_all_records: bool = true;
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
         // It is safe to remove any number of files in reference mode
@@ -221,7 +221,7 @@ pub async fn check_if_deleting_all_files_in_group(
         }
 
         loop {
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
 
@@ -276,12 +276,12 @@ pub(crate) fn empty_folder_remover(
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         loop {
             if model.get::<bool>(&iter, column_selection) {
                 selected_rows.push(model.path(&iter));
             }
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
         }
@@ -356,13 +356,13 @@ pub(crate) fn basic_remove(
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         loop {
             if model.get::<bool>(&iter, column_selection) {
                 selected_rows.push(model.path(&iter));
             }
 
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
         }
@@ -437,7 +437,7 @@ pub(crate) fn tree_remove(
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         loop {
             if model.get::<bool>(&iter, column_selection) {
                 if !model.get::<bool>(&iter, column_header) {
@@ -447,7 +447,7 @@ pub(crate) fn tree_remove(
                 }
             }
 
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
         }

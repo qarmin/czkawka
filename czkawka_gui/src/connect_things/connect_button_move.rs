@@ -113,7 +113,7 @@ fn move_with_tree(
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         loop {
             if model.get::<bool>(&iter, column_selection) {
                 if !model.get::<bool>(&iter, column_header) {
@@ -123,7 +123,7 @@ fn move_with_tree(
                 }
             }
 
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
         }
@@ -151,13 +151,13 @@ fn move_with_list(
 
     let mut selected_rows = Vec::new();
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         loop {
             if model.get::<bool>(&iter, column_selection) {
                 selected_rows.push(model.path(&iter));
             }
 
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
         }

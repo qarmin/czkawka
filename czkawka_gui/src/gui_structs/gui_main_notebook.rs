@@ -4,7 +4,7 @@ use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::SIMILAR_VALUES;
 use czkawka_core::tools::similar_images::core::get_string_from_similarity;
 use gtk4::prelude::*;
-use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, GestureClick, Image, Label, Notebook, Scale, ScrolledWindow, TreeView, Widget};
+use gtk4::{Builder, CheckButton, ComboBoxText, Entry, EventControllerKey, GestureClick, Label, Notebook, Picture, Scale, ScrolledWindow, TreeView, Widget};
 
 use crate::flg;
 use crate::help_combo_box::{AUDIO_TYPE_CHECK_METHOD_COMBO_BOX, BIG_FILES_CHECK_METHOD_COMBO_BOX, DUPLICATES_CHECK_METHOD_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX};
@@ -72,7 +72,7 @@ pub struct GuiMainNotebook {
     pub label_duplicate_hash_type: Label,
     pub check_button_duplicate_case_sensitive_name: CheckButton,
 
-    pub image_preview_duplicates: Image,
+    pub image_preview_duplicates: Picture,
 
     // Big file
     pub label_big_shown_files: Label,
@@ -97,7 +97,7 @@ pub struct GuiMainNotebook {
     pub label_image_similarity: Label,
     pub label_image_similarity_max: Label,
 
-    pub image_preview_similar_images: Image,
+    pub image_preview_similar_images: Picture,
     pub label_similar_images_minimal_similarity: Label,
 
     // Video
@@ -253,8 +253,8 @@ impl GuiMainNotebook {
         let label_video_similarity_max: Label = builder.object("label_video_similarity_max").expect("Cambalache");
         let label_big_files_mode: Label = builder.object("label_big_files_mode").expect("Cambalache");
 
-        let image_preview_similar_images: Image = builder.object("image_preview_similar_images").expect("Cambalache");
-        let image_preview_duplicates: Image = builder.object("image_preview_duplicates").expect("Cambalache");
+        let image_preview_similar_images: Picture = builder.object("image_preview_similar_images").expect("Cambalache");
+        let image_preview_duplicates: Picture = builder.object("image_preview_duplicates").expect("Cambalache");
 
         let label_audio_check_type: Label = builder.object("label_audio_check_type").expect("Cambalache");
         let combo_box_audio_check_type: ComboBoxText = builder.object("combo_box_audio_check_type").expect("Cambalache");

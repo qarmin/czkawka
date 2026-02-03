@@ -148,7 +148,7 @@ impl LoadSaveStruct {
                 } else if text == "true" || text == "1" {
                     true
                 } else {
-                    add_text_to_text_view(&self.text_view, &flg!("saving_loading_decode_problem_bool", key = key, result = item[0].to_string()));
+                    add_text_to_text_view(&self.text_view, &flg!("saving_loading_decode_problem_bool", key = key, result = item[0].clone()));
                     default_value
                 }
             } else {
@@ -172,11 +172,11 @@ impl LoadSaveStruct {
     pub(crate) fn save_list_store(&mut self, key: String, tree_view: &TreeView, column_path: i32) {
         let mut vec_string = vec![];
         let list_store = get_list_store(tree_view);
-        if let Some(iter) = list_store.iter_first() {
+        if let Some(mut iter) = list_store.iter_first() {
             loop {
                 // TODO maybe save also here reference directories?
                 vec_string.push(list_store.get::<String>(&iter, column_path));
-                if !list_store.iter_next(&iter) {
+                if !list_store.iter_next(&mut iter) {
                     break;
                 }
             }

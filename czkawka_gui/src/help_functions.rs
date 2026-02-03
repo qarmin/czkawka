@@ -244,7 +244,7 @@ pub(crate) fn get_string_from_list_store(tree_view: &TreeView, column_full_path:
 
     let mut string_vector: Vec<String> = Vec::new();
 
-    let Some(tree_iter) = list_store.iter_first() else {
+    let Some(mut tree_iter) = list_store.iter_first() else {
         return string_vector;
     };
     match column_selection {
@@ -252,13 +252,13 @@ pub(crate) fn get_string_from_list_store(tree_view: &TreeView, column_full_path:
             if list_store.get::<bool>(&tree_iter, column_selection) {
                 string_vector.push(list_store.get::<String>(&tree_iter, column_full_path));
             }
-            if !list_store.iter_next(&tree_iter) {
+            if !list_store.iter_next(&mut tree_iter) {
                 return string_vector;
             }
         },
         None => loop {
             string_vector.push(list_store.get::<String>(&tree_iter, column_full_path));
-            if !list_store.iter_next(&tree_iter) {
+            if !list_store.iter_next(&mut tree_iter) {
                 return string_vector;
             }
         },
@@ -443,7 +443,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
                 assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
                 next_iter = current_iter;
-                if !model.iter_next(&next_iter) {
+                if !model.iter_next(&mut next_iter) {
                     // There is only single header left (H1 -> END) -> (NOTHING)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     break 'main;
@@ -457,7 +457,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
                 }
 
                 next_next_iter = next_iter;
-                if !model.iter_next(&next_next_iter) {
+                if !model.iter_next(&mut next_next_iter) {
                     // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     vec_tree_path_to_delete.push(model.path(&next_iter));
@@ -474,7 +474,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
 
                 loop {
                     // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
-                    if !model.iter_next(&next_next_iter) {
+                    if !model.iter_next(&mut next_next_iter) {
                         break 'main;
                     }
                     // Move to next header
@@ -492,7 +492,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
                 assert!(model.get::<bool>(&current_iter, column_header), "First deleted element, should be a header");
 
                 next_iter = current_iter;
-                if !model.iter_next(&next_iter) {
+                if !model.iter_next(&mut next_iter) {
                     // There is only single header left (H1 -> END) -> (NOTHING)
                     vec_tree_path_to_delete.push(model.path(&current_iter));
                     break 'reference;
@@ -506,7 +506,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
                 }
 
                 next_next_iter = next_iter;
-                if !model.iter_next(&next_next_iter) {
+                if !model.iter_next(&mut next_next_iter) {
                     // There is only one child of header left, so we remove it with header (H1 -> C1 -> END) -> (NOTHING)
                     break 'reference;
                 }
@@ -519,7 +519,7 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
 
                 loop {
                     // (H1 -> C1 -> C2 -> Cn -> END) -> (NO CHANGE, BECAUSE IS GOOD)
-                    if !model.iter_next(&next_next_iter) {
+                    if !model.iter_next(&mut next_next_iter) {
                         break 'reference;
                     }
                     // Move to next header
@@ -536,8 +536,8 @@ pub(crate) fn clean_invalid_headers(model: &ListStore, column_header: i32, colum
     }
 
     // Last step, remove orphan header if exists
-    if let Some(iter) = model.iter_first() {
-        if !model.iter_next(&iter) {
+    if let Some(mut iter) = model.iter_first() {
+        if !model.iter_next(&mut iter) {
             model.clear();
         }
     }
@@ -552,12 +552,12 @@ pub(crate) fn check_how_much_elements_is_selected(tree_view: &TreeView, column_h
     let mut is_item_currently_selected_in_group: bool = false;
 
     // First iter
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         if let Some(column_header) = column_header {
             assert!(model.get::<bool>(&iter, column_header)); // First element should be header
 
             loop {
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     break;
                 }
 
@@ -579,7 +579,7 @@ pub(crate) fn check_how_much_elements_is_selected(tree_view: &TreeView, column_h
                 number_of_selected_items += 1;
             }
             loop {
-                if !model.iter_next(&iter) {
+                if !model.iter_next(&mut iter) {
                     break;
                 }
 
@@ -598,12 +598,12 @@ pub(crate) fn count_number_of_groups(tree_view: &TreeView, column_header: i32) -
 
     let model = get_list_store(tree_view);
 
-    if let Some(iter) = model.iter_first() {
+    if let Some(mut iter) = model.iter_first() {
         assert!(model.get::<bool>(&iter, column_header)); // First element should be header
         number_of_selected_groups += 1;
 
         loop {
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
 
@@ -768,7 +768,7 @@ pub(crate) fn get_pixbuf_from_dynamic_image(dynamic_image: &DynamicImage) -> Res
 }
 
 pub(crate) fn check_if_value_is_in_list_store(list_store: &ListStore, column: i32, value: &str) -> bool {
-    if let Some(iter) = list_store.iter_first() {
+    if let Some(mut iter) = list_store.iter_first() {
         loop {
             let list_store_value: String = list_store.get::<String>(&iter, column);
 
@@ -776,7 +776,7 @@ pub(crate) fn check_if_value_is_in_list_store(list_store: &ListStore, column: i3
                 return true;
             }
 
-            if !list_store.iter_next(&iter) {
+            if !list_store.iter_next(&mut iter) {
                 break;
             }
         }
@@ -786,7 +786,7 @@ pub(crate) fn check_if_value_is_in_list_store(list_store: &ListStore, column: i3
 }
 
 pub(crate) fn check_if_list_store_column_have_all_same_values(list_store: &ListStore, column: i32, value: bool) -> bool {
-    if let Some(iter) = list_store.iter_first() {
+    if let Some(mut iter) = list_store.iter_first() {
         loop {
             let list_store_value: bool = list_store.get::<bool>(&iter, column);
 
@@ -794,7 +794,7 @@ pub(crate) fn check_if_list_store_column_have_all_same_values(list_store: &ListS
                 return false;
             }
 
-            if !list_store.iter_next(&iter) {
+            if !list_store.iter_next(&mut iter) {
                 break;
             }
         }

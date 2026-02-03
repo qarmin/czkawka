@@ -390,7 +390,7 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkImage" id="image_preview_duplicates">
+                          <object class="GtkPicture" id="image_preview_duplicates">
                             <property name="height-request">100</property>
                             <property name="hexpand">True</property>
                             <property name="hexpand-set">True</property>
@@ -601,7 +601,7 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkImage" id="image_preview_similar_images">
+                          <object class="GtkPicture" id="image_preview_similar_images">
                             <property name="height-request">100</property>
                             <property name="hexpand">True</property>
                             <property name="hexpand-set">True</property>

@@ -192,9 +192,9 @@ fn reverse_selection(tree_view: &gtk4::TreeView, column_header: i32, column_sele
         model.set_value(&to_upper_iter, column_selection as u32, &(!current_value).to_value());
     }
 
-    let to_lower_iter = current_iter;
+    let mut to_lower_iter = current_iter;
     loop {
-        if !model.iter_next(&to_lower_iter) {
+        if !model.iter_next(&mut to_lower_iter) {
             break;
         }
         if model.get::<bool>(&to_lower_iter, column_header) {

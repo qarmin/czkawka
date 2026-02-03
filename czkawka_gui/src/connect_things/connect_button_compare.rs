@@ -4,7 +4,7 @@ use std::rc::Rc;
 use czkawka_core::common::image::get_dynamic_image_from_path;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
-use gtk4::{Align, CheckButton, Image, ListStore, Orientation, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
+use gtk4::{Align, CheckButton, ListStore, Orientation, Picture, ScrolledWindow, TreeIter, TreeModel, TreePath, TreeSelection, Widget};
 use image::DynamicImage;
 use log::error;
 
@@ -102,8 +102,8 @@ pub(crate) fn connect_button_compare(gui_data: &GuiData) {
         *shared_current_of_groups.borrow_mut() = 0;
         *shared_numbers_of_groups.borrow_mut() = 0;
         *shared_using_for_preview.borrow_mut() = (None, None);
-        image_compare_left.set_from_pixbuf(None);
-        image_compare_right.set_from_pixbuf(None);
+        image_compare_left.set_pixbuf(None);
+        image_compare_right.set_pixbuf(None);
         glib::Propagation::Stop
     });
 
@@ -294,15 +294,15 @@ fn populate_groups_at_start(
     model: &TreeModel,
     shared_current_path: &Rc<RefCell<Option<TreePath>>>,
     tree_path: TreePath,
-    image_compare_left: &Image,
-    image_compare_right: &Image,
+    image_compare_left: &Picture,
+    image_compare_right: &Picture,
     current_group: u32,
     group_number: u32,
     check_button_left_preview_text: &CheckButton,
     check_button_right_preview_text: &CheckButton,
     scrolled_window_compare_choose_images: &ScrolledWindow,
     label_group_info: &gtk4::Label,
-    shared_image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    shared_image_cache: &Rc<RefCell<Vec<(String, String, Picture, Picture, TreePath)>>>,
     shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     button_go_previous_compare_group: &gtk4::Button,
     button_go_next_compare_group: &gtk4::Button,
@@ -387,13 +387,13 @@ fn populate_groups_at_start(
     check_button_right_preview_text.set_active(is_active);
 }
 
-fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>, use_rust_loader: bool) -> Vec<(String, String, Image, Image, TreePath)> {
+fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>, use_rust_loader: bool) -> Vec<(String, String, Picture, Picture, TreePath)> {
     // TODO use here threads,
     // For now threads cannot be used because Image and TreeIter cannot be used in threads
     let mut cache_all_images = Vec::new();
     for (full_path, name, tree_path) in vector_with_path {
-        let small_img = Image::new();
-        let big_img = Image::new();
+        let small_img = Picture::new();
+        let big_img = Picture::new();
 
         let mut pixbuf = get_pixbuf_from_dynamic_image(&DynamicImage::new_rgb8(1, 1)).expect("Failed to create pixbuf");
 
@@ -435,8 +435,8 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
                 break;
             };
 
-            big_img.set_from_pixbuf(Some(&pixbuf_big));
-            small_img.set_from_pixbuf(Some(&pixbuf_small));
+            big_img.set_pixbuf(Some(&pixbuf_big));
+            small_img.set_pixbuf(Some(&pixbuf_small));
             break;
         }
 
@@ -446,7 +446,7 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
 }
 
 fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, column_path: i32, column_name: i32) -> Vec<(String, String, TreePath)> {
-    let used_iter = model.iter(current_path).expect("Using invalid tree_path");
+    let mut used_iter = model.iter(current_path).expect("Using invalid tree_path");
 
     assert!(model.get::<bool>(&used_iter, column_header));
     let using_reference = !model.get::<String>(&used_iter, column_path).is_empty();
@@ -462,7 +462,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
         returned_vector.push((full_name, name, model.path(&used_iter)));
     }
 
-    assert!(model.iter_next(&used_iter), "Found only header!");
+    assert!(model.iter_next(&mut used_iter), "Found only header!");
 
     loop {
         let name = model.get::<String>(&used_iter, column_name);
@@ -472,7 +472,7 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
 
         returned_vector.push((full_name, name, model.path(&used_iter)));
 
-        if !model.iter_next(&used_iter) {
+        if !model.iter_next(&mut used_iter) {
             break;
         }
 
@@ -487,19 +487,19 @@ fn get_all_path(model: &TreeModel, current_path: &TreePath, column_header: i32, 
 }
 
 fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_next: bool) -> TreePath {
-    let tree_iter = model.iter(tree_path).expect("Using invalid tree_path");
+    let mut tree_iter = model.iter(tree_path).expect("Using invalid tree_path");
 
     assert!(model.get::<bool>(&tree_iter, column_header));
 
     if go_next {
-        assert!(model.iter_next(&tree_iter), "Found only header!");
+        assert!(model.iter_next(&mut tree_iter), "Found only header!");
     } else {
         assert!(model.iter_previous(&tree_iter), "Found only header!");
     }
 
     loop {
         if go_next {
-            if !model.iter_next(&tree_iter) {
+            if !model.iter_next(&mut tree_iter) {
                 break;
             }
         } else {
@@ -517,11 +517,11 @@ fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_nex
 
 fn populate_similar_scrolled_view(
     scrolled_window: &ScrolledWindow,
-    image_cache: &[(String, String, Image, Image, TreePath)],
-    image_compare_left: &Image,
-    image_compare_right: &Image,
+    image_cache: &[(String, String, Picture, Picture, TreePath)],
+    image_compare_left: &Picture,
+    image_compare_right: &Picture,
     shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
-    shared_image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    shared_image_cache: &Rc<RefCell<Vec<(String, String, Picture, Picture, TreePath)>>>,
     check_button_left_preview_text: &CheckButton,
     check_button_right_preview_text: &CheckButton,
     model: &TreeModel,
@@ -612,7 +612,7 @@ fn populate_similar_scrolled_view(
 fn update_bottom_buttons(
     all_gtk_box: &gtk4::Box,
     shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
-    image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    image_cache: &Rc<RefCell<Vec<(String, String, Picture, Picture, TreePath)>>>,
 ) {
     let left_tree_view = shared_using_for_preview.borrow().0.clone().expect("Left tree_view not set");
     let right_tree_view = shared_using_for_preview.borrow().1.clone().expect("Right tree_view not set");
@@ -639,7 +639,7 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: &Tree
 
     let selected_records = selection.selected_rows().0;
 
-    let iter = model.iter_first().expect("Model is no empty, so should have first item"); // Checking that treeview is not empty should be done before
+    let mut iter = model.iter_first().expect("Model is no empty, so should have first item"); // Checking that treeview is not empty should be done before
     header_clone = iter; // if nothing selected, use first group
     possible_header = iter; // if nothing selected, use first group
     assert!(model.get::<bool>(&iter, column_header)); // First element should be header
@@ -647,7 +647,7 @@ fn get_current_group_and_iter_from_selection(model: &TreeModel, selection: &Tree
     if !selected_records.is_empty() {
         let first_selected_record = selected_records[0].clone();
         loop {
-            if !model.iter_next(&iter) {
+            if !model.iter_next(&mut iter) {
                 break;
             }
 

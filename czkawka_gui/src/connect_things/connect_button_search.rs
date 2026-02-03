@@ -708,11 +708,10 @@ where
 fn clean_tree_view(tree_view: &gtk4::TreeView) {
     let list_store = get_list_store(tree_view);
     let mut all_iters = Vec::new();
-    let first_iter = list_store.iter_first();
-    if let Some(first_iter) = first_iter {
+    if let Some(mut first_iter) = list_store.iter_first() {
         loop {
             all_iters.push(first_iter);
-            if !list_store.iter_next(&first_iter) {
+            if !list_store.iter_next(&mut first_iter) {
                 break;
             }
         }

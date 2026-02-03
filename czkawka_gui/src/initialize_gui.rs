@@ -8,7 +8,7 @@ use gdk4::gdk_pixbuf::Pixbuf;
 use glib::types::Type;
 use gtk4::gdk_pixbuf::InterpType;
 use gtk4::prelude::*;
-use gtk4::{CheckButton, Image, ScrolledWindow, SelectionMode, TextView, TreeModel, TreePath, TreeSelection, TreeView};
+use gtk4::{CheckButton, Picture, ScrolledWindow, SelectionMode, TextView, TreeModel, TreePath, TreeSelection, TreeView};
 
 use crate::create_tree_view::*;
 use crate::gui_structs::gui_data::*;
@@ -284,7 +284,7 @@ fn create_column_types(
     notebook_enum: NotebookMainEnum,
     select_function: Option<fn(&TreeSelection, &TreeModel, &TreePath, bool) -> bool>,
     create_tree_view_func: fn(&TreeView),
-    image_preview: Option<&Image>,
+    image_preview: Option<&Picture>,
 ) {
     if let Some(image_preview) = image_preview {
         image_preview.hide();
@@ -478,7 +478,7 @@ fn show_preview(
     tree_view: &TreeView,
     text_view_errors: &TextView,
     check_button_settings_show_preview: &CheckButton,
-    image_preview: &Image,
+    image_preview: &Picture,
     preview_path: &Rc<RefCell<String>>,
     column_path: i32,
     column_name: i32,
@@ -543,7 +543,7 @@ fn show_preview(
                 Some(pixbuf) => pixbuf,
             };
 
-            image_preview.set_from_pixbuf(Some(&pixbuf));
+            image_preview.set_pixbuf(Some(&pixbuf));
             {
                 let mut preview_path = preview_path.borrow_mut();
                 *preview_path = file_name;

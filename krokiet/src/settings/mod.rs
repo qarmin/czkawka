@@ -281,7 +281,7 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     let collected_items = StringComboBoxItems::get_items();
 
     // Hash size
-    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_images_sub_hash_size.to_string(), &collected_items.hash_size);
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_images_sub_hash_size.clone(), &collected_items.hash_size);
     // settings.set_similar_images_sub_hash_size_model(display_names); // TODO - replace with
     settings.set_similar_images_sub_hash_size_index(idx as i32);
     settings.set_similar_images_sub_hash_size_value(display_names[idx].clone());

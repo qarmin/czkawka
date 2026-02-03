@@ -63,12 +63,12 @@
             <property name="homogeneous">1</property>
             <property name="vexpand">1</property>
             <child>
-              <object class="GtkImage" id="image_compare_left">
+              <object class="GtkPicture" id="image_compare_left">
                 <property name="height-request">100</property>
               </object>
             </child>
             <child>
-              <object class="GtkImage" id="image_compare_right">
+              <object class="GtkPicture" id="image_compare_right">
                 <property name="height-request">100</property>
               </object>
             </child>
