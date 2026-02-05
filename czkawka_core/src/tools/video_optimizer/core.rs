@@ -208,7 +208,7 @@ impl VideoOptimizer {
             CurrentStage::VideoOptimizerCreatingThumbnails,
             self.video_transcode_result_entries.len(),
             self.get_test_type(),
-            self.video_transcode_result_entries.iter().map(|e| e.size).sum(),
+            0,
         );
 
         let Some(config_cache_path) = get_config_cache_path() else {
