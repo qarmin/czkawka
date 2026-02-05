@@ -680,7 +680,7 @@ mod tests {
         fn get_cd_mut(&mut self) -> &mut CommonToolData {
             self
         }
-        fn found_any_broken_files(&self) -> bool {
+        fn found_any_items(&self) -> bool {
             false
         }
     }

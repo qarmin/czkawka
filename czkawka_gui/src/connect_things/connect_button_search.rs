@@ -262,7 +262,6 @@ fn duplicate_search(
             let params = DuplicateFinderParameters::new(
                 check_method,
                 hash_type,
-                loaded_commons.hide_hard_links,
                 use_prehash_cache,
                 loaded_commons.minimal_cache_file_size,
                 minimal_prehash_cache_file_size,
@@ -597,7 +596,7 @@ fn similar_image_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let params = SimilarImagesParameters::new(similarity, hash_size, hash_alg, image_filter, ignore_same_size, loaded_commons.hide_hard_links);
+            let params = SimilarImagesParameters::new(similarity, hash_size, hash_alg, image_filter, ignore_same_size);
             let mut tool = SimilarImages::new(params);
 
             set_common_settings(&mut tool, &loaded_commons);
@@ -635,7 +634,6 @@ fn similar_video_search(
             let params = SimilarVideosParameters::new(
                 tolerance,
                 ignore_same_size,
-                loaded_commons.hide_hard_links,
                 DEFAULT_SKIP_FORWARD_AMOUNT,
                 DEFAULT_VID_HASH_DURATION,
                 DEFAULT_CROP_DETECT,
@@ -718,6 +716,7 @@ where
     component.set_save_also_as_json(loaded_commons.save_also_as_json);
     component.set_minimal_file_size(loaded_commons.minimal_file_size);
     component.set_maximal_file_size(loaded_commons.maximal_file_size);
+    component.set_hide_hard_links(loaded_commons.hide_hard_links);
 }
 
 #[fun_time(message = "clean_tree_view", level = "debug")]

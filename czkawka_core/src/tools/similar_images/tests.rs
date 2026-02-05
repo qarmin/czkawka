@@ -42,7 +42,7 @@ fn test_similar_images() {
     ];
 
     for (idx, (hash_alg, filter_type, hash_size, similarity, duplicates, groups, all_in_similar)) in algo_filter_hash_sim_found.into_iter().enumerate() {
-        let params = SimilarImagesParameters::new(similarity, hash_size, hash_alg, filter_type, false, true);
+        let params = SimilarImagesParameters::new(similarity, hash_size, hash_alg, filter_type, false);
 
         let mut finder = SimilarImages::new(params);
         finder.set_included_paths(vec![test_path.clone()]);
@@ -69,7 +69,7 @@ fn test_similar_images() {
 fn test_similar_images_exclude_same_size() {
     let test_path = get_test_resources_path();
 
-    let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, true, true);
+    let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, true);
 
     let mut finder = SimilarImages::new(params);
     finder.set_included_paths(vec![test_path]);
@@ -99,7 +99,7 @@ fn test_similar_images_empty_directory() {
     let temp_dir = TempDir::new().unwrap();
     let path = temp_dir.path();
 
-    let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, true);
+    let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false);
 
     let mut finder = SimilarImages::new(params);
     finder.set_included_paths(vec![path.to_path_buf()]);

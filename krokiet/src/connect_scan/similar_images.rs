@@ -34,13 +34,10 @@ pub(crate) fn scan_similar_images(a: Weak<MainWindow>, sd: ScanData) {
                 hash_alg,
                 resize_algorithm,
                 sd.custom_settings.similar_images_sub_ignore_same_size,
-                sd.custom_settings.similar_images_hide_hard_links,
             );
             let mut tool = SimilarImages::new(params);
 
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
-
-            tool.set_delete_outdated_cache(sd.custom_settings.similar_images_delete_outdated_entries);
 
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 

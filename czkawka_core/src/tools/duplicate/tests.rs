@@ -19,7 +19,7 @@ fn test_find_duplicates_by_hash() {
     fs::write(path.join("file2.txt"), b"duplicate content").unwrap();
     fs::write(path.join("unique.txt"), b"unique content").unwrap();
 
-    let params = DuplicateFinderParameters::new(CheckingMethod::Hash, HashType::Blake3, false, false, 0, 0, true);
+    let params = DuplicateFinderParameters::new(CheckingMethod::Hash, HashType::Blake3, false, 0, 0, true);
 
     let mut finder = DuplicateFinder::new(params);
     finder.set_included_paths(vec![path.to_path_buf()]);
@@ -45,7 +45,7 @@ fn test_find_duplicates_by_size() {
     fs::write(path.join("file2.txt"), b"abcde").unwrap();
     fs::write(path.join("unique.txt"), b"123").unwrap();
 
-    let params = DuplicateFinderParameters::new(CheckingMethod::Size, HashType::Blake3, false, false, 0, 0, true);
+    let params = DuplicateFinderParameters::new(CheckingMethod::Size, HashType::Blake3, false, 0, 0, true);
 
     let mut finder = DuplicateFinder::new(params);
     finder.set_included_paths(vec![path.to_path_buf()]);
@@ -76,7 +76,7 @@ fn test_find_duplicates_by_name() {
     fs::write(dir2.join("duplicate.txt"), b"content2").unwrap();
     fs::write(dir1.join("unique.txt"), b"unique").unwrap();
 
-    let params = DuplicateFinderParameters::new(CheckingMethod::Name, HashType::Blake3, false, false, 0, 0, true);
+    let params = DuplicateFinderParameters::new(CheckingMethod::Name, HashType::Blake3, false, 0, 0, true);
 
     let mut finder = DuplicateFinder::new(params);
     finder.set_recursive_search(true);
@@ -104,7 +104,6 @@ fn test_case_insensitive_name_comparison() {
         CheckingMethod::Name,
         HashType::Blake3,
         false,
-        false,
         0,
         0,
         false, // case insensitive
@@ -131,7 +130,7 @@ fn test_no_duplicates_found() {
     fs::write(path.join("file1.txt"), b"content1").unwrap();
     fs::write(path.join("file2.txt"), b"content2").unwrap();
 
-    let params = DuplicateFinderParameters::new(CheckingMethod::Hash, HashType::Blake3, false, false, 0, 0, true);
+    let params = DuplicateFinderParameters::new(CheckingMethod::Hash, HashType::Blake3, false, 0, 0, true);
 
     let mut finder = DuplicateFinder::new(params);
     finder.set_included_paths(vec![path.to_path_buf()]);
@@ -158,7 +157,7 @@ fn test_lost_space_calculation() {
     fs::write(path.join("file2.txt"), &content).unwrap();
     fs::write(path.join("file3.txt"), &content).unwrap();
 
-    let params = DuplicateFinderParameters::new(CheckingMethod::Hash, HashType::Blake3, false, false, 0, 0, true);
+    let params = DuplicateFinderParameters::new(CheckingMethod::Hash, HashType::Blake3, false, 0, 0, true);
 
     let mut finder = DuplicateFinder::new(params);
     finder.set_minimal_file_size(0);

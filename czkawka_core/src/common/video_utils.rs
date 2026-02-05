@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
 use crate::common::process_utils::disable_windows_console_window;
 use crate::common::progress_stop_handler::check_if_stop_received;
+use crate::flc;
 
 pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
 
@@ -27,7 +28,7 @@ pub struct VideoMetadata {
 
 impl VideoMetadata {
     pub fn from_path(path: &Path) -> Result<Self, String> {
-        let info = ffprobe(path).map_err(|e| format!("Failed to read video properties: {e}"))?;
+        let info = ffprobe(path).map_err(|e| flc!("core_failed_to_read_video_properties", reason = e.to_string()))?;
 
         let mut metadata = Self::default();
 
@@ -50,7 +51,7 @@ impl VideoMetadata {
                 && w >= 0
             {
                 if w > VIDEO_RESOLUTION_LIMIT as i64 {
-                    return Err(format!("Video width {w} exceeds the limit of {VIDEO_RESOLUTION_LIMIT}"));
+                    return Err(flc!("core_video_width_exceeds_limit", width = w, limit = VIDEO_RESOLUTION_LIMIT));
                 }
                 metadata.width = Some(w as u32);
             }
@@ -58,7 +59,7 @@ impl VideoMetadata {
                 && h >= 0
             {
                 if h > VIDEO_RESOLUTION_LIMIT as i64 {
-                    return Err(format!("Video height {h} exceeds the limit of {VIDEO_RESOLUTION_LIMIT}"));
+                    return Err(flc!("core_video_height_exceeds_limit", height = h, limit = VIDEO_RESOLUTION_LIMIT));
                 }
                 metadata.height = Some(h as u32);
             }
@@ -100,10 +101,7 @@ impl VideoMetadata {
 pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values: Option<(u32, u32)>) -> Result<RgbImage, String> {
     // This function returns strange status 234, when path contains non default UTF-8 characters, not sure why
     if !video_path.exists() {
-        return Err(format!(
-            "Video file does not exist(could be removed between scan/later steps): \"{}\"",
-            video_path.to_string_lossy()
-        ));
+        return Err(flc!("core_video_file_does_not_exist", path = video_path.to_string_lossy()));
     }
 
     let mut command = Command::new("ffmpeg");
@@ -130,14 +128,19 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .output()
-        .map_err(|e| format!("Failed to execute ffmpeg: {e}"))?;
+        .map_err(|e| flc!("core_failed_to_execute_ffmpeg", reason = e.to_string()))?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).replace("\r\n", "\n").replace("\n", " ");
-        return Err(format!("ffmpeg failed with status: {} - {stderr} - command {command:?} ", output.status));
+        return Err(flc!(
+            "core_ffmpeg_failed_with_status",
+            status = output.status.to_string(),
+            stderr = stderr,
+            command = format!("{:?}", command)
+        ));
     }
 
-    let img = image::load_from_memory(&output.stdout).map_err(|e| format!("Failed to image frame: {e}"))?;
+    let img = image::load_from_memory(&output.stdout).map_err(|e| flc!("core_failed_to_load_image_frame", reason = e.to_string()))?;
 
     Ok(img.into_rgb8())
 }
@@ -183,14 +186,14 @@ pub fn generate_thumbnail(
         let mut imgs = Vec::new();
         for ft in frame_times {
             if check_if_stop_received(stop_flag) {
-                return Err(String::from("Thumbnail generation was stopped by user"));
+                return Err(flc!("core_thumbnail_generation_stopped_by_user"));
             }
 
             match extract_frame_ffmpeg(video_path, ft, Some((max_width, max_height))) {
                 Ok(img) => imgs.push(img),
                 Err(e) => {
                     let _ = fs::write(&thumbnail_path, b"");
-                    return Err(format!("Failed to extract frame at {ft} seconds from \"{}\": {e}", video_path.to_string_lossy()));
+                    return Err(flc!("core_failed_to_extract_frame", time = ft, file = video_path.to_string_lossy(), reason = e));
                 }
             }
         }
@@ -200,10 +203,7 @@ pub fn generate_thumbnail(
 
         if imgs.iter().any(|img| img.height() != first_img.height() || img.width() != first_img.width()) {
             let _ = fs::write(&thumbnail_path, b"");
-            return Err(format!(
-                "Failed to generate thumbnail for \"{}\": extracted frames have different dimensions",
-                video_path.to_string_lossy()
-            ));
+            return Err(flc!("core_failed_to_generate_thumbnail_frames_different_dimensions", file = video_path.to_string_lossy()));
         }
         let mut new_thumbnail = RgbImage::new(first_img.width() * tiles_size as u32, first_img.height() * tiles_size as u32);
         for (idx, img) in imgs.iter().enumerate() {
@@ -211,24 +211,29 @@ pub fn generate_thumbnail(
             let y = (idx / tiles_size) as u32 * img.height();
             new_thumbnail
                 .copy_from(img, x, y)
-                .map_err(|e| format!("Failed to generate thumbnail for \"{}\": {e}", video_path.to_string_lossy()))?;
+                .map_err(|e| flc!("core_failed_to_generate_thumbnail", file = video_path.to_string_lossy(), reason = e.to_string()))?;
         }
 
         if let Err(e) = new_thumbnail.save(&thumbnail_path) {
             let _ = fs::write(&thumbnail_path, b"");
-            return Err(format!("Failed to save thumbnail for \"{}\": {e}", video_path.to_string_lossy()));
+            return Err(flc!("core_failed_to_save_thumbnail", file = video_path.to_string_lossy(), reason = e.to_string()));
         }
     } else {
         match extract_frame_ffmpeg(video_path, seek_time as f32, Some((max_width, max_height))) {
             Ok(img) => {
                 if let Err(e) = img.save(&thumbnail_path) {
                     let _ = fs::write(&thumbnail_path, b"");
-                    return Err(format!("Failed to save thumbnail for \"{}\": {e}", video_path.to_string_lossy()));
+                    return Err(flc!("core_failed_to_save_thumbnail", file = video_path.to_string_lossy(), reason = e.to_string()));
                 }
             }
             Err(e) => {
                 let _ = fs::write(&thumbnail_path, b"");
-                return Err(format!("Failed to extract frame at {seek_time} seconds from \"{}\" - {e}", video_path.to_string_lossy()));
+                return Err(flc!(
+                    "core_failed_to_extract_frame_at_seek_time",
+                    time = seek_time,
+                    file = video_path.to_string_lossy(),
+                    reason = e
+                ));
             }
         }
     }

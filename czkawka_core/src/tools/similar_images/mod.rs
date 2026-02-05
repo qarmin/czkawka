@@ -96,11 +96,10 @@ pub struct SimilarImagesParameters {
     pub hash_alg: HashAlg,
     pub image_filter: FilterType,
     pub exclude_images_with_same_size: bool,
-    pub ignore_hard_links: bool,
 }
 
 impl SimilarImagesParameters {
-    pub fn new(max_difference: u32, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType, exclude_images_with_same_size: bool, ignore_hard_links: bool) -> Self {
+    pub fn new(max_difference: u32, hash_size: u8, hash_alg: HashAlg, image_filter: FilterType, exclude_images_with_same_size: bool) -> Self {
         assert!([8, 16, 32, 64].contains(&hash_size));
         Self {
             max_difference,
@@ -108,7 +107,6 @@ impl SimilarImagesParameters {
             hash_alg,
             image_filter,
             exclude_images_with_same_size,
-            ignore_hard_links,
         }
     }
 }

@@ -2,8 +2,8 @@ use std::process;
 
 use log::{error, warn};
 
-use crate::CZKAWKA_VERSION;
 use crate::common::config_cache_path::get_config_cache_path;
+use crate::{CZKAWKA_VERSION, flc};
 
 #[derive(Clone, Debug)]
 pub struct CliResult {
@@ -146,10 +146,10 @@ fn deduplicate_folders(folder_list: &mut Vec<String>) {
 fn check_if_folder_is_valid(folder: &str) -> Result<String, String> {
     let path = std::path::Path::new(folder);
     if !path.exists() {
-        return Err(format!("Folder does not exist: {folder}"));
+        return Err(flc!("core_folder_does_not_exist", folder = folder));
     }
     if !path.is_dir() {
-        return Err(format!("Path is not a directory: {folder}"));
+        return Err(flc!("core_path_not_directory", folder = folder));
     }
     let canonical_path = dunce::canonicalize(path).map_err(|e| format!("Failed to canonicalize path: {folder}. Error: {e}"))?;
 
@@ -159,7 +159,7 @@ fn check_if_folder_is_valid(folder: &str) -> Result<String, String> {
 #[cfg(test)]
 fn check_if_folder_is_valid(folder: &str) -> Result<String, String> {
     if folder.contains("test_error") {
-        return Err(format!("Test error for folder: {folder}"));
+        return Err(flc!("core_test_error_for_folder", folder = folder));
     }
     Ok(folder.to_string())
 }

@@ -177,7 +177,7 @@ impl CommonData for VideoOptimizer {
         &mut self.common_data
     }
 
-    fn found_any_broken_files(&self) -> bool {
+    fn found_any_items(&self) -> bool {
         match &self.params {
             VideoOptimizerParameters::VideoTranscode(_) => self.information.number_of_videos_to_transcode > 0,
             VideoOptimizerParameters::VideoCrop(_) => self.information.number_of_videos_to_crop > 0,

@@ -24,6 +24,7 @@ default = []
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
 libavif = ["czkawka_core/libavif"]
+xdg_portal_trash = ["czkawka_core/xdg_portal_trash"]
 
 no_colors = []
 

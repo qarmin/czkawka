@@ -26,7 +26,9 @@ use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
-use czkawka_core::tools::video_optimizer::{VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeParams};
+use czkawka_core::tools::video_optimizer::{
+    VideoCropFixParams, VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeFixParams, VideoTranscodeParams,
+};
 use log::{debug, error, info};
 
 use crate::commands::{
@@ -129,7 +131,6 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
     let params = DuplicateFinderParameters::new(
         search_method,
         hash_type,
-        !allow_hard_links.allow_hard_links,
         use_prehash_cache,
         minimal_cached_file_size,
         minimal_prehash_cache_file_size,
@@ -140,6 +141,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
+    tool.set_hide_hard_links(!allow_hard_links.allow_hard_links);
     set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
@@ -221,19 +223,13 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         ignore_same_size,
     } = similar_images;
 
-    let params = SimilarImagesParameters::new(
-        max_difference,
-        hash_size,
-        hash_alg,
-        image_filter,
-        ignore_same_size.ignore_same_size,
-        !allow_hard_links.allow_hard_links,
-    );
+    let params = SimilarImagesParameters::new(max_difference, hash_size, hash_alg, image_filter, ignore_same_size.ignore_same_size);
     let mut tool = SimilarImages::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
+    tool.set_hide_hard_links(!allow_hard_links.allow_hard_links);
     set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
@@ -329,7 +325,6 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     let params = SimilarVideosParameters::new(
         tolerance,
         ignore_same_size.ignore_same_size,
-        !allow_hard_links.allow_hard_links,
         skip_forward_amount,
         scan_duration,
         crop_detect,
@@ -342,6 +337,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
+    tool.set_hide_hard_links(!allow_hard_links.allow_hard_links);
     set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
@@ -413,9 +409,6 @@ fn bad_names(bad_names: BadNamesArgs, stop_flag: &Arc<AtomicBool>, progress_send
 }
 
 fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    use czkawka_core::common::traits::FixingItems;
-    use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropFixParams, VideoTranscodeFixParams};
-
     use crate::commands::{CropArgs, TranscodeArgs, VideoOptimizerMode as CliVideoOptimizerMode};
 
     let VideoOptimizerArgs { common_cli_items, mode } = video_optimizer;
@@ -449,9 +442,8 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             tool.search(stop_flag, Some(progress_sender));
 
             if fix_videos {
-                let codec = target_codec.parse::<VideoCodec>().unwrap_or(VideoCodec::H265);
                 let fix_params = VideoOptimizerFixParams::VideoTranscode(VideoTranscodeFixParams {
-                    codec,
+                    codec: target_codec,
                     quality,
                     fail_if_not_smaller,
                     overwrite_original,
@@ -503,10 +495,9 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             tool.search(stop_flag, Some(progress_sender));
 
             if fix_videos {
-                let target_codec_parsed = target_codec.and_then(|s| s.parse::<VideoCodec>().ok());
                 let fix_params = VideoOptimizerFixParams::VideoCrop(VideoCropFixParams {
                     overwrite_original,
-                    target_codec: target_codec_parsed,
+                    target_codec,
                     quality,
                     crop_mechanism: crop_mech,
                 });
@@ -574,7 +565,7 @@ fn save_and_write_results_to_writer<T: CommonData + PrintResults>(component: &T,
     }
 
     let mut cli_output = CliOutput {
-        found_any_files: component.found_any_broken_files(),
+        found_any_files: component.found_any_items(),
         ignored_error_code_on_found: common_cli_items.ignore_error_code_on_found,
         output: String::new(),
     };

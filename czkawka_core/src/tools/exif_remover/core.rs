@@ -18,6 +18,7 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::flc;
 use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, ExifTagInfo, ExifTagsFixerParams, Info};
 
 impl ExifRemover {
@@ -338,7 +339,7 @@ pub fn string_to_exif_tag_group(tag: &str) -> Result<ExifTagGroup, String> {
         "INTEROP" => Ok(ExifTagGroup::INTEROP),
         "GPS" => Ok(ExifTagGroup::GPS),
         "GENERIC" => Ok(ExifTagGroup::GENERIC),
-        _ => Err(format!("Unknown EXIF tag group: {tag}")),
+        _ => Err(flc!("core_unknown_exif_tag_group", tag = tag)),
     }
 }
 

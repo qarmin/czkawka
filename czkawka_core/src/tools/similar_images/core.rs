@@ -52,7 +52,7 @@ impl SimilarImages {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.images_to_check = grouped_file_entries
                     .into_par_iter()
-                    .flat_map(if self.get_params().ignore_hard_links { |(_, fes)| fes } else { take_1_per_inode })
+                    .flat_map(if self.get_hide_hard_links() { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| {
                         let fe_str = fe.path.to_string_lossy().to_string();
                         let image_entry = fe.into_images_entry();
@@ -701,7 +701,6 @@ mod tests {
             max_difference: 0,
             image_filter: FilterType::Lanczos3,
             exclude_images_with_same_size: false,
-            ignore_hard_links: false,
         }
     }
 
@@ -1147,7 +1146,7 @@ mod connect_results_tests {
 
     #[test]
     fn test_connect_results_real_case() {
-        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, true);
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false);
         let _finder = SimilarImages::new(params);
 
         let hash1: ImHash = vec![59, 41, 53, 27, 19, 143, 228, 228];

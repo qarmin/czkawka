@@ -36,6 +36,35 @@ static ALL_AVAILABLE_THREADS: std::sync::LazyLock<Mutex<Option<usize>>> = std::s
 
 const MAX_SYMLINK_HARDLINK_ATTEMPTS: u8 = 5;
 
+#[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
+thread_local! {
+    static TOKIO_RT: std::cell::RefCell<Option<Result<tokio::runtime::Runtime, String>>> = const { std::cell::RefCell::new(None) };
+}
+
+#[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
+fn with_runtime<F, R>(f: F) -> Result<R, String>
+where
+    F: FnOnce(&tokio::runtime::Runtime) -> Result<R, String>,
+{
+    TOKIO_RT.with(|cell| {
+        let mut opt = cell.borrow_mut();
+
+        if opt.is_none() {
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .map_err(|e| format!("Failed to build Tokio runtime: {e}"));
+
+            *opt = Some(rt);
+        }
+
+        match opt.as_ref().expect("Tokio runtime is initialized before") {
+            Ok(rt) => f(rt),
+            Err(e) => Err(e.clone()),
+        }
+    })
+}
+
 pub fn get_number_of_threads() -> usize {
     let data = NUMBER_OF_THREADS.lock().expect("Cannot fail").expect("Should be set before get");
     if data >= 1 { data } else { get_all_available_threads() }
@@ -76,18 +105,18 @@ pub fn set_number_of_threads(thread_number: usize) {
 pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> Result<(), String> {
     let path = path.as_ref();
     if !path.is_dir() {
-        return Err(format!("Trying to remove folder \"{}\" which is not a directory", path.to_string_lossy()));
+        return Err(flc!("core_not_directory_remove", path = path.to_string_lossy()));
     }
 
     let mut entries_to_check = Vec::new();
     let Ok(initial_entry) = path.read_dir() else {
-        return Err(format!("Cannot read directory \"{}\"", path.to_string_lossy()));
+        return Err(flc!("core_cannot_read_directory", path = path.to_string_lossy()));
     };
     for entry in initial_entry {
         if let Ok(entry) = entry {
             entries_to_check.push(entry);
         } else {
-            return Err(format!("Cannot read entry from directory \"{}\"", path.to_string_lossy()));
+            return Err(flc!("core_cannot_read_entry_from_directory", path = path.to_string_lossy()));
         }
     }
     loop {
@@ -95,32 +124,28 @@ pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> R
             break;
         };
         let Some(file_type) = entry.file_type().ok() else {
-            return Err(format!(
-                "Folder contains file with unknown type \"{}\" inside \"{}\"",
-                entry.path().to_string_lossy(),
-                path.to_string_lossy()
+            return Err(flc!(
+                "core_unknown_directory_entry",
+                entry = entry.path().to_string_lossy().to_string(),
+                path = path.to_string_lossy()
             ));
         };
 
         if !file_type.is_dir() {
-            return Err(format!("Folder contains file \"{}\" inside \"{}\"", entry.path().to_string_lossy(), path.to_string_lossy()));
+            return Err(flc!(
+                "core_folder_contains_file_inside",
+                entry = entry.path().to_string_lossy().to_string(),
+                folder = path.to_string_lossy()
+            ));
         }
         let Ok(internal_read_dir) = entry.path().read_dir() else {
-            return Err(format!(
-                "Cannot read directory \"{}\" inside \"{}\"",
-                entry.path().to_string_lossy(),
-                path.to_string_lossy()
-            ));
+            return Err(flc!("core_cannot_read_directory", path = path.to_string_lossy().to_string()));
         };
         for internal_elements in internal_read_dir {
             if let Ok(internal_element) = internal_elements {
                 entries_to_check.push(internal_element);
             } else {
-                return Err(format!(
-                    "Cannot read entry from directory \"{}\" inside \"{}\"",
-                    entry.path().to_string_lossy(),
-                    path.to_string_lossy()
-                ));
+                return Err(flc!("core_cannot_read_entry_from_directory", path = path.to_string_lossy().to_string()));
             }
         }
     }
@@ -129,17 +154,30 @@ pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> R
 }
 
 /// A wrapper around `trash::delete`. Note that for platforms that do not have native trash support
-/// (Android, iOS), this function will always return an [`Error`].
+/// (Android, iOS), this function will always return an [`Error`]. When the `xdg_portal_trash` feature is
+/// enabled, the portal-based implementation will only be used on Linux; on other desktop OSes the
+/// regular `trash::delete` fallback will be used instead.
 fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
     let path = path.as_ref();
 
-    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    #[cfg(not(any(target_os = "android", target_os = "ios", all(feature = "xdg_portal_trash", target_os = "linux"))))]
     {
         trash::delete(path).map_err(|err| err.to_string())
     }
 
+    #[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
+    {
+        use std::os::fd::AsFd;
+        let file = std::fs::OpenOptions::new().write(true).read(true).open(path).map_err(|err| err.to_string())?;
+
+        with_runtime(|rt| rt.block_on(async move { ashpd::desktop::trash::trash_file(&file.as_fd()).await.map_err(|e| e.to_string()) }))?;
+
+        Ok(())
+    }
+
     #[cfg(any(target_os = "android", target_os = "ios"))]
     {
+        let _path = path;
         Err("trash is not supported on this platform".to_string())
     }
 }

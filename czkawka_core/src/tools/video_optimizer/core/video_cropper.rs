@@ -9,6 +9,7 @@ use log::error;
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_utils::{VideoMetadata, extract_frame_ffmpeg};
+use crate::flc;
 use crate::tools::video_optimizer::{VideoCropEntry, VideoCropParams, VideoCropSingleFixParams, VideoCroppingMechanism};
 
 const MIN_SAMPLES: usize = 3;
@@ -171,15 +172,20 @@ where
         let tmp_frame = match get_frame(timestamp) {
             Ok(frame) => frame,
             Err(e) => {
-                return Some(Err(format!("Failed to get frame at timestamp \"{}\" {timestamp}: {e}", path.to_string_lossy())));
+                return Some(Err(flc!(
+                    "core_failed_get_frame_at_timestamp",
+                    file = path.to_string_lossy().to_string(),
+                    timestamp = timestamp,
+                    reason = e
+                )));
             }
         };
         if tmp_frame.dimensions() != first_frame.dimensions() {
-            return Some(Err(format!(
-                "Frame dimensions for timestamp {} do not match the first frame dimensions ({}x{})",
-                timestamp,
-                first_frame.width(),
-                first_frame.height()
+            return Some(Err(flc!(
+                "core_frame_dimensions_mismatch",
+                timestamp = timestamp,
+                first_w = first_frame.width(),
+                first_h = first_frame.height()
             )));
         }
 
@@ -257,15 +263,20 @@ where
         let tmp_frame = match get_frame(timestamp) {
             Ok(frame) => frame,
             Err(e) => {
-                return Some(Err(format!("Failed to get frame from \"{}\" at timestamp {timestamp}: {e}", path.to_string_lossy())));
+                return Some(Err(flc!(
+                    "core_failed_get_frame_from_file",
+                    file = path.to_string_lossy().to_string(),
+                    timestamp = timestamp,
+                    reason = e
+                )));
             }
         };
         if tmp_frame.dimensions() != first_frame.dimensions() {
-            return Some(Err(format!(
-                "Frame dimensions for timestamp {} do not match the first frame dimensions ({}x{})",
-                timestamp,
-                first_frame.width(),
-                first_frame.height()
+            return Some(Err(flc!(
+                "core_frame_dimensions_mismatch",
+                timestamp = timestamp,
+                first_w = first_frame.width(),
+                first_h = first_frame.height()
             )));
         }
         let dynamic_image_diff: RgbImage = diff_between_dynamic_images(first_frame, tmp_frame);
@@ -411,7 +422,7 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropSingleFixParams, stop
     let (left, top, right, bottom) = params.crop_rectangle;
 
     if left >= right || top >= bottom {
-        return Err(format!("Invalid crop rectangle: left={left}, top={top}, right={right}, bottom={bottom}"));
+        return Err(flc!("core_invalid_crop_rectangle", left = left, top = top, right = right, bottom = bottom));
     }
 
     let crop_width = right - left;
@@ -450,12 +461,12 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropSingleFixParams, stop
         }
         Some(Err(e)) => {
             let _ = std::fs::remove_file(&temp_output);
-            return Err(format!("Failed to crop video file \"{}\": {e}", video_path.to_string_lossy()));
+            return Err(flc!("core_failed_to_crop_video_file", file = video_path.to_string_lossy(), reason = e));
         }
         Some(Ok(_)) => {
             if !temp_output.exists() {
                 error!("Cropped video file was not created: {temp_output:?}");
-                return Err(format!("Cropped video file was not created: {temp_output:?}"));
+                return Err(flc!("core_cropped_video_not_created", temp = format!("{:?}", temp_output)));
             }
         }
     }

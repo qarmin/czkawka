@@ -6,24 +6,25 @@ use std::sync::atomic::AtomicBool;
 
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_utils::VideoMetadata;
+use crate::flc;
 use crate::tools::video_optimizer::{VideoTranscodeEntry, VideoTranscodeFixParams};
 
 pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     let metadata = match VideoMetadata::from_path(&entry.path) {
         Ok(metadata) => metadata,
         Err(e) => {
-            entry.error = Some(format!("Failed to get video metadata for file \"{}\": {}", entry.path.to_string_lossy(), e));
+            entry.error = Some(flc!("core_failed_to_get_video_metadata", file = entry.path.to_string_lossy(), reason = e));
             return entry;
         }
     };
 
     let Some(current_codec) = metadata.codec.clone() else {
-        entry.error = Some(format!("Failed to get video codec for file \"{}\"", entry.path.to_string_lossy()));
+        entry.error = Some(flc!("core_failed_to_get_video_codec", file = entry.path.to_string_lossy()));
         return entry;
     };
 
     let Some(duration) = metadata.duration else {
-        entry.error = Some(format!("Failed to get video duration for file \"{}\"", entry.path.to_string_lossy()));
+        entry.error = Some(flc!("core_failed_to_get_video_duration", file = entry.path.to_string_lossy()));
         return entry;
     };
 
@@ -35,7 +36,7 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
             entry.height = height;
         }
         _ => {
-            entry.error = Some(format!("Failed to get video dimensions for file \"{}\"", entry.path.to_string_lossy()));
+            entry.error = Some(flc!("core_failed_to_get_video_dimensions", file = entry.path.to_string_lossy()));
             return entry;
         }
     }
@@ -69,11 +70,11 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
     match run_command_interruptible(command, stop_flag) {
         None => {
             let _ = fs::remove_file(&temp_output);
-            return Err(String::from("Video processing was stopped by user"));
+            return Err(flc!("core_video_processing_stopped_by_user"));
         }
         Some(Err(e)) => {
             let _ = fs::remove_file(&temp_output);
-            return Err(format!("Failed to process video file {video_path}: {e}"));
+            return Err(flc!("core_failed_to_process_video", file = video_path, reason = e));
         }
         Some(Ok(_)) => {
             // Command succeeded, continue with validation
@@ -82,24 +83,30 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
 
     let metadata = fs::metadata(&temp_output).map_err(|e| {
         let _ = fs::remove_file(&temp_output);
-        format!("Failed to get metadata of optimized file \"{}\": {}", temp_output.to_string_lossy(), e)
+        flc!(
+            "core_failed_to_get_metadata_of_optimized_file",
+            file = temp_output.to_string_lossy(),
+            reason = e.to_string()
+        )
     })?;
 
     let new_size = metadata.len();
 
     if video_transcode_params.fail_if_not_smaller && new_size >= original_size {
         let _ = fs::remove_file(&temp_output);
-        return Err(format!(
-            "Optimized file({}) ({new_size} bytes) is larger than original({}) ({original_size} bytes)",
-            temp_output.to_string_lossy(),
-            video_path
+        return Err(flc!(
+            "core_optimized_file_larger",
+            optimized = temp_output.to_string_lossy(),
+            new_size = new_size,
+            original = video_path,
+            original_size = original_size
         ));
     }
 
     if video_transcode_params.overwrite_original {
         fs::rename(&temp_output, video_path).map_err(|e| {
             let _ = fs::remove_file(&temp_output);
-            format!("Failed to replace file \"{video_path}\" with optimized version: {e}")
+            flc!("core_failed_to_replace_with_optimized", file = video_path, reason = e.to_string())
         })?;
         return Ok(());
     }

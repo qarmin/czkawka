@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.qarmin.krokiet</id>
+  <name>Krokiet</name>
+  <summary>Multi functional app to find duplicates, similar images and many more</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <description>
+    <p>Krokiet is a multi functional app that finds:</p>
+    <ul>
+      <li>Duplicates</li>
+      <li>Similar images</li>
+      <li>Similar audio files</li>
+      <li>Similar videos</li>
+      <li>Empty folders</li>
+      <li>Empty files</li>
+      <li>Broken files</li>
+      <li>Temporary files</li>
+      <li>Big files</li>
+      <li>Invalid symlinks</li>
+      <li>Bad names</li>
+      <li>Videos that can be optimized/cropped</li>
+      <li>Exif tags</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.qarmin.krokiet.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6</image>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/c95e51bf-1ae0-49ec-af92-0195efc98e5d</image>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/user-attachments/assets/4fe7bec3-4d67-48bb-91bc-91e7d3b82bdc</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="10.0.0" date="2025-08-18"/>
+  </releases>
+  <content_rating type="oars-1.0"/>
+  <developer id="io.github.qarmin">
+    <name>Rafał Mikrut</name>
+  </developer>
+  <url type="homepage">https://github.com/qarmin/czkawka</url>
+  <url type="bugtracker">https://github.com/qarmin/czkawka/issues</url>
+  <url type="donation">https://github.com/sponsors/qarmin</url>
+  <url type="translate">https://crowdin.com/project/czkawka</url>
+</component>

@@ -20,26 +20,28 @@ use rawler::rawsource::RawSource;
 
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::create_crash_message;
+use crate::flc;
 use crate::helpers::debug_timer::Timer;
 // #[cfg(feature = "heif")]
 // use libheif_rs::LibHeif;
 
 const MAXIMUM_IMAGE_PIXELS: u32 = 2_000_000_000;
 
-pub(crate) fn get_jxl_image(path: &str) -> anyhow::Result<DynamicImage> {
-    let file = File::open(path)?;
-    let decoder = JxlDecoder::new(file)?;
+pub(crate) fn get_jxl_image(path: &str) -> Result<DynamicImage, String> {
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    let decoder = JxlDecoder::new(file).map_err(|e| e.to_string())?;
 
-    let image = DynamicImage::from_decoder(decoder)?;
+    let image = DynamicImage::from_decoder(decoder).map_err(|e| e.to_string())?;
 
     Ok(image)
 }
 
 // Using this instead of image::open because image::open only reads content of files if extension matches content
 // This is not really helpful when trying to show preview of files with wrong extensions
-pub(crate) fn decode_normal_image(path: &str) -> anyhow::Result<DynamicImage> {
-    let file = File::open(path)?;
-    let img = ImageReader::new(std::io::BufReader::new(file)).with_guessed_format()?.decode()?;
+pub(crate) fn decode_normal_image(path: &str) -> Result<DynamicImage, String> {
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    let reader = ImageReader::new(std::io::BufReader::new(file)).with_guessed_format().map_err(|e| e.to_string())?;
+    let img = reader.decode().map_err(|e| e.to_string())?;
 
     Ok(img)
 }
@@ -52,30 +54,25 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
         let img = if HEIC_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             #[cfg(feature = "heif")]
             {
-                get_dynamic_image_from_heic(path).map_err(|e| format!("Cannot open heic file \"{path}\": {e}"))
+                get_dynamic_image_from_heic(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
             }
             #[cfg(not(feature = "heif"))]
             {
-                decode_normal_image(path).map_err(|e| format!("Cannot open image file \"{path}\": {e}"))
+                decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
             }
         } else if JXL_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
-            get_jxl_image(path).map_err(|e| format!("Cannot open jxl image file \"{path}\": {e}"))
+            get_jxl_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
         } else if RAW_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
-            get_raw_image(path).map_err(|e| format!("Cannot open raw image file \"{path}\": {e}"))
+            get_raw_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
         } else {
-            decode_normal_image(path).map_err(|e| format!("Cannot open image file \"{path}\": {e}"))
+            decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
         }?;
 
         if img.width() == 0 || img.height() == 0 {
-            return Err(format!("Image has zero width or height \"{path}\""));
+            return Err(flc!("core_image_zero_dimensions", path = path));
         }
         if img.width() as u64 * img.height() as u64 > MAXIMUM_IMAGE_PIXELS as u64 {
-            return Err(format!(
-                "Image is too large ({}x{}) - more than supported {} pixels \"{path}\"",
-                img.width(),
-                img.height(),
-                MAXIMUM_IMAGE_PIXELS
-            ));
+            return Err(flc!("core_image_too_large", width = img.width(), height = img.height(), max = MAXIMUM_IMAGE_PIXELS));
         }
         Ok(img)
     });
@@ -84,7 +81,7 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
         match res {
             Ok(t) => {
                 if t.width() == 0 || t.height() == 0 {
-                    return Err(format!("Image has zero width or height \"{path}\""));
+                    return Err(flc!("core_image_zero_dimensions", path = path));
                 }
 
                 let rotation = get_rotation_from_exif(path).unwrap_or(None);
@@ -99,7 +96,7 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
                     Some(ExifOrientation::Rotate270CW) => Ok(t.rotate270()),
                 }
             }
-            Err(e) => Err(format!("Cannot open image file \"{path}\": {e}")),
+            Err(e) => Err(flc!("core_image_open_failed", path = path, reason = e)),
         }
     } else {
         let message = create_crash_message("Image-rs or libraw-rs or jxl-oxide", path, "https://github.com/image-rs/image/issues");
@@ -109,27 +106,29 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
 }
 
 #[cfg(feature = "heif")]
-pub(crate) fn get_dynamic_image_from_heic(path: &str) -> anyhow::Result<DynamicImage> {
+pub(crate) fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage, String> {
     // let libheif = LibHeif::new();
-    let im = HeifContext::read_from_file(path)?;
-    let handle = im.primary_image_handle()?;
+    let im = HeifContext::read_from_file(path).map_err(|e| format!("Error reading HEIC/HEIF file: {e}"))?;
+    let handle = im.primary_image_handle().map_err(|e| format!("Error getting primary image handle: {e}"))?;
     // let image = libheif.decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)?; // Enable when using libheif 0.19
-    let image = handle.decode(ColorSpace::Rgb(RgbChroma::Rgb), None)?;
+    let image = handle
+        .decode(ColorSpace::Rgb(RgbChroma::Rgb), None)
+        .map_err(|e| format!("Error decoding HEIC/HEIF image: {e}"))?;
     let width = image.width();
     let height = image.height();
     let planes = image.planes();
-    let interleaved_plane = planes.interleaved.ok_or_else(|| anyhow::anyhow!("Failed to get interleaved plane"))?;
+    let interleaved_plane = planes.interleaved.ok_or_else(|| "No interleaved plane found in HEIC/HEIF image".to_string())?;
     ImageBuffer::from_raw(width, height, interleaved_plane.data.to_owned())
         .map(DynamicImage::ImageRgb8)
-        .ok_or_else(|| anyhow::anyhow!("Failed to create image buffer"))
+        .ok_or_else(|| "Failed to create image buffer".to_string())
 }
 
 #[cfg(feature = "libraw")]
-pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> anyhow::Result<DynamicImage> {
-    let buf = fs::read(path.as_ref())?;
+pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, String> {
+    let buf = fs::read(path.as_ref()).map_err(|e| format!("Error reading image: {e}"))?;
 
     let processor = Processor::new();
-    let processed = processor.process_8bit(&buf)?;
+    let processed = processor.process_8bit(&buf).map_err(|e| format!("Error processing RAW image: {e}"))?;
 
     let width = processed.width();
     let height = processed.height();
@@ -137,9 +136,9 @@ pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> anyhow::Result<DynamicIm
     let data = processed.to_vec();
     let data_len = data.len();
 
-    let buffer = ImageBuffer::from_raw(width, height, data).ok_or(anyhow::anyhow!(format!(
+    let buffer = ImageBuffer::from_raw(width, height, data).ok_or(format!(
         "Cannot create ImageBuffer from raw image with width: {width} and height: {height} and data length: {data_len}",
-    )))?;
+    ))?;
 
     Ok(DynamicImage::ImageRgb8(buffer))
 }
@@ -176,7 +175,7 @@ pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result
 
     timer.checkpoint("Developed raw image");
 
-    let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage")?;
+    let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage".to_string())?;
 
     timer.checkpoint("Converted to DynamicImage");
 

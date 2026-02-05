@@ -239,7 +239,7 @@ impl DuplicateFinder {
                 self.common_data.text_messages.warnings.extend(warnings);
 
                 let grouped_file_entries: Vec<(u64, Vec<FileEntry>)> = grouped_file_entries.into_iter().collect();
-                let rayon_max_len = if self.get_params().ignore_hard_links { 3 } else { 100 };
+                let rayon_max_len = if self.get_hide_hard_links() { 3 } else { 100 };
 
                 let start_time = Instant::now();
                 // We only gather files with more than 1 entry, because only this will be later used
@@ -255,7 +255,7 @@ impl DuplicateFinder {
                             return None;
                         }
 
-                        let vector = if self.get_params().ignore_hard_links { filter_hard_links(vec) } else { vec };
+                        let vector = if self.get_hide_hard_links() { filter_hard_links(vec) } else { vec };
 
                         if vector.len() > 1 {
                             Some((size, vector.into_iter().map(FileEntry::into_duplicate_entry).collect()))

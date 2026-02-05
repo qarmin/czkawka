@@ -28,6 +28,7 @@ pub use video_cropper::fix_video_crop;
 
 use crate::common::cache::CACHE_VIDEO_OPTIMIZE_VERSION;
 use crate::common::traits::ResultEntry;
+use crate::flc;
 
 impl VideoOptimizer {
     pub fn new(params: VideoOptimizerParameters) -> Self {
@@ -207,7 +208,7 @@ impl VideoOptimizer {
             CurrentStage::VideoOptimizerCreatingThumbnails,
             self.video_transcode_result_entries.len(),
             self.get_test_type(),
-            self.video_transcode_result_entries.iter().map(|e| e.size).sum(),
+            0,
         );
 
         let Some(config_cache_path) = get_config_cache_path() else {
@@ -381,7 +382,7 @@ impl VideoOptimizer {
 
                         match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
                             Ok(_new_size) => Some(None),
-                            Err(e) => Some(Some(format!("Failed to optimize video \"{}\": {}", entry.path.to_string_lossy(), e))),
+                            Err(e) => Some(Some(flc!("core_failed_to_optimize_video", file = entry.path.to_string_lossy(), reason = e))),
                         }
                     })
                     .while_some()
@@ -413,7 +414,7 @@ impl VideoOptimizer {
 
                         match fix_video_crop(&entry.path, &entry_crop_params, stop_flag) {
                             Ok(()) => Some(None),
-                            Err(e) => Some(Some(format!("Failed to crop video \"{}\": {}", entry.path.to_string_lossy(), e))),
+                            Err(e) => Some(Some(flc!("core_failed_to_crop_video", file = entry.path.to_string_lossy(), reason = e))),
                         }
                     })
                     .while_some()

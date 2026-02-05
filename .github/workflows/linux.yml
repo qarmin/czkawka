@@ -296,21 +296,18 @@ jobs:
 
           ci_tester/target/release/ci_tester target/debug/czkawka_cli
 
-  # TODO - currently not working
-  # No need to check it on every commit, because android build is not officially supported
-  # But it is good to have it checked in master branch during merge
-  #  android:
-  #    if: ${{ github.ref == 'refs/heads/master' }}
-  #    runs-on: ubuntu-22.04
-  #    steps:
-  #      - uses: actions/checkout@v4
-  #
-  #      - name: Setup rust version and target
-  #        run: |
-  #          rustup default 1.92.0
-  #          rustup target add aarch64-linux-android
-  #
-  #      - name: Check for Android
-  #        run: |
-  #          cd czkawka_core;
-  #          cargo check --target aarch64-linux-android;
+  android:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup rust version and target
+        run: |
+          rustup default 1.92.0
+          rustup target add aarch64-linux-android
+
+      - name: Check for Android
+        run: |
+          cd czkawka_core
+          cargo check --target aarch64-linux-android --features "blake_pure"

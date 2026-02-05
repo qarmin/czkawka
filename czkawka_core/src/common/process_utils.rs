@@ -6,6 +6,8 @@ use std::time::{Duration, Instant};
 
 use log::{error, warn};
 
+use crate::flc;
+
 #[expect(clippy::needless_pass_by_ref_mut)]
 pub fn disable_windows_console_window(command: &mut Command) {
     #[cfg(target_os = "windows")]
@@ -37,7 +39,7 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
 
     let mut child = match command.spawn() {
         Ok(c) => c,
-        Err(e) => return Some(Err(format!("Failed to spawn command: {e}"))),
+        Err(e) => return Some(Err(flc!("core_failed_to_spawn_command", reason = e.to_string()))),
     };
 
     let Some(mut stdout) = child.stdout.take() else {
@@ -95,13 +97,13 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
         match child.try_wait() {
             Ok(Some(_)) => break,
             Ok(None) => thread::sleep(Duration::from_millis(100)),
-            Err(e) => return Some(Err(format!("Failed to check process status: {e}"))),
+            Err(e) => return Some(Err(flc!("core_failed_to_check_process_status", reason = e.to_string()))),
         }
     }
 
     let status = match child.wait() {
         Ok(s) => s,
-        Err(e) => return Some(Err(format!("Failed to wait for process: {e}"))),
+        Err(e) => return Some(Err(flc!("core_failed_to_wait_for_process", reason = e.to_string()))),
     };
 
     let _ = out_handle.join();

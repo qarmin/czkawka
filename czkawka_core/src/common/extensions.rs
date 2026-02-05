@@ -36,13 +36,11 @@ impl Extensions {
                 }
 
                 if e.contains(' ') {
-                    messages
-                        .warnings
-                        .push(format!("{extension} is not a valid extension because it contains empty space inside"));
+                    messages.warnings.push(flc!("core_invalid_extension_contains_space", extension = extension));
                     return None;
                 }
                 if e.contains('.') {
-                    messages.warnings.push(format!("{extension} is not a valid extension because it contains dot inside"));
+                    messages.warnings.push(flc!("core_invalid_extension_contains_dot", extension = extension));
                     return None;
                 }
                 Some(e)

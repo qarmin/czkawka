@@ -27,6 +27,7 @@ use crate::common::model::{CheckingMethod, FileEntry, HashType};
 use crate::common::progress_stop_handler::check_if_stop_received;
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
+use crate::flc;
 
 pub const PREHASHING_BUFFER_SIZE: u64 = 4 * 1024;
 pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;
@@ -84,7 +85,6 @@ pub struct Info {
 pub struct DuplicateFinderParameters {
     pub check_method: CheckingMethod,
     pub hash_type: HashType,
-    pub ignore_hard_links: bool,
     pub use_prehash_cache: bool,
     pub minimal_cache_file_size: u64,
     pub minimal_prehash_cache_file_size: u64,
@@ -95,7 +95,6 @@ impl DuplicateFinderParameters {
     pub fn new(
         check_method: CheckingMethod,
         hash_type: HashType,
-        ignore_hard_links: bool,
         use_prehash_cache: bool,
         minimal_cache_file_size: u64,
         minimal_prehash_cache_file_size: u64,
@@ -104,7 +103,6 @@ impl DuplicateFinderParameters {
         Self {
             check_method,
             hash_type,
-            ignore_hard_links,
             use_prehash_cache,
             minimal_cache_file_size,
             minimal_prehash_cache_file_size,
@@ -232,14 +230,18 @@ pub(crate) fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEn
         Ok(t) => t,
         Err(e) => {
             size_counter.fetch_add(limit, Ordering::Relaxed);
-            return Err(format!("Unable to check hash of file \"{}\", reason {e}", file_entry.path.to_string_lossy()));
+            return Err(flc!(
+                "core_unable_check_hash_of_file",
+                file = file_entry.path.to_string_lossy().to_string(),
+                reason = e.to_string()
+            ));
         }
     };
     let hasher = &mut *hash_type.hasher();
     #[expect(clippy::indexing_slicing)] // Safe, because limit is always <= buffer size
     let n = match file_handler.read(&mut buffer[..limit as usize]) {
         Ok(t) => t,
-        Err(e) => return Err(format!("Error happened when checking hash of file \"{}\", reason {}", file_entry.path.to_string_lossy(), e)),
+        Err(e) => return Err(flc!("core_error_checking_hash_of_file", file = file_entry.path.to_string_lossy(), reason = e.to_string())),
     };
 
     #[expect(clippy::indexing_slicing)] // Safe, because we read only n bytes, which is always <= limit <= buffer size
@@ -259,7 +261,7 @@ pub fn hash_calculation(
         Ok(t) => t,
         Err(e) => {
             size_counter.fetch_add(file_entry.size, Ordering::Relaxed);
-            return Err(format!("Unable to check hash of file \"{}\", reason {e}", file_entry.path.to_string_lossy()));
+            return Err(flc!("core_unable_check_hash_of_file", file = file_entry.path.to_string_lossy(), reason = e.to_string()));
         }
     };
     let hasher = &mut *hash_type.hasher();
@@ -267,7 +269,7 @@ pub fn hash_calculation(
         let n = match file_handler.read(buffer) {
             Ok(0) => break,
             Ok(t) => t,
-            Err(e) => return Err(format!("Error happened when checking hash of file \"{}\", reason {}", file_entry.path.to_string_lossy(), e)),
+            Err(e) => return Err(flc!("core_error_checking_hash_of_file", file = file_entry.path.to_string_lossy(), reason = e.to_string())),
         };
 
         #[expect(clippy::indexing_slicing)] // Safe, because we read only n bytes, which is always <= buffer size
