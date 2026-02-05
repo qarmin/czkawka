@@ -53,7 +53,7 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
         let img = if HEIC_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             #[cfg(feature = "heif")]
             {
-                get_dynamic_image_from_heic(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
+                get_dynamic_image_from_heic(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
             }
             #[cfg(not(feature = "heif"))]
             {
