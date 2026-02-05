@@ -35,7 +35,7 @@ rust-embed = { version = "8.5", features = ["debug-embed"] }
 # Try to use only needed features from https://github.com/slint-ui/slint/blob/master/api/rs/slint/Cargo.toml#L23-L31
 #slint = { path = "/home/rafal/test/slint/api/rs/slint/", default-features = false, features = ["std",
 #slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = [
-slint = { version = "=1.14.1", default-features = false, features = [
+slint = { version = "1.14.1", default-features = false, features = [
     "std",
     "backend-winit",
     "compat-1-2"
@@ -43,10 +43,13 @@ slint = { version = "=1.14.1", default-features = false, features = [
 
 rodio = { version = "0.21.1", default-features = false, features = ["playback", "symphonia-all"], optional = true }
 
+# Easier cross-compilation of app to e.g. 32 bit os
+fontique = { version = "0.7.0", default-features = false, features = ["fontconfig-dlopen"] }
+
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
 #slint-build = { git = "https://github.com/slint-ui/slint.git" }
-slint-build = "=1.14.1"
+slint-build = "1.14.1"
 
 [features]
 default = ["winit_femtovg", "winit_software"]
