@@ -27,20 +27,21 @@ use crate::helpers::debug_timer::Timer;
 
 const MAXIMUM_IMAGE_PIXELS: u32 = 2_000_000_000;
 
-pub(crate) fn get_jxl_image(path: &str) -> anyhow::Result<DynamicImage> {
-    let file = File::open(path)?;
-    let decoder = JxlDecoder::new(file)?;
+pub(crate) fn get_jxl_image(path: &str) -> Result<DynamicImage, String> {
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    let decoder = JxlDecoder::new(file).map_err(|e| e.to_string())?;
 
-    let image = DynamicImage::from_decoder(decoder)?;
+    let image = DynamicImage::from_decoder(decoder).map_err(|e| e.to_string())?;
 
     Ok(image)
 }
 
 // Using this instead of image::open because image::open only reads content of files if extension matches content
 // This is not really helpful when trying to show preview of files with wrong extensions
-pub(crate) fn decode_normal_image(path: &str) -> anyhow::Result<DynamicImage> {
-    let file = File::open(path)?;
-    let img = ImageReader::new(std::io::BufReader::new(file)).with_guessed_format()?.decode()?;
+pub(crate) fn decode_normal_image(path: &str) -> Result<DynamicImage, String> {
+    let file = File::open(path).map_err(|e| e.to_string())?;
+    let reader = ImageReader::new(std::io::BufReader::new(file)).with_guessed_format().map_err(|e| e.to_string())?;
+    let img = reader.decode().map_err(|e| e.to_string())?;
 
     Ok(img)
 }
@@ -57,14 +58,14 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
             }
             #[cfg(not(feature = "heif"))]
             {
-                decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
+                decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
             }
         } else if JXL_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
-            get_jxl_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
+            get_jxl_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
         } else if RAW_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
-            get_raw_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
+            get_raw_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
         } else {
-            decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e.to_string()))
+            decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
         }?;
 
         if img.width() == 0 || img.height() == 0 {
@@ -107,10 +108,12 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
 #[cfg(feature = "heif")]
 pub(crate) fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage, String> {
     // let libheif = LibHeif::new();
-    let im = HeifContext::read_from_file(path).map_err(|e| format!("Error reading HEIC/HEIF file: {}", e))?;
-    let handle = im.primary_image_handle().map_err(|e| format!("Error getting primary image handle: {}", e))?;
+    let im = HeifContext::read_from_file(path).map_err(|e| format!("Error reading HEIC/HEIF file: {e}"))?;
+    let handle = im.primary_image_handle().map_err(|e| format!("Error getting primary image handle: {e}"))?;
     // let image = libheif.decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)?; // Enable when using libheif 0.19
-    let image = handle.decode(ColorSpace::Rgb(RgbChroma::Rgb), None).map_err(|e| format!("Error decoding HEIC/HEIF image: {}", e))?;
+    let image = handle
+        .decode(ColorSpace::Rgb(RgbChroma::Rgb), None)
+        .map_err(|e| format!("Error decoding HEIC/HEIF image: {e}"))?;
     let width = image.width();
     let height = image.height();
     let planes = image.planes();
@@ -122,10 +125,10 @@ pub(crate) fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage, St
 
 #[cfg(feature = "libraw")]
 pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, String> {
-    let buf = fs::read(path.as_ref()).map_err(|e| format!("Error reading image: {}", e))?;
+    let buf = fs::read(path.as_ref()).map_err(|e| format!("Error reading image: {e}"))?;
 
     let processor = Processor::new();
-    let processed = processor.process_8bit(&buf).map_err(|e| format!("Error processing RAW image: {}", e))?;
+    let processed = processor.process_8bit(&buf).map_err(|e| format!("Error processing RAW image: {e}"))?;
 
     let width = processed.width();
     let height = processed.height();
@@ -172,7 +175,7 @@ pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result
 
     timer.checkpoint("Developed raw image");
 
-    let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage")?;
+    let dynamic_image = developed_image.to_dynamic_image().ok_or("Failed to convert image to DynamicImage".to_string())?;
 
     timer.checkpoint("Converted to DynamicImage");
 

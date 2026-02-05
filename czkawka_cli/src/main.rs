@@ -141,7 +141,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
-    tool.set_hide_hard_links(allow_hard_links.allow_hard_links);
+    tool.set_hide_hard_links(!allow_hard_links.allow_hard_links);
     set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
@@ -229,7 +229,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
-    tool.set_hide_hard_links(allow_hard_links.allow_hard_links);
+    tool.set_hide_hard_links(!allow_hard_links.allow_hard_links);
     set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
@@ -337,7 +337,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
     tool.set_minimal_file_size(minimal_file_size);
     tool.set_maximal_file_size(maximal_file_size);
-    tool.set_hide_hard_links(allow_hard_links.allow_hard_links);
+    tool.set_hide_hard_links(!allow_hard_links.allow_hard_links);
     set_advanced_delete(&mut tool, delete_method);
 
     tool.search(stop_flag, Some(progress_sender));
