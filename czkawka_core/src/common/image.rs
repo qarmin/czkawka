@@ -105,27 +105,27 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
 }
 
 #[cfg(feature = "heif")]
-pub(crate) fn get_dynamic_image_from_heic(path: &str) -> anyhow::Result<DynamicImage> {
+pub(crate) fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage, String> {
     // let libheif = LibHeif::new();
-    let im = HeifContext::read_from_file(path)?;
-    let handle = im.primary_image_handle()?;
+    let im = HeifContext::read_from_file(path).map_err(|e| format!("Error reading HEIC/HEIF file: {}", e))?;
+    let handle = im.primary_image_handle().map_err(|e| format!("Error getting primary image handle: {}", e))?;
     // let image = libheif.decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)?; // Enable when using libheif 0.19
-    let image = handle.decode(ColorSpace::Rgb(RgbChroma::Rgb), None)?;
+    let image = handle.decode(ColorSpace::Rgb(RgbChroma::Rgb), None).map_err(|e| format!("Error decoding HEIC/HEIF image: {}", e))?;
     let width = image.width();
     let height = image.height();
     let planes = image.planes();
-    let interleaved_plane = planes.interleaved.ok_or_else(|| anyhow::anyhow!("Failed to get interleaved plane"))?;
+    let interleaved_plane = planes.interleaved.ok_or_else(|| "No interleaved plane found in HEIC/HEIF image".to_string())?;
     ImageBuffer::from_raw(width, height, interleaved_plane.data.to_owned())
         .map(DynamicImage::ImageRgb8)
-        .ok_or_else(|| anyhow::anyhow!("Failed to create image buffer"))
+        .ok_or_else(|| "Failed to create image buffer".to_string())
 }
 
 #[cfg(feature = "libraw")]
-pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> anyhow::Result<DynamicImage> {
-    let buf = fs::read(path.as_ref())?;
+pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, String> {
+    let buf = fs::read(path.as_ref()).map_err(|e| format!("Error reading image: {}", e))?;
 
     let processor = Processor::new();
-    let processed = processor.process_8bit(&buf)?;
+    let processed = processor.process_8bit(&buf).map_err(|e| format!("Error processing RAW image: {}", e))?;
 
     let width = processed.width();
     let height = processed.height();
@@ -133,9 +133,9 @@ pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> anyhow::Result<DynamicIm
     let data = processed.to_vec();
     let data_len = data.len();
 
-    let buffer = ImageBuffer::from_raw(width, height, data).ok_or(anyhow::anyhow!(format!(
+    let buffer = ImageBuffer::from_raw(width, height, data).ok_or(format!(
         "Cannot create ImageBuffer from raw image with width: {width} and height: {height} and data length: {data_len}",
-    )))?;
+    ))?;
 
     Ok(DynamicImage::ImageRgb8(buffer))
 }

@@ -1504,7 +1504,6 @@ dependencies = [
 name = "czkawka_core"
 version = "10.0.0"
 dependencies = [
- "anyhow",
  "ashpd",
  "bincode 1.3.3",
  "bitflags 2.10.0",
