@@ -475,7 +475,7 @@ fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_nex
     if go_next {
         assert!(model.iter_next(&mut tree_iter), "Found only header!");
     } else {
-        assert!(model.iter_previous(&tree_iter), "Found only header!");
+        assert!(model.iter_previous(&mut tree_iter), "Found only header!");
     }
 
     loop {
@@ -483,7 +483,7 @@ fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_nex
             if !model.iter_next(&mut tree_iter) {
                 break;
             }
-        } else if !model.iter_previous(&tree_iter) {
+        } else if !model.iter_previous(&mut tree_iter) {
             break;
         }
 
