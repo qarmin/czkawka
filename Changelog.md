@@ -1,7 +1,4 @@
 ## Version ?.?.? - ??
-### New version blockers
-- updating to slint 1.15, which fixes some bugs
-- update to stable 0.11 gtk-rs
 
 ### Breaking changes
 #### Users
@@ -19,7 +16,7 @@
 - Delayed removing destination file while symlinking, to avoid data loss in case of failure - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Fix invalid canonicalization of paths on windows - [#1604](https://github.com/qarmin/czkawka/pull/1604/files)
 - Comparison results are now deterministic - [#1654](https://github.com/qarmin/czkawka/pull/1654)
-- Reading built-in jpeg inside raw images, if available(currently disabled due - https://github.com/dnglab/dnglab/issues/638) - [#1655](https://github.com/qarmin/czkawka/pull/1655)
+- Reading built-in jpeg inside raw images, if available - [#1655](https://github.com/qarmin/czkawka/pull/1655)
 - Fixed silent panics, when logger cannot log to terminal - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Commit hash is added to logs - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Improved and fixed logic which groups similar images by its similarity - [#1685](https://github.com/qarmin/czkawka/pull/1685)
@@ -81,7 +78,7 @@
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
 - Intel Mac binaries, are now built with the latest available MacOS(15 at the moment)
-- Windows prebuild binaries, bundles now libEGL and libGLES, which fixes gtk 4.12 binaries, so gtk 4.6 binaries are no longer provided
+- Windows prebuild binaries, bundles now libEGL and libGLES, which fixes running gtk 4.12 binaries on some os, so gtk 4.6 binaries are no longer provided
 - Krokiet Mac OpenGL binaries are deprecated (due to Apple’s broken and outdated OpenGL driver), and Skia Vulkan binaries are now provided and recommended for use.
 
 ## Version 10.0.0 - 18.08.2025r

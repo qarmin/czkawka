@@ -121,8 +121,10 @@ export component SelectableTableView inherits Rectangle {
                     }
                     pointer-event(event) => {
                         if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
-                            Callabler.row_reverse_single_unique_item(idx);
-                            Callabler.row_open_parent_item_with_index(idx);
+                            if (contains_data(idx)) {
+                                Callabler.row_reverse_single_unique_item(idx);
+                                Callabler.row_open_parent_item_with_index(idx);
+                            }
                         } else if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up) {
                             if (event.modifiers.control) {
                                 start_shift_idx = idx;

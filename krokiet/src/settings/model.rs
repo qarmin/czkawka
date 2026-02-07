@@ -195,7 +195,7 @@ pub struct SettingsCustom {
     pub video_optimizer_max_height: u32,
     #[serde(default = "default_video_optimizer_image_threshold")]
     pub video_optimizer_image_threshold: u8,
-    #[serde(default)]
+    #[serde(default = "default_ignored_exif_tags")]
     pub ignored_exif_tags: String,
     #[serde(default)]
     pub column_sizes: BTreeMap<String, Vec<f32>>,
@@ -436,4 +436,7 @@ pub(crate) fn default_manual_application_scale() -> f32 {
 }
 pub(crate) fn default_use_manual_application_scale() -> bool {
     false
+}
+pub(crate) fn default_ignored_exif_tags() -> String {
+    "Orientation".to_string()
 }

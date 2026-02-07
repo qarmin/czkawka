@@ -159,13 +159,24 @@ mod opener {
             .row_data(id)
             .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
 
+        let get_debug_crash_data = || {
+            format!(
+                "Model data str - {} - cannot find path/name at index/es - {:?}, active tab - {active_tab:?}",
+                model_data.val_str.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(", "),
+                items_path_str
+            )
+        };
+
         let path_to_open = if items_path_str.len() == 1 {
-            format!("{}", model_data.val_str.iter().nth(items_path_str[0]).expect("Cannot find path"))
+            format!(
+                "{}",
+                model_data.val_str.iter().nth(items_path_str[0]).unwrap_or_else(|| panic!("{}", get_debug_crash_data()))
+            )
         } else {
             format!(
                 "{}/{}",
-                model_data.val_str.iter().nth(items_path_str[0]).expect("Cannot find path"),
-                model_data.val_str.iter().nth(items_path_str[1]).expect("Cannot find name")
+                model_data.val_str.iter().nth(items_path_str[0]).unwrap_or_else(|| panic!("{}", get_debug_crash_data())),
+                model_data.val_str.iter().nth(items_path_str[1]).unwrap_or_else(|| panic!("{}", get_debug_crash_data()))
             )
         };
         open_item_simple(&path_to_open);

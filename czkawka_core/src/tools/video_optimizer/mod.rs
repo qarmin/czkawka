@@ -128,10 +128,10 @@ pub enum VideoOptimizerParameters {
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct VideoTranscodeParams {
-    pub excluded_codecs: Vec<String>,
-    pub generate_thumbnails: bool,
-    pub thumbnail_video_percentage_from_start: u8,
-    pub generate_thumbnail_grid_instead_of_single: bool,
+    pub(crate) excluded_codecs: Vec<String>,
+    pub(crate) generate_thumbnails: bool,
+    pub(crate) thumbnail_video_percentage_from_start: u8,
+    pub(crate) generate_thumbnail_grid_instead_of_single: bool,
 }
 #[derive(Clone, PartialEq, Debug)]
 pub struct VideoCropParams {
@@ -140,9 +140,9 @@ pub struct VideoCropParams {
     pub(crate) black_bar_min_percentage: u8,
     pub(crate) max_samples: usize,
     pub(crate) min_crop_size: u32,
-    pub generate_thumbnails: bool,
-    pub thumbnail_video_percentage_from_start: u8,
-    pub generate_thumbnail_grid_instead_of_single: bool,
+    pub(crate) generate_thumbnails: bool,
+    pub(crate) thumbnail_video_percentage_from_start: u8,
+    pub(crate) generate_thumbnail_grid_instead_of_single: bool,
 }
 
 impl VideoTranscodeParams {
