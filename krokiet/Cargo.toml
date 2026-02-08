@@ -43,7 +43,7 @@ slint = { version = "1.14.1", default-features = false, features = [
 
 rodio = { version = "0.21.1", default-features = false, features = ["playback", "symphonia-all"], optional = true }
 
-# Easier cross-compilation of app to e.g. 32 bit os
+# Easier cross-compilation of app to e.g. 32 bit os, by using dlopen instead of linking libraries at compile time
 fontique = { version = "0.7.0", default-features = false, features = ["fontconfig-dlopen"] }
 
 [build-dependencies]
