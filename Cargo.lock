@@ -4171,6 +4171,7 @@ dependencies = [
  "crossbeam-channel",
  "czkawka_core",
  "fast_image_resize 6.0.0",
+ "fontique",
  "fs_extra",
  "home",
  "humansize",
