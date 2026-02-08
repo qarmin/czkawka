@@ -33,3 +33,4 @@ TestFiles
 charts*
 *__pycache__*/
 result
+.direnv
