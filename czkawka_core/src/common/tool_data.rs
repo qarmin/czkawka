@@ -283,7 +283,7 @@ pub trait CommonData {
     fn prepare_items(&mut self, tool_extensions: Option<&[&str]>) -> Result<(), ()> {
         let recursive_search = self.get_cd().recursive_search;
         // Optimizes directories and removes recursive calls
-        match self.get_cd_mut().directories.optimize_directories(recursive_search) {
+        match self.get_cd_mut().directories.optimize_directories(recursive_search, false) {
             Ok(messages) => {
                 self.get_cd_mut().text_messages.extend_with_another_messages(messages);
             }
