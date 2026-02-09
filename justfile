@@ -63,6 +63,10 @@ upgrade:
     cargo +nightly -Z unstable-options update --breaking
     cargo update
 
+clip:
+    cargo clippy --fix --allow-dirty --allow-staged --all-features --all-targets
+    cargo clippy --fix --allow-dirty --allow-staged --no-default-features --features winit_software --all-targets
+
 fix:
     ruff format --line-length 120 --no-cache
     mypy . --strict

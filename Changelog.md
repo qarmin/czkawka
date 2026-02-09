@@ -5,6 +5,7 @@
 - Czkawka gui config file converted from custom format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
 - In broken files mode, type of file is no longer saved to cache, so old cache files are incompatible with new version and should be regenerated from scratch
 - Similarity Preset(enum) argument in similar images mode, was changed into "Max Difference" integer argument(0-40)
+- Heif images rotation are now set once instead twice, so cache may contains not properly rotated images, that may be fixed by regenerating cache files
 
 #### Devs
 - Public api functions, were changed a little avoid unnecessary cloning/using reference of copyable types
@@ -30,6 +31,7 @@
 - Automatic cleaning of outdated entries, now runs max once per week - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added new function, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Fix double rotating heif images - []()
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
