@@ -15,6 +15,7 @@ use libraw::Processor;
 use log::{error, trace};
 use nom_exif::{ExifIter, ExifTag, MediaParser, MediaSource};
 use rawler::decoders::RawDecodeParams;
+use rawler::decoders::WellKnownIFD::Exif;
 use rawler::imgop::develop::RawDevelop;
 use rawler::rawsource::RawSource;
 
@@ -213,6 +214,12 @@ pub enum ExifOrientation {
 }
 
 pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientation>, nom_exif::Error> {
+    if let Some(extension) = Path::new(path).extension()
+        && HEIC_EXTENSIONS.contains(&extension.to_string_lossy().to_lowercase().as_str())
+    {
+        return Ok(None); // libheif already applies orientation
+    }
+
     let res = panic::catch_unwind(|| {
         let mut parser = MediaParser::new();
         let ms = MediaSource::file_path(path)?;
