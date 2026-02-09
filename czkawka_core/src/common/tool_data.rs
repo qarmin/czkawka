@@ -518,6 +518,9 @@ pub trait CommonData {
     #[expect(clippy::print_stdout)]
     fn debug_print_common(&self) {
         println!("---------------DEBUG PRINT COMMON---------------");
+        println!("Included paths(before optimization) - {:?}", self.get_cd().directories.original_included_paths);
+        println!("Excluded paths(before optimization) - {:?}", self.get_cd().directories.original_excluded_paths);
+        println!("Reference paths(before optimization) - {:?}", self.get_cd().directories.original_reference_paths);
         println!("Included directories(optimized) - {:?}", self.get_cd().directories.included_directories);
         println!("Included files(optimized) - {:?}", self.get_cd().directories.included_files);
         println!("Excluded directories(optimized) - {:?}", self.get_cd().directories.excluded_directories);
