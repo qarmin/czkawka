@@ -13,6 +13,7 @@
 - Free, Open Source without ads
 - Multiplatform - runs on Linux, Windows, macOS, FreeBSD, x86, ARM, RISC-V and even Android
 - Cache support - second and further scans should be much faster than the first one
+- Easy to run, easy to compile - minimal runtime and build dependencies, portable version available
 - CLI frontend - for easy automation
 - GUI frontend - uses Slint or GTK 4 frameworks
 - Core library - allows to reuse functionality in other apps

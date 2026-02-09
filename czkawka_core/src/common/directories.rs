@@ -15,6 +15,11 @@ pub struct Directories {
     pub(crate) excluded_files: Vec<PathBuf>,
     pub(crate) included_files: Vec<PathBuf>,
     pub(crate) reference_files: Vec<PathBuf>,
+
+    pub(crate) original_excluded_paths: Vec<PathBuf>,
+    pub(crate) original_included_paths: Vec<PathBuf>,
+    pub(crate) original_reference_paths: Vec<PathBuf>,
+
     pub(crate) exclude_other_filesystems: Option<bool>,
     #[cfg(target_family = "unix")]
     pub(crate) included_dev_ids: Vec<u64>,
@@ -29,10 +34,11 @@ impl Directories {
         self.reference_files = Vec::new();
         self.reference_directories = Vec::new();
         let paths = if cfg!(target_family = "windows") {
-            reference_paths.into_iter().map(normalize_windows_path).collect()
+            reference_paths.clone().into_iter().map(normalize_windows_path).collect()
         } else {
-            reference_paths
+            reference_paths.clone()
         };
+        self.original_reference_paths = reference_paths;
         self.process_paths(paths, true, false)
     }
 
@@ -40,10 +46,11 @@ impl Directories {
         self.included_files = Vec::new();
         self.included_directories = Vec::new();
         let paths = if cfg!(target_family = "windows") {
-            included_paths.into_iter().map(normalize_windows_path).collect()
+            included_paths.clone().into_iter().map(normalize_windows_path).collect()
         } else {
-            included_paths
+            included_paths.clone()
         };
+        self.original_included_paths = included_paths;
         self.process_paths(paths, false, false)
     }
 
@@ -51,10 +58,11 @@ impl Directories {
         self.excluded_files = Vec::new();
         self.excluded_directories = Vec::new();
         let paths = if cfg!(target_family = "windows") {
-            excluded_paths.into_iter().map(normalize_windows_path).collect()
+            excluded_paths.clone().into_iter().map(normalize_windows_path).collect()
         } else {
-            excluded_paths
+            excluded_paths.clone()
         };
+        self.original_excluded_paths = excluded_paths;
         self.process_paths(paths, false, true)
     }
 
@@ -134,8 +142,13 @@ impl Directories {
     pub(crate) fn optimize_directories(&mut self, recursive_search: bool, skip_exist_check: bool) -> Result<Messages, Messages> {
         let mut messages: Messages = Messages::new();
 
+        if self.original_included_paths.is_empty() {
+            messages.critical = Some(flc!("core_cannot_start_scan_no_included_paths"));
+            return Err(messages);
+        }
+
         if self.included_directories.is_empty() && self.included_files.is_empty() {
-            messages.critical = Some(flc!("core_missing_no_chosen_included_path"));
+            messages.critical = Some(flc!("core_skip_exist_check_all_included_paths_nonexistent"));
             return Err(messages);
         }
 
@@ -165,6 +178,12 @@ impl Directories {
         // Same with included files
         for kk in [&mut self.included_directories, &mut self.included_files] {
             kk.retain(|id| !self.excluded_directories.iter().any(|ed| id.starts_with(ed)));
+        }
+
+        // Remove included files inside included directories
+        {
+            let kk = &mut self.included_files;
+            kk.retain(|id| !self.included_directories.iter().any(|ed| id.starts_with(ed)));
         }
 
         // Also check if files are not excluded directly
@@ -341,6 +360,7 @@ mod tests {
         d.excluded_directories.push(PathBuf::from("/other/place"));
 
         let _msgs = d.optimize_directories(true, true).unwrap();
+        assert_eq!(d.included_directories, vec![PathBuf::from("/this/include")]);
         assert_eq!(d.excluded_directories, vec![PathBuf::from("/this/include/sub")]);
     }
 
@@ -358,6 +378,10 @@ mod tests {
 
         let _msgs = d.optimize_directories(true, true).unwrap();
 
+        assert_eq!(d.included_directories, vec![PathBuf::from("/a")]);
+        assert_eq!(d.excluded_directories, Vec::<PathBuf>::new());
+        assert_eq!(d.included_files, Vec::<PathBuf>::new());
+        assert_eq!(d.excluded_files, Vec::<PathBuf>::new());
         assert_eq!(d.reference_directories, vec![PathBuf::from("/a/sub")]);
         assert_eq!(d.reference_files, vec![PathBuf::from("/a/included_file.txt")]);
     }
@@ -388,5 +412,6 @@ mod tests {
         assert!(d.included_files.is_empty());
         // excluded_directories should be retained as it's inside included_directories
         assert_eq!(d.excluded_directories, vec![PathBuf::from("/base/file")]);
+        assert_eq!(d.included_directories, vec![PathBuf::from("/base")]);
     }
 }
