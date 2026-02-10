@@ -55,6 +55,7 @@ impl DebugPrint for InvalidSymlinks {
 
 impl PrintResults for InvalidSymlinks {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        self.write_base_search_paths(writer)?;
         if !self.invalid_symlinks.is_empty() {
             writeln!(writer, "Found {} invalid symlinks.", self.information.number_of_invalid_symlinks)?;
             for file_entry in &self.invalid_symlinks {

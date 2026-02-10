@@ -92,6 +92,7 @@ impl DebugPrint for SameMusic {
 
 impl PrintResults for SameMusic {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        self.write_base_search_paths(writer)?;
         if !self.duplicated_music_entries.is_empty() {
             writeln!(writer, "{} music files which have similar friends\n\n.", self.duplicated_music_entries.len())?;
 

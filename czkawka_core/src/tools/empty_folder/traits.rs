@@ -59,6 +59,7 @@ impl DebugPrint for EmptyFolder {
 
 impl PrintResults for EmptyFolder {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        self.write_base_search_paths(writer)?;
         if !self.empty_folder_list.is_empty() {
             writeln!(writer, "--------------------------Empty folder list--------------------------")?;
             writeln!(writer, "Found {} empty folders", self.information.number_of_empty_folders)?;

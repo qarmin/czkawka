@@ -26,6 +26,12 @@ pub enum ToolType {
     None,
 }
 
+impl ToolType {
+    pub fn may_use_reference_paths(self) -> bool {
+        matches!(self, Self::Duplicate | Self::SameMusic | Self::SimilarImages | Self::SimilarVideos | Self::VideoOptimizer)
+    }
+}
+
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Default, Deserialize, Serialize)]
 pub enum CheckingMethod {
     #[default]

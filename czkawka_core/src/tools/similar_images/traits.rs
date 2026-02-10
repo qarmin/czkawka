@@ -73,6 +73,7 @@ impl DebugPrint for SimilarImages {
 
 impl PrintResults for SimilarImages {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        self.write_base_search_paths(writer)?;
         if !self.similar_vectors.is_empty() {
             write!(writer, "{} images which have similar friends\n\n", self.similar_vectors.len())?;
 

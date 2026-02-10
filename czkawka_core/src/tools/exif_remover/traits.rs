@@ -55,11 +55,7 @@ impl DebugPrint for ExifRemover {
 
 impl PrintResults for ExifRemover {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
-        writeln!(
-            writer,
-            "Results of searching EXIF data with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories, self.common_data.directories.excluded_directories
-        )?;
+        self.write_base_search_paths(writer)?;
 
         if self.information.number_of_files_with_exif != 0 {
             writeln!(writer, "Found {} files with EXIF data.\n", self.information.number_of_files_with_exif)?;

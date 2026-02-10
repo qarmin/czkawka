@@ -73,13 +73,7 @@ impl DebugPrint for BadExtensions {
 
 impl PrintResults for BadExtensions {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
-        writeln!(
-            writer,
-            "Results of searching {:?} with excluded directories {:?} and excluded items {:?}",
-            self.common_data.directories.included_directories,
-            self.common_data.directories.excluded_directories,
-            self.common_data.excluded_items.get_excluded_items()
-        )?;
+        self.write_base_search_paths(writer)?;
         writeln!(writer, "Found {} files with invalid extension.\n", self.information.number_of_files_with_bad_extension)?;
 
         for file_entry in &self.bad_extensions_files {

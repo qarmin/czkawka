@@ -83,6 +83,8 @@ impl DebugPrint for SimilarVideos {
 
 impl PrintResults for SimilarVideos {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        self.write_base_search_paths(writer)?;
+
         fn write_video_entry<T: Write>(writer: &mut T, file_entry: &crate::tools::similar_videos::VideosEntry) -> std::io::Result<()> {
             let bitrate = format_bitrate_opt(file_entry.bitrate);
             let fps = file_entry.fps.map(|e| format!("{e:.2}")).unwrap_or_default();
