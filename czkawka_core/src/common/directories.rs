@@ -323,6 +323,8 @@ mod tests {
         let mut d = Directories::new();
         d.included_directories.push(p.clone());
         d.included_directories.push(p.clone());
+        d.original_included_paths.push(p.clone());
+        d.original_included_paths.push(p.clone());
         let _msgs = d.optimize_directories(true, true).unwrap();
         assert_eq!(d.included_directories, vec![p]);
     }
@@ -332,7 +334,8 @@ mod tests {
         let base = PathBuf::from("/this/base/does/not/exist");
         let sub = base.join("sub");
         let mut d = Directories::new();
-        d.included_directories.push(sub);
+        d.included_directories.push(sub.clone());
+        d.original_included_paths.push(sub);
         d.excluded_directories.push(base);
         let _msgs = d.optimize_directories(true, true).unwrap_err();
         assert_eq!(d.included_directories, Vec::<PathBuf>::new());
@@ -342,8 +345,11 @@ mod tests {
     fn test_optimize_nested_included_directories_dedup() {
         let mut d = Directories::new();
         d.included_directories.push(PathBuf::from("/"));
+        d.original_included_paths.push(PathBuf::from("/"));
         d.included_directories.push(PathBuf::from("/home"));
+        d.original_included_paths.push(PathBuf::from("/home"));
         d.included_directories.push(PathBuf::from("/home/Pulpit"));
+        d.original_included_paths.push(PathBuf::from("/home/Pulpit"));
 
         // use recursive_search = true and skip_exist_check = true as requested
         let msgs = d.optimize_directories(true, true).unwrap();
@@ -356,8 +362,11 @@ mod tests {
     fn test_excluded_directories_pruned_to_inside_included() {
         let mut d = Directories::new();
         d.included_directories.push(PathBuf::from("/this/include"));
+        d.original_included_paths.push(PathBuf::from("/this/include"));
         d.excluded_directories.push(PathBuf::from("/this/include/sub"));
         d.excluded_directories.push(PathBuf::from("/other/place"));
+        d.original_excluded_paths.push(PathBuf::from("/this/include/sub"));
+        d.original_excluded_paths.push(PathBuf::from("/other/place"));
 
         let _msgs = d.optimize_directories(true, true).unwrap();
         assert_eq!(d.included_directories, vec![PathBuf::from("/this/include")]);
@@ -368,7 +377,9 @@ mod tests {
     fn test_reference_dirs_and_files_retained_correctly() {
         let mut d = Directories::new();
         d.included_directories.push(PathBuf::from("/a"));
+        d.original_included_paths.push(PathBuf::from("/a"));
         d.included_files.push(PathBuf::from("/a/included_file.txt"));
+        d.original_included_paths.push(PathBuf::from("/a/included_file.txt"));
 
         d.reference_directories.push(PathBuf::from("/a/sub"));
         d.reference_directories.push(PathBuf::from("/other"));
@@ -402,10 +413,13 @@ mod tests {
     fn test_included_files_removed_when_equal_to_excluded_directory() {
         let mut d = Directories::new();
         d.included_directories.push(PathBuf::from("/base"));
+        d.original_included_paths.push(PathBuf::from("/base"));
         d.included_files.push(PathBuf::from("/base/file"));
+        d.original_included_paths.push(PathBuf::from("/base/file"));
 
         // excluded directory equals included file path
         d.excluded_directories.push(PathBuf::from("/base/file"));
+        d.original_excluded_paths.push(PathBuf::from("/base/file"));
 
         let _msgs = d.optimize_directories(true, true).unwrap();
         // included_files should be removed because it equals an excluded directory

@@ -26,7 +26,7 @@ pub trait PrintResults: CommonData {
         if self.get_cd().tool_type.may_use_reference_paths() {
             writeln!(
                 writer,
-                "Results of searching {included_paths:?} with reference paths {reference_paths:?}, excluded directories {excluded_paths:?} and excluded items {excluded_items:?}"
+                "Results of searching {included_paths:?} with reference paths {reference_paths:?}, excluded paths {excluded_paths:?} and excluded items {excluded_items:?}"
             )?;
             writeln!(
                 writer,
@@ -36,7 +36,7 @@ pub trait PrintResults: CommonData {
         } else {
             writeln!(
                 writer,
-                "Results of searching {included_paths:?} with excluded directories {excluded_paths:?} and excluded items {excluded_items:?}"
+                "Results of searching {included_paths:?} with excluded paths {excluded_paths:?} and excluded items {excluded_items:?}"
             )?;
             writeln!(
                 writer,

@@ -106,8 +106,8 @@ impl BrokenFiles {
                 panic::catch_unwind(|| {
                     if let Err(e) = audio_checker::parse_audio_file(file) {
                         let err_str = e.to_string();
-                        if !(err_str.contains("unsupported feature") || err_str.contains("not supported codec")) {
-                            file_entry.error_string = e.to_string();
+                        if !err_str.contains("not supported codec") {
+                            file_entry.error_string = err_str;
                         }
                     }
                     Some(file_entry)
