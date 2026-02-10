@@ -750,6 +750,7 @@ mod test {
         assert!(regex_check(&new_excluded_item("*home/"), "/home/"));
         assert!(regex_check(&new_excluded_item("*home/*"), "/home/"));
         assert!(regex_check(&new_excluded_item("*.git*"), "/home/.git"));
+        assert!(regex_check(&new_excluded_item("/home/*/.*"), "/home/user/.random"));
         assert!(regex_check(&new_excluded_item("*/home/rafal*rafal*rafal*rafal*"), "/home/rafal/rafalrafalrafal"));
         assert!(regex_check(&new_excluded_item("AAA"), "AAA"));
         assert!(regex_check(&new_excluded_item("AAA*"), "AAABDGG/QQPW*"));

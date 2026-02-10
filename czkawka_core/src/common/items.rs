@@ -158,9 +158,10 @@ mod tests {
     #[test]
     fn test_is_excluded() {
         let mut items = ExcludedItems::new();
-        items.set_excluded_items(vec!["*/.git/*".to_string(), "*/node_modules/*".to_string()]);
+        items.set_excluded_items(vec!["*/.git/*".to_string(), "*/node_modules/*".to_string(), "/home/*/.*".to_string()]);
 
         assert!(items.is_excluded(Path::new("/home/user/.git/config")));
+        assert!(items.is_excluded(Path::new("/home/user/.abscd/config")));
         assert!(items.is_excluded(Path::new("/project/node_modules/package.json")));
         assert!(!items.is_excluded(Path::new("/home/user/file.txt")));
 
