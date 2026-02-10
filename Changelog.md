@@ -2,7 +2,7 @@
 
 ### Breaking changes
 #### Users
-- Czkawka gui config file converted from custom format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
+- Czkawka gui config file converted from custom(and broken) format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
 - In broken files mode, type of file is no longer saved to cache, so old cache files are incompatible with new version and should be regenerated from scratch
 - Similarity Preset(enum) argument in similar images mode, was changed into "Max Difference" integer argument(0-40)
 - Heif images rotation are now set once instead twice, so cache may contains not properly rotated images, that may be fixed by regenerating cache files
@@ -31,7 +31,7 @@
 - Automatic cleaning of outdated entries, now runs max once per week - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added new function, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#1748](https://github.com/qarmin/czkawka/pull/1748)
-- Fix double rotating heif images - []()
+- Fix double rotating heif images - [#1783](https://github.com/qarmin/czkawka/pull/1783)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
@@ -73,6 +73,7 @@
 - Fixed problem with not updating sort options, due invalid multiple connection to single callback - [#1760](https://github.com/qarmin/czkawka/pull/1760)
 - Added ability to create hardlinks/symlinks - [#1760](https://github.com/qarmin/czkawka/pull/1760)
 - Added shortest/longest path selection modes - [#1738](https://github.com/qarmin/czkawka/pull/1738)
+- Fixed crashes caused by desynchronization of selection cache - [#1783](https://github.com/qarmin/czkawka/pull/1783)
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when opening file dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
