@@ -74,8 +74,8 @@ mime_guess = "2.0"
 infer = "0.19"
 
 # Newer version of libheif-rs, which is not compatible with Ubuntu 22.04, and works only o
-libheif-rs = { version = "2", optional = true, features = ["v1_17", "image"] }
-#libheif-sys = { version = "5.0.0", optional = true }
+libheif-rs = { version = "2", optional = true, default-features = false, features = ["v1_17", "image"] }
+#libheif-sys = { version = "2.1.1+1.17.4", optional = true }
 
 nom-exif = "2.1.0"
 
