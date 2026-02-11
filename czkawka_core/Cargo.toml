@@ -73,9 +73,9 @@ jxl-oxide = { version = "0.12.0", features = ["image"] }
 mime_guess = "2.0"
 infer = "0.19"
 
-# Heif/Heic
-libheif-rs = { version = "=0.18.0", optional = true } # Do not upgrade now, since Ubuntu 22.04 not works with newer version
-libheif-sys = { version = "=1.14.2", optional = true } # 1.14.3 brake compilation on Ubuntu 22.04, so pin it to this version
+# Newer version of libheif-rs, which is not compatible with Ubuntu 22.04, and works only o
+libheif-rs = { version = "2", optional = true, features = ["v1_17", "image"] }
+#libheif-sys = { version = "5.0.0", optional = true }
 
 nom-exif = "2.1.0"
 
@@ -122,12 +122,12 @@ harness = false
 
 [features]
 default = []
-heif = ["dep:libheif-rs", "dep:libheif-sys"]
+heif = ["dep:libheif-rs"]
 libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
 blake_pure = ["blake3/pure"]
 # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
-# No-op on other OSes
+# No-op on other OSes, it is slower and provides less helpful error messages
 xdg_portal_trash = ["ashpd", "tokio"]
 [lints]
 workspace = true

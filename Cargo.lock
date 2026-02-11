@@ -1521,7 +1521,6 @@ dependencies = [
  "itertools 0.14.0",
  "jxl-oxide",
  "libheif-rs",
- "libheif-sys",
  "libraw-rs",
  "little_exif",
  "lofty",
@@ -2402,9 +2401,9 @@ dependencies = [
 
 [[package]]
 name = "four-cc"
-version = "0.2.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92d73a076bdabd78c2f9045dba1b90664a655fa8372581c238596e1eb3a5e1b7"
+checksum = "795cbfc56d419a7ce47ccbb7504dd9a5b7c484c083c356e797de08bd988d9629"
 
 [[package]]
 name = "fs_extra"
@@ -4279,22 +4278,29 @@ dependencies = [
 
 [[package]]
 name = "libheif-rs"
-version = "0.18.0"
+version = "2.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37d09b0d2d69da084eeeda9534662bc6b6096fbce3f307149750c0e572ad0ccd"
+checksum = "6a125c096e3959b4bf27f07c7bb649d5ad5f2f5601bceb647c7feb0cc1c0e1b3"
 dependencies = [
+ "cfg-if",
  "enumn",
  "four-cc",
+ "image",
+ "libc",
  "libheif-sys",
 ]
 
 [[package]]
 name = "libheif-sys"
-version = "1.14.2"
+version = "5.0.0+1.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6af8b7a4151ae10f6d2e8684f7172c43f09c0258c84190fd9704422588ceec63"
+checksum = "99e20d554f655767996b08f1c74398410444e5d250c8439c5862fd7959b66f6b"
 dependencies = [
+ "cfg-if",
  "libc",
+ "system-deps",
+ "vcpkg",
+ "walkdir",
 ]
 
 [[package]]
@@ -8021,6 +8027,12 @@ dependencies = [
  "num-traits",
  "wasm-bindgen",
 ]
+
+[[package]]
+name = "vcpkg"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "version-compare"

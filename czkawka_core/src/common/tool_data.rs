@@ -541,6 +541,7 @@ pub trait CommonData {
         println!("Delete method: {:?}", self.get_cd().delete_method);
         println!("Use reference folders: {}", self.get_cd().use_reference_folders);
         println!("Dry run: {}", self.get_cd().dry_run);
+        println!("Hide hard links: {}", self.get_cd().hide_hard_links);
 
         println!("---------------DEBUG PRINT MESSAGES---------------");
         println!("Errors size - {}", self.get_cd().text_messages.errors.len());

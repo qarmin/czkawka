@@ -51,6 +51,8 @@ default = []
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
 libavif = ["czkawka_core/libavif"]
+# Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
+# No-op on other OSes, it is slower and provides less helpful error messages
 xdg_portal_trash = ["czkawka_core/xdg_portal_trash"]
 
 [lints]
