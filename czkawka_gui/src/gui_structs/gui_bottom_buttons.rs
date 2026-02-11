@@ -157,6 +157,7 @@ fn test_hardlinks() -> bool {
     use rand::Rng;
 
     fn try_create_hardlink(dir: &std::path::Path) -> bool {
+        use rand::RngExt;
         let random_suffix: u32 = rand::rng().random();
         let cache_file = dir.join(format!("czkawka_test_{}.czkawka_tmp", random_suffix));
         let cache_file_second = dir.join(format!("czkawka_test_{}_link.czkawka_tmp", random_suffix));
