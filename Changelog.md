@@ -10,6 +10,7 @@
 #### Devs
 - Public api functions, were changed a little avoid unnecessary cloning/using reference of copyable types
 - Similarity name was changed to difference
+- Apps must execute `register_image_decoding_hooks();` at start, to be able to read heif/jxl images
 
 ### Core
 - Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
@@ -32,6 +33,7 @@
 - Added new function, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Fix double rotating heif images - [#1783](https://github.com/qarmin/czkawka/pull/1783)
+- Fix invalid handling of some heif images, by using builtin libheif-rs decoding methods - [#1783](https://github.com/qarmin/czkawka/pull/1783)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
@@ -83,6 +85,7 @@
 - Intel Mac binaries, are now built with the latest available MacOS(15 at the moment)
 - Windows prebuild binaries, bundles now libEGL and libGLES, which fixes running gtk 4.12 binaries on some os, so gtk 4.6 binaries are no longer provided
 - Krokiet Mac OpenGL binaries are deprecated (due to Apple’s broken and outdated OpenGL driver), and Skia Vulkan binaries are now provided and recommended for use.
+- Linux binaries are now built on Ubuntu 24.04, to be able to use newer libheif-rs with several improvements(e.g. reading images with pixels other than rgb8)
 
 ## Version 10.0.0 - 18.08.2025r
 ### Breaking changes

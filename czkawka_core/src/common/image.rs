@@ -1,12 +1,12 @@
 use std::fs::File;
+use std::panic;
 use std::path::Path;
-use std::{panic};
 
 use image::{DynamicImage, ImageReader};
 use log::{error, trace};
 use nom_exif::{ExifIter, ExifTag, MediaParser, MediaSource};
 
-use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::create_crash_message;
 use crate::flc;
 
@@ -150,10 +150,10 @@ pub fn check_if_can_display_image(path: &str) -> bool {
     };
     let extension_str = extension.to_string_lossy().to_lowercase();
     #[cfg(feature = "heif")]
-    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat();
+    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat();
 
     #[cfg(not(feature = "heif"))]
-    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat();
+    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS].concat();
 
     allowed_extensions.iter().any(|ext| &extension_str == ext)
 }
