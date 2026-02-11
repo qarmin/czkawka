@@ -1,39 +1,21 @@
-#![allow(unused_imports)]
-// I don't want to fight with unused(heif) imports in this file, so simply ignore it to avoid too much complexity
-
 use std::fs::File;
+use std::panic;
 use std::path::Path;
-use std::{fs, panic};
 
-use image::{DynamicImage, ImageBuffer, ImageReader, Rgb, Rgba};
-use itertools::Itertools;
-use jxl_oxide::integration::JxlDecoder;
-#[cfg(feature = "heif")]
-use libheif_rs::{ColorSpace, HeifContext, RgbChroma};
-#[cfg(feature = "libraw")]
-use libraw::Processor;
+use image::{DynamicImage, ImageReader};
 use log::{error, trace};
 use nom_exif::{ExifIter, ExifTag, MediaParser, MediaSource};
-use rawler::decoders::RawDecodeParams;
-use rawler::imgop::develop::RawDevelop;
-use rawler::rawsource::RawSource;
 
-use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, JXL_IMAGE_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
+use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::create_crash_message;
 use crate::flc;
-use crate::helpers::debug_timer::Timer;
-// #[cfg(feature = "heif")]
-// use libheif_rs::LibHeif;
 
 const MAXIMUM_IMAGE_PIXELS: u32 = 2_000_000_000;
 
-pub(crate) fn get_jxl_image(path: &str) -> Result<DynamicImage, String> {
-    let file = File::open(path).map_err(|e| e.to_string())?;
-    let decoder = JxlDecoder::new(file).map_err(|e| e.to_string())?;
-
-    let image = DynamicImage::from_decoder(decoder).map_err(|e| e.to_string())?;
-
-    Ok(image)
+pub fn register_image_decoding_hooks() {
+    #[cfg(feature = "heif")]
+    libheif_rs::integration::image::register_all_decoding_hooks();
+    jxl_oxide::integration::register_image_decoding_hook();
 }
 
 // Using this instead of image::open because image::open only reads content of files if extension matches content
@@ -51,20 +33,10 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
 
     trace!("decoding file \"{path}\"");
     let res = panic::catch_unwind(|| {
-        let img = if HEIC_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
-            #[cfg(feature = "heif")]
-            {
-                get_dynamic_image_from_heic(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
-            }
-            #[cfg(not(feature = "heif"))]
-            {
-                decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
-            }
-        } else if JXL_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
-            get_jxl_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
-        } else if RAW_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
+        let img = if RAW_IMAGE_EXTENSIONS.iter().any(|ext| path_lower.ends_with(ext)) {
             get_raw_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
         } else {
+            // Heic files must be registered in image-rs
             decode_normal_image(path).map_err(|e| flc!("core_image_open_failed", path = path, reason = e))
         }?;
 
@@ -105,29 +77,11 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
     }
 }
 
-#[cfg(feature = "heif")]
-pub(crate) fn get_dynamic_image_from_heic(path: &str) -> Result<DynamicImage, String> {
-    // let libheif = LibHeif::new();
-    let im = HeifContext::read_from_file(path).map_err(|e| format!("Error reading HEIC/HEIF file: {e}"))?;
-    let handle = im.primary_image_handle().map_err(|e| format!("Error getting primary image handle: {e}"))?;
-    // let image = libheif.decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)?; // Enable when using libheif 0.19
-    let image = handle
-        .decode(ColorSpace::Rgb(RgbChroma::Rgb), None)
-        .map_err(|e| format!("Error decoding HEIC/HEIF image: {e}"))?;
-    let width = image.width();
-    let height = image.height();
-    let planes = image.planes();
-    let interleaved_plane = planes.interleaved.ok_or_else(|| "No interleaved plane found in HEIC/HEIF image".to_string())?;
-    ImageBuffer::from_raw(width, height, interleaved_plane.data.to_owned())
-        .map(DynamicImage::ImageRgb8)
-        .ok_or_else(|| "Failed to create image buffer".to_string())
-}
-
 #[cfg(feature = "libraw")]
 pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, String> {
-    let buf = fs::read(path.as_ref()).map_err(|e| format!("Error reading image: {e}"))?;
+    let buf = std::fs::read(path.as_ref()).map_err(|e| format!("Error reading image: {e}"))?;
 
-    let processor = Processor::new();
+    let processor = libraw::Processor::new();
     let processed = processor.process_8bit(&buf).map_err(|e| format!("Error processing RAW image: {e}"))?;
 
     let width = processed.width();
@@ -136,7 +90,7 @@ pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, Str
     let data = processed.to_vec();
     let data_len = data.len();
 
-    let buffer = ImageBuffer::from_raw(width, height, data).ok_or(format!(
+    let buffer = image::ImageBuffer::from_raw(width, height, data).ok_or(format!(
         "Cannot create ImageBuffer from raw image with width: {width} and height: {height} and data length: {data_len}",
     ))?;
 
@@ -145,7 +99,11 @@ pub(crate) fn get_raw_image<P: AsRef<Path>>(path: P) -> Result<DynamicImage, Str
 
 #[cfg(not(feature = "libraw"))]
 pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result<DynamicImage, String> {
-    let mut timer = Timer::new("Rawler");
+    use rawler::decoders::RawDecodeParams;
+    use rawler::imgop::develop::RawDevelop;
+    use rawler::rawsource::RawSource;
+
+    let mut timer = crate::helpers::debug_timer::Timer::new("Rawler");
 
     let raw_source = RawSource::new(path.as_ref()).map_err(|err| format!("Failed to create RawSource from path {}: {err}", path.as_ref().to_string_lossy()))?;
 
@@ -157,14 +115,16 @@ pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result
 
     let params = RawDecodeParams::default();
 
-    // TODO - currently disabled, due really bad quality of some extracted images https://github.com/dnglab/dnglab/issues/638
-    // if let Some(extracted_dynamic_image) = decoder.full_image(&raw_source, &params).ok().flatten() {
-    //     timer.checkpoint("Decoded full image");
-    //
-    //     trace!("{}", timer.report("Everything", false));
-    //
-    //     return Ok(extracted_dynamic_image);
-    // }
+    // TODO - Nef currently disabled, due really bad quality of some extracted images https://github.com/dnglab/dnglab/issues/638, waiting for new release
+    if !path.as_ref().to_string_lossy().to_ascii_lowercase().ends_with(".nef")
+        && let Some(extracted_dynamic_image) = decoder.full_image(&raw_source, &params).ok().flatten()
+    {
+        timer.checkpoint("Decoded full image");
+
+        trace!("{}", timer.report("Everything", false));
+
+        return Ok(extracted_dynamic_image);
+    }
 
     let raw_image = decoder.raw_image(&raw_source, &params, false).map_err(|e| e.to_string())?;
 
@@ -190,10 +150,10 @@ pub fn check_if_can_display_image(path: &str) -> bool {
     };
     let extension_str = extension.to_string_lossy().to_lowercase();
     #[cfg(feature = "heif")]
-    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat();
+    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat();
 
     #[cfg(not(feature = "heif"))]
-    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, JXL_IMAGE_EXTENSIONS].concat();
+    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS].concat();
 
     allowed_extensions.iter().any(|ext| &extension_str == ext)
 }
@@ -211,6 +171,12 @@ pub enum ExifOrientation {
 }
 
 pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientation>, nom_exif::Error> {
+    if let Some(extension) = Path::new(path).extension()
+        && HEIC_EXTENSIONS.contains(&extension.to_string_lossy().to_lowercase().as_str())
+    {
+        return Ok(None); // libheif already applies orientation
+    }
+
     let res = panic::catch_unwind(|| {
         let mut parser = MediaParser::new();
         let ms = MediaSource::file_path(path)?;

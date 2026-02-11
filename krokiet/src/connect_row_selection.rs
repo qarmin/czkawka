@@ -24,6 +24,14 @@ pub(crate) struct SelectionData {
 
 pub(crate) static TOOLS_SELECTION: LazyLock<RwLock<HashMap<ActiveTab, SelectionData>>> = LazyLock::new(|| RwLock::new(HashMap::new()));
 
+// pub(crate) fn get_selection_data(active_tab: ActiveTab) -> SelectionData {
+//     let lock = TOOLS_SELECTION.read().expect("Selection data is not initialized or is poisoned");
+//     let keys = lock.keys().cloned().collect::<Vec<_>>();
+//     lock.get(&active_tab)
+//         .unwrap_or_else(|| panic!("Failed to get selection data for tab {active_tab:?} - {keys:?}"))
+//         .clone()
+// }
+
 pub(crate) fn reset_selection(app: &MainWindow, active_tab: ActiveTab, reset_all_selection: bool) {
     if reset_all_selection {
         let mut lock = get_write_selection_lock();
@@ -32,6 +40,7 @@ pub(crate) fn reset_selection(app: &MainWindow, active_tab: ActiveTab, reset_all
             .get_mut(&active_tab)
             .unwrap_or_else(|| panic!("Failed to get selection data for tab {active_tab:?} - {keys:?}"));
         selection.selected_rows.clear();
+        selection.number_of_selected_rows = 0;
         selection.exceeded_limit = false;
     }
 
@@ -159,13 +168,24 @@ mod opener {
             .row_data(id)
             .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
 
+        let get_debug_crash_data = || {
+            format!(
+                "Model data str - {} - cannot find path/name at index/es - {:?}, active tab - {active_tab:?}",
+                model_data.val_str.iter().map(|e| e.to_string()).collect::<Vec<_>>().join(", "),
+                items_path_str
+            )
+        };
+
         let path_to_open = if items_path_str.len() == 1 {
-            format!("{}", model_data.val_str.iter().nth(items_path_str[0]).expect("Cannot find path"))
+            format!(
+                "{}",
+                model_data.val_str.iter().nth(items_path_str[0]).unwrap_or_else(|| panic!("{}", get_debug_crash_data()))
+            )
         } else {
             format!(
                 "{}/{}",
-                model_data.val_str.iter().nth(items_path_str[0]).expect("Cannot find path"),
-                model_data.val_str.iter().nth(items_path_str[1]).expect("Cannot find name")
+                model_data.val_str.iter().nth(items_path_str[0]).unwrap_or_else(|| panic!("{}", get_debug_crash_data())),
+                model_data.val_str.iter().nth(items_path_str[1]).unwrap_or_else(|| panic!("{}", get_debug_crash_data()))
             )
         };
         open_item_simple(&path_to_open);
@@ -192,11 +212,30 @@ mod opener {
     }
 }
 mod selection {
+    use slint::ModelRc;
+
     use super::{
         Callabler, ComponentHandle, GuiState, MainWindow, Model, get_write_selection_lock, reverse_selection_of_item_with_id, row_select_items_with_shift,
         rows_deselect_all_by_mode, rows_reverse_checked_selection, rows_select_all_by_mode, trace,
     };
+    use crate::SingleMainListModel;
+    use crate::connect_row_selection::SelectionData;
     use crate::connect_row_selection::checker::change_number_of_enabled_items;
+
+    fn validate_selection_and_model(selection: &SelectionData, model: &ModelRc<SingleMainListModel>) {
+        assert!(
+            selection.number_of_selected_rows == selection.selected_rows.len() || selection.exceeded_limit,
+            "Number of selected rows {} should be equal to length of selected rows vector {} if not exceeded limit",
+            selection.number_of_selected_rows,
+            selection.selected_rows.len()
+        );
+        assert!(
+            model.row_count() >= selection.number_of_selected_rows,
+            "Number of model items {} should be bigger than number of selected items {}",
+            model.row_count(),
+            selection.number_of_selected_rows
+        );
+    }
 
     pub(crate) fn connect_select_all_rows(app: &MainWindow) {
         let a = app.as_weak();
@@ -209,7 +248,9 @@ mod selection {
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
             let model = active_tab.get_tool_model(&app);
 
+            validate_selection_and_model(selection, &model);
             if let Some(new_model) = rows_select_all_by_mode(selection, &model) {
+                validate_selection_and_model(selection, &new_model);
                 active_tab.set_tool_model(&app, new_model);
             }
         });
@@ -226,6 +267,7 @@ mod selection {
 
             {
                 let model = active_tab.get_tool_model(&app);
+                validate_selection_and_model(selection, &model);
 
                 if let Some(new_model) = rows_deselect_all_by_mode(selection, &model) {
                     active_tab.set_tool_model(&app, new_model);
@@ -235,6 +277,7 @@ mod selection {
             // needs to get model again, because it could be replaced
             let model = active_tab.get_tool_model(&app);
             reverse_selection_of_item_with_id(selection, &model, id as usize);
+            validate_selection_and_model(selection, &model);
         });
     }
 
@@ -248,11 +291,15 @@ mod selection {
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
             let model = active_tab.get_tool_model(&app);
 
+            validate_selection_and_model(selection, &model);
+
             let (checked_items, unchecked_items, new_model) = rows_reverse_checked_selection(selection, &model);
             if let Some(new_model) = new_model {
                 active_tab.set_tool_model(&app, new_model);
             }
+
             change_number_of_enabled_items(&app, active_tab, checked_items as i64 - unchecked_items as i64);
+            validate_selection_and_model(selection, &active_tab.get_tool_model(&app));
         });
     }
     pub(crate) fn reverse_selection_on_specific_item(app: &MainWindow) {
@@ -264,8 +311,9 @@ mod selection {
             let mut lock = get_write_selection_lock();
             let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
             let model = active_tab.get_tool_model(&app);
-
+            validate_selection_and_model(selection, &model);
             reverse_selection_of_item_with_id(selection, &model, id as usize);
+            validate_selection_and_model(selection, &model);
         });
     }
 
@@ -284,7 +332,9 @@ mod selection {
             assert!((first_idx as usize) < model.row_count());
             assert!((second_idx as usize) < model.row_count());
 
+            validate_selection_and_model(selection, &model);
             if let Some(new_model) = row_select_items_with_shift(selection, &model, (first_idx as usize, second_idx as usize)) {
+                validate_selection_and_model(selection, &new_model);
                 active_tab.set_tool_model(&app, new_model);
             }
         });
@@ -497,6 +547,12 @@ fn rows_deselect_all_selected_by_replacing_models(model: &ModelRc<SingleMainList
 // Select All
 //
 fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<SingleMainListModel>) -> Option<ModelRc<SingleMainListModel>> {
+    assert!(
+        model.row_count() >= selection.number_of_selected_rows,
+        "Number of model items {} should be bigger than number of selected items {}",
+        model.row_count(),
+        selection.number_of_selected_rows
+    );
     let new_model = if model.row_count() - selection.number_of_selected_rows > 100 {
         rows_select_all_by_replacing_models(selection, model)
     } else {

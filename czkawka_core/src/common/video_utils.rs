@@ -156,15 +156,20 @@ pub fn generate_thumbnail(
     generate_grid_instead_of_single: bool,
 ) -> Result<PathBuf, String> {
     let mut hasher = Hasher::new();
-    hasher.update(
-        format!(
-            "{thumbnail_video_percentage_from_start}___{}___{}___{}___{generate_grid_instead_of_single}",
-            size,
-            modified_date,
-            video_path.to_string_lossy()
-        )
-        .as_bytes(),
-    );
+
+    if generate_grid_instead_of_single {
+        hasher.update(format!("{}___{}___{}___GRID", size, modified_date, video_path.to_string_lossy()).as_bytes());
+    } else {
+        hasher.update(
+            format!(
+                "{thumbnail_video_percentage_from_start}___{}___{}___{}___SINGLE",
+                size,
+                modified_date,
+                video_path.to_string_lossy()
+            )
+            .as_bytes(),
+        );
+    }
     let hash = hasher.finalize();
     let thumbnail_filename = format!("{}.jpg", hash.to_hex());
     let thumbnail_path = thumbnails_dir.join(thumbnail_filename);

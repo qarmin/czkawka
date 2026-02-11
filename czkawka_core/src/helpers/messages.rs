@@ -116,10 +116,13 @@ impl Messages {
 
     /// Extends this `Messages` struct with another, appending all messages, warnings, and errors.
     pub fn extend_with_another_messages(&mut self, messages: Self) {
-        let (messages, warnings, errors) = (messages.messages, messages.warnings, messages.errors);
+        let (messages, warnings, errors, critical) = (messages.messages, messages.warnings, messages.errors, messages.critical);
         self.messages.extend(messages);
         self.warnings.extend(warnings);
         self.errors.extend(errors);
+        if critical.is_some() {
+            self.critical = critical;
+        }
     }
 }
 

@@ -52,9 +52,7 @@ impl DebugPrint for VideoOptimizer {
 
 impl PrintResults for VideoOptimizer {
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
-        writeln!(writer, "Results of Video Optimizer with mode {:?}", self.params)?;
-        writeln!(writer, "Searched in directories: {:?}", self.common_data.directories.included_directories)?;
-        writeln!(writer, "Excluded directories: {:?}", self.common_data.directories.excluded_directories)?;
+        self.write_base_search_paths(writer)?;
 
         match self.params.clone() {
             VideoOptimizerParameters::VideoTranscode(_) => {

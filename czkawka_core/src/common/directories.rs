@@ -15,6 +15,11 @@ pub struct Directories {
     pub(crate) excluded_files: Vec<PathBuf>,
     pub(crate) included_files: Vec<PathBuf>,
     pub(crate) reference_files: Vec<PathBuf>,
+
+    pub(crate) original_excluded_paths: Vec<PathBuf>,
+    pub(crate) original_included_paths: Vec<PathBuf>,
+    pub(crate) original_reference_paths: Vec<PathBuf>,
+
     pub(crate) exclude_other_filesystems: Option<bool>,
     #[cfg(target_family = "unix")]
     pub(crate) included_dev_ids: Vec<u64>,
@@ -28,19 +33,37 @@ impl Directories {
     pub(crate) fn set_reference_paths(&mut self, reference_paths: Vec<PathBuf>) -> Messages {
         self.reference_files = Vec::new();
         self.reference_directories = Vec::new();
-        self.process_paths(reference_paths, true, false)
+        let paths = if cfg!(target_family = "windows") {
+            reference_paths.clone().into_iter().map(normalize_windows_path).collect()
+        } else {
+            reference_paths.clone()
+        };
+        self.original_reference_paths = reference_paths;
+        self.process_paths(paths, true, false)
     }
 
     pub(crate) fn set_included_paths(&mut self, included_paths: Vec<PathBuf>) -> Messages {
         self.included_files = Vec::new();
         self.included_directories = Vec::new();
-        self.process_paths(included_paths, false, false)
+        let paths = if cfg!(target_family = "windows") {
+            included_paths.clone().into_iter().map(normalize_windows_path).collect()
+        } else {
+            included_paths.clone()
+        };
+        self.original_included_paths = included_paths;
+        self.process_paths(paths, false, false)
     }
 
     pub(crate) fn set_excluded_paths(&mut self, excluded_paths: Vec<PathBuf>) -> Messages {
         self.excluded_files = Vec::new();
         self.excluded_directories = Vec::new();
-        self.process_paths(excluded_paths, false, true)
+        let paths = if cfg!(target_family = "windows") {
+            excluded_paths.clone().into_iter().map(normalize_windows_path).collect()
+        } else {
+            excluded_paths.clone()
+        };
+        self.original_excluded_paths = excluded_paths;
+        self.process_paths(paths, false, true)
     }
 
     fn process_paths(&mut self, paths: Vec<PathBuf>, is_reference: bool, is_excluded: bool) -> Messages {
@@ -116,11 +139,16 @@ impl Directories {
         self.exclude_other_filesystems = Some(exclude_other_filesystems);
     }
 
-    pub(crate) fn optimize_directories(&mut self, recursive_search: bool) -> Result<Messages, Messages> {
+    pub(crate) fn optimize_directories(&mut self, recursive_search: bool, skip_exist_check: bool) -> Result<Messages, Messages> {
         let mut messages: Messages = Messages::new();
 
+        if self.original_included_paths.is_empty() {
+            messages.critical = Some(flc!("core_cannot_start_scan_no_included_paths"));
+            return Err(messages);
+        }
+
         if self.included_directories.is_empty() && self.included_files.is_empty() {
-            messages.critical = Some(flc!("core_missing_no_chosen_included_path"));
+            messages.critical = Some(flc!("core_skip_exist_check_all_included_paths_nonexistent"));
             return Err(messages);
         }
 
@@ -133,11 +161,6 @@ impl Directories {
             &mut self.excluded_files,
             &mut self.reference_files,
         ] {
-            if cfg!(target_family = "windows") {
-                items.iter_mut().for_each(|item| {
-                    *item = normalize_windows_path(item.clone());
-                });
-            }
             items.sort_unstable();
             items.dedup();
         }
@@ -157,6 +180,12 @@ impl Directories {
             kk.retain(|id| !self.excluded_directories.iter().any(|ed| id.starts_with(ed)));
         }
 
+        // Remove included files inside included directories
+        {
+            let kk = &mut self.included_files;
+            kk.retain(|id| !self.included_directories.iter().any(|ed| id.starts_with(ed)));
+        }
+
         // Also check if files are not excluded directly
         {
             let kk = &mut self.included_files;
@@ -164,13 +193,15 @@ impl Directories {
         }
 
         // Remove non existed directories and files
-        for kk in [
-            &mut self.excluded_files,
-            &mut self.excluded_directories,
-            &mut self.included_files,
-            &mut self.included_directories,
-        ] {
-            kk.retain(|path| path.exists());
+        if !skip_exist_check {
+            for kk in [
+                &mut self.excluded_files,
+                &mut self.excluded_directories,
+                &mut self.included_files,
+                &mut self.included_directories,
+            ] {
+                kk.retain(|path| path.exists());
+            }
         }
 
         // Excluded paths must are inside included path, because otherwise they are pointless
@@ -210,12 +241,13 @@ impl Directories {
         }
 
         if self.included_directories.is_empty() && self.included_files.is_empty() {
-            messages.errors.push(flc!("core_missing_no_chosen_included_path"));
+            messages.critical = Some(flc!("core_missing_no_chosen_included_path"));
             return Err(messages);
         }
 
         if self.reference_directories == self.included_directories && self.included_files == self.reference_files {
-            messages.warnings.push(flc!("core_reference_included_paths_same"));
+            messages.critical = Some(flc!("core_reference_included_paths_same"));
+            return Err(messages);
         }
 
         Ok(messages)
@@ -269,5 +301,131 @@ impl Directories {
                 }
             })
             .collect::<Vec<(T, Vec<T>)>>()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn test_no_included_paths_errors() {
+        let mut d = Directories::new();
+        let msgs = d.optimize_directories(true, true).unwrap_err();
+        assert!(msgs.critical.is_some());
+    }
+
+    #[test]
+    fn test_dedup_included_directories() {
+        let p = PathBuf::from("/this/path/does/not/exist/dedup");
+        let mut d = Directories::new();
+        d.included_directories.push(p.clone());
+        d.included_directories.push(p.clone());
+        d.original_included_paths.push(p.clone());
+        d.original_included_paths.push(p.clone());
+        let _msgs = d.optimize_directories(true, true).unwrap();
+        assert_eq!(d.included_directories, vec![p]);
+    }
+
+    #[test]
+    fn test_excluded_removes_included_inside() {
+        let base = PathBuf::from("/this/base/does/not/exist");
+        let sub = base.join("sub");
+        let mut d = Directories::new();
+        d.included_directories.push(sub.clone());
+        d.original_included_paths.push(sub);
+        d.excluded_directories.push(base);
+        let _msgs = d.optimize_directories(true, true).unwrap_err();
+        assert_eq!(d.included_directories, Vec::<PathBuf>::new());
+    }
+
+    #[test]
+    fn test_optimize_nested_included_directories_dedup() {
+        let mut d = Directories::new();
+        d.included_directories.push(PathBuf::from("/"));
+        d.original_included_paths.push(PathBuf::from("/"));
+        d.included_directories.push(PathBuf::from("/home"));
+        d.original_included_paths.push(PathBuf::from("/home"));
+        d.included_directories.push(PathBuf::from("/home/Pulpit"));
+        d.original_included_paths.push(PathBuf::from("/home/Pulpit"));
+
+        // use recursive_search = true and skip_exist_check = true as requested
+        let msgs = d.optimize_directories(true, true).unwrap();
+        // only root should remain after dedup
+        assert_eq!(d.included_directories, vec![PathBuf::from("/")]);
+        assert!(msgs.critical.is_none());
+    }
+
+    #[test]
+    fn test_excluded_directories_pruned_to_inside_included() {
+        let mut d = Directories::new();
+        d.included_directories.push(PathBuf::from("/this/include"));
+        d.original_included_paths.push(PathBuf::from("/this/include"));
+        d.excluded_directories.push(PathBuf::from("/this/include/sub"));
+        d.excluded_directories.push(PathBuf::from("/other/place"));
+        d.original_excluded_paths.push(PathBuf::from("/this/include/sub"));
+        d.original_excluded_paths.push(PathBuf::from("/other/place"));
+
+        let _msgs = d.optimize_directories(true, true).unwrap();
+        assert_eq!(d.included_directories, vec![PathBuf::from("/this/include")]);
+        assert_eq!(d.excluded_directories, vec![PathBuf::from("/this/include/sub")]);
+    }
+
+    #[test]
+    fn test_reference_dirs_and_files_retained_correctly() {
+        let mut d = Directories::new();
+        d.included_directories.push(PathBuf::from("/a"));
+        d.original_included_paths.push(PathBuf::from("/a"));
+        d.included_files.push(PathBuf::from("/a/included_file.txt"));
+        d.original_included_paths.push(PathBuf::from("/a/included_file.txt"));
+
+        d.reference_directories.push(PathBuf::from("/a/sub"));
+        d.reference_directories.push(PathBuf::from("/other"));
+
+        d.reference_files.push(PathBuf::from("/a/included_file.txt"));
+        d.reference_files.push(PathBuf::from("/other/file2.txt"));
+
+        let _msgs = d.optimize_directories(true, true).unwrap();
+
+        assert_eq!(d.included_directories, vec![PathBuf::from("/a")]);
+        assert_eq!(d.excluded_directories, Vec::<PathBuf>::new());
+        assert_eq!(d.included_files, Vec::<PathBuf>::new());
+        assert_eq!(d.excluded_files, Vec::<PathBuf>::new());
+        assert_eq!(d.reference_directories, vec![PathBuf::from("/a/sub")]);
+        assert_eq!(d.reference_files, vec![PathBuf::from("/a/included_file.txt")]);
+    }
+
+    #[test]
+    fn test_reference_equals_included_error() {
+        let mut d = Directories::new();
+        d.included_directories.push(PathBuf::from("/same"));
+        d.reference_directories.push(PathBuf::from("/same"));
+        d.included_files = Vec::new();
+        d.reference_files = Vec::new();
+
+        let msgs = d.optimize_directories(true, true).unwrap_err();
+        assert!(msgs.critical.is_some());
+    }
+
+    #[test]
+    fn test_included_files_removed_when_equal_to_excluded_directory() {
+        let mut d = Directories::new();
+        d.included_directories.push(PathBuf::from("/base"));
+        d.original_included_paths.push(PathBuf::from("/base"));
+        d.included_files.push(PathBuf::from("/base/file"));
+        d.original_included_paths.push(PathBuf::from("/base/file"));
+
+        // excluded directory equals included file path
+        d.excluded_directories.push(PathBuf::from("/base/file"));
+        d.original_excluded_paths.push(PathBuf::from("/base/file"));
+
+        let _msgs = d.optimize_directories(true, true).unwrap();
+        // included_files should be removed because it equals an excluded directory
+        assert!(d.included_files.is_empty());
+        // excluded_directories should be retained as it's inside included_directories
+        assert_eq!(d.excluded_directories, vec![PathBuf::from("/base/file")]);
+        assert_eq!(d.included_directories, vec![PathBuf::from("/base")]);
     }
 }

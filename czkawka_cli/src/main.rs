@@ -8,6 +8,7 @@ use commands::Commands;
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
+use czkawka_core::common::image::register_image_decoding_hooks;
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::set_number_of_threads;
@@ -48,6 +49,7 @@ pub struct CliOutput {
 }
 
 fn main() {
+    register_image_decoding_hooks();
     if cfg!(debug_assertions) {
         use clap::CommandFactory;
         Args::command().debug_assert();

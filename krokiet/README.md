@@ -8,7 +8,7 @@ Krokiet is a new Czkawka frontend written in Slint.
 It aims to provide a more consistent experience across all platforms (Linux, Windows, macOS) compared to the previous GTK 4 frontend.
 
 ## How to install?
-Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04 (and similar distros with the same or newer glibc version).
+Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04(base)/24.04(with additional libraries) - or distros with same/newer glibc/libraries versions.
 
 You can download them from https://github.com/qarmin/czkawka/releases/, which contains recommendations, which variant to use depending on your needs.
 

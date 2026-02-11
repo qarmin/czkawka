@@ -16,6 +16,8 @@ core_folder_modified_before_epoch = Folder {$name} seems to have been modified b
 core_file_no_modification_date = Unable to get modification date from file {$name}, reason {$reason}
 core_folder_no_modification_date = Unable to get modification date from folder {$name}, reason {$reason}
 
+core_cannot_start_scan_no_included_paths = Cannot start scan, because there are no included paths
+core_skip_exist_check_all_included_paths_nonexistent = Cannot start scan, because all included paths do not exist
 core_missing_no_chosen_included_path = No valid included path was chosen(excluded paths could have excluded all included paths)
 core_reference_included_paths_same = Cannot start scan where all valid included paths are also referenced paths, try to validate or disable referenced paths
 core_path_must_exists = Provided path must exist, ignoring { $path }

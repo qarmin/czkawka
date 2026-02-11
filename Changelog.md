@@ -1,17 +1,16 @@
 ## Version ?.?.? - ??
-### New version blockers
-- updating to slint 1.15, which fixes some bugs
-- update to stable 0.11 gtk-rs
 
 ### Breaking changes
 #### Users
-- Czkawka gui config file converted from custom format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
+- Czkawka gui config file converted from custom(and broken) format to json, so all settings needs to be set again(old txt file is not removed, so it may be used as reference for changes) 
 - In broken files mode, type of file is no longer saved to cache, so old cache files are incompatible with new version and should be regenerated from scratch
 - Similarity Preset(enum) argument in similar images mode, was changed into "Max Difference" integer argument(0-40)
+- Heif images rotation are now set once instead twice, so cache may contains not properly rotated images, that may be fixed by regenerating cache files
 
 #### Devs
 - Public api functions, were changed a little avoid unnecessary cloning/using reference of copyable types
 - Similarity name was changed to difference
+- Apps must execute `register_image_decoding_hooks();` at start, to be able to read heif/jxl images
 
 ### Core
 - Extensions in similar images mode and in previews, drops validating if extension is correct(most of the time) - [#1623](https://github.com/qarmin/czkawka/pull/1623)
@@ -19,7 +18,7 @@
 - Delayed removing destination file while symlinking, to avoid data loss in case of failure - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Fix invalid canonicalization of paths on windows - [#1604](https://github.com/qarmin/czkawka/pull/1604/files)
 - Comparison results are now deterministic - [#1654](https://github.com/qarmin/czkawka/pull/1654)
-- Reading built-in jpeg inside raw images, if available(currently disabled due - https://github.com/dnglab/dnglab/issues/638) - [#1655](https://github.com/qarmin/czkawka/pull/1655)
+- Reading built-in jpeg inside raw images, if available - [#1655](https://github.com/qarmin/czkawka/pull/1655)
 - Fixed silent panics, when logger cannot log to terminal - [#1658](https://github.com/qarmin/czkawka/pull/1658)
 - Commit hash is added to logs - [#1672](https://github.com/qarmin/czkawka/pull/1672)
 - Improved and fixed logic which groups similar images by its similarity - [#1685](https://github.com/qarmin/czkawka/pull/1685)
@@ -33,6 +32,8 @@
 - Automatic cleaning of outdated entries, now runs max once per week - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added new function, to manually remove outdated entries in cache files - [#1748](https://github.com/qarmin/czkawka/pull/1748)
 - Added to all projects, info about video properties(bitrate, codec, fps, dimensions, duration) - [#1748](https://github.com/qarmin/czkawka/pull/1748)
+- Fix double rotating heif images - [#1783](https://github.com/qarmin/czkawka/pull/1783)
+- Fix invalid handling of some heif images, by using builtin libheif-rs decoding methods - [#1783](https://github.com/qarmin/czkawka/pull/1783)
 
 ### CLI
 - Using colors by default in terminal output(can be disabled by feature flag) - [#1672](https://github.com/qarmin/czkawka/pull/1672)
@@ -74,6 +75,7 @@
 - Fixed problem with not updating sort options, due invalid multiple connection to single callback - [#1760](https://github.com/qarmin/czkawka/pull/1760)
 - Added ability to create hardlinks/symlinks - [#1760](https://github.com/qarmin/czkawka/pull/1760)
 - Added shortest/longest path selection modes - [#1738](https://github.com/qarmin/czkawka/pull/1738)
+- Fixed crashes caused by desynchronization of selection cache - [#1783](https://github.com/qarmin/czkawka/pull/1783)
 
 ### External
 - Wine 10.20 contains bugfix that fixes crashes when opening file dialogs in Czkawka Gui - [Wine 49987 issue](https://bugs.winehq.org/show_bug.cgi?id=49987)
@@ -81,8 +83,9 @@
 ### Prebuilt binaries
 - Krokiet Windows binaries with skia backend are available (this is msvc build and requires vc redist installed)
 - Intel Mac binaries, are now built with the latest available MacOS(15 at the moment)
-- Windows prebuild binaries, bundles now libEGL and libGLES, which fixes gtk 4.12 binaries, so gtk 4.6 binaries are no longer provided
+- Windows prebuild binaries, bundles now libEGL and libGLES, which fixes running gtk 4.12 binaries on some os, so gtk 4.6 binaries are no longer provided
 - Krokiet Mac OpenGL binaries are deprecated (due to Apple’s broken and outdated OpenGL driver), and Skia Vulkan binaries are now provided and recommended for use.
+- Linux binaries are now built on Ubuntu 24.04, to be able to use newer libheif-rs with several improvements(e.g. reading images with pixels other than rgb8)
 
 ## Version 10.0.0 - 18.08.2025r
 ### Breaking changes

@@ -16,7 +16,38 @@ pub trait DebugPrint {
     fn debug_print(&self);
 }
 
-pub trait PrintResults {
+pub trait PrintResults: CommonData {
+    fn write_base_search_paths<T: Write>(&self, writer: &mut T) -> std::io::Result<()> {
+        let dirs = &self.get_cd().directories;
+        let included_paths = dirs.included_files.iter().chain(dirs.included_directories.iter()).collect::<Vec<_>>();
+        let excluded_paths = dirs.excluded_files.iter().chain(dirs.excluded_directories.iter()).collect::<Vec<_>>();
+        let reference_paths = dirs.reference_files.iter().chain(dirs.reference_directories.iter()).collect::<Vec<_>>();
+        let excluded_items = self.get_cd().excluded_items.get_excluded_items();
+        if self.get_cd().tool_type.may_use_reference_paths() {
+            writeln!(
+                writer,
+                "Results of searching {included_paths:?} with reference paths {reference_paths:?}, excluded paths {excluded_paths:?} and excluded items {excluded_items:?}"
+            )?;
+            writeln!(
+                writer,
+                "(Before optimizations - included paths: {:?}, excluded paths: {:?}, reference paths: {:?})",
+                dirs.original_included_paths, dirs.original_excluded_paths, dirs.original_reference_paths
+            )?;
+        } else {
+            writeln!(
+                writer,
+                "Results of searching {included_paths:?} with excluded paths {excluded_paths:?} and excluded items {excluded_items:?}"
+            )?;
+            writeln!(
+                writer,
+                "(Before optimizations - included paths: {:?}, excluded paths: {:?})",
+                dirs.original_included_paths, dirs.original_excluded_paths
+            )?;
+        }
+
+        Ok(())
+    }
+
     fn write_results<T: Write>(&self, writer: &mut T) -> std::io::Result<()>;
 
     #[fun_time(message = "print_results_to_output", level = "debug")]

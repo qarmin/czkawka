@@ -353,6 +353,7 @@ impl ModelProcessor {
                 for e in &mut new_model_after_removing_useless_items {
                     e.selected_row = false;
                 }
+                let checked_items = new_model_after_removing_useless_items.iter().filter(|e| e.checked).count();
                 self.active_tab.set_tool_model(&app, ModelRc::new(VecModel::from(new_model_after_removing_useless_items)));
 
                 app.global::<GuiState>()
@@ -361,7 +362,7 @@ impl ModelProcessor {
                 app.global::<GuiState>().set_preview_visible(false);
 
                 reset_selection(&app, self.active_tab, true);
-                set_number_of_enabled_items(&app, self.active_tab, errors_len as u64);
+                set_number_of_enabled_items(&app, self.active_tab, checked_items as u64);
                 stop_flag.store(false, Ordering::Relaxed);
                 app.invoke_processing_ended(message_type.get_summary_message(items_processed, errors_len, items_queued_to_process).into());
             })

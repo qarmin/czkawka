@@ -26,6 +26,7 @@ use connect_things::connect_similar_image_size_change::connect_similar_image_siz
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::basic_gui_cli::{CliResult, process_cli_args};
 use czkawka_core::common::config_cache_path::{get_config_cache_path, print_infos_and_warnings, set_config_cache_path};
+use czkawka_core::common::image::register_image_decoding_hooks;
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::{get_number_of_threads, set_number_of_threads};
@@ -72,6 +73,7 @@ mod taskbar_progress_win;
 pub const CZKAWKA_GTK_TOOL_NUMBER: usize = TOOLS_NUMBER - 3; // Missing exif, video optimizer, bad names tools
 
 fn main() {
+    register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Czkawka");
     let exists_krokiet_info_file = get_config_cache_path().is_some_and(|cache_config| {
         let file_path = cache_config.cache_folder.join("krokiet_info_dialog_seen.txt");

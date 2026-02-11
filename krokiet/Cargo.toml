@@ -33,7 +33,6 @@ i18n-embed-fl = "0.10"
 rust-embed = { version = "8.5", features = ["debug-embed"] }
 
 
-# qarmin: To fix 32 bit CI, this dependency must be added:
 # Easier cross-compilation of app to e.g. 32 bit os, by using dlopen instead of linking libraries at compile time
 fontique = { version = "0.7.0", default-features = false, features = ["fontconfig-dlopen"] }
 
@@ -68,6 +67,8 @@ winit_software = ["slint/renderer-winit-software"]
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
 libavif = ["czkawka_core/libavif"]
+# Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
+# No-op on other OSes, it is slower and provides less helpful error messages
 xdg_portal_trash = ["czkawka_core/xdg_portal_trash"]
 
 [lints]

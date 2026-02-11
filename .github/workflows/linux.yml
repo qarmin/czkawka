@@ -46,6 +46,86 @@ jobs:
           mv target/release/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/release/krokiet linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+
+      # Fast CI profile, to avoid out of disk space errors
+      # I doubt that anyone would use debug builds from here, because they are slow and contains not final changes
+      - name: Build Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
+          sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
+          
+          echo "VERS=debug" >> $GITHUB_ENV
+          
+          cargo build --profile fastci
+          mv target/fastci/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/fastci/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
+          mv target/fastci/krokiet linux_krokiet_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software" --profile fastci
+          mv target/fastci/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software" --profile fastci
+          mv target/fastci/krokiet linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+
+      - name: Pack with 7z
+        run: |
+          # 7z -mx=3 in rust files, takes 40% less space but is 2x slower than zip -mx=1
+          # 7z -mx=3 is 8x faster than 7z -mx=5, but generates 20% bigger 
+          # So looks that -mx=3 is the best option
+          time 7z a -t7z -mx=3 czkawka_all.7z \
+            linux_czkawka_cli_${{ env.ARCHNAME }} \
+            linux_czkawka_gui_${{ env.ARCHNAME }} \
+            linux_krokiet_${{ env.ARCHNAME }} \
+            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
+            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+
+      - name: Store
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
+          path: |
+            czkawka_all.7z
+
+      - name: Release
+        if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "Nightly"
+          files: |
+            linux_czkawka_cli_${{ env.ARCHNAME }}
+            linux_czkawka_gui_${{ env.ARCHNAME }}
+            linux_krokiet_${{ env.ARCHNAME }}
+            linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
+            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+          token: ${{ secrets.PAT_REPOSITORY }}
+
+  # Some dependencies requires ubuntu 24.04
+  linux-all-extra:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup env
+        run: |
+          ARCHNAME=$([ "${{ runner.arch }}" = "ARM64" ] && echo arm64 || echo x86_64)
+          echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
+
+      - name: Install basic libraries
+        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg libgtk-4-dev p7zip-full -y
+
+      - name: Setup rust version
+        run: rustup default 1.92.0
+
+      - name: Build Release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          sed -i 's/#lto = /lto = /g' Cargo.toml
+          sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
+          
+          echo "VERS=release" >> $GITHUB_ENV
           
           cargo build --release --features "heif,libraw"
           mv target/release/czkawka_cli linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
@@ -66,15 +146,6 @@ jobs:
           
           echo "VERS=debug" >> $GITHUB_ENV
           
-          cargo build --profile fastci
-          mv target/fastci/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
-          mv target/fastci/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
-          mv target/fastci/krokiet linux_krokiet_${{ env.ARCHNAME }}
-          cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software" --profile fastci
-          mv target/fastci/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
-          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software" --profile fastci
-          mv target/fastci/krokiet linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
-          
           cargo build --features "heif,libraw" --profile fastci
           mv target/fastci/czkawka_cli linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
           mv target/fastci/czkawka_gui linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
@@ -90,21 +161,16 @@ jobs:
           # 7z -mx=3 is 8x faster than 7z -mx=5, but generates 20% bigger 
           # So looks that -mx=3 is the best option
           time 7z a -t7z -mx=3 czkawka_all.7z \
-            linux_czkawka_cli_${{ env.ARCHNAME }} \
-            linux_czkawka_gui_${{ env.ARCHNAME }} \
-            linux_krokiet_${{ env.ARCHNAME }} \
             linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }} \
             linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
 
       - name: Store
         uses: actions/upload-artifact@v4
         with:
-          name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
+          name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}-heif-libraw
           path: |
             czkawka_all.7z
 
@@ -114,15 +180,10 @@ jobs:
         with:
           tag_name: "Nightly"
           files: |
-            linux_czkawka_cli_${{ env.ARCHNAME }}
-            linux_czkawka_gui_${{ env.ARCHNAME }}
-            linux_krokiet_${{ env.ARCHNAME }}
             linux_czkawka_cli_heif_raw_${{ env.ARCHNAME }}
             linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_${{ env.ARCHNAME }}
-            linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}
 
@@ -214,8 +275,8 @@ jobs:
             linux_krokiet_32bit
 
   linux-stability:
-    if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is really time consumig
-    runs-on: ubuntu-22.04
+    if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is really time consuming
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 

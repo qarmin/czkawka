@@ -635,30 +635,30 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
     let bitrate = properties.audio_bitrate().unwrap_or(0);
 
     if let Some(tag) = tagged_file.primary_tag() {
-        track_title = tag.get_string(&ItemKey::TrackTitle).unwrap_or_default().to_string();
-        track_artist = tag.get_string(&ItemKey::TrackArtist).unwrap_or_default().to_string();
-        year = tag.get_string(&ItemKey::Year).unwrap_or_default().to_string();
-        genre = tag.get_string(&ItemKey::Genre).unwrap_or_default().to_string();
+        track_title = tag.get_string(ItemKey::TrackTitle).unwrap_or_default().to_string();
+        track_artist = tag.get_string(ItemKey::TrackArtist).unwrap_or_default().to_string();
+        year = tag.get_string(ItemKey::Year).unwrap_or_default().to_string();
+        genre = tag.get_string(ItemKey::Genre).unwrap_or_default().to_string();
     }
 
     for tag in tagged_file.tags() {
         if track_title.is_empty()
-            && let Some(tag_value) = tag.get_string(&ItemKey::TrackTitle)
+            && let Some(tag_value) = tag.get_string(ItemKey::TrackTitle)
         {
             track_title = tag_value.to_string();
         }
         if track_artist.is_empty()
-            && let Some(tag_value) = tag.get_string(&ItemKey::TrackArtist)
+            && let Some(tag_value) = tag.get_string(ItemKey::TrackArtist)
         {
             track_artist = tag_value.to_string();
         }
         if year.is_empty()
-            && let Some(tag_value) = tag.get_string(&ItemKey::Year)
+            && let Some(tag_value) = tag.get_string(ItemKey::Year)
         {
             year = tag_value.to_string();
         }
         if genre.is_empty()
-            && let Some(tag_value) = tag.get_string(&ItemKey::Genre)
+            && let Some(tag_value) = tag.get_string(ItemKey::Genre)
         {
             genre = tag_value.to_string();
         }

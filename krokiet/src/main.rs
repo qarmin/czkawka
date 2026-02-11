@@ -11,6 +11,7 @@ use std::sync::atomic::AtomicBool;
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::basic_gui_cli::process_cli_args;
 use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
+use czkawka_core::common::image::register_image_decoding_hooks;
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
 use file_actions::connect_clean_exif::connect_clean;
@@ -78,6 +79,7 @@ mod test_common;
 slint::include_modules!();
 
 fn main() {
+    register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
 
