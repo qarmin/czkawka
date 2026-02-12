@@ -50,11 +50,13 @@ rodio = { version = "0.21.1", default-features = false, features = ["playback", 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
 #slint-build = { git = "https://github.com/slint-ui/slint.git" }
-slint-build = "1.15.0"
+slint-build = "1.15"
+winresource = "0.1"
 
 [features]
 default = ["winit_femtovg", "winit_software"]
 audio = ["rodio"]
+add_windows_icon = []
 skia_opengl = ["slint/renderer-skia-opengl"]
 skia_vulkan = ["slint/renderer-skia-vulkan"]
 software = ["slint/renderer-software"]

@@ -1,0 +1,10 @@
+[package]
+name = "add_icon_exe"
+version = "0.1.0"
+edition = "2021"
+authors = ["czkawka <noreply@example.com>"]
+description = "Small helper to embed a PNG icon into a Windows PE executable using editpe"
+license = "MIT"
+
+[dependencies]
+editpe = "0.2.1"

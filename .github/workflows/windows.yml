@@ -17,7 +17,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt update || true;sudo apt install -y mingw-w64 mingw-w64-x86-64-dev
+          sudo apt update || true
+          sudo apt install -y mingw-w64 mingw-w64-x86-64-dev wget wget2 curl wine || true
 
       - name: Setup rust version
         run: |
@@ -31,6 +32,8 @@ jobs:
           sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
+          cargo build --release --target x86_64-pc-windows-gnu --bin krokiet --features "add_windows_icon"
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_with_icon.exe
 
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -39,11 +42,14 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           cargo build --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux.exe
+          cargo build --target x86_64-pc-windows-gnu --bin krokiet --features "add_windows_icon"
+          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux_with_icon.exe
 
       - name: Pack with 7z
         run: |
           time 7z a -t7z -mx=3 czkawka_all.7z \
-            windows_krokiet_on_linux.exe
+            windows_krokiet_on_linux.exe \
+            windows_krokiet_on_linux_with_icon.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -60,6 +66,7 @@ jobs:
           tag_name: "Nightly"
           files: |
             windows_krokiet_on_linux.exe
+            windows_krokiet_on_linux_with_icon.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
   # Skia not provides support for gnu toolchain, which is easy to cross-compile - https://github.com/rust-skia/rust-skia/issues/345
@@ -82,8 +89,12 @@ jobs:
           powershell -Command "(Get-Content Cargo.toml) -replace '#codegen-units ', 'codegen-units ' | Set-Content Cargo.toml"
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
           mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
+          cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software,add_windows_icon"
+          mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl_with_icon.exe
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/release/krokiet.exe windows_krokiet_on_windows_skia_vulkan.exe
+          cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,add_windows_icon"
+          mv target/release/krokiet.exe windows_krokiet_on_windows_skia_vulkan_with_icon.exe
 
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -94,6 +105,12 @@ jobs:
           powershell -Command "(Get-Content Cargo.toml) -replace '^opt-level = 3 # OPT PACKAGES', '#opt-level = 3 # OPT PACKAGES' | Set-Content Cargo.toml"
           cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
           mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
+          cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software,add_windows_icon"
+          mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_opengl_with_icon.exe
+          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
+          mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_vulkan.exe
+          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,add_windows_icon"
+          mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_vulkan_with_icon.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -102,6 +119,8 @@ jobs:
           path: |
             windows_krokiet_on_windows_skia_opengl.exe
             windows_krokiet_on_windows_skia_vulkan.exe
+            windows_krokiet_on_windows_skia_opengl_with_icon.exe
+            windows_krokiet_on_windows_skia_vulkan_with_icon.exe
           if-no-files-found: error
 
       - name: Release
@@ -112,6 +131,8 @@ jobs:
           files: |
             windows_krokiet_on_windows_skia_opengl.exe
             windows_krokiet_on_windows_skia_vulkan.exe
+            windows_krokiet_on_windows_skia_opengl_with_icon.exe
+            windows_krokiet_on_windows_skia_vulkan_with_icon.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_12:
@@ -123,13 +144,14 @@ jobs:
       - name: Install additional dependencies
         # gio is for the build script
         run: |
-          dnf install curl wget2 unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme -y && dnf clean all -y
+          dnf install curl wget2 wget unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme wine -y && dnf clean all -y
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           source "$HOME/.cargo/env"
           rustup default 1.92.0
           rustup target add x86_64-pc-windows-gnu
           
           mkdir -p package
+          mkdir -p package_with_icon_tmp
 
       - name: Cross compile for Windows - Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -139,6 +161,10 @@ jobs:
           cargo build --target=x86_64-pc-windows-gnu --release --locked
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+          
+          cargo build --target=x86_64-pc-windows-gnu --release --locked --features "add_windows_icon"
+          cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package_with_icon_tmp/
+          cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package_with_icon_tmp/
 
       - name: Cross compile for Windows - Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -148,6 +174,10 @@ jobs:
           cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package/
+          
+          cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci --features "add_windows_icon"
+          cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package_with_icon_tmp/
+          cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package_with_icon_tmp/
 
       - name: Package
         run: |
@@ -176,6 +206,10 @@ jobs:
           unzip libGL.zip
           mv libEGL.dll package/
           mv libGLESv2.dll package/
+          
+          cp -r package package_with_icon
+          rm package_with_icon/*.exe
+          cp package_with_icon_tmp/* package_with_icon/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -183,12 +217,17 @@ jobs:
           name: czkawka-windows-${{ github.sha }}-4.12
           path: |
             ./package
+            ./package_with_icon
           if-no-files-found: error
 
       - name: Prepare files to release
         run: |
           cd package
           zip -r ../windows_czkawka_gui_gtk_412.zip .
+          cd ..
+          
+          cd package_with_icon
+          zip -r ../windows_czkawka_gui_gtk_412_with_icon.zip .
           cd ..
 
       - name: Release
@@ -198,4 +237,5 @@ jobs:
           tag_name: "Nightly"
           files: |
             windows_czkawka_gui_gtk_412.zip
+            windows_czkawka_gui_gtk_412_with_icon.zip
           token: ${{ secrets.PAT_REPOSITORY }}

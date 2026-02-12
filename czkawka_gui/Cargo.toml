@@ -46,6 +46,9 @@ rand = "0.10.0"
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["combaseapi", "objbase", "shobjidl_core", "windef", "winerror", "wtypesbase", "winuser"] }
 
+[build-dependencies]
+winresource = "0.1"
+
 [features]
 default = []
 heif = ["czkawka_core/heif"]
@@ -54,6 +57,7 @@ libavif = ["czkawka_core/libavif"]
 # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
 # No-op on other OSes, it is slower and provides less helpful error messages
 xdg_portal_trash = ["czkawka_core/xdg_portal_trash"]
+add_windows_icon = []
 
 [lints]
 workspace = true
