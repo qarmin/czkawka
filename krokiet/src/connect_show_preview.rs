@@ -183,7 +183,7 @@ fn draw_crop_rectangle_on_image(
                 return buf;
             }
 
-            let thickness = (width.max(height) / 150 / images_in_thumbnails_line).max(3);
+            let thickness = (width.max(height) / 100 * images_in_thumbnails_line).max(2);
 
             for side in [-1, 1] {
                 for th in 0..(thickness as i32 / 2) {
