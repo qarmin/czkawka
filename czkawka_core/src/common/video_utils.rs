@@ -5,7 +5,6 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use blake3::Hasher;
-use ffprobe::ffprobe;
 use image::{GenericImage, RgbImage};
 use serde::{Deserialize, Serialize};
 
@@ -13,6 +12,7 @@ use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
 use crate::common::process_utils::disable_windows_console_window;
 use crate::common::progress_stop_handler::check_if_stop_received;
 use crate::flc;
+use crate::helpers::ffprobe::ffprobe;
 
 pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
 
