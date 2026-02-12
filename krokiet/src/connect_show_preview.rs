@@ -1,17 +1,19 @@
 use std::fs::metadata;
 use std::path::Path;
-
+use std::sync::{Arc, Mutex};
 use czkawka_core::common::image::{check_if_can_display_image, get_dynamic_image_from_path};
 use czkawka_core::helpers::debug_timer::Timer;
 use fast_image_resize::{FilterType, ResizeAlg, ResizeOptions, Resizer};
 use image::{DynamicImage, Rgba, RgbaImage};
 use log::{debug, error};
 use slint::ComponentHandle;
-
+use czkawka_core::tools::video_optimizer::VideoOptimizerParameters;
 use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
+use crate::shared_models::SharedModels;
+
 pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 
-pub(crate) fn connect_show_preview(app: &MainWindow) {
+pub(crate) fn connect_show_preview(app: &MainWindow, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
     app.global::<Callabler>()
         .on_load_image_preview(move |image_path, crop_left, crop_top, crop_right, crop_bottom, orig_width, orig_height| {
@@ -48,6 +50,9 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
 
             let path = Path::new(image_path.as_str());
 
+            let images_in_thumbnails_line = if active_tab == ActiveTab::VideoOptimizer {
+                shared_models.lock().expect("Failed to lock model mutex").shared_video_optimizer_state.as_ref().map_or(1, |state| state.get_params().get_generate_number_of_items_in_thumbnail_grid())} else {1};
+
             // Looks that resizing image before sending it to GUI works better that letting Slint do it automatically
             if let Some((mut timer, img)) = load_image(path) {
                 let mut img_to_use = if img.width() > 1024 || img.height() > 1024 {
@@ -76,7 +81,7 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
                 };
 
                 if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 && orig_width > 0 && orig_height > 0 {
-                    img_to_use = draw_crop_rectangle_on_image(img_to_use, crop_left, crop_top, crop_right, crop_bottom, orig_width as u32, orig_height as u32);
+                    img_to_use = draw_crop_rectangle_on_image(img_to_use, crop_left, crop_top, crop_right, crop_bottom, orig_width as u32, orig_height as u32, images_in_thumbnails_line);
                     timer.checkpoint("cropping image");
                 }
 
@@ -137,6 +142,7 @@ fn draw_crop_rectangle_on_image(
     crop_bottom: i32,
     original_width: u32,
     _original_height: u32,
+    images_in_thumbnails_line: u32
 ) -> ImageBufferRgba {
     let width = buf.width();
     let height = buf.height();
