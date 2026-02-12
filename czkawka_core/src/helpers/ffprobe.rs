@@ -7,8 +7,9 @@
 //!
 //!
 //!
-//! ```rust
-//! match ffprobe::ffprobe("path/to/video.mp4") {
+//! ```rust, no_run
+//! use czkawka_core::helpers::ffprobe::ffprobe;
+//! match ffprobe("path/to/video.mp4") {
 //!    Ok(info) => {
 //!        dbg!(info);
 //!    },
