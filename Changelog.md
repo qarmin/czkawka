@@ -86,6 +86,8 @@
 - Windows prebuild binaries, bundles now libEGL and libGLES, which fixes running gtk 4.12 binaries on some os, so gtk 4.6 binaries are no longer provided
 - Krokiet Mac OpenGL binaries are deprecated (due to Apple’s broken and outdated OpenGL driver), and Skia Vulkan binaries are now provided and recommended for use.
 - Linux binaries are now built on Ubuntu 24.04, to be able to use newer libheif-rs with several improvements(e.g. reading images with pixels other than rgb8)
+- Windows binaries, now set stack size to 8MB aligning with Linux, which fixes stack overflows in debug builds
+- Windows binaries, now contains builtin icons
 
 ## Version 10.0.0 - 18.08.2025r
 ### Breaking changes
