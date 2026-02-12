@@ -135,7 +135,7 @@ fn main() {
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
     connect_add_remove_directories(&app);
-    connect_show_preview(&app);
+    connect_show_preview(&app, Arc::clone(&shared_models));
     connect_translations(&app);
     connect_changing_settings_preset(&app);
     connect_select(&app);

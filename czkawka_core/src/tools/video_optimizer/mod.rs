@@ -128,16 +128,12 @@ pub enum VideoOptimizerParameters {
 
 impl VideoOptimizerParameters {
     pub fn get_generate_number_of_items_in_thumbnail_grid(&self) -> u8 {
-        let generate_thumbnail_grid_instead_of_single =  match self {
+        let generate_thumbnail_grid_instead_of_single = match self {
             Self::VideoTranscode(params) => params.generate_thumbnail_grid_instead_of_single,
             Self::VideoCrop(params) => params.generate_thumbnail_grid_instead_of_single,
         };
 
-        if generate_thumbnail_grid_instead_of_single {
-            3
-        } else {
-            1
-        }
+        if generate_thumbnail_grid_instead_of_single { 3 } else { 1 }
     }
 }
 
