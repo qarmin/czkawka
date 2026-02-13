@@ -435,7 +435,7 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
             } = transcode_args;
 
             let excluded_codecs_vec = excluded_codecs.map_or_else(
-                || vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
+                || vec!["hevc".to_string(), "h265".to_string(), "av1".to_string(), "vp9".to_string()],
                 |s| s.split(',').map(|c| c.trim().to_string()).collect(),
             );
 

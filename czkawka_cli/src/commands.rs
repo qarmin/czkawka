@@ -1110,7 +1110,7 @@ fn parse_checking_method_same_music(src: &str) -> Result<CheckingMethod, &'stati
 fn parse_video_codec(src: &str) -> Result<VideoCodec, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "h264" => Ok(VideoCodec::H264),
-        "h265" => Ok(VideoCodec::H265),
+        "h265" | "hevc" => Ok(VideoCodec::H265),
         "av1" => Ok(VideoCodec::Av1),
         "vp9" => Ok(VideoCodec::Vp9),
         _ => Err("Couldn't parse the video codec (allowed: h264, h265, av1, vp9)"),

@@ -12,7 +12,6 @@ use serde::{Deserialize, Serialize};
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
-use crate::common::video_utils::THUMBNAIL_GRID_TILES_PER_SIDE;
 use crate::flc;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -49,7 +48,7 @@ impl std::str::FromStr for VideoCodec {
     fn from_str(codec: &str) -> Result<Self, Self::Err> {
         match codec.to_lowercase().as_str() {
             "h264" | "libx264" => Ok(Self::H264),
-            "h265" | "libx265" => Ok(Self::H265),
+            "h265" | "hevc" | "libx265" => Ok(Self::H265),
             "av1" | "libaom-av1" => Ok(Self::Av1),
             "vp9" | "libvpx-vp9" => Ok(Self::Vp9),
             _ => Err(flc!("core_unknown_codec", codec = codec)),
@@ -179,7 +178,7 @@ impl VideoTranscodeParams {
 impl Default for VideoTranscodeParams {
     fn default() -> Self {
         Self {
-            excluded_codecs: vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
+            excluded_codecs: vec!["hevc".to_string(), "h265".to_string(), "av1".to_string(), "vp9".to_string()],
             generate_thumbnails: false,
             thumbnail_video_percentage_from_start: 10,
             generate_thumbnail_grid_instead_of_single: false,

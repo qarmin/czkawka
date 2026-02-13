@@ -422,7 +422,7 @@ pub(crate) fn default_video_optimizer_video_codec() -> String {
     "h265".to_string()
 }
 pub(crate) fn default_video_optimizer_excluded_codecs() -> String {
-    "h265,av1,vp9".to_string()
+    "h265,hevc,av1,vp9".to_string()
 }
 pub(crate) fn default_video_optimizer_video_quality() -> u32 {
     23

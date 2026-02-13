@@ -446,7 +446,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_video_thumbnails_generate_grid(custom_settings.video_thumbnails_generate_grid);
     settings.set_video_thumbnails_grid_tiles_per_side(custom_settings.video_thumbnails_grid_tiles_per_side as f32);
     settings.set_video_thumbnails_grid_tiles_per_side_min(2.0);
-    settings.set_video_thumbnails_grid_tiles_per_side_max(10.0);
+    settings.set_video_thumbnails_grid_tiles_per_side_max(6.0);
 
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
