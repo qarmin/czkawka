@@ -7,19 +7,19 @@ window_compare_images = Resimleri Karşılaştır
 general_ok_button = Tamam
 general_close_button = Kapat
 # Krokiet info dialog
-krokiet_info_title = Krokiet - Yeni Versiyon Czkawka
+krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-    Krokiet, yeni, geliştirilmiş, daha hızlı ve daha az hatalı Czkawka GTK GUI sürümüdür!
+    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
     
-    Bağımsız yapısı sayesinde, çalıştırması çok daha kolaydır ve sistem değişikliklerine ve paket sürümü güncellemelerine karşı daha dirençlidir.
+    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
     
-    Video karşılaştırma modunda ön izlemeler, dosya taşıma/kopyalama/silme ilerlemesi ve gelişmiş sıralama seçenekleri gibi Czkawka'da bulunmayan birçok özelliği içerir.
+    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
     
-    Deneyin ve farkı görün!
+    Give it a try and see the difference!
     
-    Czkawka hala hata düzeltmeleri ve küçük güncellemeler alacak, ancak tüm yeni özellikler yalnızca Krokiet'te uygulanacaktır.
+    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
     
-    PS. Bu mesaj yalnızca bir kez görünmeli, ancak tekrar görünürse CZKAWKA_DONT_ANNOY_ME ortam değişkenini herhangi bir boş olmayan değere ayarlayın.
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = Başlık
 music_artist_checkbox = Sanatçı
@@ -162,6 +162,8 @@ main_check_box_broken_files_audio = Ses
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arşiv
 main_check_box_broken_files_image = Resim
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
 check_button_general_same_size = Aynı boyutu yok say
 check_button_general_same_size_tooltip = Sonuçlarda aynı boyutta olan dosyaları yoksay - genellikle bunlar bire bir kopyalardır
 main_label_size_bytes_tooltip = Taramada kullanılacak dosyaların boyutu
@@ -195,8 +197,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = "Hariç Tutulacak Klasörler" listesine yeni bir dizin ekler.
 upper_remove_excluded_button_tooltip = Seçili dizini "Hariç Tutulacak Klasörler" listesinden kaldırır.
 upper_notebook_items_configuration = Öğe Yapılandırması
-upper_notebook_excluded_directories = Hariç Tutulan Dizinler
-upper_notebook_included_directories = Aranacak Dizinler
+upper_notebook_excluded_directories = Excluded Paths
+upper_notebook_included_directories = Included Paths
 upper_allowed_extensions_tooltip =
     İzin verilen uzantılar virgülle ayrılmalıdır (varsayılan olarak her uzantı kullanılır).
     
@@ -209,8 +211,8 @@ upper_excluded_extensions_tooltip =
     
     İzin verilen ve devre dışı bırakılan uzantılar kullanıldığında, bu daha yüksek önceliğe sahiptir, bu nedenle dosya kontrol edilmeyecektir.
 upper_excluded_items_tooltip =
-    Hariç tutulan öğeler * joker karakterini içermeli ve virgülle ayrılmalıdır.
-    Bu işlev, Hariç Tutulan Dizinlerden daha yavaştır, bu yüzden dikkatli kullanın.
+    Excluded items must contain * wildcard and should be separated by commas.
+    This is slower than Excluded Paths, so use it carefully.
 upper_excluded_items = Hariç Tutulan Öğeler:
 upper_allowed_extensions = İzin Verilen Uzantılar:
 upper_excluded_extensions = Devre Dışı Uzantılar:
@@ -218,6 +220,8 @@ upper_excluded_extensions = Devre Dışı Uzantılar:
 popover_select_all = Tümünü seç
 popover_unselect_all = Tümünün seçimini kaldır
 popover_reverse = Seçimi Ters Çevir
+popover_select_all_except_shortest_path = Select all except shortest path
+popover_select_all_except_longest_path = Select all except longest path
 popover_select_all_except_oldest = En eski olan hariç hepsini seç
 popover_select_all_except_newest = En yeni olan hariç hepsini seç
 popover_select_one_oldest = En eski olanı seç

@@ -7,19 +7,19 @@ window_compare_images = مقارنة الصور
 general_ok_button = حسناً
 general_close_button = أغلق
 # Krokiet info dialog
-krokiet_info_title = تقديم Krokiet - النسخة الجديدة من Czkawka
+krokiet_info_title = تقديم Krokiet - نسخة جديدة من Czkawka
 krokiet_info_message =
-    كروكييت هو الإصدار الجديد والمحسّن والأسرع والأقل عرضة للأخطاء من Czkawka GTK!
+    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
     
-    بكونه ذاتي المحتوى، فهو أسهل في التشغيل وأكثر مقاومة للتغييرات في النظام وتحديثات إصدار الحزم.
+    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
     
-    يحتوي على العديد من الميزات غير المتوفرة في Czkawka، مثل الصور المصغرة في وضع مقارنة الفيديو، وتقدم عملية نقل/نسخ/حذف الملفات وخيارات الفرز الممتدة.
+    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
     
-    جربه بنفسك وشاهد الفرق!
+    Give it a try and see the difference!
     
-    سيستمر Czkawka في تلقي إصلاحات الأخطاء والتحديثات الطفيفة، ولكن جميع الميزات الجديدة ستُنفَّذ فقط في كروكييت.
+    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
     
-    ملاحظة: يجب أن يكون هذا الرسالة مرئياً مرة واحدة فقط، ولكن إذا ظهر مرة أخرى، قم بتعيين متغير البيئة CZKAWKA_DONT_ANNOY_ME إلى أي قيمة غير فارغة.
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = العنوان
 music_artist_checkbox = الفنان
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = الصوت
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = أرشيف
 main_check_box_broken_files_image = صورة
+main_check_box_broken_files_video = فيديو
+main_check_box_broken_files_video_tooltip = يستخدم ffmpeg/ffprobe للتحقق من صحة ملفات الفيديو. بطيء جداً وقد يكتشف الأخطاء الضوئية حتى لو كان الملف يعمل بشكل جيد.
 check_button_general_same_size = تجاهل نفس الحجم
 check_button_general_same_size_tooltip = تجاهل الملفات ذات الحجم المتطابق في النتائج - عادة ما تكون هذه المكررة 1:1
 main_label_size_bytes_tooltip = حجم الملفات التي سيتم استخدامها في المسح
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = إضافة دليل ليتم استبعاده في البحث.
 upper_remove_excluded_button_tooltip = حذف الدليل من المستبعد.
 upper_notebook_items_configuration = تكوين العناصر
-upper_notebook_excluded_directories = المجلدات المستبعدة
-upper_notebook_included_directories = المجلدات المضمنة
+upper_notebook_excluded_directories = المسارات المستبعدة
+upper_notebook_included_directories = المسارات المضمنة
 upper_allowed_extensions_tooltip =
     يجب أن تكون الملحقات المسموح بها مفصولة بفواصل (بشكل افتراضي كلها متاحة).
     
@@ -193,8 +195,8 @@ upper_excluded_extensions_tooltip =
     
     عند استخدام الملحقات المسموح بها والمعطلة على حد سواء، هذه واحدة لها أولوية أعلى، لذلك لن يتم تحديد الملف.
 upper_excluded_items_tooltip =
-    العناصر المخزنة يجب أن تحتوي على نجمة (*) ك Placeholder وdevide بينها بالنقاط وال逗号。
-    هذا أslower than Directories محظورة مباشرة، لذا استخدمه بعناية.
+    Excluded items must contain * wildcard and should be separated by commas.
+    This is slower than Excluded Paths, so use it carefully.
 upper_excluded_items = البنود المستثناة:
 upper_allowed_extensions = الإضافات المسموح بها:
 upper_excluded_extensions = الملحقات المعطّلة:
@@ -202,6 +204,8 @@ upper_excluded_extensions = الملحقات المعطّلة:
 popover_select_all = حدد الكل
 popover_unselect_all = إلغاء تحديد الكل
 popover_reverse = الاختيار العكسي
+popover_select_all_except_shortest_path = حدد الكل باستثناء أقصر مسار
+popover_select_all_except_longest_path = حدد الكل باستثناء أطول مسار
 popover_select_all_except_oldest = حدد الكل باستثناء الأقدم
 popover_select_all_except_newest = حدد الكل باستثناء الأحدث
 popover_select_one_oldest = حدد أقدم واحد

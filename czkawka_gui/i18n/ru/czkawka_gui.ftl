@@ -7,19 +7,19 @@ window_compare_images = Сравнить изображения
 general_ok_button = ОК
 general_close_button = Закрыть
 # Krokiet info dialog
-krokiet_info_title = Представляем Krokiet - Новая версия Czkawka
+krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-    Крокиет – это новая, улучшенная, более быстрая и менее подверженная ошибкам версия Czkawka GTK!
+    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
     
-    Будучи самодостаточной, она гораздо проще в установке и более устойчива к изменениям системы и обновлениям версии пакетов.
+    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
     
-    В ней включено множество функций, недоступных в Czkawka, таких как миниатюры в режиме сравнения видео, прогресс перемещения/копирования/удаления файлов и расширенные возможности сортировки.
+    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
     
-    Попробуйте и убедитесь в разнице!
+    Give it a try and see the difference!
     
-    Czkawka продолжит получать исправления ошибок и небольшие обновления, но все новые функции будут реализованы только в Krokiet.
+    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
     
-    ПС. Это сообщение должно быть видно только один раз, но если оно снова появится, установите переменную среды CZKAWKA_DONT_ANNOY_ME на любое не пустое значение.
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = Заголовок
 music_artist_checkbox = Исполнитель
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Звук
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Архивировать
 main_check_box_broken_files_image = Изображение
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
 check_button_general_same_size = Игнорировать одинаковый размер
 check_button_general_same_size_tooltip = Игнорировать файлы с одинаковым размером в результатах - обычно это 1:1 дубликаты
 main_label_size_bytes_tooltip = Размер файлов, которые будут просканированы
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Добавить каталог, исключаемый из поиска.
 upper_remove_excluded_button_tooltip = Убрать каталог из исключенных.
 upper_notebook_items_configuration = Параметры поиска
-upper_notebook_excluded_directories = Исключённые каталоги
-upper_notebook_included_directories = Включённые каталоги
+upper_notebook_excluded_directories = Excluded Paths
+upper_notebook_included_directories = Included Paths
 upper_allowed_extensions_tooltip =
     Включаемые расширения должны быть разделены запятыми (по умолчанию ищутся файлы с любыми расширениями).
     
@@ -193,8 +195,8 @@ upper_excluded_extensions_tooltip =
     
     При использовании разрешенных и отключенных расширений этот файл имеет более высокий приоритет, поэтому файл не будет проверяться.
 upper_excluded_items_tooltip =
-    Исключаемые элементы должны содержать маску «*» и быть разделены запятыми.
-    Это медленнее, чем «Исключённые каталоги», поэтому используйте осторожно.
+    Excluded items must contain * wildcard and should be separated by commas.
+    This is slower than Excluded Paths, so use it carefully.
 upper_excluded_items = Исключённые элементы:
 upper_allowed_extensions = Допустимые расширения:
 upper_excluded_extensions = Отключенные расширения:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Отключенные расширения:
 popover_select_all = Выбрать все
 popover_unselect_all = Снять выделение
 popover_reverse = Обратить выделение
+popover_select_all_except_shortest_path = Select all except shortest path
+popover_select_all_except_longest_path = Select all except longest path
 popover_select_all_except_oldest = Выделить все, кроме старых
 popover_select_all_except_newest = Выделить все, кроме новых
 popover_select_one_oldest = Выбрать один старый

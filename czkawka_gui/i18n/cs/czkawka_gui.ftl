@@ -7,19 +7,19 @@ window_compare_images = Porovnat obrázky
 general_ok_button = Ok
 general_close_button = Zavřít
 # Krokiet info dialog
-krokiet_info_title = Představujeme Krokiet - Nová verze Czkawky
+krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-    Krokiet je nový, vylepšený, rychlejší a méně chybný verze Czkawka GTK!
+    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
     
-    Díky tomu, že je samoobsahový, je mnohem snazší spouštět a odolnější vůči systémovým změnám a aktualizacím verzí balíčků.
+    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
     
-    Obsahuje mnoho funkcí, které nejsou dostupné v Czkawce, jako jsou miniatury v režimu porovnání videa, průběh přesunu/kopírování/smazání souborů a rozšířené možnosti třídění.
+    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
     
-    Vyzkoušejte to a uvidíte rozdíl!
+    Give it a try and see the difference!
     
-    Czkawka bude stále dostávat opravy chyb a menší aktualizace, ale všechny nové funkce budou implementovány pouze v Krokiet.
+    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
     
-    PS. Tato zpráva by měla být viditelná pouze jednou, ale pokud se objeví znovu, nastavte proměnnou CZKAWKA_DONT_ANNOY_ME na libovolnou neprázdnou hodnotu.
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = Hlava 1 – Celkem
 music_artist_checkbox = Umělec
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Zvuk
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archivovat
 main_check_box_broken_files_image = Obrázek
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
 check_button_general_same_size = Ignorovat stejnou velikost
 check_button_general_same_size_tooltip = Ignorovat soubory se stejnou velikostí ve výsledcích - obvykle se jedná o 1:1 duplicitní
 main_label_size_bytes_tooltip = Velikost souborů, které budou použity při skenování
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Přidat adresář, který bude při hledání vyloučen.
 upper_remove_excluded_button_tooltip = Odstranit adresář z vyloučení.
 upper_notebook_items_configuration = Konfigurace položek
-upper_notebook_excluded_directories = Vyloučené adresáře
-upper_notebook_included_directories = Zahrnuté adresáře
+upper_notebook_excluded_directories = Excluded Paths
+upper_notebook_included_directories = Included Paths
 upper_allowed_extensions_tooltip =
     Povolené přípony musí být odděleny čárkami (ve výchozím nastavení jsou všechny k dispozici).
     
@@ -193,8 +195,8 @@ upper_excluded_extensions_tooltip =
     
     Při používání povolených i zakázaných přípon, má tato vyšší prioritu, takže soubor nebude zaškrtnut.
 upper_excluded_items_tooltip =
-    Vyloučené položky musí obsahovat * zástupné znaky a měly by být odděleny čárkami.
-    To je pomalejší než vyloučené adresáře, proto je používáme opatrně.
+    Excluded items must contain * wildcard and should be separated by commas.
+    This is slower than Excluded Paths, so use it carefully.
 upper_excluded_items = Vyloučené položky:
 upper_allowed_extensions = Povolená rozšíření:
 upper_excluded_extensions = Zakázané rozšíření:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Zakázané rozšíření:
 popover_select_all = Vybrat vše
 popover_unselect_all = Odznačit vše
 popover_reverse = Reverzní výběr
+popover_select_all_except_shortest_path = Select all except shortest path
+popover_select_all_except_longest_path = Select all except longest path
 popover_select_all_except_oldest = Vybrat vše kromě nejstarších
 popover_select_all_except_newest = Vybrat vše kromě nejnovějších
 popover_select_one_oldest = Vyberte jeden nejstarší

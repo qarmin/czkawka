@@ -7,19 +7,19 @@ window_compare_images = Porównywanie Obrazów
 general_ok_button = Ok
 general_close_button = Zamknij
 # Krokiet info dialog
-krokiet_info_title = Wprowadzenie do Krokieta - Nowa Wersja Czkawki
+krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-    Krokiet to nowa, ulepszona, szybsza i mniej błędogenna wersja Czkawki GTK!
+    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
     
-    Dzięki wbudowanym zależnościom jest znacznie łatwiejszy w konfiruacji i bardziej odporny na zmiany systemu oraz aktualizacje pakietów systemowych.
+    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
     
-    Zawiera wiele funkcji niedostępnych w Czkawce, takich jak miniaturki w trybie porównywania wideo, wyświetlanie postępu przesyłania/kopiowania/usuwania plików oraz rozszerzone opcje sortowania.
+    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
     
-    Wypróbuj go i zobacz różnicę!
+    Give it a try and see the difference!
     
-    Czkawka nadal będzie otrzymywać poprawki błędów i drobne aktualizacje, ale wszystkie nowe funkcje będą implementowane tylko w Krokietcie.
+    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
     
-    PS. Ten komunikat powinien być widoczny tylko raz, ale jeśli pojawi się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną wartość niepustą.
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Dźwięk
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archiwa
 main_check_box_broken_files_image = Obraz
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
 check_button_general_same_size = Ignoruj identyczny rozmiar
 check_button_general_same_size_tooltip = Ignoruj pliki o identycznym rozmiarze w wynikach - zazwyczaj są to duplikaty 1:1
 main_label_size_bytes_tooltip = Rozmiar plików które będą zawarte przy przeszukiwaniu
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Dodaje wybrany folder do ignorowanych.
 upper_remove_excluded_button_tooltip = Usuwa zaznaczony folder z ignorowanych.
 upper_notebook_items_configuration = Konfiguracja Skanowania
-upper_notebook_excluded_directories = Ignorowane Foldery
-upper_notebook_included_directories = Przeszukiwane Foldery
+upper_notebook_excluded_directories = Excluded Paths
+upper_notebook_included_directories = Included Paths
 upper_allowed_extensions_tooltip =
     Dozwolone rozszerzenia muszą być oddzielone przecinkami (domyślnie wszystkie są dostępne).
     
@@ -193,8 +195,8 @@ upper_excluded_extensions_tooltip =
     
     Gdy używasz zarówno dozwolonych, jak i wyłączonych rozszerzeń, ten ma wyższy priorytet, więc plik nie zostanie sprawdzony.
 upper_excluded_items_tooltip =
-    Wykluczone elementy muszą zawierać znak * (który odpowiada za dowolny ciąg znaków) i powinny być oddzielone przecinkami.
-    Jest to wolniejszy sposób od zwykłego wykluczania katalogów, więc należy używać go ostrożnie.
+    Excluded items must contain * wildcard and should be separated by commas.
+    This is slower than Excluded Paths, so use it carefully.
 upper_excluded_items = Ignorowane Obiekty:
 upper_allowed_extensions = Dozwolone Rozszerzenia:
 upper_excluded_extensions = Wyłączone rozszerzenia:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Wyłączone rozszerzenia:
 popover_select_all = Zaznacz wszystko
 popover_unselect_all = Odznacz wszystko
 popover_reverse = Odwróć zaznaczenie
+popover_select_all_except_shortest_path = Select all except shortest path
+popover_select_all_except_longest_path = Select all except longest path
 popover_select_all_except_oldest = Zaznacz wszystkie oprócz najstarszego
 popover_select_all_except_newest = Zaznacz wszystkie oprócz najnowszego
 popover_select_one_oldest = Zaznacz jedno najstarsze
@@ -210,8 +214,6 @@ popover_select_custom = Własne zaznaczanie
 popover_unselect_custom = Własne odznaczanie
 popover_select_all_images_except_biggest = Zaznacz wszystkie oprócz największego
 popover_select_all_images_except_smallest = Zaznacz wszystkie oprócz najmniejszego
-popover_select_all_except_shortest_path = Zaznacz wszystkie oprócz najkrótszej ścieżki
-popover_select_all_except_longest_path = Zaznacz wszystkie oprócz najdłuższej ścieżki
 popover_custom_path_check_button_entry_tooltip =
     Zaznacza rekordy według ścieżki.
     

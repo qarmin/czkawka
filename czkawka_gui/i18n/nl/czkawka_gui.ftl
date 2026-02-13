@@ -7,19 +7,19 @@ window_compare_images = Vergelijk afbeeldingen
 general_ok_button = OK
 general_close_button = Afsluiten
 # Krokiet info dialog
-krokiet_info_title = Introductie van Krokiet - Nieuwe Versie van Czkawka
+krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-    Krokiet is de nieuwe, verbeterde, snellere en minder buggy versie van Czkawka GTK!
+    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
     
-    Omdat het zelfstandig is, is het veel gemakkelijker te draaien en meer bestand tegen systeemwijzigingen en pakketversie-updates.
+    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
     
-    Het bevat veel functies die niet beschikbaar zijn in Czkawka, zoals thumbnails in video vergelijkingsmodus, bestand verplaatsen/kopieëren/verwijderen voortgang en uitgebreide sorteeropties.
+    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
     
-    Probeer het uit en zie het verschil!
+    Give it a try and see the difference!
     
-    Czkawka zal nog steeds bugfixes en kleine updates ontvangen, maar alle nieuwe functies zullen alleen in Krokiet worden geïmplementeerd.
+    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
     
-    PS. Dit bericht zou alleen één keer zichtbaar moeten zijn, maar als het weer verschijnt, stel dan de CZKAWKA_DONT_ANNOY_ME omgeving variabele in op een niet-lege waarde.
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = Aanspreektitel
 music_artist_checkbox = Kunstenaar
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Geluid
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Archief
 main_check_box_broken_files_image = Afbeelding
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
 check_button_general_same_size = Negeer dezelfde grootte
 check_button_general_same_size_tooltip = Bestanden met identieke grootte in resultaten negeren - meestal zijn deze 1:1 duplicaten
 main_label_size_bytes_tooltip = Grootte van bestanden die zullen worden gebruikt in scan
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Voeg map toe om uitgesloten te worden in zoekopdracht.
 upper_remove_excluded_button_tooltip = Verwijder map van uitgesloten.
 upper_notebook_items_configuration = Artikelen configuratie
-upper_notebook_excluded_directories = Uitgesloten Mappen
-upper_notebook_included_directories = Inbegrepen Mappen
+upper_notebook_excluded_directories = Excluded Paths
+upper_notebook_included_directories = Included Paths
 upper_allowed_extensions_tooltip =
     Toegestane extensies moeten door komma's gescheiden worden (standaard zijn alle beschikbaar).
     
@@ -193,8 +195,8 @@ upper_excluded_extensions_tooltip =
     
     Wanneer gebruik wordt gemaakt van toegestane en uitgeschakelde extensies, heeft deze hogere prioriteit, dus het bestand zal niet worden gecontroleerd.
 upper_excluded_items_tooltip =
-    Uitgesloten items moeten * jokertekens bevatten en moeten gescheiden worden door komma's.
-    Dit is langzamer dan uitgesloten mappen, dus gebruik het zorgvuldig.
+    Excluded items must contain * wildcard and should be separated by commas.
+    This is slower than Excluded Paths, so use it carefully.
 upper_excluded_items = Uitgesloten artikelen:
 upper_allowed_extensions = Toegestane extensies:
 upper_excluded_extensions = Uitgeschakelde extensies:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Uitgeschakelde extensies:
 popover_select_all = Alles selecteren
 popover_unselect_all = Selectie ongedaan maken
 popover_reverse = Omgekeerde selectie
+popover_select_all_except_shortest_path = Select all except shortest path
+popover_select_all_except_longest_path = Select all except longest path
 popover_select_all_except_oldest = Alles selecteren behalve oudste
 popover_select_all_except_newest = Selecteer alles behalve nieuwste
 popover_select_one_oldest = Selecteer één oudste

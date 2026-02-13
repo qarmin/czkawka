@@ -7,19 +7,19 @@ window_compare_images = 이미지 비교
 general_ok_button = 확인
 general_close_button = 닫기
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - 새로운 버전의 Czkawka
+krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-    크로키에트는 Czkawka GTK GUI의 새로운, 개선된, 더 빠르고 버그가 적은 버전입니다!
+    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
     
-    자체 포함되어 있어 실행이 훨씬 쉽고 시스템 변경 및 패키지 버전 업데이트에 더 강합니다.
+    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
     
-    비디오 비교 모드에서 썸네일, 파일 이동/복사/삭제 진행률 및 확장된 정렬 옵션과 같이 Czkawka에는 없는 많은 기능이 포함되어 있습니다.
+    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
     
-    사용해 보고 차이점을 확인해 보세요!
+    Give it a try and see the difference!
     
-    Czkawka는 여전히 버그 수정 및 미세 업데이트를 받겠지만 모든 새로운 기능은 크로키에트에서만 구현됩니다.
+    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
     
-    PS. 이 메시지는 한 번만 표시되어야 하지만 다시 나타나면 CZKAWKA_DONT_ANNOY_ME 환경 변수를 비어 있는 값이 아닌 값으로 설정하세요.
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = 제목
 music_artist_checkbox = 아티스트
@@ -157,6 +157,8 @@ main_check_box_broken_files_audio = 음악 파일
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = 압축 파일
 main_check_box_broken_files_image = 이미지
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
 check_button_general_same_size = 같은 파일크기 무시
 check_button_general_same_size_tooltip = 동일한 크기의 파일은 결과에서 제외합니다 – 대부분 1:1 중복일 가능성이 높습니다
 main_label_size_bytes_tooltip = 스캔할 파일의 크기입니다.
@@ -188,8 +190,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = 제외할 디렉터리를 추가합니다.
 upper_remove_excluded_button_tooltip = 제외할 디렉터리에서 제거합니다.
 upper_notebook_items_configuration = 항목 설정
-upper_notebook_excluded_directories = 제외할 디렉터리
-upper_notebook_included_directories = 검색할 디렉터리
+upper_notebook_excluded_directories = Excluded Paths
+upper_notebook_included_directories = Included Paths
 upper_allowed_extensions_tooltip =
     허용할 확장자는 콤마(',')를 통해 구분해야 합니다. (기본값인 경우 모든 확장자를 허용합니다.)
     
@@ -201,8 +203,8 @@ upper_excluded_extensions_tooltip =
     
     허용된 확장자와 비활성화된 확장자를 둘 다 사용할 경우, 비활성화된 확장자가 더 높은 우선순위를 가지므로 해당 파일은 검사되지 않습니다.
 upper_excluded_items_tooltip =
-    제외할 항목은 반드시 '*' 와일드카드 문자를 사용해서 추가해야 하며, 콤마(',')로 구분되어야 합니다.
-    디렉터리를 직접 제외하는 것보다 느립니다. 주의해서 사용하세요.
+    Excluded items must contain * wildcard and should be separated by commas.
+    This is slower than Excluded Paths, so use it carefully.
 upper_excluded_items = 제외할 항목:
 upper_allowed_extensions = 허용할 확장자:
 upper_excluded_extensions = 비활성 확장자:
@@ -210,6 +212,8 @@ upper_excluded_extensions = 비활성 확장자:
 popover_select_all = 모두 선택
 popover_unselect_all = 모두 선택 해제
 popover_reverse = 선택 반전
+popover_select_all_except_shortest_path = Select all except shortest path
+popover_select_all_except_longest_path = Select all except longest path
 popover_select_all_except_oldest = 가장 오래된 파일 제외하고 모두 선택
 popover_select_all_except_newest = 가장 최신인 파일 제외하고 모두 선택
 popover_select_one_oldest = 가장 오래된 파일 선택

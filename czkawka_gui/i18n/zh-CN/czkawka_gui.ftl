@@ -7,19 +7,19 @@ window_compare_images = 比较图像
 general_ok_button = 确定
 general_close_button = 关闭
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - 新版本 Czkawka
+krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-    克罗基特是 Czkawka GTK GUI 的新、改进、更快且更少错误的版！
+    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
     
-    由于它具有自包含性，因此运行起来更容易，并且对系统更改和软件包版本更新更具抵抗力。
+    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
     
-    它包含 Czkawka 中不可用的许多功能，例如视频比较模式下的缩略图、文件移动/复制/删除进度以及扩展的排序选项。
+    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
     
-    尝试一下并看看区别！
+    Give it a try and see the difference!
     
-    Czkawka 将继续获得错误修复和小更新，但所有新功能都只会在克罗基特中实现。
+    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
     
-    PS. 此消息应仅显示一次，但如果它再次出现，请将 CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = 标题
 music_artist_checkbox = 艺人
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = 音频
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = 归档
 main_check_box_broken_files_image = 图像
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
 check_button_general_same_size = 忽略相同的大小
 check_button_general_same_size_tooltip = 忽略结果中相同大小的文件 - 通常是 1:1 重复
 main_label_size_bytes_tooltip = 将用于扫描的文件大小
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = 添加在搜索中排除的目录。
 upper_remove_excluded_button_tooltip = 从排除中删除目录。
 upper_notebook_items_configuration = 项目配置
-upper_notebook_excluded_directories = 排除的目录
-upper_notebook_included_directories = 包含的目录
+upper_notebook_excluded_directories = Excluded Paths
+upper_notebook_included_directories = Included Paths
 upper_allowed_extensions_tooltip =
     允许的扩展名必须用逗号分隔（默认情况下所有扩展名都可用）。
     
@@ -195,8 +197,8 @@ upper_excluded_extensions_tooltip =
     
     在使用允许和禁用的扩展时，这个扩展具有更高的优先级，所以文件将不会被检查。
 upper_excluded_items_tooltip =
-    被排除的项目必须包含 * 通配符，并用逗号分隔。
-    与排除目录相比，这种方式较慢，因此请小心使用。
+    Excluded items must contain * wildcard and should be separated by commas.
+    This is slower than Excluded Paths, so use it carefully.
 upper_excluded_items = 排除的项目：
 upper_allowed_extensions = 允许的扩展：
 upper_excluded_extensions = 已禁用扩展：
@@ -204,6 +206,8 @@ upper_excluded_extensions = 已禁用扩展：
 popover_select_all = 全部选择
 popover_unselect_all = 取消全选
 popover_reverse = 反向选择
+popover_select_all_except_shortest_path = Select all except shortest path
+popover_select_all_except_longest_path = Select all except longest path
 popover_select_all_except_oldest = 选择除最旧以外的所有选项
 popover_select_all_except_newest = 选择除最新以外的所有选项
 popover_select_one_oldest = 选择一个最旧的
