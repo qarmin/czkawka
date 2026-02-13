@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
+use crate::common::video_utils::THUMBNAIL_GRID_TILES_PER_SIDE;
 use crate::flc;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -133,7 +134,7 @@ impl VideoOptimizerParameters {
             Self::VideoCrop(params) => params.generate_thumbnail_grid_instead_of_single,
         };
 
-        if generate_thumbnail_grid_instead_of_single { 3 } else { 1 }
+        if generate_thumbnail_grid_instead_of_single { THUMBNAIL_GRID_TILES_PER_SIDE } else { 1 }
     }
 }
 

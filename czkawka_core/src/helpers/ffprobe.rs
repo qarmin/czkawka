@@ -22,6 +22,7 @@
 //! CODE IS COPIED FROM https://github.com/theduke/ffprobe-rs
 //! I WILL BE ABLE TO AGAIN USE IT AFTER A NEW VERSION IS RELEASED
 //! https://github.com/theduke/ffprobe-rs/issues/33
+//! LICENSE: MIT
 
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;

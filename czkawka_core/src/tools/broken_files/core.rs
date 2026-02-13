@@ -167,7 +167,7 @@ impl BrokenFiles {
                 return Some(file_entry);
             }
             Some(Ok(output)) => {
-                let combined = format!("{}{}", &output.stdout.trim().to_string(), &output.stderr.trim().to_string());
+                let combined = format!("{}{}", output.stdout.trim(), output.stderr.trim());
 
                 if let Some((error_message, additional_message)) = ffprobe_errors.iter().find(|(err, _)| combined.contains(err)) {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());

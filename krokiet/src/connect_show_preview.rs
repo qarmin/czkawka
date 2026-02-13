@@ -162,29 +162,29 @@ fn draw_crop_rectangle_on_image(
     _original_height: u32,
     images_in_thumbnails_line: u32,
 ) -> ImageBufferRgba {
+    let width = buf.width() / images_in_thumbnails_line;
+    let height = buf.height() / images_in_thumbnails_line;
+
+    let scale_factor = original_width as f32 / width as f32;
+
+    let crop_left = (crop_left as f32 / scale_factor).round() as i32;
+    let crop_top = (crop_top as f32 / scale_factor).round() as i32;
+    let crop_right = (crop_right as f32 / scale_factor).round() as i32;
+    let crop_bottom = (crop_bottom as f32 / scale_factor).round() as i32;
+
+    let l = (crop_left.max(0) as u32).min(width.saturating_sub(1));
+    let t = (crop_top.max(0) as u32).min(height.saturating_sub(1));
+    let r = (crop_right.max(0) as u32).min(width.saturating_sub(1));
+    let b = (crop_bottom.max(0) as u32).min(height.saturating_sub(1));
+
+    if l > r || t > b {
+        return buf;
+    }
+
+    let thickness = (width.max(height) / 100 * images_in_thumbnails_line).max(2);
+
     for x_im in 0..images_in_thumbnails_line {
         for y_im in 0..images_in_thumbnails_line {
-            let width = buf.width() / images_in_thumbnails_line;
-            let height = buf.height() / images_in_thumbnails_line;
-
-            let scale_factor = original_width as f32 / width as f32;
-
-            let crop_left = (crop_left as f32 / scale_factor).round() as i32;
-            let crop_top = (crop_top as f32 / scale_factor).round() as i32;
-            let crop_right = (crop_right as f32 / scale_factor).round() as i32;
-            let crop_bottom = (crop_bottom as f32 / scale_factor).round() as i32;
-
-            let l = (crop_left.max(0) as u32).min(width.saturating_sub(1));
-            let t = (crop_top.max(0) as u32).min(height.saturating_sub(1));
-            let r = (crop_right.max(0) as u32).min(width.saturating_sub(1));
-            let b = (crop_bottom.max(0) as u32).min(height.saturating_sub(1));
-
-            if l > r || t > b {
-                return buf;
-            }
-
-            let thickness = (width.max(height) / 100 * images_in_thumbnails_line).max(2);
-
             for side in [-1, 1] {
                 for th in 0..(thickness as i32 / 2) {
                     let th_val = side * th;
