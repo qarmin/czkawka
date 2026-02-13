@@ -333,6 +333,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         false, // creating thumbnails in CLI, makes almost no sense
         10,    // creating thumbnails in CLI, makes almost no sense
         false, // creating thumbnails in CLI, makes almost no sense
+        2,     // creating thumbnails in CLI, makes almost no sense
     );
     let mut tool = SimilarVideos::new(params);
 
@@ -430,14 +431,21 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
                 limit_video_size,
                 max_width,
                 max_height,
+                thumbnail_grid_tiles_per_side,
             } = transcode_args;
 
             let excluded_codecs_vec = excluded_codecs.map_or_else(
-                || vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
+                || vec!["hevc".to_string(), "h265".to_string(), "av1".to_string(), "vp9".to_string()],
                 |s| s.split(',').map(|c| c.trim().to_string()).collect(),
             );
 
-            let params = VideoOptimizerParameters::VideoTranscode(VideoTranscodeParams::new(excluded_codecs_vec, generate_thumbnails, thumbnail_percentage, thumbnail_grid));
+            let params = VideoOptimizerParameters::VideoTranscode(VideoTranscodeParams::new(
+                excluded_codecs_vec,
+                generate_thumbnails,
+                thumbnail_percentage,
+                thumbnail_grid,
+                thumbnail_grid_tiles_per_side,
+            ));
 
             let mut tool = VideoOptimizer::new(params);
             set_common_settings(&mut tool, &common_cli_items, None);
@@ -468,6 +476,7 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
                 generate_thumbnails,
                 thumbnail_percentage,
                 thumbnail_grid,
+                thumbnail_grid_tiles_per_side,
                 fix_videos,
                 overwrite_original,
                 target_codec,
@@ -490,6 +499,7 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
                 generate_thumbnails,
                 thumbnail_percentage,
                 thumbnail_grid,
+                thumbnail_grid_tiles_per_side,
             ));
 
             let mut tool = VideoOptimizer::new(params);

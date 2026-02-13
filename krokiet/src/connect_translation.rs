@@ -358,6 +358,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_video_thumbnails_position_text(flk!("settings_video_thumbnails_position").into());
     translation.set_settings_video_thumbnails_generate_grid_text(flk!("settings_video_thumbnails_generate_grid").into());
     translation.set_settings_video_thumbnails_generate_grid_hint_text(flk!("settings_video_thumbnails_generate_grid_hint").into());
+    translation.set_settings_video_thumbnails_grid_tiles_per_side_text(flk!("settings_video_thumbnails_grid_tiles_per_side").into());
+    translation.set_settings_video_thumbnails_grid_tiles_per_side_hint_text(flk!("settings_video_thumbnails_grid_tiles_per_side_hint").into());
     translation.set_settings_similar_images_tool_text(flk!("settings_similar_images_tool").into());
     translation.set_settings_general_settings_text(flk!("settings_general_settings").into());
     translation.set_settings_settings_text(flk!("settings_settings").into());

@@ -1,5 +1,6 @@
 use std::fs::metadata;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
 
 use czkawka_core::common::image::{check_if_can_display_image, get_dynamic_image_from_path};
 use czkawka_core::helpers::debug_timer::Timer;
@@ -8,10 +9,12 @@ use image::{DynamicImage, Rgba, RgbaImage};
 use log::{debug, error};
 use slint::ComponentHandle;
 
+use crate::shared_models::SharedModels;
 use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
+
 pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 
-pub(crate) fn connect_show_preview(app: &MainWindow) {
+pub(crate) fn connect_show_preview(app: &MainWindow, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
     app.global::<Callabler>()
         .on_load_image_preview(move |image_path, crop_left, crop_top, crop_right, crop_bottom, orig_width, orig_height| {
@@ -48,6 +51,17 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
 
             let path = Path::new(image_path.as_str());
 
+            let images_in_thumbnails_line = if active_tab == ActiveTab::VideoOptimizer {
+                shared_models
+                    .lock()
+                    .expect("Failed to lock model mutex")
+                    .shared_video_optimizer_state
+                    .as_ref()
+                    .map_or(1, |state| state.get_params().get_generate_number_of_items_in_thumbnail_grid())
+            } else {
+                1
+            };
+
             // Looks that resizing image before sending it to GUI works better that letting Slint do it automatically
             if let Some((mut timer, img)) = load_image(path) {
                 let mut img_to_use = if img.width() > 1024 || img.height() > 1024 {
@@ -76,7 +90,16 @@ pub(crate) fn connect_show_preview(app: &MainWindow) {
                 };
 
                 if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 && orig_width > 0 && orig_height > 0 {
-                    img_to_use = draw_crop_rectangle_on_image(img_to_use, crop_left, crop_top, crop_right, crop_bottom, orig_width as u32, orig_height as u32);
+                    img_to_use = draw_crop_rectangle_on_image(
+                        img_to_use,
+                        crop_left,
+                        crop_top,
+                        crop_right,
+                        crop_bottom,
+                        orig_width as u32,
+                        orig_height as u32,
+                        images_in_thumbnails_line as u32,
+                    );
                     timer.checkpoint("cropping image");
                 }
 
@@ -137,11 +160,12 @@ fn draw_crop_rectangle_on_image(
     crop_bottom: i32,
     original_width: u32,
     _original_height: u32,
+    images_in_thumbnails_line: u32,
 ) -> ImageBufferRgba {
-    let width = buf.width();
-    let height = buf.height();
+    let width = buf.width() / images_in_thumbnails_line;
+    let height = buf.height() / images_in_thumbnails_line;
 
-    let scale_factor = original_width as f32 / buf.width() as f32;
+    let scale_factor = original_width as f32 / width as f32;
 
     let crop_left = (crop_left as f32 / scale_factor).round() as i32;
     let crop_top = (crop_top as f32 / scale_factor).round() as i32;
@@ -157,50 +181,38 @@ fn draw_crop_rectangle_on_image(
         return buf;
     }
 
-    let thickness = (width.max(height) / 150).max(2);
+    let thickness = (width.max(height) / 100 * images_in_thumbnails_line).max(2);
 
-    #[inline]
-    fn get_pixel_color(x: u32, y: u32) -> Rgba<u8> {
-        match (x + y) % 9 {
-            0 => Rgba([127u8, 0u8, 0u8, 255u8]),
-            1 => Rgba([0u8, 127u8, 0u8, 255u8]),
-            2 => Rgba([0u8, 0u8, 127u8, 255u8]),
-            3 => Rgba([255u8, 255u8, 0u8, 255u8]),
-            4 => Rgba([0u8, 255u8, 255u8, 255u8]),
-            5 => Rgba([255u8, 0u8, 255u8, 255u8]),
-            6 => Rgba([255u8, 255u8, 255u8, 255u8]),
-            7 => Rgba([128u8, 0u8, 128u8, 255u8]),
-            8 => Rgba([0u8, 0u8, 0u8, 255u8]),
-            _ => unreachable!("Modulo 9 should always be in 0..8"),
-        }
-    }
+    for x_im in 0..images_in_thumbnails_line {
+        for y_im in 0..images_in_thumbnails_line {
+            for side in [-1, 1] {
+                for th in 0..(thickness as i32 / 2) {
+                    let th_val = side * th;
 
-    for side in [-1, 1] {
-        for th in 0..(thickness as i32 / 2) {
-            let th_val = side * th;
+                    let top_y = (t as i32 + th_val) as u32;
+                    let bottom_y = (b as i32 - th_val) as u32;
+                    let left_x = (l as i32) as u32;
+                    let right_x = (r as i32) as u32;
 
-            let top_y = (t as i32 + th_val) as u32;
-            let bottom_y = (b as i32 - th_val) as u32;
-            let left_x = (l as i32) as u32;
-            let right_x = (r as i32) as u32;
-
-            for x in left_x..=right_x {
-                for y in [top_y, bottom_y] {
-                    if (0..height).contains(&y) && (0..width).contains(&x) {
-                        buf.put_pixel(x, y, get_pixel_color(x, y));
+                    for x in left_x..=right_x {
+                        for y in [top_y, bottom_y] {
+                            if (0..height).contains(&y) && (0..width).contains(&x) {
+                                buf.put_pixel(x + x_im * width, y + y_im * height, get_pixel_color(x, y));
+                            }
+                        }
                     }
-                }
-            }
 
-            let top_y = (t as i32) as u32;
-            let bottom_y = (b as i32) as u32;
-            let left_x = (l as i32 + th_val) as u32;
-            let right_x = (r as i32 - th_val) as u32;
+                    let top_y = (t as i32) as u32;
+                    let bottom_y = (b as i32) as u32;
+                    let left_x = (l as i32 + th_val) as u32;
+                    let right_x = (r as i32 - th_val) as u32;
 
-            for y in top_y..=bottom_y {
-                for x in [left_x, right_x] {
-                    if (0..height).contains(&y) && (0..width).contains(&x) {
-                        buf.put_pixel(x, y, get_pixel_color(x, y));
+                    for y in top_y..=bottom_y {
+                        for x in [left_x, right_x] {
+                            if (0..height).contains(&y) && (0..width).contains(&x) {
+                                buf.put_pixel(x + x_im * width, y + y_im * height, get_pixel_color(x, y));
+                            }
+                        }
                     }
                 }
             }
@@ -208,4 +220,20 @@ fn draw_crop_rectangle_on_image(
     }
 
     buf
+}
+
+#[inline]
+fn get_pixel_color(x: u32, y: u32) -> Rgba<u8> {
+    match (x + y) % 9 {
+        0 => Rgba([127u8, 0u8, 0u8, 255u8]),
+        1 => Rgba([0u8, 127u8, 0u8, 255u8]),
+        2 => Rgba([0u8, 0u8, 127u8, 255u8]),
+        3 => Rgba([255u8, 255u8, 0u8, 255u8]),
+        4 => Rgba([0u8, 255u8, 255u8, 255u8]),
+        5 => Rgba([255u8, 0u8, 255u8, 255u8]),
+        6 => Rgba([255u8, 255u8, 255u8, 255u8]),
+        7 => Rgba([128u8, 0u8, 128u8, 255u8]),
+        8 => Rgba([0u8, 0u8, 0u8, 255u8]),
+        _ => unreachable!("Modulo 9 should always be in 0..8"),
+    }
 }

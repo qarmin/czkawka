@@ -33,6 +33,7 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
                     sd.custom_settings.video_thumbnails_generate,
                     sd.custom_settings.video_thumbnails_percentage,
                     sd.custom_settings.video_thumbnails_generate_grid,
+                    sd.custom_settings.video_thumbnails_grid_tiles_per_side,
                 );
                 VideoOptimizerParameters::VideoCrop(params)
             } else {
@@ -48,6 +49,7 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
                     sd.custom_settings.video_thumbnails_generate,
                     sd.custom_settings.video_thumbnails_percentage,
                     sd.custom_settings.video_thumbnails_generate_grid,
+                    sd.custom_settings.video_thumbnails_grid_tiles_per_side,
                 );
                 VideoOptimizerParameters::VideoTranscode(params)
             };

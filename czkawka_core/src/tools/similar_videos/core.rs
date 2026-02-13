@@ -212,6 +212,7 @@ impl SimilarVideos {
         }
         let thumbnail_video_percentage_from_start = self.params.thumbnail_video_percentage_from_start;
         let generate_grid_instead_of_single = self.params.generate_thumbnail_grid_instead_of_single;
+        let thumbnail_grid_tiles_per_side = self.params.thumbnail_grid_tiles_per_side;
         let errors = self
             .similar_vectors
             .par_iter_mut()
@@ -232,6 +233,7 @@ impl SimilarVideos {
                         &thumbnails_dir,
                         thumbnail_video_percentage_from_start,
                         generate_grid_instead_of_single,
+                        thumbnail_grid_tiles_per_side,
                     ) {
                         Ok(thumbnail_path) => {
                             file_entry.thumbnail_path = Some(thumbnail_path);

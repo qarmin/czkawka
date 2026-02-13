@@ -223,6 +223,7 @@ impl VideoOptimizer {
 
         let thumbnail_video_percentage_from_start = params.thumbnail_video_percentage_from_start;
         let generate_grid_instead_of_single = params.generate_thumbnail_grid_instead_of_single;
+        let thumbnail_grid_tiles_per_side = params.thumbnail_grid_tiles_per_side;
 
         let errors = self
             .video_transcode_result_entries
@@ -241,6 +242,7 @@ impl VideoOptimizer {
                     &thumbnails_dir,
                     thumbnail_video_percentage_from_start,
                     generate_grid_instead_of_single,
+                    thumbnail_grid_tiles_per_side,
                 ) {
                     Ok(thumbnail_path) => {
                         entry.thumbnail_path = Some(thumbnail_path);
@@ -293,6 +295,7 @@ impl VideoOptimizer {
 
         let thumbnail_video_percentage_from_start = params.thumbnail_video_percentage_from_start;
         let generate_grid_instead_of_single = params.generate_thumbnail_grid_instead_of_single;
+        let thumbnail_grid_tiles_per_side = params.thumbnail_grid_tiles_per_side;
 
         let errors = self
             .video_crop_result_entries
@@ -311,6 +314,7 @@ impl VideoOptimizer {
                     &thumbnails_dir,
                     thumbnail_video_percentage_from_start,
                     generate_grid_instead_of_single,
+                    thumbnail_grid_tiles_per_side,
                 );
 
                 match result {

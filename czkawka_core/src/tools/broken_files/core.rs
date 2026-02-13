@@ -75,7 +75,7 @@ impl BrokenFiles {
                     }
                 }
                 Err(e) => {
-                    file_entry.error_string = e.to_string();
+                    file_entry.error_string = e.to_string().trim().to_string();
                 }
             }
             file_entry
@@ -91,7 +91,7 @@ impl BrokenFiles {
         match File::open(&file_entry.path) {
             Ok(file) => {
                 if let Err(e) = zip::ZipArchive::new(file) {
-                    file_entry.error_string = e.to_string();
+                    file_entry.error_string = e.to_string().trim().to_string();
                 }
                 Some(file_entry)
             }
@@ -107,7 +107,7 @@ impl BrokenFiles {
                     if let Err(e) = audio_checker::parse_audio_file(file) {
                         let err_str = e.to_string();
                         if !err_str.contains("not supported codec") {
-                            file_entry.error_string = err_str;
+                            file_entry.error_string = err_str.trim().to_string();
                         }
                     }
                     Some(file_entry)
@@ -128,11 +128,11 @@ impl BrokenFiles {
             match File::open(&file_entry.path) {
                 Ok(file) => {
                     if let Err(e) = Document::load_from(file) {
-                        file_entry.error_string = e.to_string();
+                        file_entry.error_string = e.to_string().trim().to_string();
                     }
                 }
                 Err(e) => {
-                    file_entry.error_string = e.to_string();
+                    file_entry.error_string = e.to_string().trim().to_string();
                 }
             }
             file_entry
@@ -163,11 +163,11 @@ impl BrokenFiles {
             None => return None,
             Some(Err(e)) => {
                 debug!("Failed to run ffprobe on {:?}: {}", file_entry.path, e);
-                file_entry.error_string = format!("Failed to run ffprobe: {e}");
+                file_entry.error_string = format!("Failed to run ffprobe: {e}").trim().to_string();
                 return Some(file_entry);
             }
             Some(Ok(output)) => {
-                let combined = format!("{}{}", &output.stdout, &output.stderr);
+                let combined = format!("{}{}", output.stdout.trim(), output.stderr.trim());
 
                 if let Some((error_message, additional_message)) = ffprobe_errors.iter().find(|(err, _)| combined.contains(err)) {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
@@ -223,10 +223,10 @@ impl BrokenFiles {
             None => return None,
             Some(Err(e)) => {
                 debug!("Failed to run ffmpeg on {:?}: {}", file_entry.path, e);
-                file_entry.error_string = format!("Failed to run ffmpeg: {e}");
+                file_entry.error_string = format!("Failed to run ffmpeg: {}", e.trim());
             }
             Some(Ok(output)) => {
-                let combined = format!("{}{}", &output.stdout, &output.stderr);
+                let combined = format!("{}{}", output.stdout.trim(), output.stderr.trim());
 
                 if ffmpeg_allowed_messages.iter().any(|msg| combined.contains(msg)) {
                     // Allowed message, do nothing

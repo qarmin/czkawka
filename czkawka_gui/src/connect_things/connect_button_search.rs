@@ -640,6 +640,7 @@ fn similar_video_search(
                 false, // Not implemented in gtk gui
                 10,    // Not implemented in gtk gui
                 false, // Not implemented in gtk gui
+                2,     // Not implemented in gtk gui
             );
             let mut tool = SimilarVideos::new(params);
 

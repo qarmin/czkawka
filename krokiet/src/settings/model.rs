@@ -165,6 +165,8 @@ pub struct SettingsCustom {
     pub video_thumbnails_percentage: u8,
     #[serde(default)]
     pub video_thumbnails_generate_grid: bool,
+    #[serde(default = "default_video_thumbnails_grid_tiles_per_side")]
+    pub video_thumbnails_grid_tiles_per_side: u8,
     #[serde(default = "default_video_optimizer_mode")]
     pub video_optimizer_mode: String,
     #[serde(default = "default_video_optimizer_crop_type")]
@@ -321,6 +323,9 @@ fn default_similar_videos_crop_detect() -> String {
 fn default_similar_videos_thumbnail_percentage() -> u8 {
     DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL
 }
+fn default_video_thumbnails_grid_tiles_per_side() -> u8 {
+    2
+}
 
 fn default_duplicates_check_method() -> String {
     "hash".to_string()
@@ -417,7 +422,7 @@ pub(crate) fn default_video_optimizer_video_codec() -> String {
     "h265".to_string()
 }
 pub(crate) fn default_video_optimizer_excluded_codecs() -> String {
-    "h265,av1,vp9".to_string()
+    "h265,hevc,av1,vp9".to_string()
 }
 pub(crate) fn default_video_optimizer_video_quality() -> u32 {
     23

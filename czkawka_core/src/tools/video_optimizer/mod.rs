@@ -48,7 +48,7 @@ impl std::str::FromStr for VideoCodec {
     fn from_str(codec: &str) -> Result<Self, Self::Err> {
         match codec.to_lowercase().as_str() {
             "h264" | "libx264" => Ok(Self::H264),
-            "h265" | "libx265" => Ok(Self::H265),
+            "h265" | "hevc" | "libx265" => Ok(Self::H265),
             "av1" | "libaom-av1" => Ok(Self::Av1),
             "vp9" | "libvpx-vp9" => Ok(Self::Vp9),
             _ => Err(flc!("core_unknown_codec", codec = codec)),
@@ -126,12 +126,24 @@ pub enum VideoOptimizerParameters {
     VideoCrop(VideoCropParams),
 }
 
+impl VideoOptimizerParameters {
+    pub fn get_generate_number_of_items_in_thumbnail_grid(&self) -> u8 {
+        let (generate_thumbnail_grid_instead_of_single, thumbnail_grid_tiles_per_side) = match self {
+            Self::VideoTranscode(params) => (params.generate_thumbnail_grid_instead_of_single, params.thumbnail_grid_tiles_per_side),
+            Self::VideoCrop(params) => (params.generate_thumbnail_grid_instead_of_single, params.thumbnail_grid_tiles_per_side),
+        };
+
+        if generate_thumbnail_grid_instead_of_single { thumbnail_grid_tiles_per_side } else { 1 }
+    }
+}
+
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct VideoTranscodeParams {
     pub(crate) excluded_codecs: Vec<String>,
     pub(crate) generate_thumbnails: bool,
     pub(crate) thumbnail_video_percentage_from_start: u8,
     pub(crate) generate_thumbnail_grid_instead_of_single: bool,
+    pub(crate) thumbnail_grid_tiles_per_side: u8,
 }
 #[derive(Clone, PartialEq, Debug)]
 pub struct VideoCropParams {
@@ -143,25 +155,34 @@ pub struct VideoCropParams {
     pub(crate) generate_thumbnails: bool,
     pub(crate) thumbnail_video_percentage_from_start: u8,
     pub(crate) generate_thumbnail_grid_instead_of_single: bool,
+    pub(crate) thumbnail_grid_tiles_per_side: u8,
 }
 
 impl VideoTranscodeParams {
-    pub fn new(excluded_codecs: Vec<String>, generate_thumbnails: bool, thumbnail_video_percentage_from_start: u8, generate_thumbnail_grid_instead_of_single: bool) -> Self {
+    pub fn new(
+        excluded_codecs: Vec<String>,
+        generate_thumbnails: bool,
+        thumbnail_video_percentage_from_start: u8,
+        generate_thumbnail_grid_instead_of_single: bool,
+        thumbnail_grid_tiles_per_side: u8,
+    ) -> Self {
         Self {
             excluded_codecs,
             generate_thumbnails,
             thumbnail_video_percentage_from_start,
             generate_thumbnail_grid_instead_of_single,
+            thumbnail_grid_tiles_per_side,
         }
     }
 }
 impl Default for VideoTranscodeParams {
     fn default() -> Self {
         Self {
-            excluded_codecs: vec!["h265".to_string(), "av1".to_string(), "vp9".to_string()],
+            excluded_codecs: vec!["hevc".to_string(), "h265".to_string(), "av1".to_string(), "vp9".to_string()],
             generate_thumbnails: false,
             thumbnail_video_percentage_from_start: 10,
             generate_thumbnail_grid_instead_of_single: false,
+            thumbnail_grid_tiles_per_side: 2,
         }
     }
 }
@@ -176,6 +197,7 @@ impl VideoCropParams {
         generate_thumbnails: bool,
         thumbnail_video_percentage_from_start: u8,
         generate_thumbnail_grid_instead_of_single: bool,
+        thumbnail_grid_tiles_per_side: u8,
     ) -> Self {
         assert!(black_pixel_threshold <= 128, "black_pixel_threshold must be 0-128, got {black_pixel_threshold}");
         assert!(
@@ -194,6 +216,7 @@ impl VideoCropParams {
             generate_thumbnails,
             thumbnail_video_percentage_from_start,
             generate_thumbnail_grid_instead_of_single,
+            thumbnail_grid_tiles_per_side,
         }
     }
 }

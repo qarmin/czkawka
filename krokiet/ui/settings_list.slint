@@ -518,6 +518,39 @@ export component SettingsList inherits VerticalLayout {
                 }
             }
 
+            HorizontalLayout {
+                spacing: 5px;
+                Text {
+                    text <=> Translations.settings_video_thumbnails_grid_tiles_per_side_text;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    font-size: FontSizes.normal;
+                }
+
+                Slider {
+                    minimum <=> Settings.video_thumbnails_grid_tiles_per_side_min;
+                    maximum <=> Settings.video_thumbnails_grid_tiles_per_side_max;
+                    value <=> Settings.video_thumbnails_grid_tiles_per_side;
+                }
+
+                Text {
+                    text: round(Settings.video_thumbnails_grid_tiles_per_side);
+                    vertical-alignment: TextVerticalAlignment.center;
+                    font-size: FontSizes.normal;
+                    min-width: 60px;
+                }
+            }
+
+            HorizontalLayout {
+                spacing: 5px;
+                Text {
+                    text <=> Translations.settings_video_thumbnails_grid_tiles_per_side_hint_text;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    font-size: FontSizes.small;
+                    color: ColorPalette.hint_color;
+                    wrap: TextWrap.word-wrap;
+                }
+            }
+
             HeaderText {
                 text <=> Translations.settings_cache_header_text;
             }
