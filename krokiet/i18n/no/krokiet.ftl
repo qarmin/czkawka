@@ -110,7 +110,6 @@ rust_symlink_confirmation = Er du sikker på at du vil opprette symlinker for de
 rust_symlink_confirmation_number_simple = { $items } elementer valgt.
 rust_rename_confirmation = Er du sikker på at du vil omdøpe de valgte elementene?
 rust_rename_confirmation_number_simple = { $items } elementer valgt.
-rust_cache_processed_files = Behandlet { $filer } cache-filer
 rust_cache_entries_stats = Fjernet { $removed } oppføringer ut av alle { $all }, { $left } igjen
 rust_cache_size_reduced = Redusert cachefilstørrelse med { $size }
 rust_cache_time_elapsed = Tid som er gått: { $time }
@@ -366,3 +365,5 @@ hardlink_confirmation_text = Er du sikker på at du vil opprette hardkoblinger f
 softlink_button_text = Programlenke
 softlink_text = Opprett mylkoblinger
 softlink_confirmation_text = Er du sikker på at du vil opprette softlenker (symlinks) for de valgte elementene?
+
+rust_cache_processed_files = Processed { $files } cache files

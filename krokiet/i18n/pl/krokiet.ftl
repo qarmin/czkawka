@@ -110,7 +110,6 @@ rust_symlink_confirmation = Czy na pewno chcesz utworzyć dowiązania symboliczn
 rust_symlink_confirmation_number_simple = Wybrano { $items } elementów.
 rust_rename_confirmation = Czy na pewno chcesz zmienić nazwę wybranych elementów?
 rust_rename_confirmation_number_simple = Wybrano { $items } elementów.
-rust_cache_processed_files = Przetworzono { $pliki } plików pamięci podręcznej
 rust_cache_entries_stats = Usunięto { $removed } wpisów z { $all }, { $left } pozostało
 rust_cache_size_reduced = Zmniejszono rozmiar pamięci podręcznej o { $size }
 rust_cache_time_elapsed = Upłynęło: { $time }
@@ -366,3 +365,5 @@ hardlink_confirmation_text = Czy na pewno chcesz utworzyć twarde dowiązania dl
 softlink_button_text = Dowiązanie symboliczne
 softlink_text = Utwórz dowiązania symboliczne
 softlink_confirmation_text = Czy na pewno chcesz utworzyć dowiązania symboliczne dla wybranych elementów?
+
+rust_cache_processed_files = Processed { $files } cache files

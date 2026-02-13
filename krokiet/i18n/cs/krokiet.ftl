@@ -110,7 +110,6 @@ rust_symlink_confirmation = Jste si jisti, že chcete vytvořit symlinky pro vyb
 rust_symlink_confirmation_number_simple = { $items } položek vybráno.
 rust_rename_confirmation = Jste si jisti, že chcete přejmenovat vybrané položky?
 rust_rename_confirmation_number_simple = { $items } položek vybráno.
-rust_cache_processed_files = Zpracovány { $soubory } mezipaměťové soubory
 rust_cache_entries_stats = Odstraněny { $removed } záznamy z { $all }, { $left } zbývá
 rust_cache_size_reduced = Snížená velikost souborů mezipaměti o { $size }
 rust_cache_time_elapsed = Čas uplynul: { $time }
@@ -366,3 +365,5 @@ hardlink_confirmation_text = Jste si jisti, že chcete vytvořit tvrdé odkazy p
 softlink_button_text = Měkký odkaz
 softlink_text = Vytvořit softlinky
 softlink_confirmation_text = Jste si jisti, že chcete vytvořit softlinky (symlinky) pro vybrané položky?
+
+rust_cache_processed_files = Processed { $files } cache files

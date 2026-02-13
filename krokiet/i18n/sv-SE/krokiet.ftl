@@ -110,7 +110,6 @@ rust_symlink_confirmation = Är du säker på att du vill skapa symboliska länk
 rust_symlink_confirmation_number_simple = { $items } föremål valda.
 rust_rename_confirmation = Är du säker på att du vill omdöpa de valda objekten?
 rust_rename_confirmation_number_simple = { $items } föremål valda.
-rust_cache_processed_files = Bearbet { $filer } cache-filer
 rust_cache_entries_stats = Borttagna { $removed } posteringar ut av alla { $all }, { $left } kvar
 rust_cache_size_reduced = Minskade cachefilers storlek med { $size }
 rust_cache_time_elapsed = Tid som gått: { $time }
@@ -366,3 +365,5 @@ hardlink_confirmation_text = Är du säker på att du vill skapa hårda länkar 
 softlink_button_text = Softlink
 softlink_text = Skapa symboliska länkar
 softlink_confirmation_text = Är du säker på att du vill skapa symboliska länkar (symlinks) för de valda objekten?
+
+rust_cache_processed_files = Processed { $files } cache files

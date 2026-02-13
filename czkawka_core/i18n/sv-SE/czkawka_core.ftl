@@ -60,10 +60,8 @@ core_folder_contains_file_inside = Mappen innehåller filen "{ $entry }" inuti "
 core_unknown_directory_entry = Kan inte fastställa filtyp för katalogposten "{ $entry }" inuti "{ $path }"
 core_video_width_exceeds_limit = Video bredd { $width } överskrider gränsen för { $limit }
 core_video_height_exceeds_limit = Video höjd { $height } överskrider gränsen för { $limit }
-core_failed_to_process_video = Misslyckades med att bearbeta videofilen { $fil }: { $orsak }
 core_optimized_file_larger = Optimerad fil { $optimized } (storlek: { $new_size }) är inte mindre än original { $original } (storlek: { $original_size })
 core_unknown_codec = Okänt codec: { $codec }
-core_invalid_video_optimizer_mode = Ogiltig videobeställningsläge: '{ $läge }'. Tillåtna värden: transkodera, klipp
 core_folder_does_not_exist = Mappexisterar inte: { $folder }
 core_path_not_directory = Sökvägen är inte en katalog: { $folder }
 core_test_error_for_folder = Feltest för mapp: { $folder }
@@ -95,3 +93,6 @@ core_cannot_create_or_open_cache_file = Kan inte skapa eller öppna cachefil "{ 
 core_cannot_set_config_cache_path = Kan inte ställa in config/cache-sökväg - config och cache kommer inte att användas.
 core_invalid_extension_contains_space = { $extension } är inte en giltig filändelse eftersom den innehåller tomma utrymmen däri
 core_invalid_extension_contains_dot = { $extension } är inte en giltig filändelse eftersom den innehåller en punkt inuti
+
+core_failed_to_process_video = Failed to process video file { $file }: { $reason }
+core_invalid_video_optimizer_mode = Invalid video optimizer mode: '{ $mode }'. Allowed values: transcode, crop

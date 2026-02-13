@@ -50,7 +50,6 @@ core_invalid_crop_rectangle = 유효하지 않은 래스터 영역: left={ $left
 core_failed_to_crop_video_file = 비디오 파일 "{ $file }" 자르기 실패: { $reason }
 core_cropped_video_not_created = 잘린 비디오 파일이 생성되지 않았습니다: { $temp }
 core_unable_check_hash_of_file = 파일 해시 확인 불가 { $file }, 이유 { $reason }
-core_error_checking_hash_of_file = 파일 해시 검사 중 오류가 발생했습니다, 이유 { $reason }
 core_image_zero_dimensions = 이미지의 너비 또는 높이는 0입니다 "{ $path }"
 core_image_open_failed = 불가능: "{ $path }" 이미지 파일을 열 수 없습니다. { $reason }
 core_not_directory_remove = 폴더 "{ $path }"을 제거하려고 하는데, 디렉터리가 아닙니다.
@@ -95,3 +94,5 @@ core_cannot_create_or_open_cache_file = 캐시 파일 "{ $file }"를 생성하�
 core_cannot_set_config_cache_path = 설정/캐시 경로 설정 불가 - 설정 및 캐시는 사용되지 않습니다.
 core_invalid_extension_contains_space = { $extension }는 유효하지 않은 확장자입니다. 확장자 안에 빈 공간이 있기 때문입니다.
 core_invalid_extension_contains_dot = { $extension }는 유효하지 않은 확장자입니다. 확장자 안에 점이 포함되어 있기 때문입니다.
+
+core_error_checking_hash_of_file = Error happened when checking hash of file "{ $file }", reason { $reason }
