@@ -331,7 +331,7 @@ settings_load_at_start_button_tooltip =
     
     Αν δεν είναι ενεργοποιημένη, θα χρησιμοποιηθούν οι προεπιλεγμένες ρυθμίσεις.
 settings_confirm_deletion_button_tooltip = Εμφάνιση διαλόγου επιβεβαίωσης όταν κάνετε κλικ στο κουμπί διαγραφής.
-settings_confirm_link_button_tooltip = Εμφάνιση διαλόγου επιβεβαίωσης όταν κάνετε κλικ στο κουμπί hard/symlink
+settings_confirm_link_button_tooltip = Εμφάνιση διαλόγου επιβεβαίωσης όταν κάνετε κλικ στο κουμπί hard/symlink.
 settings_confirm_group_deletion_button_tooltip = Εμφάνιση διαλόγου προειδοποίησης όταν προσπαθείτε να διαγράψετε όλες τις εγγραφές από την ομάδα.
 settings_show_text_view_button_tooltip = Εμφάνιση πίνακα κειμένου στο κάτω μέρος της διεπαφής χρήστη.
 settings_use_cache_button_tooltip = Χρήση προσωρινής μνήμης αρχείων.
@@ -349,10 +349,10 @@ settings_save_also_as_json_button = Επίσης αποθήκευση προσω
 settings_use_trash_button = Μετακίνηση διαγραμμένων αρχείων στον κάδο απορριμμάτων
 settings_language_label = Γλώσσα
 settings_multiple_delete_outdated_cache_checkbutton = Αυτόματη διαγραφή ξεπερασμένων καταχωρήσεων cache
-settings_multiple_delete_outdated_cache_checkbutton_tooltip =
+settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
     Στρεμώστε τα αποσκευάκημα πλήρωμα που καθυστερούν και δείχνουν ότι συνδέονται με αρχεία που δεν υπάρχουν.
     
-    Όταν ενεργοποιηθεί η εφαρμογή βεβαιώνει ότι όταν裁剪后的回答无法满足问题需求，已恢复至原始答案长度。
+    Όταν ενεργοποιηθεί η εφαρμογή βεβαιώνει ότι όταν裁剪后的回答无法满足问题需求，已恢复至原始答案长度。.
 settings_notebook_general = Γενικά
 settings_notebook_duplicates = Διπλότυπα
 settings_notebook_images = Παρόμοιες Εικόνες

@@ -140,8 +140,8 @@ main_label_check_method = Controleer methode
 main_label_hash_type = Soort hash
 main_label_hash_size = Hash grootte
 main_label_size_bytes = Grootte (bytes)
-main_label_min_size = Min.
-main_label_max_size = Max.
+main_label_min_size = Min
+main_label_max_size = Max
 main_label_shown_files = Aantal getoonde bestanden
 main_label_resize_algorithm = Algoritme aanpassen
 main_label_similarity = Similarity{ "   " }
@@ -290,7 +290,7 @@ bottom_move_button_tooltip =
     Wanneer twee bestanden met dezelfde naam naar de map worden verplaatst, zal de tweede mislukt en de fout worden weergegeven.
 bottom_sort_button_tooltip = Sorteert bestanden/mappen op de geselecteerde methode.
 bottom_compare_button_tooltip = Afbeeldingen in de groep vergelijken.
-bottom_show_errors_tooltip = Onderste tekstvenster tonen/verbergen
+bottom_show_errors_tooltip = Onderste tekstvenster tonen/verbergen.
 bottom_show_upper_notebook_tooltip = Toon/Verberg bovenste notitieboekpaneel.
 # Progress Window
 progress_stop_button = Stoppen

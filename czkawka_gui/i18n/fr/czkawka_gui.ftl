@@ -480,7 +480,7 @@ saving_loading_failed_to_read_config_file = Impossible de charger la configurati
 saving_loading_failed_to_read_data_from_file = Impossible de lire les données du fichier "{ $path }". Raison : "{ $reason }".
 # Other
 selected_all_reference_folders = Impossible de lancer la recherche quand tous les répertoires sont définis comme des répertoires de référence
-searching_for_data = Recherche de données. Cela peut prendre un certain temps, veuillez patienter…
+searching_for_data = Recherche de données. Cela peut prendre un certain temps, veuillez patienter….
 text_view_messages = MESSAGESS
 text_view_warnings = AVERTISSEMENTS
 text_view_errors = ERREURS

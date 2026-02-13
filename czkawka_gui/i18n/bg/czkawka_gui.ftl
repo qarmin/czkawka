@@ -315,7 +315,7 @@ header_about_button_tooltip = Отваря диалогов прозорец с 
 
 settings_number_of_threads = Брой използвани нишки
 settings_number_of_threads_tooltip = Брой използвани нишки, 0 означава, че ще бъдат използвани всички налични нишки.
-settings_use_rust_preview = Използвай външна библиотека вместо GTK да зареди визуализацията.
+settings_use_rust_preview = Използвай външна библиотека вместо GTK да зареди визуализацията
 settings_use_rust_preview_tooltip =
     Използвайки GTK визуализации, понякога ще е по-бързо и ще поддържа повече формати, но понякога това може да е точно обратното.
     

@@ -2,12 +2,12 @@
 rust_init_error_title = 应用启动时发生严重错误
 rust_init_error_message = 
         在启动应用程序时发生了一个严重错误：
-
+ 
         { $error_message }
-
+ 
         这可能是由于缺少或损坏的 OpenGL/Vulkan 驱动程序、在虚拟机中运行应用程序或 Krokiet 或其库中的错误所致。
-
-        您可以尝试运行不同的构建（skia_opengl、skia_vulkan、femtovg_opengl - 默认）或使用软件渲染器，看看是否可以解决问题。
+ 
+        您可以尝试运行不同的构建（skia_opengl、skia_vulkan、femtovg_opengl - 默认）或使用软件渲染器，看看是否可以解决问题。.
 rust_loaded_preset = 加载预设 { $preset_idx }
 rust_file_already_exists = 文件 "{ $file }" 已存在，不会被覆盖
 rust_error_removing_file_after_copy = 删除文件 "{ $file }" 时出错 (复制到不同分区后), 原因: { $reason }
@@ -42,8 +42,8 @@ rust_checked_videos = 已检查 { $items_stats } 视频 ({ $size_stats })
 rust_analyzed_partial_hash = 分析了 { $items_stats } 文件的部分散列({ $size_stats })
 rust_analyzed_full_hash = 分析了 { $items_stats } 文件的完整哈希({ $size_stats })
 rust_failed_to_rename_file = 无法将文件 { $old_path } 重命名为 { $new_path }, 错误: { $error }
-rust_no_included_paths = 无法在未设置任何包含路径时开始扫描。
-rust_all_paths_referenced = 无法在所有包含路径都设置为引用路径时开始扫描，您需要禁用输入路径旁边的引用复选框。
+rust_no_included_paths = 无法在未设置任何包含路径时开始扫描。.
+rust_all_paths_referenced = 无法在所有包含路径都设置为引用路径时开始扫描，您需要禁用输入路径旁边的引用复选框。.
 rust_found_empty_folders = 找到了{ $items_found }个空文件夹在{ $time }时间内
 rust_found_empty_files = 找到了 { $items_found } 个空文件在 { $time }
 rust_found_similar_images = 在 { $groups } 组中找到 { $items_found } 相似的图像文件在 { $time }
@@ -51,7 +51,7 @@ rust_found_similar_videos = 在 { $groups } 组中找到 { $items_found } 类似
 rust_found_similar_music_files = 在 { $groups } 组中找到 { $items_found } 类似的音乐文件在 { $time }
 rust_found_invalid_symlinks = 找到了 { $items_found } 无效的符号链接在 { $time }
 rust_found_temporary_files = 找到了 { $items_found } 个临时文件，在 { $time }
-rust_no_file_type_selected = 找不到没有选定文件类型的损坏文件。
+rust_no_file_type_selected = 找不到没有选定文件类型的损坏文件。.
 rust_found_broken_files = 找到 { $items_found } 个损坏的文件，从 { $size } 到 { $time }
 rust_found_bad_extensions = 在 { $items_found } 文件扩展名有坏的 { $time }
 rust_found_bad_names = 找到 { $items_found } 个名称不正确的文件在 { $time }
@@ -94,22 +94,22 @@ rust_no_videos_optimized = 未选择任何视频进行优化
 rust_no_exif_cleaned = 未选择任何文件进行EXIF清理
 rust_extracted_exif_tags = 从 { $items_stats } 文件中提取 EXIF 标签 ({ $size_stats })
 rust_delete_confirmation = 您确定要删除选定的项目吗？
-rust_delete_confirmation_number_simple = 选择了 { $items } 个项目。
-rust_delete_confirmation_number_groups = { $items } 项目在 { $groups } 组中选定。
-rust_delete_confirmation_selected_all_in_group = 在 { $groups } 组中选择的所有项目。
+rust_delete_confirmation_number_simple = 选择了 { $items } 个项目。.
+rust_delete_confirmation_number_groups = { $items } 项目在 { $groups } 组中选定。.
+rust_delete_confirmation_selected_all_in_group = 在 { $groups } 组中选择的所有项目。.
 rust_move_confirmation = 确定您是否要移动所选项目？
-rust_move_confirmation_number_simple = { $items } 项目已选定。
+rust_move_confirmation_number_simple = { $items } 项目已选定。.
 rust_clean_exif_confirmation = 您确定要从所选项目删除 EXIF 数据吗？
-rust_clean_exif_confirmation_number_simple = { $items } 项目已选定。
+rust_clean_exif_confirmation_number_simple = { $items } 项目已选定。.
 clean_exif_overwrite_files_text = 覆盖文件
 rust_optimize_video_confirmation = 您确定要优化所选视频吗？
-rust_optimize_video_confirmation_number_simple = { $items } 项目已选定。
+rust_optimize_video_confirmation_number_simple = { $items } 项目已选定。.
 rust_hardlink_confirmation = 您确定要为所选项目创建硬链接吗？
-rust_hardlink_confirmation_number_simple = { $items } 项目已选定。
+rust_hardlink_confirmation_number_simple = { $items } 项目已选定。.
 rust_symlink_confirmation = 您确定要为所选项目创建符号链接吗？
-rust_symlink_confirmation_number_simple = { $items } 项目已选定。
+rust_symlink_confirmation_number_simple = { $items } 项目已选定。.
 rust_rename_confirmation = 您确定要重命名所选项目吗？
-rust_rename_confirmation_number_simple = { $items } 项目已选定。
+rust_rename_confirmation_number_simple = { $items } 项目已选定。.
 rust_cache_processed_files = 已处理 { $files } 缓存文件
 rust_cache_entries_stats = 移除了 { $removed } 条目中的所有 { $all }，{ $left } 条还剩
 rust_cache_size_reduced = 减少缓存文件大小为 { $size }
@@ -158,8 +158,8 @@ delete_button = 删除
 save_button = 保存
 sort_button = 排序
 rename_button = 重命名：
-motto = 这个程序可以自由使用，并且将永远是。\n详情请参阅MIT/GPL许可证。
-unicorn = 你不能看到独角兽，但独角兽总是看到你。
+motto = 这个程序可以自由使用，并且将永远是。\n详情请参阅MIT/GPL许可证。.
+unicorn = 你不能看到独角兽，但独角兽总是看到你。.
 repository = 存储库
 instruction = 说明
 donation = 捐助
@@ -228,7 +228,7 @@ subsettings_broken_files_pdf = 帕德夫
 subsettings_broken_files_archive = 存档
 subsettings_broken_files_image = 图片
 subsettings_broken_files_video = 视频
-subsettings_broken_files_video_info = 使用ffmpeg/ffprobe。 速度较慢，并且可能检测到刻板的错误，即使文件播放正常。
+subsettings_broken_files_video_info = 使用ffmpeg/ffprobe。 速度较慢，并且可能检测到刻板的错误，即使文件播放正常。.
 subsettings_bad_names_issues = 文件检查
 subsettings_bad_names_uppercase_extension = 大写延伸
 subsettings_bad_names_uppercase_extension_hint = 查找包含大写字母的扩展名的文件（例如：.JPG、.Mp3）并建议使用小写版本
@@ -269,7 +269,7 @@ settings_duplicate_use_prehash = 使用预设的
 settings_duplicate_minimal_prehash_cache_size = 缓存文件最小大小 - Prehash (KB)
 settings_similar_images_show_image_preview = 图像预览
 settings_application_scale_text = 应用规模
-settings_application_scale_hint_text = 当手动缩放启用时，这允许您选择自定义缩放比例，但完全禁用基于显示器 DPI 的自动缩放。
+settings_application_scale_hint_text = 当手动缩放启用时，这允许您选择自定义缩放比例，但完全禁用基于显示器 DPI 的自动缩放。.
 settings_restart_required_scale_text = 您需要重启应用以应用缩放更改
 settings_use_manual_application_scale_text = 使用手动应用刻度
 settings_video_thumbnails_preview = 图片预览
@@ -290,7 +290,7 @@ settings_video_thumbnails_position = 视频缩图位置（%）
 settings_video_thumbnails_generate_grid = 生成缩图网格而不是单个图像
 settings_video_thumbnails_generate_grid_hint = 生成多个图像在网格中比生成单个缩略图要慢很多
 settings_video_thumbnails_grid_tiles_per_side = 缩略图网格每侧瓷砖数量
-settings_video_thumbnails_grid_tiles_per_side_hint = 网格中每侧缩图瓦片的数量。例如，选择 2 会创建一个 2 x 2 网格，从而产生一个由 4 张图像组成的单个缩图。
+settings_video_thumbnails_grid_tiles_per_side_hint = 网格中每侧缩图瓦片的数量。例如，选择 2 会创建一个 2 x 2 网格，从而产生一个由 4 张图像组成的单个缩图。.
 settings_similar_images_tool = 相似图像工具
 settings_general_settings = 常规设置
 settings_cache_header_text = 缓存设置
@@ -321,7 +321,7 @@ settings_cache_number_size_text = 缓存文件大小: { $size }, 文件数量: {
 settings_video_thumbnails_number_size_text = 视频缩略图大小： { $size }，文件数量： { $number }
 settings_log_number_size_text = 日志文件大小: { $size }, 文件数量: { $number }
 popup_clean_cache_title_text = 清除过时缓存
-popup_clean_cache_confirmation_text = 您确定要清理过时的缓存条目吗？ 这将删除不再存在或已修改的文件缓存条目。
+popup_clean_cache_confirmation_text = 您确定要清理过时的缓存条目吗？ 这将删除不再存在或已修改的文件缓存条目。.
 popup_clean_cache_progress_text = 处理缓存文件：
 popup_clean_cache_current_file_text = 当前文件：
 popup_clean_cache_file_progress_text = 当前文件进度：
@@ -345,7 +345,7 @@ subsettings_video_optimizer_excluded_codecs = 排除编解码器
 subsettings_video_optimizer_video_quality = 视频质量 (CRF)
 subsettings_reset = 重置
 subsettings_exif_ignored_tags_text = 忽略的标签：
-subsettings_exif_ignored_tags_hint_text = 逗号分隔的排除扫描的标签列表（例如：GPS、缩图）。某些标签，如 TIFF 文件中的 ImageWidth，被隐藏以防止损坏图像。
+subsettings_exif_ignored_tags_hint_text = 逗号分隔的排除扫描的标签列表（例如：GPS、缩图）。某些标签，如 TIFF 文件中的 ImageWidth，被隐藏以防止损坏图像。.
 clean_button_text = 清洁
 clean_text = 清理EXIF数据
 clean_confirmation_text = 您确定要从所选项目删除 EXIF 数据吗？

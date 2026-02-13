@@ -2,12 +2,12 @@
 rust_init_error_title = 應用程式啟動期間發生嚴重錯誤
 rust_init_error_message = 
         當啟動應用程式時發生了嚴重錯誤：
-
+ 
         { $error_message }
-
+ 
         這可能是因為缺少或損壞的 OpenGL/Vulkan 驅動程式、在虛擬機器中或在 Krokiet 或其其中一個函式庫中執行所致，或 Krokiet 或其函式庫中的錯誤。
-
-        您可以嘗試執行不同的建置（skia_opengl、skia_vulkan、femtovg_opengl - 預設）或使用軟體渲染器，看看是否能解決問題。
+ 
+        您可以嘗試執行不同的建置（skia_opengl、skia_vulkan、femtovg_opengl - 預設）或使用軟體渲染器，看看是否能解決問題。.
 rust_loaded_preset = 已載入預設設定 { $preset_idx }
 rust_file_already_exists = 檔案 "{ $file }" 已存在，不會被覆蓋。
 rust_error_removing_file_after_copy = 移除檔案 "{ $file }" 發生錯誤 (將其複製到不同分割區後)，原因：{ $reason}
@@ -42,8 +42,8 @@ rust_checked_videos = 已檢閱 { $items_stats } 影片 ({ $size_stats })
 rust_analyzed_partial_hash = 已分析 { $items_stats } 個檔案的部分雜湊（{ $size_stats }）
 rust_analyzed_full_hash = 已分析 { $items_stats } 個檔案的完整雜湊（{ $size_stats }）
 rust_failed_to_rename_file = 無法將檔案 { $old_path } 重新命名為 { $new_path }，錯誤：{ $error }
-rust_no_included_paths = 無法在未設定任何包含路徑時開始掃描。
-rust_all_paths_referenced = 無法在所有包含路徑都設定為參照路徑時開始掃描，您需要停選啟動參照檢查方塊旁邊的輸入路徑。
+rust_no_included_paths = 無法在未設定任何包含路徑時開始掃描。.
+rust_all_paths_referenced = 無法在所有包含路徑都設定為參照路徑時開始掃描，您需要停選啟動參照檢查方塊旁邊的輸入路徑。.
 rust_found_empty_folders = 在 { $time } 內找到 { $items_found } 個空資料夾
 rust_found_empty_files = 在 { $time } 內找到 { $items_found } 個空檔案
 rust_found_similar_images = 在 { $time } 內找到 { $items_found } 個相似圖檔，共 { $groups } 組
@@ -51,7 +51,7 @@ rust_found_similar_videos = 在 { $time } 內找到 { $items_found } 個相似�
 rust_found_similar_music_files = 在 { $time } 內找到 { $items_found } 個相似音樂檔案，共 { $groups } 組
 rust_found_invalid_symlinks = 在 { $time } 內找到 { $items_found } 個無效符號連結
 rust_found_temporary_files = 在 { $time } 內找到 { $items_found } 個暫存檔案
-rust_no_file_type_selected = 無法找到損壞檔案，請先選擇檔案類型。
+rust_no_file_type_selected = 無法找到損壞檔案，請先選擇檔案類型。.
 rust_found_broken_files = 在 { $time } 內找到 { $items_found } 個損壞檔案，佔用 { $size }
 rust_found_bad_extensions = 在 { $time } 內找到 { $items_found } 個副檔名錯誤的檔案
 rust_found_bad_names = 找到 { $items_found } 個檔名有問題，在 { $time }
@@ -94,22 +94,22 @@ rust_no_videos_optimized = 未選擇任何影片進行優化
 rust_no_exif_cleaned = 沒有選擇任何檔案用於 EXIF 清理
 rust_extracted_exif_tags = 從 { $items_stats } 檔案中提取 EXIF 標籤 ({ $size_stats })
 rust_delete_confirmation = 您確定要刪除所選項目嗎？
-rust_delete_confirmation_number_simple = 選取了 { $items } 個項目。
-rust_delete_confirmation_number_groups = 在 { $groups } 個群組中選取了 { $items } 個項目。
-rust_delete_confirmation_selected_all_in_group = 已選取 { $groups } 個群組中的所有項目。
+rust_delete_confirmation_number_simple = 選取了 { $items } 個項目。.
+rust_delete_confirmation_number_groups = 在 { $groups } 個群組中選取了 { $items } 個項目。.
+rust_delete_confirmation_selected_all_in_group = 已選取 { $groups } 個群組中的所有項目。.
 rust_move_confirmation = 確定您是否要移動所選的項目？
-rust_move_confirmation_number_simple = { $items } 項目已選取。
+rust_move_confirmation_number_simple = { $items } 項目已選取。.
 rust_clean_exif_confirmation = 您確定要從所選項目中移除 EXIF 數據嗎？
-rust_clean_exif_confirmation_number_simple = { $items } 項目已選取。
+rust_clean_exif_confirmation_number_simple = { $items } 項目已選取。.
 clean_exif_overwrite_files_text = 覆蓋檔案
 rust_optimize_video_confirmation = 您確定要優化所選取的影片嗎？
-rust_optimize_video_confirmation_number_simple = { $items } 項目已選取。
+rust_optimize_video_confirmation_number_simple = { $items } 項目已選取。.
 rust_hardlink_confirmation = 您確定要為所選項目建立硬連結嗎？
-rust_hardlink_confirmation_number_simple = { $items } 項目已選取。
+rust_hardlink_confirmation_number_simple = { $items } 項目已選取。.
 rust_symlink_confirmation = 確定您是否想為所選項目建立對象鏈接？
-rust_symlink_confirmation_number_simple = { $items } 項目已選取。
+rust_symlink_confirmation_number_simple = { $items } 項目已選取。.
 rust_rename_confirmation = 確定您是否要更名所選取的項目？
-rust_rename_confirmation_number_simple = { $items } 項目已選取。
+rust_rename_confirmation_number_simple = { $items } 項目已選取。.
 rust_cache_processed_files = 已處理 { $files } 緩存檔案
 rust_cache_entries_stats = 移除 { $removed } 條出於所有 { $all }，{ $left } 條剩餘
 rust_cache_size_reduced = 減少緩存檔案大小於 { $size }
@@ -158,8 +158,8 @@ delete_button = 刪除
 save_button = 儲存
 sort_button = 排序
 rename_button = 重新命名
-motto = 這個程式免費供使用，並且永遠會如此。\n請參閱 MIT/GPL 授權以取得詳細資料。
-unicorn = 你可能不會看獨角獸，但獨角獸總是看著你。
+motto = 這個程式免費供使用，並且永遠會如此。\n請參閱 MIT/GPL 授權以取得詳細資料。.
+unicorn = 你可能不會看獨角獸，但獨角獸總是看著你。.
 repository = 儲存庫
 instruction = 說明
 donation = 贊助
@@ -228,7 +228,7 @@ subsettings_broken_files_pdf = PDF
 subsettings_broken_files_archive = 歸檔
 subsettings_broken_files_image = 影像
 subsettings_broken_files_video = 影片
-subsettings_broken_files_video_info = 使用 ffmpeg/ffprobe。 相當慢，且可能偵測到刻板錯誤，即使檔案播放正常。
+subsettings_broken_files_video_info = 使用 ffmpeg/ffprobe。 相當慢，且可能偵測到刻板錯誤，即使檔案播放正常。.
 subsettings_bad_names_issues = 檔案檢查
 subsettings_bad_names_uppercase_extension = 大寫延伸
 subsettings_bad_names_uppercase_extension_hint = 尋找具有大寫字母的檔案名稱（例如：.JPG、.Mp3）並建議使用小寫字母版本
@@ -269,7 +269,7 @@ settings_duplicate_use_prehash = 使用預雜湊
 settings_duplicate_minimal_prehash_cache_size = 快取檔案的最小大小 - 預雜湊（KB）
 settings_similar_images_show_image_preview = 圖像預覽
 settings_application_scale_text = 應用規模
-settings_application_scale_hint_text = 當手動縮放已啟用時，這允許您選擇自訂縮放比例，但完全停用根據螢幕 DPI 進行的自動縮放。
+settings_application_scale_hint_text = 當手動縮放已啟用時，這允許您選擇自訂縮放比例，但完全停用根據螢幕 DPI 進行的自動縮放。.
 settings_restart_required_scale_text = 您需要重新啟動應用程式以應用比例變更。
 settings_use_manual_application_scale_text = 使用手動應用量表
 settings_video_thumbnails_preview = 圖像預覽
@@ -290,7 +290,7 @@ settings_video_thumbnails_position = 視頻中縮圖位置 (%)
 settings_video_thumbnails_generate_grid = 生成縮圖網格而不是單張圖片
 settings_video_thumbnails_generate_grid_hint = 生成多個圖片為網格比生成單個縮圖要慢很多
 settings_video_thumbnails_grid_tiles_per_side = 縮圖網格每側瓷磚數量
-settings_video_thumbnails_grid_tiles_per_side_hint = 網格每側縮圖瓦片的數量。例如，選擇 2 會產生一個 2 x 2 網格，結果會產生一個由 4 張圖片組成的單一縮圖。
+settings_video_thumbnails_grid_tiles_per_side_hint = 網格每側縮圖瓦片的數量。例如，選擇 2 會產生一個 2 x 2 網格，結果會產生一個由 4 張圖片組成的單一縮圖。.
 settings_similar_images_tool = 相似圖像工具
 settings_general_settings = 一般設定
 settings_cache_header_text = 快取設定
@@ -321,7 +321,7 @@ settings_cache_number_size_text = 快取檔案大小：{ $size }，檔案數量�
 settings_video_thumbnails_number_size_text = 影片縮圖大小：{ $size }，檔案數量：{ $number }
 settings_log_number_size_text = 日誌檔案大小：{ $size }，檔案數量：{ $number }
 popup_clean_cache_title_text = 清除過時快取
-popup_clean_cache_confirmation_text = 您確定要清除過時快取項目嗎？這將會移除不再存在或已修改的檔案的快取項目。
+popup_clean_cache_confirmation_text = 您確定要清除過時快取項目嗎？這將會移除不再存在或已修改的檔案的快取項目。.
 popup_clean_cache_progress_text = 處理快取檔案：
 popup_clean_cache_current_file_text = 目前檔案：
 popup_clean_cache_file_progress_text = 目前檔案進度：
@@ -345,7 +345,7 @@ subsettings_video_optimizer_excluded_codecs = 排除碼型
 subsettings_video_optimizer_video_quality = 影片品質 (CRF)
 subsettings_reset = 重置
 subsettings_exif_ignored_tags_text = 忽略的標籤：
-subsettings_exif_ignored_tags_hint_text = 逗點分隔清單，列出不應從掃描中排除的標籤（例如：GPS、小圖樣）。某些標籤，例如 TIFF 檔案中的 ImageWidth，會被隱藏以防止破壞圖片。
+subsettings_exif_ignored_tags_hint_text = 逗點分隔清單，列出不應從掃描中排除的標籤（例如：GPS、小圖樣）。某些標籤，例如 TIFF 檔案中的 ImageWidth，會被隱藏以防止破壞圖片。.
 clean_button_text = 清潔
 clean_text = 清除 EXIF 數據
 clean_confirmation_text = 您確定要從所選項目中移除 EXIF 數據嗎？

@@ -376,11 +376,11 @@ settings_multiple_clear_cache_button = إزالة النتائج القديمة 
 
 ## Duplicates
 
-settings_duplicates_hide_hard_link_button_tooltip =
+settings_duplicates_hide_hard_link_button_tooltip = 
     يختبئ جميع الملفات باستثناء واحد، إذا أشار كل منها إلى نفس البيانات (وهو متصل بشكل صلب).  
     
     مثال: في حالة وجود سبع ملفات على дисك مترابطة ببيانات معينة وملف مختلف يحتوي على نفس البيانات ولكن inode مختلف，则继续翻译剩下的部分：
-    ملف inode، ثم في مستكشف الملفات المكرر، سيتم عرض只有一个唯一文件和一个来自硬链接的文件。
+    ملف inode، ثم في مستكشف الملفات المكرر، سيتم عرض只有一个唯一文件和一个来自硬链接的文件。.
 settings_duplicates_minimal_size_entry_tooltip =
     설정할 최소 파일 크기를 캐시에 저장할 것입니다.
     작은 값을 선택하면 더 많은 기록이 생성됩니다. 이는 검색 속도가 빨라질 것이지만 캐시 로드/저장은 느려질 수 있습니다.

@@ -218,15 +218,15 @@ popover_select_custom = انتخاب خاصیتutzer Merkel
 popover_unselect_custom = غير فردی را بیگانه کنید
 popover_select_all_images_except_biggest = انتخاب همه از بیشترین به جز خود را حذف کنید
 popover_select_all_images_except_smallest = انتخاب همه می‌شود به جز کوچکترین
-popover_custom_path_check_button_entry_tooltip =
+popover_custom_path_check_button_entry_tooltip = 
     انتخاب رکوردها با مسیر.
     
     مثال استفاده:
-    /home/pimpek/rzecz.txt را با /home/pim* پیدا کنید.
-popover_custom_name_check_button_entry_tooltip =
+    /home/pimpek/rzecz.txt را با /home/pim* پیدا کنید
+popover_custom_name_check_button_entry_tooltip = 
     فایل‌ها را با نام‌های فایل انتخاب کنید.
     
-    رایکسی از /usr/ping/pong.txt با *ong* می‌تواند پیدا شود.
+    رایکسی از /usr/ping/pong.txt با *ong* می‌تواند پیدا شود
 popover_custom_regex_check_button_entry_tooltip =
     انتخاب رکوردها با استفاده از Regular Expression مشخص شده.
     
@@ -295,7 +295,7 @@ bottom_move_button_tooltip =
     وقتی سعی می‌کنید دو فایل با نام تکراری را به مسیری منتقل کنید، دومی با خطا مواجه خواهد شد.
 bottom_sort_button_tooltip = فرمت فایل‌ها/دسته‌بندی‌ها را بر اساس روش مورد انتخاب تنظیم کند.
 bottom_compare_button_tooltip = مقایسه تصاویر در گروه را انجام دهید.
-bottom_show_errors_tooltip = نمایش/起底部文本面板。
+bottom_show_errors_tooltip = نمایش/起底部文本面板。.
 bottom_show_upper_notebook_tooltip = نمایش/پنهان کردن پanel بالایی نوت‌بук.
 # Progress Window
 progress_stop_button = وقفه
@@ -329,10 +329,10 @@ settings_use_rust_preview_tooltip =
     در سیستم‌های غیر-Linux، توصیه می‌شود این گزینه را استفاده کنید، زیرا gtk-pixbuf همیشه در آنجا دسترسی پذیر نیستند بنابراین تعطیل کردن این گزینه باعث می‌شود پیش‌نمای برخی تصاویر بارگذاری نشوند.
 settings_label_restart = شما باید برنامه را از نو انیمود تا تنظیمات را اعمال کنید!
 settings_ignore_other_filesystems = سایر سیستم‌های فایل را نادیده بگیرید (فقط لینوکس)
-settings_ignore_other_filesystems_tooltip =
+settings_ignore_other_filesystems_tooltip = 
     پروژه فایل‌هایی را نادیده می‌گیرد که در سیستم‌فایل‌های مشترک با دایرکتوری‌های جستجو نیستند.
     
-    به طور مشابه عملکرد -xdev گزینه در دستور find در روی سیستم عامل لینوکس است.
+    به طور مشابه عملکرد -xdev گزینه در دستور find در روی سیستم عامل لینوکس است
 settings_save_at_exit_button_tooltip = هنگام بسته شدن برنامه، تنظیمات را در فایل ذخیره کنید.
 settings_load_at_start_button_tooltip =
     به زمانی که برنامه را می‌افزایید، تنظیمات را از فایل بارشید.
@@ -427,7 +427,7 @@ settings_folder_cache_open = پوشه کاشی را باز کنید
 settings_folder_settings_open = پوشه تنظیمات را باز کنید
 # Compute results
 compute_stopped_by_user = جستجو توسط کاربر متوقف شد
-compute_found_duplicates_hash_size = یافته { $number_files } کپی برابر را در { $number_groups } گروه که { $size } را در { $time } صرف کرد.
+compute_found_duplicates_hash_size = یافته { $number_files } کپی برابر را در { $number_groups } گروه که { $size } را در { $time } صرف کرد
 compute_found_duplicates_name = Duplication { $number_files } فایل در { $number_groups } گروه در { $time } پیدا شد پیدا شد
 compute_found_empty_folders = فولدرهای خالی پیدا شد { $number_files } در زمان { $time }
 compute_found_empty_files = فایل‌های خالی پیدا شد: { $number_files } در زمان: { $time }
@@ -435,7 +435,7 @@ compute_found_big_files = فایل‌های بزرگ { $number_files } تا در
 compute_found_temporary_files = فایل‌های موقت { $number_files } تا { $time } پیدا شدند
 compute_found_images = { $number_files } تصویر مرتبط در { $number_groups } گروه پیدا شد در { $time }
 compute_found_videos = { $number_files } ویدیو مشابه در { $number_groups } گروه پیدا شد در زمان { $time }
-compute_found_music = فایل‌های موسیقی مشابه { $number_files } را در { $number_groups } گروه و در زمان { $time } پیدا کردیم.
+compute_found_music = فایل‌های موسیقی مشابه { $number_files } را در { $number_groups } گروه و در زمان { $time } پیدا کردیم
 compute_found_invalid_symlinks = { $number_files } لینک معلق نامعتبر در { $time } پیدا شد
 compute_found_broken_files = فایل‌های شکسته { $number_files } را در { $time } پیدا کردم
 compute_found_bad_extensions = فایل‌هایی با پسوند نامعتبر در { $time } شماره { $number_files } پیدا کرد
@@ -501,7 +501,7 @@ delete_items_label = { $items } فایل‌هایی خواهند پاک شد.
 delete_items_groups_label = { $items } فایل از { $groups } گروه خواهند شوی.
 hardlink_failed = به ترکیب مجدد { $name } به { $target } امکان پذیر نشد، دلیل { $reason }
 hard_sym_invalid_selection_title_dialog = بازخورد نامعتبر با گروه‌هایی از جمله
-hard_sym_invalid_selection_label_1 = در برخی گروه‌ها تنها یک رکورد انتخاب شده است و آن مورد忽略。
+hard_sym_invalid_selection_label_1 = در برخی گروه‌ها تنها یک رکورد انتخاب شده است و آن مورد忽略。.
 hard_sym_invalid_selection_label_2 = برای توانا به صورت سخت/هم لینک این فایل‌ها، حداقل دو نتیجه در گروه باید انتخاب شوند.
 hard_sym_invalid_selection_label_3 = اولین در گروه به عنوان اصلی شناخته می‌شود و تغییر نمی‌کند اما دوم و بعدی عرضه شده‌اند.
 hard_sym_link_title_dialog = تأیید لینک

@@ -158,7 +158,7 @@ main_label_size_bytes_tooltip = Dimensione dei file utilizzati nella ricerca
 upper_tree_view_included_folder_column_title = Cartelle di Ricerca
 upper_tree_view_included_reference_column_title = Cartelle di Riferimento
 upper_recursive_button = Ricorsivo
-upper_recursive_button_tooltip = Se selezionato, cerca anche tra i file contenuti nelle cartelle figlie delle Cartelle di Riferimento
+upper_recursive_button_tooltip = Se selezionato, cerca anche tra i file contenuti nelle cartelle figlie delle Cartelle di Riferimento.
 upper_manual_add_included_button = Aggiungi Manualmente
 upper_add_included_button = Aggiungi
 upper_remove_included_button = Rimuovi
@@ -171,16 +171,16 @@ upper_manual_add_included_button_tooltip =
     È possibile aggiungere più percorsi contemporaneamente separarli da ;
     
     /home/roman;/home/rozkaz aggiungerà due directory /home/roman e /home/rozkaz
-upper_add_included_button_tooltip = Aggiungi nuova cartella per la ricerca
-upper_remove_included_button_tooltip = Cancella cartella dalla ricerca
+upper_add_included_button_tooltip = Aggiungi nuova cartella per la ricerca.
+upper_remove_included_button_tooltip = Cancella cartella dalla ricerca.
 upper_manual_add_excluded_button_tooltip =
     Aggiungi manualmente i nomi delle cartelle da escludere.
     
     È possibile aggiungere più percorsi contemporaneamente separarli da ;
     
     /home/roman;/home/krokiet aggiungerà due directory /home/roman e /home/keokiet
-upper_add_excluded_button_tooltip = Aggiunge una cartella da escludere dalla ricerca
-upper_remove_excluded_button_tooltip = Rimuove una cartella da quelle escluse
+upper_add_excluded_button_tooltip = Aggiunge una cartella da escludere dalla ricerca.
+upper_remove_excluded_button_tooltip = Rimuove una cartella da quelle escluse.
 upper_notebook_items_configuration = Configurazione degli elementi
 upper_notebook_excluded_directories = Percorsi Esclusi
 upper_notebook_included_directories = Percorsi Inclusi
@@ -269,7 +269,7 @@ bottom_sort_button = Ordina
 bottom_compare_button = Confronta
 bottom_search_button_tooltip = Avvia ricerca
 bottom_select_button_tooltip = Seleziona record. Solo i file/cartelle selezionati possono essere elaborati in seguito.
-bottom_delete_button_tooltip = Cancella i file/cartelle selezionati
+bottom_delete_button_tooltip = Cancella i file/cartelle selezionati.
 bottom_save_button_tooltip = Salva i risultati della ricerca in un file
 bottom_symlink_button_tooltip =
     Crea collegamenti simbolici.
@@ -390,7 +390,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     È disabilitato per impostazione predefinita perché può causare rallentamenti in alcune situazioni.
     
     Si consiglia vivamente di usarlo durante la scansione di centinaia di migliaia o milioni di file, perché può accelerare la ricerca di più volte.
-settings_duplicates_prehash_minimal_entry_tooltip = Dimensione minima delle voci della cache
+settings_duplicates_prehash_minimal_entry_tooltip = Dimensione minima delle voci della cache.
 settings_duplicates_hide_hard_link_button = Nascondi collegamenti rigidi
 settings_duplicates_prehash_checkbutton = Utilizza la cash prehash
 settings_duplicates_minimal_size_cache_label = Dimensione minima dei file (in byte) salvati nella cache
@@ -473,7 +473,7 @@ progress_all_stages = Tutte le fasi:{ "  " }
 saving_loading_saving_success = Salvataggio configurazione su file { $name }.
 saving_loading_saving_failure = Impossibile salvare i dati di configurazione nel file { $name }, motivo { $reason }.
 saving_loading_reset_configuration = La configurazione corrente è stata cancellata.
-saving_loading_loading_success = Caricamento configurazione da file avvenuto con successo
+saving_loading_loading_success = Caricamento configurazione da file avvenuto con successo.
 saving_loading_failed_to_create_config_file = Impossibile creare il file di configurazione "{ $path }", motivo "{ $reason }".
 saving_loading_failed_to_read_config_file = Impossibile caricare la configurazione da "{ $path }" perché non esiste o non è un file.
 saving_loading_failed_to_read_data_from_file = Impossibile leggere il file "{ $path }", motivo "{ $reason }".

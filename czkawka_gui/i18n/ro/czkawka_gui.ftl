@@ -182,7 +182,7 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Adauga directorul pentru a fi exclus in cautare.
 upper_remove_excluded_button_tooltip = Ştergeţi directorul din excludere.
 upper_notebook_items_configuration = Configurare articole
-upper_notebook_excluded_directories = Puteți exclude căile.
+upper_notebook_excluded_directories = Puteți exclude căile
 upper_notebook_included_directories = Include Puteți
 upper_allowed_extensions_tooltip =
     Extensiile permise trebuie separate prin virgulă (implicit toate sunt disponibile).
@@ -279,11 +279,11 @@ bottom_hardlink_button_tooltip =
     Creează link-uri hardware.
     Funcţionează numai atunci când cel puţin două rezultate sunt selectate într-un grup.
     Prima este neschimbată, iar a doua și mai târziu sunt greu legate mai întâi.
-bottom_hardlink_button_not_available_tooltip =
+bottom_hardlink_button_not_available_tooltip = 
     Creează link-uri hardware.
     Butonul este dezactivat, deoarece hardlink-urile nu pot fi create.
     Legăturile fizice funcționează doar cu privilegii de administrator pe Windows, așa că asigură-te că rulezi aplicația ca administrator.
-    Dacă aplicația funcționează deja cu astfel de privilegii verificați pentru probleme similare pe Giwhere,
+    Dacă aplicația funcționează deja cu astfel de privilegii verificați pentru probleme similare pe Giwhere,.
 bottom_move_button_tooltip =
     Mută fișierele în directorul ales.
     Copiază toate fișierele în director fără a păstra directorul arborescent.
@@ -338,7 +338,7 @@ settings_confirm_link_button_tooltip = Afișați caseta de confirmare când face
 settings_confirm_group_deletion_button_tooltip = Arată dialogul de avertizare când se încearcă ștergerea tuturor înregistrărilor din grup.
 settings_show_text_view_button_tooltip = Arată panoul de text în partea de jos a interfeței utilizatorului.
 settings_use_cache_button_tooltip = Foloseşte cache-ul fişierelor.
-settings_save_also_as_json_button_tooltip = Salvează cache-ul în formatul JSON (citibil uman). Este posibil să îi modifici conținutul. Geocutia din acest fişier va fi citită automat de aplicaţie dacă nu există geocutie în format binar (cu extensie bin)
+settings_save_also_as_json_button_tooltip = Salvează cache-ul în formatul JSON (citibil uman). Este posibil să îi modifici conținutul. Geocutia din acest fişier va fi citită automat de aplicaţie dacă nu există geocutie în format binar (cu extensie bin).
 settings_use_trash_button_tooltip = Mută fișierele la gunoi în loc să le ștergi definitiv.
 settings_language_label_tooltip = Limba interfeței utilizatorului.
 settings_save_at_exit_button = Salvați configurația la închiderea aplicației
@@ -390,7 +390,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     este dezactivat implicit deoarece poate cauza încetiniri în unele situații.
     
     Este foarte recomandat sa il utilizezi cand scanezi sute de mii sau milioane de fisiere, pentru ca poate accelera cautarea de mai multe ori.
-settings_duplicates_prehash_minimal_entry_tooltip = Dimensiunea minimă a intrării în cache
+settings_duplicates_prehash_minimal_entry_tooltip = Dimensiunea minimă a intrării în cache.
 settings_duplicates_hide_hard_link_button = Ascunde link-urile fizice
 settings_duplicates_prehash_checkbutton = Foloseste cache-ul prehash
 settings_duplicates_minimal_size_cache_label = Dimensiunea minimă a fişierelor (în octeţi) salvate în cache

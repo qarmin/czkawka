@@ -2,12 +2,12 @@
 rust_init_error_title = アプリの起動中に致命的なエラーが発生しました
 rust_init_error_message = 
         アプリケーションの起動中に、次のエラーが発生しました：
-
+ 
         { $error_message }
-
+ 
         これは、OpenGL/Vulkanドライバが不足しているか、または動作していないこと、仮想マシンでアプリケーションを実行していること、またはKrokietまたはそのライブラリ内のバグによって引き起こされた可能性があります。
-
-        問題が解決するかどうかを確認するために、異なるビルド（skia_opengl、skia_vulkan、femtovg_opengl - デフォルト）を実行するか、ソフトウェアレンダラーを使用してみてください。
+ 
+        問題が解決するかどうかを確認するために、異なるビルド（skia_opengl、skia_vulkan、femtovg_opengl - デフォルト）を実行するか、ソフトウェアレンダラーを使用してみてください。.
 rust_loaded_preset = プリセット { $preset_idx }を読み込みました
 rust_file_already_exists = ファイル "{ $file }" は既に存在し、上書きされません。
 rust_error_removing_file_after_copy = ファイル "{ $file }" の削除中にエラー (別のパーティションにコピーされた後)、理由: { $reason }
@@ -42,8 +42,8 @@ rust_checked_videos = チェック済み { $items_stats } ビデオ ({ $size_sta
 rust_analyzed_partial_hash = { $items_stats } ファイルの部分ハッシュを分析しました ({ $size_stats })
 rust_analyzed_full_hash = { $items_stats } ファイルの完全ハッシュを分析しました ({ $size_stats })
 rust_failed_to_rename_file = ファイル { $old_path } を { $new_path }にリネームできませんでした。エラー: { $error }
-rust_no_included_paths = パスが設定されていませんので、スキャンを開始できません。
-rust_all_paths_referenced = すべての含まれるパスを参照パスとして設定するとスキャンを開始できません。入力パスの横にある参照チェックボックスを無効にする必要があります。
+rust_no_included_paths = パスが設定されていませんので、スキャンを開始できません。.
+rust_all_paths_referenced = すべての含まれるパスを参照パスとして設定するとスキャンを開始できません。入力パスの横にある参照チェックボックスを無効にする必要があります。.
 rust_found_empty_folders = 空のフォルダが { $items_found } 個見つかりました ({ $time })
 rust_found_empty_files = 空のファイルが { $items_found } 個見つかりました ({ $time })
 rust_found_similar_images = { $items_found } 同様の画像ファイルが { $groups } グループ内の { $time } で見つかりました
@@ -55,7 +55,7 @@ rust_found_similar_music_files =
     見つかった { $items_found } 類似音楽ファイルは { $groups } レコードにまたがり、時間は { $time } です。
 rust_found_invalid_symlinks = 無効なシンボリックリンクが { $items_found } 個見つかりました ({ $time })
 rust_found_temporary_files = 一時ファイルが { $items_found } 個見つかりました ({ $time })
-rust_no_file_type_selected = 選択したファイルタイプがない壊れたファイルを見つけることができません。
+rust_no_file_type_selected = 選択したファイルタイプがない壊れたファイルを見つけることができません。.
 rust_found_broken_files = 見つかった壊れたファイル数は{ $items_found }で、サイズは{ $size }で、時間は{ $time }took
 rust_found_bad_extensions = 無効な拡張子を持つファイルが { $items_found } 個見つかりました ({ $time })
 rust_found_bad_names = { $items_found } ファイルを { $time } で見つけました。
@@ -98,22 +98,22 @@ rust_no_videos_optimized = 動画の最適化には選択された動画があ�
 rust_no_exif_cleaned = EXIFクリーニング用のファイルが選択されていません
 rust_extracted_exif_tags = 抽出 { $items_stats } ファイル ({ $size_stats }) から EXIF タグ
 rust_delete_confirmation = 選択したアイテムを削除してもよろしいですか？
-rust_delete_confirmation_number_simple = { $items } アイテムを選択しました。
-rust_delete_confirmation_number_groups = { $items } 個のグループで { $groups } 個のアイテムが選択されました。
-rust_delete_confirmation_selected_all_in_group = { $groups } グループで選択されたすべてのアイテム。
+rust_delete_confirmation_number_simple = { $items } アイテムを選択しました。.
+rust_delete_confirmation_number_groups = { $items } 個のグループで { $groups } 個のアイテムが選択されました。.
+rust_delete_confirmation_selected_all_in_group = { $groups } グループで選択されたすべてのアイテム。.
 rust_move_confirmation = 選択した項目を移動しますか？
-rust_move_confirmation_number_simple = { $items } アイテムが選択されました。
+rust_move_confirmation_number_simple = { $items } アイテムが選択されました。.
 rust_clean_exif_confirmation = 選択した項目からEXIFデータを削除しますか？
-rust_clean_exif_confirmation_number_simple = { $items } アイテムが選択されました。
+rust_clean_exif_confirmation_number_simple = { $items } アイテムが選択されました。.
 clean_exif_overwrite_files_text = ファイルを上書きする
 rust_optimize_video_confirmation = 選択したビデオを最適化しますか？
-rust_optimize_video_confirmation_number_simple = { $items } アイテムが選択されました。
+rust_optimize_video_confirmation_number_simple = { $items } アイテムが選択されました。.
 rust_hardlink_confirmation = 選択した項目に対してハードリンクを作成しますか？
-rust_hardlink_confirmation_number_simple = { $items } アイテムが選択されました。
+rust_hardlink_confirmation_number_simple = { $items } アイテムが選択されました。.
 rust_symlink_confirmation = 選択した項目に対してシンボリックリンクを作成しますか？
-rust_symlink_confirmation_number_simple = { $items } アイテムが選択されました。
+rust_symlink_confirmation_number_simple = { $items } アイテムが選択されました。.
 rust_rename_confirmation = 選択した項目をリネームしますか？
-rust_rename_confirmation_number_simple = { $items } アイテムが選択されました。
+rust_rename_confirmation_number_simple = { $items } アイテムが選択されました。.
 rust_cache_processed_files = 処理済み { $files } キャッシュファイル
 rust_cache_entries_stats = 削除 { $removed } エントリのうち、{ $all } のうち、{ $left } が残る
 rust_cache_size_reduced = キャッシュファイルのサイズを{ $size }に削減しました。
@@ -162,8 +162,8 @@ delete_button = 削除
 save_button = 保存
 sort_button = 並べ替え
 rename_button = 名前の変更
-motto = \n詳細については、MIT/GPL ライセンスをご覧ください。
-unicorn = ユニコーンを見てはいけませんが、ユニコーンはいつもあなたを見ています。
+motto = \n詳細については、MIT/GPL ライセンスをご覧ください。.
+unicorn = ユニコーンを見てはいけませんが、ユニコーンはいつもあなたを見ています。.
 repository = リポジトリ
 instruction = 説明
 donation = 寄付
@@ -185,7 +185,7 @@ tool_broken_files = 壊れたファイル
 tool_bad_extensions = 不正な拡張子
 tool_bad_names = 悪い名前
 tool_video_optimizer = ビデオ最適化
-tool_exif_remover = Exif Remover
+tool_exif_remover = Exif 情報削除ツール
 sort_by_full_name = 氏名でソート
 sort_by_selection = 選択でソート
 sort_reverse = 順序を逆にする
@@ -232,7 +232,7 @@ subsettings_broken_files_pdf = pdf
 subsettings_broken_files_archive = アーカイブ
 subsettings_broken_files_image = 画像
 subsettings_broken_files_video = ビデオ
-subsettings_broken_files_video_info = ffmpeg/ffprobe を使用します。遅く、ファイルが正常に再生されていても、煩雑なエラーを検出することがあります。
+subsettings_broken_files_video_info = ffmpeg/ffprobe を使用します。遅く、ファイルが正常に再生されていても、煩雑なエラーを検出することがあります。.
 subsettings_bad_names_issues = ファイル名チェック
 subsettings_bad_names_uppercase_extension = 大文字拡張
 subsettings_bad_names_uppercase_extension_hint = 大文字の拡張子（例：.JPG、.Mp3）を持つファイルを検索し、小文字版を提案します。
@@ -273,7 +273,7 @@ settings_duplicate_use_prehash = 事前ハッシュを使用
 settings_duplicate_minimal_prehash_cache_size = キャッシュされたファイルの最小サイズ - Prehash (KB)
 settings_similar_images_show_image_preview = 画像のプレビュー
 settings_application_scale_text = アプリケーション規模
-settings_application_scale_hint_text = 手動スケーリングが有効になっていると、カスタムのスケーリングファクタを選択できますが、モニターのDPIに基づく自動スケーリングを完全に無効にします。
+settings_application_scale_hint_text = 手動スケーリングが有効になっていると、カスタムのスケーリングファクタを選択できますが、モニターのDPIに基づく自動スケーリングを完全に無効にします。.
 settings_restart_required_scale_text = ---アプリを再起動して、スケール変更を適用する必要があります---
 settings_use_manual_application_scale_text = 手動アプリケーションスケールを使用する
 settings_video_thumbnails_preview = 画像プレビュー
@@ -294,7 +294,7 @@ settings_video_thumbnails_position = 動画のサムネイル位置（%）
 settings_video_thumbnails_generate_grid = サムネイルグリッドを単一画像ではなく生成する
 settings_video_thumbnails_generate_grid_hint = 複数の画像をグリッドで生成することは、単一のサムネイルを生成するよりもずっと遅いです。
 settings_video_thumbnails_grid_tiles_per_side = サムネイルグリッドの一辺当たりのタイル数
-settings_video_thumbnails_grid_tiles_per_side_hint = グリッドの各辺のサムネイルタイル数。たとえば、2を選択すると2 x 2グリッドが作成され、4枚の画像を含む単一のサムネイルが生成されます。
+settings_video_thumbnails_grid_tiles_per_side_hint = グリッドの各辺のサムネイルタイル数。たとえば、2を選択すると2 x 2グリッドが作成され、4枚の画像を含む単一のサムネイルが生成されます。.
 settings_similar_images_tool = 類似の画像ツール
 settings_general_settings = 全般設定
 settings_cache_header_text = キャッシュ設定
@@ -325,7 +325,7 @@ settings_cache_number_size_text = キャッシュファイルサイズ: { $size 
 settings_video_thumbnails_number_size_text = 動画のサムネイルサイズ: { $size }, ファイル数: { $number }
 settings_log_number_size_text = ログ ファイル サイズ: { $size }、ファイル数: { $number }
 popup_clean_cache_title_text = 古いキャッシュをクリアする
-popup_clean_cache_confirmation_text = 古いキャッシュエントリを削除しますか？ これは、存在しなくなったファイルまたは変更されたファイルに対するキャッシュエントリを削除します。
+popup_clean_cache_confirmation_text = 古いキャッシュエントリを削除しますか？ これは、存在しなくなったファイルまたは変更されたファイルに対するキャッシュエントリを削除します。.
 popup_clean_cache_progress_text = 処理キャッシュファイル:
 popup_clean_cache_current_file_text = 現在のファイル:
 popup_clean_cache_file_progress_text = 現在のファイル進捗:
@@ -349,7 +349,7 @@ subsettings_video_optimizer_excluded_codecs = 除外コーデック
 subsettings_video_optimizer_video_quality = ビデオ品質（CRF）
 subsettings_reset = リセット
 subsettings_exif_ignored_tags_text = 無視されたタグ：
-subsettings_exif_ignored_tags_hint_text = カンマ区切りのスキャンから除外するタグのリスト（例：GPS、サムネイル）。一部のタグ、例えばTIFFファイルのImageWidthは、画像の破損を防ぐために非表示になっています。
+subsettings_exif_ignored_tags_hint_text = カンマ区切りのスキャンから除外するタグのリスト（例：GPS、サムネイル）。一部のタグ、例えばTIFFファイルのImageWidthは、画像の破損を防ぐために非表示になっています。.
 clean_button_text = きれい
 clean_text = クリーン EXIF データ
 clean_confirmation_text = 選択した項目からEXIFデータを削除しますか？

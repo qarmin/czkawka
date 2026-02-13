@@ -43,10 +43,10 @@ music_comparison_checkbox_tooltip =
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021) (Santuário --- O santuário foi remixado no verão de 2021)
 duplicate_case_sensitive_name = Diferenciar as letras maiúsculas das minúsculas
-duplicate_case_sensitive_name_tooltip =
+duplicate_case_sensitive_name_tooltip = 
     Quando esta opção está ativada, agrupa apenas os registros se eles tiverem exatamente o mesmo nome. Por exemplo, pagar <-> pagar.
     
-    Quando esta opção está desativada, agrupa os registros por nomes e sem verificar a diferença entre as letras maiúsculas das minúsculas. Por exemplo, pagar <-> Pagar.
+    Quando esta opção está desativada, agrupa os registros por nomes e sem verificar a diferença entre as letras maiúsculas das minúsculas. Por exemplo, pagar <-> Pagar
 duplicate_mode_size_name_combo_box = Tamanho e nome
 duplicate_mode_name_combo_box = Nome
 duplicate_mode_size_combo_box = Tamanho
@@ -156,20 +156,20 @@ upper_remove_included_button = Remover
 upper_manual_add_excluded_button = Adicionar manualmente
 upper_add_excluded_button = Adicionar
 upper_remove_excluded_button = Remover
-upper_manual_add_included_button_tooltip =
+upper_manual_add_included_button_tooltip = 
     Adicionar manualmente os nomes dos diretórios ou das pastas para serem pesquisadas.
     
     Para adicionar vários caminhos de uma vez, separe-os com o ponto e vírgula ‘ ; ’.
     
-    Por exemplo, ao utilizar ‘/home/roman;/home/rozkaz’ irá adicionar os dois diretórios ‘/home/roman’ e ‘/home/rozkaz’.
+    Por exemplo, ao utilizar ‘/home/roman;/home/rozkaz’ irá adicionar os dois diretórios ‘/home/roman’ e ‘/home/rozkaz’
 upper_add_included_button_tooltip = Adicionar um novo diretório para ser pesquisado.
 upper_remove_included_button_tooltip = Remover o diretório da pesquisa.
-upper_manual_add_excluded_button_tooltip =
+upper_manual_add_excluded_button_tooltip = 
     Adicionar manualmente um diretório à lista das exceções.
     
     Para adicionar vários caminhos de uma vez, separe-os com o ponto e vírgula ‘ ; ’.
     
-    Por exemplo, ao utilizar ‘/home/roman;/home/krokiet’ irá adicionar os dois diretórios ‘/home/roman’ e ‘/home/keokiet’.
+    Por exemplo, ao utilizar ‘/home/roman;/home/krokiet’ irá adicionar os dois diretórios ‘/home/roman’ e ‘/home/keokiet’
 upper_add_excluded_button_tooltip = Selecionar o diretório que não será incluído na pesquisa.
 upper_remove_excluded_button_tooltip = Selecionar o diretório na lista das exceções.
 upper_notebook_items_configuration = Configurações dos itens
@@ -261,7 +261,7 @@ bottom_compare_button = Comparar
 bottom_search_button_tooltip = Iniciar a pesquisa
 bottom_select_button_tooltip = Ao selecionar os registros, apenas os arquivos e as pastas que foram selecionadas poderão ser processadas posteriormente.
 bottom_delete_button_tooltip = Excluir os arquivos e as pastas que foram selecionadas.
-bottom_save_button_tooltip = Salvar as informações da pesquisa em um arquivo.
+bottom_save_button_tooltip = Salvar as informações da pesquisa em um arquivo
 bottom_symlink_button_tooltip =
     Criar ligações simbólicas ou vínculos simbólicos (‘symbolic links’ ou ‘symlinks’ ou ‘soft links’) ou ‘atalho’ para um outro arquivo ou para um outro diretório (pasta).
     Esta opção só funciona se pelo menos dois resultados do grupo estiverem selecionados.
@@ -313,7 +313,7 @@ settings_use_rust_preview_tooltip =
     Se você tiver problemas para carregar a pré-visualização, pode tentar alterar esta configuração.
     
     Nos sistemas operacionais que não são da família do GNU/Linux, é recomendável utilizar esta opção, porque o pacote ‘gtk-pixbuf’ nem sempre está disponível, portanto, a desativação desta opção não irá carregar a pré-visualização de algumas imagens.
-settings_label_restart = Você tem que reiniciar o programa para aplicar as novas configurações.
+settings_label_restart = Você tem que reiniciar o programa para aplicar as novas configurações
 settings_ignore_other_filesystems = Ignorar outros sistemas de arquivos (somente para o GNU/Linux)
 settings_ignore_other_filesystems_tooltip =
     Ignorar os arquivos que não estão no mesmo sistema de arquivos dos diretórios que estão sendo pesquisados.
@@ -327,7 +327,7 @@ settings_load_at_start_button_tooltip =
 settings_confirm_deletion_button_tooltip = Exibir a janela de confirmação de exclusão ao clicar no botão ‘Excluir’.
 settings_confirm_link_button_tooltip = Exibir a janela de confirmação ao clicar no botão da ‘Ligação simbólica’.
 settings_confirm_group_deletion_button_tooltip = Exibir a janela de confirmação de exclusão ao tentar excluir todos os registros de um grupo.
-settings_show_text_view_button_tooltip = Exibir o painel de texto na parte inferior da interface gráfica do usuário
+settings_show_text_view_button_tooltip = Exibir o painel de texto na parte inferior da interface gráfica do usuário.
 settings_use_cache_button_tooltip = Utilizar o arquivo de ‘cache’.
 settings_save_also_as_json_button_tooltip = Salvar o arquivo de ‘cache’ no formato JSON que é legível por seres humanos e que permite modificar o seu conteúdo. O arquivo de ‘cache’ será lido automaticamente pelo programa, se o formato do ‘cache’ for binário com a extensão ‘.bin’ ou se não tiver uma extensão do arquivo.
 settings_use_trash_button_tooltip = Mover os arquivos para a lixeira em vez de excluí-los permanentemente.
@@ -335,7 +335,7 @@ settings_language_label_tooltip = Idioma da interface gráfica do usuário.
 settings_save_at_exit_button = Salvar as configurações ao fechar o programa
 settings_load_at_start_button = Carregar as configurações ao abrir o programa
 settings_confirm_deletion_button = Exibir a janela de confirmação quando for excluir qualquer arquivo
-settings_confirm_link_button = Exibir a janela de confirmação quando for criar qualquer arquivo de ligação simbólica ou de vínculo simbólico.
+settings_confirm_link_button = Exibir a janela de confirmação quando for criar qualquer arquivo de ligação simbólica ou de vínculo simbólico
 settings_confirm_group_deletion_button = Exibir a janela de confirmação quando for excluir todos os arquivos do grupo
 settings_show_text_view_button = Exibir o painel de texto inferior
 settings_use_cache_button = Utilizar o arquivo de ‘cache’
@@ -492,7 +492,7 @@ move_folder_failed = Ocorreu uma falha ao mover a pasta ‘{ $name }’, por cau
 move_file_failed = Ocorreu uma falha ao mover o arquivo ‘{ $name }’, por causa de ‘{ $reason }’
 move_files_title_dialog = Escolha a pasta que você quer mover os arquivos duplicados
 move_files_choose_more_than_1_path = Somente um caminho pode ser selecionado para copiar os arquivos duplicados. A pasta ‘{ $path_number }’ foi selecionada.
-move_stats = Os arquivos ‘{ $num_files }’ de ‘{ $all_files }’ foram movidos corretamente.
+move_stats = Os arquivos ‘{ $num_files }’ de ‘{ $all_files }’ foram movidos corretamente
 save_results_to_file = Os resultados foram salvos tanto nos arquivos no formato ‘.txt’ quanto no formato ‘.json’ na pasta ‘{ $name }’.
 search_not_choosing_any_music = Ocorreu um erro, porque você tem que selecionar pelo menos uma caixa de seleção com o tipo dos arquivos de música que serão pesquisados.
 search_not_choosing_any_broken_files = Ocorreu um erro, porque você tem que selecionar pelo menos uma caixa de seleção com o tipo dos arquivos corrompidos que serão pesquisados.

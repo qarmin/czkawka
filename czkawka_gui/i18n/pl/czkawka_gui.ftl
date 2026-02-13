@@ -24,7 +24,7 @@ krokiet_info_message =
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
 music_year_checkbox = Rok
-music_bitrate_checkbox = Bitrate
+music_bitrate_checkbox = Przepływność bitów
 music_genre_checkbox = Gatunek
 music_length_checkbox = Długość
 music_comparison_checkbox = Przybliżone Porównywanie
@@ -125,7 +125,7 @@ main_tree_view_column_dimensions = Wymiary
 main_tree_view_column_title = Tytuł
 main_tree_view_column_artist = Wykonawca
 main_tree_view_column_year = Rok
-main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_bitrate = Przepływność bitów
 main_tree_view_column_length = Długość
 main_tree_view_column_genre = Gatunek
 main_tree_view_column_symlink_file_name = Nazwa Symlinka
@@ -270,7 +270,7 @@ bottom_compare_button = Porównaj
 bottom_search_button_tooltip = Rozpocznij wyszukiwanie
 bottom_select_button_tooltip = Wybierz rekordy. Tylko wybrane pliki/foldery mogą być później przetwarzane.
 bottom_delete_button_tooltip = Usuń zaznaczone elementy.
-bottom_save_button_tooltip = Zapisz informacje o skanowaniu.
+bottom_save_button_tooltip = Zapisz informacje o skanowaniu
 bottom_symlink_button_tooltip =
     Utwórz linki symboliczne.
     Działa tylko wtedy, gdy co najmniej dwa wyniki w grupie są zaznaczone.
@@ -296,7 +296,7 @@ bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 progress_stop_button = Zatrzymaj
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
-about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
+about_repository_button_tooltip = Link do repozytorium z kodem źródłowym.
 about_donation_button_tooltip = Link do strony z dotacjami.
 about_instruction_button_tooltip = Link do strony z instrukcją.
 about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficialnie wspierany jest język polski i angielski.
