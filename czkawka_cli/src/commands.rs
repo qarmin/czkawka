@@ -608,6 +608,15 @@ pub struct TranscodeArgs {
     pub thumbnail_percentage: u8,
     #[clap(short = 'g', long, help = "Generate thumbnail grid", long_help = "Generate a grid of thumbnails instead of single thumbnail")]
     pub thumbnail_grid: bool,
+    #[clap(
+        short = 'Z',
+        long,
+        default_value = "3",
+        value_parser = clap::value_parser!(u8).range(2..=6),
+        help = "Thumbnail grid tiles per side (2-6)",
+        long_help = "Number of tiles per side for thumbnail grid (2-6). Only used if -g is enabled."
+    )]
+    pub thumbnail_grid_tiles_per_side: u8,
     #[clap(short = 'F', long, help = "Fix/optimize videos", long_help = "Actually perform the transcoding on found videos")]
     pub fix_videos: bool,
     #[clap(
@@ -710,6 +719,15 @@ pub struct CropArgs {
     pub thumbnail_percentage: u8,
     #[clap(short = 'g', long, help = "Generate thumbnail grid", long_help = "Generate a grid of thumbnails instead of single thumbnail")]
     pub thumbnail_grid: bool,
+    #[clap(
+        short = 'Z',
+        long,
+        default_value = "3",
+        value_parser = clap::value_parser!(u8).range(2..=6),
+        help = "Thumbnail grid tiles per side (2-6)",
+        long_help = "Number of tiles per side for thumbnail grid (2-6). Only used if -g is enabled."
+    )]
+    pub thumbnail_grid_tiles_per_side: u8,
     #[clap(short = 'F', long, help = "Fix/crop videos", long_help = "Actually perform the cropping on found videos")]
     pub fix_videos: bool,
     #[clap(long, help = "Overwrite original files", long_help = "Overwrite original video files with cropped versions")]

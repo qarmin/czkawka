@@ -15,7 +15,6 @@ use crate::flc;
 use crate::helpers::ffprobe::ffprobe;
 
 pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
-pub const THUMBNAIL_GRID_TILES_PER_SIDE: u8 = 2;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct VideoMetadata {
@@ -155,11 +154,12 @@ pub fn generate_thumbnail(
     thumbnails_dir: &Path,
     thumbnail_video_percentage_from_start: u8,
     generate_grid_instead_of_single: bool,
+    thumbnail_grid_tiles_per_side: u8,
 ) -> Result<PathBuf, String> {
     let mut hasher = Hasher::new();
 
     if generate_grid_instead_of_single {
-        hasher.update(format!("{size}___{modified_date}___{}___GRID_{THUMBNAIL_GRID_TILES_PER_SIDE}", video_path.to_string_lossy()).as_bytes());
+        hasher.update(format!("{size}___{modified_date}___{}___GRID_{thumbnail_grid_tiles_per_side}", video_path.to_string_lossy()).as_bytes());
     } else {
         hasher.update(
             format!(
@@ -179,13 +179,15 @@ pub fn generate_thumbnail(
     }
 
     let seek_time = duration.map_or(5.0, |d| d * (thumbnail_video_percentage_from_start as f64) / 100.0);
-    let duration_per_tile_items = duration.map_or(0.5, |d| d / (THUMBNAIL_GRID_TILES_PER_SIDE * THUMBNAIL_GRID_TILES_PER_SIDE + 2) as f64);
+    let duration_per_tile_items = duration.map_or(0.5, |d| d / (thumbnail_grid_tiles_per_side * thumbnail_grid_tiles_per_side + 2) as f64);
 
-    let max_height = 1080;
-    let max_width = 1920;
+    let max_height = 1080 / thumbnail_grid_tiles_per_side as u32;
+    let max_width = 1920 / thumbnail_grid_tiles_per_side as u32;
 
     if generate_grid_instead_of_single {
-        let frame_times = (0..(THUMBNAIL_GRID_TILES_PER_SIDE * THUMBNAIL_GRID_TILES_PER_SIDE)).map(|i| duration_per_tile_items as f32 * (i + 1) as f32).collect::<Vec<f32>>();
+        let frame_times = (0..(thumbnail_grid_tiles_per_side * thumbnail_grid_tiles_per_side))
+            .map(|i| duration_per_tile_items as f32 * (i + 1) as f32)
+            .collect::<Vec<f32>>();
         let mut imgs = Vec::new();
         for ft in frame_times {
             if check_if_stop_received(stop_flag) {
@@ -200,7 +202,7 @@ pub fn generate_thumbnail(
                 }
             }
         }
-        assert_eq!(imgs.len(), (THUMBNAIL_GRID_TILES_PER_SIDE * THUMBNAIL_GRID_TILES_PER_SIDE) as usize);
+        assert_eq!(imgs.len(), (thumbnail_grid_tiles_per_side * thumbnail_grid_tiles_per_side) as usize);
 
         let first_img = &imgs.first().expect("Cannot be empty here, because at least tiles_size^2 images are extracted");
 
@@ -208,10 +210,13 @@ pub fn generate_thumbnail(
             let _ = fs::write(&thumbnail_path, b"");
             return Err(flc!("core_failed_to_generate_thumbnail_frames_different_dimensions", file = video_path.to_string_lossy()));
         }
-        let mut new_thumbnail = RgbImage::new(first_img.width() * THUMBNAIL_GRID_TILES_PER_SIDE as u32, first_img.height() * THUMBNAIL_GRID_TILES_PER_SIDE as u32);
+        let mut new_thumbnail = RgbImage::new(
+            first_img.width() * thumbnail_grid_tiles_per_side as u32,
+            first_img.height() * thumbnail_grid_tiles_per_side as u32,
+        );
         for (idx, img) in imgs.iter().enumerate() {
-            let x = (idx % THUMBNAIL_GRID_TILES_PER_SIDE as usize) as u32 * img.width();
-            let y = (idx / THUMBNAIL_GRID_TILES_PER_SIDE as usize) as u32 * img.height();
+            let x = (idx % thumbnail_grid_tiles_per_side as usize) as u32 * img.width();
+            let y = (idx / thumbnail_grid_tiles_per_side as usize) as u32 * img.height();
             new_thumbnail
                 .copy_from(img, x, y)
                 .map_err(|e| flc!("core_failed_to_generate_thumbnail", file = video_path.to_string_lossy(), reason = e.to_string()))?;

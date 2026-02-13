@@ -165,6 +165,8 @@ pub struct SettingsCustom {
     pub video_thumbnails_percentage: u8,
     #[serde(default)]
     pub video_thumbnails_generate_grid: bool,
+    #[serde(default = "default_video_thumbnails_grid_tiles_per_side")]
+    pub video_thumbnails_grid_tiles_per_side: u8,
     #[serde(default = "default_video_optimizer_mode")]
     pub video_optimizer_mode: String,
     #[serde(default = "default_video_optimizer_crop_type")]
@@ -320,6 +322,9 @@ fn default_similar_videos_crop_detect() -> String {
 }
 fn default_similar_videos_thumbnail_percentage() -> u8 {
     DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL
+}
+fn default_video_thumbnails_grid_tiles_per_side() -> u8 {
+    2
 }
 
 fn default_duplicates_check_method() -> String {

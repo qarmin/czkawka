@@ -129,12 +129,12 @@ pub enum VideoOptimizerParameters {
 
 impl VideoOptimizerParameters {
     pub fn get_generate_number_of_items_in_thumbnail_grid(&self) -> u8 {
-        let generate_thumbnail_grid_instead_of_single = match self {
-            Self::VideoTranscode(params) => params.generate_thumbnail_grid_instead_of_single,
-            Self::VideoCrop(params) => params.generate_thumbnail_grid_instead_of_single,
+        let (generate_thumbnail_grid_instead_of_single, thumbnail_grid_tiles_per_side) = match self {
+            Self::VideoTranscode(params) => (params.generate_thumbnail_grid_instead_of_single, params.thumbnail_grid_tiles_per_side),
+            Self::VideoCrop(params) => (params.generate_thumbnail_grid_instead_of_single, params.thumbnail_grid_tiles_per_side),
         };
 
-        if generate_thumbnail_grid_instead_of_single { THUMBNAIL_GRID_TILES_PER_SIDE } else { 1 }
+        if generate_thumbnail_grid_instead_of_single { thumbnail_grid_tiles_per_side } else { 1 }
     }
 }
 
@@ -144,6 +144,7 @@ pub struct VideoTranscodeParams {
     pub(crate) generate_thumbnails: bool,
     pub(crate) thumbnail_video_percentage_from_start: u8,
     pub(crate) generate_thumbnail_grid_instead_of_single: bool,
+    pub(crate) thumbnail_grid_tiles_per_side: u8,
 }
 #[derive(Clone, PartialEq, Debug)]
 pub struct VideoCropParams {
@@ -155,15 +156,23 @@ pub struct VideoCropParams {
     pub(crate) generate_thumbnails: bool,
     pub(crate) thumbnail_video_percentage_from_start: u8,
     pub(crate) generate_thumbnail_grid_instead_of_single: bool,
+    pub(crate) thumbnail_grid_tiles_per_side: u8,
 }
 
 impl VideoTranscodeParams {
-    pub fn new(excluded_codecs: Vec<String>, generate_thumbnails: bool, thumbnail_video_percentage_from_start: u8, generate_thumbnail_grid_instead_of_single: bool) -> Self {
+    pub fn new(
+        excluded_codecs: Vec<String>,
+        generate_thumbnails: bool,
+        thumbnail_video_percentage_from_start: u8,
+        generate_thumbnail_grid_instead_of_single: bool,
+        thumbnail_grid_tiles_per_side: u8,
+    ) -> Self {
         Self {
             excluded_codecs,
             generate_thumbnails,
             thumbnail_video_percentage_from_start,
             generate_thumbnail_grid_instead_of_single,
+            thumbnail_grid_tiles_per_side,
         }
     }
 }
@@ -174,6 +183,7 @@ impl Default for VideoTranscodeParams {
             generate_thumbnails: false,
             thumbnail_video_percentage_from_start: 10,
             generate_thumbnail_grid_instead_of_single: false,
+            thumbnail_grid_tiles_per_side: 2,
         }
     }
 }
@@ -188,6 +198,7 @@ impl VideoCropParams {
         generate_thumbnails: bool,
         thumbnail_video_percentage_from_start: u8,
         generate_thumbnail_grid_instead_of_single: bool,
+        thumbnail_grid_tiles_per_side: u8,
     ) -> Self {
         assert!(black_pixel_threshold <= 128, "black_pixel_threshold must be 0-128, got {black_pixel_threshold}");
         assert!(
@@ -206,6 +217,7 @@ impl VideoCropParams {
             generate_thumbnails,
             thumbnail_video_percentage_from_start,
             generate_thumbnail_grid_instead_of_single,
+            thumbnail_grid_tiles_per_side,
         }
     }
 }

@@ -497,6 +497,7 @@ mod tests {
             generate_thumbnails: false,
             thumbnail_video_percentage_from_start: 0,
             generate_thumbnail_grid_instead_of_single: false,
+            thumbnail_grid_tiles_per_side: 2,
         }
     }
 
