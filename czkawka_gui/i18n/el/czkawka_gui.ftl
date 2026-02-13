@@ -7,19 +7,19 @@ window_compare_images = Σύγκριση Εικόνων
 general_ok_button = Εντάξει
 general_close_button = Κλείσιμο
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Εισαγωγή στο Krokiet - Νέα έκδοση του Czkawka
+krokiet_info_message = 
+        Το Krokiet είναι η νέα, βελτιωμένη, ταχύτερη και πιο αξιόπιστη έκδοση της Czkawka GTK GUI!
+
+        Είναι ευκολότερο στο πρόγραμμα και πιο ανθεκτικό στις αλλαγές του συστήματος, καθώς εξαρτάται μόνο από βασικές βιβλιοθήκες που είναι διαθέσιμες στα περισσότερα συστήματα από προεπιλογή.
+
+        Το Krokiet επίσης φέρνει λειτουργίες που λείπουν από την Czkawka, συμπεριλαμβανομένων των μικρογραφιών στην λειτουργία σύγκρισης βίντεο, ενός καθαριστή EXIF, επιλογών προόδου για μετακίνησης/αντιγραφής/διαγραφής αρχείων ή επεκτάσιμων επιλογών ταξινόμησης.
+
+        Δοκιμάστε το και δείτε τη διαφορά!
+
+        Η Czkawka θα συνεχίσει να λαμβάνει διορθώσεις σφαλμάτων και μικρές ενημερώσεις από εμένα, αλλά όλες οι νέες λειτουργίες θα αναπτυχθούν αποκλειστικά για το Krokiet και οποιοσδήποτε είναι ελεύθερος να συνεισφέρει νέες λειτουργίες, να προσθέσει ελλείπουσες λειτουργίες ή να επεκτείνει περαιτέρω την Czkawka.
+
+        PS: Αυτό το μήνυμα θα πρέπει να εμφανίζεται μόνο μία φορά. Εάν εμφανίζεται ξανά, ορίστε την περιβαλλοντική μεταβλητή CZKAWKA_DONT_ANNOY_ME σε οποιαδήποτε μη κενή τιμή.
 # Main window
 music_title_checkbox = Τίτλος
 music_artist_checkbox = Καλλιτέχνης
@@ -149,8 +149,8 @@ main_check_box_broken_files_audio = Ήχος
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Αρχειοθέτηση
 main_check_box_broken_files_image = Εικόνα
-main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video = Βίντεο
+main_check_box_broken_files_video_tooltip = Χρησιμοποιεί το ffmpeg/ffprobe για την επικύρωση αρχείων βίντεο. Πολύ αργό και μπορεί να ανιχνεύσει αυστηρές ατέλειες ακόμη και αν το αρχείο παίζει κανονικά.
 check_button_general_same_size = Αγνόηση ίδιου μεγέθους
 check_button_general_same_size_tooltip = Αγνοήστε τα αρχεία με το ίδιο μέγεθος στα αποτελέσματα - συνήθως αυτά είναι 1: 1 διπλότυπα
 main_label_size_bytes_tooltip = Μέγεθος αρχείων που θα χρησιμοποιηθούν κατά τη σάρωση
@@ -182,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Προσθήκη καταλόγου για να αποκλειστεί στην αναζήτηση.
 upper_remove_excluded_button_tooltip = Διαγραφή καταλόγου από αποκλεισμένους.
 upper_notebook_items_configuration = Ρύθμιση Στοιχείων
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = Αποκλεισμένοι Δρόμοι
+upper_notebook_included_directories = Συμπεριλημμένες Διαδρομές
 upper_allowed_extensions_tooltip =
     Οι επιτρεπόμενες επεκτάσεις πρέπει να διαχωρίζονται με κόμματα (εξ ορισμού είναι διαθέσιμες).
     
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Λίστα απενεργοποιημένων αρχείων που θα αγνοηθούν κατά τη σάρωση.
     
     Όταν χρησιμοποιείτε και τις δύο επιτρεπόμενες και απενεργοποιημένες επεκτάσεις, αυτή έχει υψηλότερη προτεραιότητα, οπότε το αρχείο δεν θα ελεγχθεί.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        Πρέπει να εξαιρούνται τα στοιχεία που περιέχουν * wildcard και να διαχωρίζονται με κόμματα.
+        Αυτό είναι πιο αργό από τα Excluded Paths, οπότε χρησιμοποιήστε το προσεκτικά.
 upper_excluded_items = Εξαιρούμενα Αντικείμενα:
 upper_allowed_extensions = Επιτρεπόμενες Επεκτάσεις:
 upper_excluded_extensions = Απενεργοποιημένες Επεκτάσεις:
@@ -204,8 +204,8 @@ upper_excluded_extensions = Απενεργοποιημένες Επεκτάσε�
 popover_select_all = Επιλογή όλων
 popover_unselect_all = Αποεπιλογή όλων
 popover_reverse = Αντίστροφη Επιλογή
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = Επιλέξτε όλα εκτός από τη συντομότερη διαδρομή
+popover_select_all_except_longest_path = Επιλέξτε όλα εκτός από τη μεγαλύτερη διαδρομή
 popover_select_all_except_oldest = Επιλογή όλων εκτός από το παλαιότερο
 popover_select_all_except_newest = Επιλογή όλων εκτός από το νεότερο
 popover_select_one_oldest = Επιλέξτε ένα παλαιότερο

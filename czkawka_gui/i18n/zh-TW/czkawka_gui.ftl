@@ -7,19 +7,19 @@ window_compare_images = 比較影像
 general_ok_button = 確定
 general_close_button = 關閉
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = 介紹 Krokiet - Czkawka 的新版本
+krokiet_info_message = 
+        考基特是新的、改良的、更快速且更可靠的Czkawka GTK GUI版本！
+
+        它更容易運行，並且更能抵抗系統變動，因為它僅依賴於大多數系統預設可用的核心函式庫。
+
+        考基特還帶來了Czkawka所沒有的功能，包括影片比較模式下的縮圖、EXIF清理器、檔案移動/複製/刪除進度或擴展的排序選項。
+
+        試試看，看看區別吧！
+
+        Czkawka將繼續由我提供錯誤修復和輕微更新，但所有新功能都將專門為考基特開發，任何人都可以在自由地貢獻新的功能、添加缺失的模式或進一步擴展Czkawka。
+
+        PS：這則訊息只應該出現一次。如果它再次出現，請將CZKAWKA_DONT_ANNOY_ME環境變數設定為任何非空值。
 # Main window
 music_title_checkbox = 標題
 music_artist_checkbox = 藝人
@@ -149,8 +149,8 @@ main_check_box_broken_files_audio = 音訊
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = 歸檔
 main_check_box_broken_files_image = 影像
-main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video = 影片
+main_check_box_broken_files_video_tooltip = 使用 ffmpeg/ffprobe 驗證影片檔案。相當慢，且可能偵測到刻板錯誤，即使檔案播放正常。
 check_button_general_same_size = 忽略相同的大小
 check_button_general_same_size_tooltip = 忽略在結果中具有完全相同大小的檔案 - 通常這些是 1:1 的重複
 main_label_size_bytes_tooltip = 將用於掃描的檔案大小
@@ -182,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = 新增要在搜尋中排除的目錄。
 upper_remove_excluded_button_tooltip = 從排除中移除目錄。
 upper_notebook_items_configuration = 項目設定
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = 排除路徑
+upper_notebook_included_directories = 包含的路徑
 upper_allowed_extensions_tooltip =
     允許的副檔名必須用逗號分隔（預設所有可用）。
     
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     在掃描中將會被忽略的禁用檔案清單。
     
     當使同時使用允許與禁用兩者時，此項擁有更高的優先等級，所以檔案將不會被檢查。
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        排除的項目必須包含 * 萬位符號，並且用逗號分隔。
+        這比排除路徑慢，所以請謹慎使用。
 upper_excluded_items = 排除的項目：
 upper_allowed_extensions = 允許的副檔名：
 upper_excluded_extensions = 禁用的副檔名：
@@ -204,8 +204,8 @@ upper_excluded_extensions = 禁用的副檔名：
 popover_select_all = 選擇全部
 popover_unselect_all = 取消選擇全部
 popover_reverse = 反向選擇
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = 選擇所有，除最短路徑
+popover_select_all_except_longest_path = 選擇所有，不包括最長路徑
 popover_select_all_except_oldest = 選擇除最舊以外的全部
 popover_select_all_except_newest = 選擇除最新以外的全部
 popover_select_one_oldest = 選擇一個最舊的

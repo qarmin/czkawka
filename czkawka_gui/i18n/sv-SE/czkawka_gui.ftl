@@ -7,19 +7,19 @@ window_compare_images = Jämför bilder
 general_ok_button = Ok
 general_close_button = Stäng
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Införande av Krokiet – Ny version av Czkawka
+krokiet_info_message = 
+        Stödet är den nya, förbättrade, snabbare och mer pålitliga versionen av Czkawka GTK GUI!
+
+        Det är lättare att köra och mer motståndskraftigt mot systemändringar, eftersom det bara förlitar sig på kärnbibliotek som finns tillgängliga på de flesta system som standard.
+
+        Stödet medför också funktioner som Czkawka saknar, inklusive miniatyrbilder i videojämförelsetillstånd, en EXIF-renare, filflytt/kopiera/ta bort-framsteg eller utökade sorteringsalternativ.
+
+        Prova det och se skillnaden!
+
+        Czkawka kommer fortsätta att få buggfixar och mindre uppdateringar från mig, men alla nya funktioner kommer att utvecklas exklusivt för Stödet, och vem som helst är fri att bidra med nya funktioner, lägga till saknade lägen eller utöka Czkawka vidare.
+
+        PS: Detta meddelande bör bara visas en gång. Om det visas igen, sätt miljökvariabeln CZKAWKA_DONT_ANNOY_ME till ett värde som inte är tomt.
 # Main window
 music_title_checkbox = Titel
 music_artist_checkbox = Kunstnär
@@ -150,7 +150,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arkiv
 main_check_box_broken_files_image = Bild
 main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video_tooltip = Använder ffmpeg/ffprobe för att validera videofiler. Ganska långsam och kan detektera pedantiska fel även om filen spelas fint.
 check_button_general_same_size = Ignorera samma storlek
 check_button_general_same_size_tooltip = Ignorera filer med samma storlek i resultat - vanligtvis är dessa 1:1 dubbletter
 main_label_size_bytes_tooltip = Storlek på filer som kommer att användas vid skanning
@@ -182,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Lägg till katalog som ska exkluderas i sökningen.
 upper_remove_excluded_button_tooltip = Ta bort katalog från utesluten.
 upper_notebook_items_configuration = Objekt konfiguration
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = Exkluderade Sökvägar
+upper_notebook_included_directories = Inkluderade Sökvägar
 upper_allowed_extensions_tooltip =
     Tillåtna tillägg måste separeras med kommatecken (som standard alla är tillgängliga).
     
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lista över inaktiverade filer som kommer att ignoreras i skanning.
     
     Vid användning av både tillåtna och inaktiverade tillägg har denna högre prioritet, så filen kommer inte att kontrolleras.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        Uteslutna objekt måste innehålla * wildcard och ska separeras med komma.
+        Detta är långsammare än Exkluderade Sökvägar, så använd det försiktigt.
 upper_excluded_items = Exkluderade objekt:
 upper_allowed_extensions = Tillåtna tillägg:
 upper_excluded_extensions = Inaktiverade tillägg:
@@ -204,8 +204,8 @@ upper_excluded_extensions = Inaktiverade tillägg:
 popover_select_all = Radera
 popover_unselect_all = Avmarkera alla
 popover_reverse = Omvänd markering
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = Välj allt förutom den kortaste vägen
+popover_select_all_except_longest_path = Välj allt undantaget längst väg
 popover_select_all_except_oldest = Välj alla utom äldsta
 popover_select_all_except_newest = Välj alla utom nyaste
 popover_select_one_oldest = Välj en äldsta

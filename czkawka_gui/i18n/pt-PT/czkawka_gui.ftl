@@ -7,19 +7,19 @@ window_compare_images = Comparar Imagens
 general_ok_button = Ok
 general_close_button = Fechar
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Apresentando Krokiet - Nova versão do Czkawka
+krokiet_info_message = 
+        Krokiet é a nova, melhorada, mais rápida e mais confiável versão da interface gráfica Czkawka GTK!
+
+        É mais fácil de executar e mais resistente a alterações do sistema, pois depende apenas de bibliotecas principais disponíveis na maioria dos sistemas por padrão.
+
+        Krokiet também traz recursos que a Czkawka não possui, incluindo miniaturas no modo de comparação de vídeo, um limpador EXIF, opções de progresso de mover/copiar/excluir arquivos ou opções de classificação estendidas.
+
+        Experimente e veja a diferença!
+
+        A Czkawka continuará a receber correções de bugs e atualizações menores de mim, mas todos os novos recursos serão desenvolvidos exclusivamente para o Krokiet e qualquer pessoa é livre para contribuir com novos recursos, adicionar modos ausentes ou estender ainda mais a Czkawka.
+
+        PS: Esta mensagem deve aparecer apenas uma vez. Se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME para qualquer valor não vazio.
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista
@@ -147,8 +147,8 @@ main_check_box_broken_files_audio = Áudio
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Arquivar
 main_check_box_broken_files_image = Imagem
-main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video = Vídeo
+main_check_box_broken_files_video_tooltip = Usa ffmpeg/ffprobe para validar arquivos de vídeo. Muito lento e pode detectar erros pedantes mesmo se o arquivo reproduzir bem.
 check_button_general_same_size = Ignorar do mesmo tamanho
 check_button_general_same_size_tooltip = Ignorar arquivos com tamanho idêntico nos resultados — geralmente estes são duplicatas 1:1
 main_label_size_bytes_tooltip = Tamanho dos arquivos usados na verificação
@@ -180,8 +180,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Adicionar diretório a ser excluído na busca.
 upper_remove_excluded_button_tooltip = Excluir diretório da exclusão.
 upper_notebook_items_configuration = Configuração dos Itens
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = Caminhos Excluídos
+upper_notebook_included_directories = Caminhos Incluídos
 upper_allowed_extensions_tooltip =
     Extensões permitidas devem ser separadas por vírgulas (por padrão todas estão disponíveis).
     
@@ -192,9 +192,9 @@ upper_excluded_extensions_tooltip =
     Lista de arquivos desabilitados que serão ignorados na verificação.
     
     Ao usar extensões permitidas e desativadas, este tem maior prioridade, então o arquivo não será marcado.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        Itens excluídos devem conter * wildcard e devem ser separados por vírgulas.
+        Este é mais lento que Excluídas Caminhos, portanto use-o com cuidado.
 upper_excluded_items = Itens excluídos:
 upper_allowed_extensions = Extensões permitidas:
 upper_excluded_extensions = Extensões desabilitadas:
@@ -202,8 +202,8 @@ upper_excluded_extensions = Extensões desabilitadas:
 popover_select_all = Selecionar todos
 popover_unselect_all = Desmarcar todos
 popover_reverse = Seleção inversa
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = Selecione tudo exceto o caminho mais curto
+popover_select_all_except_longest_path = Selecione tudo exceto o caminho mais longo
 popover_select_all_except_oldest = Selecionar todos, exceto os mais antigos
 popover_select_all_except_newest = Selecionar todos, exceto os mais recentes
 popover_select_one_oldest = Selecionar um mais antigo

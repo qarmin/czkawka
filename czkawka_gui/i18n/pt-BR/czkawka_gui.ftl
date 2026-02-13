@@ -185,9 +185,9 @@ upper_excluded_extensions_tooltip =
     Lista dos arquivos que serão ignorados na verificação.
     
     Quando você utiliza as extensões permitidas, estas tem maior prioridade em relação as outras, então o arquivo não será verificado.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        Itens excluídos devem conter * wildcard e devem ser separados por vírgulas.
+        Isto é mais lento que Excluídas Caminhos, portanto use-o com cuidado.
 upper_excluded_items = Itens ignorados:
 upper_allowed_extensions = Extensões permitidas:
 upper_excluded_extensions = Extensões ignoradas:
@@ -442,7 +442,6 @@ progress_scanning_music_tags_end = Comparando ‘{ $file_checked }’ de ‘{ $a
 progress_scanning_music_tags = Lendo ‘{ $file_checked }’ de ‘{ $all_files }’ informações dos arquivos de música
 progress_scanning_music_content_end = Comparando ‘{ $file_checked }’ de ‘{ $all_files }’ impressões digitais dos arquivos de música
 progress_scanning_music_content = Foram calculados ‘{ $file_checked }’ de ‘{ $all_files }’ impressões digitais dos arquivos de música e foi verificado ‘{ $data_checked }’ de ‘{ $all_data }’
-progress_scanning_empty_folders = Pesquisando nas { $folder_number } pastas
 progress_scanning_size = Pesquisando por tamanho do arquivo nos ‘{ $file_number }’
 progress_scanning_size_name = Pesquisando por nome e por tamanho do arquivo nos ‘{ $file_number }’
 progress_scanning_name = Pesquisando por nome do arquivo nos ‘{ $file_number }’
@@ -515,3 +514,8 @@ preview_image_opening_failure = Ocorreu uma falha ao abrir a imagem ‘{ $name }
 compare_groups_number = Os ‘{ $current_group }’ de ‘{ $all_groups }’ grupos possuem ‘{ $images_in_group }’ imagens
 compare_move_left_button = E
 compare_move_right_button = D
+
+progress_scanning_empty_folders = 
+        {$pasta_numero ->
+        [um] Pasta {$folder_number} escaneada
+        *[outro] Pastas {$folder_number} escaneadas}

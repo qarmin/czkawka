@@ -8,18 +8,18 @@ general_ok_button = حسناً
 general_close_button = أغلق
 # Krokiet info dialog
 krokiet_info_title = تقديم Krokiet - نسخة جديدة من Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_message = 
+        كروكيت هو الإصدار الجديد والمحسّن والأسرع والأكثر موثوقية لـ Czkawka GTK GUI!
+
+        إنه أسهل في التشغيل وأكثر مقاومة للتغييرات في النظام، لأنه يعتمد فقط على المكتبات الأساسية المتاحة افتراضيًا على معظم الأنظمة.
+
+        كروكيت أيضًا يقدم ميزات يفتقر إليها Czkawka، بما في ذلك الصور المصغرة في وضع مقارنة الفيديو، ومسحّف EXIF، وخيارات تقدم نقل/نسخ/حذف الملفات أو ترتيب موسع.
+
+        جربه بنفسك وشاهد الفرق!
+
+        ستواصل Czkawka تلقي إصلاحات الأخطاء والتحديثات الصغيرة مني، ولكن جميع الميزات الجديدة ستتم تطويرها حصريًا لكروكيت، وأي شخص حر في المساهمة بميزات جديدة أو إضافة أوضاع مفقودة أو توسيع Czkawka بشكل أكبر.
+
+        ملاحظة: يجب أن يظهر هذا الرسالة مرة واحدة فقط. إذا ظهر مرة أخرى، قم بتعيين متغير البيئة CZKAWKA_DONT_ANNOY_ME إلى أي قيمة غير فارغة.
 # Main window
 music_title_checkbox = العنوان
 music_artist_checkbox = الفنان
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     قائمة الملفات المعطلة التي سيتم تجاهلها في المسح.
     
     عند استخدام الملحقات المسموح بها والمعطلة على حد سواء، هذه واحدة لها أولوية أعلى، لذلك لن يتم تحديد الملف.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        يجب أن تتضمن العناصر المستبعدة * ويفصل بينها الفواصل.
+        هذا أبطأ من المسارات المستبعدة، لذا استخدمه بحذر.
 upper_excluded_items = البنود المستثناة:
 upper_allowed_extensions = الإضافات المسموح بها:
 upper_excluded_extensions = الملحقات المعطّلة:

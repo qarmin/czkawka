@@ -7,19 +7,19 @@ window_compare_images = Resimleri Karşılaştır
 general_ok_button = Tamam
 general_close_button = Kapat
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Krokiet - Yeni versiyon Czkawka
+krokiet_info_message = 
+        Krokiet, Czkawka GTK GUI’nin yeni, geliştirilmiş, daha hızlı ve daha güvenilir versiyonudur!
+
+        Çalıştırması daha kolay ve sistem değişikliklerine karşı daha dirençlidir, çünkü çoğu sistemde varsayılan olarak bulunan temel kütüphanelere dayanır.
+
+        Krokiet ayrıca, Czkawka’da bulunmayan özellikler getirir, örneğin video karşılaştırma modunda alıştırmalar, bir EXIF temizleyici, dosya taşıma/kopyalama/silme ilerleme veya gelişmiş sıralama seçenekleri.
+
+        Deneyin ve farkı görün!
+
+        Czkawka’nın benim tarafımdan düzeltmeler ve küçük güncellemeler almaya devam etmesi muhtemeldir, ancak tüm yeni özellikler yalnızca Krokiet için geliştirilecek ve herkes yeni özellikler eklemek, eksik modları tamamlamak veya Czkawka’yı daha da genişletmekten serbestçe yararlanabilir.
+
+        PS: Bu mesaj yalnızca bir kez görünmelidir. Tekrar gösteriliyorsa, CZKAWKA_DONT_ANNOY_ME ortam değişkenini herhangi bir boş olmayan değere ayarlayın.
 # Main window
 music_title_checkbox = Başlık
 music_artist_checkbox = Sanatçı
@@ -163,7 +163,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arşiv
 main_check_box_broken_files_image = Resim
 main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video_tooltip = ffmpeg/ffprobe kullanarak video dosyalarını doğrular. Çok yavaş ve dosyanın düzgün çalışmasına rağmen katı hataları bile tespit edebilir.
 check_button_general_same_size = Aynı boyutu yok say
 check_button_general_same_size_tooltip = Sonuçlarda aynı boyutta olan dosyaları yoksay - genellikle bunlar bire bir kopyalardır
 main_label_size_bytes_tooltip = Taramada kullanılacak dosyaların boyutu
@@ -197,8 +197,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = "Hariç Tutulacak Klasörler" listesine yeni bir dizin ekler.
 upper_remove_excluded_button_tooltip = Seçili dizini "Hariç Tutulacak Klasörler" listesinden kaldırır.
 upper_notebook_items_configuration = Öğe Yapılandırması
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = Hariç Tutulan Yollar
+upper_notebook_included_directories = Dahil Edilen Yollar
 upper_allowed_extensions_tooltip =
     İzin verilen uzantılar virgülle ayrılmalıdır (varsayılan olarak her uzantı kullanılır).
     
@@ -210,9 +210,9 @@ upper_excluded_extensions_tooltip =
     Taramada göz ardı edilecek devre dışı bırakılmış dosyaların listesi.
     
     İzin verilen ve devre dışı bırakılan uzantılar kullanıldığında, bu daha yüksek önceliğe sahiptir, bu nedenle dosya kontrol edilmeyecektir.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        Hariçlanan öğeler * joker karakterini içermeli ve virgülle ayrılmalıdır.
+        Bu, Hariç Yollar'dan daha yavaştır, bu nedenle dikkatli kullanılmalıdır.
 upper_excluded_items = Hariç Tutulan Öğeler:
 upper_allowed_extensions = İzin Verilen Uzantılar:
 upper_excluded_extensions = Devre Dışı Uzantılar:
@@ -220,8 +220,8 @@ upper_excluded_extensions = Devre Dışı Uzantılar:
 popover_select_all = Tümünü seç
 popover_unselect_all = Tümünün seçimini kaldır
 popover_reverse = Seçimi Ters Çevir
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = Tümünü seç hariç en kısa yolu seç
+popover_select_all_except_longest_path = Tümünü seç hariç en uzun yolu seç
 popover_select_all_except_oldest = En eski olan hariç hepsini seç
 popover_select_all_except_newest = En yeni olan hariç hepsini seç
 popover_select_one_oldest = En eski olanı seç

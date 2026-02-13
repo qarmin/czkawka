@@ -7,19 +7,19 @@ window_compare_images = 画像を比較
 general_ok_button = Ok
 general_close_button = 閉じる
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Krokiet – 新バージョン Czkawka
+krokiet_info_message = 
+        Krokietは、Czkawka GTK GUIの新しい、改良され、高速かつ信頼性の高いバージョンです！
+
+        実行が簡単で、システム変更に強く、ほとんどのシステムでデフォルトで利用可能なコアライブラリに依存するためです。
+
+        Krokietは、サムネイルをビデオ比較モードで、EXIFクリーナー、ファイル移動/コピー/削除の進捗状況、または拡張されたソートオプションなど、Czkawkaにはない機能も提供します。
+
+        試してみてください。違いを確かめてください！
+
+        Czkawkaは、私からバグ修正や軽微なアップデートを継続的に受け取りますが、すべての新機能はKrokietにのみ開発され、誰でも新しい機能を追加したり、欠落しているモードを補ったり、Czkawkaをさらに拡張したりすることができます。
+
+        追伸：このメッセージは一度だけ表示されるように設計されています。もし表示された場合は、CZKAWKA_DONT_ANNOY_ME環境変数を任意の非空の値に設定してください。
 # Main window
 music_title_checkbox = タイトル
 music_artist_checkbox = アーティスト
@@ -149,8 +149,8 @@ main_check_box_broken_files_audio = 音声
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = アーカイブする
 main_check_box_broken_files_image = 画像
-main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video = ビデオ
+main_check_box_broken_files_video_tooltip = ffmpeg/ffprobe を使用してビデオファイルを検証します。かなり遅く、ファイルが正常に再生されても、煩雑なエラーを検出することがあります。
 check_button_general_same_size = 同じサイズを無視
 check_button_general_same_size_tooltip = 結果として同じサイズのファイルを無視 - 通常、これらは1:1重複です
 main_label_size_bytes_tooltip = スキャンで使用されるファイルのサイズ
@@ -182,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = 検索で除外するディレクトリを追加します。
 upper_remove_excluded_button_tooltip = 除外されたディレクトリを削除します。
 upper_notebook_items_configuration = アイテム設定
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = 除外パス
+upper_notebook_included_directories = 含まれるパス
 upper_allowed_extensions_tooltip =
     許可する拡張子はカンマで区切る必要があります（デフォルトではすべてが使用可能です）。
     
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     スキャンで無視される無効なファイルの一覧です。
     
     許可された拡張子と無効化された拡張子の両方を使用する場合、この拡張子の方が優先度が高いので、ファイルはチェックされません。
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        除外項目には *ワイルドカードを含んでおり、カンマで区切ってください。
+        これはExcluded Pathsよりも遅いため、注意して使用してください。
 upper_excluded_items = 除外するアイテム:
 upper_allowed_extensions = 許可される拡張子:
 upper_excluded_extensions = 無効なエクステンション:
@@ -204,8 +204,8 @@ upper_excluded_extensions = 無効なエクステンション:
 popover_select_all = すべて選択
 popover_unselect_all = すべて選択解除
 popover_reverse = 選択を逆にする
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = 選択を解除し、最短経路を除く
+popover_select_all_except_longest_path = 選択を解除する、最長パスを除く
 popover_select_all_except_oldest = 一番古いもの以外のすべてを選択
 popover_select_all_except_newest = 一番新しいもの以外のすべてを選択
 popover_select_one_oldest = 一番古いものを選択

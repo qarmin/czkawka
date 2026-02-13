@@ -7,19 +7,19 @@ window_compare_images = مقایسه تصاویر
 general_ok_button = اوکی
 general_close_button = بسته شود
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = معرفی کرکیه - نسخه جدید CzKawkA
+krokiet_info_message = 
+        کروکیِت نسخه جدید، بهبود یافته، سریع‌تر و قابل اعتمادتر رابط کاربری GTK Czkawka است!
+
+        اجرای آن آسان‌تر و مقاوم‌تر در برابر تغییرات سیستم است، زیرا فقط به کتابخانه‌های اصلی موجود در اکثر سیستم‌ها به صورت پیش‌فرض وابسته است.
+
+        کروکیِت همچنین ویژگی‌هایی را به همراه دارد که Czkawka فاقد آن‌هاست، از جمله تصاویر کوچک در حالت مقایسه ویدیو، یک پاک‌کن EXIF، گزینه‌های پیشرفت برای انتقال/کپی/حذف فایل یا گزینه‌های مرتب‌سازی گسترده.
+
+        آن را امتحان کنید و تفاوت را ببینید!
+
+        Czkawka همچنان با رفع باگ‌ها و به‌روزرسانی‌های جزئی از طرف من دریافت خواهد شد، اما تمام ویژگی‌های جدید به طور انحصاری برای کروکیِت توسعه خواهند یافت و هر کسی می‌تواند ویژگی‌های جدید، افزودن حالت‌های از دست رفته یا گسترش بیشتر Czkawka را ارائه دهد.
+
+        PS: این پیام باید فقط یک بار ظاهر شود. اگر دوباره ظاهر شد، متغیر محیطی CZKAWKA_DONT_ANNOY_ME را به هر مقدار غیر خالی تنظیم کنید.
 # Main window
 music_title_checkbox = عنوان
 music_artist_checkbox = هنرپرداز
@@ -149,8 +149,8 @@ main_check_box_broken_files_audio = آوتویډ
 main_check_box_broken_files_pdf = پdf
 main_check_box_broken_files_archive = اریکرج
 main_check_box_broken_files_image = عکس
-main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video = ویدئو
+main_check_box_broken_files_video_tooltip = از ffmpeg/ffprobe برای اعتبارسنجی فایل‌های ویدیویی استفاده می‌کند. نسبتاً کند است و ممکن است خطاها را به صورت دقیق تشخیص دهد حتی اگر فایل به درستی پخش شود.
 check_button_general_same_size = تنها سایز‌های مختلف را تغییر ندهید
 check_button_general_same_size_tooltip = فایل‌های مشابه سایز آن‌ها در نتایج را ترک کنید - معمولاً این فایل‌ها دوباره تولید شده‌اند (1:1)
 main_label_size_bytes_tooltip = حجم فایل‌هایی که در طول سcan استفاده خواهند شد
@@ -186,8 +186,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = پوشه‌ای برای جستجوی مورد بندی خارج شود.
 upper_remove_excluded_button_tooltip = دایرکتوری را از مورد نادیده‌گرفتن حذف کنید.
 upper_notebook_items_configuration = تنظیم‌های موارد
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = مسیرهای حذف‌شده
+upper_notebook_included_directories = مسارات شامل‌شده
 upper_allowed_extensions_tooltip =
     امتدادهای مجاز باید با کاما جدا شوند (به طور پیش فرض همه موجود هستند).
     
@@ -198,9 +198,9 @@ upper_excluded_extensions_tooltip =
     فهرست فایل‌های غیرفعال که در اسکن نادیده گرفته می‌شوند.
     
     هنگام استفاده از همچون پسوندها مجاز و غیرفعال، این یکی اولویت بالاتری دارد، بنابراین فایل بررسی نخواهد شد.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        موارد حذف شده باید شامل * wildcard و باید با کاما از هم جدا شوند.
+        این کندتر از مسیرهای حذف شده است، بنابراین از آن با دقت استفاده کنید.
 upper_excluded_items = آیتم‌های حذف شده:
 upper_allowed_extensions = مدت زمان مجاز:
 upper_excluded_extensions = توسعه‌های غیرفعال:
@@ -208,8 +208,8 @@ upper_excluded_extensions = توسعه‌های غیرفعال:
 popover_select_all = انتخاب همه
 popover_unselect_all = همه را مخاطب نکنید
 popover_reverse = انتخاب را برگردانید
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = انتخاب همه چیز به جز کوتاه‌ترین مسیر
+popover_select_all_except_longest_path = انتخاب همه موارد به جز طولانی‌ترین مسیر
 popover_select_all_except_oldest = انتخاب همه غیر از قدیمی nhất
 popover_select_all_except_newest = انتخاب همه مواردی که نوزاد نیستند
 popover_select_one_oldest = انتخاب یکی از قدیمی‌ترینanst

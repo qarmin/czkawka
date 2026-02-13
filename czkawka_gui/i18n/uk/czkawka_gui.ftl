@@ -7,19 +7,19 @@ window_compare_images = Порівняння зображень
 general_ok_button = Гаразд
 general_close_button = Закрити
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Представляємо Krokiet - Нова версія Czkawka
+krokiet_info_message = 
+        Крокієт – це нова, покращена, швидша та надійніша версія Czkawka GTK GUI!
+
+        Він легше запускається та більш стійкий до змін у системі, оскільки покладається лише на основні бібліотеки, які за замовчуванням доступні на більшості систем.
+
+        Крокієт також приносить функції, яких немає в Czkawka, включаючи мініатюри в режимі порівняння відео, EXIF очищувач, прогрес переміщення/копіювання/видалення файлів або розширені опції сортування.
+
+        Спробуйте його та подивіться на різницю!
+
+        Czkawka продовжуватиме отримувати виправлення помилок та невеликі оновлення від мене, але всі нові функції будуть розроблені виключно для Крокієта, і будь-хто вільний пропонувати нові функції, додавати відсутні режими або розширювати Czkawka далі.
+
+        P.S.: Це повідомлення має з’явитися лише один раз. Якщо воно з’являється знову, встановіть змінну середовища CZKAWKA_DONT_ANNOY_ME на будь-яке не порожнє значення.
 # Main window
 music_title_checkbox = Найменування
 music_artist_checkbox = Виконавець
@@ -149,8 +149,8 @@ main_check_box_broken_files_audio = Звук
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Архів
 main_check_box_broken_files_image = Зображення
-main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video = Відео
+main_check_box_broken_files_video_tooltip = Використовує ffmpeg/ffprobe для валідації відеофайлів. Дуже повільно і може виявляти педантичні помилки, навіть якщо файл відтворюється нормально.
 check_button_general_same_size = Ігнорувати однаковий розмір
 check_button_general_same_size_tooltip = Ігнорувати файли з однаковим розміром у результаті - зазвичай це 1:1 дублікатів
 main_label_size_bytes_tooltip = Розмір файлів, які будуть проскановані
@@ -182,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Додати каталог, який виключається з пошуку.
 upper_remove_excluded_button_tooltip = Видалити каталог з виключених.
 upper_notebook_items_configuration = Параметри пошуку
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = Виключені шляхи
+upper_notebook_included_directories = Включені шляхи
 upper_allowed_extensions_tooltip =
     Розширення, що включаються, повинні бути розділені комами (за замовчуванням шукаються файли з будь-якими розширеннями).
     
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Список вимкнених файлів, які будуть ігноруватися при скануванні.
     
     При використанні дозволених і вимкнених розширень, цей файл має більший пріоритет, тому файл не буде відмітити.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        Виключені елементи повинні містити * wildcard і повинні бути розділені комами.
+        Це повільніше, ніж Excluded Paths, тому використовуйте його обережно.
 upper_excluded_items = Виключені елементи:
 upper_allowed_extensions = Дозволені розширення:
 upper_excluded_extensions = Вимкнені розширення:
@@ -204,8 +204,8 @@ upper_excluded_extensions = Вимкнені розширення:
 popover_select_all = Виділити все
 popover_unselect_all = Прибрати всі
 popover_reverse = Зворотній вибір
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = Виберіть все, крім найкоротшого шляху
+popover_select_all_except_longest_path = Виберіть все, крім найдовшого шляху
 popover_select_all_except_oldest = Вибрати всі, крім старіших
 popover_select_all_except_newest = Вибрати всі, крім найновіших
 popover_select_one_oldest = Вибрати один найстаріший

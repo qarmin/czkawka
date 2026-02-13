@@ -7,19 +7,19 @@ window_compare_images = Porównywanie Obrazów
 general_ok_button = Ok
 general_close_button = Zamknij
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Wprowadzamy Krokiet - Nowa wersja Czkawki
+krokiet_info_message = 
+        Krokiet to nowa, ulepszona, szybsza i bardziej niezawodna wersja Czkawki GTK!
+
+        Jest łatwiejszy w uruchomieniu i bardziej odporny na zmiany w systemie, ponieważ polega tylko na podstawowych bibliotekach dostępnych domyślnie na większości systemów.
+
+        Krokiet oferuje również funkcje, których brakuje Czkawce, w tym miniaturki w trybie porównania wideo, czyszczenie EXIF, wyświetlanie postępu kopiowania/przenoszenia/usuwania plików czy rozszerzone opcje sortowania.
+
+        Wypróbuj go i zobacz różnicę!
+
+        Czkawka będzie nadal otrzymywać poprawki błędów i drobne aktualizacje z mojej strony, ale wszystkie nowe funkcje będą rozwijane wyłącznie dla Krokieta, lecz zachęcam każdego chętnego by jeśli chce, to by implementował na własną rękę nowe funkcje czy brakujące tryby w Czkawce.
+
+        PS: Ta wiadomość powinna pojawić się tylko raz. Jeśli pojawia się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną niepustą wartość.
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
@@ -149,8 +149,8 @@ main_check_box_broken_files_audio = Dźwięk
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archiwa
 main_check_box_broken_files_image = Obraz
-main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video = Wideo
+main_check_box_broken_files_video_tooltip = Używa ffmpeg/ffprobe do weryfikacji plików wideo. Jest to dość powolne i może wykryć błędy, które nie są widoczne przy zwykłym odtwarzaniu wideo.
 check_button_general_same_size = Ignoruj identyczny rozmiar
 check_button_general_same_size_tooltip = Ignoruj pliki o identycznym rozmiarze w wynikach - zazwyczaj są to duplikaty 1:1
 main_label_size_bytes_tooltip = Rozmiar plików które będą zawarte przy przeszukiwaniu
@@ -182,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Dodaje wybrany folder do ignorowanych.
 upper_remove_excluded_button_tooltip = Usuwa zaznaczony folder z ignorowanych.
 upper_notebook_items_configuration = Konfiguracja Skanowania
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = Wykluczone Ścieżki
+upper_notebook_included_directories = Dołączone ścieżki
 upper_allowed_extensions_tooltip =
     Dozwolone rozszerzenia muszą być oddzielone przecinkami (domyślnie wszystkie są dostępne).
     
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lista wyłączonych plików, które zostaną zignorowane w skanowaniu.
     
     Gdy używasz zarówno dozwolonych, jak i wyłączonych rozszerzeń, ten ma wyższy priorytet, więc plik nie zostanie sprawdzony.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        Wykluczone elementy muszą zawierać znak * i powinny być oddzielone przecinkami.
+        To działa wolniej niż ustawianie wykluczonych katalogow i plików, więc używaj tego z rozwagą.
 upper_excluded_items = Ignorowane Obiekty:
 upper_allowed_extensions = Dozwolone Rozszerzenia:
 upper_excluded_extensions = Wyłączone rozszerzenia:
@@ -204,8 +204,8 @@ upper_excluded_extensions = Wyłączone rozszerzenia:
 popover_select_all = Zaznacz wszystko
 popover_unselect_all = Odznacz wszystko
 popover_reverse = Odwróć zaznaczenie
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = Zaznacz wszystkie oprócz najkrótszej ścieżki
+popover_select_all_except_longest_path = Zaznacz wszystkie oprócz najdłuższego ścieżki
 popover_select_all_except_oldest = Zaznacz wszystkie oprócz najstarszego
 popover_select_all_except_newest = Zaznacz wszystkie oprócz najnowszego
 popover_select_one_oldest = Zaznacz jedno najstarsze
@@ -293,7 +293,7 @@ bottom_compare_button_tooltip = Porównaj obrazy w grupie.
 bottom_show_errors_tooltip = Pokaż/Ukryj dolny panel tekstowy.
 bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 # Progress Window
-progress_stop_button = Stop
+progress_stop_button = Zatrzymaj
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
 about_repository_button_tooltip = Link do repozytorium z kodem źródłowym

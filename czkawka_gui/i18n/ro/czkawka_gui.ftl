@@ -7,19 +7,19 @@ window_compare_images = Compară imaginile
 general_ok_button = Ok
 general_close_button = Inchide
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Introducerea lui Krokiet - Noua versiune a Czkawka
+krokiet_info_message = 
+        Krokiet este noua, îmbunătățită, mai rapidă și mai fiabilă versiune a Czkawka GTK GUI!
+
+        Este mai ușor de rulat și mai rezistent la modificările sistemului, deoarece depinde doar de bibliotecile de bază disponibile pe majoritatea sistemelor implicit.
+
+        Krokiet aduce, de asemenea, funcții pe care Czkawka nu le are, inclusiv miniaturile în modul de comparare video, un curățător EXIF, progresul mutării/copierii/ștergerii fișierelor sau opțiuni extinse de sortare.
+
+        Îl testează și vezi diferența!
+
+        Czkawka va continua să primească corecții de erori și actualizări minore de la mine, dar toate noile funcții vor fi dezvoltate exclusiv pentru Krokiet, iar oricine este liber să contribuie cu noi funcții, să adauge moduri lipsă sau să extindă Czkawka în continuare.
+
+        PS: Acest mesaj ar trebui să apară doar o dată. Dacă apare din nou, setați variabila de mediu CZKAWKA_DONT_ANNOY_ME la orice valoare non-goalomptă.
 # Main window
 music_title_checkbox = Titlu
 music_artist_checkbox = Artist
@@ -150,7 +150,7 @@ main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arhivează
 main_check_box_broken_files_image = Imagine
 main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video_tooltip = Folosește ffmpeg/ffprobe pentru a valida fișiere video. Foarte lent și poate detecta erori pedantice chiar dacă fișierul rulează bine.
 check_button_general_same_size = Ignoră aceeași dimensiune
 check_button_general_same_size_tooltip = Ignoră fișierele cu rezultate de dimensiune identică - de obicei, acestea sunt de 1:1 duplicate
 main_label_size_bytes_tooltip = Dimensiunea fişierelor care vor fi utilizate în scanare
@@ -182,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Adauga directorul pentru a fi exclus in cautare.
 upper_remove_excluded_button_tooltip = Ştergeţi directorul din excludere.
 upper_notebook_items_configuration = Configurare articole
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = Puteți exclude căile.
+upper_notebook_included_directories = Include Puteți
 upper_allowed_extensions_tooltip =
     Extensiile permise trebuie separate prin virgulă (implicit toate sunt disponibile).
     
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lista fişierelor dezactivate care vor fi ignorate în scanare.
     
     La utilizarea extensiilor permise și dezactivate, aceasta are prioritate mai mare, deci fișierul nu va fi verificat.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        Elemente excluse trebuie să conțină * wildcard și să fie separate prin virgulă.
+        Aceasta este mai lentă decât Excluded Paths, deci folosiți-o cu grijă.
 upper_excluded_items = Elemente excluse:
 upper_allowed_extensions = Extensii permise:
 upper_excluded_extensions = Extensii dezactivate:
@@ -204,8 +204,8 @@ upper_excluded_extensions = Extensii dezactivate:
 popover_select_all = Selectează tot
 popover_unselect_all = Deselectează tot
 popover_reverse = Selectare inversă
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = Selectează toate, cu excepția celui mai scurt drum
+popover_select_all_except_longest_path = Selectează toate, cu excepția celui mai lung traseu
 popover_select_all_except_oldest = Selectează toate cu excepția celor mai vechi
 popover_select_all_except_newest = Selectează toate cu excepția celor noi
 popover_select_one_oldest = Selectează unul mai vechi

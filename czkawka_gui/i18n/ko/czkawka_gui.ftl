@@ -7,19 +7,19 @@ window_compare_images = 이미지 비교
 general_ok_button = 확인
 general_close_button = 닫기
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
-krokiet_info_message =
-    Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
-    
-    It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
-    
-    Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-    
-    Give it a try and see the difference!
-    
-    Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Introducing Krokiet - 새로운 버전의 Czkawka
+krokiet_info_message = 
+        크로키트는 Czkawka GTK GUI의 새로운, 개선된, 더 빠르고 더 안정적인 버전입니다!
+
+        실행하기가 더 쉽고 시스템 변경에 더 강하며, 대부분의 시스템에서 기본적으로 사용 가능한 핵심 라이브러리에만 의존합니다.
+
+        크로키트는 Czkawka에 없는 기능도 제공하며, 비디오 비교 모드에서 미리보기, EXIF 클리너, 파일 이동/복사/삭제 진행률 또는 확장된 정렬 옵션 등이 포함됩니다.
+
+        사용해 보고 차이점을 확인해 보세요!
+
+        Czkawka는 저로부터 버그 수정 및 소규모 업데이트를 계속 받겠지만, 모든 새로운 기능은 크로키트에만 개발되며, 누구나 새로운 기능 추가, 누락된 모드 확장 또는 Czkawka 추가 확장을 자유롭게 기여할 수 있습니다.
+
+        PS: 이 메시지는 한 번만 표시되어야 합니다. 다시 나타나면 CZKAWKA_DONT_ANNOY_ME 환경 변수를 비어 있는 값이 아닌 값으로 설정하십시오.
 # Main window
 music_title_checkbox = 제목
 music_artist_checkbox = 아티스트
@@ -157,8 +157,8 @@ main_check_box_broken_files_audio = 음악 파일
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = 압축 파일
 main_check_box_broken_files_image = 이미지
-main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Uses ffmpeg/ffprobe to validate video files. Quite slow and may detect pedantic errors even if the file plays fine.
+main_check_box_broken_files_video = 비디오
+main_check_box_broken_files_video_tooltip = ffmpeg/ffprobe를 사용하여 비디오 파일 유효성 검사합니다. 상당히 느리고 파일이 잘 재생되더라도 형식에 민감한 오류를 감지할 수 있습니다.
 check_button_general_same_size = 같은 파일크기 무시
 check_button_general_same_size_tooltip = 동일한 크기의 파일은 결과에서 제외합니다 – 대부분 1:1 중복일 가능성이 높습니다
 main_label_size_bytes_tooltip = 스캔할 파일의 크기입니다.
@@ -190,8 +190,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = 제외할 디렉터리를 추가합니다.
 upper_remove_excluded_button_tooltip = 제외할 디렉터리에서 제거합니다.
 upper_notebook_items_configuration = 항목 설정
-upper_notebook_excluded_directories = Excluded Paths
-upper_notebook_included_directories = Included Paths
+upper_notebook_excluded_directories = 제외 경로
+upper_notebook_included_directories = 포함된 경로
 upper_allowed_extensions_tooltip =
     허용할 확장자는 콤마(',')를 통해 구분해야 합니다. (기본값인 경우 모든 확장자를 허용합니다.)
     
@@ -202,9 +202,9 @@ upper_excluded_extensions_tooltip =
     검사에서 무시될 비활성화된 파일 목록입니다.
     
     허용된 확장자와 비활성화된 확장자를 둘 다 사용할 경우, 비활성화된 확장자가 더 높은 우선순위를 가지므로 해당 파일은 검사되지 않습니다.
-upper_excluded_items_tooltip =
-    Excluded items must contain * wildcard and should be separated by commas.
-    This is slower than Excluded Paths, so use it carefully.
+upper_excluded_items_tooltip = 
+        제외 항목은 * 와일드카드와 쉼표로 구분되어야 합니다.
+        이는 Excluded Paths 보다 느리므로 주의해서 사용하십시오.
 upper_excluded_items = 제외할 항목:
 upper_allowed_extensions = 허용할 확장자:
 upper_excluded_extensions = 비활성 확장자:
@@ -212,8 +212,8 @@ upper_excluded_extensions = 비활성 확장자:
 popover_select_all = 모두 선택
 popover_unselect_all = 모두 선택 해제
 popover_reverse = 선택 반전
-popover_select_all_except_shortest_path = Select all except shortest path
-popover_select_all_except_longest_path = Select all except longest path
+popover_select_all_except_shortest_path = 선택 모두 제외 짧은 경로
+popover_select_all_except_longest_path = 선택 전부 제외 가장 긴 경로
 popover_select_all_except_oldest = 가장 오래된 파일 제외하고 모두 선택
 popover_select_all_except_newest = 가장 최신인 파일 제외하고 모두 선택
 popover_select_one_oldest = 가장 오래된 파일 선택
