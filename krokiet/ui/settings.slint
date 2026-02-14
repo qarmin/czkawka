@@ -60,7 +60,7 @@ export global Settings {
     in-out property <[string]> similar_images_sub_available_hash_size: ["8", "16", "32", "64"];
     in-out property <int> similar_images_sub_hash_size_index: 1;
     in-out property <string> similar_images_sub_hash_size_value: "16";
-    in-out property <[string]> similar_images_sub_available_resize_algorithm: ["Lanczos3", "Nearest", "Triangle", "Gaussian", "CatmullRom"];
+    in-out property <[string]> similar_images_sub_available_resize_algorithm: ["Lanczos3", "Gaussian", "CatmullRom", "Triangle", "Nearest"];
     in-out property <int> similar_images_sub_resize_algorithm_index: 0;
     in-out property <string> similar_images_sub_resize_algorithm_value: "Lanczos3";
     in-out property <[string]> similar_images_sub_available_hash_type: ["Mean", "Gradient", "BlockHash", "VertGradient", "DoubleGradient", "Median"];
@@ -150,8 +150,6 @@ export global Settings {
     in-out property <string> video_optimizer_sub_max_samples: "60";
     in-out property <string> video_optimizer_sub_min_crop_size: "20";
 
-    in-out property <int> video_optimizer_sub_video_codec_index: 0;
-    in-out property <string> video_optimizer_sub_video_codec_value: "HEVC/H265";
     in-out property <string> video_optimizer_sub_excluded_codecs: "h265,hevc,av1,vp9";
     in-out property <float> video_optimizer_sub_video_quality: 23;
     in-out property <float> video_optimizer_sub_video_quality_max: 51;
@@ -162,8 +160,8 @@ export global Settings {
 
     // ComboBox model/value for optimizer codec (initialized from Rust)
     in-out property <[string]> video_optimizer_sub_video_codec_config: ["HEVC/H265", "H264", "VP9", "AV1"];
-    in-out property <int> video_optimizer_sub_video_codec_config_index: 0;
-    in-out property <string> video_optimizer_sub_video_codec_config_value: "h265";
+    in-out property <int> video_optimizer_sub_video_codec_index: 0;
+    in-out property <string> video_optimizer_sub_video_codec_value: "h265";
 
     // Fail/overwrite/quality settings for optimizer (initialized from Rust)
     in-out property <bool> video_optimizer_sub_fail_if_bigger: false;
