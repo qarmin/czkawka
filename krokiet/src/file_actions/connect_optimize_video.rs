@@ -167,6 +167,7 @@ impl ModelProcessor {
             let path_idx = self.active_tab.get_str_path_idx();
             let name_idx = self.active_tab.get_str_name_idx();
             let size_idx = self.active_tab.get_int_size_idx();
+            let codec_idx = self.active_tab.get_str_video_codec_idx();
 
             let rect_left_idx = IntDataVideoOptimizer::RectLeft as usize;
             let rect_top_idx = IntDataVideoOptimizer::RectTop as usize;
@@ -179,6 +180,7 @@ impl ModelProcessor {
             let crop_fnc = move |data: &SimplerSingleMainListModel| {
                 let full_path = format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]);
                 let original_size = data.get_size(size_idx);
+                let codec = &data.val_str[codec_idx];
 
                 let left = data.val_int[rect_left_idx] as u32;
                 let top = data.val_int[rect_top_idx] as u32;
@@ -196,6 +198,7 @@ impl ModelProcessor {
                         crop_rectangle: (left, top, right, bottom),
                         crop_mechanism: video_crop_mechanism,
                     },
+                    codec,
                 )
             };
 
@@ -226,12 +229,12 @@ fn optimize_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _origin
 }
 
 #[cfg(not(test))]
-fn crop_single_video(stop_flag: &Arc<AtomicBool>, full_path: &str, _original_size: u64, params: VideoCropSingleFixParams) -> Result<(), String> {
-    czkawka_core::tools::video_optimizer::core::fix_video_crop(std::path::Path::new(full_path), &params, stop_flag)
+fn crop_single_video(stop_flag: &Arc<AtomicBool>, full_path: &str, _original_size: u64, params: VideoCropSingleFixParams, codec: &str) -> Result<(), String> {
+    czkawka_core::tools::video_optimizer::core::fix_video_crop(std::path::Path::new(full_path), &params, stop_flag, codec)
 }
 
 #[cfg(test)]
-fn crop_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _params: VideoCropSingleFixParams) -> Result<(), String> {
+fn crop_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _params: VideoCropSingleFixParams, _codec: &str) -> Result<(), String> {
     if video_path.contains("test_error") {
         return Err(format!("Test error for item: {video_path}"));
     }

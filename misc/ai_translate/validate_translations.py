@@ -65,14 +65,18 @@ def validate_translation(base_value: str, translated_value: str, key: str) -> Li
                 )
 
     # New: validate trailing dot presence/absence consistency
-    base_has_dot = base_value.strip().endswith('.')
-    translated_has_dot = translated_value.strip().endswith('.')
+    base_has_dot = base_value.strip().endswith(".")
+    translated_has_dot = translated_value.strip().endswith(".")
 
     if base_has_dot != translated_has_dot:
         if base_has_dot:
-            errors.append(f"  {Colors.RED}Trailing dot mismatch:{Colors.RESET} source ends with a dot but translation does not")
+            errors.append(
+                f"  {Colors.RED}Trailing dot mismatch:{Colors.RESET} source ends with a dot but translation does not"
+            )
         else:
-            errors.append(f"  {Colors.RED}Trailing dot mismatch:{Colors.RESET} source does not end with a dot but translation does")
+            errors.append(
+                f"  {Colors.RED}Trailing dot mismatch:{Colors.RESET} source does not end with a dot but translation does"
+            )
 
     return errors
 
@@ -135,7 +139,9 @@ def fix_language_file(lang_file: pathlib.Path, keys_to_remove: Set[str]) -> int:
     return removed_count
 
 
-def fix_trailing_dots_in_language_file(lang_file: pathlib.Path, base_entries: Dict[str, str], keys_to_fix: Set[str]) -> int:
+def fix_trailing_dots_in_language_file(
+    lang_file: pathlib.Path, base_entries: Dict[str, str], keys_to_fix: Set[str]
+) -> int:
     content = lang_file.read_text(encoding="utf-8")
     lines = content.split("\n")
     result_lines: List[str] = []
@@ -197,15 +203,15 @@ def fix_trailing_dots_in_language_file(lang_file: pathlib.Path, base_entries: Di
 
                     # split into text and trailing spaces to preserve spacing
                     m = re.match(r"^(.*?)(\s*)$", last_part, flags=re.S)
-                    text = m.group(1)
-                    trailing_spaces = m.group(2)
+                    text = m.group(1)  # type: ignore
+                    trailing_spaces = m.group(2)  # type: ignore
 
-                    base_has_dot = base_entries[key].strip().endswith('.')
-                    trans_has_dot = text.endswith('.')
+                    base_has_dot = base_entries[key].strip().endswith(".")
+                    trans_has_dot = text.endswith(".")
 
                     new_text = text
                     if base_has_dot and not trans_has_dot:
-                        new_text = text + '.'
+                        new_text = text + "."
                     elif not base_has_dot and trans_has_dot:
                         # remove all trailing dots from the textual end
                         new_text = re.sub(r"\.+$", "", text)
@@ -291,7 +297,9 @@ def validate_i18n_folder(
         return 0
 
     if fix_mode:
-        print(f"\n{Colors.YELLOW}FIX MODE: Fixing trailing-dot mismatches and removing entries with placeholder errors{Colors.RESET}\n")
+        print(
+            f"\n{Colors.YELLOW}FIX MODE: Fixing trailing-dot mismatches and removing entries with placeholder errors{Colors.RESET}\n"
+        )
 
         total_removed = 0
         total_fixed = 0
@@ -305,7 +313,11 @@ def validate_i18n_folder(
 
             for key, msgs in data["errors"].items():
                 combined = "\n".join(msgs)
-                if "Missing placeholders" in combined or "Extra placeholders" in combined or "Wrong occurrence count" in combined:
+                if (
+                    "Missing placeholders" in combined
+                    or "Extra placeholders" in combined
+                    or "Wrong occurrence count" in combined
+                ):
                     keys_to_remove.add(key)
                 elif "Trailing dot mismatch" in combined:
                     keys_to_fix_dots.add(key)
@@ -327,7 +339,9 @@ def validate_i18n_folder(
 
             print(f"{lang_code:8} ({data['name']:25}) - removed {removed:3} entry(ies), fixed {fixed:3} entry(ies)")
 
-        print(f"\n{Colors.GREEN}Fixed! Removed {total_removed} entry(ies) and updated {total_fixed} translation(s) with trailing-dot mismatches{Colors.RESET}")
+        print(
+            f"\n{Colors.GREEN}Fixed! Removed {total_removed} entry(ies) and updated {total_fixed} translation(s) with trailing-dot mismatches{Colors.RESET}"
+        )
         return 0
 
     print(f"\nFound errors in {len(errors_by_language)} language(s):\n")

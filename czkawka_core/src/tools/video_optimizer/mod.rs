@@ -32,7 +32,7 @@ impl VideoCodec {
         }
     }
 
-    pub const fn as_ffprobe_codec_name(&self) -> &str {
+    pub const fn as_ffprobe_codec_name(self) -> &'static str {
         match self {
             Self::H264 => "h264",
             Self::H265 => "h265",

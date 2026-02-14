@@ -28,6 +28,9 @@ pub struct CommandOutput {
     pub stderr: String,
 }
 
+// Remember - Ok returned by this function does not necessarily mean that the command executed successfully
+// it only means that the command was executed and its output was captured.
+// The actual success of the command should be determined by checking the `status` field of the returned `CommandOutput`.
 pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBool>) -> Option<Result<CommandOutput, String>> {
     if stop_flag.load(Ordering::Relaxed) {
         return None;
