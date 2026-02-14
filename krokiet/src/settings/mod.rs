@@ -361,6 +361,7 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
         .collect::<Vec<_>>();
     let codec_config_value = collected_items.video_optimizer_video_codec[idx].config_name.clone();
     settings.set_video_optimizer_sub_video_codec_config(ModelRc::new(VecModel::from(codec_display_names)));
+    settings.set_video_optimizer_sub_video_codec_config_index(idx as i32);
     settings.set_video_optimizer_sub_video_codec_config_value(codec_config_value.into());
 }
 

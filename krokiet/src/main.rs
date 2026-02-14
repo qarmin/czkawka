@@ -40,6 +40,7 @@ use crate::connect_stop::connect_stop_button;
 use crate::connect_tab_changed::connect_tab_changed;
 use crate::connect_translation::connect_translations;
 use crate::create_calculate_task_size::create_calculate_task_size;
+use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::set_initial_scroll_list_data_indexes::set_initial_scroll_list_data_indexes;
 // TODO - at start this should be used, to be sure that rust models are in sync with slint models
 // currently I need to do this manually - https://github.com/slint-ui/slint/issues/7632
@@ -122,7 +123,7 @@ fn main() {
     let audio_player = Arc::new(crate::audio_player::AudioPlayer::new());
 
     // Disabled for now, due invalid settings model at start
-    // set_initial_gui_infos(&app);
+    set_initial_gui_infos(&app);
 
     set_initial_scroll_list_data_indexes(&app);
 

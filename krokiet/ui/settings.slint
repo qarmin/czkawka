@@ -162,6 +162,7 @@ export global Settings {
 
     // ComboBox model/value for optimizer codec (initialized from Rust)
     in-out property <[string]> video_optimizer_sub_video_codec_config: ["HEVC/H265", "H264", "VP9", "AV1"];
+    in-out property <int> video_optimizer_sub_video_codec_config_index: 0;
     in-out property <string> video_optimizer_sub_video_codec_config_value: "h265";
 
     // Fail/overwrite/quality settings for optimizer (initialized from Rust)
