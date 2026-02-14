@@ -163,7 +163,7 @@ impl StringComboBoxItems {
         *STRING_COMBO_BOX_ITEMS.lock().expect("Can't lock string combobox items") = Self::regenerate_items();
     }
 
-    pub(crate) fn get_display_names<T>(items: &Vec<StringComboBoxItem<T>>) -> Vec<SharedString> {
+    pub(crate) fn get_display_names<T: Debug + Clone>(items: &[StringComboBoxItem<T>]) -> Vec<SharedString> {
         items.iter().map(|e| e.display_name.clone().into()).collect()
     }
 }
