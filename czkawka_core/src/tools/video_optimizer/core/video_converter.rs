@@ -4,6 +4,8 @@ use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
+use log::error;
+
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_utils::VideoMetadata;
 use crate::flc;
@@ -44,7 +46,7 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     entry
 }
 
-pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, video_transcode_params: VideoTranscodeFixParams) -> Result<(), String> {
+pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, params: VideoTranscodeFixParams) -> Result<(), String> {
     let temp_output = Path::new(video_path).with_extension("czkawka_optimized.mp4");
 
     let mut command = Command::new("ffmpeg");
@@ -53,15 +55,12 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
         .arg(video_path)
         .arg("-nostdin")
         .arg("-c:v")
-        .arg(video_transcode_params.codec.as_str())
+        .arg(params.codec.as_str())
         .arg("-crf")
-        .arg(video_transcode_params.quality.to_string());
+        .arg(params.quality.to_string());
 
-    if video_transcode_params.limit_video_size {
-        let scale_filter = format!(
-            "scale='min({},iw):min({},ih):force_original_aspect_ratio=decrease'",
-            video_transcode_params.max_width, video_transcode_params.max_height
-        );
+    if params.limit_video_size {
+        let scale_filter = format!("scale='min({},iw):min({},ih):force_original_aspect_ratio=decrease'", params.max_width, params.max_height);
         command.arg("-vf").arg(scale_filter);
     }
 
@@ -76,8 +75,18 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
             let _ = fs::remove_file(&temp_output);
             return Err(flc!("core_failed_to_process_video", file = video_path, reason = e));
         }
-        Some(Ok(_)) => {
-            // Command succeeded, continue with validation
+        Some(Ok(output)) => {
+            if !output.status.success() {
+                let connected = format!("{} - {}", output.stdout, output.stderr);
+                if connected.to_lowercase().contains("unknown encoder") {
+                    return Err(flc!("core_ffmpeg_unknown_encoder", file = video_path, encoder = params.codec.as_ffprobe_codec_name()));
+                }
+                error!(
+                    "FFmpeg failed to transcode video \"{}\" with status {}. Stdout: {}, Stderr: {}",
+                    video_path, output.status, output.stdout, output.stderr
+                );
+                return Err(flc!("core_ffmpeg_error", file = video_path, code = output.status.to_string(), reason = output.stderr));
+            }
         }
     }
 
@@ -92,7 +101,7 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
 
     let new_size = metadata.len();
 
-    if video_transcode_params.fail_if_not_smaller && new_size >= original_size {
+    if params.fail_if_not_smaller && new_size >= original_size {
         let _ = fs::remove_file(&temp_output);
         return Err(flc!(
             "core_optimized_file_larger",
@@ -103,7 +112,7 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
         ));
     }
 
-    if video_transcode_params.overwrite_original {
+    if params.overwrite_original {
         fs::rename(&temp_output, video_path).map_err(|e| {
             let _ = fs::remove_file(&temp_output);
             flc!("core_failed_to_replace_with_optimized", file = video_path, reason = e.to_string())

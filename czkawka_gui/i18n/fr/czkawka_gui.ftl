@@ -7,17 +7,20 @@ window_compare_images = Comparer les images
 general_ok_button = Ok
 general_close_button = Fermer
 # Krokiet info dialog
-krokiet_info_title = Introduction à Krokiet - Nouvelle version de Czkawka
+krokiet_info_title = Présentation de Krokiet - Nouvelle version de Czkawka
 krokiet_info_message =
-    Krokiet est une nouvelle version, améliorée, plus rapide et moins buggée de l'interface graphique GTK de Czkawka !
+    Krokiet est la nouvelle version améliorée, plus rapide et plus fiable de l'interface graphique GTK Czkawka !
     
-    Étant autonome, il est beaucoup plus facile de Czkawka, tels que les miniatures dans le mode de comparaison des vidéos, la progression du déplacement, de la copie et de la suppression des fichiers et des options de tri étendu.
+    Il est plus facile à exécuter et plus résistant aux changements du système, car il dépend uniquement des bibliothèques de base disponibles par défaut sur la plupart des systèmes.
     
-    Essayez et constatez la différence !
+    Krokiet apporte également des fonctionnalités qui font défaut à Czkawka, notamment des vignettes en mode de comparaison vidéo, un nettoyeur d'EXIF, la progression du déplacement/copie/suppression de fichiers et des options de tri étendues.
     
-    Czkawka continuera de recevoir des corrections de bugs et des mises à jour mineures, mais toutes les nouvelles fonctionnalités sera implémentée uniquement dans Krokiet.
+    Essayez-le et constatez la différence !
     
-    PS : ce message ne devrait s'afficher qu'une seule fois, mais, si elle apparaissait à nouveau, paramétrer la variable d'environnement CZKAWKA_DONT_ANNOY_ME à n'importe quelle valeur non vide.
+    Czkawka continuera à bénéficier de corrections de bugs et de mises à jour mineures de ma part, mais toutes les nouvelles fonctionnalités seront développées exclusivement dans Krokiet, et tout le monde est libre de
+     contribuer à l'ajout de nouvelles fonctionnalités, de modes manquants ou à l'extension de Czkawka.
+    
+    PS : ce message ne devrait apparaître qu'une seule fois. S'il s'affiche à nouveau, définissez la variable d'environnement CZKAWKA_DONT_ANNOY_ME à une valeur non vide.
 # Main window
 music_title_checkbox = Titre de la page
 music_artist_checkbox = Artiste
@@ -147,6 +150,8 @@ main_check_box_broken_files_audio = Audio
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archiver
 main_check_box_broken_files_image = Image
+main_check_box_broken_files_video = Vidéo
+main_check_box_broken_files_video_tooltip = Utilise ffmpeg/ffprobe pour valider les fichiers vidéo. Très lent et peut détecter des erreurs insignifiantes même si le fichier est bien lu.
 check_button_general_same_size = Ignorer la même taille
 check_button_general_same_size_tooltip = Ignorer les fichiers avec la même taille dans les résultats - généralement ce sont des doublons 1:1
 main_label_size_bytes_tooltip = Taille des fichiers qui seront utilisés lors de l'analyse
@@ -178,8 +183,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Ajouter un répertoire à exclure de la recherche.
 upper_remove_excluded_button_tooltip = Retirer le répertoire de la liste de ceux exclus.
 upper_notebook_items_configuration = Configuration des éléments
-upper_notebook_excluded_directories = Répertoires exclus
-upper_notebook_included_directories = Répertoires inclus
+upper_notebook_excluded_directories = Chemins exclus
+upper_notebook_included_directories = Chemins inclus
 upper_allowed_extensions_tooltip =
     Les extensions autorisées doivent être séparées par des virgules (toutes sont disponibles par défaut).
     
@@ -200,6 +205,8 @@ upper_excluded_extensions = Extensions désactivées :
 popover_select_all = Tout sélectionner
 popover_unselect_all = Tout désélectionner
 popover_reverse = Inverser la sélection
+popover_select_all_except_shortest_path = Tout sélectionner sauf le chemin le plus court
+popover_select_all_except_longest_path = Tout sélectionner sauf le chemin le plus long
 popover_select_all_except_oldest = Tout sélectionner sauf le plus ancien
 popover_select_all_except_newest = Tout sélectionner sauf le plus récent
 popover_select_one_oldest = Sélectionner un élément plus ancien
@@ -473,7 +480,7 @@ saving_loading_failed_to_read_config_file = Impossible de charger la configurati
 saving_loading_failed_to_read_data_from_file = Impossible de lire les données du fichier "{ $path }". Raison : "{ $reason }".
 # Other
 selected_all_reference_folders = Impossible de lancer la recherche quand tous les répertoires sont définis comme des répertoires de référence
-searching_for_data = Recherche de données. Cela peut prendre un certain temps, veuillez patienter…
+searching_for_data = Recherche de données. Cela peut prendre un certain temps, veuillez patienter….
 text_view_messages = MESSAGESS
 text_view_warnings = AVERTISSEMENTS
 text_view_errors = ERREURS

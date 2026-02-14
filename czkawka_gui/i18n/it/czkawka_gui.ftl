@@ -7,24 +7,24 @@ window_compare_images = Confronta le immagini
 general_ok_button = Ok
 general_close_button = Chiudi
 # Krokiet info dialog
-krokiet_info_title = Introdurre Krokiet - Nuova Versione di Czkawka
+krokiet_info_title = Vi presentiamo Krokiet - La nuova versione di Czkawka
 krokiet_info_message =
-    Krokiet è la nuova, migliorata, più veloce e meno buggata versione di Czkawka GTK!
+    Krokiet è la versione nuova, migliorata, più veloce e più affidabile della GUI Czkawka GTK!
     
-    Essendo autosufficiente, è molto più facile da eseguire e più resistente alle modifiche del sistema e agli aggiornamenti delle versioni dei pacchetti.
+    È più facile da eseguire e più resiliente ai cambiamenti di sistema, in quanto dipende solo dalle librerie di base disponibili sulla maggior parte dei sistemi per impostazione predefinita.
     
-    Include molte funzionalità non disponibili in Czkawka, come le miniature in modalità di confronto video, il progresso del trasferimento/copia/eliminazione dei file e opzioni di ordinamento estese.
+    Krokiet porta anche funzionalità aggiuntive: miniature in modalità di confronto video, un pulitore di dati EXIF, opzioni per spostare, copiare, cancellare e riordinare i file.
     
     Provalo e vedi la differenza!
     
-    Czkawka riceverà comunque correzioni di bug e aggiornamenti minori, ma tutte le nuove funzionalità saranno implementate solo in Krokiet.
+    Czkawka continuerà a ricevere correzioni di bug e aggiornamenti minori da me, ma tutte le nuove funzionalità saranno sviluppate esclusivamente per Krokiet, e chiunque è libero di aggiungere funzionalità o estendere ulteriormente Czkawka.
     
-    PS. Questo messaggio dovrebbe essere visibile solo una volta, ma se appare di nuovo, imposta la variabile d'ambiente CZKAWKA_DONT_ANNOY_ME a qualsiasi valore non vuoto.
+    PS: Questo messaggio dovrebbe apparire solo una volta. Se viene visualizzato di nuovo, impostare la variabile di ambiente CZKAWKA_DONT_ANNOY_ME a qualsiasi valore non vuoto.
 # Main window
 music_title_checkbox = Titolo
 music_artist_checkbox = Artista
 music_year_checkbox = Anno
-music_bitrate_checkbox = Tasso di bit
+music_bitrate_checkbox = Velocità in bit
 music_genre_checkbox = Genere
 music_length_checkbox = Durata
 music_comparison_checkbox = Confronto approssimativo
@@ -36,27 +36,27 @@ music_compare_only_in_title_group = Confronta all'interno di gruppi di titoli si
 music_compare_only_in_title_group_tooltip =
     Se abilitato, i file vengono raggruppati per titolo e poi confrontati tra loro.
     
-    Con 10000 file, invece quasi 100 milioni di confronti di solito ci saranno circa 20000 confronti.
+    Con 10 000 file, invece di 100 milioni di confronti di solito ci saranno circa 20 000 confronti.
 same_music_tooltip =
-    La ricerca di file musicali simili dal suo contenuto può essere configurata impostando:
+    La ricerca di file musicali simili per contenuto può essere configurata impostando:
     
-    - Il tempo minimo di frammento dopo il quale i file musicali possono essere identificati come simili
-    - La differenza massima tra due frammenti testati
+    - Il tempo minimo del frammento dopo il quale i file musicali possono essere identificati come simili
+    - La differenza massima tra due frammenti analizzati
     
-    La chiave per ottenere buoni risultati è trovare combinazioni sensate di questi parametri, per fornito.
+    La chiave per ottenere buoni risultati è trovare combinazioni sensate di questi parametri.
     
     Impostando il tempo minimo a 5s e la differenza massima a 1.0, cercherà frammenti quasi identici nei file.
-    Un tempo di 20 anni e una differenza massima di 6.0, d'altra parte, funziona bene per trovare remix/versioni live ecc.
+    Un tempo di 20s e una differenza massima di 6.0, invece, funziona bene per trovare remix, versioni live ecc.
     
-    Per impostazione predefinita, ogni file musicale viene confrontato tra loro e questo può richiedere molto tempo quando si testano molti file, quindi è di solito meglio usare le cartelle di riferimento e specificare quali file devono essere confrontati tra loro (con la stessa quantità di file, il confronto delle impronte digitali sarà più veloce di almeno 4x che senza cartelle di riferimento).
+    Per impostazione predefinita, ogni file musicale viene confrontato con tutti gli altri e questo può richiedere molto tempo quando si anaalizzano molti file. Quindi di solito è meglio usare le cartelle di riferimento e specificare quali file devono essere confrontati tra loro (con la stessa quantità di file, il confronto delle impronte digitali sarà più veloce di almeno 4x che senza cartelle di riferimento).
 music_comparison_checkbox_tooltip =
-    Cerca file musicali simili usando l'IA, che utilizza l'apprendimento automatico per rimuovere parentesi da una frase. Ad esempio, con questa opzione abilitata, i file in questione saranno considerati duplicati:
+    Cerca file musicali simili usando il machine learning per rimuovere parentesi da una frase. Ad esempio, con questa opzione abilitata, questi file saranno considerati duplicati:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
-duplicate_case_sensitive_name = Caso Sensibile
+duplicate_case_sensitive_name = Distingue Maiuscole e minuscole
 duplicate_case_sensitive_name_tooltip =
-    Se abilitato, raggruppa solo i record quando hanno esattamente lo stesso nome, ad es. Żołd <-> Żołd
-    La disattivazione di tale opzione raggrupperà i nomi senza controllare se ogni lettera ha le stesse dimensioni, ad esempio żoŁD <-> Żołd
+    Se abilitato, raggruppa solo i risultati quando hanno esattamente lo stesso nome, ad es. Żołd <-> Żołd
+    La disattivazione di tale opzione raggrupperà i nomi senza distinguere tra maiuscole e minuscole, ad esempio żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = Dimensione e nome
 duplicate_mode_name_combo_box = Nome
 duplicate_mode_size_combo_box = Dimensione
@@ -68,7 +68,7 @@ duplicate_hash_type_tooltip =
     
     CRC32 - semplice funzione di hash. Questo dovrebbe essere più veloce di Blake3, ma può molto raramente avere alcune collisioni.
     
-    XXH3 - molto simile in termini di prestazioni e qualità di hash a Blake3 (ma non crittografica). Quindi, tali modalità possono essere facilmente intercambiate.
+    XXH3 - molto simile in termini di prestazioni e qualità di hash a Blake3 (ma non crittografica). Queste modalità possono essere facilmente intercambiate.
 duplicate_check_method_tooltip =
     Per ora, Czkawka offre tre tipi di metodo per trovare i duplicati di:
     
@@ -76,30 +76,31 @@ duplicate_check_method_tooltip =
     
     Dimensione - Trova i file che hanno la stessa dimensione.
     
-    Hash - Trova i file che hanno lo stesso contenuto. Questa modalità fa hash sul file e in seguito confronta questo hash per trovare i duplicati. Questa modalità è il modo più sicuro per trovare i duplicati. App usa pesantemente la cache, quindi la seconda e ulteriori scansioni degli stessi dati dovrebbero essere molto più veloce del primo.
+    Hash - Trova i file che hanno lo stesso contenuto. Questa modalità fa la hash sui file e in seguito le confronta
+    per trovare i duplicati. Questa modalità è il modo più sicuro per trovare i duplicati. Czkawka usa pesantemente la cache quindi successive scansioni degli stessi file dovrebbero essere molto più veloci del primo.
 image_hash_size_tooltip =
-    Ogni immagine selezionata produce un hash speciale che può essere confrontato l'uno con l'altro, e una piccola differenza tra loro significa che queste immagini sono simili.
+    Ogni immagine selezionata produce una hash speciale che può essere confrontata l'una con l'altra, e una piccola differenza tra loro significa che queste immagini sono simili.
     
-    8 hash size è abbastanza buono per trovare immagini che sono solo un po 'simili all'originale. Con un insieme più grande di immagini (>1000), questo produrrà una grande quantità di falsi positivi, quindi vi consiglio di utilizzare una dimensione di hash più grande in questo caso.
+    8 hash size è abbastanza buono per trovare immagini che sono solo un po' simili all'originale. Con un insieme più grande di immagini (>1000), questo produrrà una grande quantità di falsi positivi, quindi vi consiglio di utilizzare una dimensione di hash più grande in questo caso.
     
-    16 è la dimensione predefinita dell'hash che è abbastanza un buon compromesso tra trovare anche un po 'di immagini simili e avere solo una piccola quantità di collisioni di hash.
+    16 è la dimensione predefinita dell'hash, che è un buon compromesso tra trovare anche un po' di immagini simili e avere solo una piccola quantità di collisioni di hash.
     
-    32 e 64 hash trovano solo immagini molto simili, ma non dovrebbero avere quasi falsi positivi (forse tranne alcune immagini con canale alfa).
+    32 e 64 hash trovano solo immagini molto simili e non dovrebbero avere quasi mai falsi positivi (forse tranne alcune immagini con canale alfa).
 image_resize_filter_tooltip =
     Per calcolare l'hash dell'immagine, la libreria deve prima ridimensionarla.
     
-    Dipende dall'algoritmo scelto, l'immagine risultante utilizzata per calcolare l'hash apparirà un po' diversa.
+    A seconda dall'algoritmo scelto l'immagine utilizzata per calcolare l'hash apparirà un po' diversa.
     
-    L'algoritmo più veloce da usare, ma anche quello che dà i peggiori risultati, è più vicino. È abilitato per impostazione predefinita, perché con 16x16 dimensioni hash di qualità inferiore non è davvero visibile.
+    Nearest (il più vicino) è l'algoritmo più veloce da usare, ma anche quello che dà i peggiori risultati. È abilitato per impostazione predefinita perché con 16x16 dimensioni hash la qualità inferiore non è davvero visibile.
     
-    Con 8x8 dimensioni di hash si consiglia di utilizzare un algoritmo diverso da quello più vicino, per avere migliori gruppi di immagini.
+    Con 8x8 dimensioni di hash si consiglia di utilizzare un algoritmo diverso da Nearest, per avere migliori gruppi di immagini.
 image_hash_alg_tooltip =
     Gli utenti possono scegliere tra uno dei molti algoritmi di calcolo dell'hash.
     
-    Ognuno ha punti forti e più deboli e a volte darà risultati migliori e a volte peggiori per immagini diverse.
+    Ognuno ha punti di forza e di debolezza e a volte darà risultati migliori e a volte peggiori per immagini diverse.
     
     Quindi, per determinare quello migliore per te, è necessario un test manuale.
-big_files_mode_combobox_tooltip = Consente di cercare file più piccoli/più grandi
+big_files_mode_combobox_tooltip = Consente di cercare i file più piccoli/più grandi
 big_files_mode_label = File controllati
 big_files_mode_smallest_combo_box = Il Più Piccolo
 big_files_mode_biggest_combo_box = Il Più Grande
@@ -114,29 +115,29 @@ main_notebook_same_music = Duplicati musicali
 main_notebook_symlinks = Collegamenti invalidi
 main_notebook_broken_files = File corrotti
 main_notebook_bad_extensions = Estensioni Errate
-main_tree_view_column_file_name = Nome file
-main_tree_view_column_folder_name = Nome cartella
+main_tree_view_column_file_name = Nome File
+main_tree_view_column_folder_name = Nome Cartella
 main_tree_view_column_path = Percorso
-main_tree_view_column_modification = Data di modifica
+main_tree_view_column_modification = Data di Modifica
 main_tree_view_column_size = Dimensione
 main_tree_view_column_similarity = Similitudine
 main_tree_view_column_dimensions = Dimensioni
 main_tree_view_column_title = Titolo
 main_tree_view_column_artist = Artista
 main_tree_view_column_year = Anno
-main_tree_view_column_bitrate = Tasso di bit
+main_tree_view_column_bitrate = Velocità in Bit
 main_tree_view_column_length = Durata
 main_tree_view_column_genre = Genere
-main_tree_view_column_symlink_file_name = Nome collegamento
+main_tree_view_column_symlink_file_name = Nome Collegamento
 main_tree_view_column_symlink_folder = Cartella Collegamenti Simbolici
-main_tree_view_column_destination_path = Percorso di destinazione
+main_tree_view_column_destination_path = Percorso di Destinazione
 main_tree_view_column_type_of_error = Tipo di Errore
 main_tree_view_column_current_extension = Estensione Corrente
 main_tree_view_column_proper_extensions = Estensione Corretta
 main_tree_view_column_fps = FPS
 main_tree_view_column_codec = Codicecá
 main_label_check_method = Metodo di verifica
-main_label_hash_type = Tipo hash
+main_label_hash_type = Tipo di hash
 main_label_hash_size = Dimensione hash
 main_label_size_bytes = Dimensione (byte)
 main_label_min_size = Min
@@ -148,92 +149,96 @@ main_check_box_broken_files_audio = Audio
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Compresso
 main_check_box_broken_files_image = Immagine
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Usa ffmpeg/ffmprobe per convalidare file video. Più lento, ma può rilevare errori nascosti anche se il file viene riprodotto bene.
 check_button_general_same_size = Ignora stesse dimensioni
 check_button_general_same_size_tooltip = Ignora i file con dimensioni identiche nei risultati - di solito sono duplicati 1:1
 main_label_size_bytes_tooltip = Dimensione dei file utilizzati nella ricerca
 # Upper window
-upper_tree_view_included_folder_column_title = Cartelle di ricerca
-upper_tree_view_included_reference_column_title = Cartelle di riferimento
+upper_tree_view_included_folder_column_title = Cartelle di Ricerca
+upper_tree_view_included_reference_column_title = Cartelle di Riferimento
 upper_recursive_button = Ricorsivo
-upper_recursive_button_tooltip = Se selezionata, cerca anche tra i file non posizionati direttamente nelle catelle selezionate
-upper_manual_add_included_button = Aggiungi manualmente
+upper_recursive_button_tooltip = Se selezionato, cerca anche tra i file contenuti nelle cartelle figlie delle Cartelle di Riferimento.
+upper_manual_add_included_button = Aggiungi Manualmente
 upper_add_included_button = Aggiungi
 upper_remove_included_button = Rimuovi
-upper_manual_add_excluded_button = Aggiungi manualmente
+upper_manual_add_excluded_button = Aggiungi Manualmente
 upper_add_excluded_button = Aggiungi
 upper_remove_excluded_button = Rimuovi
 upper_manual_add_included_button_tooltip =
-    Aggiungi nome directory da cercare a mano.
+    Aggiungi manualmente i nomi delle cartelle in cui cercare.
     
-    Per aggiungere più percorsi contemporaneamente, separarli da ;
+    È possibile aggiungere più percorsi contemporaneamente separarli da ;
     
     /home/roman;/home/rozkaz aggiungerà due directory /home/roman e /home/rozkaz
-upper_add_included_button_tooltip = Aggiungi nuova cartella per la ricerca
-upper_remove_included_button_tooltip = Cancella cartella dalla ricerca
+upper_add_included_button_tooltip = Aggiungi nuova cartella per la ricerca.
+upper_remove_included_button_tooltip = Cancella cartella dalla ricerca.
 upper_manual_add_excluded_button_tooltip =
-    Aggiungi nome directory escluso a mano.
+    Aggiungi manualmente i nomi delle cartelle da escludere.
     
-    Per aggiungere più percorsi contemporaneamente, separarli da ;
+    È possibile aggiungere più percorsi contemporaneamente separarli da ;
     
     /home/roman;/home/krokiet aggiungerà due directory /home/roman e /home/keokiet
-upper_add_excluded_button_tooltip = Aggiunge una cartella da escludere dalla ricerca
-upper_remove_excluded_button_tooltip = Rimuove una cartella da quelle escluse
-upper_notebook_items_configuration = Configurazione degli oggetti
-upper_notebook_excluded_directories = Cartelle escluse
-upper_notebook_included_directories = Cartelle incluse
+upper_add_excluded_button_tooltip = Aggiunge una cartella da escludere dalla ricerca.
+upper_remove_excluded_button_tooltip = Rimuove una cartella da quelle escluse.
+upper_notebook_items_configuration = Configurazione degli elementi
+upper_notebook_excluded_directories = Percorsi Esclusi
+upper_notebook_included_directories = Percorsi Inclusi
 upper_allowed_extensions_tooltip =
-    Le estensioni consentite devono essere separate da virgole (di default tutte sono disponibili).
+    Le estensioni consentite devono essere separate da virgole (di default sono tutte disponibili).
     
-    Sono disponibili anche i seguenti Macro, che aggiungono più estensioni contemporaneamente: IMAGE, VIDEO, MUSIC, TESTO.
+    Sono disponibili anche le seguenti Macro, che aggiungono più estensioni contemporaneamente: IMAGE, VIDEO, MUSIC, TESTO.
     
-    Esempio di utilizzo ".exe, IMAGE, VIDEO, .rar, 7z" - questo significa che le immagini (e. . jpg, png), video (ad esempio avi, mp4), exe, rar e file 7z verranno analizzati.
+    Esempio di utilizzo ".exe, IMAGE, VIDEO, .rar, 7z" - questo significa che verranno analizzati le immagini (e. . jpg, png), i video (ad esempio avi, mp4), exe, rar e i file 7z.
 upper_excluded_extensions_tooltip =
     Elenco dei file disabilitati che verranno ignorati nella scansione.
     
-    Quando si usano entrambe le estensioni consentite e disabilitate, questo ha la priorità maggiore, quindi il file non verrà selezionato.
+    Quando si usano sia le estensioni consentite che quelle disabilitate, queste ultime hanno maggiore priorità, quindi il file non verrà analizzato.
 upper_excluded_items_tooltip =
-    Gli elementi esclusi devono contenere * caratteri jolly e devono essere separati da virgole.
-    Questo è più lento delle directory escluse, quindi usalo attentamente.
-upper_excluded_items = Voci escluse:
-upper_allowed_extensions = Estensioni permesse:
+    Gli elementi esclusi devono contenere il carattere jolly * e devono essere separati da virgole.
+    Questo metodo è più lento rispetto ai Percorsi Esclusi. Utilizzare con cautela.
+upper_excluded_items = Elementi Esclusi:
+upper_allowed_extensions = Estensioni Permesse:
 upper_excluded_extensions = Estensioni Disabilitate:
 # Popovers
 popover_select_all = Seleziona tutto
 popover_unselect_all = Deseleziona tutto
 popover_reverse = Inverti la selezione
-popover_select_all_except_oldest = Seleziona tutti eccetto il più vecchio
-popover_select_all_except_newest = Seleziona tutti eccetto il più recente
+popover_select_all_except_shortest_path = Seleziona tutto tranne il percorso più corto
+popover_select_all_except_longest_path = Seleziona tutto tranne il percorso più lungo
+popover_select_all_except_oldest = Seleziona tutto eccetto il più vecchio
+popover_select_all_except_newest = Seleziona tutto eccetto il più recente
 popover_select_one_oldest = Seleziona il più vecchio
 popover_select_one_newest = Seleziona il più recente
 popover_select_custom = Selezione personalizzata
 popover_unselect_custom = Delezione personalizzata
 popover_select_all_images_except_biggest = Seleziona tutti eccetto il più grande
-popover_select_all_images_except_smallest = Seleziona tutti eccetto il più piccolo
+popover_select_all_images_except_smallest = Seleziona tutto eccetto il più piccolo
 popover_custom_path_check_button_entry_tooltip =
-    Seleziona i record per percorso.
+    Seleziona i risultati specificando il percorso.
     
-    Esempio di utilizzo:
+    Esempio:
     /home/pimpek/rzecz.txt può essere trovato con /home/pim*
 popover_custom_name_check_button_entry_tooltip =
-    Seleziona i record per nomi file.
+    Seleziona i risultati in base al nome.
     
-    Esempio di utilizzo:
+    Esempio:
     /usr/ping/pong.txt può essere trovato con *ong*
 popover_custom_regex_check_button_entry_tooltip =
-    Seleziona i record per Regex specificato.
+    Seleziona i risultati specificando una Regex.
     
     Con questa modalità, il testo cercato è Percorso con Nome.
     
-    Esempio di utilizzo:
-    /usr/bin/ziemniak. xt può essere trovato con /ziem[a-z]+
+    Esempio:
+    /usr/bin/ziemniak.txt può essere trovato con /ziem[a-z]+
     
-    Questo utilizza l'implementazione regex Rust predefinita. Puoi leggere di più qui: https://docs.rs/regex.
+    Questo utilizza l'implementazione predefinita delle Regex Rust. Puoi leggere di più qui: https://docs.rs/regex.
 popover_custom_case_sensitive_check_button_tooltip =
     Abilita rilevamento maiuscolo/minuscolo.
     
     Quando disabilitato /home/* trova sia /HoMe/roman che /home/roman.
 popover_custom_not_all_check_button_tooltip =
-    Impedisce di selezionare tutti i record nel gruppo.
+    Impedisce di selezionare tutti i risultati nel gruppo.
     
     Questo è abilitato per impostazione predefinita, perché nella maggior parte delle situazioni, non si desidera eliminare entrambi i file originali e duplicati, ma si desidera lasciare almeno un file.
     
@@ -241,10 +246,10 @@ popover_custom_not_all_check_button_tooltip =
 popover_custom_regex_path_label = Percorso
 popover_custom_regex_name_label = Nome
 popover_custom_regex_regex_label = Regex Percorso + Nome
-popover_custom_case_sensitive_check_button = Differenzia maiuscole/minuscole
+popover_custom_case_sensitive_check_button = Distingui maiuscole/minuscole
 popover_custom_all_in_group_label = Non selezionare tutte le voci in un gruppo
-popover_custom_mode_unselect = Deselezione personalizzata
-popover_custom_mode_select = Selezione personalizzata
+popover_custom_mode_unselect = Deselezione Personalizzata
+popover_custom_mode_select = Selezione Personalizzata
 popover_sort_file_name = Nome del file
 popover_sort_folder_name = Nome cartella
 popover_sort_full_name = Nome e cognome
@@ -264,19 +269,19 @@ bottom_sort_button = Ordina
 bottom_compare_button = Confronta
 bottom_search_button_tooltip = Avvia ricerca
 bottom_select_button_tooltip = Seleziona record. Solo i file/cartelle selezionati possono essere elaborati in seguito.
-bottom_delete_button_tooltip = Cancella i file/cartelle selezionati
+bottom_delete_button_tooltip = Cancella i file/cartelle selezionati.
 bottom_save_button_tooltip = Salva i risultati della ricerca in un file
 bottom_symlink_button_tooltip =
     Crea collegamenti simbolici.
     Funziona solo quando sono selezionati almeno due risultati in un gruppo.
-    Il primo è invariato e il secondo e poi sono symlinked al primo.
+    Il primo rimane invariato, dal secondo in poi si creano dei collegamenti al primo.
 bottom_hardlink_button_tooltip =
     Crea collegamenti fisici.
     Funziona solo quando sono selezionati almeno due risultati in un gruppo.
-    Il primo è invariato e il secondo e poi sono hardlinked al primo.
+    Il primo è invariato, dal secondo in poi si creano dei collegamenti fisici al primo.
 bottom_hardlink_button_not_available_tooltip =
     Crea collegamenti fisici.
-    Il pulsante è disabilitato, perché non è possibile creare collegamenti fisici.
+    Il pulsante è disabilitato perché non è possibile creare collegamenti fisici.
     I collegamenti fisici funzionano solo con i privilegi di amministratore su Windows, quindi assicurati di eseguire l'app come amministratore.
     Se l'app funziona già con tali privilegi, controlla problemi simili su Github.
 bottom_move_button_tooltip =
@@ -288,14 +293,14 @@ bottom_compare_button_tooltip = Confronta le immagini nel gruppo.
 bottom_show_errors_tooltip = Mostra/Nasconde il pannello di testo inferiore.
 bottom_show_upper_notebook_tooltip = Mostra/Nasconde il pannello comandi.
 # Progress Window
-progress_stop_button = Ferma
+progress_stop_button = Interrompi
 progress_stop_additional_message = Interrompi richiesta
 # About Window
-about_repository_button_tooltip = Link alla pagina del repository con il codice sorgente.
-about_donation_button_tooltip = Link alla pagina della donazione.
+about_repository_button_tooltip = Link alla pagina della repository con il codice sorgente.
+about_donation_button_tooltip = Link alla pagina per le donazioni.
 about_instruction_button_tooltip = Link alla pagina delle istruzioni.
 about_translation_button_tooltip = Link alla pagina Crowdin con le traduzioni delle app. Ufficialmente polacco e inglese sono supportati.
-about_repository_button = Archivio
+about_repository_button = Repository
 about_donation_button = Donazioni
 about_instruction_button = Istruzioni
 about_translation_button = Traduzione
@@ -310,7 +315,7 @@ header_about_button_tooltip = Apre la finestra delle informazioni sul programma.
 
 settings_number_of_threads = Numero di thread usati
 settings_number_of_threads_tooltip = Numero di thread usati, 0 significa che tutti i thread disponibili saranno utilizzati.
-settings_use_rust_preview = Usa librerie esterne invece di gtk per caricare anteprime
+settings_use_rust_preview = Usa librerie esterne invece di gtk per caricare le anteprime
 settings_use_rust_preview_tooltip =
     Utilizzando le anteprime gtk a volte sarà più veloce e supporterà più formati, ma a volte questo potrebbe essere esattamente il contrario.
     
@@ -320,7 +325,7 @@ settings_use_rust_preview_tooltip =
 settings_label_restart = È necessario riavviare l'app per applicare le impostazioni!
 settings_ignore_other_filesystems = Ignora altri filesystem (solo Linux)
 settings_ignore_other_filesystems_tooltip =
-    ignora i file che non sono nello stesso file system delle directory cercate.
+    ignora i file che non sono nello stesso file system delle cartelle analizzate.
     
     Funziona come l'opzione -xdev nel comando find su Linux
 settings_save_at_exit_button_tooltip = Salva la configurazione su file quando chiudi l'app.
@@ -330,11 +335,11 @@ settings_load_at_start_button_tooltip =
     Se non è abilitata, verranno utilizzate le impostazioni predefinite.
 settings_confirm_deletion_button_tooltip = Mostra la finestra di conferma quando si fa clic sul pulsante Elimina.
 settings_confirm_link_button_tooltip = Mostra la finestra di conferma quando si fa clic sul pulsante hard/symlink.
-settings_confirm_group_deletion_button_tooltip = Mostra la finestra di avviso quando si tenta di eliminare tutti i record dal gruppo.
+settings_confirm_group_deletion_button_tooltip = Mostra la finestra di avviso quando si tenta di eliminare tutti i risultati dal gruppo.
 settings_show_text_view_button_tooltip = Mostra il pannello di testo in fondo all'interfaccia utente.
-settings_use_cache_button_tooltip = Usa cache file.
+settings_use_cache_button_tooltip = Usa i file di cache. 
 settings_save_also_as_json_button_tooltip = Salva la cache in formato JSON (leggibile). È possibile modificarne il contenuto. La cache da questo file verrà letta automaticamente dall'app se manca la cache in formato binario (con estensione bid).
-settings_use_trash_button_tooltip = Sposta i file nel cestino invece eliminandoli in modo permanente.
+settings_use_trash_button_tooltip = Sposta i file nel cestino invece di eliminarli in modo permanente.
 settings_language_label_tooltip = Lingua per l'interfaccia utente.
 settings_save_at_exit_button = Salva la configurazione alla chiusura dell'app
 settings_load_at_start_button = Carica la configurazione quando apri l'app
@@ -350,15 +355,15 @@ settings_multiple_delete_outdated_cache_checkbutton = Cancella automaticamente l
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     Elimina i risultati della cache obsoleti che puntano a file inesistenti.
     
-    Quando abilitata, l'app si assicura durante il caricamento dei record, che tutti i record puntino a file validi (quelli interrotti vengono ignorati).
+    Quando abilitata, l'app si assicura che durante il caricamento dei risultati che tutti puntino a file validi (quelli invalidi vengono ignorati).
     
-    Disabilitare questo aiuterà durante la scansione dei file su unità esterne, quindi le voci della cache su di loro non verranno eliminate nella prossima scansione.
+    Disabilitare questo aiuterà durante la scansione dei file su unità esterne perché le loro voci della cache non verranno eliminate nella prossima scansione.
     
-    Nel caso di avere centinaia di migliaia di record nella cache, si consiglia di abilitare questa funzione, che velocizzerà il caricamento della cache/salvataggio all'inizio/fine della scansione.
+    Nel caso di centinaia di migliaia di record nella cache, si consiglia di abilitare questa funzione, che velocizzerà il caricamento della cache/salvataggio all'inizio/fine della scansione.
 settings_notebook_general = Generale
 settings_notebook_duplicates = Duplicati
-settings_notebook_images = Immagini simili
-settings_notebook_videos = Video simili
+settings_notebook_images = Immagini Simili
+settings_notebook_videos = Video Simili
 
 ## Multiple - settings used in multiple tabs
 
@@ -385,7 +390,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     È disabilitato per impostazione predefinita perché può causare rallentamenti in alcune situazioni.
     
     Si consiglia vivamente di usarlo durante la scansione di centinaia di migliaia o milioni di file, perché può accelerare la ricerca di più volte.
-settings_duplicates_prehash_minimal_entry_tooltip = Dimensione minima delle voci della cache
+settings_duplicates_prehash_minimal_entry_tooltip = Dimensione minima delle voci della cache.
 settings_duplicates_hide_hard_link_button = Nascondi collegamenti rigidi
 settings_duplicates_prehash_checkbutton = Utilizza la cash prehash
 settings_duplicates_minimal_size_cache_label = Dimensione minima dei file (in byte) salvati nella cache
@@ -413,39 +418,39 @@ settings_folder_cache_open_tooltip =
 settings_folder_settings_open_tooltip =
     Apre la cartella in cui viene memorizzata la configurazione Czkawka.
     
-    ATTENZIONE: Modificare manualmente la configurazione potrebbe rompere il flusso di lavoro.
+    ATTENZIONE: Modificare manualmente la configurazione potrebbe interferire coi processi in atto.
 settings_folder_cache_open = Apri la cartella della cache
 settings_folder_settings_open = Apri la cartella delle impostazioni
 # Compute results
 compute_stopped_by_user = Ricerca interrotta dall'utente
-compute_found_duplicates_hash_size = Trovato { $number_files } duplicati in { $number_groups } gruppi che hanno preso { $size } in { $time }
+compute_found_duplicates_hash_size = Trovato { $number_files } duplicati in { $number_groups } gruppi che occupano { $size } in { $time }
 compute_found_duplicates_name = Trovato { $number_files } duplicati in { $number_groups } gruppi in { $time }
-compute_found_empty_folders = Trovo { $number_files } folder vuote in { $time }
+compute_found_empty_folders = Trovo { $number_files } cartelle vuote in { $time }
 compute_found_empty_files = Trovati { $number_files } file vuoti in { $time }
 compute_found_big_files = Trovati { $number_files } file grandi in { $time }
 compute_found_temporary_files = Trovati { $number_files } file temporanei in { $time }
 compute_found_images = Trova { $number_files } immagini simili in { $number_groups } gruppi in { $time }
 compute_found_videos = Trovati { $number_files } video simili in { $number_groups } gruppi in { $time }
 compute_found_music = Trovo { $number_files } file musicali simili in { $number_groups } gruppi in { $time }
-compute_found_invalid_symlinks = Trovati { $number_files } simboliche invalidi in { $time }
+compute_found_invalid_symlinks = Trovati { $number_files } collegamenti simbolici invalidi in { $time }
 compute_found_broken_files = Trovate { $number_files } file danneggiati in { $time }
 compute_found_bad_extensions = Trovati { $number_files } file con estensioni non valide in { $time }
 # Progress window
 progress_scanning_general_file =
     { $file_number ->
-        [one] Scanned { $file_number } file
-       *[other] Scanned { $file_number } files
+        [one] Analizzato { $file_number }  file
+       *[other] Analizzati  { $file_number }  files
     }
-progress_scanning_extension_of_files = Estensione controllata del file { $file_checked }/{ $all_files }
-progress_scanning_broken_files = Checked { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
+progress_scanning_extension_of_files = Controllo estensione del file { $file_checked }/{ $all_files }
+progress_scanning_broken_files = Controllo { $file_checked }/{ $all_files } file ({ $data_checked }/{ $all_data })
+progress_scanning_video = Genero Hash del video { $file_checked }/{ $all_files }
 progress_creating_video_thumbnails = Miniature create di { $file_checked }/{ $all_files } video
-progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Confrontato { $file_checked }/{ $all_files } immagine hash
-progress_scanning_music_tags_end = Etichette confrontate di { $file_checked }/{ $all_files } file musicale
-progress_scanning_music_tags = Leggi i tag di { $file_checked }/{ $all_files } file musicale
-progress_scanning_music_content_end = Impronta digitale comparata di { $file_checked }/{ $all_files } file musicale
-progress_scanning_music_content = Impronta digitale calcolata di { $file_checked }/{ $all_files } file musicale ({ $data_checked }/{ $all_data })
+progress_scanning_image = Generate hash di  { $file_checked }/{ $all_files } immagini({ $data_checked }/{ $all_data })
+progress_comparing_image_hashes = Confrontate { $file_checked }/{ $all_files } hash di immagini
+progress_scanning_music_tags_end = Etichette confrontate di { $file_checked }/{ $all_files } file musicali
+progress_scanning_music_tags = Lettura dei tag di { $file_checked }/{ $all_files } file musicali
+progress_scanning_music_content_end = Confronto l'impronta digitale di { $file_checked }/{ $all_files } file musicali
+progress_scanning_music_content = Impronta digitale calcolata di { $file_checked }/{ $all_files } file musicali ({ $data_checked }/{ $all_data })
 progress_scanning_empty_folders =
     { $folder_number ->
         [one] Scanned { $folder_number } folder
@@ -468,7 +473,7 @@ progress_all_stages = Tutte le fasi:{ "  " }
 saving_loading_saving_success = Salvataggio configurazione su file { $name }.
 saving_loading_saving_failure = Impossibile salvare i dati di configurazione nel file { $name }, motivo { $reason }.
 saving_loading_reset_configuration = La configurazione corrente è stata cancellata.
-saving_loading_loading_success = Caricamento configurazione da file avvenuto con successo
+saving_loading_loading_success = Caricamento configurazione da file avvenuto con successo.
 saving_loading_failed_to_create_config_file = Impossibile creare il file di configurazione "{ $path }", motivo "{ $reason }".
 saving_loading_failed_to_read_config_file = Impossibile caricare la configurazione da "{ $path }" perché non esiste o non è un file.
 saving_loading_failed_to_read_data_from_file = Impossibile leggere il file "{ $path }", motivo "{ $reason }".
@@ -494,7 +499,7 @@ hardlink_failed = Collegamento non riuscito a { $name } a { $target }, motivo { 
 hard_sym_invalid_selection_title_dialog = Selezione invalida in alcuni gruppi
 hard_sym_invalid_selection_label_1 = In alcuni gruppi c'è solo un record selezionato e verrà ignorato.
 hard_sym_invalid_selection_label_2 = Per essere in grado di collegare hard/sym questi file, è necessario selezionare almeno due risultati nel gruppo.
-hard_sym_invalid_selection_label_3 = Il primo nel gruppo sarà considerato l'originale ed inalteratom, ma il secondo ed i successivi verranno modificati.
+hard_sym_invalid_selection_label_3 = Il primo nel gruppo sarà considerato l'originale ed inalterato, ma il secondo ed i successivi verranno modificati.
 hard_sym_link_title_dialog = Conferma collegamento
 hard_sym_link_label = Sei sicuro di voler collegare questi file?
 move_folder_failed = Spostamento cartella { $name } fallito, ragione { $reason }

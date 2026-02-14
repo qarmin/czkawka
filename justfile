@@ -1,3 +1,5 @@
+set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
+
 build_all: && fix
     cargo build --release
     cargo build
@@ -139,7 +141,8 @@ prepare_translations_deps:
     # qwen2.5:7b - fast, but quite bad quality
     # qwen2.5:32b - very slow, still not good quality
     # zongwei/gemma3-translator:4b - not so fast, but looks quite good
-    ollama pull zongwei/gemma3-translator:4b
+    # translategemma:12b - probably very slow - using only for small tasks
+    export OLLAMA_VULKAN=1; export HSA_OVERRIDE_GFX_VERSION=10.3.0; ollama pull translategemma:12b
 
 translate:
     cd misc/ai_translate; uv run translate.py ../../czkawka_gui/i18n

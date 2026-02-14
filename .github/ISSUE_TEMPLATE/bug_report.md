@@ -37,13 +37,13 @@ macOS: `/Users/Username/Library/Caches/pl.Qarmin.Czkawka`,
 Windows: `C:\Users\Username\AppData\Local\Qarmin\Czkawka\cache`).
 Note: the exact path depends on the installation method(you can open config/cache path from gui). -->
 <!-- Example of logs: -->
-<!-- Czkawka gtk version: 10.0.0, debug mode, rust 1.92.0 (2025-06-23), os Ubuntu 25.4.0 (x86_64 64-bit), 24 cpu/threads, features(1): [fast_image_resize], app cpu version: x86-64-v3 (AVX2) or x86-64-v4 (AVX-512), os cpu version: x86-64-v4 (AVX-512) -->
+<!-- Czkawka gtk version: 11.0.0, debug mode, rust 1.92.0 (2025-06-23), os Ubuntu 25.4.0 (x86_64 64-bit), 24 cpu/threads, features(1): [fast_image_resize], app cpu version: x86-64-v3 (AVX2) or x86-64-v4 (AVX-512), os cpu version: x86-64-v4 (AVX-512) -->
 <!-- Config folder set to "/home/rafal/.config/czkawka" and cache folder set to "/home/rafal/.cache/czkawka" -->
 <!-- Czkawka Gui - used thread number: 24, gtk version 4.18.5 -->
 
 <!-- Please do not report feature request unique for Gtk Czkawka gui, because it is in maintenance mode. -->
 
-- Czkawka/Krokiet version: <!--  e.g. 10.0.0 cli/gui -->
+- Czkawka/Krokiet version: <!--  e.g. 11.0.0 cli/gui -->
 - OS version: <!--  e.g. Ubuntu 22.04, Windows 11, Mac 15.1 ARM -->
 - Installation method: <!-- e.g. github binaries, flatpak, msys2 -->
 

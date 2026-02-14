@@ -7,19 +7,19 @@ window_compare_images = Compară imaginile
 general_ok_button = Ok
 general_close_button = Inchide
 # Krokiet info dialog
-krokiet_info_title = Introducerea lui Krokiet - Noua Versiune a Czkawka
-krokiet_info_message =
-    Pașii este noua, îmbunătățită, mai rapidă și mai puțin buggy versiune a Czkawka GTK!
-    
-    Fiind auto-conținută, este mult mai ușor de rulat și mai rezistentă la modificările sistemului și la actualizările de versiune a pachetelor.
-    
-    Include multe funcții indisponibile în Czkawka, cum ar fi miniaturi în modul de comparare video, progresul mișcării fișierelor/copierea/ștergerea și opțiuni extinse de sortare.
-    
-    Încearcă-o și vezi diferența!
-    
-    Czkawka va continua să primească corecții de bug-uri și actualizări minore, dar toate noile funcții vor fi implementate doar în Krokiet.
-    
-    PS. Acest mesaj ar trebui să fie vizibil doar o singură dată, dar dacă apare din nou, setați variabila de mediu CZKAWKA_DONT_ANNOY_ME la orice valoare non-goalomptă.
+krokiet_info_title = Introducerea lui Krokiet - Noua versiune a Czkawka
+krokiet_info_message = 
+        Krokiet este noua, îmbunătățită, mai rapidă și mai fiabilă versiune a Czkawka GTK GUI!
+
+        Este mai ușor de rulat și mai rezistent la modificările sistemului, deoarece depinde doar de bibliotecile de bază disponibile pe majoritatea sistemelor implicit.
+
+        Krokiet aduce, de asemenea, funcții pe care Czkawka nu le are, inclusiv miniaturile în modul de comparare video, un curățător EXIF, progresul mutării/copierii/ștergerii fișierelor sau opțiuni extinse de sortare.
+
+        Îl testează și vezi diferența!
+
+        Czkawka va continua să primească corecții de erori și actualizări minore de la mine, dar toate noile funcții vor fi dezvoltate exclusiv pentru Krokiet, iar oricine este liber să contribuie cu noi funcții, să adauge moduri lipsă sau să extindă Czkawka în continuare.
+
+        PS: Acest mesaj ar trebui să apară doar o dată. Dacă apare din nou, setați variabila de mediu CZKAWKA_DONT_ANNOY_ME la orice valoare non-goalomptă.
 # Main window
 music_title_checkbox = Titlu
 music_artist_checkbox = Artist
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Audio
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arhivează
 main_check_box_broken_files_image = Imagine
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Folosește ffmpeg/ffprobe pentru a valida fișiere video. Foarte lent și poate detecta erori pedantice chiar dacă fișierul rulează bine.
 check_button_general_same_size = Ignoră aceeași dimensiune
 check_button_general_same_size_tooltip = Ignoră fișierele cu rezultate de dimensiune identică - de obicei, acestea sunt de 1:1 duplicate
 main_label_size_bytes_tooltip = Dimensiunea fişierelor care vor fi utilizate în scanare
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Adauga directorul pentru a fi exclus in cautare.
 upper_remove_excluded_button_tooltip = Ştergeţi directorul din excludere.
 upper_notebook_items_configuration = Configurare articole
-upper_notebook_excluded_directories = Dosare excluse
-upper_notebook_included_directories = Dosare incluse
+upper_notebook_excluded_directories = Puteți exclude căile
+upper_notebook_included_directories = Include Puteți
 upper_allowed_extensions_tooltip =
     Extensiile permise trebuie separate prin virgulă (implicit toate sunt disponibile).
     
@@ -192,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lista fişierelor dezactivate care vor fi ignorate în scanare.
     
     La utilizarea extensiilor permise și dezactivate, aceasta are prioritate mai mare, deci fișierul nu va fi verificat.
-upper_excluded_items_tooltip =
-    Elementele excluse trebuie sa contina * wildcard si sa fie separate prin virgule.
-    Acest lucru este mai lent decat directoarele excluse, asa ca il folositi cu atentie.
+upper_excluded_items_tooltip = 
+        Elemente excluse trebuie să conțină * wildcard și să fie separate prin virgulă.
+        Aceasta este mai lentă decât Excluded Paths, deci folosiți-o cu grijă.
 upper_excluded_items = Elemente excluse:
 upper_allowed_extensions = Extensii permise:
 upper_excluded_extensions = Extensii dezactivate:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Extensii dezactivate:
 popover_select_all = Selectează tot
 popover_unselect_all = Deselectează tot
 popover_reverse = Selectare inversă
+popover_select_all_except_shortest_path = Selectează toate, cu excepția celui mai scurt drum
+popover_select_all_except_longest_path = Selectează toate, cu excepția celui mai lung traseu
 popover_select_all_except_oldest = Selectează toate cu excepția celor mai vechi
 popover_select_all_except_newest = Selectează toate cu excepția celor noi
 popover_select_one_oldest = Selectează unul mai vechi
@@ -275,11 +279,11 @@ bottom_hardlink_button_tooltip =
     Creează link-uri hardware.
     Funcţionează numai atunci când cel puţin două rezultate sunt selectate într-un grup.
     Prima este neschimbată, iar a doua și mai târziu sunt greu legate mai întâi.
-bottom_hardlink_button_not_available_tooltip =
+bottom_hardlink_button_not_available_tooltip = 
     Creează link-uri hardware.
     Butonul este dezactivat, deoarece hardlink-urile nu pot fi create.
     Legăturile fizice funcționează doar cu privilegii de administrator pe Windows, așa că asigură-te că rulezi aplicația ca administrator.
-    Dacă aplicația funcționează deja cu astfel de privilegii verificați pentru probleme similare pe Giwhere,
+    Dacă aplicația funcționează deja cu astfel de privilegii verificați pentru probleme similare pe Giwhere,.
 bottom_move_button_tooltip =
     Mută fișierele în directorul ales.
     Copiază toate fișierele în director fără a păstra directorul arborescent.
@@ -334,7 +338,7 @@ settings_confirm_link_button_tooltip = Afișați caseta de confirmare când face
 settings_confirm_group_deletion_button_tooltip = Arată dialogul de avertizare când se încearcă ștergerea tuturor înregistrărilor din grup.
 settings_show_text_view_button_tooltip = Arată panoul de text în partea de jos a interfeței utilizatorului.
 settings_use_cache_button_tooltip = Foloseşte cache-ul fişierelor.
-settings_save_also_as_json_button_tooltip = Salvează cache-ul în formatul JSON (citibil uman). Este posibil să îi modifici conținutul. Geocutia din acest fişier va fi citită automat de aplicaţie dacă nu există geocutie în format binar (cu extensie bin)
+settings_save_also_as_json_button_tooltip = Salvează cache-ul în formatul JSON (citibil uman). Este posibil să îi modifici conținutul. Geocutia din acest fişier va fi citită automat de aplicaţie dacă nu există geocutie în format binar (cu extensie bin).
 settings_use_trash_button_tooltip = Mută fișierele la gunoi în loc să le ștergi definitiv.
 settings_language_label_tooltip = Limba interfeței utilizatorului.
 settings_save_at_exit_button = Salvați configurația la închiderea aplicației
@@ -386,7 +390,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     este dezactivat implicit deoarece poate cauza încetiniri în unele situații.
     
     Este foarte recomandat sa il utilizezi cand scanezi sute de mii sau milioane de fisiere, pentru ca poate accelera cautarea de mai multe ori.
-settings_duplicates_prehash_minimal_entry_tooltip = Dimensiunea minimă a intrării în cache
+settings_duplicates_prehash_minimal_entry_tooltip = Dimensiunea minimă a intrării în cache.
 settings_duplicates_hide_hard_link_button = Ascunde link-urile fizice
 settings_duplicates_prehash_checkbutton = Foloseste cache-ul prehash
 settings_duplicates_minimal_size_cache_label = Dimensiunea minimă a fişierelor (în octeţi) salvate în cache

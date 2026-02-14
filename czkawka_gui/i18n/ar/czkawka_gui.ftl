@@ -7,19 +7,19 @@ window_compare_images = مقارنة الصور
 general_ok_button = حسناً
 general_close_button = أغلق
 # Krokiet info dialog
-krokiet_info_title = تقديم Krokiet - النسخة الجديدة من Czkawka
-krokiet_info_message =
-    كروكييت هو الإصدار الجديد والمحسّن والأسرع والأقل عرضة للأخطاء من Czkawka GTK!
-    
-    بكونه ذاتي المحتوى، فهو أسهل في التشغيل وأكثر مقاومة للتغييرات في النظام وتحديثات إصدار الحزم.
-    
-    يحتوي على العديد من الميزات غير المتوفرة في Czkawka، مثل الصور المصغرة في وضع مقارنة الفيديو، وتقدم عملية نقل/نسخ/حذف الملفات وخيارات الفرز الممتدة.
-    
-    جربه بنفسك وشاهد الفرق!
-    
-    سيستمر Czkawka في تلقي إصلاحات الأخطاء والتحديثات الطفيفة، ولكن جميع الميزات الجديدة ستُنفَّذ فقط في كروكييت.
-    
-    ملاحظة: يجب أن يكون هذا الرسالة مرئياً مرة واحدة فقط، ولكن إذا ظهر مرة أخرى، قم بتعيين متغير البيئة CZKAWKA_DONT_ANNOY_ME إلى أي قيمة غير فارغة.
+krokiet_info_title = تقديم Krokiet - نسخة جديدة من Czkawka
+krokiet_info_message = 
+        كروكيت هو الإصدار الجديد والمحسّن والأسرع والأكثر موثوقية لـ Czkawka GTK GUI!
+
+        إنه أسهل في التشغيل وأكثر مقاومة للتغييرات في النظام، لأنه يعتمد فقط على المكتبات الأساسية المتاحة افتراضيًا على معظم الأنظمة.
+
+        كروكيت أيضًا يقدم ميزات يفتقر إليها Czkawka، بما في ذلك الصور المصغرة في وضع مقارنة الفيديو، ومسحّف EXIF، وخيارات تقدم نقل/نسخ/حذف الملفات أو ترتيب موسع.
+
+        جربه بنفسك وشاهد الفرق!
+
+        ستواصل Czkawka تلقي إصلاحات الأخطاء والتحديثات الصغيرة مني، ولكن جميع الميزات الجديدة ستتم تطويرها حصريًا لكروكيت، وأي شخص حر في المساهمة بميزات جديدة أو إضافة أوضاع مفقودة أو توسيع Czkawka بشكل أكبر.
+
+        ملاحظة: يجب أن يظهر هذا الرسالة مرة واحدة فقط. إذا ظهر مرة أخرى، قم بتعيين متغير البيئة CZKAWKA_DONT_ANNOY_ME إلى أي قيمة غير فارغة.
 # Main window
 music_title_checkbox = العنوان
 music_artist_checkbox = الفنان
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = الصوت
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = أرشيف
 main_check_box_broken_files_image = صورة
+main_check_box_broken_files_video = فيديو
+main_check_box_broken_files_video_tooltip = يستخدم ffmpeg/ffprobe للتحقق من صحة ملفات الفيديو. بطيء جداً وقد يكتشف الأخطاء الضوئية حتى لو كان الملف يعمل بشكل جيد.
 check_button_general_same_size = تجاهل نفس الحجم
 check_button_general_same_size_tooltip = تجاهل الملفات ذات الحجم المتطابق في النتائج - عادة ما تكون هذه المكررة 1:1
 main_label_size_bytes_tooltip = حجم الملفات التي سيتم استخدامها في المسح
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = إضافة دليل ليتم استبعاده في البحث.
 upper_remove_excluded_button_tooltip = حذف الدليل من المستبعد.
 upper_notebook_items_configuration = تكوين العناصر
-upper_notebook_excluded_directories = المجلدات المستبعدة
-upper_notebook_included_directories = المجلدات المضمنة
+upper_notebook_excluded_directories = المسارات المستبعدة
+upper_notebook_included_directories = المسارات المضمنة
 upper_allowed_extensions_tooltip =
     يجب أن تكون الملحقات المسموح بها مفصولة بفواصل (بشكل افتراضي كلها متاحة).
     
@@ -192,9 +194,9 @@ upper_excluded_extensions_tooltip =
     قائمة الملفات المعطلة التي سيتم تجاهلها في المسح.
     
     عند استخدام الملحقات المسموح بها والمعطلة على حد سواء، هذه واحدة لها أولوية أعلى، لذلك لن يتم تحديد الملف.
-upper_excluded_items_tooltip =
-    العناصر المخزنة يجب أن تحتوي على نجمة (*) ك Placeholder وdevide بينها بالنقاط وال逗号。
-    هذا أslower than Directories محظورة مباشرة، لذا استخدمه بعناية.
+upper_excluded_items_tooltip = 
+        يجب أن تتضمن العناصر المستبعدة * ويفصل بينها الفواصل.
+        هذا أبطأ من المسارات المستبعدة، لذا استخدمه بحذر.
 upper_excluded_items = البنود المستثناة:
 upper_allowed_extensions = الإضافات المسموح بها:
 upper_excluded_extensions = الملحقات المعطّلة:
@@ -202,6 +204,8 @@ upper_excluded_extensions = الملحقات المعطّلة:
 popover_select_all = حدد الكل
 popover_unselect_all = إلغاء تحديد الكل
 popover_reverse = الاختيار العكسي
+popover_select_all_except_shortest_path = حدد الكل باستثناء أقصر مسار
+popover_select_all_except_longest_path = حدد الكل باستثناء أطول مسار
 popover_select_all_except_oldest = حدد الكل باستثناء الأقدم
 popover_select_all_except_newest = حدد الكل باستثناء الأحدث
 popover_select_one_oldest = حدد أقدم واحد
@@ -372,11 +376,11 @@ settings_multiple_clear_cache_button = إزالة النتائج القديمة 
 
 ## Duplicates
 
-settings_duplicates_hide_hard_link_button_tooltip =
+settings_duplicates_hide_hard_link_button_tooltip = 
     يختبئ جميع الملفات باستثناء واحد، إذا أشار كل منها إلى نفس البيانات (وهو متصل بشكل صلب).  
     
     مثال: في حالة وجود سبع ملفات على дисك مترابطة ببيانات معينة وملف مختلف يحتوي على نفس البيانات ولكن inode مختلف，则继续翻译剩下的部分：
-    ملف inode، ثم في مستكشف الملفات المكرر، سيتم عرض只有一个唯一文件和一个来自硬链接的文件。
+    ملف inode، ثم في مستكشف الملفات المكرر، سيتم عرض只有一个唯一文件和一个来自硬链接的文件。.
 settings_duplicates_minimal_size_entry_tooltip =
     설정할 최소 파일 크기를 캐시에 저장할 것입니다.
     작은 값을 선택하면 더 많은 기록이 생성됩니다. 이는 검색 속도가 빨라질 것이지만 캐시 로드/저장은 느려질 수 있습니다.

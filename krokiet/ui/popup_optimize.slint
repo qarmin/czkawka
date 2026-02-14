@@ -36,7 +36,11 @@ export component PopupReencodeVideo inherits Rectangle {
                     HorizontalLayout {
                         spacing: 5px;
                         Text { text: Translations.subsettings_video_optimizer_video_codec_text; vertical_alignment: TextVerticalAlignment.center; }
-                        ComboBox { model <=> Settings.video_optimizer_sub_video_codec_config; current_value <=> Settings.video_optimizer_sub_video_codec_config_value; }
+                        ComboBox {
+                            model <=> Settings.video_optimizer_sub_video_codec_config;
+                            current_index <=> Settings.video_optimizer_sub_video_codec_index;
+                            current_value <=> Settings.video_optimizer_sub_video_codec_value;
+                        }
                     }
 
                     HorizontalLayout {

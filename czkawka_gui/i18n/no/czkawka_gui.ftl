@@ -8,18 +8,18 @@ general_ok_button = Ok
 general_close_button = Lukk
 # Krokiet info dialog
 krokiet_info_title = Introduserer Krokiet - Ny versjon av Czkawka
-krokiet_info_message =
-    Krokiet er den nye, forbedrede, raskere og mindre buggy versjonen av Czkawka GTK!
-    
-    Siden den er selvstendig, er den mye lettere å kjøre og mer motstandsdyktig mot systemendringer og pakkeversjonsoppdateringer.
-    
-    Den inkluderer mange funksjoner som ikke er tilgjengelige i Czkawka, som for eksempel forhåndsvisninger i videokomparismodus, filflyttings-/kopierings-/slettingsprogresjon og utvidede sorteringsalternativer.
-    
-    Prøv det ut og se forskjellen!
-    
-    Czkawka vil fortsatt motta feilrettinger og mindre oppdateringer, men alle nye funksjoner vil kun implementeres i Krokiet.
-    
-    PS. Denne meldingen skal kun være synlig én gang, men hvis den dukker opp igjen, sett CZKAWKA_DONT_ANNOY_ME miljøvariabelen til en hvilken som helst ikke tom verdi.
+krokiet_info_message = 
+        Krokiet er den nye, forbedrede, raskere og mer pålitelige versjonen av Czkawka GTK GUI!
+
+        Det er lettere å kjøre og mer motstandsdyktig mot systemendringer, siden det bare er avhengig av kjernelibbrer som er tilgjengelige på de fleste systemer som standard.
+
+        Krokiet bringer også funksjoner som Czkawka mangler, inkludert forhåndsvisninger i videoj sammenligningsmodus, en EXIF-renser, fil flytt/kopier/slett fremdrift eller utvidede sorteringsalternativer.
+
+        Prøv det og se forskjellen!
+
+        Czkawka vil fortsette å motta feilrettinger og mindre oppdateringer fra meg, men alle nye funksjoner vil bli utviklet eksklusivt for Krokiet, og alle er fri til å bidra med nye funksjoner, legge til manglende moduser eller utvide Czkawka videre.
+
+        PS: Denne meldingen skal bare vises én gang. Hvis den dukker opp igjen, sett CZKAWKA_DONT_ANNOY_ME miljøvariabelen til en hvilken som helst ikke-tom verdi.
 # Main window
 music_title_checkbox = Tittel
 music_artist_checkbox = Kunstner
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Lyd
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arkiv
 main_check_box_broken_files_image = Bilde
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Bruker ffmpeg/ffprobe for å validere video filer. Veldig treg og kan detektere pedantiske feil selv om filen spilles fint.
 check_button_general_same_size = Ignorer samme størrelse
 check_button_general_same_size_tooltip = Ignorer filer med identisk størrelse i resultater - vanligvis disse er 1:1 duplikater
 main_label_size_bytes_tooltip = Størrelse på filer som vil bli brukt i skanning
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Legg til mappe som skal utelukkes i søk.
 upper_remove_excluded_button_tooltip = Slett mappen fra ekskludert.
 upper_notebook_items_configuration = Konfigurasjon av elementer
-upper_notebook_excluded_directories = Ekskluderte kataloger
-upper_notebook_included_directories = Inkluderte mapper
+upper_notebook_excluded_directories = Uekskluderte stier
+upper_notebook_included_directories = Inkluderte Stier
 upper_allowed_extensions_tooltip =
     Tillatte utvidelser må være atskilt med komma (ved at alle er tilgjengelige).
     
@@ -192,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Liste over deaktiverte filer som vil bli ignorert i skanning.
     
     Ved bruk av både tillatte og deaktiverte utvidelser, har denne prioriteten høyere enn prioritet, så filen vil ikke bli sjekket.
-upper_excluded_items_tooltip =
-    Ekskluderte elementer må inneholde * jokertegn og bør separeres med komma.
-    Dette er tregere enn ekskluderte kataloger, så bruk den med forsiktighet.
+upper_excluded_items_tooltip = 
+        Uekskluderte elementer må inneholde * wildcard og skal være separert med komma.
+        Dette er tregere enn Excluded Paths, så bruk det forsiktig.
 upper_excluded_items = Ekskluderte elementer:
 upper_allowed_extensions = Tillatte utvidelser:
 upper_excluded_extensions = Deaktiverte utvidelser:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Deaktiverte utvidelser:
 popover_select_all = Velg alle
 popover_unselect_all = Fjern alle valg
 popover_reverse = Omvendt utvalg
+popover_select_all_except_shortest_path = Velg alle unntatt korteste vei
+popover_select_all_except_longest_path = Velg alle unntatt lengste sti
 popover_select_all_except_oldest = Velg alt unntatt det eldste
 popover_select_all_except_newest = Velg alle unntatt nyeste
 popover_select_one_oldest = Velg en eldste

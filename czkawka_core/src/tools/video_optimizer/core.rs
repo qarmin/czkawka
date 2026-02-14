@@ -416,7 +416,7 @@ impl VideoOptimizer {
                             crop_mechanism: video_crop_params.crop_mechanism,
                         };
 
-                        match fix_video_crop(&entry.path, &entry_crop_params, stop_flag) {
+                        match fix_video_crop(&entry.path, &entry_crop_params, stop_flag, &entry.codec) {
                             Ok(()) => Some(None),
                             Err(e) => Some(Some(flc!("core_failed_to_crop_video", file = entry.path.to_string_lossy(), reason = e))),
                         }

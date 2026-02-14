@@ -8,18 +8,18 @@ general_ok_button = Ок
 general_close_button = Затвори
 # Krokiet info dialog
 krokiet_info_title = Представяме ви Krokiet - Нова версия на Czkawka
-krokiet_info_message =
-    Крокиет е новата, подобрена, по-бърза и по-малко бъгоустойчива версия на Czkawka GTK!
-    
-    Тъй като е самостоятелна, е много по-лесна за стартиране и по-устойчива на системни промени и актуализации на версия на пакет.
-    
-    Включва много функции, недостъпни в Czkawka, като например миниатюри в режим на сравнение на видео, прогрес при преместване/копиране/изтриване на файлове и разширени опции за сортиране.
-    
-    Опитайте я и вижте разликата!
-    
-    Czkawka все още ще получава поправки на грешки и малки актуализации, но всички нови функции ще бъдат имплементирани само в Krokiet.
-    
-    ПС. Това съобщение трябва да бъде видимо само веднъж, но ако се появи отново, задайте променливата на средата CZKAWKA_DONT_ANNOY_ME на всяка непразна стойност.
+krokiet_info_message = 
+        Krokiet е новата, подобрена, по-бърза и по-надеждна версия на Czkawka GTK GUI!
+
+        По-лесно се изпълнява и е по-устойчив на системни промени, тъй като разчита само на основни библиотеки, налични по подразбиране на повечето системи.
+
+        Krokiet също така предлага функции, които Czkawka няма, включително миниатюри в режим на сравнение на видео, EXIF почистване, прогрес при преместване/копиране/изтриване на файлове или разширени опции за сортиране.
+
+        Опитайте го и вижте разликата!
+
+        Czkawka ще продължи да получава поправки на грешки и малки актуализации от мен, но всички нови функции ще бъдат разработени изключително за Krokiet, а всеки е свободен да допринася с нови функции, да добавя липсващи режими или да разширява Czkawka допълнително.
+
+        ПС: Това съобщение трябва да се появи само веднъж. Ако се появи отново, задайте променливата на средата CZKAWKA_DONT_ANNOY_ME на всяка непразна стойност.
 # Main window
 music_title_checkbox = Заглавие
 music_artist_checkbox = Изпълнител
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Аудио
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Архив
 main_check_box_broken_files_image = Изображение
+main_check_box_broken_files_video = Видео
+main_check_box_broken_files_video_tooltip = Използва ffmpeg/ffprobe за валидиране на видео файлове. Доста бавно и може да открие педантични грешки дори ако файлът се възпроизвежда добре.
 check_button_general_same_size = Игнорирай еднакъв размер
 check_button_general_same_size_tooltip = Игнорирай файлове с идентичен размер в резултата - обикновено това са 1:1 дубликати
 main_label_size_bytes_tooltip = Размер на файловете, които ще се използват при сканиране
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Добавяне на директория, която да бъде изключена при търсене.
 upper_remove_excluded_button_tooltip = Изтриване на директория от изключените.
 upper_notebook_items_configuration = Конфигурация на елементите
-upper_notebook_excluded_directories = Изключени директории
-upper_notebook_included_directories = Включени директории
+upper_notebook_excluded_directories = Изключени пътища
+upper_notebook_included_directories = Включени пътища
 upper_allowed_extensions_tooltip =
     Разрешените разширения трябва да бъдат разделени със запетаи (по подразбиране са налични всички).
     
@@ -192,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Списък с изключени от търсенето файлове.
     
     Когато се ползват едновременно включени и изключени разширения, този тук има по-голям приоритет и файла няма да бъде проверен.
-upper_excluded_items_tooltip =
-    Изключените елементи трябва да съдържат заместител * и да са разделени със запетаи.
-    Тази функция е по-бавна от функцията Изключени директории, затова я използвайте внимателно.
+upper_excluded_items_tooltip = 
+        Изключените елементи трябва да съдържат * wildcard и да бъдат разделени с ками.
+        Това е по-бавно от Excluded Paths, така че използвайте внимателно.
 upper_excluded_items = Изключени елементи:
 upper_allowed_extensions = Разрешени разширения:
 upper_excluded_extensions = Изключени разширения:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Изключени разширения:
 popover_select_all = Избери всички
 popover_unselect_all = Размаркирайте всички
 popover_reverse = Избери обратното
+popover_select_all_except_shortest_path = Изберете всички, освен най-краткия път
+popover_select_all_except_longest_path = Изберете всички, освен най-дълъг път
 popover_select_all_except_oldest = Избери всички освен най-старото
 popover_select_all_except_newest = Избери всички освен най-новото
 popover_select_one_oldest = Избери най-старото
@@ -311,7 +315,7 @@ header_about_button_tooltip = Отваря диалогов прозорец с 
 
 settings_number_of_threads = Брой използвани нишки
 settings_number_of_threads_tooltip = Брой използвани нишки, 0 означава, че ще бъдат използвани всички налични нишки.
-settings_use_rust_preview = Използвай външна библиотека вместо GTK да зареди визуализацията.
+settings_use_rust_preview = Използвай външна библиотека вместо GTK да зареди визуализацията
 settings_use_rust_preview_tooltip =
     Използвайки GTK визуализации, понякога ще е по-бързо и ще поддържа повече формати, но понякога това може да е точно обратното.
     

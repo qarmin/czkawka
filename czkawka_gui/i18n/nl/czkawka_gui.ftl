@@ -7,19 +7,19 @@ window_compare_images = Vergelijk afbeeldingen
 general_ok_button = OK
 general_close_button = Afsluiten
 # Krokiet info dialog
-krokiet_info_title = Introductie van Krokiet - Nieuwe Versie van Czkawka
-krokiet_info_message =
-    Krokiet is de nieuwe, verbeterde, snellere en minder buggy versie van Czkawka GTK!
-    
-    Omdat het zelfstandig is, is het veel gemakkelijker te draaien en meer bestand tegen systeemwijzigingen en pakketversie-updates.
-    
-    Het bevat veel functies die niet beschikbaar zijn in Czkawka, zoals thumbnails in video vergelijkingsmodus, bestand verplaatsen/kopieëren/verwijderen voortgang en uitgebreide sorteeropties.
-    
-    Probeer het uit en zie het verschil!
-    
-    Czkawka zal nog steeds bugfixes en kleine updates ontvangen, maar alle nieuwe functies zullen alleen in Krokiet worden geïmplementeerd.
-    
-    PS. Dit bericht zou alleen één keer zichtbaar moeten zijn, maar als het weer verschijnt, stel dan de CZKAWKA_DONT_ANNOY_ME omgeving variabele in op een niet-lege waarde.
+krokiet_info_title = Introductie van Krokiet - Nieuwe versie van Czkawka
+krokiet_info_message = 
+        Krokiet is de nieuwe, verbeterde, snellere en betrouwbaardere versie van de Czkawka GTK GUI!
+
+        Het is eenvoudiger te draaien en robuuster tegen systeemwijzigingen, omdat het alleen afhankelijk is van kernbibliotheken die standaard op de meeste systemen beschikbaar zijn.
+
+        Krokiet brengt ook functies die Czkawka mist, waaronder thumbnails in video vergelijking modus, een EXIF cleaner, bestand verplaatsen/kopieer/verwijderen voortgang of uitgebreide sorteeropties.
+
+        Probeer het uit en zie het verschil!
+
+        Czkawka zal blijven ontvangen bugfixes en kleine updates van mij, maar alle nieuwe functies zullen exclusief voor Krokiet worden ontwikkeld, en iedereen is vrij om nieuwe functies toe te voegen, ontbrekende modi uit te breiden of Czkawka verder te ontwikkelen.
+
+        PS: Dit bericht zou alleen één keer moeten verschijnen. Als het weer verschijnt, stel dan de CZKAWKA_DONT_ANNOY_ME omgeving variabele in op een niet-lege waarde.
 # Main window
 music_title_checkbox = Aanspreektitel
 music_artist_checkbox = Kunstenaar
@@ -140,8 +140,8 @@ main_label_check_method = Controleer methode
 main_label_hash_type = Soort hash
 main_label_hash_size = Hash grootte
 main_label_size_bytes = Grootte (bytes)
-main_label_min_size = Min.
-main_label_max_size = Max.
+main_label_min_size = Min
+main_label_max_size = Max
 main_label_shown_files = Aantal getoonde bestanden
 main_label_resize_algorithm = Algoritme aanpassen
 main_label_similarity = Similarity{ "   " }
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Geluid
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Archief
 main_check_box_broken_files_image = Afbeelding
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Gebruikt ffmpeg/ffprobe om video bestanden te valideren. Zeer traag en kan pedantische fouten detecteren zelfs als de bestand goed afspeelt.
 check_button_general_same_size = Negeer dezelfde grootte
 check_button_general_same_size_tooltip = Bestanden met identieke grootte in resultaten negeren - meestal zijn deze 1:1 duplicaten
 main_label_size_bytes_tooltip = Grootte van bestanden die zullen worden gebruikt in scan
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Voeg map toe om uitgesloten te worden in zoekopdracht.
 upper_remove_excluded_button_tooltip = Verwijder map van uitgesloten.
 upper_notebook_items_configuration = Artikelen configuratie
-upper_notebook_excluded_directories = Uitgesloten Mappen
-upper_notebook_included_directories = Inbegrepen Mappen
+upper_notebook_excluded_directories = Uitgesloten Paden
+upper_notebook_included_directories = Inclusieve Paden
 upper_allowed_extensions_tooltip =
     Toegestane extensies moeten door komma's gescheiden worden (standaard zijn alle beschikbaar).
     
@@ -192,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lijst van uitgeschakelde bestanden die genegeerd zullen worden in scan.
     
     Wanneer gebruik wordt gemaakt van toegestane en uitgeschakelde extensies, heeft deze hogere prioriteit, dus het bestand zal niet worden gecontroleerd.
-upper_excluded_items_tooltip =
-    Uitgesloten items moeten * jokertekens bevatten en moeten gescheiden worden door komma's.
-    Dit is langzamer dan uitgesloten mappen, dus gebruik het zorgvuldig.
+upper_excluded_items_tooltip = 
+        Uitsluitende items moeten * wildcard bevatten en moeten gescheiden worden door komma's.
+        Dit is langzamer dan Uitsluitingspaden, dus gebruik het voorzichtig.
 upper_excluded_items = Uitgesloten artikelen:
 upper_allowed_extensions = Toegestane extensies:
 upper_excluded_extensions = Uitgeschakelde extensies:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Uitgeschakelde extensies:
 popover_select_all = Alles selecteren
 popover_unselect_all = Selectie ongedaan maken
 popover_reverse = Omgekeerde selectie
+popover_select_all_except_shortest_path = Selecteer alles behalve de kortste route
+popover_select_all_except_longest_path = Selecteer alles behalve de langste pad
 popover_select_all_except_oldest = Alles selecteren behalve oudste
 popover_select_all_except_newest = Selecteer alles behalve nieuwste
 popover_select_one_oldest = Selecteer één oudste
@@ -286,7 +290,7 @@ bottom_move_button_tooltip =
     Wanneer twee bestanden met dezelfde naam naar de map worden verplaatst, zal de tweede mislukt en de fout worden weergegeven.
 bottom_sort_button_tooltip = Sorteert bestanden/mappen op de geselecteerde methode.
 bottom_compare_button_tooltip = Afbeeldingen in de groep vergelijken.
-bottom_show_errors_tooltip = Onderste tekstvenster tonen/verbergen
+bottom_show_errors_tooltip = Onderste tekstvenster tonen/verbergen.
 bottom_show_upper_notebook_tooltip = Toon/Verberg bovenste notitieboekpaneel.
 # Progress Window
 progress_stop_button = Stoppen

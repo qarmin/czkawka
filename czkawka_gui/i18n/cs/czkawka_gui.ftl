@@ -7,19 +7,19 @@ window_compare_images = Porovnat obrázky
 general_ok_button = Ok
 general_close_button = Zavřít
 # Krokiet info dialog
-krokiet_info_title = Představujeme Krokiet - Nová verze Czkawky
-krokiet_info_message =
-    Krokiet je nový, vylepšený, rychlejší a méně chybný verze Czkawka GTK!
-    
-    Díky tomu, že je samoobsahový, je mnohem snazší spouštět a odolnější vůči systémovým změnám a aktualizacím verzí balíčků.
-    
-    Obsahuje mnoho funkcí, které nejsou dostupné v Czkawce, jako jsou miniatury v režimu porovnání videa, průběh přesunu/kopírování/smazání souborů a rozšířené možnosti třídění.
-    
-    Vyzkoušejte to a uvidíte rozdíl!
-    
-    Czkawka bude stále dostávat opravy chyb a menší aktualizace, ale všechny nové funkce budou implementovány pouze v Krokiet.
-    
-    PS. Tato zpráva by měla být viditelná pouze jednou, ale pokud se objeví znovu, nastavte proměnnou CZKAWKA_DONT_ANNOY_ME na libovolnou neprázdnou hodnotu.
+krokiet_info_title = Představujeme Krokiet - Nová verze Czkawka
+krokiet_info_message = 
+        Krokiet je nový, vylepšený, rychlejší a spolehlivější verze Czkawky GTK GUI!
+
+        Je snazší spouštět a odolnější vůči systémovým změnám, protože závisí pouze na základních knihovnách, které jsou standardně dostupné na většině systémů.
+
+        Krokiet přináší také funkce, které Czkawka postrádá, včetně miniatur v režimu porovnání videa, EXIF čističe, průběhu přenosu/kopírování/smazání souborů nebo rozšířených možností třídění.
+
+        Vyzkoušejte to a uvidíte rozdíl!
+
+        Czkawka bude nadále dostávat opravy chyb a drobné aktualizace od mě, ale všechny nové funkce budou vyvíjeny výhradně pro Krokiet a kdokoliv je může volně přispívat novými funkcemi, přidávat chybějící režimy nebo rozšiřovat Czkawku dále.
+
+        PS: Tato zpráva by měla být zobrazena pouze jednou. Pokud se zobrazí znovu, nastavte proměnnou CZKAWKA_DONT_ANNOY_ME na libovolnou neprázdnou hodnotu.
 # Main window
 music_title_checkbox = Hlava 1 – Celkem
 music_artist_checkbox = Umělec
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Zvuk
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archivovat
 main_check_box_broken_files_image = Obrázek
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Používá ffmpeg/ffprobe k ověření video souborů. Poměrně pomalé a může detekovat pedantické chyby i když soubor hraje v pořádku.
 check_button_general_same_size = Ignorovat stejnou velikost
 check_button_general_same_size_tooltip = Ignorovat soubory se stejnou velikostí ve výsledcích - obvykle se jedná o 1:1 duplicitní
 main_label_size_bytes_tooltip = Velikost souborů, které budou použity při skenování
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Přidat adresář, který bude při hledání vyloučen.
 upper_remove_excluded_button_tooltip = Odstranit adresář z vyloučení.
 upper_notebook_items_configuration = Konfigurace položek
-upper_notebook_excluded_directories = Vyloučené adresáře
-upper_notebook_included_directories = Zahrnuté adresáře
+upper_notebook_excluded_directories = Vyloučené cesty
+upper_notebook_included_directories = Zahrnuté cesty
 upper_allowed_extensions_tooltip =
     Povolené přípony musí být odděleny čárkami (ve výchozím nastavení jsou všechny k dispozici).
     
@@ -192,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Seznam zakázaných souborů, které budou při skenování ignorovány.
     
     Při používání povolených i zakázaných přípon, má tato vyšší prioritu, takže soubor nebude zaškrtnut.
-upper_excluded_items_tooltip =
-    Vyloučené položky musí obsahovat * zástupné znaky a měly by být odděleny čárkami.
-    To je pomalejší než vyloučené adresáře, proto je používáme opatrně.
+upper_excluded_items_tooltip = 
+        Vyřazené položky musí obsahovat * wildcard a měly by být odděleny čárkami.
+        Toto je pomalejší než Excluded Paths, takže používejte opatrně.
 upper_excluded_items = Vyloučené položky:
 upper_allowed_extensions = Povolená rozšíření:
 upper_excluded_extensions = Zakázané rozšíření:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Zakázané rozšíření:
 popover_select_all = Vybrat vše
 popover_unselect_all = Odznačit vše
 popover_reverse = Reverzní výběr
+popover_select_all_except_shortest_path = Vyberte vše kromě nejkratší cesty
+popover_select_all_except_longest_path = Vyberte vše kromě nejdelší cesty
 popover_select_all_except_oldest = Vybrat vše kromě nejstarších
 popover_select_all_except_newest = Vybrat vše kromě nejnovějších
 popover_select_one_oldest = Vyberte jeden nejstarší

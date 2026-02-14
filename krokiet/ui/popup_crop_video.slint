@@ -40,7 +40,8 @@ export component PopupCropVideo inherits Rectangle {
                         Text { text: Translations.subsettings_video_optimizer_video_codec_text; vertical_alignment: TextVerticalAlignment.center; }
                         ComboBox {
                             model <=> Settings.video_optimizer_sub_video_codec_config;
-                            current_value <=> Settings.video_optimizer_sub_video_codec_config_value;
+                            current_index <=> Settings.video_optimizer_sub_video_codec_index;
+                            current_value <=> Settings.video_optimizer_sub_video_codec_value;
                             enabled: Settings.popup_crop_video_reencode;
                         }
                     }

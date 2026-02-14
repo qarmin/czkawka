@@ -8,18 +8,18 @@ general_ok_button = Ok
 general_close_button = 閉じる
 # Krokiet info dialog
 krokiet_info_title = Krokiet – 新バージョン Czkawka
-krokiet_info_message =
-    クローキエッとは、新しい、改良され、高速で、バグが少ないCzkawka GTK GUIのバージョンです！
-    
-    自己完結型なので、実行が簡単で、システム変更やパッケージバージョン更新に強いです。
-    
-    ビデオ比較モードでのサムネイル、ファイルの移動/コピー/削除の進捗状況、拡張されたソートオプションなど、Czkawkaでは利用できない多くの機能が含まれています。
-    
-    試して違いを見てください！
-    
-    Czkawkaは引き続きバグ修正や軽微なアップデートを受け取りますが、すべての新機能はクローキエッでのみ実装されます。
-    
-    追伸。このメッセージは一度だけ表示されるように設計されていますが、表示された場合は、CZKAWKA_DONT_ANNOY_ME環境変数を任意の空でない値に設定してください。
+krokiet_info_message = 
+        Krokietは、Czkawka GTK GUIの新しい、改良され、高速かつ信頼性の高いバージョンです！
+ 
+        実行が簡単で、システム変更に強く、ほとんどのシステムでデフォルトで利用可能なコアライブラリに依存するためです。
+ 
+        Krokietは、サムネイルをビデオ比較モードで、EXIFクリーナー、ファイル移動/コピー/削除の進捗状況、または拡張されたソートオプションなど、Czkawkaにはない機能も提供します。
+ 
+        試してみてください。違いを確かめてください！
+ 
+        Czkawkaは、私からバグ修正や軽微なアップデートを継続的に受け取りますが、すべての新機能はKrokietにのみ開発され、誰でも新しい機能を追加したり、欠落しているモードを補ったり、Czkawkaをさらに拡張したりすることができます。
+ 
+        追伸：このメッセージは一度だけ表示されるように設計されています。もし表示された場合は、CZKAWKA_DONT_ANNOY_ME環境変数を任意の非空の値に設定してください。.
 # Main window
 music_title_checkbox = タイトル
 music_artist_checkbox = アーティスト
@@ -33,11 +33,11 @@ music_checking_by_content = コンテンツ
 same_music_seconds_label = フラグメント最小秒の持続時間
 same_music_similarity_label = 最大差
 music_compare_only_in_title_group = 類似したタイトルのグループ内で比較
-music_compare_only_in_title_group_tooltip =
+music_compare_only_in_title_group_tooltip = 
     有効にすると、ファイルはタイトルでグループ化され、それから比較されます。
     
-    10000ファイルでは、その代わりに約100万比較が通常、約20000比較があります。
-same_music_tooltip =
+    10000ファイルでは、その代わりに約100万比較が通常、約20000比較があります。.
+same_music_tooltip = 
     音楽ファイルの内容から類似ファイルを検索するように設定できます：
     
     - 音楽ファイルが類似していると識別されるフラグメントの最小時間
@@ -48,7 +48,7 @@ same_music_tooltip =
     最小時間を5秒、最大差を1.0に設定すると、ファイル内のほとんど同じフラグメントを探します。
     一方、時間を20秒、差の最大値を6.0に設定すると、リミックスやライブ・バージョンなどを探すのに効果的です。
     
-    デフォルトでは、各音楽ファイルは互いに比較され、多数のファイルをテストする場合、これは多くの時間を要します。したがって、通常、参照フォルダを使用し、どのファイルを互いに比較するかを指定する方が良いでしょう（同じ量のファイルでは、フィンガープリントの比較は参照フォルダなしよりも少なくとも 4 倍速くなります）。
+    デフォルトでは、各音楽ファイルは互いに比較され、多数のファイルをテストする場合、これは多くの時間を要します。したがって、通常、参照フォルダを使用し、どのファイルを互いに比較するかを指定する方が良いでしょう（同じ量のファイルでは、フィンガープリントの比較は参照フォルダなしよりも少なくとも 4 倍速くなります）。.
 music_comparison_checkbox_tooltip =
     機械学習によりフレーズから括弧とその中身を除外するAIを使用して、類似の音楽ファイルを検索します。このオプションが有効な場合、例えば以下のファイルは重複とみなされます:
     
@@ -62,44 +62,44 @@ duplicate_mode_size_name_combo_box = サイズと名前
 duplicate_mode_name_combo_box = 名前
 duplicate_mode_size_combo_box = サイズ
 duplicate_mode_hash_combo_box = ハッシュ
-duplicate_hash_type_tooltip =
+duplicate_hash_type_tooltip = 
     Czkawkaは3種類のハッシュを提供します:
     
     Blake3 - 暗号学的ハッシュ関数。非常に高速であるため、デフォルトのハッシュ方式として使用されます。
     
     CRC32 - シンプルなハッシュ関数。Blake3より高速ですが、まれに衝突が発生する可能性があります。
     
-    XXH3 - パフォーマンスとハッシュの質がBlake3に非常に近いので、このようなモードの代わりに簡単に使用できます。（ただし、暗号学的ではありません）
-duplicate_check_method_tooltip =
+    XXH3 - パフォーマンスとハッシュの質がBlake3に非常に近いので、このようなモードの代わりに簡単に使用できます。（ただし、暗号学的ではありません）.
+duplicate_check_method_tooltip = 
     Czkawkaは、今のところ以下の3種類の方法で重複を見つけることができます:
     
     名前 - 同じ名前のファイルを検索します。
     
     サイズ - 同じサイズのファイルを探します。
     
-    ハッシュ - 同じ内容のファイルを探します。ファイルをハッシュ化して比較することにより重複を見つけます。このモードは、重複を見つけるための最も安全な方法です。このツールはキャッシュを多用するので、同じデータの2回目以降のスキャンは最初の時よりずっと速くなるはずです。
-image_hash_size_tooltip =
+    ハッシュ - 同じ内容のファイルを探します。ファイルをハッシュ化して比較することにより重複を見つけます。このモードは、重複を見つけるための最も安全な方法です。このツールはキャッシュを多用するので、同じデータの2回目以降のスキャンは最初の時よりずっと速くなるはずです。.
+image_hash_size_tooltip = 
     チェックした画像はそれぞれ特別なハッシュを生成し、そのハッシュを比較したときに差が小さいほど、この画像は類似していることを意味します。
     
     8のハッシュサイズは、オリジナルに少ししか似ていない画像を見つけるのにかなり適しています。しかし、1000枚を超えるような大きな画像では、誤検出が多くなるため、より大きなハッシュサイズを使用することをお勧めします。
     
     16はデフォルトのハッシュサイズであり、少しでも類似した画像を見つけることとハッシュの衝突を少なくすることの間でかなり良い妥協点です。
     
-    32と64のハッシュは非常に類似した画像しか見つけられませんが、誤検出はほとんどありません（アルファチャンネルのある一部の画像を除いて）。
-image_resize_filter_tooltip =
+    32と64のハッシュは非常に類似した画像しか見つけられませんが、誤検出はほとんどありません（アルファチャンネルのある一部の画像を除いて）。.
+image_resize_filter_tooltip = 
     画像のハッシュを計算するために、ライブラリはまず画像のサイズを必ず変更します。
     
     どのアルゴリズムを選択したかによって、ハッシュを計算するために使用される画像は少し違って見えるかもしれません。
     
     最も高速なアルゴリズムは Nearest ですが、最も悪い結果を出すのも Nearest です。16x16のハッシュサイズで低品質の場合、それが明らかになることはないので、デフォルトは Nearest です。
     
-    8x8のハッシュサイズでは、より良い画像群を得るために、Nearestとは異なるアルゴリズムを使用することが推奨されます。
-image_hash_alg_tooltip =
+    8x8のハッシュサイズでは、より良い画像群を得るために、Nearestとは異なるアルゴリズムを使用することが推奨されます。.
+image_hash_alg_tooltip = 
     ハッシュの計算方法は、多くのアルゴリズムの中からユーザーが選択することができます。
     
     それぞれ長所と短所があり、画像によって良い結果が出る場合もあれば、悪い結果が出る場合もあります。
     
-    そのため、最適なものを見極めるには、手動でのテストが必要です。
+    そのため、最適なものを見極めるには、手動でのテストが必要です。.
 big_files_mode_combobox_tooltip = 最小/最大のファイルを検索できます
 big_files_mode_label = チェックされたファイル
 big_files_mode_smallest_combo_box = 最も小さい
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = 音声
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = アーカイブする
 main_check_box_broken_files_image = 画像
+main_check_box_broken_files_video = ビデオ
+main_check_box_broken_files_video_tooltip = ffmpeg/ffprobe を使用してビデオファイルを検証します。かなり遅く、ファイルが正常に再生されても、煩雑なエラーを検出することがあります。.
 check_button_general_same_size = 同じサイズを無視
 check_button_general_same_size_tooltip = 結果として同じサイズのファイルを無視 - 通常、これらは1:1重複です
 main_label_size_bytes_tooltip = スキャンで使用されるファイルのサイズ
@@ -156,7 +158,7 @@ main_label_size_bytes_tooltip = スキャンで使用されるファイルのサ
 upper_tree_view_included_folder_column_title = 検索するフォルダ
 upper_tree_view_included_reference_column_title = 参照フォルダ
 upper_recursive_button = 再帰的
-upper_recursive_button_tooltip = 選択した場合、選択したフォルダの下に直接配置されていないファイルも検索します。
+upper_recursive_button_tooltip = 選択した場合、選択したフォルダの下に直接配置されていないファイルも検索します。.
 upper_manual_add_included_button = 手動追加
 upper_add_included_button = 追加
 upper_remove_included_button = 削除
@@ -169,32 +171,32 @@ upper_manual_add_included_button_tooltip =
     一度に複数のパスを追加するには、 ;
     
     /home/roman;/home/rozkazは/home/romanと/home/rozkazの2つのディレクトリを追加します。
-upper_add_included_button_tooltip = 検索に新しいディレクトリを追加します。
-upper_remove_included_button_tooltip = 検索からディレクトリを削除します。
+upper_add_included_button_tooltip = 検索に新しいディレクトリを追加します。.
+upper_remove_included_button_tooltip = 検索からディレクトリを削除します。.
 upper_manual_add_excluded_button_tooltip =
     除外されたディレクトリ名を手動で追加します。
     
     一度に複数のパスを追加するには、 ;
     
     /home/roman;/home/krokiet は /home/roman と /home/keokiet の 2 つのディレクトリを追加します。
-upper_add_excluded_button_tooltip = 検索で除外するディレクトリを追加します。
-upper_remove_excluded_button_tooltip = 除外されたディレクトリを削除します。
+upper_add_excluded_button_tooltip = 検索で除外するディレクトリを追加します。.
+upper_remove_excluded_button_tooltip = 除外されたディレクトリを削除します。.
 upper_notebook_items_configuration = アイテム設定
-upper_notebook_excluded_directories = 除外されたディレクトリ
-upper_notebook_included_directories = 含まれるディレクトリ
-upper_allowed_extensions_tooltip =
+upper_notebook_excluded_directories = 除外パス
+upper_notebook_included_directories = 含まれるパス
+upper_allowed_extensions_tooltip = 
     許可する拡張子はカンマで区切る必要があります（デフォルトではすべてが使用可能です）。
     
     複数の拡張子を一度に追加するマクロ: IMAGE, VIDEO, MUSIC, TEXT も利用可能です。
     
-    使用例: ".exe, IMAGE, VIDEO, .rar, 7z" - これは画像（jpg、pngなど）、動画（avi、mp4など）、exe、rar、7zファイルがスキャンされることを意味します。
-upper_excluded_extensions_tooltip =
+    使用例: ".exe, IMAGE, VIDEO, .rar, 7z" - これは画像（jpg、pngなど）、動画（avi、mp4など）、exe、rar、7zファイルがスキャンされることを意味します。.
+upper_excluded_extensions_tooltip = 
     スキャンで無視される無効なファイルの一覧です。
     
-    許可された拡張子と無効化された拡張子の両方を使用する場合、この拡張子の方が優先度が高いので、ファイルはチェックされません。
-upper_excluded_items_tooltip =
-    除外された項目はワイルドカード * を含んでいる必要があり、カンマで区切る必要があります。
-    ディレクトリを除外するよりも遅いので注意してください。
+    許可された拡張子と無効化された拡張子の両方を使用する場合、この拡張子の方が優先度が高いので、ファイルはチェックされません。.
+upper_excluded_items_tooltip = 
+        除外項目には *ワイルドカードを含んでおり、カンマで区切ってください。
+        これはExcluded Pathsよりも遅いため、注意して使用してください。.
 upper_excluded_items = 除外するアイテム:
 upper_allowed_extensions = 許可される拡張子:
 upper_excluded_extensions = 無効なエクステンション:
@@ -202,6 +204,8 @@ upper_excluded_extensions = 無効なエクステンション:
 popover_select_all = すべて選択
 popover_unselect_all = すべて選択解除
 popover_reverse = 選択を逆にする
+popover_select_all_except_shortest_path = 選択を解除し、最短経路を除く
+popover_select_all_except_longest_path = 選択を解除する、最長パスを除く
 popover_select_all_except_oldest = 一番古いもの以外のすべてを選択
 popover_select_all_except_newest = 一番新しいもの以外のすべてを選択
 popover_select_one_oldest = 一番古いものを選択
@@ -220,7 +224,7 @@ popover_custom_name_check_button_entry_tooltip =
     
     使用例:
     /usr/ping/pong.txt は *ong* でを見つけることができます
-popover_custom_regex_check_button_entry_tooltip =
+popover_custom_regex_check_button_entry_tooltip = 
     指定した正規表現でレコードを選択することができます。
     
     このモードでは、検索される文字列はパスと文字列になります。
@@ -228,17 +232,17 @@ popover_custom_regex_check_button_entry_tooltip =
     使用例:
     /usr/bin/ziemniak.txt は /ziem[a-z]+ で検索できます。
     
-    これはRustのデフォルトの正規表現実装を使用しているので、詳しくは https://docs.rs/regex を参照してください。
-popover_custom_case_sensitive_check_button_tooltip =
+    これはRustのデフォルトの正規表現実装を使用しているので、詳しくは https://docs.rs/regex を参照してください。.
+popover_custom_case_sensitive_check_button_tooltip = 
     大文字小文字を区別する検出を有効にします。
     
-    /home/* を無効にすると、/Home/roman と /home/roman の両方が検出されます。
-popover_custom_not_all_check_button_tooltip =
+    /home/* を無効にすると、/Home/roman と /home/roman の両方が検出されます。.
+popover_custom_not_all_check_button_tooltip = 
     グループ内のすべてのレコードを選択できないようにします。
     
     ほとんどの状況でユーザーは元のファイルと重複ファイルの両方を削除したくないため、これはデフォルトで有効になっています。 少なくとも1つのファイルを残したい。
     
-    警告: この設定は、すでにユーザーがグループ内のすべての結果を手動で選択している場合には機能しません。
+    警告: この設定は、すでにユーザーがグループ内のすべての結果を手動で選択している場合には機能しません。.
 popover_custom_regex_path_label = パス
 popover_custom_regex_name_label = 名前
 popover_custom_regex_regex_label = 正規表現（パス + 名前）
@@ -264,79 +268,79 @@ bottom_move_button = 移動
 bottom_sort_button = 並び替え
 bottom_compare_button = 比較
 bottom_search_button_tooltip = 検索を開始
-bottom_select_button_tooltip = レコードを選択します。選択したファイル/フォルダのみが後で処理できます。
-bottom_delete_button_tooltip = 選択したファイル/フォルダを削除します。
+bottom_select_button_tooltip = レコードを選択します。選択したファイル/フォルダのみが後で処理できます。.
+bottom_delete_button_tooltip = 選択したファイル/フォルダを削除します。.
 bottom_save_button_tooltip = 検索に関するデータをファイルに保存します。
-bottom_symlink_button_tooltip =
+bottom_symlink_button_tooltip = 
     シンボリックリンクを作成します。
     グループ内の2つ以上の結果が選択されている場合にのみ機能します。
-    最初の結果は変更されず、2番目以降の結果が最初の結果にシンボリックリンクされます。
-bottom_hardlink_button_tooltip =
+    最初の結果は変更されず、2番目以降の結果が最初の結果にシンボリックリンクされます。.
+bottom_hardlink_button_tooltip = 
     ハードリンクを作成します。
     グループ内の2つ以上の結果が選択されている場合にのみ機能します。
-    最初の結果は変更されず、2番目以降の結果が最初の結果にハードリンクされます。
-bottom_hardlink_button_not_available_tooltip =
+    最初の結果は変更されず、2番目以降の結果が最初の結果にハードリンクされます。.
+bottom_hardlink_button_not_available_tooltip = 
     ハードリンクを作成する。
     ハードリンクを作成できないため、ボタンは無効になっています。
     ハードリンクはWindowsの管理者権限でのみ動作するので、アプリは必ず管理者として実行してください。
-    アプリがすでにそのような権限で動作している場合は、Githubに同様の問題がないか確認してください。
-bottom_move_button_tooltip =
+    アプリがすでにそのような権限で動作している場合は、Githubに同様の問題がないか確認してください。.
+bottom_move_button_tooltip = 
     選択したフォルダにファイルを移動します。
     ディレクトリツリーを維持したまま、すべてのファイルをフォルダにコピーします。
-    同じ名前の2つのファイルをフォルダに移動しようとすると、2番目のファイルが失敗し、エラーが表示されます。
-bottom_sort_button_tooltip = 選択した方法に従ってファイル/フォルダを並べ替えます。
-bottom_compare_button_tooltip = グループ内の画像を比較する
-bottom_show_errors_tooltip = 下部のエラーパネルを表示/非表示にします。
-bottom_show_upper_notebook_tooltip = 上部のノートブックパネルを表示/非表示にします。
+    同じ名前の2つのファイルをフォルダに移動しようとすると、2番目のファイルが失敗し、エラーが表示されます。.
+bottom_sort_button_tooltip = 選択した方法に従ってファイル/フォルダを並べ替えます。.
+bottom_compare_button_tooltip = グループ内の画像を比較する.
+bottom_show_errors_tooltip = 下部のエラーパネルを表示/非表示にします。.
+bottom_show_upper_notebook_tooltip = 上部のノートブックパネルを表示/非表示にします。.
 # Progress Window
 progress_stop_button = 停止
 progress_stop_additional_message = リクエストを停止する
 # About Window
-about_repository_button_tooltip = ソースコードのあるリポジトリページへのリンク
-about_donation_button_tooltip = 寄付ページへのリンク
-about_instruction_button_tooltip = 使い方ページへのリンク
-about_translation_button_tooltip = Crowdin ページにアプリの翻訳をリンクします。公式にポーランド語と英語がサポートされています。
+about_repository_button_tooltip = ソースコードのあるリポジトリページへのリンク.
+about_donation_button_tooltip = 寄付ページへのリンク.
+about_instruction_button_tooltip = 使い方ページへのリンク.
+about_translation_button_tooltip = Crowdin ページにアプリの翻訳をリンクします。公式にポーランド語と英語がサポートされています。.
 about_repository_button = リポジトリ
 about_donation_button = 寄付
 about_instruction_button = 使い方
 about_translation_button = 翻訳
 # Header
-header_setting_button_tooltip = 設定ダイアログを開きます。
-header_about_button_tooltip = アプリに関する情報を含むダイアログを開きます。
-
+header_setting_button_tooltip = 設定ダイアログを開きます。.
+header_about_button_tooltip = アプリに関する情報を含むダイアログを開きます。.
+ 
 # Settings
 
 
 ## General
 
 settings_number_of_threads = 使用されるスレッドの数
-settings_number_of_threads_tooltip = 使用するスレッドの数、0 は、使用可能なすべてのスレッドが使用されることを意味します。
+settings_number_of_threads_tooltip = 使用するスレッドの数、0 は、使用可能なすべてのスレッドが使用されることを意味します。.
 settings_use_rust_preview = プレビューの読み込みにgtkの代わりに外部ライブラリを使用する
-settings_use_rust_preview_tooltip =
+settings_use_rust_preview_tooltip = 
     GTKプレビューはいくらかの場合において高速で多くのフォーマットをサポートしているが、全く逆となる場合もある。
     
     プレビューの読み込みに問題がある場合、この設定を変更してみるとよい。
     
-    Linux以外の環境では、gtk-pixbufが常に有効とは限らず、無効にすることによりいくらかの画像のプレビューが読み込まれないため、このオプションの使用が推奨される。
+    Linux以外の環境では、gtk-pixbufが常に有効とは限らず、無効にすることによりいくらかの画像のプレビューが読み込まれないため、このオプションの使用が推奨される。.
 settings_label_restart = 設定を適用するにはアプリを再起動する必要があります！
 settings_ignore_other_filesystems = 他のファイルシステムを無視(Linuxのみ)
 settings_ignore_other_filesystems_tooltip =
     検索されたディレクトリと同じファイルシステムにないファイルを無視します。
     
     Linux の find コマンドで -xdev オプションのように動作します。
-settings_save_at_exit_button_tooltip = 終了時に設定をファイルに保存します。
-settings_load_at_start_button_tooltip =
+settings_save_at_exit_button_tooltip = 終了時に設定をファイルに保存します。.
+settings_load_at_start_button_tooltip = 
     起動時にファイルから設定を読み込みます。
     
-    このオプションが無効の場合、デフォルトの設定が使用されます。
-settings_confirm_deletion_button_tooltip = 削除ボタンをクリックしたときに確認ダイアログを表示します。
-settings_confirm_link_button_tooltip = ハードリンク/シンボリックリンクボタンをクリックしたときに確認ダイアログを表示します。
-settings_confirm_group_deletion_button_tooltip = グループからすべてのレコードを削除しようとしたときに警告ダイアログを表示します。
-settings_show_text_view_button_tooltip = 下部にテキストパネルを表示します。
-settings_use_cache_button_tooltip = ファイルキャッシュを使用します。
-settings_save_also_as_json_button_tooltip = キャッシュを人間にも読みやすい形のJSON形式で保存します。この内容は編集可能です。コンテンツを変更することができます。 バイナリ形式のキャッシュ（bin拡張子のもの）がない場合、このファイルから自動的にキャッシュが読み込まれます。
-settings_use_trash_button_tooltip = ファイルを永久に削除する代わりにゴミ箱に移動します。
-settings_language_label_tooltip = 操作画面における言語を選択します。
+    このオプションが無効の場合、デフォルトの設定が使用されます。.
+settings_confirm_deletion_button_tooltip = 削除ボタンをクリックしたときに確認ダイアログを表示します。.
+settings_confirm_link_button_tooltip = ハードリンク/シンボリックリンクボタンをクリックしたときに確認ダイアログを表示します。.
+settings_confirm_group_deletion_button_tooltip = グループからすべてのレコードを削除しようとしたときに警告ダイアログを表示します。.
+settings_show_text_view_button_tooltip = 下部にテキストパネルを表示します。.
+settings_use_cache_button_tooltip = ファイルキャッシュを使用します。.
+settings_save_also_as_json_button_tooltip = キャッシュを人間にも読みやすい形のJSON形式で保存します。この内容は編集可能です。コンテンツを変更することができます。 バイナリ形式のキャッシュ（bin拡張子のもの）がない場合、このファイルから自動的にキャッシュが読み込まれます。.
+settings_use_trash_button_tooltip = ファイルを永久に削除する代わりにゴミ箱に移動します。.
+settings_language_label_tooltip = 操作画面における言語を選択します。.
 settings_save_at_exit_button = 終了時に設定を保存
 settings_load_at_start_button = 起動時に設定を読み込む
 settings_confirm_deletion_button = ファイルを削除するときに確認ダイアログを表示する
@@ -348,14 +352,14 @@ settings_save_also_as_json_button = JSONファイルにもキャッシュを保�
 settings_use_trash_button = 削除したファイルをゴミ箱に移動する
 settings_language_label = 言語
 settings_multiple_delete_outdated_cache_checkbutton = 古いキャッシュエントリを自動的に削除
-settings_multiple_delete_outdated_cache_checkbutton_tooltip =
+settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
     存在しないファイルを指している古いキャッシュエントリを削除できるようにします。
     
     このオプションを有効にすると、アプリはレコードを読み込むときにすべてのポイントが有効なファイルであることを確認します（壊れたファイルは無視されます）。
     
     無効にすると、それらに関するキャッシュエントリが次のスキャンで削除されなくなり、外部ドライブ上のファイルをスキャンする際に役立ちます。
     
-    キャッシュに何十万ものレコードがある場合、スキャンの開始時・終了時のキャッシュの読み込み・保存を高速化するためにこのオプションを有効にすることが推奨されます。
+    キャッシュに何十万ものレコードがある場合、スキャンの開始時・終了時のキャッシュの読み込み・保存を高速化するためにこのオプションを有効にすることが推奨されます。.
 settings_notebook_general = 全般
 settings_notebook_duplicates = 重複
 settings_notebook_images = 類似の画像
@@ -363,30 +367,30 @@ settings_notebook_videos = 類似の動画
 
 ## Multiple - settings used in multiple tabs
 
-settings_multiple_image_preview_checkbutton_tooltip = 画像ファイルを選択しているとき、右側にプレビューを表示します。
+settings_multiple_image_preview_checkbutton_tooltip = 画像ファイルを選択しているとき、右側にプレビューを表示します。.
 settings_multiple_image_preview_checkbutton = 画像のプレビューを表示
-settings_multiple_clear_cache_button_tooltip =
+settings_multiple_clear_cache_button_tooltip = 
     古いキャッシュエントリを手動でクリアします。
-    自動クリアが無効の場合にのみ使用する必要があります。
-settings_multiple_clear_cache_button = キャッシュから古い結果を削除します。
-
+    自動クリアが無効の場合にのみ使用する必要があります。.
+settings_multiple_clear_cache_button = キャッシュから古い結果を削除します。.
+ 
 ## Duplicates
 
-settings_duplicates_hide_hard_link_button_tooltip =
+settings_duplicates_hide_hard_link_button_tooltip = 
     ハードリンクされていてかつ同じデータを指している場合、1つを除くすべてのファイルを非表示にします。
     
-    例： ディスク上に特定のデータにハードリンクされている同じデータを持つ7つのファイルと、1つの異なるinodeのファイルがある場合、 重複検索では一意のファイルとハードリンクされたファイルのみが表示されます。
-settings_duplicates_minimal_size_entry_tooltip =
+    例： ディスク上に特定のデータにハードリンクされている同じデータを持つ7つのファイルと、1つの異なるinodeのファイルがある場合、 重複検索では一意のファイルとハードリンクされたファイルのみが表示されます。.
+settings_duplicates_minimal_size_entry_tooltip = 
     キャッシュされるファイルの最小サイズを設定します。
     
-    値を小さくするとキャッシュが生成されるレコードが増え検索が高速化しますが、キャッシュの読み込みと保存が遅くなります。
-settings_duplicates_prehash_checkbutton_tooltip =
+    値を小さくするとキャッシュが生成されるレコードが増え検索が高速化しますが、キャッシュの読み込みと保存が遅くなります。.
+settings_duplicates_prehash_checkbutton_tooltip = 
     プレハッシュ(ファイルの一部から計算したハッシュ) のキャッシュを有効にし、重複していない検索結果をより早く捨てられるようにします。
     
     いくつかの場面では低速化の要因になりうるので、この機能はデフォルトでは無効になっています。
     
-    数十万・数百万のファイルをスキャンする場合には、検索を何倍も高速化できるため使用を強く推奨します。
-settings_duplicates_prehash_minimal_entry_tooltip = キャッシュされたエントリの最小サイズ。
+    数十万・数百万のファイルをスキャンする場合には、検索を何倍も高速化できるため使用を強く推奨します。.
+settings_duplicates_prehash_minimal_entry_tooltip = キャッシュされたエントリの最小サイズ。.
 settings_duplicates_hide_hard_link_button = ハードリンクを隠す
 settings_duplicates_prehash_checkbutton = プリハッシュキャッシュを使用
 settings_duplicates_minimal_size_cache_label = キャッシュに保存するファイルの最小サイズ（バイト単位）
@@ -394,27 +398,27 @@ settings_duplicates_minimal_size_cache_prehash_label = プリハッシュキャ�
 
 ## Saving/Loading settings
 
-settings_saving_button_tooltip = 現在の設定をファイルに保存します。
-settings_loading_button_tooltip = 設定をファイルから読み込み、現在の設定を置き換えます。
-settings_reset_button_tooltip = 設定をデフォルトにリセットします。
+settings_saving_button_tooltip = 現在の設定をファイルに保存します。.
+settings_loading_button_tooltip = 設定をファイルから読み込み、現在の設定を置き換えます。.
+settings_reset_button_tooltip = 設定をデフォルトにリセットします。.
 settings_saving_button = 設定を保存
 settings_loading_button = 構成を読み込む
 settings_reset_button = 設定をリセット
 
 ## Opening cache/config folders
 
-settings_folder_cache_open_tooltip =
+settings_folder_cache_open_tooltip = 
     キャッシュを持つtxtファイルが保存されているフォルダを開きます。
     
     これらのファイルを変更すると不正な結果を表示することがありますが、パスなどを変更することで、大量のファイルを別の場所に移動する際の時間を短縮することができます。
     
     このファイルをコンピュータ間でコピーすることで、再度ファイルをスキャンするときの時間を節約できます（もちろん、コンピュータのディレクトリ構造が似ている場合に限り）。
     
-    キャッシュに問題がある場合、このファイルを削除することができます。アプリは自動的にそれらを再生成します。
-settings_folder_settings_open_tooltip =
+    キャッシュに問題がある場合、このファイルを削除することができます。アプリは自動的にそれらを再生成します。.
+settings_folder_settings_open_tooltip = 
     Czkawkaの設定ファイルが保存されているフォルダを開きます。
     
-    警告: 手動で変更すると、ワークフローが壊れる可能性があります。
+    警告: 手動で変更すると、ワークフローが壊れる可能性があります。.
 settings_folder_cache_open = キャッシュフォルダーを開く
 settings_folder_settings_open = 設定フォルダを開く
 # Compute results
@@ -466,46 +470,46 @@ progress_cache_saving = キャッシュを保存中
 progress_current_stage = 現在のステージ:{ "  " }
 progress_all_stages = すべてのステージ:{ "  " }
 # Saving loading 
-saving_loading_saving_success = ファイル { $name } に設定を保存しました。
-saving_loading_saving_failure = 設定データをファイル { $name }、理由 { $reason } に保存できませんでした。
-saving_loading_reset_configuration = 現在の設定がクリアされました。
-saving_loading_loading_success = 設定の読み込みが正常に完了しました。
-saving_loading_failed_to_create_config_file = 設定ファイル "{ $path }" の作成に失敗しました、理由 "{ $reason }"。
-saving_loading_failed_to_read_config_file = 存在しないか設定ファイルでないため、"{ $path }" から設定を読み込めません。
-saving_loading_failed_to_read_data_from_file = ファイル "{ $path }" からデータを読み取ることができません、理由 "{ $reason } "。
+saving_loading_saving_success = ファイル { $name } に設定を保存しました。.
+saving_loading_saving_failure = 設定データをファイル { $name }、理由 { $reason } に保存できませんでした。.
+saving_loading_reset_configuration = 現在の設定がクリアされました。.
+saving_loading_loading_success = 設定の読み込みが正常に完了しました。.
+saving_loading_failed_to_create_config_file = 設定ファイル "{ $path }" の作成に失敗しました、理由 "{ $reason }"。.
+saving_loading_failed_to_read_config_file = 存在しないか設定ファイルでないため、"{ $path }" から設定を読み込めません。.
+saving_loading_failed_to_read_data_from_file = ファイル "{ $path }" からデータを読み取ることができません、理由 "{ $reason } "。.
 # Other
 selected_all_reference_folders = すべてのディレクトリが参照フォルダとして設定されている場合、検索を開始できません
 searching_for_data = データを検索中、しばらくお待ちください...
 text_view_messages = メッセージ
 text_view_warnings = 警告
 text_view_errors = エラー
-about_window_motto = このプログラムは自由に使用することができます、常に。
-krokiet_new_app = Czkawkaはメンテナンスモードであるため、重大なバグのみが修正され、新機能は追加されません。 新機能については、より安定しており、パフォーマンスが高く、積極的な開発中の新しいKrokietアプリをご覧ください。
+about_window_motto = このプログラムは自由に使用することができます、常に。.
+krokiet_new_app = Czkawkaはメンテナンスモードであるため、重大なバグのみが修正され、新機能は追加されません。 新機能については、より安定しており、パフォーマンスが高く、積極的な開発中の新しいKrokietアプリをご覧ください。.
 # Various dialog
 dialogs_ask_next_time = 次回に確認
 symlink_failed = { $name } から { $target }へのシンボリックリンクに失敗しました , 理由 { $reason }
 delete_title_dialog = 削除の確認
 delete_question_label = ファイルを削除してもよろしいですか？
 delete_all_files_in_group_title = グループ内のすべてのファイルを削除することの確認
-delete_all_files_in_group_label1 = いくつかのグループでは、すべてのレコードが選択されています。
+delete_all_files_in_group_label1 = いくつかのグループでは、すべてのレコードが選択されています。.
 delete_all_files_in_group_label2 = 本当に削除しますか？
-delete_items_label = { $items } ファイルが削除されます。
-delete_items_groups_label = { $groups } グループから { $items } 個のファイルが削除されます。
+delete_items_label = { $items } ファイルが削除されます。.
+delete_items_groups_label = { $groups } グループから { $items } 個のファイルが削除されます。.
 hardlink_failed = { $name } から { $target }へのハードリンクに失敗しました , 理由 { $reason }
 hard_sym_invalid_selection_title_dialog = いくつかのグループで無効な選択です
-hard_sym_invalid_selection_label_1 = いくつかのグループでは一つのレコードしか選択されていないため、それらは無視されます。
-hard_sym_invalid_selection_label_2 = これらのファイルをハード/シンボリックにリンクできるようにするには、グループ内の少なくとも2つの結果を選択する必要があります。
-hard_sym_invalid_selection_label_3 = グループ内で最初のものはオリジナルとして認識され変更されませんが、二つ目以降は変更されます。
+hard_sym_invalid_selection_label_1 = いくつかのグループでは一つのレコードしか選択されていないため、それらは無視されます。.
+hard_sym_invalid_selection_label_2 = これらのファイルをハード/シンボリックにリンクできるようにするには、グループ内の少なくとも2つの結果を選択する必要があります。.
+hard_sym_invalid_selection_label_3 = グループ内で最初のものはオリジナルとして認識され変更されませんが、二つ目以降は変更されます。.
 hard_sym_link_title_dialog = リンクの確認
 hard_sym_link_label = このファイルをリンクしてもよろしいですか？
 move_folder_failed = フォルダ { $name } の移動に失敗しました、理由 { $reason }
 move_file_failed = ファイル { $name } を移動できませんでした、理由 { $reason }
 move_files_title_dialog = 重複したファイルの移動先フォルダを選択
-move_files_choose_more_than_1_path = 重複したファイルをコピーするには、1つのパスのみを選択する必要があります、{ $path_number } つ選択されました。
+move_files_choose_more_than_1_path = 重複したファイルをコピーするには、1つのパスのみを選択する必要があります、{ $path_number } つ選択されました。.
 move_stats = { $num_files }/{ $all_files } アイテムを適切に移動しました
-save_results_to_file = txtファイルとjsonファイルの両方を"{ $name }"フォルダに保存しました。
-search_not_choosing_any_music = エラー: 音楽検索タイプのチェックボックスを少なくとも1つ選択する必要があります。
-search_not_choosing_any_broken_files = エラー: チェックされた壊れたファイルの種類のチェックボックスを少なくとも1つ選択する必要があります。
+save_results_to_file = txtファイルとjsonファイルの両方を"{ $name }"フォルダに保存しました。.
+search_not_choosing_any_music = エラー: 音楽検索タイプのチェックボックスを少なくとも1つ選択する必要があります。.
+search_not_choosing_any_broken_files = エラー: チェックされた壊れたファイルの種類のチェックボックスを少なくとも1つ選択する必要があります。.
 include_folders_dialog_title = 含めるフォルダ
 exclude_folders_dialog_title = 除外するフォルダ
 include_manually_directories_dialog_title = ディレクトリを手動で追加
@@ -514,11 +518,11 @@ cache_clear_duplicates_title = 重複したキャッシュをクリアする
 cache_clear_similar_images_title = 類似した画像のキャッシュをクリア中
 cache_clear_similar_videos_title = 類似した動画のキャッシュをクリア中
 cache_clear_message_label_1 = 古いエントリのキャッシュを消去しますか？
-cache_clear_message_label_2 = この操作は無効なファイルを指すすべてのキャッシュエントリを削除します。
-cache_clear_message_label_3 = これはキャッシュへの読み込みと保存を少し高速化することがあります。
-cache_clear_message_label_4 = 警告: 操作により、現在接続されていない外部ドライブからキャッシュされたすべてのデータが削除されます。そのため、それらのハッシュは再度生成する必要があります。
+cache_clear_message_label_2 = この操作は無効なファイルを指すすべてのキャッシュエントリを削除します。.
+cache_clear_message_label_3 = これはキャッシュへの読み込みと保存を少し高速化することがあります。.
+cache_clear_message_label_4 = 警告: 操作により、現在接続されていない外部ドライブからキャッシュされたすべてのデータが削除されます。そのため、それらのハッシュは再度生成する必要があります。.
 # Show preview
-preview_image_resize_failure = 画像 { $name } のリサイズに失敗しました。
+preview_image_resize_failure = 画像 { $name } のリサイズに失敗しました。.
 preview_image_opening_failure = イメージ { $name } を開けませんでした、理由 { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
 compare_groups_number = グループ { $current_group }/{ $all_groups } ({ $images_in_group } 画像)

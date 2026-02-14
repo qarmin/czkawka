@@ -7,19 +7,19 @@ window_compare_images = Σύγκριση Εικόνων
 general_ok_button = Εντάξει
 general_close_button = Κλείσιμο
 # Krokiet info dialog
-krokiet_info_title = Εισαγωγή στην Krokiet - Νέα Έκδοση του Czkawka
-krokiet_info_message =
-    Κροκιέτ είναι η νέα, βελτιωμένη, ταχύτερη και λιγότερο προβληματική έκδοση του Czkawka GTK!
-    
-    Επειδή είναι αυτόνομη, είναι πολύ πιο εύκολη στην εκτέλεση και πιο ανθεκτική στις αλλαγές του συστήματος και στις ενημερώσεις εκδόσεων πακέτων.
-    
-    Περιλαμβάνει πολλές λειτουργίες που δεν είναι διαθέσιμες στο Czkawka, όπως μικρογραφίες στην λειτουργία σύγκρισης βίντεο, πρόοδος μετακίνησης/αντιγραφής/διαγραφής αρχείων και προηγμένες επιλογές ταξινόμησης.
-    
-    Δοκιμάστε το και δείτε τη διαφορά!
-    
-    Το Czkawka θα συνεχίσει να λαμβάνει διορθώσεις σφαλμάτων και μικρές ενημερώσεις, αλλά όλες οι νέες λειτουργίες θα υλοποιηθούν μόνο στο Κροκιέτ.
-    
-    Σημείωση. Αυτό το μήνυμα θα πρέπει να είναι ορατό μόνο μία φορά, αλλά αν εμφανίζεται ξανά, ορίστε την περιβαλλοντική μεταβλητή CZKAWKA_DONT_ANNOY_ME σε οποιαδήποτε μη κενή τιμή.
+krokiet_info_title = Εισαγωγή στο Krokiet - Νέα έκδοση του Czkawka
+krokiet_info_message = 
+        Το Krokiet είναι η νέα, βελτιωμένη, ταχύτερη και πιο αξιόπιστη έκδοση της Czkawka GTK GUI!
+
+        Είναι ευκολότερο στο πρόγραμμα και πιο ανθεκτικό στις αλλαγές του συστήματος, καθώς εξαρτάται μόνο από βασικές βιβλιοθήκες που είναι διαθέσιμες στα περισσότερα συστήματα από προεπιλογή.
+
+        Το Krokiet επίσης φέρνει λειτουργίες που λείπουν από την Czkawka, συμπεριλαμβανομένων των μικρογραφιών στην λειτουργία σύγκρισης βίντεο, ενός καθαριστή EXIF, επιλογών προόδου για μετακίνησης/αντιγραφής/διαγραφής αρχείων ή επεκτάσιμων επιλογών ταξινόμησης.
+
+        Δοκιμάστε το και δείτε τη διαφορά!
+
+        Η Czkawka θα συνεχίσει να λαμβάνει διορθώσεις σφαλμάτων και μικρές ενημερώσεις από εμένα, αλλά όλες οι νέες λειτουργίες θα αναπτυχθούν αποκλειστικά για το Krokiet και οποιοσδήποτε είναι ελεύθερος να συνεισφέρει νέες λειτουργίες, να προσθέσει ελλείπουσες λειτουργίες ή να επεκτείνει περαιτέρω την Czkawka.
+
+        PS: Αυτό το μήνυμα θα πρέπει να εμφανίζεται μόνο μία φορά. Εάν εμφανίζεται ξανά, ορίστε την περιβαλλοντική μεταβλητή CZKAWKA_DONT_ANNOY_ME σε οποιαδήποτε μη κενή τιμή.
 # Main window
 music_title_checkbox = Τίτλος
 music_artist_checkbox = Καλλιτέχνης
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Ήχος
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Αρχειοθέτηση
 main_check_box_broken_files_image = Εικόνα
+main_check_box_broken_files_video = Βίντεο
+main_check_box_broken_files_video_tooltip = Χρησιμοποιεί το ffmpeg/ffprobe για την επικύρωση αρχείων βίντεο. Πολύ αργό και μπορεί να ανιχνεύσει αυστηρές ατέλειες ακόμη και αν το αρχείο παίζει κανονικά.
 check_button_general_same_size = Αγνόηση ίδιου μεγέθους
 check_button_general_same_size_tooltip = Αγνοήστε τα αρχεία με το ίδιο μέγεθος στα αποτελέσματα - συνήθως αυτά είναι 1: 1 διπλότυπα
 main_label_size_bytes_tooltip = Μέγεθος αρχείων που θα χρησιμοποιηθούν κατά τη σάρωση
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Προσθήκη καταλόγου για να αποκλειστεί στην αναζήτηση.
 upper_remove_excluded_button_tooltip = Διαγραφή καταλόγου από αποκλεισμένους.
 upper_notebook_items_configuration = Ρύθμιση Στοιχείων
-upper_notebook_excluded_directories = Εξαιρούμενοι Κατάλογοι
-upper_notebook_included_directories = Συμπεριλαμβανόμενοι Κατάλογοι
+upper_notebook_excluded_directories = Αποκλεισμένοι Δρόμοι
+upper_notebook_included_directories = Συμπεριλημμένες Διαδρομές
 upper_allowed_extensions_tooltip =
     Οι επιτρεπόμενες επεκτάσεις πρέπει να διαχωρίζονται με κόμματα (εξ ορισμού είναι διαθέσιμες).
     
@@ -192,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Λίστα απενεργοποιημένων αρχείων που θα αγνοηθούν κατά τη σάρωση.
     
     Όταν χρησιμοποιείτε και τις δύο επιτρεπόμενες και απενεργοποιημένες επεκτάσεις, αυτή έχει υψηλότερη προτεραιότητα, οπότε το αρχείο δεν θα ελεγχθεί.
-upper_excluded_items_tooltip =
-    Τα εξαιρούμενα αντικείμενα πρέπει να περιέχουν * μπαλαντέρ και πρέπει να διαχωρίζονται με κόμματα.
-    Αυτό είναι πιο αργό από τους Αποκλεισμένους Κατάλογους, οπότε χρησιμοποιήστε το προσεκτικά.
+upper_excluded_items_tooltip = 
+        Πρέπει να εξαιρούνται τα στοιχεία που περιέχουν * wildcard και να διαχωρίζονται με κόμματα.
+        Αυτό είναι πιο αργό από τα Excluded Paths, οπότε χρησιμοποιήστε το προσεκτικά.
 upper_excluded_items = Εξαιρούμενα Αντικείμενα:
 upper_allowed_extensions = Επιτρεπόμενες Επεκτάσεις:
 upper_excluded_extensions = Απενεργοποιημένες Επεκτάσεις:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Απενεργοποιημένες Επεκτάσε�
 popover_select_all = Επιλογή όλων
 popover_unselect_all = Αποεπιλογή όλων
 popover_reverse = Αντίστροφη Επιλογή
+popover_select_all_except_shortest_path = Επιλέξτε όλα εκτός από τη συντομότερη διαδρομή
+popover_select_all_except_longest_path = Επιλέξτε όλα εκτός από τη μεγαλύτερη διαδρομή
 popover_select_all_except_oldest = Επιλογή όλων εκτός από το παλαιότερο
 popover_select_all_except_newest = Επιλογή όλων εκτός από το νεότερο
 popover_select_one_oldest = Επιλέξτε ένα παλαιότερο
@@ -327,7 +331,7 @@ settings_load_at_start_button_tooltip =
     
     Αν δεν είναι ενεργοποιημένη, θα χρησιμοποιηθούν οι προεπιλεγμένες ρυθμίσεις.
 settings_confirm_deletion_button_tooltip = Εμφάνιση διαλόγου επιβεβαίωσης όταν κάνετε κλικ στο κουμπί διαγραφής.
-settings_confirm_link_button_tooltip = Εμφάνιση διαλόγου επιβεβαίωσης όταν κάνετε κλικ στο κουμπί hard/symlink
+settings_confirm_link_button_tooltip = Εμφάνιση διαλόγου επιβεβαίωσης όταν κάνετε κλικ στο κουμπί hard/symlink.
 settings_confirm_group_deletion_button_tooltip = Εμφάνιση διαλόγου προειδοποίησης όταν προσπαθείτε να διαγράψετε όλες τις εγγραφές από την ομάδα.
 settings_show_text_view_button_tooltip = Εμφάνιση πίνακα κειμένου στο κάτω μέρος της διεπαφής χρήστη.
 settings_use_cache_button_tooltip = Χρήση προσωρινής μνήμης αρχείων.
@@ -345,10 +349,10 @@ settings_save_also_as_json_button = Επίσης αποθήκευση προσω
 settings_use_trash_button = Μετακίνηση διαγραμμένων αρχείων στον κάδο απορριμμάτων
 settings_language_label = Γλώσσα
 settings_multiple_delete_outdated_cache_checkbutton = Αυτόματη διαγραφή ξεπερασμένων καταχωρήσεων cache
-settings_multiple_delete_outdated_cache_checkbutton_tooltip =
+settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
     Στρεμώστε τα αποσκευάκημα πλήρωμα που καθυστερούν και δείχνουν ότι συνδέονται με αρχεία που δεν υπάρχουν.
     
-    Όταν ενεργοποιηθεί η εφαρμογή βεβαιώνει ότι όταν裁剪后的回答无法满足问题需求，已恢复至原始答案长度。
+    Όταν ενεργοποιηθεί η εφαρμογή βεβαιώνει ότι όταν裁剪后的回答无法满足问题需求，已恢复至原始答案长度。.
 settings_notebook_general = Γενικά
 settings_notebook_duplicates = Διπλότυπα
 settings_notebook_images = Παρόμοιες Εικόνες

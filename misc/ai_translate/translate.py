@@ -9,7 +9,8 @@ from ftl_utils import parse_ftl_file, find_ftl_file_in_folder, LANGUAGE_NAMES
 
 # DEFAULT_MODEL = "qwen2.5:7b"
 # DEFAULT_MODEL = "qwen2.5:32b"
-DEFAULT_MODEL = "zongwei/gemma3-translator:4b"
+# DEFAULT_MODEL = "zongwei/gemma3-translator:4b"
+DEFAULT_MODEL = "translategemma:12b"
 
 IGNORED_KEYS = [
     "bottom_symlink_button",

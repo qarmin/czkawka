@@ -353,15 +353,6 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_video_codec, &collected_items.video_optimizer_video_codec);
     settings.set_video_optimizer_sub_video_codec_index(idx as i32);
     settings.set_video_optimizer_sub_video_codec_value(display_names[idx].clone());
-
-    let codec_display_names = collected_items
-        .video_optimizer_video_codec
-        .iter()
-        .map(|e| e.display_name.clone().into())
-        .collect::<Vec<_>>();
-    let codec_config_value = collected_items.video_optimizer_video_codec[idx].config_name.clone();
-    settings.set_video_optimizer_sub_video_codec_config(ModelRc::new(VecModel::from(codec_display_names)));
-    settings.set_video_optimizer_sub_video_codec_config_value(codec_config_value.into());
 }
 
 pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, base_settings: &BasicSettings, cli_args: Option<CliResult>) {

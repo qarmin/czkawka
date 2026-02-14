@@ -8,18 +8,18 @@ general_ok_button = Ok
 general_close_button = Schließen
 # Krokiet info dialog
 krokiet_info_title = Krokiet – Neue Version von Czkawka
-krokiet_info_message =
-    Krokiet ist die neue, verbesserte, schnellere und weniger fehlerhafte Version von Czkawka GTK!
-    
-    Da es sich um eine eigenständige Version handelt, ist es viel einfacher zu starten und widerstandsfähiger gegen Systemänderungen und Paketversionsupdates.
-    
-    Es enthält viele Funktionen, die in Czkawka nicht verfügbar sind, wie z. B. Vorschaubilder im Video-Vergleichsmodus, Fortschritt bei Datei-Move/Kopieren/Löschen und erweiterte Sortieroptionen.
-    
-    Probiere es aus und sieh den Unterschied!
-    
-    Czkawka wird weiterhin Fehlerbehebungen und kleinere Updates erhalten, aber alle neuen Funktionen werden nur in Krokiet implementiert.
-    
-    PS. Diese Nachricht sollte nur einmal sichtbar sein, aber wenn sie erneut erscheint, setze die Umgebungsvariable CZKAWKA_DONT_ANNOY_ME auf einen nicht leeren Wert.
+krokiet_info_message = 
+        Krokiet ist die neue, verbesserte, schnellere und zuverlässigere Version der Czkawka GTK GUI!
+
+        Es ist einfacher zu betreiben und widerstandsfähiger gegenüber Systemänderungen, da es nur auf Core-Bibliotheken angewiesen ist, die standardmäßig auf den meisten Systemen verfügbar sind.
+
+        Krokiet bietet außerdem Funktionen, die Czkawka nicht hat, darunter Miniaturansichten im Video-Vergleichsmodus, ein EXIF-Bereiniger, Fortschritt bei Datei-Verschieben/Kopieren/Löschen oder erweiterte Sortieroptionen.
+
+        Probiere es aus und sieh den Unterschied!
+
+        Czkawka wird weiterhin Fehlerbehebungen und kleinere Updates von mir erhalten, aber alle neuen Funktionen werden ausschließlich für Krokiet entwickelt und jeder ist frei, neue Funktionen hinzuzufügen, fehlende Modi zu erweitern oder Czkawka weiter auszubauen.
+
+        PS: Diese Nachricht sollte nur einmal erscheinen. Wenn sie erneut angezeigt wird, setze die Umgebungsvariable CZKAWKA_DONT_ANNOY_ME auf einen nicht leeren Wert.
 # Main window
 music_title_checkbox = Titel
 music_artist_checkbox = Künstler
@@ -148,6 +148,8 @@ main_check_box_broken_files_audio = Ton
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archiv
 main_check_box_broken_files_image = Bild
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Verwendet ffmpeg/ffprobe zur Validierung von Videodateien. Sehr langsam und kann pedantische Fehler erkennen, auch wenn die Datei fehlerfrei abgespielt wird.
 check_button_general_same_size = Gleiche Größe ignorieren
 check_button_general_same_size_tooltip = Ignoriere Dateien mit identischer Größe in den Ergebnissen - in der Regel sind es 1:1 Duplikate
 main_label_size_bytes_tooltip = Größe der Dateien, die beim Scannen verwendet werden
@@ -179,8 +181,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Verzeichnis hinzufügen, das bei der Suche ausgeschlossen werden soll.
 upper_remove_excluded_button_tooltip = Ausgeschlossene Verzeichnisse löschen.
 upper_notebook_items_configuration = Suchbedingungen
-upper_notebook_excluded_directories = Ausgeschlossene Verzeichnisse
-upper_notebook_included_directories = Einbezogene Verzeichnisse
+upper_notebook_excluded_directories = Ausgeschlossene Pfade
+upper_notebook_included_directories = Einbezogene Pfade
 upper_allowed_extensions_tooltip =
     Erlaubte Erweiterungen müssen durch Kommas getrennt werden (standardmäßig sind alle verfügbar).
     
@@ -191,9 +193,9 @@ upper_excluded_extensions_tooltip =
     Liste der deaktivierten Dateien, die beim Scannen ignoriert werden.
     
     Wenn sowohl erlaubte als auch deaktivierte Erweiterungen verwendet werden, hat diese eine höhere Priorität, so dass die Datei nicht ausgewählt wird.
-upper_excluded_items_tooltip =
-    Ausgeschlossene Elemente müssen * als Platzhalter enthalten und durch Kommata getrennt werden.
-    Dies ist langsamer als Verzeichnisse auszuschließen, daher mit Vorsicht verwenden.
+upper_excluded_items_tooltip = 
+        Ausgeschlossene Elemente müssen * Wildcard und durch Kommas getrennt enthalten.
+        Dies ist langsamer als Exkludierte Pfade, also verwenden Sie es vorsichtig.
 upper_excluded_items = Ausgeschlossene Elemente:
 upper_allowed_extensions = Erlaubte Erweiterungen:
 upper_excluded_extensions = Deaktivierte Erweiterungen:
@@ -201,6 +203,8 @@ upper_excluded_extensions = Deaktivierte Erweiterungen:
 popover_select_all = Alles auswählen
 popover_unselect_all = Gesamte Auswahl aufheben
 popover_reverse = Auswahl umkehren
+popover_select_all_except_shortest_path = Wähle alle außer den kürzesten Pfad
+popover_select_all_except_longest_path = Wähle alle außer den längsten Pfad
 popover_select_all_except_oldest = Alle außer Ältester auswählen
 popover_select_all_except_newest = Alle außer Neuester auswählen
 popover_select_one_oldest = Älteste auswählen

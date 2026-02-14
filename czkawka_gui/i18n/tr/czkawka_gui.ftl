@@ -1,25 +1,25 @@
 # Window titles
 window_settings_title = Ayarlar
 window_main_title = Czkawka (Hıçkırık)
-window_progress_title = Taranıyor...
+window_progress_title = Taranıyor
 window_compare_images = Resimleri Karşılaştır
 # General
 general_ok_button = Tamam
 general_close_button = Kapat
 # Krokiet info dialog
-krokiet_info_title = Krokiet - Yeni Versiyon Czkawka
-krokiet_info_message =
-    Krokiet, yeni, geliştirilmiş, daha hızlı ve daha az hatalı Czkawka GTK GUI sürümüdür!
-    
-    Bağımsız yapısı sayesinde, çalıştırması çok daha kolaydır ve sistem değişikliklerine ve paket sürümü güncellemelerine karşı daha dirençlidir.
-    
-    Video karşılaştırma modunda ön izlemeler, dosya taşıma/kopyalama/silme ilerlemesi ve gelişmiş sıralama seçenekleri gibi Czkawka'da bulunmayan birçok özelliği içerir.
-    
-    Deneyin ve farkı görün!
-    
-    Czkawka hala hata düzeltmeleri ve küçük güncellemeler alacak, ancak tüm yeni özellikler yalnızca Krokiet'te uygulanacaktır.
-    
-    PS. Bu mesaj yalnızca bir kez görünmeli, ancak tekrar görünürse CZKAWKA_DONT_ANNOY_ME ortam değişkenini herhangi bir boş olmayan değere ayarlayın.
+krokiet_info_title = Krokiet - Yeni versiyon Czkawka
+krokiet_info_message = 
+        Krokiet, Czkawka GTK GUI’nin yeni, geliştirilmiş, daha hızlı ve daha güvenilir versiyonudur!
+
+        Çalıştırması daha kolay ve sistem değişikliklerine karşı daha dirençlidir, çünkü çoğu sistemde varsayılan olarak bulunan temel kütüphanelere dayanır.
+
+        Krokiet ayrıca, Czkawka’da bulunmayan özellikler getirir, örneğin video karşılaştırma modunda alıştırmalar, bir EXIF temizleyici, dosya taşıma/kopyalama/silme ilerleme veya gelişmiş sıralama seçenekleri.
+
+        Deneyin ve farkı görün!
+
+        Czkawka’nın benim tarafımdan düzeltmeler ve küçük güncellemeler almaya devam etmesi muhtemeldir, ancak tüm yeni özellikler yalnızca Krokiet için geliştirilecek ve herkes yeni özellikler eklemek, eksik modları tamamlamak veya Czkawka’yı daha da genişletmekten serbestçe yararlanabilir.
+
+        PS: Bu mesaj yalnızca bir kez görünmelidir. Tekrar gösteriliyorsa, CZKAWKA_DONT_ANNOY_ME ortam değişkenini herhangi bir boş olmayan değere ayarlayın.
 # Main window
 music_title_checkbox = Başlık
 music_artist_checkbox = Sanatçı
@@ -113,7 +113,7 @@ image_hash_alg_tooltip =
     Her birinin hem güçlü hem de zayıf noktaları vardır ve farklı görüntüler için 
     bazen daha iyi, bazen daha kötü sonuçlar verir. Bu nedenle, size göre en iyisini belirlemek için 
     elle test gereklidir.
-big_files_mode_combobox_tooltip = Boyut bakımından En Büyük/En Küçük dosyaları aramaya izin verir.
+big_files_mode_combobox_tooltip = Boyut bakımından En Büyük/En Küçük dosyaları aramaya izin verir
 big_files_mode_label = Denetim şekli
 big_files_mode_smallest_combo_box = En Küçük
 big_files_mode_biggest_combo_box = En Büyük
@@ -162,6 +162,8 @@ main_check_box_broken_files_audio = Ses
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Arşiv
 main_check_box_broken_files_image = Resim
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = ffmpeg/ffprobe kullanarak video dosyalarını doğrular. Çok yavaş ve dosyanın düzgün çalışmasına rağmen katı hataları bile tespit edebilir.
 check_button_general_same_size = Aynı boyutu yok say
 check_button_general_same_size_tooltip = Sonuçlarda aynı boyutta olan dosyaları yoksay - genellikle bunlar bire bir kopyalardır
 main_label_size_bytes_tooltip = Taramada kullanılacak dosyaların boyutu
@@ -170,33 +172,33 @@ upper_tree_view_included_folder_column_title = Aranacak Klasörler
 upper_tree_view_included_reference_column_title = Başvuru Klasörleri
 upper_recursive_button = Özyinelemeli
 upper_recursive_button_tooltip = Seçilirse, doğrudan "Aranacak Klasörler" listesindeki dizin altında yer almayan (alt dizinlerdeki dosyaları da) arar.
-upper_manual_add_included_button = Dizin Gir...
+upper_manual_add_included_button = Dizin Gir
 upper_add_included_button = Ekle
 upper_remove_included_button = Kaldır
-upper_manual_add_excluded_button = Dizin Gir...
+upper_manual_add_excluded_button = Dizin Gir
 upper_add_excluded_button = Ekle
 upper_remove_excluded_button = Kaldır
-upper_manual_add_included_button_tooltip =
+upper_manual_add_included_button_tooltip = 
     Arama yapılacak dizin yolunu doğrudan yazın.
     
     Aynı anda birden fazla girdi eklemek için bunları ";" ile ayırın.
     
     /home/fatih;/home/kavalci girdisi biri /home/fatih öteki /home/kavalci 
-    olmak üzere iki dizin ekleyecektir.
+    olmak üzere iki dizin ekleyecektir
 upper_add_included_button_tooltip = "Aranacak Klasörler" listesine yeni bir dizin ekler.
 upper_remove_included_button_tooltip = Seçili dizini "Aranacak Klasörler" listesinden kaldırır.
-upper_manual_add_excluded_button_tooltip =
+upper_manual_add_excluded_button_tooltip = 
     Hariç tutulacak dizin yolunu doğrudan yazın.
     
     Aynı anda birden fazla girdi eklemek için bunları ";" ile ayırın.
     
     /home/fatih;/home/kavalci girdisi biri /home/fatih öteki /home/kavalci 
-    olmak üzere iki dizin ekleyecektir.
+    olmak üzere iki dizin ekleyecektir
 upper_add_excluded_button_tooltip = "Hariç Tutulacak Klasörler" listesine yeni bir dizin ekler.
 upper_remove_excluded_button_tooltip = Seçili dizini "Hariç Tutulacak Klasörler" listesinden kaldırır.
 upper_notebook_items_configuration = Öğe Yapılandırması
-upper_notebook_excluded_directories = Hariç Tutulan Dizinler
-upper_notebook_included_directories = Aranacak Dizinler
+upper_notebook_excluded_directories = Hariç Tutulan Yollar
+upper_notebook_included_directories = Dahil Edilen Yollar
 upper_allowed_extensions_tooltip =
     İzin verilen uzantılar virgülle ayrılmalıdır (varsayılan olarak her uzantı kullanılır).
     
@@ -208,9 +210,9 @@ upper_excluded_extensions_tooltip =
     Taramada göz ardı edilecek devre dışı bırakılmış dosyaların listesi.
     
     İzin verilen ve devre dışı bırakılan uzantılar kullanıldığında, bu daha yüksek önceliğe sahiptir, bu nedenle dosya kontrol edilmeyecektir.
-upper_excluded_items_tooltip =
-    Hariç tutulan öğeler * joker karakterini içermeli ve virgülle ayrılmalıdır.
-    Bu işlev, Hariç Tutulan Dizinlerden daha yavaştır, bu yüzden dikkatli kullanın.
+upper_excluded_items_tooltip = 
+        Hariçlanan öğeler * joker karakterini içermeli ve virgülle ayrılmalıdır.
+        Bu, Hariç Yollar'dan daha yavaştır, bu nedenle dikkatli kullanılmalıdır.
 upper_excluded_items = Hariç Tutulan Öğeler:
 upper_allowed_extensions = İzin Verilen Uzantılar:
 upper_excluded_extensions = Devre Dışı Uzantılar:
@@ -218,6 +220,8 @@ upper_excluded_extensions = Devre Dışı Uzantılar:
 popover_select_all = Tümünü seç
 popover_unselect_all = Tümünün seçimini kaldır
 popover_reverse = Seçimi Ters Çevir
+popover_select_all_except_shortest_path = Tümünü seç hariç en kısa yolu seç
+popover_select_all_except_longest_path = Tümünü seç hariç en uzun yolu seç
 popover_select_all_except_oldest = En eski olan hariç hepsini seç
 popover_select_all_except_newest = En yeni olan hariç hepsini seç
 popover_select_one_oldest = En eski olanı seç
@@ -282,10 +286,10 @@ bottom_hardlink_button = Sabit bağlantı
 bottom_move_button = Taşı
 bottom_sort_button = Sırala
 bottom_compare_button = Karşılaştır
-bottom_search_button_tooltip = Aramayı başlatır.
+bottom_search_button_tooltip = Aramayı başlatır
 bottom_select_button_tooltip = Kayıtları seçer. Yalnızca seçilen dosyalara/klasörlere işlem uygulanabilir.
 bottom_delete_button_tooltip = Seçili dosyaları/klasörleri siler.
-bottom_save_button_tooltip = Aramayla ilgili verileri dosyaya kaydeder.
+bottom_save_button_tooltip = Aramayla ilgili verileri dosyaya kaydeder
 bottom_symlink_button_tooltip =
     Sembolik bağlantılar oluşturur.
     Yalnızca bir gruptaki en az iki sonuç seçildiğinde çalışır.
@@ -309,7 +313,7 @@ bottom_show_errors_tooltip = Alt çıktı panelini göster/gizle.
 bottom_show_upper_notebook_tooltip = Üst denetim panelini göster/gizle.
 # Progress Window
 progress_stop_button = Durdur
-progress_stop_additional_message = İşlem durduruldu.
+progress_stop_additional_message = İşlem durduruldu
 # About Window
 about_repository_button_tooltip = Kaynak kodu depo sayfasına bağlanır.
 about_donation_button_tooltip = Bağış sayfasına bağlanır.
@@ -339,10 +343,10 @@ settings_use_rust_preview_tooltip =
     Linux dışı sistemlerde bu seçeneğin kullanılması önerilir çünkü gtk-pixbuf her zaman mevcut değildir, dolayısıyla bu seçeneğin devre dışı bırakılması bazı görüntülerin ön izlemelerini yüklemeyecektir.
 settings_label_restart = Ayarları uygulamak için uygulamayı yeniden başlatmanız gerekir!
 settings_ignore_other_filesystems = Öteki dosya sistemlerini yoksay (sadece Linux)
-settings_ignore_other_filesystems_tooltip =
+settings_ignore_other_filesystems_tooltip = 
     Aranan dizinlerle aynı dosya sisteminde olmayan dosyaları yoksayar.
     
-    Linux'ta find komutundaki -xdev seçeneği ile aynı şekilde çalışır.
+    Linux'ta find komutundaki -xdev seçeneği ile aynı şekilde çalışır
 settings_save_at_exit_button_tooltip = Uygulamayı kapatırken yapılandırmayı dosyaya kaydeder.
 settings_load_at_start_button_tooltip =
     Uygulamayı açarken yapılandırmayı dosyadan yükler.
@@ -451,16 +455,16 @@ settings_folder_settings_open_tooltip =
 settings_folder_cache_open = Önbellek klasörünü aç
 settings_folder_settings_open = Ayarlar klasörünü aç
 # Compute results
-compute_stopped_by_user = Arama, kullanıcı tarafından durduruldu.
-compute_found_duplicates_hash_size = { $number_files } tane ekleme { $number_groups } grupta bulunmuştur ve bu,{ $size }'ye { $time } sürede kadardır.
-compute_found_duplicates_name = { $number_files } kopya, { $number_groups } grubunda { $time } süresi içinde bulunmuştur.
+compute_stopped_by_user = Arama, kullanıcı tarafından durduruldu
+compute_found_duplicates_hash_size = { $number_files } tane ekleme { $number_groups } grupta bulunmuştur ve bu,{ $size }'ye { $time } sürede kadardır
+compute_found_duplicates_name = { $number_files } kopya, { $number_groups } grubunda { $time } süresi içinde bulunmuştur
 compute_found_empty_folders = { $number_files } boş klasörünü { $time } buldum
-compute_found_empty_files = { $number_files } adet dosya { $time } içinde boş bulundu.
+compute_found_empty_files = { $number_files } adet dosya { $time } içinde boş bulundu
 compute_found_big_files = { $number_files } büyük dosya { $time } içinde bulundu
 compute_found_temporary_files = { $number_files } geçici dosya { $time } içinde bulundu
 compute_found_images = { $number_files } benzer görüntüyü { $number_groups } grupta { $time } süre içinde buldum
 compute_found_videos = { $number_files } benzer videoyu { $number_groups } grupta { $time } içinde buldum
-compute_found_music = { $number_files } benzer müzik dosyası { $number_groups } grup içinde { $time } bulunmuştur.
+compute_found_music = { $number_files } benzer müzik dosyası { $number_groups } grup içinde { $time } bulunmuştur
 compute_found_invalid_symlinks = { $number_files } geçerli olmayan simge bağlantısı { $time } içinde bulunuldu
 compute_found_broken_files = { $number_files } bozuk dosya bulundu { $time } içinde
 compute_found_bad_extensions = Geçersiz uzantılarla { $number_files } dosya { $time } içinde bulundu
@@ -475,7 +479,7 @@ progress_scanning_broken_files = Kontrol edilen { $file_checked }/{ $all_files }
 progress_scanning_video = Hash işlemi uygulanmış { $file_checked }/{ $all_files } video
 progress_creating_video_thumbnails = Created thumbnails of { $file_checked }/{ $all_files } video
 progress_scanning_image = Hash işlemi uygulanmış { $file_checked }/{ $all_files } görsel ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = { $file_checked }/{ $all_files } görsel hash kaydı karşılaştırıldı.
+progress_comparing_image_hashes = { $file_checked }/{ $all_files } görsel hash kaydı karşılaştırıldı
 progress_scanning_music_tags_end = Compared tags of { $file_checked }/{ $all_files } music file
 progress_scanning_music_tags = Read tags of { $file_checked }/{ $all_files } music file
 progress_scanning_music_content_end = Compared fingerprint of { $file_checked }/{ $all_files } music file
@@ -507,7 +511,7 @@ saving_loading_failed_to_create_config_file = "{ $path }" dizininde yapılandır
 saving_loading_failed_to_read_config_file = "{ $path }" dizininden yapılandırma dosyası yüklenemiyor, böyle dosya yok ya da bir dosya değil.
 saving_loading_failed_to_read_data_from_file = "{ $path }" dosyasından veri okunamıyor, nedeni: "{ $reason }".
 # Other
-selected_all_reference_folders = Tüm dizinler, "Başvuru Klasörü" olarak ayarlandığında arama başlatılamaz.
+selected_all_reference_folders = Tüm dizinler, "Başvuru Klasörü" olarak ayarlandığında arama başlatılamaz
 searching_for_data = İşleminiz yürütülüyor, bu biraz zaman alabilir, lütfen bekleyin...
 text_view_messages = MESAJLAR
 text_view_warnings = UYARILAR
@@ -517,9 +521,9 @@ krokiet_new_app = Czkawka bakım modunda, bu da sadece kritik hatalarının düz
 # Various dialog
 dialogs_ask_next_time = Bir dahaki sefere sor
 symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
-delete_title_dialog = Silmeyi onaylayın.
+delete_title_dialog = Silmeyi onaylayın
 delete_question_label = Dosyaları silmek istediğinizden emin misiniz?
-delete_all_files_in_group_title = Gruptaki tüm dosyaları silmeyi onaylayın.
+delete_all_files_in_group_title = Gruptaki tüm dosyaları silmeyi onaylayın
 delete_all_files_in_group_label1 = Kimi gruplarda tüm kayıtlar seçilir.
 delete_all_files_in_group_label2 = Bunları silmek istediğinizden emin misiniz?
 delete_items_label = { $items } dosya silinecek.
@@ -535,14 +539,14 @@ move_folder_failed = { $name } klasörü taşınamadı, nedeni: { $reason }
 move_file_failed = { $name } dosyası taşınamadı, nedeni: { $reason }
 move_files_title_dialog = Eş dosyaları taşımak istediğiniz klasörü seçin
 move_files_choose_more_than_1_path = Eş dosyaları taşıyabilmek için yalnızca bir yol seçilebilir, { $path_number } seçildi.
-move_stats = { $num_files }/{ $all_files } öğe düzgün şekilde taşındı.
+move_stats = { $num_files }/{ $all_files } öğe düzgün şekilde taşındı
 save_results_to_file = Saved results both to txt and json files into "{ $name }" folder.
 search_not_choosing_any_music = HATA: Müzik araması için en az bir onay kutusu seçmelisiniz.
 search_not_choosing_any_broken_files = HATA: Bozuk dosya araması için en az bir onay kutusu seçmelisiniz.
 include_folders_dialog_title = Aranacak Klasörler
 exclude_folders_dialog_title = Hariç Tutulan Klasörler
 include_manually_directories_dialog_title = Dizini elle ekle
-cache_properly_cleared = Önbellek, uygun şekilde temizlendi.
+cache_properly_cleared = Önbellek, uygun şekilde temizlendi
 cache_clear_duplicates_title = Eş dosyalar önbelleğini temizle
 cache_clear_similar_images_title = Benzer resimler önbelleğini temizle
 cache_clear_similar_videos_title = Benzer videolar önbelleğini temizle

@@ -7,19 +7,19 @@ window_compare_images = مقایسه تصاویر
 general_ok_button = اوکی
 general_close_button = بسته شود
 # Krokiet info dialog
-krokiet_info_title = معرفی کرکیه - نسخه جدید Czkawka
-krokiet_info_message =
-    کروکیت نسخه جدید، بهبود یافته، سریعتر و بدون باگ Czkawka GTK GUI است!
-    
-    به دلیل خودکفایی، اجرای آن آسان‌تر است و در برابر تغییرات سیستم و به‌روزرسانی‌های نسخه بسته‌ها مقاوم‌تر است.
-    
-    شامل بسیاری از ویژگی‌هایی است که در Czkawka در دسترس نیستند، مانند تصاویر کوچک در حالت مقایسه ویدیو، پیشرفت انتقال/کپی/حذف فایل و گزینه‌های مرتب‌سازی گسترده.
-    
-    آن را امتحان کنید و تفاوت را ببینید!
-    
-    Czkawka همچنان شامل رفع اشکال و به‌روزرسانی‌های جزئی خواهد بود، اما تمام ویژگی‌های جدید فقط درکروکیت پیاده‌سازی خواهند شد.
-    
-    PS. این پیام باید فقط یک بار قابل مشاهده باشد، اما اگر دوباره ظاهر شد، متغیر محیطی CZKAWKA_DONT_ANNOY_ME را به هر مقدار غیر خالی تنظیم کنید.
+krokiet_info_title = معرفی کرکیه - نسخه جدید CzKawkA
+krokiet_info_message = 
+        کروکیِت نسخه جدید، بهبود یافته، سریع‌تر و قابل اعتمادتر رابط کاربری GTK Czkawka است!
+
+        اجرای آن آسان‌تر و مقاوم‌تر در برابر تغییرات سیستم است، زیرا فقط به کتابخانه‌های اصلی موجود در اکثر سیستم‌ها به صورت پیش‌فرض وابسته است.
+
+        کروکیِت همچنین ویژگی‌هایی را به همراه دارد که Czkawka فاقد آن‌هاست، از جمله تصاویر کوچک در حالت مقایسه ویدیو، یک پاک‌کن EXIF، گزینه‌های پیشرفت برای انتقال/کپی/حذف فایل یا گزینه‌های مرتب‌سازی گسترده.
+
+        آن را امتحان کنید و تفاوت را ببینید!
+
+        Czkawka همچنان با رفع باگ‌ها و به‌روزرسانی‌های جزئی از طرف من دریافت خواهد شد، اما تمام ویژگی‌های جدید به طور انحصاری برای کروکیِت توسعه خواهند یافت و هر کسی می‌تواند ویژگی‌های جدید، افزودن حالت‌های از دست رفته یا گسترش بیشتر Czkawka را ارائه دهد.
+
+        PS: این پیام باید فقط یک بار ظاهر شود. اگر دوباره ظاهر شد، متغیر محیطی CZKAWKA_DONT_ANNOY_ME را به هر مقدار غیر خالی تنظیم کنید.
 # Main window
 music_title_checkbox = عنوان
 music_artist_checkbox = هنرپرداز
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = آوتویډ
 main_check_box_broken_files_pdf = پdf
 main_check_box_broken_files_archive = اریکرج
 main_check_box_broken_files_image = عکس
+main_check_box_broken_files_video = ویدئو
+main_check_box_broken_files_video_tooltip = از ffmpeg/ffprobe برای اعتبارسنجی فایل‌های ویدیویی استفاده می‌کند. نسبتاً کند است و ممکن است خطاها را به صورت دقیق تشخیص دهد حتی اگر فایل به درستی پخش شود.
 check_button_general_same_size = تنها سایز‌های مختلف را تغییر ندهید
 check_button_general_same_size_tooltip = فایل‌های مشابه سایز آن‌ها در نتایج را ترک کنید - معمولاً این فایل‌ها دوباره تولید شده‌اند (1:1)
 main_label_size_bytes_tooltip = حجم فایل‌هایی که در طول سcan استفاده خواهند شد
@@ -184,8 +186,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = پوشه‌ای برای جستجوی مورد بندی خارج شود.
 upper_remove_excluded_button_tooltip = دایرکتوری را از مورد نادیده‌گرفتن حذف کنید.
 upper_notebook_items_configuration = تنظیم‌های موارد
-upper_notebook_excluded_directories = دایرکتوری‌های خارج شده
-upper_notebook_included_directories = درج دایرکتوری‌ها
+upper_notebook_excluded_directories = مسیرهای حذف‌شده
+upper_notebook_included_directories = مسارات شامل‌شده
 upper_allowed_extensions_tooltip =
     امتدادهای مجاز باید با کاما جدا شوند (به طور پیش فرض همه موجود هستند).
     
@@ -196,9 +198,9 @@ upper_excluded_extensions_tooltip =
     فهرست فایل‌های غیرفعال که در اسکن نادیده گرفته می‌شوند.
     
     هنگام استفاده از همچون پسوندها مجاز و غیرفعال، این یکی اولویت بالاتری دارد، بنابراین فایل بررسی نخواهد شد.
-upper_excluded_items_tooltip =
-    بیرون‌ریخته شده‌ها باید شامل * ویکسل درست باشند و باید توسط کاما جدا شوند.
-    این سریع‌تر از بیرون‌ریخته شده‌ی دایرکتوری‌ها نیست، پس آن را به دقت استفاده کنید.
+upper_excluded_items_tooltip = 
+        موارد حذف شده باید شامل * wildcard و باید با کاما از هم جدا شوند.
+        این کندتر از مسیرهای حذف شده است، بنابراین از آن با دقت استفاده کنید.
 upper_excluded_items = آیتم‌های حذف شده:
 upper_allowed_extensions = مدت زمان مجاز:
 upper_excluded_extensions = توسعه‌های غیرفعال:
@@ -206,6 +208,8 @@ upper_excluded_extensions = توسعه‌های غیرفعال:
 popover_select_all = انتخاب همه
 popover_unselect_all = همه را مخاطب نکنید
 popover_reverse = انتخاب را برگردانید
+popover_select_all_except_shortest_path = انتخاب همه چیز به جز کوتاه‌ترین مسیر
+popover_select_all_except_longest_path = انتخاب همه موارد به جز طولانی‌ترین مسیر
 popover_select_all_except_oldest = انتخاب همه غیر از قدیمی nhất
 popover_select_all_except_newest = انتخاب همه مواردی که نوزاد نیستند
 popover_select_one_oldest = انتخاب یکی از قدیمی‌ترینanst
@@ -214,15 +218,15 @@ popover_select_custom = انتخاب خاصیتutzer Merkel
 popover_unselect_custom = غير فردی را بیگانه کنید
 popover_select_all_images_except_biggest = انتخاب همه از بیشترین به جز خود را حذف کنید
 popover_select_all_images_except_smallest = انتخاب همه می‌شود به جز کوچکترین
-popover_custom_path_check_button_entry_tooltip =
+popover_custom_path_check_button_entry_tooltip = 
     انتخاب رکوردها با مسیر.
     
     مثال استفاده:
-    /home/pimpek/rzecz.txt را با /home/pim* پیدا کنید.
-popover_custom_name_check_button_entry_tooltip =
+    /home/pimpek/rzecz.txt را با /home/pim* پیدا کنید
+popover_custom_name_check_button_entry_tooltip = 
     فایل‌ها را با نام‌های فایل انتخاب کنید.
     
-    رایکسی از /usr/ping/pong.txt با *ong* می‌تواند پیدا شود.
+    رایکسی از /usr/ping/pong.txt با *ong* می‌تواند پیدا شود
 popover_custom_regex_check_button_entry_tooltip =
     انتخاب رکوردها با استفاده از Regular Expression مشخص شده.
     
@@ -291,7 +295,7 @@ bottom_move_button_tooltip =
     وقتی سعی می‌کنید دو فایل با نام تکراری را به مسیری منتقل کنید، دومی با خطا مواجه خواهد شد.
 bottom_sort_button_tooltip = فرمت فایل‌ها/دسته‌بندی‌ها را بر اساس روش مورد انتخاب تنظیم کند.
 bottom_compare_button_tooltip = مقایسه تصاویر در گروه را انجام دهید.
-bottom_show_errors_tooltip = نمایش/起底部文本面板。
+bottom_show_errors_tooltip = نمایش/起底部文本面板。.
 bottom_show_upper_notebook_tooltip = نمایش/پنهان کردن پanel بالایی نوت‌بук.
 # Progress Window
 progress_stop_button = وقفه
@@ -325,10 +329,10 @@ settings_use_rust_preview_tooltip =
     در سیستم‌های غیر-Linux، توصیه می‌شود این گزینه را استفاده کنید، زیرا gtk-pixbuf همیشه در آنجا دسترسی پذیر نیستند بنابراین تعطیل کردن این گزینه باعث می‌شود پیش‌نمای برخی تصاویر بارگذاری نشوند.
 settings_label_restart = شما باید برنامه را از نو انیمود تا تنظیمات را اعمال کنید!
 settings_ignore_other_filesystems = سایر سیستم‌های فایل را نادیده بگیرید (فقط لینوکس)
-settings_ignore_other_filesystems_tooltip =
+settings_ignore_other_filesystems_tooltip = 
     پروژه فایل‌هایی را نادیده می‌گیرد که در سیستم‌فایل‌های مشترک با دایرکتوری‌های جستجو نیستند.
     
-    به طور مشابه عملکرد -xdev گزینه در دستور find در روی سیستم عامل لینوکس است.
+    به طور مشابه عملکرد -xdev گزینه در دستور find در روی سیستم عامل لینوکس است
 settings_save_at_exit_button_tooltip = هنگام بسته شدن برنامه، تنظیمات را در فایل ذخیره کنید.
 settings_load_at_start_button_tooltip =
     به زمانی که برنامه را می‌افزایید، تنظیمات را از فایل بارشید.
@@ -423,7 +427,7 @@ settings_folder_cache_open = پوشه کاشی را باز کنید
 settings_folder_settings_open = پوشه تنظیمات را باز کنید
 # Compute results
 compute_stopped_by_user = جستجو توسط کاربر متوقف شد
-compute_found_duplicates_hash_size = یافته { $number_files } کپی برابر را در { $number_groups } گروه که { $size } را در { $time } صرف کرد.
+compute_found_duplicates_hash_size = یافته { $number_files } کپی برابر را در { $number_groups } گروه که { $size } را در { $time } صرف کرد
 compute_found_duplicates_name = Duplication { $number_files } فایل در { $number_groups } گروه در { $time } پیدا شد پیدا شد
 compute_found_empty_folders = فولدرهای خالی پیدا شد { $number_files } در زمان { $time }
 compute_found_empty_files = فایل‌های خالی پیدا شد: { $number_files } در زمان: { $time }
@@ -431,7 +435,7 @@ compute_found_big_files = فایل‌های بزرگ { $number_files } تا در
 compute_found_temporary_files = فایل‌های موقت { $number_files } تا { $time } پیدا شدند
 compute_found_images = { $number_files } تصویر مرتبط در { $number_groups } گروه پیدا شد در { $time }
 compute_found_videos = { $number_files } ویدیو مشابه در { $number_groups } گروه پیدا شد در زمان { $time }
-compute_found_music = فایل‌های موسیقی مشابه { $number_files } را در { $number_groups } گروه و در زمان { $time } پیدا کردیم.
+compute_found_music = فایل‌های موسیقی مشابه { $number_files } را در { $number_groups } گروه و در زمان { $time } پیدا کردیم
 compute_found_invalid_symlinks = { $number_files } لینک معلق نامعتبر در { $time } پیدا شد
 compute_found_broken_files = فایل‌های شکسته { $number_files } را در { $time } پیدا کردم
 compute_found_bad_extensions = فایل‌هایی با پسوند نامعتبر در { $time } شماره { $number_files } پیدا کرد
@@ -497,7 +501,7 @@ delete_items_label = { $items } فایل‌هایی خواهند پاک شد.
 delete_items_groups_label = { $items } فایل از { $groups } گروه خواهند شوی.
 hardlink_failed = به ترکیب مجدد { $name } به { $target } امکان پذیر نشد، دلیل { $reason }
 hard_sym_invalid_selection_title_dialog = بازخورد نامعتبر با گروه‌هایی از جمله
-hard_sym_invalid_selection_label_1 = در برخی گروه‌ها تنها یک رکورد انتخاب شده است و آن مورد忽略。
+hard_sym_invalid_selection_label_1 = در برخی گروه‌ها تنها یک رکورد انتخاب شده است و آن مورد忽略。.
 hard_sym_invalid_selection_label_2 = برای توانا به صورت سخت/هم لینک این فایل‌ها، حداقل دو نتیجه در گروه باید انتخاب شوند.
 hard_sym_invalid_selection_label_3 = اولین در گروه به عنوان اصلی شناخته می‌شود و تغییر نمی‌کند اما دوم و بعدی عرضه شده‌اند.
 hard_sym_link_title_dialog = تأیید لینک

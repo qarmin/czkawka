@@ -414,7 +414,7 @@ pub fn check_video_crop(mut entry: VideoCropEntry, params: &VideoCropParams, sto
     Some(entry)
 }
 
-pub fn fix_video_crop(video_path: &Path, params: &VideoCropSingleFixParams, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
+pub fn fix_video_crop(video_path: &Path, params: &VideoCropSingleFixParams, stop_flag: &Arc<AtomicBool>, current_codec: &str) -> Result<(), String> {
     if stop_flag.load(Ordering::Relaxed) {
         return Err("Video processing was stopped by user".to_string());
     }
@@ -463,12 +463,36 @@ pub fn fix_video_crop(video_path: &Path, params: &VideoCropSingleFixParams, stop
             let _ = std::fs::remove_file(&temp_output);
             return Err(flc!("core_failed_to_crop_video_file", file = video_path.to_string_lossy(), reason = e));
         }
-        Some(Ok(_)) => {
-            if !temp_output.exists() {
-                error!("Cropped video file was not created: {temp_output:?}");
-                return Err(flc!("core_cropped_video_not_created", temp = format!("{:?}", temp_output)));
+        Some(Ok(output)) => {
+            if !output.status.success() {
+                let connected = format!("{} - {}", output.stdout, output.stderr);
+                if connected.to_lowercase().contains("unknown encoder") {
+                    let missing_codec = match params.target_codec {
+                        Some(target_codec) => target_codec.as_ffprobe_codec_name(),
+                        None => current_codec,
+                    };
+                    return Err(flc!("core_ffmpeg_unknown_encoder", file = video_path.to_string_lossy(), encoder = missing_codec));
+                }
+                error!(
+                    "FFmpeg failed to crop video \"{}\" with status {}. Stdout: {}, Stderr: {}",
+                    video_path.to_string_lossy(),
+                    output.status,
+                    output.stdout,
+                    output.stderr
+                );
+                return Err(flc!(
+                    "core_ffmpeg_error",
+                    file = video_path.to_string_lossy(),
+                    code = output.status.to_string(),
+                    reason = output.stderr
+                ));
             }
         }
+    }
+
+    if !temp_output.exists() {
+        error!("Cropped video file was not created: {temp_output:?}");
+        return Err(flc!("core_cropped_video_not_created", temp = format!("{:?}", temp_output)));
     }
 
     if params.overwrite_original {

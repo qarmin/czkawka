@@ -1,8 +1,15 @@
 # In Rust translations
+rust_init_error_title = خطای حیاتی در هنگام راه‌اندازی برنامه
+rust_init_error_message = 
+        خطای حیاتی در هنگام راه‌اندازی برنامه رخ داد:
+
+        { $error_message }
+
+        این ممکن است به دلیل نبودن یا عملکرد نادرست درایورهای OpenGL/Vulkan، اجرای برنامه در یک ماشین مجازی یا یک باگ در Krokiet یا یکی از کتابخانه‌های آن باشد.
 rust_loaded_preset = پیش‌-installed سفارش { $preset_idx }
-rust_file_already_exists = فایل "{ $file }" مدرک وجود دارد و نخواهد می‌شد آن را جایگزین کرد
-rust_error_removing_file_after_copy = خطا در حذف فایل \"{ $file }\"(بعد از کپی آن به پارتیشن متفاوت)، دلیل:{ $reason }
-rust_error_copying_file = خطا در کپی کردن \"{ $input }\" به \"{ $output }\", دلیل: { $reason }
+rust_file_already_exists = فایل "{ $file }" قبلاً وجود دارد و بر روی آن پوشیده نمی‌شود
+rust_error_removing_file_after_copy = خطای هنگام حذف فایل "{ $file }" (پس از کپی شدن به پارتیشن متفاوت)، دلیل: { $reason }
+rust_error_copying_file = خطای کپی "{ $input }" به "{ $output }"، دلیل: { $reason }
 rust_loading_tags_cache = چャک سیم کانه را بارگذاری کنید
 rust_loading_fingerprints_cache = ارتباطات از طوابق отاگرده را بارگذاری کنید
 rust_saving_tags_cache = موجودیت پنجره‌های کشی
@@ -28,24 +35,24 @@ rust_hashed_videos = پس انداز شده { $items_stats } ویدئو
 rust_created_thumbnails = تصاویر کمکی برای { $items_stats } ویدیو ساختم
 rust_checked_files = چک شده فایل { $items_stats } (اندازه { $size_stats })
 rust_checked_files_bad_extensions = چک شده فایل { $items_stats }
-rust_checked_images = بررسی شد { $items_stats } تصاویر ({ $size_stats })
+rust_checked_files_bad_names = چک شده فایل { $items_stats }
 rust_checked_videos = بررسی شد { $items_stats } ویدیو ({ $size_stats })
 rust_analyzed_partial_hash = جزییات هاش تحلیل شده از { $items_stats } فایل ({ $size_stats })
 rust_analyzed_full_hash = انالیز هش کامل { $items_stats } فایل ({ $size_stats })
 rust_failed_to_rename_file = خطا در تغییر نام فایل { $old_path } به { $new_path }, помک: { $error }
-rust_no_included_directories = وقتی دایرکتوری درج نشده است، فحص شروع نمی‌شود.
-rust_all_dirs_referenced = وقتی تمام مسیرهای درج شده به صورت پوشه‌های اشاره‌گر تنظیم شده‌اند، نمی‌توان ارزشیابی را شروع کرد.
+rust_no_included_paths = امکان شروع اسکن وجود ندارد، زمانی که مسیرهای گنجانده شده تعیین نشده باشند.
+rust_all_paths_referenced = امکان شروع اسکن وجود ندارد، زمانی که تمام مسیرهای گنجانده شده به عنوان مسیرهای ارجاعی تنظیم شده باشند، باید ابتدا تیک گزینه‌ی ارجاع کنار مسیر ورودی را غیرفعال کنید.
 rust_found_empty_folders = دایره‌های خالی { $items_found } را در { $time } پیدا کردم
 rust_found_empty_files = { $items_found } فایل خالی در { $time } پیدا شد
 rust_found_similar_images = { $items_found } تصویر مشابه در { $groups } گروه در { $time } پیدا شده است
 rust_found_similar_videos = مثیه‌{ $items_found } فایل ویدئو مشابه در { $groups } گروه در { $time } پیدا کردіم
-rust_no_similarity_method_selected = فیلدهای موسیقی مشابه را بدون انتخاب روش مشابهی پیدا نمی‌توانید بیابید.
 rust_found_similar_music_files = یکشمار { $items_found } فایل موسیقی مشابه در { $groups } گروه در { $time } پیدا کرده‌ام
 rust_found_invalid_symlinks = موجودی { $items_found } لینک منحرف نامعتبر در { $time }
 rust_found_temporary_files = { $items_found } فایل موقت دست به دست کرد در { $time }
 rust_no_file_type_selected = بدون انتخاب فرمت فایل، سیستم نمی‌تواند فایل‌های شکسته را پیدا کند.
 rust_found_broken_files = مورد پیدا کردن { $items_found } فایل شکسته با حجم { $size } در { $time }
 rust_found_bad_extensions = موجودی { $items_found } فایل با پسوند نادرست در { $time }
+rust_found_bad_names = یافته { $items_found } فایل با نام‌های نامناسب در { $time }
 rust_found_video_optimizer = یافته { $items_found } فایل برای بهینه‌سازی در { $time }
 rust_found_duplicate_files = موجودی { $items_found } فایل تکراری در { $groups } گروه با حجم کل { $size } در { $time } پیدا شده است
 rust_found_duplicate_files_no_lost_space = در { $items_found } فایل تکراری در { $groups } گروه در { $time } پیدا شده است
@@ -79,8 +86,8 @@ rust_cleaning_no_size_exif = پاک کردن EXIF از فایل { $items_stats }
 rust_no_files_deleted = لیست نرم‌افزار یا پوشه مورد حذف انتخاب نشده است
 rust_no_files_renamed = هیچ فایل یا پوشه‌ی انتخابی برای نامبردهش وجود ندارد
 rust_no_files_moved = هیچ فایل یا mapه نم chosen برای منتقل کردن است
-rust_no_files_hardlinked = فایل یا پوشه‌ای برای پیوند سخت انتخاب نشده است.
-rust_no_files_symlinked = هیچ فایل یا پوشه‌ای برای پیوند نمایی انتخاب نشده است.
+rust_no_files_hardlinked = فایل یا پوشه‌ای برای پیوند سخت انتخاب نشده است
+rust_no_files_symlinked = هیچ فایل یا پوشه‌ای برای پیوند نمایی انتخاب نشده است
 rust_no_videos_optimized = بهینه‌سازی نشده / ویدیو انتخاب نشده برای بهینه‌سازی
 rust_no_exif_cleaned = فایل‌های انتخابی برای پاکسازی EXIF وجود ندارد
 rust_extracted_exif_tags = استخراج برچسب‌های EXIF از فایل‌های { $items_stats } ({ $size_stats })
@@ -101,6 +108,12 @@ rust_symlink_confirmation = آیا مطمئن هستید که می‌خواهی�
 rust_symlink_confirmation_number_simple = { $items } آیتم‌های انتخاب شده.
 rust_rename_confirmation = آیا مطمئن هستید که می‌خواهید آیتم‌های انتخاب شده را تغییر نام دهید؟
 rust_rename_confirmation_number_simple = { $items } آیتم‌های انتخاب شده.
+rust_cache_processed_files = فایل‌های کش { $files } پردازش شدند
+rust_cache_entries_stats = حذف { $removed } از { $all }، { $left } باقی‌مانده
+rust_cache_size_reduced = کاهش اندازه فایل‌های کش شده توسط { $size }
+rust_cache_time_elapsed = زمان سپری شده: { $time }
+rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_hardlink_failed = به ترکیب مجدد { $name } به { $target } امکان پذیر نشد، دلیل { $reason }
 
 # Slint translations, but in arrays
 
@@ -111,6 +124,7 @@ column_path = مسیر
 column_modification_date = تاریخ تغییر"http://www.example.com/"
 column_similarity = شباهت
 column_dimensions = بعد از اندازه‌گیریاته کنید
+column_new_dimensions = новых измерения
 column_title = عنوان
 column_artist = خاطره
 column_year = سال
@@ -127,6 +141,7 @@ column_fps = فپس
 column_codec = کدکوډ ( Codec )
 column_duration = مدت زمان
 column_exif_tags = تگ‌های EXIF
+column_new_name = نام جدید
 # Slint translations
 ok_button = اوکی
 cancel_button = لغو
@@ -134,6 +149,7 @@ do_you_want_to_continue = شما عازم به دنباله هستید؟
 main_window_title = کروکیت - پاکنامه داده‌ها
 scan_button = سکن
 stop_button = ストップ
+stop_text = ストップ
 select_button = انتخاب کنید
 move_button = برح<label class="move">الی</label>mite
 delete_button = حذف
@@ -141,15 +157,15 @@ save_button = پای 若要继续，请输入完整的问题或命令。保存�
 sort_button = مرتب کردن
 rename_button = تغییر نام
 motto = این برنامه را می‌توانید به طور آزاد استفاده کنید و همیشه اینطور خواهد بود.\nبرای جزئیات، به پروتکلライセンス MIT/GPL نگاه کنید.
-unicorn =
+unicorn = 
     شما ممکن است یک گوسفند سرخ نگاه نکنید، اما گوسفند سرخ همいつante始发时间总是过去时，你总是在它之后。永远不要认为你了解了什么，因为每一次的遇见都是一次新的开始。
-    你可能不会去看一只独角兽，但独角兽总是看着你。
+    你可能不会去看一只独角兽，但独角兽总是看着你。.
 repository = گارایو
 instruction = دکمه دستورالعمل
 donation = پیمانکار
 translation = ترجمه:
-included_directories = فهرست دایرکتوری‌ها
-excluded_directories = دایرکتوری‌های حذف شده
+included_paths = مسارات شامل‌شده
+excluded_paths = مسیرهای حذف‌شده
 ref = ."',()'
 path = مسیر
 tool_duplicate_files = ملف‌های تکراری
@@ -163,6 +179,7 @@ tool_music_duplicates = 拷贝의 음악
 tool_invalid_symlinks = تعدادی از لینک‌های نامعتبر
 tool_broken_files = فایل‌های شکسته
 tool_bad_extensions = مدیریت‌های بد
+tool_bad_names = نام‌های بد
 tool_video_optimizer = بهینه‌ساز ویدیو
 tool_exif_remover = حذف EXIF
 sort_by_full_name = sort با نام کامل
@@ -177,6 +194,8 @@ selection_the_smallest_size = چویید حجم کوچکترین را
 selection_the_smallest_resolution = انتخاب توزیع کوچکتر را انجام دهید
 selection_newest = انتخاب جدید‌ترین
 selection_oldest = انتخاب جوان‌تر
+selection_shortest_path = انتخاب کوتاه‌ترین مسیر را
+selection_longest_path = انتخاب مسیر طولانی‌ترین را
 stage_current = حالي‌گراي شايد:
 stage_all = همه مرحله‌ها:
 subsettings = تنظیمات زیر Menú
@@ -208,6 +227,22 @@ subsettings_broken_files_audio = آهنگ
 subsettings_broken_files_pdf = پdf
 subsettings_broken_files_archive = ارشیو
 subsettings_broken_files_image = عکس
+subsettings_broken_files_video = ویدئو
+subsettings_broken_files_video_info = از ffmpeg/ffprobe استفاده می‌کند. نسبتاً کند است و ممکن است حتی اگر فایل به درستی پخش شود، خطاهای دقیق را تشخیص دهد.
+subsettings_bad_names_issues = بررسی نام فایل
+subsettings_bad_names_uppercase_extension = افزایش حروف بزرگ
+subsettings_bad_names_uppercase_extension_hint = پیدا کردن فایل‌هایی با حروف بزرگ در پسوند (مانند .JPG، .Mp3) و پیشنهاد نسخه کوچک‌نویسی‌شده
+subsettings_bad_names_emoji_used = ایموجی در نام
+subsettings_bad_names_emoji_used_hint = پیدا کردن فایل‌هایی با کاراکترهای ایموجی (😀، 🎉، و غیره) در نام و پیشنهاد حذف آن‌ها
+subsettings_bad_names_space_at_start_end = فضاهای پیشانی/پایانی
+subsettings_bad_names_space_at_start_end_hint = پیدا کردن فایل‌هایی با فضاهای خالی در ابتدا یا انتهای نام و پیشنهاد حذف آن‌ها
+subsettings_bad_names_non_ascii = کاراکترهای غیر ASCII
+subsettings_bad_names_non_ascii_hint = پیدا می‌کند کاراکترهای غیر ASCII (مانند ą، ć، ñ و غیره) و پیشنهاد می‌دهد آن‌ها را با معادل‌های ASCII (مانند a، c، n) جایگزین کند یا اگر هیچ نگاشت وجود نداشته باشد، حذف کند
+subsettings_bad_names_restricted_charset = charset محدود
+subsettings_bad_names_restricted_charset_hint = تبدیل می‌کند کاراکترهای غیر-ASCII را به ASCII، سپس فایل‌هایی را که شامل کاراکترهایی خارج از 0-9a-zA-Z و کاراکترهای مجاز تعریف‌شده توسط کاربر هستند، پیدا می‌کند
+subsettings_bad_names_allowed_chars = مجاز است
+subsettings_bad_names_remove_duplicated = حروف تکراری
+subsettings_bad_names_remove_duplicated_hint = پیدا کردن کاراکترهای تکراری پشت سر هم غیر الفبایی (مانند "file---name..txt") و پیشنهاد حذف تکرارها
 settings_global_settings = تنظیمات جهانی
 settings_dark_theme = نیکت سیاه
 settings_show_only_icons = نمایش فقط علامت‌گذاری
@@ -222,25 +257,22 @@ settings_use_cache = استفاده از کشی
 settings_save_as_json = همچنین кеш را به فایل JSON ذخیره کنید
 settings_move_to_trash = فایل‌های حذف شده را به سبد اسکیز منتقل کنید
 settings_ignore_other_filesystems = سایر سیستم‌هايisis FileSystem را ددغناييد (فقط لينукس)
+settings_delete_outdated_cache_entries = حذف خودکار ورودی‌های کش منسوخ‌شده به‌طور خودکار
+settings_delete_outdated_cache_entries_hint = هنگام فعال‌سازی، برنامه در هنگام بارگذاری کش (حداکثر یک بار در هفته) بررسی می‌کند که آیا رکودهای کش‌شده هنوز به فایل‌ها/داده‌های موجود و بدون تغییر اشاره می‌کنند یا خیر
+settings_hide_hard_links = پناه از پیوندهای سخت را بپناهید
+settings_hide_hard_links_hint = پنهان کردن پیوند‌های سخت به یکسان فایل‌ها در نتایج
 settings_thread_number = شماره‌ی tread
 settings_restart_required = شما باید برنامه را دوباره اجرا کنید تا تغییرات در شماره نادل را اعمال کنید---
 settings_duplicate_image_preview = نمایش نیمه تصویر
-settings_duplicate_hide_hard_links = پیوندهای سخت را پنهان کنید
 settings_duplicate_minimal_hash_cache_size = حجم مinیمum پرونده‌های کش شده - چکیده (کیلوبات)
 settings_duplicate_use_prehash = استفاده از prehash
 settings_duplicate_minimal_prehash_cache_size = حجم مینیمم فایل‌های کاش شده - پرسیکس (کیلو بایت)
-settings_duplicate_delete_outdated_entries = حذف موارد بازهولی تلقی شده
 settings_similar_images_show_image_preview = نمای prevی شاخص 이미ジプレビュー
 settings_application_scale_text = مقیاس درخواست
-settings_application_scale_hint_text = اعمال مقیاس دستی (به عنوان مثال، 1.0 = 100٪)
+settings_application_scale_hint_text = هنگامی که مقیاس دستی فعال است، این به شما این امکان را می‌دهد که یک فاکتور مقیاس سفارشی انتخاب کنید، اما به طور کامل مقیاس‌بندی خودکار را بر اساس DPI مانیتور غیرفعال می‌کند.
 settings_restart_required_scale_text = ---شما باید برنامه را برای اعمال تغییرات مقیاس راه‌اندازی مجدد کنید---
 settings_use_manual_application_scale_text = استفاده از مقیاس دستی
-settings_similar_videos_generate_thumbnail_grid_instead_of_single_image_hint_text = یک شبکه از پیش‌نمایه‌ها به جای یک تصویر واحد تولید کنید (ممکن است زمان بیشتری طول بکشد)
-settings_similar_images_hide_hard_links = پناه از پیوندهای سخت را بگ pled硬编码错误，已纠正 - 请隐藏坚链接
-settings_delete_outdated_entries = حذف رکords مسدود شده به طور خودکار
-settings_similar_videos_hide_hard_links = پناه از پیوندهای سخت را بپناهید
-settings_similar_videos_image_preview = نمایش پیش‌نمایشbeeld
-settings_similar_videos_generate_thumbnail_grid_instead_of_single_image = ایجاد شبکه پیش‌نمایه‌ها به جای یک تصویر واحد
+settings_video_thumbnails_preview = نمایش پیش‌نمایشbeeld
 settings_open_config_folder = دایرکتوری تنظیمات را باز کنید
 settings_open_cache_folder = پوشه کشیش را باز کنید
 settings_language = زبان
@@ -251,18 +283,29 @@ settings_save = ذخیره
 settings_load = caricaturه
 settings_reset = بازگشت
 settings_similar_videos_tool = gereh ویدئوهای مشابه
+settings_video_thumbnails_clear_unused_thumbnails = حذف تصاویر پس‌زمینه ویدیویی غیرفعال قدیمی‌تر از 7 روز در هنگام راه‌اندازی برنامه
+settings_video_thumbnails_header = تصاویر کوچک ویدیو
+settings_video_thumbnails_generate = تولید پیش‌نمایش‌ها
+settings_video_thumbnails_position = pozیション تصویر کمپین در ویدئو (%)
+settings_video_thumbnails_generate_grid = ایجاد شبکه پیش‌نمایه‌ها به جای یک تصویر واحد
+settings_video_thumbnails_generate_grid_hint = ایجاد چندین تصویر در یک شبکه، کندتر از تولید یک پیش‌نمایش تک است
+settings_video_thumbnails_grid_tiles_per_side = تعداد تراشه ها در هر طرف در شبکه کوچک تصویر
+settings_video_thumbnails_grid_tiles_per_side_hint = تعداد بلاک‌های تصویر کوچک در هر طرف در شبکه. به عنوان مثال، انتخاب 2 یک شبکه 2x2 ایجاد می‌کند که منجر به یک تصویر کوچک واحدی می‌شود که از 4 تصویر تشکیل شده است.
 settings_similar_images_tool = آبکاری شبیه آنگانه‌ها کارساز
-settings_similar_music_tool = سیمilar موسیقی ابزار
 settings_general_settings = تنظیمات کلی
+settings_cache_header_text = تنظیمات کش
+settings_clean_cache_button_text = پاک کردن کش قدیمی
 settings_settings = تنظیمات
 settings_load_tabs_sizes_at_startup = سایز های قوائم را در آغاز بارگذاری بارگذاری کنید
 settings_load_windows_size_at_startup = اکتشاف سایز پنجره در زمان شروع
 settings_limit_lines_of_messages = متن پیام‌ها را به سرعت ۵۰۰ خط حفظ کنید(حلی برای ویجت sluggish TextEdit)
-settings_similar_videos_clear_unused_thumbnails = حذف تصاویر پس‌زمینه ویدیویی غیرفعال قدیمی‌تر از 7 روز در هنگام راه‌اندازی برنامه
+settings_play_audio_on_scan_completion_text = صدای پخش هنگام اتمام موفقیت‌آمیز اسکن
+settings_audio_feature_hint_text = فقط در صورت کامپایل با ویژگی صوتی در دسترس است
+settings_audio_env_variable_hint_text = می‌تواند صدا را تغییر داد، با تنظیم متغیر محیطی KROKIET_AUDIO_STOP_FILE به یک مسیر فایل صوتی معتبر
 popup_save_title = ذخیره نتایج
 popup_save_message = این متن نتیجه را به سه فایل متفاوت ذخیره خواهد کرد
 popup_rename_title = بازنامه فایل‌ها
-popup_new_directories_title = لطفا دایرکتوری‌ها را هر یک در یک خط اضافه کنید
+popup_new_paths_title = لطفا مسیرها را یکی در هر سطر اضافه کنید
 popup_move_title = انتقال فایل‌ها
 popup_move_copy_checkbox = کپی فایل‌ها به جای منتقل کردن
 popup_move_preserve_folder_checkbox = ساختار پوشه را حفظ کنید
@@ -274,24 +317,44 @@ searching = جستجو کردن...
 subsettings_videos_crop_detect = روش شناساندن کره
 subsettings_videos_skip_forward_amount = مدت زمان hop [س]
 subsettings_videos_vid_hash_duration = مدت زمان ویدیو هاش
-subsettings_videos_thumbnail_percentage = pozیション تصویر کمپین در ویدئو (%)
 settings_cache_number_size_text = حجم فایل‌های پوше: { $size }, تعداد فایل‌ها: { $number }
 settings_video_thumbnails_number_size_text = rozمغزهای ویدیو: { $size }، تعداد فایل‌ها: { $number }
 settings_log_number_size_text = اندازه فایل‌های لگ: { $size }, تعداد فایل‌ها: { $number }
+popup_clean_cache_title_text = پاک کردن کش قدیمی
+popup_clean_cache_confirmation_text = آیا مطمئن هستید که می‌خواهید آیتم‌های کش قدیمی را پاک کنید؟ این کار آیتم‌های کش را برای فایل‌هایی که دیگر وجود ندارند یا تغییر کرده‌اند حذف می‌کند.
+popup_clean_cache_progress_text = در حال پردازش فایل کش:
+popup_clean_cache_current_file_text = فایل فعلی:
+popup_clean_cache_file_progress_text = پیشرفت فایل فعلی:
+popup_clean_cache_overall_progress_text = پیشرفت کلی:
+popup_clean_cache_stopped_by_user_text = پاکسازی کش توسط کاربر متوقف شد
+popup_clean_cache_finished_text = پاکسازی کش با موفقیت انجام شد!
+popup_clean_cache_error_details_text = جزئیات خطا:
+popup_clean_cache_files_with_errors = فایل‌های دارای خطا:
 subsettings_video_optimizer_mode = حالت
+subsettings_video_optimizer_crop_type = نوع محصول
+subsettings_video_optimizer_black_pixel_threshold = آستانه پیکسلی سیاه
+subsettings_video_optimizer_black_pixel_threshold_hint = حداکثر مقدار RGB برای هر کانال پیکسل در نظر گرفته شود سیاه (0-128). پیش‌فرض: 20
+subsettings_video_optimizer_black_bar_min_percentage = ٪ حداقل نوار سیاه
+subsettings_video_optimizer_black_bar_min_percentage_hint = حداقل درصد پیکسل‌های سیاه در یک ردیف/ستون برای در نظر گرفته شدن به عنوان یک نوار سیاه (50-100). پیش‌فرض: 90
+subsettings_video_optimizer_max_samples = حداکثر نمونه‌ها
+subsettings_video_optimizer_max_samples_hint = حداکثر تعداد فریم‌های قابل تجزیه و تحلیل در هر ویدیو (5-1000). پیش‌فرض: 60
+subsettings_video_optimizer_min_crop_size = حداقل اندازه محصول
+subsettings_video_optimizer_min_crop_size_hint = حداقل پیکسل‌های قابل برش در هر طرف (1-1000). برش‌های کوچک نادیده گرفته می‌شوند. پیش‌فرض: 5
 subsettings_video_optimizer_video_codec = ویدئو کُدک
 subsettings_video_optimizer_excluded_codecs = استثنی شده کدک‌ها
 subsettings_video_optimizer_video_quality = کیفیت ویدیو (CRF)
-subsettings_video_optimizer_image_threshold = آستانه تصویر
 subsettings_reset = بازنشانی
 subsettings_exif_ignored_tags_text = تگ‌های نادیده گرفته شده:
 subsettings_exif_ignored_tags_hint_text = لیست جدا شده با کاما از برچسب‌هایی که باید از اسکن حذف شوند (به عنوان مثال، GPS، Thumbnail). برخی از برچسب‌ها، مانند ImageWidth در فایل‌های TIFF، پنهان شده‌اند تا از شکستن تصویر جلوگیری شود.
 clean_button_text = تمیز
 clean_text = داده‌های EXIF تمیز
 clean_confirmation_text = آیا مطمئن هستید که می‌خواهید داده‌های EXIF را از آیتم‌های انتخاب شده حذف کنید؟
+crop_videos_text = برش ویدیوها
+crop_video_confirmation_text = آیا مطمئن هستید که می‌خواهید ویدیوهای انتخاب شده را برش دهید؟
+crop_reencode_video_text = باز‌رمزنگاری ویدیو
+reencode_videos_text = بازکدگذاری ویدیوها
 optimize_button_text = بهینه‌سازی
-optimize_text = بهینه‌سازی تصاویر
-optimize_confirmation_text = آیا مطمئن هستید که می‌خواهید آیتم‌های انتخاب شده را بهینه‌سازی کنید؟
+optimize_confirmation_text = آیا مطمئن هستید که می‌خواهید ویدیوهای انتخاب شده را دوباره رمزگذاری کنید؟
 optimize_fail_if_bigger_text = اگر فایل بهینه شده بزرگتر شد، شکست بخشد
 optimize_overwrite_files_text = بازنویسی فایل‌ها
 optimize_limit_video_size_text = حداکثر اندازه ویدیو

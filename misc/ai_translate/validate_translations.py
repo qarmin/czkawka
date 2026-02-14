@@ -19,14 +19,14 @@ class Colors:
 
 
 def extract_placeholders(text: str) -> Set[str]:
-    pattern = re.compile(r"\{\s*\$[\w-]+\s*\}")
+    pattern = re.compile(r"{\s*\$[\w-]+\s*}")
     matches = pattern.findall(text)
     normalized = {re.sub(r"\s+", "", match) for match in matches}
     return normalized
 
 
 def count_placeholders(text: str) -> Dict[str, int]:
-    pattern = re.compile(r"\{\s*\$[\w-]+\s*\}")
+    pattern = re.compile(r"{\s*\$[\w-]+\s*}")
     matches = pattern.findall(text)
     normalized_matches = [re.sub(r"\s+", "", match) for match in matches]
 
@@ -63,6 +63,20 @@ def validate_translation(base_value: str, translated_value: str, key: str) -> Li
                 errors.append(
                     f"  {Colors.RED}Wrong occurrence count for {placeholder}:{Colors.RESET} expected {base_count}, found {translated_count}"
                 )
+
+    # New: validate trailing dot presence/absence consistency
+    base_has_dot = base_value.strip().endswith(".")
+    translated_has_dot = translated_value.strip().endswith(".")
+
+    if base_has_dot != translated_has_dot:
+        if base_has_dot:
+            errors.append(
+                f"  {Colors.RED}Trailing dot mismatch:{Colors.RESET} source ends with a dot but translation does not"
+            )
+        else:
+            errors.append(
+                f"  {Colors.RED}Trailing dot mismatch:{Colors.RESET} source does not end with a dot but translation does"
+            )
 
     return errors
 
@@ -125,6 +139,111 @@ def fix_language_file(lang_file: pathlib.Path, keys_to_remove: Set[str]) -> int:
     return removed_count
 
 
+def fix_trailing_dots_in_language_file(
+    lang_file: pathlib.Path, base_entries: Dict[str, str], keys_to_fix: Set[str]
+) -> int:
+    content = lang_file.read_text(encoding="utf-8")
+    lines = content.split("\n")
+    result_lines: List[str] = []
+    i = 0
+    modified_count = 0
+
+    # Parse language file entries once
+    lang_entries = parse_ftl_file(lang_file)
+
+    while i < len(lines):
+        line = lines[i]
+        key_match = re.match(r"^([\w][\w-]*)\s*=\s*(.*)$", line)
+
+        if key_match:
+            key = key_match.group(1)
+
+            if key in keys_to_fix and key in lang_entries and key in base_entries:
+                # Collect the block lines (initial + continuation lines starting with a space)
+                block_start = i
+                block_lines = [lines[i]]
+                j = i + 1
+                while j < len(lines) and (lines[j].startswith(" ") or lines[j].strip() == ""):
+                    # include continuation or empty lines that might be part of the value
+                    # stop when next non-indented non-empty line appears
+                    if lines[j].startswith(" ") or lines[j] == "":
+                        block_lines.append(lines[j])
+                        j += 1
+                    else:
+                        break
+
+                # Extract content parts for each block line (preserve whitespace around content)
+                content_parts: List[str] = []
+                indents: List[str] = []
+                for idx, bl in enumerate(block_lines):
+                    if idx == 0:
+                        m = re.match(r"^([\w][\w-]*)\s*=\s*(.*)$", bl)
+                        part = m.group(2) if m else ""
+                        content_parts.append(part)
+                        indents.append("")
+                    else:
+                        # capture leading whitespace (indent) and the rest of content
+                        m = re.match(r"^(\s*)(.*)$", bl)
+                        if m:
+                            indent = m.group(1)
+                            part = m.group(2)
+                        else:
+                            indent = ""
+                            part = bl
+                        content_parts.append(part)
+                        indents.append(indent)
+
+                # Determine last content part index (skip trailing empty continuation lines)
+                last_idx = len(content_parts) - 1
+                while last_idx >= 0 and content_parts[last_idx].strip() == "":
+                    last_idx -= 1
+
+                if last_idx >= 0:
+                    last_part = content_parts[last_idx]
+
+                    # split into text and trailing spaces to preserve spacing
+                    m = re.match(r"^(.*?)(\s*)$", last_part, flags=re.S)
+                    text = m.group(1)  # type: ignore
+                    trailing_spaces = m.group(2)  # type: ignore
+
+                    base_has_dot = base_entries[key].strip().endswith(".")
+                    trans_has_dot = text.endswith(".")
+
+                    new_text = text
+                    if base_has_dot and not trans_has_dot:
+                        new_text = text + "."
+                    elif not base_has_dot and trans_has_dot:
+                        # remove all trailing dots from the textual end
+                        new_text = re.sub(r"\.+$", "", text)
+
+                    if new_text != text:
+                        # replace last content part while keeping other parts intact
+                        content_parts[last_idx] = new_text + trailing_spaces
+
+                        # Rebuild block lines preserving original formatting
+                        new_block_lines: List[str] = []
+                        for idx, part in enumerate(content_parts):
+                            if idx == 0:
+                                new_block_lines.append(f"{key} = {part}")
+                            else:
+                                new_block_lines.append(f"{indents[idx]}{part}")
+
+                        # Append new block lines to result and advance index
+                        result_lines.extend(new_block_lines)
+                        modified_count += 1
+                        i = j
+                        continue
+
+        # default: copy original line
+        result_lines.append(line)
+        i += 1
+
+    if modified_count > 0:
+        lang_file.write_text("\n".join(result_lines), encoding="utf-8")
+
+    return modified_count
+
+
 def validate_i18n_folder(
     i18n_path: pathlib.Path, target_languages: List[str] | None = None, fix_mode: bool = False
 ) -> int:
@@ -178,19 +297,51 @@ def validate_i18n_folder(
         return 0
 
     if fix_mode:
-        print(f"\n{Colors.YELLOW}FIX MODE: Removing entries with placeholder errors{Colors.RESET}\n")
+        print(
+            f"\n{Colors.YELLOW}FIX MODE: Fixing trailing-dot mismatches and removing entries with placeholder errors{Colors.RESET}\n"
+        )
 
+        total_removed = 0
         total_fixed = 0
+
         for lang_code in sorted(errors_by_language.keys()):
             data = errors_by_language[lang_code]
-            keys_to_remove = set(data["errors"].keys())
+            lang_file = data["file"]
+            # classify keys by type of error
+            keys_to_remove: Set[str] = set()
+            keys_to_fix_dots: Set[str] = set()
 
-            removed = fix_language_file(data["file"], keys_to_remove)
-            total_fixed += removed
+            for key, msgs in data["errors"].items():
+                combined = "\n".join(msgs)
+                if (
+                    "Missing placeholders" in combined
+                    or "Extra placeholders" in combined
+                    or "Wrong occurrence count" in combined
+                ):
+                    keys_to_remove.add(key)
+                elif "Trailing dot mismatch" in combined:
+                    keys_to_fix_dots.add(key)
+                else:
+                    # default to removal if unknown error
+                    keys_to_remove.add(key)
 
-            print(f"{lang_code:8} ({data['name']:25}) - removed {removed:3} entry(ies)")
+            removed = 0
+            fixed = 0
 
-        print(f"\n{Colors.GREEN}Fixed! Removed {total_fixed} entry(ies) with errors{Colors.RESET}")
+            if keys_to_remove:
+                removed = fix_language_file(lang_file, keys_to_remove)
+
+            if keys_to_fix_dots:
+                fixed = fix_trailing_dots_in_language_file(lang_file, base_entries, keys_to_fix_dots)
+
+            total_removed += removed
+            total_fixed += fixed
+
+            print(f"{lang_code:8} ({data['name']:25}) - removed {removed:3} entry(ies), fixed {fixed:3} entry(ies)")
+
+        print(
+            f"\n{Colors.GREEN}Fixed! Removed {total_removed} entry(ies) and updated {total_fixed} translation(s) with trailing-dot mismatches{Colors.RESET}"
+        )
         return 0
 
     print(f"\nFound errors in {len(errors_by_language)} language(s):\n")

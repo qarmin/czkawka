@@ -7,24 +7,24 @@ window_compare_images = Porównywanie Obrazów
 general_ok_button = Ok
 general_close_button = Zamknij
 # Krokiet info dialog
-krokiet_info_title = Wprowadzenie do Krokieta - Nowa Wersja Czkawki
-krokiet_info_message =
-    Krokiet to nowa, ulepszona, szybsza i mniej błędogenna wersja Czkawki GTK!
-    
-    Dzięki wbudowanym zależnościom jest znacznie łatwiejszy w konfiruacji i bardziej odporny na zmiany systemu oraz aktualizacje pakietów systemowych.
-    
-    Zawiera wiele funkcji niedostępnych w Czkawce, takich jak miniaturki w trybie porównywania wideo, wyświetlanie postępu przesyłania/kopiowania/usuwania plików oraz rozszerzone opcje sortowania.
-    
-    Wypróbuj go i zobacz różnicę!
-    
-    Czkawka nadal będzie otrzymywać poprawki błędów i drobne aktualizacje, ale wszystkie nowe funkcje będą implementowane tylko w Krokietcie.
-    
-    PS. Ten komunikat powinien być widoczny tylko raz, ale jeśli pojawi się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną wartość niepustą.
+krokiet_info_title = Wprowadzamy Krokiet - Nowa wersja Czkawki
+krokiet_info_message = 
+        Krokiet to nowa, ulepszona, szybsza i bardziej niezawodna wersja Czkawki GTK!
+
+        Jest łatwiejszy w uruchomieniu i bardziej odporny na zmiany w systemie, ponieważ polega tylko na podstawowych bibliotekach dostępnych domyślnie na większości systemów.
+
+        Krokiet oferuje również funkcje, których brakuje Czkawce, w tym miniaturki w trybie porównania wideo, czyszczenie EXIF, wyświetlanie postępu kopiowania/przenoszenia/usuwania plików czy rozszerzone opcje sortowania.
+
+        Wypróbuj go i zobacz różnicę!
+
+        Czkawka będzie nadal otrzymywać poprawki błędów i drobne aktualizacje z mojej strony, ale wszystkie nowe funkcje będą rozwijane wyłącznie dla Krokieta, lecz zachęcam każdego chętnego by jeśli chce, to by implementował na własną rękę nowe funkcje czy brakujące tryby w Czkawce.
+
+        PS: Ta wiadomość powinna pojawić się tylko raz. Jeśli pojawia się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną niepustą wartość.
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
 music_year_checkbox = Rok
-music_bitrate_checkbox = Bitrate
+music_bitrate_checkbox = Przepływność bitów
 music_genre_checkbox = Gatunek
 music_length_checkbox = Długość
 music_comparison_checkbox = Przybliżone Porównywanie
@@ -125,7 +125,7 @@ main_tree_view_column_dimensions = Wymiary
 main_tree_view_column_title = Tytuł
 main_tree_view_column_artist = Wykonawca
 main_tree_view_column_year = Rok
-main_tree_view_column_bitrate = Bitrate
+main_tree_view_column_bitrate = Przepływność bitów
 main_tree_view_column_length = Długość
 main_tree_view_column_genre = Gatunek
 main_tree_view_column_symlink_file_name = Nazwa Symlinka
@@ -149,6 +149,8 @@ main_check_box_broken_files_audio = Dźwięk
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archiwa
 main_check_box_broken_files_image = Obraz
+main_check_box_broken_files_video = Wideo
+main_check_box_broken_files_video_tooltip = Używa ffmpeg/ffprobe do weryfikacji plików wideo. Jest to dość powolne i może wykryć błędy, które nie są widoczne przy zwykłym odtwarzaniu wideo.
 check_button_general_same_size = Ignoruj identyczny rozmiar
 check_button_general_same_size_tooltip = Ignoruj pliki o identycznym rozmiarze w wynikach - zazwyczaj są to duplikaty 1:1
 main_label_size_bytes_tooltip = Rozmiar plików które będą zawarte przy przeszukiwaniu
@@ -180,8 +182,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Dodaje wybrany folder do ignorowanych.
 upper_remove_excluded_button_tooltip = Usuwa zaznaczony folder z ignorowanych.
 upper_notebook_items_configuration = Konfiguracja Skanowania
-upper_notebook_excluded_directories = Ignorowane Foldery
-upper_notebook_included_directories = Przeszukiwane Foldery
+upper_notebook_excluded_directories = Wykluczone Ścieżki
+upper_notebook_included_directories = Dołączone ścieżki
 upper_allowed_extensions_tooltip =
     Dozwolone rozszerzenia muszą być oddzielone przecinkami (domyślnie wszystkie są dostępne).
     
@@ -192,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lista wyłączonych plików, które zostaną zignorowane w skanowaniu.
     
     Gdy używasz zarówno dozwolonych, jak i wyłączonych rozszerzeń, ten ma wyższy priorytet, więc plik nie zostanie sprawdzony.
-upper_excluded_items_tooltip =
-    Wykluczone elementy muszą zawierać znak * (który odpowiada za dowolny ciąg znaków) i powinny być oddzielone przecinkami.
-    Jest to wolniejszy sposób od zwykłego wykluczania katalogów, więc należy używać go ostrożnie.
+upper_excluded_items_tooltip = 
+        Wykluczone elementy muszą zawierać znak * i powinny być oddzielone przecinkami.
+        To działa wolniej niż ustawianie wykluczonych katalogow i plików, więc używaj tego z rozwagą.
 upper_excluded_items = Ignorowane Obiekty:
 upper_allowed_extensions = Dozwolone Rozszerzenia:
 upper_excluded_extensions = Wyłączone rozszerzenia:
@@ -202,6 +204,8 @@ upper_excluded_extensions = Wyłączone rozszerzenia:
 popover_select_all = Zaznacz wszystko
 popover_unselect_all = Odznacz wszystko
 popover_reverse = Odwróć zaznaczenie
+popover_select_all_except_shortest_path = Zaznacz wszystkie oprócz najkrótszej ścieżki
+popover_select_all_except_longest_path = Zaznacz wszystkie oprócz najdłuższego ścieżki
 popover_select_all_except_oldest = Zaznacz wszystkie oprócz najstarszego
 popover_select_all_except_newest = Zaznacz wszystkie oprócz najnowszego
 popover_select_one_oldest = Zaznacz jedno najstarsze
@@ -210,8 +214,6 @@ popover_select_custom = Własne zaznaczanie
 popover_unselect_custom = Własne odznaczanie
 popover_select_all_images_except_biggest = Zaznacz wszystkie oprócz największego
 popover_select_all_images_except_smallest = Zaznacz wszystkie oprócz najmniejszego
-popover_select_all_except_shortest_path = Zaznacz wszystkie oprócz najkrótszej ścieżki
-popover_select_all_except_longest_path = Zaznacz wszystkie oprócz najdłuższej ścieżki
 popover_custom_path_check_button_entry_tooltip =
     Zaznacza rekordy według ścieżki.
     
@@ -268,7 +270,7 @@ bottom_compare_button = Porównaj
 bottom_search_button_tooltip = Rozpocznij wyszukiwanie
 bottom_select_button_tooltip = Wybierz rekordy. Tylko wybrane pliki/foldery mogą być później przetwarzane.
 bottom_delete_button_tooltip = Usuń zaznaczone elementy.
-bottom_save_button_tooltip = Zapisz informacje o skanowaniu.
+bottom_save_button_tooltip = Zapisz informacje o skanowaniu
 bottom_symlink_button_tooltip =
     Utwórz linki symboliczne.
     Działa tylko wtedy, gdy co najmniej dwa wyniki w grupie są zaznaczone.
@@ -291,10 +293,10 @@ bottom_compare_button_tooltip = Porównaj obrazy w grupie.
 bottom_show_errors_tooltip = Pokaż/Ukryj dolny panel tekstowy.
 bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 # Progress Window
-progress_stop_button = Stop
+progress_stop_button = Zatrzymaj
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
-about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
+about_repository_button_tooltip = Link do repozytorium z kodem źródłowym.
 about_donation_button_tooltip = Link do strony z dotacjami.
 about_instruction_button_tooltip = Link do strony z instrukcją.
 about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficialnie wspierany jest język polski i angielski.

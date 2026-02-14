@@ -9,17 +9,17 @@ general_close_button = Cerrar
 # Krokiet info dialog
 krokiet_info_title = Presentando Krokiet - Nueva Versión de Czkawka
 krokiet_info_message =
-    Krokiet es la nueva, mejorada, más rápida y menos problemática versión de la interfaz gráfica GTK de Czkawka.
+    Krokiet es la nueva versión mejorada, más rápida y más fiable de la interfaz gráfica GTK de Czkawka.
     
-    Al ser autosuficiente, es mucho más fácil de ejecutar y más resistente a los cambios del sistema y las actualizaciones de versiones de paquetes.
+    Es más fácil de ejecutar y más resistente a los cambios del sistema, ya que depende solo de bibliotecas básicas disponibles por defecto en la mayoría de los sistemas.
     
-    Incluye muchas funciones que no están disponibles en Czkawka, como miniaturas en el modo de comparación de vídeo, el progreso de la copia/movimiento/borrado de archivos y opciones de ordenación ampliadas.
+    Krokiet también incorpora funciones que Czkawka no tiene, como miniaturas en el modo de comparación de vídeos, un limpiador EXIF, progreso al mover/copiar/eliminar archivos u opciones de ordenación ampliadas.
     
-    Pruébalo y comprueba la diferencia.
+    ¡Pruébalo y nota la diferencia!
     
-    Czkawka seguirá recibiendo correcciones de errores y actualizaciones menores, pero todas las nuevas funciones se implementarán solo en Krokiet.
+    Czkawka seguirá recibiendo correcciones de errores y pequeñas actualizaciones por mi parte, pero todas las funciones nuevas se desarrollarán exclusivamente para Krokiet, y cualquiera es libre de contribuir con nuevas funciones, añadir modos faltantes o ampliar aún más Czkawka.
     
-    PS. Este mensaje debería ser visible solo una vez, pero si aparece de nuevo, establece la variable de entorno CZKAWKA_DONT_ANNOY_ME con cualquier valor no vacío.
+    PD: Este mensaje debería aparecer solo una vez. Si vuelve a mostrarse, establece la variable de entorno CZKAWKA_DONT_ANNOY_ME con cualquier valor no vacío.
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista
@@ -148,6 +148,8 @@ main_check_box_broken_files_audio = Sonido
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Guardar
 main_check_box_broken_files_image = Imagen
+main_check_box_broken_files_video = Video
+main_check_box_broken_files_video_tooltip = Utiliza ffmpeg/ffprobe para validar archivos de vídeo. Muy lento y puede detectar errores pedánticos incluso si el archivo se reproduce correctamente.
 check_button_general_same_size = Ignorar el mismo tamaño
 check_button_general_same_size_tooltip = Ignorar archivos con idéntico tamaño en resultados - usualmente son 1:1 duplicados
 main_label_size_bytes_tooltip = Tamaño de los archivos que se utilizarán en el escaneo
@@ -179,8 +181,8 @@ upper_manual_add_excluded_button_tooltip =
 upper_add_excluded_button_tooltip = Añadir directorio a excluir en la búsqueda.
 upper_remove_excluded_button_tooltip = Eliminar directorio de excluidos.
 upper_notebook_items_configuration = Configuración de artículos
-upper_notebook_excluded_directories = Directorios excluidos
-upper_notebook_included_directories = Directorios incluidos
+upper_notebook_excluded_directories = Rutas excluidas
+upper_notebook_included_directories = Rutas incluidas
 upper_allowed_extensions_tooltip =
     Las extensiones permitidas deben estar separadas por comas (por defecto todas están disponibles).
     
@@ -192,7 +194,7 @@ upper_excluded_extensions_tooltip =
     
     Cuando desactivamos las extensiones permitidas, estas tienen mayor prioridad, haciendo que los archivos no sean comprobados.
 upper_excluded_items_tooltip =
-    Los artículos excluidos deben contener * comodín y deben estar separados por comas.
+    Los artículos excluidos deben contener el comodín * y deben estar separados por comas.
     Esto es más lento que los Directorios Excluidos, así que úselo con cuidado.
 upper_excluded_items = Elementos excluidos:
 upper_allowed_extensions = Extensiones permitidas:
@@ -201,6 +203,8 @@ upper_excluded_extensions = Extensiones desactivadas:
 popover_select_all = Seleccionar todo
 popover_unselect_all = Deseleccionar todo
 popover_reverse = Invertir selección
+popover_select_all_except_shortest_path = Seleccionar todo excepto la ruta más corta
+popover_select_all_except_longest_path = Seleccionar todo excepto la ruta más larga
 popover_select_all_except_oldest = Seleccionar todo excepto más antiguo
 popover_select_all_except_newest = Seleccionar todo excepto el más reciente
 popover_select_one_oldest = Seleccione uno más antiguo
