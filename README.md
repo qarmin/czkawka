@@ -35,7 +35,7 @@
     - Video Optimizer - Crops from static parts and converts videos to more efficient formats
     - Bad Names - Finds files with names that may be not wanted (e.g., containing special characters)
 
-![Krokiet](https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6)
+![Krokiet](https://github.com/user-attachments/assets/3cc7ec6a-3d6a-42cb-9d33-4b0f0c547af6)
 
 ![Czkawka](https://github.com/user-attachments/assets/b0409515-1bec-4e13-8fac-7bdfa15f5848)
 
@@ -104,7 +104,7 @@ There are many similar applications to Czkawka on the Internet, which do some th
 - [DupeGuru](https://github.com/arsenetar/dupeguru) - Many options to customize; great photo compare tool
 - [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
 - [AntiDupl.NET](https://github.com/ermig1979/AntiDupl) - Shows a lot of metadata of compared images
-- [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos(surprising, isn't it), supports video thumbnails
+- [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos(surprising, isn't it)
 
 ### CLI
 
