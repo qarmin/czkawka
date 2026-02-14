@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_cli"
-version = "10.0.0"
+version = "11.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
 rust-version = "1.92.0"
@@ -13,7 +13,7 @@ repository = "https://github.com/qarmin/czkawka"
 clap = { version = "4.5", features = ["derive", "color"] }
 
 log = "0.4.22"
-czkawka_core = { path = "../czkawka_core", version = "10.0.0", features = [] }
+czkawka_core = { path = "../czkawka_core", version = "11.0.0", features = [] }
 indicatif = "0.18"
 crossbeam-channel = { version = "0.5", features = [] }
 ctrlc = { version = "3.4", features = ["termination"] }

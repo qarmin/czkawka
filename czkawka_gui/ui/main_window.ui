@@ -1172,7 +1172,7 @@
                 <property name="editable">0</property>
                 <property name="focusable">1</property>
                 <property name="has-frame">0</property>
-                <property name="text" translatable="yes">Czkawka 10.0.0</property>
+                <property name="text" translatable="yes">Czkawka 11.0.0</property>
                 <property name="xalign">1</property>
               </object>
             </child>

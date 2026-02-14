@@ -11,6 +11,6 @@ App is now in maintenance mode, so check Krokiet, the successor of Czkawka</prop
     <property name="license-type">mit-x11</property>
     <property name="logo-icon-name">help-about-symbolic</property>
     <property name="program-name">Czkawka</property>
-    <property name="version">10.0.0</property>
+    <property name="version">11.0.0</property>
   </object>
 </interface>

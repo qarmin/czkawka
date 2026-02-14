@@ -1,4 +1,4 @@
-## Version 11.0.0 - ??
+## Version 11.0.0 - 14.02.2026r
 
 ### Breaking changes
 #### Users
