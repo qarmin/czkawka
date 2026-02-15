@@ -216,7 +216,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         tree_view_name: "tree_view_similar_images_finder",
     },
     NotebookObject {
-        name: "Similar Images",
+        name: "Similar Videos",
         notebook_type: NotebookMainEnum::SimilarVideos,
         available_modes: &[
             PopoverTypes::All,
@@ -244,6 +244,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
             Type::STRING, // Codec
             Type::STRING, // Bitrate
             Type::STRING, // Dimensions
+            Type::STRING, // Duration
             Type::STRING, // Name
             Type::STRING, // Path
             Type::STRING, // Modification
