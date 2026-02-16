@@ -78,14 +78,14 @@ impl GuiUpperNotebook {
                     "scrolled_window_included_directories",
                     NotebookUpperEnum::IncludedDirectories,
                     UpperTreeViewEnum::IncludedDirectories,
-                    "tree_view_included_directories",
+                    "tree_view_upper_included_directories",
                 ),
                 UpperSubView::new(
                     builder,
                     "scrolled_window_excluded_directories",
                     NotebookUpperEnum::ExcludedDirectories,
                     UpperTreeViewEnum::ExcludedDirectories,
-                    "tree_view_excluded_directories",
+                    "tree_view_upper_excluded_directories",
                 ),
             ],
         };
