@@ -79,7 +79,7 @@ impl Directories {
                 break;
             }
 
-            let (dir, msg) = Self::canonicalize_and_clear_path(&path, false);
+            let (dir, msg) = Self::canonicalize_and_clear_path(&path, is_excluded);
 
             messages.extend_with_another_messages(msg);
 
