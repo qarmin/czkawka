@@ -53,6 +53,10 @@ jobs:
           mv target/release/krokiet mac_krokiet_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/release/krokiet mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "femtovg_wgpu"
+          mv target/release/krokiet mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu"
+          mv target/release/krokiet mac_krokiet_all_backends_${{ env.ARCHNAME }}
           
           cargo build --release --features "heif,libavif"
           mv target/release/czkawka_cli mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
@@ -60,6 +64,10 @@ jobs:
           mv target/release/krokiet mac_krokiet_heif_avif_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libavif"
           mv target/release/krokiet mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "femtovg_wgpu,heif,libavif"
+          mv target/release/krokiet mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu,heif,libavif"
+          mv target/release/krokiet mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}
 
       - name: Build Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -78,6 +86,10 @@ jobs:
           mv target/fastci/krokiet mac_krokiet_${{ env.ARCHNAME }}
           cargo build --profile fastci --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/fastci/krokiet mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+          cargo build --profile fastci --bin krokiet --no-default-features --features "femtovg_wgpu"
+          mv target/fastci/krokiet mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+          cargo build --profile fastci --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu"
+          mv target/fastci/krokiet mac_krokiet_all_backends_${{ env.ARCHNAME }}
           
           cargo build --profile fastci --features "heif,libavif"
           mv target/fastci/czkawka_cli mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
@@ -85,6 +97,10 @@ jobs:
           mv target/fastci/krokiet mac_krokiet_heif_avif_${{ env.ARCHNAME }}
           cargo build --profile fastci --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libavif"
           mv target/fastci/krokiet mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
+          cargo build --profile fastci --bin krokiet --no-default-features --features "femtovg_wgpu,heif,libavif"
+          mv target/fastci/krokiet mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
+          cargo build --profile fastci --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu,heif,libavif"
+          mv target/fastci/krokiet mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}
 
       - name: Store MacOS
         uses: actions/upload-artifact@v4
@@ -94,11 +110,15 @@ jobs:
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_czkawka_gui_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+            mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
@@ -109,9 +129,13 @@ jobs:
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_czkawka_gui_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+            mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}

@@ -46,6 +46,10 @@ jobs:
           mv target/release/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/release/krokiet linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "femtovg_wgpu"
+          mv target/release/krokiet linux_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu"
+          mv target/release/krokiet linux_krokiet_all_backends_${{ env.ARCHNAME }}
 
       # Fast CI profile, to avoid out of disk space errors
       # I doubt that anyone would use debug builds from here, because they are slow and contains not final changes
@@ -65,6 +69,10 @@ jobs:
           mv target/fastci/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
           cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software" --profile fastci
           mv target/fastci/krokiet linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "femtovg_wgpu" --profile fastci
+          mv target/fastci/krokiet linux_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu" --profile fastci
+          mv target/fastci/krokiet linux_krokiet_all_backends_${{ env.ARCHNAME }}
 
       - name: Pack with 7z
         run: |
@@ -76,7 +84,9 @@ jobs:
             linux_czkawka_gui_${{ env.ARCHNAME }} \
             linux_krokiet_${{ env.ARCHNAME }} \
             linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+            linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
+            linux_krokiet_femtovg_wgpu_${{ env.ARCHNAME }} \
+            linux_krokiet_all_backends_${{ env.ARCHNAME }}
 
       - name: Store
         uses: actions/upload-artifact@v4
@@ -96,6 +106,8 @@ jobs:
             linux_krokiet_${{ env.ARCHNAME }}
             linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
             linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+            linux_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+            linux_krokiet_all_backends_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}
 
   # Some dependencies requires ubuntu 24.04
@@ -135,6 +147,10 @@ jobs:
           mv target/release/krokiet linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libraw"
           mv target/release/krokiet linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "femtovg_wgpu,heif,libraw"
+          mv target/release/krokiet linux_krokiet_heif_raw_femtovg_wgpu_${{ env.ARCHNAME }}
+          cargo build --release --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu,heif,libraw"
+          mv target/release/krokiet linux_krokiet_heif_raw_all_backends_${{ env.ARCHNAME }}
 
       # Fast CI profile, to avoid out of disk space errors
       # I doubt that anyone would use debug builds from here, because they are slow and contains not final changes
@@ -154,6 +170,10 @@ jobs:
           mv target/fastci/krokiet linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
           cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libraw" --profile fastci
           mv target/fastci/krokiet linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "femtovg_wgpu,heif,libraw" --profile fastci
+          mv target/fastci/krokiet linux_krokiet_heif_raw_femtovg_wgpu_${{ env.ARCHNAME }}
+          cargo build --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu,heif,libraw" --profile fastci
+          mv target/fastci/krokiet linux_krokiet_heif_raw_all_backends_${{ env.ARCHNAME }}
 
       - name: Pack with 7z
         run: |
@@ -165,7 +185,9 @@ jobs:
             linux_czkawka_gui_heif_raw_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }} \
+            linux_krokiet_heif_raw_femtovg_wgpu_${{ env.ARCHNAME }} \
+            linux_krokiet_heif_raw_all_backends_${{ env.ARCHNAME }}
 
       - name: Store
         uses: actions/upload-artifact@v4
@@ -185,6 +207,8 @@ jobs:
             linux_krokiet_heif_raw_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_skia_opengl_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_skia_vulkan_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_femtovg_wgpu_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_all_backends_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}
 
   ### MUSL CLI and Krokiet Release and Debug

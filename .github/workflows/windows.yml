@@ -85,6 +85,10 @@ jobs:
           mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,add_windows_icon"
           mv target/release/krokiet.exe windows_krokiet_on_windows_skia_vulkan.exe
+          cargo build --release --bin krokiet --no-default-features --features "femtovg_wgpu,add_windows_icon"
+          mv target/release/krokiet.exe windows_krokiet_on_windows_femtovg_wgpu.exe
+          cargo build --release --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu,add_windows_icon"
+          mv target/release/krokiet.exe windows_krokiet_on_windows_all_backends.exe
 
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -97,6 +101,10 @@ jobs:
           mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
           cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,add_windows_icon"
           mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_vulkan.exe
+          cargo build --bin krokiet --no-default-features --features "femtovg_wgpu,add_windows_icon"
+          mv target/debug/krokiet.exe windows_krokiet_on_windows_femtovg_wgpu.exe
+          cargo build --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu,add_windows_icon"
+          mv target/debug/krokiet.exe windows_krokiet_on_windows_all_backends.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -105,6 +113,8 @@ jobs:
           path: |
             windows_krokiet_on_windows_skia_opengl.exe
             windows_krokiet_on_windows_skia_vulkan.exe
+            windows_krokiet_on_windows_femtovg_wgpu.exe
+            windows_krokiet_on_windows_all_backends.exe
           if-no-files-found: error
 
       - name: Release
@@ -115,6 +125,8 @@ jobs:
           files: |
             windows_krokiet_on_windows_skia_opengl.exe
             windows_krokiet_on_windows_skia_vulkan.exe
+            windows_krokiet_on_windows_femtovg_wgpu.exe
+            windows_krokiet_on_windows_all_backends.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_12:

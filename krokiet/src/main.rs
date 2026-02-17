@@ -221,6 +221,8 @@ pub(crate) fn print_krokiet_features() {
     features.push("winit_skia_vulkan");
     #[cfg(feature = "winit_software")]
     features.push("winit_software");
+    #[cfg(feature = "femtovg_wgpu")]
+    features.push("femtovg_wgpu");
 
     info!("Krokiet features({}): [{}]", features.len(), features.join(", "));
 }
