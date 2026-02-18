@@ -702,23 +702,23 @@ mod tests {
     const CONTENT: &[u8; 1] = b"a";
 
     fn create_files(dir: &TempDir) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
-        let (src, hard, other) = (dir.path().join("a"), dir.path().join("b"), dir.path().join("c"));
+        let (src, hard, other_file) = (dir.path().join("a"), dir.path().join("b"), dir.path().join("c"));
 
         let mut file = File::create(&src)?;
         file.write_all(CONTENT)?;
         fs::hard_link(&src, &hard)?;
         file.set_modified(*NOW)?;
 
-        let mut file = File::create(&other)?;
+        let mut file = File::create(&other_file)?;
         file.write_all(CONTENT)?;
         file.set_modified(*NOW)?;
-        Ok((src, hard, other))
+        Ok((src, hard, other_file))
     }
 
     #[test]
     fn test_traversal() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let (src, hard, other) = create_files(&dir)?;
+        let (src, hard, other_file) = create_files(&dir)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
@@ -750,7 +750,7 @@ mod tests {
                             modified_date: secs,
                         },
                         FileEntry {
-                            path: other,
+                            path: other_file,
                             size: 1,
                             modified_date: secs,
                         },
@@ -766,87 +766,105 @@ mod tests {
     }
 
     fn create_temp_structure(dir: &TempDir) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
-        let global = dir.path().join("global.txt");
-        let other_dir = dir.path().join("other");
+        let global_file = dir.path().join("global_file.txt");
+        let other_dir = dir.path().join("other_file");
         fs::create_dir_all(&other_dir)?;
-        let other = other_dir.join("other.txt");
+        let other_file = other_dir.join("other_file.txt");
 
-        let mut f = File::create(&global)?;
-        f.write_all(b"global")?;
+        let mut f = File::create(&global_file)?;
+        f.write_all(b"global_file")?;
         f.set_modified(*NOW)?;
 
-        let mut f2 = File::create(&other)?;
-        f2.write_all(b"other")?;
+        let mut f2 = File::create(&other_file)?;
+        f2.write_all(b"other_file")?;
         f2.set_modified(*NOW)?;
 
-        Ok((global, other, other_dir))
+        Ok((global_file, other_file, other_dir))
+    }
+
+    fn run_traversal(common_data: &CommonToolData) -> Vec<FileEntry> {
+        match DirTraversalBuilder::new()
+            .group_by(|_fe| ())
+            .stop_flag(&Arc::default())
+            .common_data(common_data)
+            .build()
+            .run()
+        {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, .. } => {
+                grouped_file_entries.into_values().flatten().collect()
+            }
+            DirTraversalResult::Stopped => panic!("Expect SuccessFiles."),
+        }
     }
 
     #[test]
     fn test_traversal_with_and_without_excluded_dir() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let (global, other, other_dir) = create_temp_structure(&dir)?;
+        let (global_file, other_file, other_dir) = create_temp_structure(&dir)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
         common_data.directories.set_included_paths([dir.path().to_owned()].to_vec());
         common_data.set_minimal_file_size(0);
 
-        match DirTraversalBuilder::new()
-            .group_by(|_fe| ())
-            .stop_flag(&Arc::default())
-            .common_data(&common_data)
-            .build()
-            .run()
-        {
-            DirTraversalResult::SuccessFiles { grouped_file_entries, .. } => {
-                let actual: IndexSet<_> = grouped_file_entries.into_values().flatten().collect();
-                assert_eq!(2, actual.len());
-                assert!(actual.contains(&FileEntry { path: global.clone(), size: 6, modified_date: secs }));
-                assert!(actual.contains(&FileEntry { path: other.clone(), size: 5, modified_date: secs }));
-            }
-            DirTraversalResult::Stopped => panic!("Expect SuccessFiles."),
-        }
+        let actual: IndexSet<_> = run_traversal(&common_data).into_iter().collect();
+        assert_eq!(2, actual.len());
+        dbg!(&actual);
+        assert!(actual.contains(&FileEntry { path: global_file.clone(), size: 11, modified_date: secs }));
+        assert!(actual.contains(&FileEntry { path: other_file.clone(), size: 10, modified_date: secs }));
 
         let mut common_data2 = CommonToolData::new(ToolType::SimilarImages);
         common_data2.directories.set_included_paths([dir.path().to_owned()].to_vec());
         common_data2.directories.set_excluded_paths([other_dir.clone()].to_vec());
         common_data2.set_minimal_file_size(0);
 
-        match DirTraversalBuilder::new()
-            .group_by(|_fe| ())
-            .stop_flag(&Arc::default())
-            .common_data(&common_data2)
-            .build()
-            .run()
-        {
-            DirTraversalResult::SuccessFiles { grouped_file_entries, .. } => {
-                let actual: IndexSet<_> = grouped_file_entries.into_values().flatten().collect();
-                assert_eq!(1, actual.len());
-                assert!(actual.contains(&FileEntry { path: global.clone(), size: 6, modified_date: secs }));
-            }
-            DirTraversalResult::Stopped => panic!("Expect SuccessFiles."),
-        }
+        let actual: IndexSet<_> = run_traversal(&common_data2).into_iter().collect();
+        assert_eq!(1, actual.len());
+        assert!(actual.contains(&FileEntry { path: global_file.clone(), size: 11, modified_date: secs }));
 
-        let mut common_data2 = CommonToolData::new(ToolType::SimilarImages);
-        common_data2.directories.set_included_paths([dir.path().to_owned()].to_vec());
-        common_data2.directories.set_excluded_paths([other.clone()].to_vec());
-        common_data2.set_minimal_file_size(0);
+        let mut common_data3 = CommonToolData::new(ToolType::SimilarImages);
+        common_data3.directories.set_included_paths([dir.path().to_owned()].to_vec());
+        common_data3.directories.set_excluded_paths([other_file.clone()].to_vec());
+        common_data3.set_minimal_file_size(0);
 
-        match DirTraversalBuilder::new()
-            .group_by(|_fe| ())
-            .stop_flag(&Arc::default())
-            .common_data(&common_data2)
-            .build()
-            .run()
-        {
-            DirTraversalResult::SuccessFiles { grouped_file_entries, .. } => {
-                let actual: IndexSet<_> = grouped_file_entries.into_values().flatten().collect();
-                assert_eq!(1, actual.len());
-                assert!(actual.contains(&FileEntry { path: global, size: 6, modified_date: secs }));
-            }
-            DirTraversalResult::Stopped => panic!("Expect SuccessFiles."),
-        }
+        let actual: IndexSet<_> = run_traversal(&common_data3).into_iter().collect();
+        assert_eq!(1, actual.len());
+        assert!(actual.contains(&FileEntry { path: global_file.clone(), size: 11, modified_date: secs }));
+
+        let mut common_data4 = CommonToolData::new(ToolType::SimilarImages);
+        common_data4.directories.set_included_paths([global_file.clone()].to_vec());
+        common_data4.set_minimal_file_size(0);
+
+        let actual: IndexSet<_> = run_traversal(&common_data4).into_iter().collect();
+        assert_eq!(1, actual.len());
+        assert!(actual.contains(&FileEntry { path: global_file.clone(), size: 11, modified_date: secs }));
+
+        let mut common_data5 = CommonToolData::new(ToolType::SimilarImages);
+        common_data5.directories.set_included_paths([global_file.clone(), other_file.clone()].to_vec());
+        common_data5.set_minimal_file_size(0);
+
+        let actual: IndexSet<_> = run_traversal(&common_data5).into_iter().collect();
+        assert_eq!(2, actual.len());
+        assert!(actual.contains(&FileEntry { path: global_file.clone(), size: 11, modified_date: secs }));
+        assert!(actual.contains(&FileEntry { path: other_file.clone(), size: 10, modified_date: secs }));
+
+        let mut common_data6 = CommonToolData::new(ToolType::SimilarImages);
+        common_data6.directories.set_included_paths([global_file.clone(), other_file.clone()].to_vec());
+        common_data6.directories.set_excluded_paths([other_file.clone()].to_vec());
+        common_data6.set_minimal_file_size(0);
+
+        let actual: IndexSet<_> = run_traversal(&common_data6).into_iter().collect();
+        assert_eq!(1, actual.len());
+        assert!(actual.contains(&FileEntry { path: global_file.clone(), size: 11, modified_date: secs }));
+
+        // This test is invalid - other dir should be removed by optimizer
+        // let mut common_data7 = CommonToolData::new(ToolType::SimilarImages);
+        // common_data7.directories.set_included_paths([other_file.clone()].to_vec());
+        // common_data7.directories.set_excluded_paths([other_dir.clone()].to_vec());
+        // common_data7.set_minimal_file_size(0);
+        //
+        // let actual: IndexSet<_> = run_traversal(&common_data7).into_iter().collect();
+        // assert_eq!(0, actual.len());
 
         Ok(())
     }
