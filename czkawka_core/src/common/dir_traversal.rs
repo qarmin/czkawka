@@ -752,6 +752,92 @@ mod tests {
         Ok(())
     }
 
+    fn create_temp_structure(dir: &TempDir) -> io::Result<(PathBuf, PathBuf)> {
+        let global = dir.path().join("global.txt");
+        let other_dir = dir.path().join("other");
+        fs::create_dir_all(&other_dir)?;
+        let other = other_dir.join("other.txt");
+
+        let mut f = File::create(&global)?;
+        f.write_all(b"global")?;
+        f.set_modified(*NOW)?;
+
+        let mut f2 = File::create(&other)?;
+        f2.write_all(b"other")?;
+        f2.set_modified(*NOW)?;
+
+        Ok((global, other))
+    }
+
+    #[test]
+    fn test_traversal_with_and_without_excluded_dir() -> io::Result<()> {
+        let dir = tempfile::Builder::new().tempdir()?;
+        let (global, other) = create_temp_structure(&dir)?;
+        let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
+
+        let mut common_data = CommonToolData::new(ToolType::SimilarImages);
+        common_data.directories.set_included_paths([dir.path().to_owned()].to_vec());
+        common_data.set_minimal_file_size(0);
+
+        match DirTraversalBuilder::new()
+            .group_by(|_fe| ())
+            .stop_flag(&Arc::default())
+            .common_data(&common_data)
+            .build()
+            .run()
+        {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, .. } => {
+                let actual: IndexSet<_> = grouped_file_entries.into_values().flatten().collect();
+                assert_eq!(2, actual.len());
+                assert!(actual.contains(&FileEntry { path: global.clone(), size: 6, modified_date: secs }));
+                assert!(actual.contains(&FileEntry { path: other.clone(), size: 5, modified_date: secs }));
+            }
+            DirTraversalResult::Stopped => panic!("Expect SuccessFiles."),
+        }
+
+        let mut common_data2 = CommonToolData::new(ToolType::SimilarImages);
+        common_data2.directories.set_included_paths([dir.path().to_owned()].to_vec());
+        common_data2.directories.set_excluded_paths([other.clone()].to_vec());
+        common_data2.set_minimal_file_size(0);
+
+        match DirTraversalBuilder::new()
+            .group_by(|_fe| ())
+            .stop_flag(&Arc::default())
+            .common_data(&common_data2)
+            .build()
+            .run()
+        {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, .. } => {
+                let actual: IndexSet<_> = grouped_file_entries.into_values().flatten().collect();
+                assert_eq!(1, actual.len());
+                assert!(actual.contains(&FileEntry { path: global.clone(), size: 6, modified_date: secs }));
+            }
+            DirTraversalResult::Stopped => panic!("Expect SuccessFiles."),
+        }
+
+        let mut common_data2 = CommonToolData::new(ToolType::SimilarImages);
+        common_data2.directories.set_included_paths([dir.path().to_owned()].to_vec());
+        common_data2.directories.set_excluded_paths([other.clone().join("other.txt")].to_vec());
+        common_data2.set_minimal_file_size(0);
+
+        match DirTraversalBuilder::new()
+            .group_by(|_fe| ())
+            .stop_flag(&Arc::default())
+            .common_data(&common_data2)
+            .build()
+            .run()
+        {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, .. } => {
+                let actual: IndexSet<_> = grouped_file_entries.into_values().flatten().collect();
+                assert_eq!(1, actual.len());
+                assert!(actual.contains(&FileEntry { path: global, size: 6, modified_date: secs }));
+            }
+            DirTraversalResult::Stopped => panic!("Expect SuccessFiles."),
+        }
+
+        Ok(())
+    }
+
     #[cfg(target_family = "unix")]
     #[test]
     fn test_traversal_group_by_inode() -> io::Result<()> {
