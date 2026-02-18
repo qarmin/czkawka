@@ -9,15 +9,15 @@ use crate::helpers::messages::Messages;
 
 #[derive(Debug, Clone, Default)]
 pub struct Directories {
-    pub(crate) excluded_directories: Vec<PathBuf>,
     pub(crate) included_directories: Vec<PathBuf>,
+    pub(crate) excluded_directories: Vec<PathBuf>,
     pub(crate) reference_directories: Vec<PathBuf>,
-    pub(crate) excluded_files: Vec<PathBuf>,
     pub(crate) included_files: Vec<PathBuf>,
+    pub(crate) excluded_files: Vec<PathBuf>,
     pub(crate) reference_files: Vec<PathBuf>,
 
-    pub(crate) original_excluded_paths: Vec<PathBuf>,
     pub(crate) original_included_paths: Vec<PathBuf>,
+    pub(crate) original_excluded_paths: Vec<PathBuf>,
     pub(crate) original_reference_paths: Vec<PathBuf>,
 
     pub(crate) exclude_other_filesystems: Option<bool>,
@@ -259,11 +259,27 @@ impl Directories {
         self.reference_directories.iter().any(|e| path.starts_with(e)) || self.reference_files.iter().any(|e| e.as_path() == path)
     }
 
-    pub(crate) fn is_excluded(&self, path: &Path) -> bool {
+    pub(crate) fn is_excluded_dir(&self, path: &Path) -> bool {
         #[cfg(target_family = "windows")]
         let path = normalize_windows_path(path);
         // We're assuming that `excluded_directories` are already normalized
         self.excluded_directories.iter().any(|p| p.as_path() == path)
+    }
+
+    pub(crate) fn is_excluded_file(&self, path: &Path) -> bool {
+        #[cfg(target_family = "windows")]
+        let path = normalize_windows_path(path);
+        // We're assuming that `excluded_files` are already normalized
+        self.excluded_files.iter().any(|p| p.as_path() == path)
+    }
+
+    // Usually it is not required, because if main directory is excluded, then we don't run check on
+    // every single children, different situation is with excluded single file
+    pub(crate) fn is_excluded_item_in_dir(&self, path: &Path) -> bool {
+        #[cfg(target_family = "windows")]
+        let path = normalize_windows_path(path);
+        // We're assuming that `excluded_directories` are already normalized
+        self.excluded_directories.iter().any(|p| p.starts_with(path))
     }
 
     #[cfg(target_family = "unix")]

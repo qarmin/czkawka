@@ -251,6 +251,7 @@ where
                         &mut file_results,
                         &extensions,
                         &excluded_items,
+                        &directories,
                         minimal_file_size,
                         maximal_file_size,
                     );
@@ -389,6 +390,10 @@ fn process_file_in_file_mode(
         return;
     }
 
+    if directories.is_excluded_file(&current_file_name) {
+        return;
+    }
+
     #[cfg(target_family = "unix")]
     if directories.exclude_other_filesystems() {
         match directories.is_on_other_filesystems(&current_file_name) {
@@ -425,6 +430,7 @@ fn process_file_in_file_mode_path_check(
     fe_result: &mut Vec<FileEntry>,
     extensions: &Extensions,
     excluded_items: &ExcludedItems,
+    directories: &Directories,
     minimal_file_size: u64,
     maximal_file_size: u64,
 ) {
@@ -432,6 +438,13 @@ fn process_file_in_file_mode_path_check(
         return;
     };
     if !extensions.check_if_entry_have_valid_extension(file_name) {
+        return;
+    }
+
+    if directories.is_excluded_file(path) {
+        return;
+    }
+    if directories.is_excluded_item_in_dir(path) {
         return;
     }
 
@@ -464,7 +477,7 @@ fn process_dir_in_file_symlink_mode(
     }
 
     let dir_path = entry_data.path();
-    if directories.is_excluded(&dir_path) {
+    if directories.is_excluded_dir(&dir_path) {
         return;
     }
 
@@ -752,7 +765,7 @@ mod tests {
         Ok(())
     }
 
-    fn create_temp_structure(dir: &TempDir) -> io::Result<(PathBuf, PathBuf)> {
+    fn create_temp_structure(dir: &TempDir) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
         let global = dir.path().join("global.txt");
         let other_dir = dir.path().join("other");
         fs::create_dir_all(&other_dir)?;
@@ -766,13 +779,13 @@ mod tests {
         f2.write_all(b"other")?;
         f2.set_modified(*NOW)?;
 
-        Ok((global, other))
+        Ok((global, other, other_dir))
     }
 
     #[test]
     fn test_traversal_with_and_without_excluded_dir() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let (global, other) = create_temp_structure(&dir)?;
+        let (global, other, other_dir) = create_temp_structure(&dir)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
@@ -797,7 +810,7 @@ mod tests {
 
         let mut common_data2 = CommonToolData::new(ToolType::SimilarImages);
         common_data2.directories.set_included_paths([dir.path().to_owned()].to_vec());
-        common_data2.directories.set_excluded_paths([other.clone()].to_vec());
+        common_data2.directories.set_excluded_paths([other_dir.clone()].to_vec());
         common_data2.set_minimal_file_size(0);
 
         match DirTraversalBuilder::new()
@@ -817,7 +830,7 @@ mod tests {
 
         let mut common_data2 = CommonToolData::new(ToolType::SimilarImages);
         common_data2.directories.set_included_paths([dir.path().to_owned()].to_vec());
-        common_data2.directories.set_excluded_paths([other.clone().join("other.txt")].to_vec());
+        common_data2.directories.set_excluded_paths([other.clone()].to_vec());
         common_data2.set_minimal_file_size(0);
 
         match DirTraversalBuilder::new()

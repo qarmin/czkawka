@@ -209,7 +209,7 @@ impl EmptyFolder {
         folder_entries_list: &mut Vec<FolderEntry>,
     ) {
         let next_folder = entry_data.path();
-        if excluded_items.is_excluded(&next_folder) || directories.is_excluded(&next_folder) {
+        if excluded_items.is_excluded(&next_folder) || directories.is_excluded_dir(&next_folder) {
             if non_empty_folder.is_none() {
                 *non_empty_folder = Some(current_folder_as_str.to_string());
             }
