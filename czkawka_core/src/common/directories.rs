@@ -279,7 +279,7 @@ impl Directories {
         #[cfg(target_family = "windows")]
         let path = normalize_windows_path(path);
         // We're assuming that `excluded_directories` are already normalized
-        self.excluded_directories.iter().any(|p| p.starts_with(path))
+        self.excluded_directories.iter().any(|p| p.starts_with(&path))
     }
 
     #[cfg(target_family = "unix")]
