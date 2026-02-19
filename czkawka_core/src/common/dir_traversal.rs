@@ -873,6 +873,7 @@ mod tests {
             modified_date: secs
         }));
 
+        // Other file should be excluded by optimizer, but it works even without it, so we can keep this test, but can be removed if it will start to fail
         let mut common_data6 = CommonToolData::new(ToolType::SimilarImages);
         common_data6.directories.set_included_paths([global_file.clone(), other_file.clone()].to_vec());
         common_data6.directories.set_excluded_paths([other_file].to_vec());

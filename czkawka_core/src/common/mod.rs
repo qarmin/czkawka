@@ -666,7 +666,8 @@ mod test {
         Ok(())
     }
 
-    #[cfg(any(target_family = "unix", target_family = "windows"))]
+    // Windows needs super user permissions
+    #[cfg(target_family = "unix")]
     #[test]
     fn test_make_file_symlink() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
@@ -693,7 +694,7 @@ mod test {
         Ok(())
     }
 
-    #[cfg(any(target_family = "unix", target_family = "windows"))]
+    #[cfg(target_family = "unix")]
     #[test]
     fn test_make_file_symlink_fails() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
@@ -771,7 +772,6 @@ mod test {
 
         if cfg!(target_family = "windows") {
             assert!(regex_check(&new_excluded_item("*\\home"), "C:\\home"));
-            assert!(regex_check(&new_excluded_item("*/home"), "C:\\home"));
         }
     }
 

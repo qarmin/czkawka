@@ -1,12 +1,18 @@
+#[cfg(target_family = "unix")]
 use std::fs;
-use std::os::unix;
+#[cfg(target_family = "unix")]
 use std::sync::Arc;
+#[cfg(target_family = "unix")]
 use std::sync::atomic::AtomicBool;
 
+#[cfg(target_family = "unix")]
 use tempfile::TempDir;
 
+#[cfg(target_family = "unix")]
 use crate::common::tool_data::CommonData;
+#[cfg(target_family = "unix")]
 use crate::common::traits::Search;
+#[cfg(target_family = "unix")]
 use crate::tools::invalid_symlinks::InvalidSymlinks;
 
 #[test]
@@ -19,10 +25,10 @@ fn test_find_invalid_symlinks() {
     fs::write(&valid_target, b"content").unwrap();
 
     let valid_link = path.join("valid_link");
-    unix::fs::symlink(&valid_target, &valid_link).unwrap();
+    std::os::unix::fs::symlink(&valid_target, &valid_link).unwrap();
 
     let invalid_link = path.join("invalid_link");
-    unix::fs::symlink(path.join("non_existent.txt"), &invalid_link).unwrap();
+    std::os::unix::fs::symlink(path.join("non_existent.txt"), &invalid_link).unwrap();
 
     let mut finder = InvalidSymlinks::new();
     finder.set_included_paths(vec![path.to_path_buf()]);
@@ -45,7 +51,7 @@ fn test_no_invalid_symlinks() {
     fs::write(&target, b"content").unwrap();
 
     let link = path.join("link");
-    unix::fs::symlink(&target, &link).unwrap();
+    std::os::unix::fs::symlink(&target, &link).unwrap();
 
     let mut finder = InvalidSymlinks::new();
     finder.set_included_paths(vec![path.to_path_buf()]);
@@ -68,7 +74,7 @@ fn test_deleted_target_creates_invalid_symlink() {
     fs::write(&target, b"content").unwrap();
 
     let link = path.join("link");
-    unix::fs::symlink(&target, &link).unwrap();
+    std::os::unix::fs::symlink(&target, &link).unwrap();
 
     fs::remove_file(&target).unwrap();
 

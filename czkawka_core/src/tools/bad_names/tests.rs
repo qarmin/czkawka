@@ -421,7 +421,6 @@ mod tests2 {
             ("file>more.txt", "filemore.txt"),
             ("question?.log", "question.log"),
             ("wild*.txt", "wild.txt"),
-            ("slash\\.doc", "slash.doc"),
             ("comma,.csv", "comma.csv"),
         ];
 

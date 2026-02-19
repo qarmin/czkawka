@@ -215,3 +215,19 @@ jobs:
           files: |
             windows_czkawka_gui_gtk_412.zip
           token: ${{ secrets.PAT_REPOSITORY }}
+
+
+
+  windows-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup rust version
+        run: |
+          rustup default 1.92.0
+
+      # Both additional features and gtk gui are non-testable due really complicated setup of environment on Windows
+      - name: Test
+        run: |
+          cargo test -p czkawka_core -p krokiet
