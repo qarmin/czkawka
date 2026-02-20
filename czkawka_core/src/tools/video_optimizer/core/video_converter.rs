@@ -59,6 +59,9 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
         .arg("-crf")
         .arg(params.quality.to_string());
 
+    // Add threads for better performance (especially important for AV1)
+    command.arg("-threads").arg("0");
+
     if params.limit_video_size {
         let scale_filter = format!("scale='min({},iw):min({},ih):force_original_aspect_ratio=decrease'", params.max_width, params.max_height);
         command.arg("-vf").arg(scale_filter);

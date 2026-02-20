@@ -19,6 +19,7 @@ pub enum VideoCodec {
     H264,
     H265,
     Av1,
+    Av1Svt,
     Vp9,
 }
 
@@ -28,6 +29,7 @@ impl VideoCodec {
             Self::H264 => "libx264",
             Self::H265 => "libx265",
             Self::Av1 => "libaom-av1",
+            Self::Av1Svt => "libsvtav1",
             Self::Vp9 => "libvpx-vp9",
         }
     }
@@ -37,6 +39,7 @@ impl VideoCodec {
             Self::H264 => "h264",
             Self::H265 => "h265",
             Self::Av1 => "av1",
+            Self::Av1Svt => "av1",
             Self::Vp9 => "vp9",
         }
     }
@@ -50,6 +53,7 @@ impl std::str::FromStr for VideoCodec {
             "h264" | "libx264" => Ok(Self::H264),
             "h265" | "hevc" | "libx265" => Ok(Self::H265),
             "av1" | "libaom-av1" => Ok(Self::Av1),
+            "av1_svt" | "svtav1" | "libsvtav1" => Ok(Self::Av1Svt),
             "vp9" | "libvpx-vp9" => Ok(Self::Vp9),
             _ => Err(flc!("core_unknown_codec", codec = codec)),
         }
