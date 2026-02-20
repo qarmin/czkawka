@@ -45,8 +45,7 @@ slint = { version = "1.15.0", default-features = false, features = [
     "compat-1-2"
 ] }
 
-# TODO - update, it will require a little api
-rodio = { version = "=0.21.1", default-features = false, features = ["playback", "symphonia-all"], optional = true }
+rodio = { version = "0.22.0", default-features = false, features = ["playback", "symphonia-all"], optional = true }
 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
