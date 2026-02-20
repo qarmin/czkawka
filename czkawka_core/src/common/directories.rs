@@ -118,6 +118,9 @@ impl Directories {
             }
         }
 
+        #[cfg(target_family = "windows")]
+        let path = crate::common::normalize_windows_path(&path);
+
         (Some(path), messages)
     }
 

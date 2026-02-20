@@ -1,3 +1,19 @@
+## Version 11.0.1 - ??.??.2026r
+### Core
+- Fixed problem with not working excluded folders on windows - [#1783]()
+
+### GTK GUI
+- Added missing Duration column to similar videos notebook, fixing panic that was occurring after analyzing videos - [#1793](https://github.com/qarmin/czkawka/pull/1793)
+- Removed warning log message displayed for non-existing excluded directories - [#1795](https://github.com/qarmin/czkawka/pull/1795)
+- Fixed panic that was occurring when double-clicking on a folder from the included or excluded directory list - [#1799](https://github.com/qarmin/czkawka/pull/1799)
+
+### Krokiet
+- Increased, default maximum file size limit - 2GB -> 2TB - []()
+
+## Prebuild binaries
+- Added new Krokiet wgpu binaries - []()
+- Added new all-in-one krokiet binaries, with all backends included - []()
+
 ## Version 11.0.0 - 14.02.2026r
 
 ### Breaking changes
