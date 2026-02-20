@@ -4,7 +4,7 @@
 use std::io::{BufReader, Cursor};
 
 #[cfg(feature = "audio")]
-use rodio::{Decoder, OutputStreamBuilder, Sink};
+use rodio::{Decoder, DeviceSinkBuilder, Player};
 
 const DEFAULT_STOP_AUDIO: &[u8] = include_bytes!("../audio/stop_bit.mp3");
 
@@ -70,9 +70,9 @@ impl AudioPlayer {
 
     #[cfg(feature = "audio")]
     fn play_audio_blocking(audio_data: &[u8]) -> Result<(), String> {
-        let stream_handle = OutputStreamBuilder::open_default_stream().map_err(|e| format!("Failed to get audio output stream: {e}"))?;
+        let stream_handle = DeviceSinkBuilder::open_default_sink().map_err(|e| format!("Failed to get audio output stream: {e}"))?;
 
-        let sink = Sink::connect_new(stream_handle.mixer());
+        let sink = Player::connect_new(stream_handle.mixer());
 
         let cursor = Cursor::new(audio_data.to_vec());
         let buf_reader = BufReader::new(cursor);
