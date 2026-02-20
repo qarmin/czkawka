@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_core"
-version = "11.0.0"
+version = "11.0.1"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
 rust-version = "1.92.0"
@@ -32,7 +32,7 @@ bitflags = "2.6"
 lofty = "0.23"
 
 # Needed by broken files
-zip = { version = "7.0", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
+zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 lopdf = "0.39.0"
 
 # Needed by audio similarity feature

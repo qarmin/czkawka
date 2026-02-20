@@ -1,6 +1,6 @@
 [package]
 name = "krokiet"
-version = "11.0.0"
+version = "11.0.1"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
 rust-version = "1.92.0"
@@ -11,7 +11,7 @@ repository = "https://github.com/qarmin/czkawka"
 build = "build.rs"
 
 [dependencies]
-czkawka_core = { version = "11.0.0", path = "../czkawka_core" }
+czkawka_core = { version = "11.0.1", path = "../czkawka_core" }
 chrono = "0.4.38"
 open = "5.3"
 crossbeam-channel = "0.5"
@@ -45,7 +45,7 @@ slint = { version = "1.15.0", default-features = false, features = [
     "compat-1-2"
 ] }
 
-rodio = { version = "0.21.1", default-features = false, features = ["playback", "symphonia-all"], optional = true }
+rodio = { version = "0.22.0", default-features = false, features = ["playback", "symphonia-all"], optional = true }
 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
@@ -61,6 +61,7 @@ skia_opengl = ["slint/renderer-skia-opengl"]
 skia_vulkan = ["slint/renderer-skia-vulkan"]
 software = ["slint/renderer-software"]
 femtovg = ["slint/renderer-femtovg"]
+femtovg_wgpu = ["slint/renderer-femtovg-wgpu"]
 winit_femtovg = ["slint/renderer-winit-femtovg"]
 winit_skia_opengl = ["slint/renderer-winit-skia-opengl"]
 winit_skia_vulkan = ["slint/renderer-winit-skia-vulkan"]

@@ -2,22 +2,21 @@ use std::path::{Path, PathBuf};
 #[cfg(target_family = "unix")]
 use std::{fs, os::unix::fs::MetadataExt};
 
-use crate::common::normalize_windows_path;
 use crate::common::traits::ResultEntry;
 use crate::flc;
 use crate::helpers::messages::Messages;
 
 #[derive(Debug, Clone, Default)]
 pub struct Directories {
-    pub(crate) excluded_directories: Vec<PathBuf>,
     pub(crate) included_directories: Vec<PathBuf>,
+    pub(crate) excluded_directories: Vec<PathBuf>,
     pub(crate) reference_directories: Vec<PathBuf>,
-    pub(crate) excluded_files: Vec<PathBuf>,
     pub(crate) included_files: Vec<PathBuf>,
+    pub(crate) excluded_files: Vec<PathBuf>,
     pub(crate) reference_files: Vec<PathBuf>,
 
-    pub(crate) original_excluded_paths: Vec<PathBuf>,
     pub(crate) original_included_paths: Vec<PathBuf>,
+    pub(crate) original_excluded_paths: Vec<PathBuf>,
     pub(crate) original_reference_paths: Vec<PathBuf>,
 
     pub(crate) exclude_other_filesystems: Option<bool>,
@@ -33,37 +32,22 @@ impl Directories {
     pub(crate) fn set_reference_paths(&mut self, reference_paths: Vec<PathBuf>) -> Messages {
         self.reference_files = Vec::new();
         self.reference_directories = Vec::new();
-        let paths = if cfg!(target_family = "windows") {
-            reference_paths.clone().into_iter().map(normalize_windows_path).collect()
-        } else {
-            reference_paths.clone()
-        };
-        self.original_reference_paths = reference_paths;
-        self.process_paths(paths, true, false)
+        self.original_reference_paths = reference_paths.clone();
+        self.process_paths(reference_paths, true, false)
     }
 
     pub(crate) fn set_included_paths(&mut self, included_paths: Vec<PathBuf>) -> Messages {
         self.included_files = Vec::new();
         self.included_directories = Vec::new();
-        let paths = if cfg!(target_family = "windows") {
-            included_paths.clone().into_iter().map(normalize_windows_path).collect()
-        } else {
-            included_paths.clone()
-        };
-        self.original_included_paths = included_paths;
-        self.process_paths(paths, false, false)
+        self.original_included_paths = included_paths.clone();
+        self.process_paths(included_paths, false, false)
     }
 
     pub(crate) fn set_excluded_paths(&mut self, excluded_paths: Vec<PathBuf>) -> Messages {
         self.excluded_files = Vec::new();
         self.excluded_directories = Vec::new();
-        let paths = if cfg!(target_family = "windows") {
-            excluded_paths.clone().into_iter().map(normalize_windows_path).collect()
-        } else {
-            excluded_paths.clone()
-        };
-        self.original_excluded_paths = excluded_paths;
-        self.process_paths(paths, false, true)
+        self.original_excluded_paths = excluded_paths.clone();
+        self.process_paths(excluded_paths, false, true)
     }
 
     fn process_paths(&mut self, paths: Vec<PathBuf>, is_reference: bool, is_excluded: bool) -> Messages {
@@ -84,6 +68,9 @@ impl Directories {
             messages.extend_with_another_messages(msg);
 
             if let Some(dir) = dir {
+                #[cfg(target_family = "windows")]
+                let dir = crate::common::normalize_windows_path(&dir);
+
                 match (dir.is_file(), is_reference, is_excluded) {
                     (false, true, false) => self.reference_directories.push(dir),
                     (false, false, false) => self.included_directories.push(dir),
@@ -130,6 +117,9 @@ impl Directories {
                 path = dir;
             }
         }
+
+        #[cfg(target_family = "windows")]
+        let path = crate::common::normalize_windows_path(&path);
 
         (Some(path), messages)
     }
@@ -259,11 +249,30 @@ impl Directories {
         self.reference_directories.iter().any(|e| path.starts_with(e)) || self.reference_files.iter().any(|e| e.as_path() == path)
     }
 
-    pub(crate) fn is_excluded(&self, path: &Path) -> bool {
+    pub(crate) fn is_excluded_dir(&self, path: &Path) -> bool {
         #[cfg(target_family = "windows")]
-        let path = normalize_windows_path(path);
+        let path = crate::common::normalize_windows_path(path);
         // We're assuming that `excluded_directories` are already normalized
         self.excluded_directories.iter().any(|p| p.as_path() == path)
+    }
+
+    pub(crate) fn is_excluded_file(&self, path: &Path) -> bool {
+        #[cfg(target_family = "windows")]
+        let path = crate::common::normalize_windows_path(path);
+        // We're assuming that `excluded_files` are already normalized
+        self.excluded_files.iter().any(|p| p.as_path() == path)
+    }
+
+    // Usually it is not required, because if main directory is excluded, then we don't run check on
+    // every single children, different situation is with excluded single file
+    pub(crate) fn is_excluded_item_in_dir(&self, path: &Path) -> bool {
+        #[cfg(target_family = "windows")]
+        let path = crate::common::normalize_windows_path(path);
+        #[cfg(target_family = "windows")]
+        let path = &path;
+        // We're assuming that `excluded_directories` are already normalized
+
+        self.excluded_directories.iter().any(|p| path.starts_with(p))
     }
 
     #[cfg(target_family = "unix")]

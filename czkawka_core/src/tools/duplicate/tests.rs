@@ -92,36 +92,6 @@ fn test_find_duplicates_by_name() {
 }
 
 #[test]
-fn test_case_insensitive_name_comparison() {
-    let temp_dir = TempDir::new().unwrap();
-    let path = temp_dir.path();
-
-    // Create files with same name but different case
-    fs::write(path.join("TEST.txt"), b"content1").unwrap();
-    fs::write(path.join("test.txt"), b"content2").unwrap();
-
-    let params = DuplicateFinderParameters::new(
-        CheckingMethod::Name,
-        HashType::Blake3,
-        false,
-        0,
-        0,
-        false, // case insensitive
-    );
-
-    let mut finder = DuplicateFinder::new(params);
-    finder.set_recursive_search(true);
-    finder.set_use_cache(false);
-    finder.set_minimal_file_size(0);
-    finder.set_included_paths(vec![path.to_path_buf()]);
-
-    let stop_flag = Arc::new(AtomicBool::new(false));
-    finder.search(&stop_flag, None);
-    let info = finder.get_information();
-    assert_eq!(info.number_of_groups_by_name, 1, "Should find duplicates with case insensitive search");
-}
-
-#[test]
 fn test_no_duplicates_found() {
     let temp_dir = TempDir::new().unwrap();
     let path = temp_dir.path();

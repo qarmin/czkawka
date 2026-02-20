@@ -136,7 +136,7 @@ pub(crate) fn check_folder_children(
     }
 
     let next_item = entry_data.path();
-    if directories.is_excluded(&next_item) {
+    if directories.is_excluded_dir(&next_item) {
         return;
     }
 
