@@ -700,6 +700,13 @@ mod tests {
     static NOW: std::sync::LazyLock<SystemTime> = std::sync::LazyLock::new(|| SystemTime::UNIX_EPOCH + Duration::new(100, 0));
     const CONTENT: &[u8; 1] = b"a";
 
+    fn normalize_path(item: &Path) -> PathBuf {
+        #[cfg(target_family = "windows")]
+        return crate::common::normalize_windows_path(item);
+        #[cfg(not(target_family = "windows"))]
+        return item.to_path_buf();
+    }
+
     fn create_files(dir: &Path) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
         let (src, hard, other_file) = (dir.join("a"), dir.join("b"), dir.join("c"));
 
@@ -711,7 +718,8 @@ mod tests {
         let mut file = File::create(&other_file)?;
         file.write_all(CONTENT)?;
         file.set_modified(*NOW)?;
-        Ok((src, hard, other_file))
+
+        Ok((normalize_path(&src), normalize_path(&hard), normalize_path(&other_file)))
     }
 
     #[test]
@@ -742,17 +750,17 @@ mod tests {
                 assert_eq!(
                     IndexSet::from([
                         FileEntry {
-                            path: src,
+                            path: normalize_path(&src),
                             size: 1,
                             modified_date: secs,
                         },
                         FileEntry {
-                            path: hard,
+                            path: normalize_path(&hard),
                             size: 1,
                             modified_date: secs,
                         },
                         FileEntry {
-                            path: other_file,
+                            path: normalize_path(&other_file),
                             size: 1,
                             modified_date: secs,
                         },
@@ -781,6 +789,10 @@ mod tests {
         f2.write_all(b"other_file")?;
         f2.set_modified(*NOW)?;
 
+        let global_file = normalize_path(&global_file);
+        let other_file = normalize_path(&other_file);
+        let other_dir = normalize_path(&other_dir);
+
         Ok((global_file, other_file, other_dir))
     }
 
@@ -801,8 +813,7 @@ mod tests {
     fn test_traversal_with_and_without_excluded_dir() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let dir_path = dir.path().to_path_buf();
-        #[cfg(target_family = "windows")]
-        let dir_path = crate::common::normalize_windows_path(&dir_path);
+        let dir_path = normalize_path(&dir_path);
         let (global_file, other_file, other_dir) = create_temp_structure(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
@@ -810,7 +821,8 @@ mod tests {
         common_data.directories.set_included_paths([dir.path().to_owned()].to_vec());
         common_data.set_minimal_file_size(0);
 
-        let actual: IndexSet<_> = run_traversal(&common_data).into_iter().collect();
+        let mut actual: Vec<_> = run_traversal(&common_data);
+        actual.iter_mut().for_each(|e| e.path = normalize_path(&e.path));
         assert_eq!(2, actual.len());
         assert!(actual.contains(&FileEntry {
             path: global_file.clone(),
@@ -828,7 +840,8 @@ mod tests {
         common_data2.directories.set_excluded_paths([other_dir].to_vec());
         common_data2.set_minimal_file_size(0);
 
-        let actual: IndexSet<_> = run_traversal(&common_data2).into_iter().collect();
+        let mut actual: Vec<_> = run_traversal(&common_data2);
+        actual.iter_mut().for_each(|e| e.path = normalize_path(&e.path));
         assert_eq!(1, actual.len());
         assert!(actual.contains(&FileEntry {
             path: global_file.clone(),
@@ -841,7 +854,8 @@ mod tests {
         common_data3.directories.set_excluded_paths([other_file.clone()].to_vec());
         common_data3.set_minimal_file_size(0);
 
-        let actual: IndexSet<_> = run_traversal(&common_data3).into_iter().collect();
+        let mut actual: Vec<_> = run_traversal(&common_data3);
+        actual.iter_mut().for_each(|e| e.path = normalize_path(&e.path));
         assert_eq!(1, actual.len());
         assert!(actual.contains(&FileEntry {
             path: global_file.clone(),
@@ -853,7 +867,8 @@ mod tests {
         common_data4.directories.set_included_paths([global_file.clone()].to_vec());
         common_data4.set_minimal_file_size(0);
 
-        let actual: IndexSet<_> = run_traversal(&common_data4).into_iter().collect();
+        let mut actual: Vec<_> = run_traversal(&common_data4);
+        actual.iter_mut().for_each(|e| e.path = normalize_path(&e.path));
         assert_eq!(1, actual.len());
         assert!(actual.contains(&FileEntry {
             path: global_file.clone(),
@@ -865,7 +880,8 @@ mod tests {
         common_data5.directories.set_included_paths([global_file.clone(), other_file.clone()].to_vec());
         common_data5.set_minimal_file_size(0);
 
-        let actual: IndexSet<_> = run_traversal(&common_data5).into_iter().collect();
+        let mut actual: Vec<_> = run_traversal(&common_data5);
+        actual.iter_mut().for_each(|e| e.path = normalize_path(&e.path));
         assert_eq!(2, actual.len());
         assert!(actual.contains(&FileEntry {
             path: global_file.clone(),
@@ -884,7 +900,8 @@ mod tests {
         common_data6.directories.set_excluded_paths([other_file].to_vec());
         common_data6.set_minimal_file_size(0);
 
-        let actual: IndexSet<_> = run_traversal(&common_data6).into_iter().collect();
+        let mut actual: Vec<_> = run_traversal(&common_data6);
+        actual.iter_mut().for_each(|e| e.path = normalize_path(&e.path));
         assert_eq!(1, actual.len());
         assert!(actual.contains(&FileEntry {
             path: global_file,
@@ -908,7 +925,7 @@ mod tests {
     #[test]
     fn test_traversal_group_by_inode() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let dir_path = dir.path().to_path_buf();
+        let dir_path = normalize_path(&dir.path());
         let (src, _, other) = create_files(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
@@ -931,12 +948,12 @@ mod tests {
                 assert_eq!(
                     IndexSet::from([
                         FileEntry {
-                            path: src,
+                            path: normalize_path(&src),
                             size: 1,
                             modified_date: secs,
                         },
                         FileEntry {
-                            path: other,
+                            path: normalize_path(&other),
                             size: 1,
                             modified_date: secs,
                         },

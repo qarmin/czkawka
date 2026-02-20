@@ -33,37 +33,22 @@ impl Directories {
     pub(crate) fn set_reference_paths(&mut self, reference_paths: Vec<PathBuf>) -> Messages {
         self.reference_files = Vec::new();
         self.reference_directories = Vec::new();
-        let paths = if cfg!(target_family = "windows") {
-            reference_paths.clone().into_iter().map(normalize_windows_path).collect()
-        } else {
-            reference_paths.clone()
-        };
-        self.original_reference_paths = reference_paths;
-        self.process_paths(paths, true, false)
+        self.original_reference_paths = reference_paths.clone();
+        self.process_paths(reference_paths, true, false)
     }
 
     pub(crate) fn set_included_paths(&mut self, included_paths: Vec<PathBuf>) -> Messages {
         self.included_files = Vec::new();
         self.included_directories = Vec::new();
-        let paths = if cfg!(target_family = "windows") {
-            included_paths.clone().into_iter().map(normalize_windows_path).collect()
-        } else {
-            included_paths.clone()
-        };
-        self.original_included_paths = included_paths;
-        self.process_paths(paths, false, false)
+        self.original_included_paths = included_paths.clone();
+        self.process_paths(included_paths, false, false)
     }
 
     pub(crate) fn set_excluded_paths(&mut self, excluded_paths: Vec<PathBuf>) -> Messages {
         self.excluded_files = Vec::new();
         self.excluded_directories = Vec::new();
-        let paths = if cfg!(target_family = "windows") {
-            excluded_paths.clone().into_iter().map(normalize_windows_path).collect()
-        } else {
-            excluded_paths.clone()
-        };
-        self.original_excluded_paths = excluded_paths;
-        self.process_paths(paths, false, true)
+        self.original_excluded_paths = excluded_paths.clone();
+        self.process_paths(excluded_paths, false, true)
     }
 
     fn process_paths(&mut self, paths: Vec<PathBuf>, is_reference: bool, is_excluded: bool) -> Messages {
@@ -84,6 +69,9 @@ impl Directories {
             messages.extend_with_another_messages(msg);
 
             if let Some(dir) = dir {
+                #[cfg(target_family = "windows")]
+                let dir = normalize_windows_path(&dir);
+
                 match (dir.is_file(), is_reference, is_excluded) {
                     (false, true, false) => self.reference_directories.push(dir),
                     (false, false, false) => self.included_directories.push(dir),
@@ -281,6 +269,7 @@ impl Directories {
         #[cfg(target_family = "windows")]
         let path = &path;
         // We're assuming that `excluded_directories` are already normalized
+
         self.excluded_directories.iter().any(|p| path.starts_with(p))
     }
 
