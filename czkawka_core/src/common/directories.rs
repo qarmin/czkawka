@@ -278,8 +278,10 @@ impl Directories {
     pub(crate) fn is_excluded_item_in_dir(&self, path: &Path) -> bool {
         #[cfg(target_family = "windows")]
         let path = normalize_windows_path(path);
+        #[cfg(target_family = "windows")]
+        let path = &path;
         // We're assuming that `excluded_directories` are already normalized
-        self.excluded_directories.iter().any(|p| p.starts_with(&path))
+        self.excluded_directories.iter().any(|p| path.starts_with(p))
     }
 
     #[cfg(target_family = "unix")]

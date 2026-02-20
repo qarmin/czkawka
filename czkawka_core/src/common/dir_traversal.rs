@@ -677,7 +677,6 @@ mod tests {
     use std::{fs, io};
 
     use indexmap::IndexSet;
-    use tempfile::TempDir;
 
     use super::*;
     use crate::common::tool_data::*;
@@ -701,8 +700,8 @@ mod tests {
     static NOW: std::sync::LazyLock<SystemTime> = std::sync::LazyLock::new(|| SystemTime::UNIX_EPOCH + Duration::new(100, 0));
     const CONTENT: &[u8; 1] = b"a";
 
-    fn create_files(dir: &TempDir) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
-        let (src, hard, other_file) = (dir.path().join("a"), dir.path().join("b"), dir.path().join("c"));
+    fn create_files(dir: &Path) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
+        let (src, hard, other_file) = (dir.join("a"), dir.join("b"), dir.join("c"));
 
         let mut file = File::create(&src)?;
         file.write_all(CONTENT)?;
@@ -718,7 +717,10 @@ mod tests {
     #[test]
     fn test_traversal() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let (src, hard, other_file) = create_files(&dir)?;
+        let dir_path = dir.path().to_path_buf();
+        #[cfg(target_family = "windows")]
+        let dir_path = crate::common::normalize_windows_path(&dir_path);
+        let (src, hard, other_file) = create_files(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
@@ -765,9 +767,9 @@ mod tests {
         Ok(())
     }
 
-    fn create_temp_structure(dir: &TempDir) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
-        let global_file = dir.path().join("global_file.txt");
-        let other_dir = dir.path().join("other_file");
+    fn create_temp_structure(dir: &Path) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
+        let global_file = dir.join("global_file.txt");
+        let other_dir = dir.join("other_file");
         fs::create_dir_all(&other_dir)?;
         let other_file = other_dir.join("other_file.txt");
 
@@ -798,7 +800,10 @@ mod tests {
     #[test]
     fn test_traversal_with_and_without_excluded_dir() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let (global_file, other_file, other_dir) = create_temp_structure(&dir)?;
+        let dir_path = dir.path().to_path_buf();
+        #[cfg(target_family = "windows")]
+        let dir_path = crate::common::normalize_windows_path(&dir_path);
+        let (global_file, other_file, other_dir) = create_temp_structure(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
@@ -903,7 +908,8 @@ mod tests {
     #[test]
     fn test_traversal_group_by_inode() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let (src, _, other) = create_files(&dir)?;
+        let dir_path = dir.path().to_path_buf();
+        let (src, _, other) = create_files(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
@@ -949,11 +955,12 @@ mod tests {
     #[test]
     fn test_traversal_group_by_inode() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let (src, hard, other) = create_files(&dir)?;
+        let dir_path =  crate::common::normalize_windows_path(&dir.path());
+        let (src, hard, other) = create_files(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail duration from epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
-        common_data.directories.set_included_paths([dir.path().to_owned()].to_vec());
+        common_data.directories.set_included_paths([dir_path.to_owned()].to_vec());
         common_data.set_minimal_file_size(0);
 
         match DirTraversalBuilder::new()
