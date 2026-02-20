@@ -701,7 +701,26 @@ mod tests {
     const CONTENT: &[u8; 1] = b"a";
 
     fn normalize_path(item: &Path) -> PathBuf {
-        let canonicalized = item.canonicalize().unwrap_or_else(|_| item.to_path_buf());
+        let canonicalized =
+        if cfg!(windows) {
+            // Only canonicalize if it's not a network path
+            // This can be done by checking if path starts with \\?\UNC\
+            if let Ok(dir_can) = item.canonicalize()
+                && let Some(dir_can_str) = dir_can.to_string_lossy().strip_prefix(r"\\?\")
+                && dir_can_str.chars().nth(1) == Some(':')
+            {
+                PathBuf::from(dir_can_str)
+            } else {
+                item.to_path_buf()
+            }
+        } else {
+            if let Ok(dir) = item.canonicalize() {
+                dir
+            } else {
+                item.to_path_buf()
+            }
+        };
+
         #[cfg(target_family = "windows")]
         return crate::common::normalize_windows_path(&canonicalized);
         #[cfg(not(target_family = "windows"))]
