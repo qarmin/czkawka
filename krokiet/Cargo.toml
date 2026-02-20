@@ -1,6 +1,6 @@
 [package]
 name = "krokiet"
-version = "11.0.0"
+version = "11.0.1"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
 rust-version = "1.92.0"
@@ -11,7 +11,7 @@ repository = "https://github.com/qarmin/czkawka"
 build = "build.rs"
 
 [dependencies]
-czkawka_core = { version = "11.0.0", path = "../czkawka_core" }
+czkawka_core = { version = "11.0.1", path = "../czkawka_core" }
 chrono = "0.4.38"
 open = "5.3"
 crossbeam-channel = "0.5"
@@ -45,7 +45,8 @@ slint = { version = "1.15.0", default-features = false, features = [
     "compat-1-2"
 ] }
 
-rodio = { version = "0.21.1", default-features = false, features = ["playback", "symphonia-all"], optional = true }
+# TODO - update, it will require a little api
+rodio = { version = "=0.21.1", default-features = false, features = ["playback", "symphonia-all"], optional = true }
 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}

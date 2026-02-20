@@ -1,6 +1,6 @@
 [package]
 name = "czkawka_core"
-version = "11.0.0"
+version = "11.0.1"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
 rust-version = "1.92.0"

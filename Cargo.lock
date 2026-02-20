@@ -873,9 +873,9 @@ dependencies = [
 
 [[package]]
 name = "cairo-rs"
-version = "0.22.0-alpha.3"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1bfa0ba0f289c6b72e05b790b65316d186d2a39c7bf39709080cbd615a6c176"
+checksum = "5cc8d9aa793480744cd9a0524fef1a2e197d9eaa0f739cde19d16aba530dcb95"
 dependencies = [
  "bitflags 2.11.0",
  "cairo-sys-rs",
@@ -1551,7 +1551,7 @@ checksum = "f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f"
 
 [[package]]
 name = "czkawka_cli"
-version = "11.0.0"
+version = "11.0.1"
 dependencies = [
  "clap",
  "crossbeam-channel",
@@ -1564,7 +1564,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_core"
-version = "11.0.0"
+version = "11.0.1"
 dependencies = [
  "ashpd",
  "bincode 1.3.3",
@@ -1625,7 +1625,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "11.0.0"
+version = "11.0.1"
 dependencies = [
  "chrono",
  "crossbeam-channel",
@@ -2630,9 +2630,9 @@ dependencies = [
 
 [[package]]
 name = "gdk-pixbuf"
-version = "0.22.0-alpha.3"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48490c42fe0e3bdc0d2a351ef18d22cafd77fa3194c25e25e8b2c65e5d61a667"
+checksum = "25f420376dbee041b2db374ce4573892a36222bb3f6c0c43e24f0d67eae9b646"
 dependencies = [
  "gdk-pixbuf-sys",
  "gio",
@@ -2655,9 +2655,9 @@ dependencies = [
 
 [[package]]
 name = "gdk4"
-version = "0.11.0-alpha.3"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b54e5928b29e90239e9bafe455cefdd364c765a525e1f8afb423b768e77700e4"
+checksum = "2e9a95621b043a35e70ea9f6da89e1a471658ee5771258874f000a11f6a9cb89"
 dependencies = [
  "cairo-rs",
  "gdk-pixbuf",
@@ -2784,9 +2784,9 @@ checksum = "e629b9b98ef3dd8afe6ca2bd0f89306cec16d43d907889945bc5d6687f2f13c7"
 
 [[package]]
 name = "gio"
-version = "0.22.0-alpha.3"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03fa804f55f67d88f4e8fcc43a045c2243032ab814e9f024ca9af877578de589"
+checksum = "2bfcf4050773ce77b59512146e487d0eb232bec6665fe65e89bdf3c3f52525d5"
 dependencies = [
  "futures-channel",
  "futures-core",
@@ -2825,9 +2825,9 @@ dependencies = [
 
 [[package]]
 name = "glib"
-version = "0.22.0-alpha.2"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d97df62440eff82e6c4dd9874b5ac268eecff9395ea34eeec12364ab948bee8"
+checksum = "9a3b79a62980e85d61aae88988e5bcca6a35f05b0008e1333aa43bd61ef9bf35"
 dependencies = [
  "bitflags 2.11.0",
  "futures-channel",
@@ -3003,9 +3003,9 @@ dependencies = [
 
 [[package]]
 name = "graphene-rs"
-version = "0.22.0-alpha.3"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c1cda278bf45e78f114d113fb8d6c35520282dc68f2431b63dfcd7b7b756f52"
+checksum = "c7d1b7881f96869f49808b6adfe906a93a57a34204952253444d68c3208d71f1"
 dependencies = [
  "glib",
  "graphene-sys",
@@ -3026,9 +3026,9 @@ dependencies = [
 
 [[package]]
 name = "gsk4"
-version = "0.11.0-alpha.3"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fa8b404073dd71e616a50d8545c9ae4e7e821f42321c39f1d06a84cf6c487e6"
+checksum = "c84a7e778764e5c8e67440c616e11a0da21828bbf04490655c4058f6c917af6f"
 dependencies = [
  "cairo-rs",
  "gdk4",
@@ -3057,9 +3057,9 @@ dependencies = [
 
 [[package]]
 name = "gtk4"
-version = "0.11.0-alpha.3"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb5270bc4be0a32b204e5f434b82baa9e22579d85b64189b08fd72e16d1c2b4d"
+checksum = "56f78f0fe325e541c40f1a7f647d324bdda34cf67fe217c2843fd9c18ae514c9"
 dependencies = [
  "cairo-rs",
  "field-offset",
@@ -4288,7 +4288,7 @@ checksum = "e2db585e1d738fc771bf08a151420d3ed193d9d895a36df7f6f8a9456b911ddc"
 
 [[package]]
 name = "krokiet"
-version = "11.0.0"
+version = "11.0.1"
 dependencies = [
  "chrono",
  "crossbeam-channel",
@@ -5746,9 +5746,9 @@ dependencies = [
 
 [[package]]
 name = "pango"
-version = "0.22.0-alpha.3"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "297277b061aa061399e39bc7cb5a5f8908fb0488a6fd472cc590f5add58e7188"
+checksum = "25d8f224eddef627b896d2f7b05725b3faedbd140e0e8343446f0d34f34238ee"
 dependencies = [
  "gio",
  "glib",
