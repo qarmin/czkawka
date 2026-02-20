@@ -1,18 +1,22 @@
 ## Version 11.0.1 - ??.??.2026r
 ### Core
-- Fixed problem with not working excluded folders on windows - [#1783]()
+- Fixed problem with not working excluded folders on windows - [#1808](https://github.com/qarmin/czkawka/pull/1808)
 
 ### GTK GUI
 - Added missing Duration column to similar videos notebook, fixing panic that was occurring after analyzing videos - [#1793](https://github.com/qarmin/czkawka/pull/1793)
 - Removed warning log message displayed for non-existing excluded directories - [#1795](https://github.com/qarmin/czkawka/pull/1795)
 - Fixed panic that was occurring when double-clicking on a folder from the included or excluded directory list - [#1799](https://github.com/qarmin/czkawka/pull/1799)
+- Update to stable gtk4-rs 0.11 - [#1808](https://github.com/qarmin/czkawka/pull/1808)
 
 ### Krokiet
-- Increased, default maximum file size limit - 2GB -> 2TB - []()
+- Increased, default maximum file size limit - [#1808](https://github.com/qarmin/czkawka/pull/1808)
 
 ## Prebuild binaries
-- Added new Krokiet wgpu binaries - []()
-- Added new all-in-one krokiet binaries, with all backends included - []()
+- Added new Krokiet wgpu binaries
+- Added new all-in-one krokiet binaries, with all backends included
+
+## CI
+- Added Windows Test CI
 
 ## Version 11.0.0 - 14.02.2026r
 

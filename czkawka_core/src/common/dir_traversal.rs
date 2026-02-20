@@ -701,8 +701,7 @@ mod tests {
     const CONTENT: &[u8; 1] = b"a";
 
     fn normalize_path(item: &Path) -> PathBuf {
-        let canonicalized =
-        if cfg!(windows) {
+        let canonicalized = if cfg!(windows) {
             // Only canonicalize if it's not a network path
             // This can be done by checking if path starts with \\?\UNC\
             if let Ok(dir_can) = item.canonicalize()
@@ -714,11 +713,7 @@ mod tests {
                 item.to_path_buf()
             }
         } else {
-            if let Ok(dir) = item.canonicalize() {
-                dir
-            } else {
-                item.to_path_buf()
-            }
+            if let Ok(dir) = item.canonicalize() { dir } else { item.to_path_buf() }
         };
 
         #[cfg(target_family = "windows")]
