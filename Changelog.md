@@ -1,4 +1,4 @@
-## Version 11.0.1 - ??.??.2026r
+## Version 11.0.1 - 20.02.2026r
 ### Core
 - Fixed issue with excluded folders not working on Windows - [#1808](https://github.com/qarmin/czkawka/pull/1808)
 
