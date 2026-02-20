@@ -1,7 +1,5 @@
 use std::path::Path;
 
-#[cfg(not(target_family = "unix"))]
-use crate::common::normalize_windows_path;
 use crate::common::regex_check;
 use crate::helpers::messages::Messages;
 
@@ -95,7 +93,7 @@ impl ExcludedItems {
             return false;
         }
         #[cfg(target_family = "windows")]
-        let path = normalize_windows_path(path);
+        let path = crate::common::normalize_windows_path(path);
 
         let path_str = path.to_string_lossy();
 

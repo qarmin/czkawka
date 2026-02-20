@@ -2,7 +2,6 @@ use std::path::{Path, PathBuf};
 #[cfg(target_family = "unix")]
 use std::{fs, os::unix::fs::MetadataExt};
 
-use crate::common::normalize_windows_path;
 use crate::common::traits::ResultEntry;
 use crate::flc;
 use crate::helpers::messages::Messages;
@@ -70,7 +69,7 @@ impl Directories {
 
             if let Some(dir) = dir {
                 #[cfg(target_family = "windows")]
-                let dir = normalize_windows_path(&dir);
+                let dir = crate::common::normalize_windows_path(&dir);
 
                 match (dir.is_file(), is_reference, is_excluded) {
                     (false, true, false) => self.reference_directories.push(dir),
@@ -249,14 +248,14 @@ impl Directories {
 
     pub(crate) fn is_excluded_dir(&self, path: &Path) -> bool {
         #[cfg(target_family = "windows")]
-        let path = normalize_windows_path(path);
+        let path = crate::common::normalize_windows_path(path);
         // We're assuming that `excluded_directories` are already normalized
         self.excluded_directories.iter().any(|p| p.as_path() == path)
     }
 
     pub(crate) fn is_excluded_file(&self, path: &Path) -> bool {
         #[cfg(target_family = "windows")]
-        let path = normalize_windows_path(path);
+        let path = crate::common::normalize_windows_path(path);
         // We're assuming that `excluded_files` are already normalized
         self.excluded_files.iter().any(|p| p.as_path() == path)
     }
@@ -265,7 +264,7 @@ impl Directories {
     // every single children, different situation is with excluded single file
     pub(crate) fn is_excluded_item_in_dir(&self, path: &Path) -> bool {
         #[cfg(target_family = "windows")]
-        let path = normalize_windows_path(path);
+        let path = crate::common::normalize_windows_path(path);
         #[cfg(target_family = "windows")]
         let path = &path;
         // We're assuming that `excluded_directories` are already normalized

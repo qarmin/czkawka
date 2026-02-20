@@ -701,10 +701,11 @@ mod tests {
     const CONTENT: &[u8; 1] = b"a";
 
     fn normalize_path(item: &Path) -> PathBuf {
+        let canonicalized = item.canonicalize().unwrap_or_else(|_| item.to_path_buf());
         #[cfg(target_family = "windows")]
-        return crate::common::normalize_windows_path(item);
+        return crate::common::normalize_windows_path(&canonicalized);
         #[cfg(not(target_family = "windows"))]
-        return item.to_path_buf();
+        return canonicalized;
     }
 
     fn create_files(dir: &Path) -> io::Result<(PathBuf, PathBuf, PathBuf)> {
@@ -725,9 +726,7 @@ mod tests {
     #[test]
     fn test_traversal() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let dir_path = dir.path().to_path_buf();
-        #[cfg(target_family = "windows")]
-        let dir_path = crate::common::normalize_windows_path(&dir_path);
+        let dir_path = normalize_path(dir.path());
         let (src, hard, other_file) = create_files(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
@@ -810,6 +809,7 @@ mod tests {
     }
 
     #[test]
+    #[expect(clippy::needless_for_each)]
     fn test_traversal_with_and_without_excluded_dir() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
         let dir_path = dir.path().to_path_buf();
@@ -925,7 +925,7 @@ mod tests {
     #[test]
     fn test_traversal_group_by_inode() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let dir_path = normalize_path(&dir.path());
+        let dir_path = normalize_path(dir.path());
         let (src, _, other) = create_files(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail calculating duration since epoch").as_secs();
 
@@ -972,7 +972,7 @@ mod tests {
     #[test]
     fn test_traversal_group_by_inode() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let dir_path =  crate::common::normalize_windows_path(&dir.path());
+        let dir_path = normalize_path(&dir.path());
         let (src, hard, other) = create_files(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail duration from epoch").as_secs();
 
