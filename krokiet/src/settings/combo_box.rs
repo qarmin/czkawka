@@ -122,7 +122,8 @@ impl StringComboBoxItems {
             ("h265", "HEVC/H265", VideoCodec::H265),
             ("h264", "H264", VideoCodec::H264),
             ("vp9", "VP9", VideoCodec::Vp9),
-            ("av1", "AV1", VideoCodec::Av1),
+            ("av1", "AV1 (slow)", VideoCodec::Av1),
+            ("av1_svt", "AV1 SVT (fast)", VideoCodec::Av1Svt),
         ]);
 
         Self {
