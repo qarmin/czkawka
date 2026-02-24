@@ -7,7 +7,7 @@ import { GuiState } from "gui_state.slint";
 export component PopupSelectResults inherits Rectangle {
     callback show_popup();
     callback close_popup();
-    callback open_custom_select_popup(bool); // true = select, false = unselect
+    callback open_custom_select_popup();
     property <[SelectModel]> model: GuiState.select_results_list;
     property <length> item_height: 30px;
     out property <length> item_width;
@@ -26,9 +26,10 @@ export component PopupSelectResults inherits Rectangle {
             VerticalLayout {
                 for i in model: Button {
                     text: i.name;
+                    height: item_height;
                     clicked => {
                         if (i.data == SelectMode.SelectCustom) {
-                            root.open_custom_select_popup(true);
+                            root.open_custom_select_popup();
                         } else {
                             Callabler.select_items(i.data);
                         }

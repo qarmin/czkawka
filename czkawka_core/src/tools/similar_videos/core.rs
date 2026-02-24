@@ -189,10 +189,6 @@ impl SimilarVideos {
 
     #[fun_time(message = "create_thumbnails", level = "debug")]
     fn create_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
-        if !self.params.generate_thumbnails {
-            return WorkContinueStatus::Continue;
-        }
-
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarVideosCreatingThumbnails,
@@ -234,10 +230,12 @@ impl SimilarVideos {
                         thumbnail_video_percentage_from_start,
                         generate_grid_instead_of_single,
                         thumbnail_grid_tiles_per_side,
+                        self.params.generate_thumbnails,
                     ) {
-                        Ok(thumbnail_path) => {
+                        Ok(Some(thumbnail_path)) => {
                             file_entry.thumbnail_path = Some(thumbnail_path);
                         }
+                        Ok(None) => {}
                         Err(e) => errs.push(e),
                     }
 

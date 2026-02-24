@@ -100,7 +100,7 @@ glibc_musl_version = "0.1.0"
 
 rand = "0.10.0"
 
-ashpd = { version = "0.12.1", optional = true }
+ashpd = { version = "0.13.2", optional = true, features = ["trash"] }
 tokio = { version = "1.49.0", optional = true }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]

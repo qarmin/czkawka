@@ -199,10 +199,6 @@ impl VideoOptimizer {
 
     #[fun_time(message = "create_transcode_thumbnails", level = "debug")]
     fn create_transcode_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>, params: &VideoTranscodeParams) -> WorkContinueStatus {
-        if !params.generate_thumbnails {
-            return WorkContinueStatus::Continue;
-        }
-
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::VideoOptimizerCreatingThumbnails,
@@ -243,9 +239,14 @@ impl VideoOptimizer {
                     thumbnail_video_percentage_from_start,
                     generate_grid_instead_of_single,
                     thumbnail_grid_tiles_per_side,
+                    params.generate_thumbnails,
                 ) {
-                    Ok(thumbnail_path) => {
+                    Ok(Some(thumbnail_path)) => {
                         entry.thumbnail_path = Some(thumbnail_path);
+                        progress_handler.increase_items(1);
+                        Some(None)
+                    }
+                    Ok(None) => {
                         progress_handler.increase_items(1);
                         Some(None)
                     }
@@ -271,10 +272,6 @@ impl VideoOptimizer {
 
     #[fun_time(message = "create_crop_thumbnails", level = "debug")]
     fn create_crop_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>, params: &VideoCropParams) -> WorkContinueStatus {
-        if !params.generate_thumbnails {
-            return WorkContinueStatus::Continue;
-        }
-
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::VideoOptimizerCreatingThumbnails,
@@ -315,11 +312,16 @@ impl VideoOptimizer {
                     thumbnail_video_percentage_from_start,
                     generate_grid_instead_of_single,
                     thumbnail_grid_tiles_per_side,
+                    params.generate_thumbnails,
                 );
 
                 match result {
-                    Ok(thumbnail_path) => {
+                    Ok(Some(thumbnail_path)) => {
                         entry.thumbnail_path = Some(thumbnail_path);
+                        progress_handler.increase_items(1);
+                        Some(None)
+                    }
+                    Ok(None) => {
                         progress_handler.increase_items(1);
                         Some(None)
                     }

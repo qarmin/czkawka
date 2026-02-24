@@ -55,6 +55,7 @@ mod connect_clean_cache;
 mod connect_directories_changes;
 mod connect_open;
 mod connect_progress_receiver;
+mod connect_rfd;
 mod connect_row_selection;
 mod connect_save;
 mod connect_scan;

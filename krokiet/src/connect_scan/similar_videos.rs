@@ -26,7 +26,7 @@ pub(crate) fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
                 sd.custom_settings.similar_videos_skip_forward_amount,
                 sd.custom_settings.similar_videos_vid_hash_duration,
                 sd.combo_box_items.videos_crop_detect.value,
-                sd.custom_settings.video_thumbnails_preview,
+                sd.custom_settings.video_thumbnails_generate,
                 sd.custom_settings.video_thumbnails_percentage,
                 sd.custom_settings.video_thumbnails_generate_grid,
                 sd.custom_settings.video_thumbnails_grid_tiles_per_side,

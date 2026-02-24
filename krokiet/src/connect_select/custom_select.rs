@@ -334,9 +334,7 @@ fn matches_str_filter(raw_value: &str, filter: &str, case_sensitive: bool) -> bo
     regex_check(&excluded, &value_cmp)
 }
 
-fn matches_full_path_filter(item: &SingleMainListModel, col: &CustomSelectColumnModel, path_idx: usize, name_idx: usize, case_sensitive: bool) -> bool {
-    let _ = col; // column_idx unused for FullPath; indices come from active_tab
-    let val_strs: Vec<SharedString> = item.val_str.iter().collect();
+fn matches_full_path_filter(col: &CustomSelectColumnModel, path_idx: usize, name_idx: usize, case_sensitive: bool, val_strs: &[SharedString]) -> bool {
     let path = val_strs.get(path_idx).map_or("", |s| s.as_str());
     let name = val_strs.get(name_idx).map_or("", |s| s.as_str());
     let full = format!("{path}/{name}");
@@ -372,7 +370,7 @@ pub(super) fn select_custom_columns(
                 }
                 ColumnType::Int => matches_int_filter(item, col),
                 ColumnType::Date => matches_date_filter(item, col),
-                ColumnType::FullPath => matches_full_path_filter(item, col, path_idx, name_idx, case_sensitive),
+                ColumnType::FullPath => matches_full_path_filter(col, path_idx, name_idx, case_sensitive, &val_strs),
             };
             if !matches {
                 return false;
@@ -496,99 +494,60 @@ mod tests {
     }
 
     #[test]
-    fn parse_op_and_value_bare_number_is_eq() {
+    fn parse_op_and_val() {
         let (op, val) = parse_op_and_value("42").unwrap();
         assert_eq!(op, CmpOp::Eq);
         assert_eq!(val, 42);
-    }
 
-    #[test]
-    fn parse_op_and_value_gte() {
         let (op, val) = parse_op_and_value(">= 100").unwrap();
         assert_eq!(op, CmpOp::Gte);
         assert_eq!(val, 100);
-    }
 
-    #[test]
-    fn parse_op_and_value_lte() {
         let (op, val) = parse_op_and_value("<= 200").unwrap();
         assert_eq!(op, CmpOp::Lte);
         assert_eq!(val, 200);
-    }
 
-    #[test]
-    fn parse_op_and_value_gt() {
         let (op, val) = parse_op_and_value("> 0").unwrap();
         assert_eq!(op, CmpOp::Gt);
         assert_eq!(val, 0);
-    }
 
-    #[test]
-    fn parse_op_and_value_lt() {
         let (op, val) = parse_op_and_value("< 512").unwrap();
         assert_eq!(op, CmpOp::Lt);
         assert_eq!(val, 512);
-    }
 
-    #[test]
-    fn parse_op_and_value_eq_explicit() {
         let (op, val) = parse_op_and_value("= 7").unwrap();
         assert_eq!(op, CmpOp::Eq);
         assert_eq!(val, 7);
-    }
 
-    #[test]
-    fn parse_op_and_value_empty_returns_none() {
         assert!(parse_op_and_value("").is_none());
-    }
 
-    #[test]
-    fn parse_op_and_value_non_numeric_returns_none() {
         assert!(parse_op_and_value(">= abc").is_none());
     }
 
     #[test]
-    fn parse_date_dd_mm_yyyy() {
+    fn parse_dat() {
         let ts = parse_date("15-01-2020").unwrap();
         assert_eq!(ts, 1578960000);
-    }
 
-    #[test]
-    fn parse_date_yyyy_mm_dd() {
         let ts = parse_date("2020-01-15").unwrap();
         assert_eq!(ts, 1578960000);
-    }
 
-    #[test]
-    fn parse_date_both_formats_give_same_timestamp() {
         let ts1 = parse_date("15-01-2020").unwrap();
         let ts2 = parse_date("2020-01-15").unwrap();
         assert_eq!(ts1, ts2);
-    }
 
-    #[test]
-    fn parse_date_with_hh_mm_ss() {
         let base = parse_date("2020-01-15").unwrap();
         let with_time = parse_date("2020-01-15 12:30:45").unwrap();
         assert_eq!(with_time, base + 12 * 3600 + 30 * 60 + 45);
-    }
 
-    #[test]
-    fn parse_date_with_hh_mm_only() {
         let base = parse_date("2020-01-15").unwrap();
         let with_time = parse_date("2020-01-15 08:00").unwrap();
         assert_eq!(with_time, base + 8 * 3600);
-    }
 
-    #[test]
-    fn parse_date_dd_mm_yyyy_with_time() {
         let ts1 = parse_date("15-01-2020 06:00:00").unwrap();
         let ts2 = parse_date("2020-01-15 06:00:00").unwrap();
         assert_eq!(ts1, ts2);
-    }
 
-    #[test]
-    fn parse_date_invalid_returns_none() {
         assert!(parse_date("not-a-date").is_none());
         assert!(parse_date("32-01-2020").is_none());
         assert!(parse_date("").is_none());
@@ -598,27 +557,11 @@ mod tests {
     fn matches_str_filter_exact_case_sensitive() {
         assert!(matches_str_filter("hello.rs", "hello.rs", true));
         assert!(!matches_str_filter("Hello.rs", "hello.rs", true));
-    }
-
-    #[test]
-    fn matches_str_filter_case_insensitive() {
         assert!(matches_str_filter("Hello.RS", "hello.rs", false));
-    }
-
-    #[test]
-    fn matches_str_filter_wildcard_star() {
         assert!(matches_str_filter("photo_2024.jpg", "*.jpg", false));
         assert!(!matches_str_filter("photo_2024.png", "*.jpg", false));
-    }
-
-    #[test]
-    fn matches_str_filter_wildcard_contains() {
         assert!(matches_str_filter("my_backup_file.tar", "*backup*", false));
         assert!(!matches_str_filter("my_document.pdf", "*backup*", false));
-    }
-
-    #[test]
-    fn matches_str_filter_empty_filter_matches_nothing() {
         assert!(matches_str_filter("anything", "", false));
     }
 

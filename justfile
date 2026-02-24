@@ -37,14 +37,18 @@ valr bin:
     valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes target/release/{{bin}}
 
 
-#  echo '-1' | sudo tee /proc/sys/kernel/perf_event_paranoid
-samply bin:
-    cargo build --bin {{bin}}
-    samply record target/debug/{{bin}}
+# echo '-1' | sudo tee /proc/sys/kernel/perf_event_paranoid
+# // Or permanently
+# echo "kernel.perf_event_paranoid = -1" | sudo tee /etc/sysctl.d/99-perf.conf
+# sudo sysctl --system
 
-samplyrd bin:
+samply bin *args:
+    cargo build --bin {{bin}}
+    samply record target/debug/{{bin}} {{args}}
+
+samplyrd bin *args:
     cargo build --bin {{bin}} --profile rdebug
-    samply record target/rdebug/{{bin}}
+    samply record target/rdebug/{{bin}} {{args}}
 
 ## Other
 

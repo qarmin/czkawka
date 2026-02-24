@@ -4,6 +4,7 @@ use czkawka_core::tools::video_optimizer::VideoOptimizerParameters;
 use rfd::FileDialog;
 use slint::ComponentHandle;
 
+use crate::connect_rfd::{hide_file_dialog_overlay, show_file_dialog_overlay};
 use crate::model_operations::get_checked_info_from_app;
 use crate::shared_models::SharedModels;
 use crate::{MainWindow, PopupRequest, Translations, flk};
@@ -35,10 +36,7 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow, shared_models: Arc<Mut
                         base.push_str(
                             format!(
                                 "\n{}",
-                                flk!(
-                                    "rust_delete_confirmation_selected_leave_one_in_group",
-                                    groups = group_res.number_of_groups_with_all_items_checked
-                                )
+                                flk!("rust_delete_confirmation_selected_all_in_group", groups = group_res.number_of_groups_with_all_items_checked)
                             )
                             .as_str(),
                         );
@@ -49,15 +47,29 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow, shared_models: Arc<Mut
                 translation.set_delete_confirmation_text(base.into());
             }
             PopupRequest::Move => {
-                let file_dialog = FileDialog::new();
-                let Some(folder) = file_dialog.pick_folder() else {
-                    return;
-                };
-                data = folder.to_string_lossy().to_string();
+                let res = get_checked_info_from_app(&app);
+                let checked_items_number = res.checked_items_number;
 
-                let mut base = flk!("rust_move_confirmation");
-                base.push_str(format!("\n{}", flk!("rust_move_confirmation_number_simple", items = res.checked_items_number)).as_str());
-                translation.set_move_confirmation_text(base.into());
+                show_file_dialog_overlay(&app);
+
+                let weak = a.clone();
+                std::thread::spawn(move || {
+                    let folder = FileDialog::new().pick_folder();
+
+                    hide_file_dialog_overlay(&weak);
+
+                    if let Some(folder) = folder {
+                        let data = folder.to_string_lossy().to_string();
+                        weak.upgrade_in_event_loop(move |app| {
+                            let mut base = flk!("rust_move_confirmation");
+                            base.push_str(format!("\n{}", flk!("rust_move_confirmation_number_simple", items = checked_items_number)).as_str());
+                            app.global::<Translations>().set_move_confirmation_text(base.into());
+                            app.invoke_show_action_popup(PopupRequest::Move, data.into());
+                        })
+                        .expect("Failed to show move popup");
+                    }
+                });
+                return;
             }
             PopupRequest::OptimizeVideo => {
                 let mut base = flk!("rust_optimize_video_confirmation");

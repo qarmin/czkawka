@@ -163,7 +163,6 @@ export component PopupCustomSelect inherits Rectangle {
                     }
                     Button {
                         text: Translations.popup_custom_unselect_button_text;
-                        primary: true;
                         clicked => {
                             Callabler.select_items_custom_columns(false, case_sensitive, leave_one_in_group);
                             popup_window.close();

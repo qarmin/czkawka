@@ -282,6 +282,7 @@ settings_save = Zapisz
 settings_load = Wczytaj
 settings_reset = Resetuj
 settings_similar_videos_tool = Narzędzie do podobnych wideo
+settings_similar_videos_preview_hint = Podgląd będzie widoczny tylko, gdy opcja „Generuj miniatury” jest włączona, lub jeśli miniatura została już wygenerowana.
 settings_video_thumbnails_clear_unused_thumbnails = Usuń nieużywane miniatury wideo starsze niż 7 dni przy uruchamianiu aplikacji
 settings_video_thumbnails_header = Miniatury wideo
 settings_video_thumbnails_generate = Generuj miniatury

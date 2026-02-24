@@ -1,6 +1,7 @@
 use rfd::FileDialog;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
+use crate::connect_rfd::{hide_file_dialog_overlay, show_file_dialog_overlay};
 use crate::{Callabler, ExcludedPathsModel, IncludedPathsModel, MainWindow, Settings};
 
 pub(crate) fn connect_add_remove_directories(app: &MainWindow) {
@@ -59,21 +60,28 @@ fn connect_add_directories(app: &MainWindow) {
     app.on_folder_choose_requested(move |included_paths| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
-        let directory = std::env::current_dir().unwrap_or(std::path::PathBuf::from("/"));
+        show_file_dialog_overlay(&app);
 
-        let file_dialog = FileDialog::new().set_directory(directory);
+        let weak = a.clone();
+        std::thread::spawn(move || {
+            let directory = std::env::current_dir().unwrap_or(std::path::PathBuf::from("/"));
+            let folders = FileDialog::new().set_directory(directory).pick_folders();
 
-        let Some(folders) = file_dialog.pick_folders() else {
-            return;
-        };
-        let folders = folders.iter().map(|x| x.to_string_lossy().to_string()).collect::<Vec<_>>();
+            hide_file_dialog_overlay(&weak);
 
-        let settings = app.global::<Settings>();
-        if included_paths {
-            add_included_paths(&settings, &folders);
-        } else {
-            add_excluded_paths(&settings, &folders);
-        }
+            if let Some(folders) = folders {
+                let folders = folders.iter().map(|x| x.to_string_lossy().to_string()).collect::<Vec<_>>();
+                weak.upgrade_in_event_loop(move |app| {
+                    let settings = app.global::<Settings>();
+                    if included_paths {
+                        add_included_paths(&settings, &folders);
+                    } else {
+                        add_excluded_paths(&settings, &folders);
+                    }
+                })
+                .expect("Failed to update directories");
+            }
+        });
     });
 }
 
@@ -82,21 +90,28 @@ fn connect_add_files(app: &MainWindow) {
     app.on_file_choose_requested(move |included_paths| {
         let app = a.upgrade().expect("Failed to upgrade app :(");
 
-        let directory = std::env::current_dir().unwrap_or(std::path::PathBuf::from("/"));
+        show_file_dialog_overlay(&app);
 
-        let file_dialog = FileDialog::new().set_directory(directory);
+        let weak = a.clone();
+        std::thread::spawn(move || {
+            let directory = std::env::current_dir().unwrap_or(std::path::PathBuf::from("/"));
+            let files = FileDialog::new().set_directory(directory).pick_files();
 
-        let Some(files) = file_dialog.pick_files() else {
-            return;
-        };
-        let files = files.iter().map(|x| x.to_string_lossy().to_string()).collect::<Vec<_>>();
+            hide_file_dialog_overlay(&weak);
 
-        let settings = app.global::<Settings>();
-        if included_paths {
-            add_included_paths(&settings, &files);
-        } else {
-            add_excluded_paths(&settings, &files);
-        }
+            if let Some(files) = files {
+                let files = files.iter().map(|x| x.to_string_lossy().to_string()).collect::<Vec<_>>();
+                weak.upgrade_in_event_loop(move |app| {
+                    let settings = app.global::<Settings>();
+                    if included_paths {
+                        add_included_paths(&settings, &files);
+                    } else {
+                        add_excluded_paths(&settings, &files);
+                    }
+                })
+                .expect("Failed to update files");
+            }
+        });
     });
 }
 

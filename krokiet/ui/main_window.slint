@@ -238,7 +238,7 @@ export component MainWindow inherits Window {
         y: parent.y + y_offset - self.all_items_height - 5px;
         height: root.height;
         width: root.width;
-        open_custom_select_popup(is_select) => {
+        open_custom_select_popup() => {
             custom_select_popup_window.show_popup();
         }
     }
@@ -380,6 +380,46 @@ export component MainWindow inherits Window {
         action_confirmed => {
             Callabler.softlink_items();
         }
+    }
+
+    if GuiState.file_dialog_open: Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        background: #808080cc;
+        z: 1000;
+
+        // Absorb all keyboard events so nothing behind the overlay can be triggered
+        fs := FocusScope {
+            x: 0; y: 0;
+            width: parent.width;
+            height: parent.height;
+            enabled: true;
+            key-pressed(event) => { EventResult.accept }
+            key-released(event) => { EventResult.accept }
+        }
+
+        // Absorb all pointer/mouse events so nothing behind the overlay can be clicked
+        TouchArea {
+            x: 0; y: 0;
+            width: parent.width;
+            height: parent.height;
+            mouse-cursor: MouseCursor.default;
+        }
+
+        Text {
+            width: parent.width;
+            height: parent.height;
+            text: Translations.file_dialog_open_text;
+            font-size: FontSizes.header;
+            color: #ffffff;
+            vertical-alignment: center;
+            horizontal-alignment: center;
+            wrap: TextWrap.word-wrap;
+        }
+
+        init => { fs.focus(); }
     }
 
     scan_ended(scan_text) => {

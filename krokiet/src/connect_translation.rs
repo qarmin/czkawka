@@ -164,6 +164,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_cancel_button_text(flk!("cancel_button").into());
     translation.set_do_you_want_to_continue_text(flk!("do_you_want_to_continue").into());
     translation.set_main_window_title_text(flk!("main_window_title").into());
+    translation.set_file_dialog_open_text(flk!("file_dialog_open").into());
     translation.set_scan_button_text(flk!("scan_button").into());
     translation.set_stop_button_text(flk!("stop_button").into());
     translation.set_select_button_text(flk!("select_button").into());
@@ -304,6 +305,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_restart_required_text(flk!("settings_restart_required").into());
     translation.set_settings_duplicate_image_preview_text(flk!("settings_duplicate_image_preview").into());
     translation.set_settings_similar_videos_preview_text(flk!("settings_video_thumbnails_preview").into());
+    translation.set_settings_similar_videos_preview_hint_text(flk!("settings_similar_videos_preview_hint").into());
     translation.set_settings_application_scale_text(flk!("settings_application_scale_text").into());
     translation.set_settings_application_scale_hint_text(flk!("settings_application_scale_hint_text").into());
     translation.set_settings_restart_required_scale_text(flk!("settings_restart_required_scale_text").into());

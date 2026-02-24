@@ -56,8 +56,14 @@ winresource = "0.1"
 
 [features]
 default = ["winit_femtovg", "winit_software"]
+
+# Audio support
 audio = ["rodio"]
+
+# Bundles windows icon into executable
 add_windows_icon = []
+
+# Renderers
 skia_opengl = ["slint/renderer-skia-opengl"]
 skia_vulkan = ["slint/renderer-skia-vulkan"]
 software = ["slint/renderer-software"]
@@ -68,9 +74,11 @@ winit_skia_opengl = ["slint/renderer-winit-skia-opengl"]
 winit_skia_vulkan = ["slint/renderer-winit-skia-vulkan"]
 winit_software = ["slint/renderer-winit-software"]
 
+# Additional features
 heif = ["czkawka_core/heif"]
 libraw = ["czkawka_core/libraw"]
 libavif = ["czkawka_core/libavif"]
+
 # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
 # No-op on other OSes, it is slower and provides less helpful error messages
 xdg_portal_trash = ["czkawka_core/xdg_portal_trash"]
