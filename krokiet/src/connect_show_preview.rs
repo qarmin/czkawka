@@ -2,9 +2,9 @@ use std::fs::metadata;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
-use czkawka_core::common::image::{check_if_can_display_image, get_dynamic_image_from_path};
+use czkawka_core::common::image::{ImgResizeOptions, check_if_can_display_image, get_dynamic_image_from_path};
 use czkawka_core::helpers::debug_timer::Timer;
-use fast_image_resize::{FilterType, ResizeAlg, ResizeOptions, Resizer};
+use czkawka_core::re_exported::FirFilterType;
 use image::{DynamicImage, Rgba, RgbaImage};
 use log::{debug, error};
 use slint::ComponentHandle;
@@ -62,32 +62,8 @@ pub(crate) fn connect_show_preview(app: &MainWindow, shared_models: Arc<Mutex<Sh
                 1
             };
 
-            // Looks that resizing image before sending it to GUI works better that letting Slint do it automatically
             if let Some((mut timer, img)) = load_image(path) {
-                let mut img_to_use = if img.width() > 1024 || img.height() > 1024 {
-                    let bigger_side = img.width().max(img.height());
-                    let scale_factor = bigger_side as f32 / 1024.0;
-                    let new_width = (img.width() as f32 / scale_factor) as u32;
-                    let new_height = (img.height() as f32 / scale_factor) as u32;
-
-                    let mut dst_img = DynamicImage::new(new_width, new_height, img.color());
-                    timer.checkpoint("creating new image buffer");
-
-                    let resize_options = ResizeOptions::new().resize_alg(ResizeAlg::Interpolation(FilterType::Lanczos3));
-                    match Resizer::new().resize(&img, &mut dst_img, Some(&resize_options)) {
-                        Ok(()) => {
-                            timer.checkpoint("resizing image with fast-image-resize");
-                            dst_img.into_rgba8()
-                        }
-                        Err(_) => {
-                            let r = img.resize(new_width, new_height, image::imageops::Lanczos3);
-                            timer.checkpoint("resizing image with image-rs");
-                            r.into_rgba8()
-                        }
-                    }
-                } else {
-                    img.into_rgba8()
-                };
+                let mut img_to_use = img.into_rgba8();
 
                 if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 && orig_width > 0 && orig_height > 0 {
                     img_to_use = draw_crop_rectangle_on_image(
@@ -139,7 +115,14 @@ fn load_image(image_path: &Path) -> Option<(Timer, DynamicImage)> {
 
     let mut debug_timer = Timer::new("Loading and converting image in slint");
 
-    let img = match get_dynamic_image_from_path(&image_path.to_string_lossy()) {
+    let img = match get_dynamic_image_from_path(
+        &image_path.to_string_lossy(),
+        Some(ImgResizeOptions {
+            max_width: 1024,
+            max_height: 1024,
+            filter: FirFilterType::Bilinear,
+        }),
+    ) {
         Ok(img) => img,
         Err(e) => {
             error!("Failed to load image \"{}\": {e}", image_path.to_string_lossy());

@@ -1,10 +1,11 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use czkawka_core::common::image::get_dynamic_image_from_path;
+use czkawka_core::common::image::{ImgResizeOptions, get_dynamic_image_from_path};
+use czkawka_core::re_exported::FirFilterType;
 use gdk4::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk4::prelude::*;
-use gtk4::{Align, CheckButton, Image, Orientation, Picture, ScrolledWindow, TreeIter, TreeModel, TreePath, Widget};
+use gtk4::{Align, CheckButton, Orientation, Picture, ScrolledWindow, TreeIter, TreeModel, TreePath, Widget};
 use image::DynamicImage;
 use log::error;
 
@@ -17,7 +18,7 @@ use crate::helpers::image_operations::{get_pixbuf_from_dynamic_image, resize_pix
 use crate::helpers::list_store_operations::count_number_of_groups;
 use crate::notebook_info::NotebookObject;
 
-const BIG_PREVIEW_SIZE: i32 = 600;
+const BIG_PREVIEW_SIZE: i32 = 1024;
 const SMALL_PREVIEW_SIZE: i32 = 130;
 
 pub(crate) fn connect_button_compare(gui_data: &GuiData) {
@@ -290,7 +291,7 @@ fn populate_groups_at_start(
     check_button_right_preview_text: &CheckButton,
     scrolled_window_compare_choose_images: &ScrolledWindow,
     label_group_info: &gtk4::Label,
-    shared_image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    shared_image_cache: &Rc<RefCell<Vec<(String, String, Picture, Picture, TreePath)>>>,
     shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
     button_go_previous_compare_group: &gtk4::Button,
     button_go_next_compare_group: &gtk4::Button,
@@ -375,18 +376,27 @@ fn populate_groups_at_start(
     check_button_right_preview_text.set_active(is_active);
 }
 
-fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>, use_rust_loader: bool) -> Vec<(String, String, Image, Image, TreePath)> {
+fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>, use_rust_loader: bool) -> Vec<(String, String, Picture, Picture, TreePath)> {
     // TODO use here threads,
     // For now threads cannot be used because Image and TreeIter cannot be used in threads
     let mut cache_all_images = Vec::new();
     for (full_path, name, tree_path) in vector_with_path {
-        let small_img = Image::new();
-        let big_img = Image::new();
+        let small_img = Picture::new();
+        let big_img = Picture::new();
 
         let mut pixbuf = get_pixbuf_from_dynamic_image(DynamicImage::new_rgb8(1, 1)).expect("Failed to create pixbuf");
 
         if use_rust_loader {
-            match get_dynamic_image_from_path(&full_path).and_then(get_pixbuf_from_dynamic_image) {
+            match get_dynamic_image_from_path(
+                &full_path,
+                Some(ImgResizeOptions {
+                    max_width: BIG_PREVIEW_SIZE as u32,
+                    max_height: BIG_PREVIEW_SIZE as u32,
+                    filter: FirFilterType::Bilinear,
+                }),
+            )
+            .and_then(get_pixbuf_from_dynamic_image)
+            {
                 Ok(t) => {
                     pixbuf = t;
                 }
@@ -416,8 +426,8 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
                 break;
             };
 
-            big_img.set_from_pixbuf(Some(&pixbuf_big));
-            small_img.set_from_pixbuf(Some(&pixbuf_small));
+            big_img.set_pixbuf(Some(&pixbuf_big));
+            small_img.set_pixbuf(Some(&pixbuf_small));
             break;
         }
 
@@ -496,11 +506,11 @@ fn move_iter(model: &TreeModel, tree_path: &TreePath, column_header: i32, go_nex
 
 fn populate_similar_scrolled_view(
     scrolled_window: &ScrolledWindow,
-    image_cache: &[(String, String, Image, Image, TreePath)],
+    image_cache: &[(String, String, Picture, Picture, TreePath)],
     image_compare_left: &Picture,
     image_compare_right: &Picture,
     shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
-    shared_image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    shared_image_cache: &Rc<RefCell<Vec<(String, String, Picture, Picture, TreePath)>>>,
     check_button_left_preview_text: &CheckButton,
     check_button_right_preview_text: &CheckButton,
     model: &TreeModel,
@@ -591,7 +601,7 @@ fn populate_similar_scrolled_view(
 fn update_bottom_buttons(
     all_gtk_box: &gtk4::Box,
     shared_using_for_preview: &Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
-    image_cache: &Rc<RefCell<Vec<(String, String, Image, Image, TreePath)>>>,
+    image_cache: &Rc<RefCell<Vec<(String, String, Picture, Picture, TreePath)>>>,
 ) {
     let left_tree_view = shared_using_for_preview.borrow().0.clone().expect("Left tree_view not set");
     let right_tree_view = shared_using_for_preview.borrow().1.clone().expect("Right tree_view not set");

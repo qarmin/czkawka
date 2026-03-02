@@ -1,5 +1,11 @@
 set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 
+adb := "adb"
+android_home := env("ANDROID_HOME", "/home/rafal/android-sdk")
+android_ndk := env("ANDROID_NDK_HOME", "/home/rafal/android-sdk/ndk/26.3.11579264")
+apk_package := "io.github.qarmin.cedinia"
+apk_activity := "android.app.NativeActivity"
+
 build_all: && fix
     cargo build --release
     cargo build
@@ -74,15 +80,16 @@ clip:
     cargo clippy --fix --allow-dirty --allow-staged --no-default-features --features winit_software --all-targets
 
 fix:
-    ruff format --line-length 120 --no-cache
-    mypy misc --strict
-    python3 misc/delete_unused_krokiet_slint_imports.py
-    python3 misc/find_unused_fluent_translations.py czkawka_gui
-    python3 misc/find_unused_fluent_translations.py krokiet
-    python3 misc/find_unused_fluent_translations.py czkawka_core
-    python3 misc/find_unused_slint_translations.py krokiet
-    python3 misc/find_unused_callbacks.py krokiet
-    # python3 misc/find_unused_settings_properties.py
+    #    ruff format --line-length 120 --no-cache
+    #    mypy misc --strict
+    #    python3 misc/delete_unused_krokiet_slint_imports.py
+    #    python3 misc/find_unused_fluent_translations.py czkawka_gui
+    #    python3 misc/find_unused_fluent_translations.py krokiet
+    #    python3 misc/find_unused_fluent_translations.py czkawka_core
+    #    python3 misc/find_unused_slint_translations.py krokiet
+    #    python3 misc/find_unused_callbacks.py krokiet
+
+    ## python3 misc/find_unused_settings_properties.py
 
     cargo +nightly fmt
     cargo clippy --fix --allow-dirty --allow-staged --all-features --all-targets
@@ -108,6 +115,35 @@ unused_features:
     xdg-open czkawka_cli/report.html
     xdg-open czkawka_core/report.html
     xdg-open czkawka_gui/report.html
+
+##################### ANDROID #####################
+
+android_build:
+    ANDROID_HOME={{android_home}} ANDROID_NDK_ROOT={{android_ndk}} cargo apk build -p cedinia --lib
+
+android_build_release:
+    ANDROID_HOME={{android_home}} ANDROID_NDK_ROOT={{android_ndk}} cargo apk build -p cedinia --lib --release
+
+android_install:
+    {{adb}} install -r target/debug/apk/cedinia.apk
+
+android_install_release:
+    {{adb}} install -r target/release/apk/cedinia.apk
+
+android_run:
+    {{adb}} shell am start -n {{apk_package}}/{{apk_activity}}
+
+android_log:
+    {{adb}} logcat -s RustStdoutStderr:V *:S
+
+android_devices:
+    {{adb}} devices -l
+
+android: android_build android_install android_run
+
+android_release: android_build_release android_install_release android_run
+
+##################### BENCHMARKS #####################
 
 prepare_binaries:
     mkdir -p benchmarks

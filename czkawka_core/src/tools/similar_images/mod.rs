@@ -1,6 +1,8 @@
 pub mod core;
 pub mod traits;
 
+pub use core::return_similarity_from_similarity_preset;
+
 #[cfg(test)]
 mod tests;
 

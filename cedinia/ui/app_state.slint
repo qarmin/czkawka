@@ -1,0 +1,111 @@
+
+
+import { ActiveTool, ScanState, ProgressData, VolumeEntry, CollectTestResult } from "common.slint";
+
+
+export global GeneralSettings {
+    in-out property <bool>   use_cache:           true;
+    in-out property <bool>   ignore_hidden:        true;
+
+
+    in-out property <int>    min_file_size_idx:    0;
+
+    in-out property <string> excluded_items:       "";
+
+    in-out property <string> allowed_extensions:   "";
+
+    in-out property <string> excluded_extensions:  "";
+}
+
+
+export global DuplicateSettings {
+    in-out property <int>    check_method:       0;
+    in-out property <string> check_method_value: "hash";
+    in-out property <int>    hash_type:          0;
+    in-out property <string> hash_type_value:    "blake3";
+    in-out property <int>    min_size_kb_idx:    1;
+}
+
+
+export global SimilarImagesSettings {
+    in-out property <int>    similarity_preset:       2;
+    in-out property <string> similarity_preset_value: "medium";
+    in-out property <int>    hash_size_idx:           1;
+    in-out property <string> hash_size_value:         "16";
+}
+
+
+export global BigFilesSettings {
+    in-out property <int>    search_mode_idx:   0;
+    in-out property <string> search_mode_value: "biggest";
+    in-out property <int>    count_idx:         1;
+    in-out property <string> count_value:       "50";
+}
+
+
+export global AppState {
+    in-out property <ActiveTool> active_tool:    ActiveTool.Home;
+
+    in-out property <ActiveTool> last_scan_tool: ActiveTool.DuplicateFiles;
+    in-out property <ScanState>  scan_state:  ScanState.Idle;
+    in-out property <ProgressData> progress: { step_name: "", current_progress: 0, all_progress: 0, is_indeterminate: false };
+    in-out property <string>     status_message: "Gotowy / Ready";
+    in-out property <bool>       show_included_dirs: false;
+    in-out property <bool>       show_excluded_dirs: false;
+    in-out property <bool>       bottom_sheet_open: false;
+    in-out property <string>     bottom_sheet_title: "";
+    in-out property <int>        selected_count: 0;
+
+
+    in-out property <length> inset_top:    0px;
+    in-out property <length> inset_bottom: 0px;
+
+
+    callback tool_changed(ActiveTool);
+    callback scan_requested();
+    callback stop_requested();
+    callback delete_selected();
+    callback select_all();
+    callback deselect_all();
+    callback select_all_except_one();
+    callback deselect_all_except_one();
+    callback invert_selection();
+    callback toggle_file_checked(int);
+    callback pick_include_dir();
+    callback pick_exclude_dir();
+    callback add_include_dir(string);
+    callback remove_include_dir(string);
+    callback add_exclude_dir(string);
+    callback remove_exclude_dir(string);
+
+    in-out property <[VolumeEntry]> storage_volumes: [];
+    callback list_storage_volumes();
+
+    callback request_storage_permission();
+    in-out property <bool> storage_permission_granted: true;
+    in-out property <bool> show_permission_popup: false;
+
+    callback run_collect_test();
+    callback stop_collect_test();
+    in-out property <CollectTestResult> collect_test_result: { volumes: 0, files: 0, folders: 0, elapsed_ms: 0 };
+    in-out property <bool> collect_test_running: false;
+    in-out property <bool> collect_test_done: false;
+
+    in-out property <bool> similar_images_gallery_mode: true;
+
+
+    in-out property <bool>   gallery_delete_popup_visible: false;
+    in-out property <string> gallery_delete_message:       "";
+    in-out property <string> gallery_delete_warning:       "";
+    callback request_gallery_delete();
+    callback confirm_gallery_delete();
+
+
+    in-out property <bool>   delete_running:        false;
+    in-out property <string> delete_progress_text:  "";
+    callback delete_stop_requested();
+
+
+    in-out property <bool>   delete_errors_visible: false;
+    in-out property <string> delete_errors_text:    "";
+}

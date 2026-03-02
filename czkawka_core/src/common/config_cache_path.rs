@@ -20,6 +20,35 @@ pub fn get_config_cache_path() -> Option<ConfigCachePath> {
     CONFIG_CACHE_PATH.get().expect("Cannot fail if set_config_cache_path was called before").clone()
 }
 
+/// On Android `ProjectDirs` always returns `None` because there is no concept of a home
+/// directory accessible via standard UNIX paths.  Instead we use the app-private data
+/// directory exposed by the Android runtime through the `DATA_DIR` or `HOME` env variable.
+/// If neither variable is set, `None` is returned and the caller should handle the missing
+/// path (e.g. via the `CZKAWKA_CACHE_PATH` / `CZKAWKA_CONFIG_PATH` env overrides).
+///
+/// The base directory is expected to be set by the host application (e.g. cedinia) before
+/// calling `set_config_cache_path`, so that `czkawka_core` stays package-agnostic.
+///
+/// Android paths used:
+///   cache  – $DATA_DIR/cache/<name>
+///   config – $DATA_DIR/files/<name>
+#[cfg(target_os = "android")]
+fn android_default_dirs(cache_name: &str, config_name: &str) -> (Option<PathBuf>, Option<PathBuf>) {
+    let base = match env::var("DATA_DIR").or_else(|_| env::var("HOME")) {
+        Ok(path) => PathBuf::from(path),
+        Err(_) => return (None, None),
+    };
+
+    let cache_folder = Some(base.join("cache").join(cache_name));
+    let config_folder = Some(base.join("files").join(config_name));
+    (cache_folder, config_folder)
+}
+
+#[cfg(not(target_os = "android"))]
+fn android_default_dirs(_cache_name: &str, _config_name: &str) -> (Option<PathBuf>, Option<PathBuf>) {
+    (None, None)
+}
+
 fn resolve_folder(env_var: &str, default_folder: Option<PathBuf>, name: &'static str, warnings: &mut Vec<String>) -> Option<PathBuf> {
     let default_folder_str = default_folder.as_ref().map_or("<not available>".to_string(), |t| t.to_string_lossy().to_string());
 
@@ -92,8 +121,13 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
     let config_folder_env = env::var("CZKAWKA_CONFIG_PATH").unwrap_or_default().trim().to_string();
     let cache_folder_env = env::var("CZKAWKA_CACHE_PATH").unwrap_or_default().trim().to_string();
 
-    let default_cache_folder = ProjectDirs::from("pl", "Qarmin", cache_name).map(|proj_dirs| proj_dirs.cache_dir().to_path_buf());
-    let default_config_folder = ProjectDirs::from("pl", "Qarmin", config_name).map(|proj_dirs| proj_dirs.config_dir().to_path_buf());
+    let (android_cache_folder, android_config_folder) = android_default_dirs(cache_name, config_name);
+    let default_cache_folder = ProjectDirs::from("pl", "Qarmin", cache_name)
+        .map(|proj_dirs| proj_dirs.cache_dir().to_path_buf())
+        .or(android_cache_folder);
+    let default_config_folder = ProjectDirs::from("pl", "Qarmin", config_name)
+        .map(|proj_dirs| proj_dirs.config_dir().to_path_buf())
+        .or(android_config_folder);
 
     let default_config_path_exists = default_config_folder.as_ref().is_some_and(|t| t.exists());
     let default_cache_path_exists = default_cache_folder.as_ref().is_some_and(|t| t.exists());

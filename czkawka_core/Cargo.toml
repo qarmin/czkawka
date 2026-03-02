@@ -26,6 +26,7 @@ image_hasher = { version = "3.0", features = ["fast_resize_unstable"] }
 bk-tree = "0.5"
 image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp", "rayon"] }
 hamming-bitwise-fast = "1.0"
+fast_image_resize = { version = "6.0.0", features = ["image"] }
 
 # Needed by same music
 bitflags = "2.6"
