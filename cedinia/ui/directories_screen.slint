@@ -1,0 +1,176 @@
+
+
+import { CediniaColors } from "colors.slint";
+import { DirectoryEntry, VolumeEntry } from "common.slint";
+import { AppState } from "app_state.slint";
+import { TouchButton, SectionHeader, Divider } from "components.slint";
+
+component DirRow {
+    in property <string>  path;
+    in property <bool>    is_included;
+    callback remove();
+
+    height: 56px;
+
+    Rectangle {
+        background: ta.has-hover ? CediniaColors.bg_elevated : CediniaColors.bg_surface;
+        animate background { duration: 100ms; }
+
+        HorizontalLayout {
+            padding-left: 12px;
+            padding-right: 8px;
+            spacing: 8px;
+            alignment: LayoutAlignment.start;
+
+
+            Rectangle {
+                width: 4px;
+                height: 36px;
+                border-radius: 2px;
+                background: root.is_included ? CediniaColors.success : CediniaColors.danger;
+                vertical-stretch: 0.0;
+            }
+
+            ta := TouchArea {
+                horizontal-stretch: 1.0;
+            }
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                horizontal-stretch: 1.0;
+                Text {
+                    text: root.path;
+                    color: CediniaColors.text_primary;
+                    font-size: 13px;
+                    overflow: elide;
+                }
+                Text {
+                    text: root.is_included ? "Uwzględniony" : "Wykluczony";
+                    color: root.is_included ? CediniaColors.success : CediniaColors.danger;
+                    font-size: 11px;
+                }
+            }
+
+
+            Rectangle {
+                width: 40px;
+                height: 40px;
+                border-radius: 20px;
+                background: rm_ta.has-hover ? CediniaColors.danger.with-alpha(0.2) : transparent;
+                vertical-stretch: 0.0;
+
+                rm_ta := TouchArea {
+                    clicked => { root.remove(); }
+                }
+                Text {
+                    text: "✕";
+                    color: CediniaColors.danger;
+                    font-size: 18px;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+        }
+        Divider {}
+    }
+}
+
+export component DirectoriesScreen {
+    in property <[DirectoryEntry]> directories: [];
+
+    VerticalLayout {
+        height: parent.height;
+        spacing: 0px;
+
+        
+        if directories.length == 0 : Rectangle {}
+
+        Flickable {
+            vertical-stretch: 1.0;
+            viewport-height: max(dir_layout.preferred-height, self.height);
+
+            dir_layout := VerticalLayout {
+                spacing: 0px;
+
+                if directories.length == 0 : Rectangle {
+                    height: 120px;
+                    VerticalLayout {
+                        alignment: LayoutAlignment.center;
+                        spacing: 8px;
+                        Text {
+                            text: "📂";
+                            font-size: 36px;
+                            horizontal-alignment: TextHorizontalAlignment.center;
+                            color: CediniaColors.text_disabled;
+                        }
+                        Text {
+                            text: "Brak ścieżek – dodaj poniżej";
+                            color: CediniaColors.text_disabled;
+                            font-size: 13px;
+                            horizontal-alignment: TextHorizontalAlignment.center;
+                        }
+                    }
+                }
+
+                for entry in directories : DirRow {
+                    path: entry.path;
+                    is_included: entry.is_included;
+                    remove => {
+                        if (entry.is_included) {
+                            AppState.remove_include_dir(entry.path);
+                        } else {
+                            AppState.remove_exclude_dir(entry.path);
+                        }
+                    }
+                }
+            }
+        }
+        Rectangle {}
+
+
+
+        Rectangle {
+            vertical-stretch: 0.0;
+            height: 64px;
+            background: CediniaColors.bg_surface;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+
+            HorizontalLayout {
+                padding: 10px;
+                spacing: 10px;
+                alignment: LayoutAlignment.stretch;
+
+                TouchButton {
+                    label: "+ Dodaj";
+                    horizontal-stretch: 1.0;
+                    bg: CediniaColors.success.with-alpha(0.8);
+                    fg: #000000;
+                    clicked => { AppState.pick_include_dir(); }
+                }
+
+                TouchButton {
+                    label: "− Wyklucz";
+                    horizontal-stretch: 1.0;
+                    bg: CediniaColors.danger.with-alpha(0.8);
+                    fg: #ffffff;
+                    clicked => { AppState.pick_exclude_dir(); }
+                }
+
+                TouchButton {
+                    label: "💾 Woluminy";
+                    horizontal-stretch: 1.0;
+                    bg: AppState.storage_volumes.length > 0 ? CediniaColors.accent_muted : CediniaColors.bg_elevated;
+                    fg: AppState.storage_volumes.length > 0 ? CediniaColors.accent_light : CediniaColors.text_primary;
+                    clicked => {
+                        if (AppState.storage_volumes.length > 0) {
+                            AppState.storage_volumes = [];
+                        } else {
+                            AppState.list_storage_volumes();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

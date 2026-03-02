@@ -1,0 +1,191 @@
+
+
+
+import { CediniaColors } from "colors.slint";
+import { ActiveTool } from "common.slint";
+import { AppState } from "app_state.slint";
+
+
+component NavItem {
+    in property <string>     label;
+    in property <ActiveTool> tool;
+    in property <image>      icon;
+
+    height: 64px;
+
+    property <bool> is_active: AppState.active_tool == root.tool;
+
+    Rectangle {
+        width: root.width;
+        height: root.height;
+        background: ta.has-hover ? CediniaColors.ripple : transparent;
+        animate background { duration: 100ms; }
+        border-radius: 8px;
+
+        ta := TouchArea {
+            clicked => {
+                if AppState.active_tool != root.tool {
+                    AppState.active_tool = root.tool;
+                    AppState.tool_changed(root.tool);
+                }
+            }
+        }
+
+        VerticalLayout {
+            alignment: LayoutAlignment.center;
+            spacing: 3px;
+            padding-top: 6px;
+            padding-bottom: 6px;
+
+            Rectangle {
+                height: 3px;
+                horizontal-stretch: 0.0;
+                background: root.is_active ? CediniaColors.accent : transparent;
+                border-radius: 2px;
+                animate background { duration: 150ms; }
+            }
+
+            Image {
+                source: root.icon;
+                colorize: root.is_active ? CediniaColors.nav_active : CediniaColors.nav_inactive;
+                horizontal-alignment: ImageHorizontalAlignment.center;
+                vertical-alignment: ImageVerticalAlignment.center;
+                animate colorize { duration: 150ms; }
+            }
+
+            Text {
+                text: root.label;
+                color: root.is_active ? CediniaColors.nav_active : CediniaColors.nav_inactive;
+                font-size: 10px;
+                font-weight: root.is_active ? 700 : 400;
+                horizontal-alignment: TextHorizontalAlignment.center;
+                overflow: elide;
+                animate color { duration: 150ms; }
+            }
+        }
+    }
+}
+
+
+
+component DynamicToolItem {
+    height: 64px;
+
+
+    property <ActiveTool> t: AppState.last_scan_tool;
+
+    property <string> t_label:
+        t == ActiveTool.DuplicateFiles   ? "Duplikaty"
+      : t == ActiveTool.EmptyFolders     ? "Puste foldery"
+      : t == ActiveTool.SimilarImages    ? "Obrazy"
+      : t == ActiveTool.EmptyFiles       ? "Puste pliki"
+      : t == ActiveTool.TemporaryFiles   ? "Tymczasowe"
+      : t == ActiveTool.BigFiles         ? "Największe"
+      : t == ActiveTool.BrokenFiles      ? "Uszkodzone"
+      : t == ActiveTool.InvalidSymlinks  ? "Dowiązania"
+      : t == ActiveTool.BadExtensions    ? "Rozszerzenia"
+      : t == ActiveTool.SameMusic        ? "Muzyka"
+      : "Skanowanie";
+
+    property <image> t_icon:
+        t == ActiveTool.SimilarImages    ? @image-url("icons/image.svg")
+      : t == ActiveTool.EmptyFolders     ? @image-url("icons/folder_empty.svg")
+      : @image-url("icons/duplicate.svg");
+
+    property <bool> is_active: AppState.active_tool == root.t;
+
+    Rectangle {
+        width: root.width;
+        height: root.height;
+        background: ta.has-hover ? CediniaColors.ripple : transparent;
+        animate background { duration: 100ms; }
+        border-radius: 8px;
+
+        ta := TouchArea {
+            clicked => {
+                if AppState.active_tool != root.t {
+                    AppState.active_tool = root.t;
+                    AppState.tool_changed(root.t);
+                }
+            }
+        }
+
+        VerticalLayout {
+            alignment: LayoutAlignment.center;
+            spacing: 3px;
+            padding-top: 6px;
+            padding-bottom: 6px;
+
+            Rectangle {
+                height: 3px;
+                horizontal-stretch: 0.0;
+                background: root.is_active ? CediniaColors.accent : transparent;
+                border-radius: 2px;
+                animate background { duration: 150ms; }
+            }
+
+            Image {
+                source: root.t_icon;
+                colorize: root.is_active ? CediniaColors.nav_active : CediniaColors.nav_inactive;
+                horizontal-alignment: ImageHorizontalAlignment.center;
+                vertical-alignment: ImageVerticalAlignment.center;
+                animate colorize { duration: 150ms; }
+            }
+
+            Text {
+                text: root.t_label;
+                color: root.is_active ? CediniaColors.nav_active : CediniaColors.nav_inactive;
+                font-size: 10px;
+                font-weight: root.is_active ? 700 : 400;
+                horizontal-alignment: TextHorizontalAlignment.center;
+                overflow: elide;
+                animate color { duration: 150ms; }
+            }
+        }
+    }
+}
+
+
+export component BottomNavBar {
+    height: 64px;
+    horizontal-stretch: 1.0;
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: CediniaColors.nav_bg;
+        border-width: 1px;
+        border-color: CediniaColors.divider;
+
+        HorizontalLayout {
+            alignment: LayoutAlignment.stretch;
+            padding-left: 0px;
+            padding-right: 0px;
+
+            NavItem {
+                horizontal-stretch: 1.0;
+                label: "Narzędzia";
+                tool: ActiveTool.Home;
+                icon: @image-url("icons/home.svg");
+            }
+
+            DynamicToolItem {
+                horizontal-stretch: 1.0;
+            }
+
+            NavItem {
+                horizontal-stretch: 1.0;
+                label: "Katalogi";
+                tool: ActiveTool.Directories;
+                icon: @image-url("icons/folder.svg");
+            }
+
+            NavItem {
+                horizontal-stretch: 1.0;
+                label: "Więcej";
+                tool: ActiveTool.Settings;
+                icon: @image-url("icons/more.svg");
+            }
+        }
+    }
+}

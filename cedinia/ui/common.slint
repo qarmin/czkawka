@@ -1,0 +1,74 @@
+
+export enum ActiveTool {
+    Home,
+    DuplicateFiles,
+    EmptyFolders,
+    SimilarImages,
+    EmptyFiles,
+    TemporaryFiles,
+    BigFiles,
+    BrokenFiles,
+    InvalidSymlinks,
+    BadExtensions,
+    SameMusic,
+    Directories,
+    Settings,
+}
+export enum ScanState {
+    Idle,
+    Scanning,
+
+    Stopping,
+    Stopped,
+    Done,
+}
+
+
+export struct SimilarImageItem {
+    full_path:  string,
+    name:       string,
+    size:       string,
+    extra:      string,
+    flat_idx:   int,
+    thumbnail:  image,
+
+
+    checked:    bool,
+}
+
+
+export struct SimilarGroupCard {
+    label: string,
+    items: [SimilarImageItem],
+}
+export struct ProgressData {
+    step_name: string,
+    current_progress: int,
+    all_progress: int,
+    is_indeterminate: bool,
+}
+export struct FileEntry {
+    checked: bool,
+    is_header: bool,
+    path: string,
+    name: string,
+    size: string,
+    modified: string,
+    extra: string,
+}
+export struct DirectoryEntry {
+    path: string,
+    is_included: bool,
+}
+export struct VolumeEntry {
+    path: string,
+    label: string,
+    is_included: bool,
+    is_excluded: bool,
+}
+export struct CollectTestResult {
+    volumes:      int,
+    files:        int,
+    folders:      int,
+    elapsed_ms:   int,
+}

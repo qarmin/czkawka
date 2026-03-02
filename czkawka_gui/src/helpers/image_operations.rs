@@ -16,6 +16,7 @@ use crate::gtk_traits::WidgetTraits;
 const SIZE_OF_ICON: i32 = 18;
 const TYPE_OF_INTERPOLATION: InterpType = InterpType::Tiles;
 
+// TODO - verify if this needs to be executed for smaller items than requested size
 pub(crate) fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32), interp_type: InterpType) -> Option<Pixbuf> {
     let current_ratio = pixbuf.width() as f32 / pixbuf.height() as f32;
     let mut new_size;
@@ -24,13 +25,9 @@ pub(crate) fn resize_pixbuf_dimension(pixbuf: &Pixbuf, requested_size: (i32, i32
             new_size = (requested_size.0, (pixbuf.height() * requested_size.0) / pixbuf.width());
             new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
         }
-        Ordering::Less => {
-            new_size = ((pixbuf.width() * requested_size.1) / pixbuf.height(), requested_size.1);
-            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
-        }
-        Ordering::Equal => {
-            new_size = requested_size;
-            new_size = (std::cmp::max(new_size.0, 1), std::cmp::max(new_size.1, 1));
+
+        Ordering::Less | Ordering::Equal => {
+            return Some(pixbuf.clone());
         }
     }
     pixbuf.scale_simple(new_size.0, new_size.1, interp_type)

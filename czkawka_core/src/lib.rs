@@ -4,6 +4,7 @@ pub mod localizer_core;
 pub mod tools;
 
 pub mod re_exported {
+    pub use fast_image_resize::FilterType as FirFilterType;
     pub use image_hasher::{FilterType, HashAlg};
     pub use vid_dup_finder_lib::Cropdetect;
 }

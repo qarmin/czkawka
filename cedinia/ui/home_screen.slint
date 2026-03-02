@@ -1,0 +1,156 @@
+
+import { CediniaColors } from "colors.slint";
+import { ActiveTool } from "common.slint";
+import { AppState } from "app_state.slint";
+import { TouchButton, SectionHeader } from "components.slint";
+component ToolCard {
+    in property <string>  emoji;
+    in property <string>  title;
+    in property <string>  description;
+    in property <ActiveTool> tool;
+    in property <color>   accent: CediniaColors.accent;
+    height: 88px;
+    horizontal-stretch: 1.0;
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        border-radius: 10px;
+        background: CediniaColors.bg_card;
+        border-width: 1px;
+        border-color: ta.has-hover ? root.accent : CediniaColors.border;
+        animate border-color { duration: 120ms; }
+        ta := TouchArea {
+            clicked => {
+                AppState.active_tool    = root.tool;
+                AppState.last_scan_tool = root.tool;
+                AppState.tool_changed(root.tool);
+            }
+        }
+        HorizontalLayout {
+            padding: 12px;
+            spacing: 12px;
+            alignment: LayoutAlignment.start;
+
+            Rectangle {
+                width: 48px;
+                height: 48px;
+                border-radius: 24px;
+                background: root.accent.with-alpha(0.15);
+                vertical-stretch: 0.0;
+                Text {
+                    text: root.emoji;
+                    font-size: 24px;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                spacing: 4px;
+                horizontal-stretch: 1.0;
+                Text {
+                    text: root.title;
+                    color: CediniaColors.text_primary;
+                    font-size: 15px;
+                    font-weight: 700;
+                }
+                Text {
+                    text: root.description;
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    overflow: elide;
+                }
+            }
+
+            Text {
+                text: "›";
+                color: root.accent;
+                font-size: 22px;
+                vertical-alignment: TextVerticalAlignment.center;
+            }
+        }
+    }
+}
+export component HomeScreen {
+    VerticalLayout {
+        horizontal-stretch: 1.0;
+        Flickable {
+            horizontal-stretch: 1.0;
+            vertical-stretch: 1.0;
+            cards := VerticalLayout {
+                width: parent.width;
+                padding: 12px;
+                spacing: 10px;
+                ToolCard {
+                    emoji: "📂";
+                    title: "Duplikaty";
+                    description: "Znajdź pliki o tej samej zawartości";
+                    tool: ActiveTool.DuplicateFiles;
+                }
+                ToolCard {
+                    emoji: "📁";
+                    title: "Puste foldery";
+                    description: "Katalogi bez zawartości";
+                    tool: ActiveTool.EmptyFolders;
+                    accent: #ff9800;
+                }
+                ToolCard {
+                    emoji: "🖼";
+                    title: "Podobne obrazy";
+                    description: "Znajdź wizualnie podobne zdjęcia";
+                    tool: ActiveTool.SimilarImages;
+                    accent: #9c27b0;
+                }
+                ToolCard {
+                    emoji: "📄";
+                    title: "Puste pliki";
+                    description: "Pliki o zerowym rozmiarze";
+                    tool: ActiveTool.EmptyFiles;
+                    accent: #607d8b;
+                }
+                ToolCard {
+                    emoji: "🗑";
+                    title: "Pliki tymczasowe";
+                    description: "Tymczasowe i cache'owane pliki";
+                    tool: ActiveTool.TemporaryFiles;
+                    accent: #795548;
+                }
+                ToolCard {
+                    emoji: "📦";
+                    title: "Największe pliki";
+                    description: "50 największych plików na dysku";
+                    tool: ActiveTool.BigFiles;
+                    accent: #f44336;
+                }
+                ToolCard {
+                    emoji: "⚠";
+                    title: "Uszkodzone pliki";
+                    description: "Pliki PDF, audio, obrazy, archiwa";
+                    tool: ActiveTool.BrokenFiles;
+                    accent: #e91e63;
+                }
+                ToolCard {
+                    emoji: "🔗";
+                    title: "Złe dowiązania";
+                    description: "Martwe linki symboliczne";
+                    tool: ActiveTool.InvalidSymlinks;
+                    accent: #00bcd4;
+                }
+                ToolCard {
+                    emoji: "🏷";
+                    title: "Złe rozszerzenia";
+                    description: "Pliki z nieprawidłowym rozszerzeniem";
+                    tool: ActiveTool.BadExtensions;
+                    accent: #009688;
+                }
+                ToolCard {
+                    emoji: "🎵";
+                    title: "Duplikaty muzyki";
+                    description: "Podobne pliki audio wg tagów";
+                    tool: ActiveTool.SameMusic;
+                    accent: #3f51b5;
+                }
+            }
+        }
+    }
+}
