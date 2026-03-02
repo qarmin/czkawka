@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::SimilarityPreset;
 use log::warn;
@@ -15,13 +16,38 @@ where
     pub value: T,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MinFileSize {
+    None,
+    OneKb,
+    EightKb,
+    SixtyFourKb,
+    OneMb,
+}
+
+impl MinFileSize {
+    pub fn to_bytes(self) -> u64 {
+        match self {
+            Self::None => 0,
+            Self::OneKb => 1_024,
+            Self::EightKb => 8 * 1_024,
+            Self::SixtyFourKb => 64 * 1_024,
+            Self::OneMb => 1_024 * 1_024,
+        }
+    }
+}
+
 pub struct StringComboBoxItems {
+    pub min_file_size: Vec<StringComboBoxItem<MinFileSize>>,
     pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
     pub duplicates_hash_type: Vec<StringComboBoxItem<HashType>>,
     pub hash_size: Vec<StringComboBoxItem<u8>>,
     pub biggest_files_method: Vec<StringComboBoxItem<SearchMode>>,
     pub big_files_count: Vec<StringComboBoxItem<usize>>,
     pub similarity_preset: Vec<StringComboBoxItem<SimilarityPreset>>,
+    pub hash_alg: Vec<StringComboBoxItem<HashAlg>>,
+    pub image_filter: Vec<StringComboBoxItem<FilterType>>,
+    pub same_music_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
 }
 
 impl Default for StringComboBoxItems {
@@ -32,11 +58,19 @@ impl Default for StringComboBoxItems {
 
 impl StringComboBoxItems {
     pub fn new() -> Self {
+        let min_file_size = Self::convert(&[
+            ("none", "Brak", MinFileSize::None),
+            ("1kb", "1 KB", MinFileSize::OneKb),
+            ("8kb", "8 KB", MinFileSize::EightKb),
+            ("64kb", "64 KB", MinFileSize::SixtyFourKb),
+            ("1mb", "1 MB", MinFileSize::OneMb),
+        ]);
+
         let duplicates_check_method = Self::convert(&[
             ("hash", "Hash", CheckingMethod::Hash),
-            ("name", "Name", CheckingMethod::Name),
-            ("size_and_name", "Size and Name", CheckingMethod::SizeName),
-            ("size", "Size", CheckingMethod::Size),
+            ("name", "Nazwa", CheckingMethod::Name),
+            ("size_and_name", "Rozm+Naz", CheckingMethod::SizeName),
+            ("size", "Rozmiar", CheckingMethod::Size),
         ]);
 
         let duplicates_hash_type = Self::convert(&[
@@ -60,13 +94,36 @@ impl StringComboBoxItems {
             ("minimal", "Min.", SimilarityPreset::Minimal),
         ]);
 
+        let hash_alg = Self::convert(&[
+            ("mean", "Mean", HashAlg::Mean),
+            ("gradient", "Gradient", HashAlg::Gradient),
+            ("double_gradient", "D.Grad.", HashAlg::DoubleGradient),
+            ("vert_gradient", "V.Grad.", HashAlg::VertGradient),
+            ("median", "Median", HashAlg::Median),
+            ("blockhash", "Blockhash", HashAlg::Blockhash),
+        ]);
+
+        let image_filter = Self::convert(&[
+            ("nearest", "Nearest", FilterType::Nearest),
+            ("triangle", "Triangle", FilterType::Triangle),
+            ("catmull_rom", "CatmullRom", FilterType::CatmullRom),
+            ("gaussian", "Gaussian", FilterType::Gaussian),
+            ("lanczos3", "Lanczos3", FilterType::Lanczos3),
+        ]);
+
+        let same_music_check_method = Self::convert(&[("tags", "Tagi", CheckingMethod::AudioTags), ("audio", "Audio", CheckingMethod::AudioContent)]);
+
         Self {
+            min_file_size,
             duplicates_check_method,
             duplicates_hash_type,
             hash_size,
             biggest_files_method,
             big_files_count,
             similarity_preset,
+            hash_alg,
+            image_filter,
+            same_music_check_method,
         }
     }
 
@@ -92,9 +149,12 @@ impl StringComboBoxItems {
     }
 
     pub fn value_from_config_name<T: Clone + Debug>(config_name: &str, items: &[StringComboBoxItem<T>], default: T) -> T {
-        items.iter().find(|e| e.config_name == config_name).map(|e| e.value.clone()).unwrap_or_else(|| {
-            warn!("Unknown config_name \"{config_name}\" in {items:?}, using default");
-            default
-        })
+        items.iter().find(|e| e.config_name == config_name).map_or_else(
+            || {
+                warn!("Unknown config_name \"{config_name}\" in {items:?}, using default");
+                default
+            },
+            |e| e.value.clone(),
+        )
     }
 }

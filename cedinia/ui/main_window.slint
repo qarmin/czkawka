@@ -3,7 +3,7 @@
 
 import { CediniaColors } from "colors.slint";
 import { ActiveTool, ScanState, FileEntry, DirectoryEntry, SimilarGroupCard } from "common.slint";
-import { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings } from "app_state.slint";
+import { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings } from "app_state.slint";
 import { TopAppBar } from "top_bar.slint";
 import { BottomNavBar } from "bottom_nav.slint";
 import { ScanProgressBar } from "scan_progress.slint";
@@ -13,7 +13,8 @@ import { SettingsScreen } from "settings_screen.slint";
 import { HomeScreen } from "home_screen.slint";
 import { DirectoriesScreen } from "directories_screen.slint";
 import { TouchButton } from "components.slint";
-export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings }
+import { Translations } from "translations.slint";
+export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, Translations }
 export component MainWindow inherits Window {
     title: "Cedinia";
     background: CediniaColors.bg_primary;
@@ -31,9 +32,10 @@ export component MainWindow inherits Window {
     in-out property <[FileEntry]>        temporary_files_model:    [];
     in-out property <[FileEntry]>        big_files_model:          [];
     in-out property <[FileEntry]>        broken_files_model:       [];
-    in-out property <[FileEntry]>        invalid_symlinks_model:   [];
     in-out property <[FileEntry]>        bad_extensions_model:     [];
     in-out property <[FileEntry]>        same_music_model:         [];
+    in-out property <[FileEntry]>        bad_names_model:          [];
+    in-out property <[FileEntry]>        exif_remover_model:       [];
     in-out property <[DirectoryEntry]>   directories_model:        [];
 
     VerticalLayout {
@@ -43,20 +45,21 @@ export component MainWindow inherits Window {
         padding-bottom: max(AppState.inset_bottom, root.safe-area-insets.bottom);
 
         TopAppBar {
-            title: AppState.active_tool == ActiveTool.Home             ? "Cedinia"
-                 : AppState.active_tool == ActiveTool.DuplicateFiles   ? "Duplikaty"
-                 : AppState.active_tool == ActiveTool.EmptyFolders     ? "Puste foldery"
-                 : AppState.active_tool == ActiveTool.SimilarImages    ? "Podobne obrazy"
-                 : AppState.active_tool == ActiveTool.EmptyFiles       ? "Puste pliki"
-                 : AppState.active_tool == ActiveTool.TemporaryFiles   ? "Pliki tymczasowe"
-                 : AppState.active_tool == ActiveTool.BigFiles         ? "Największe pliki"
-                 : AppState.active_tool == ActiveTool.BrokenFiles      ? "Uszkodzone pliki"
-                 : AppState.active_tool == ActiveTool.InvalidSymlinks  ? "Złe dowiązania"
-                 : AppState.active_tool == ActiveTool.BadExtensions    ? "Złe rozszerzenia"
-                 : AppState.active_tool == ActiveTool.SameMusic        ? "Duplikaty muzyki"
-                 : AppState.active_tool == ActiveTool.Directories      ? "Katalogi"
-                 : AppState.active_tool == ActiveTool.Settings         ? "Ustawienia"
-                 : "Cedinia";
+            title: AppState.active_tool == ActiveTool.Home             ? Translations.app_name_text
+                 : AppState.active_tool == ActiveTool.DuplicateFiles   ? Translations.tool_duplicate_files_text
+                 : AppState.active_tool == ActiveTool.EmptyFolders     ? Translations.tool_empty_folders_text
+                 : AppState.active_tool == ActiveTool.SimilarImages    ? Translations.tool_similar_images_text
+                 : AppState.active_tool == ActiveTool.EmptyFiles       ? Translations.tool_empty_files_text
+                 : AppState.active_tool == ActiveTool.TemporaryFiles   ? Translations.tool_temporary_files_text
+                 : AppState.active_tool == ActiveTool.BigFiles         ? Translations.tool_big_files_text
+                 : AppState.active_tool == ActiveTool.BrokenFiles      ? Translations.tool_broken_files_text
+                 : AppState.active_tool == ActiveTool.BadExtensions    ? Translations.tool_bad_extensions_text
+                 : AppState.active_tool == ActiveTool.SameMusic        ? Translations.tool_same_music_text
+                 : AppState.active_tool == ActiveTool.BadNames         ? Translations.tool_bad_names_text
+                 : AppState.active_tool == ActiveTool.ExifRemover      ? Translations.tool_exif_remover_text
+                 : AppState.active_tool == ActiveTool.Directories      ? Translations.tool_directories_text
+                 : AppState.active_tool == ActiveTool.Settings         ? Translations.tool_settings_text
+                 : Translations.app_name_text;
         }
 
         ScanProgressBar {}
@@ -85,7 +88,7 @@ export component MainWindow inherits Window {
                 height: parent.height;
                 width: parent.width;
                 entries: duplicate_files_model;
-                tool_title: "Duplikaty";
+                tool_title: Translations.tool_duplicate_files_text;
                 tool_emoji: "📂";
                 is_grouped: true;
             }
@@ -94,7 +97,7 @@ export component MainWindow inherits Window {
                 height: parent.height;
                 width: parent.width;
                 entries: empty_folder_model;
-                tool_title: "Puste foldery";
+                tool_title: Translations.tool_empty_folders_text;
                 tool_emoji: "📁";
             }
 
@@ -102,10 +105,12 @@ export component MainWindow inherits Window {
                 height: parent.height;
                 width: parent.width;
                 entries: similar_images_model;
-                tool_title: "Podobne obrazy";
+                tool_title: Translations.tool_similar_images_text;
                 tool_emoji: "🖼";
                 is_grouped: true;
                 has_gallery_mode: true;
+                has_size_select: true;
+                has_resolution_select: true;
             }
 
             if AppState.active_tool == ActiveTool.SimilarImages && AppState.similar_images_gallery_mode : SimilarImagesGallery {
@@ -118,7 +123,7 @@ export component MainWindow inherits Window {
                 height: parent.height;
                 width: parent.width;
                 entries: empty_files_model;
-                tool_title: "Puste pliki";
+                tool_title: Translations.tool_empty_files_text;
                 tool_emoji: "📄";
             }
 
@@ -126,7 +131,7 @@ export component MainWindow inherits Window {
                 height: parent.height;
                 width: parent.width;
                 entries: temporary_files_model;
-                tool_title: "Pliki tymczasowe";
+                tool_title: Translations.tool_temporary_files_text;
                 tool_emoji: "🗑";
             }
 
@@ -134,7 +139,7 @@ export component MainWindow inherits Window {
                 height: parent.height;
                 width: parent.width;
                 entries: big_files_model;
-                tool_title: "Największe pliki";
+                tool_title: Translations.tool_big_files_text;
                 tool_emoji: "📦";
             }
 
@@ -142,33 +147,47 @@ export component MainWindow inherits Window {
                 height: parent.height;
                 width: parent.width;
                 entries: broken_files_model;
-                tool_title: "Uszkodzone pliki";
+                tool_title: Translations.tool_broken_files_text;
                 tool_emoji: "⚠";
-            }
-
-            if AppState.active_tool == ActiveTool.InvalidSymlinks : ResultsList {
-                height: parent.height;
-                width: parent.width;
-                entries: invalid_symlinks_model;
-                tool_title: "Złe dowiązania";
-                tool_emoji: "🔗";
             }
 
             if AppState.active_tool == ActiveTool.BadExtensions : ResultsList {
                 height: parent.height;
                 width: parent.width;
                 entries: bad_extensions_model;
-                tool_title: "Złe rozszerzenia";
+                tool_title: Translations.tool_bad_extensions_text;
                 tool_emoji: "🏷";
+                can_delete: false;
+                can_rename: true;
             }
 
             if AppState.active_tool == ActiveTool.SameMusic : ResultsList {
                 height: parent.height;
                 width: parent.width;
                 entries: same_music_model;
-                tool_title: "Duplikaty muzyki";
+                tool_title: Translations.tool_same_music_text;
                 tool_emoji: "🎵";
                 is_grouped: true;
+                has_size_select: true;
+            }
+
+            if AppState.active_tool == ActiveTool.BadNames : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: bad_names_model;
+                tool_title: Translations.tool_bad_names_text;
+                tool_emoji: "✏";
+                can_rename: true;
+            }
+
+            if AppState.active_tool == ActiveTool.ExifRemover : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: exif_remover_model;
+                tool_title: Translations.tool_exif_remover_text;
+                tool_emoji: "📷";
+                can_delete: false;
+                can_clean_exif: true;
             }
         }
 
@@ -198,14 +217,14 @@ export component MainWindow inherits Window {
                 alignment: LayoutAlignment.center;
 
                 Text {
-                    text: "⏹ Zatrzymywanie";
+                    text: Translations.stopping_overlay_title_text;
                     font-size: 17px;
                     font-weight: 700;
                     color: CediniaColors.warning;
                     horizontal-alignment: TextHorizontalAlignment.center;
                 }
                 Text {
-                    text: "Kończenie bieżącego skanu…\nProszę czekać.";
+                    text: Translations.stopping_overlay_body_text;
                     font-size: 13px;
                     color: CediniaColors.text_secondary;
                     horizontal-alignment: TextHorizontalAlignment.center;
@@ -238,7 +257,7 @@ export component MainWindow inherits Window {
                 spacing: 16px;
 
                 Text {
-                    text: "🔒 Dostęp do plików";
+                    text: Translations.permission_title_text;
                     color: CediniaColors.warning;
                     font-size: 18px;
                     font-weight: 700;
@@ -246,7 +265,7 @@ export component MainWindow inherits Window {
                 }
 
                 Text {
-                    text: "Aby skanować pliki, aplikacja potrzebuje dostępu do pamięci urządzenia. Bez tego uprawnienia skanowanie nie będzie możliwe.";
+                    text: Translations.permission_body_text;
                     color: CediniaColors.text_secondary;
                     font-size: 13px;
                     wrap: word-wrap;
@@ -256,7 +275,7 @@ export component MainWindow inherits Window {
                 HorizontalLayout {
                     spacing: 12px;
                     TouchButton {
-                        label: "Anuluj";
+                        label: Translations.cancel_text;
                         bg: CediniaColors.bg_surface;
                         fg: CediniaColors.text_secondary;
                         min_h: 48px;
@@ -264,7 +283,7 @@ export component MainWindow inherits Window {
                         clicked => { AppState.show_permission_popup = false; }
                     }
                     TouchButton {
-                        label: "Przyznaj";
+                        label: Translations.grant_text;
                         bg: CediniaColors.accent;
                         fg: #000000;
                         min_h: 48px;

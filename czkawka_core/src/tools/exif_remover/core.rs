@@ -254,6 +254,11 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], overri
     .map_err(|e: String| format!("Failed to remove EXIF from file {file_path} - {e}"))
 }
 
+pub fn extract_exif_tags_public(path: &Path) -> Result<Vec<(u16, String)>, String> {
+    let tags = extract_exif_tags(path)?;
+    Ok(tags.into_iter().map(|(_, code, group)| (code, group)).collect())
+}
+
 fn extract_exif_tags(path: &Path) -> Result<Vec<(String, u16, String)>, String> {
     panic::catch_unwind(|| {
         let file_path = Path::new(path);

@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TARGET_DIR = ROOT / 'cedinia' / 'ui'
+TARGET_DIR = ROOT / 'cedinia' / 'src'
 
 
 def remove_comments_from_text(s: str) -> str:
@@ -185,9 +185,9 @@ def main():
     if not TARGET_DIR.exists():
         print('Target directory not found:', TARGET_DIR)
         sys.exit(1)
-    rs_files = list(TARGET_DIR.rglob('*.slint'))
+    rs_files = list(TARGET_DIR.rglob('*.rs'))
     if not rs_files:
-        print('No .rs files found under', TARGET_DIR)
+        print('No .slint files found under', TARGET_DIR)
         sys.exit(0)
     changed = 0
     for f in rs_files:

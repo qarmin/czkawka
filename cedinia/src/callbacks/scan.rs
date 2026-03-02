@@ -5,13 +5,17 @@ use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::SimilarityPreset;
-use slint::{ComponentHandle, SharedString};
+use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::scan_runner::{CommonFilters, ScanRequest};
 use crate::settings::gui_settings_values::StringComboBoxItems;
-use crate::{ActiveTool, AppState, BigFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, ScanState, SimilarImagesSettings};
+use crate::{
+    ActiveTool, AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, FileEntry, GeneralSettings, MainWindow, SameMusicSettings, ScanState,
+    SimilarGroupCard, SimilarImagesSettings,
+};
 
 pub(crate) fn wire_scan(
     window: &MainWindow,
@@ -22,18 +26,19 @@ pub(crate) fn wire_scan(
 ) {
     {
         let weak = window.as_weak();
-        let inc = included_dirs.clone();
+        let inc = included_dirs;
         let stop = stop_flag.clone();
         let tx = scan_tx.clone();
-        let scan_gen2 = scan_gen.clone();
+        let scan_gen2 = scan_gen;
         window.global::<AppState>().on_scan_requested(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_scan_requested");
             scan_gen2.fetch_add(1, Ordering::SeqCst);
             win.global::<AppState>().set_scan_state(ScanState::Scanning);
             win.global::<AppState>().set_status_message(SharedString::from("Skanowanie…"));
             stop.store(false, Ordering::Relaxed);
             let dirs = inc.borrow().clone();
             let tool = win.global::<AppState>().get_active_tool();
+            clear_tool_results(&win, tool);
             let req = build_scan_request(&win, tool, dirs);
             let _ = tx.send(req);
         });
@@ -43,30 +48,56 @@ pub(crate) fn wire_scan(
         let stop = stop_flag;
         let tx = scan_tx;
         window.global::<AppState>().on_stop_requested(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_stop_requested");
             stop.store(true, Ordering::Relaxed);
             let _ = tx.send(ScanRequest::Stop);
             win.global::<AppState>().set_scan_state(ScanState::Stopping);
         });
     }
-    window.global::<AppState>().on_tool_changed(|_| {});
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_tool_changed(move |_| {
+            let win = weak.upgrade().expect("MainWindow dropped in on_tool_changed");
+            win.global::<AppState>().set_selected_count(0);
+            win.global::<AppState>().set_status_message(SharedString::default());
+        });
+    }
+}
+
+fn empty_entries() -> ModelRc<FileEntry> {
+    ModelRc::new(VecModel::from(vec![]))
+}
+
+fn clear_tool_results(win: &MainWindow, tool: ActiveTool) {
+    match tool {
+        ActiveTool::DuplicateFiles => win.set_duplicate_files_model(empty_entries()),
+        ActiveTool::EmptyFolders => win.set_empty_folder_model(empty_entries()),
+        ActiveTool::SimilarImages => {
+            win.set_similar_images_model(empty_entries());
+            win.set_similar_images_groups(ModelRc::new(VecModel::<SimilarGroupCard>::from(vec![])));
+        }
+        ActiveTool::EmptyFiles => win.set_empty_files_model(empty_entries()),
+        ActiveTool::TemporaryFiles => win.set_temporary_files_model(empty_entries()),
+        ActiveTool::BigFiles => win.set_big_files_model(empty_entries()),
+        ActiveTool::BrokenFiles => win.set_broken_files_model(empty_entries()),
+        ActiveTool::BadExtensions => win.set_bad_extensions_model(empty_entries()),
+        ActiveTool::SameMusic => win.set_same_music_model(empty_entries()),
+        ActiveTool::BadNames => win.set_bad_names_model(empty_entries()),
+        ActiveTool::ExifRemover => win.set_exif_remover_model(empty_entries()),
+        ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {}
+    }
+    win.global::<AppState>().set_selected_count(0);
 }
 
 fn build_common_filters(win: &MainWindow) -> CommonFilters {
     let g = win.global::<GeneralSettings>();
-    let min_file_size_bytes = match g.get_min_file_size_idx() {
-        0 => 0,
-        1 => 1024,
-        2 => 8 * 1024,
-        3 => 64 * 1024,
-        4 => 1024 * 1024,
-        _ => 0,
-    };
+    let items = StringComboBoxItems::new();
+    let min_file_size_bytes = items.min_file_size.get(g.get_min_file_size_idx() as usize).map_or(0, |e| e.value.to_bytes());
     let split_csv = |s: slint::SharedString| -> Vec<String> { s.as_str().split(',').map(|p| p.trim().to_string()).filter(|p| !p.is_empty()).collect() };
     let mut excluded_items = split_csv(g.get_excluded_items());
     let cache_dir = crate::thumbnail_loader::thumbnail_cache_dir();
     if let Some(s) = cache_dir.to_str() {
-        excluded_items.push(format!("{}/*", s));
+        excluded_items.push(format!("{s}/*"));
     }
     if g.get_ignore_hidden() {
         excluded_items.push("*/.*".to_string());
@@ -90,7 +121,6 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>) ->
             dirs: dirs.clone(),
             check_method: StringComboBoxItems::value_from_config_name(&d.get_check_method_value(), &items.duplicates_check_method, CheckingMethod::Hash),
             hash_type: StringComboBoxItems::value_from_config_name(&d.get_hash_type_value(), &items.duplicates_hash_type, HashType::Blake3),
-            min_size_kb: min_size_kb_from_idx(d.get_min_size_kb_idx()),
             use_cache: win.global::<GeneralSettings>().get_use_cache(),
             filters: filters.clone(),
         }
@@ -105,6 +135,9 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>) ->
                 dirs,
                 similarity_preset: StringComboBoxItems::value_from_config_name(&s.get_similarity_preset_value(), &items.similarity_preset, SimilarityPreset::Medium),
                 hash_size: StringComboBoxItems::value_from_config_name(&s.get_hash_size_value(), &items.hash_size, 16),
+                hash_alg: StringComboBoxItems::value_from_config_name(&s.get_hash_alg_value(), &items.hash_alg, HashAlg::Mean),
+                image_filter: StringComboBoxItems::value_from_config_name(&s.get_image_filter_value(), &items.image_filter, FilterType::Triangle),
+                ignore_same_size: s.get_ignore_same_size(),
                 filters,
             }
         }
@@ -119,20 +152,77 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>) ->
                 filters,
             }
         }
-        ActiveTool::BrokenFiles => ScanRequest::BrokenFiles { dirs, filters },
-        ActiveTool::InvalidSymlinks => ScanRequest::InvalidSymlinks { dirs, filters },
+        ActiveTool::BrokenFiles => {
+            let b = win.global::<BrokenFilesSettings>();
+            use czkawka_core::tools::broken_files::CheckedTypes;
+            let mut types = CheckedTypes::empty();
+            if b.get_check_audio() {
+                types |= CheckedTypes::AUDIO;
+            }
+            if b.get_check_pdf() {
+                types |= CheckedTypes::PDF;
+            }
+            if b.get_check_archive() {
+                types |= CheckedTypes::ARCHIVE;
+            }
+            if b.get_check_image() {
+                types |= CheckedTypes::IMAGE;
+            }
+            ScanRequest::BrokenFiles {
+                dirs,
+                filters,
+                checked_types: types.bits(),
+            }
+        }
         ActiveTool::BadExtensions => ScanRequest::BadExtensions { dirs, filters },
-        ActiveTool::SameMusic => ScanRequest::SameMusic { dirs, filters },
-        ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => duplicate_request(),
-    }
-}
-
-fn min_size_kb_from_idx(idx: i32) -> i32 {
-    match idx {
-        0 => 1,
-        1 => 8,
-        2 => 64,
-        3 => 1024,
-        _ => 8,
+        ActiveTool::SameMusic => {
+            let m = win.global::<SameMusicSettings>();
+            use czkawka_core::tools::same_music::MusicSimilarity;
+            let mut sim = MusicSimilarity::NONE;
+            if m.get_title() {
+                sim |= MusicSimilarity::TRACK_TITLE;
+            }
+            if m.get_artist() {
+                sim |= MusicSimilarity::TRACK_ARTIST;
+            }
+            if m.get_year() {
+                sim |= MusicSimilarity::YEAR;
+            }
+            if m.get_length() {
+                sim |= MusicSimilarity::LENGTH;
+            }
+            if m.get_genre() {
+                sim |= MusicSimilarity::GENRE;
+            }
+            if m.get_bitrate() {
+                sim |= MusicSimilarity::BITRATE;
+            }
+            if sim.is_empty() {
+                sim = MusicSimilarity::TRACK_TITLE | MusicSimilarity::TRACK_ARTIST;
+            }
+            ScanRequest::SameMusic {
+                dirs,
+                filters,
+                music_similarity: sim.bits(),
+                approximate: m.get_approximate(),
+                check_method: StringComboBoxItems::value_from_config_name(&m.get_check_method_value(), &items.same_music_check_method, CheckingMethod::AudioTags),
+            }
+        }
+        ActiveTool::BadNames => {
+            let bn = win.global::<BadNamesSettings>();
+            ScanRequest::BadNames {
+                dirs,
+                filters,
+                uppercase_extension: bn.get_uppercase_extension(),
+                emoji_used: bn.get_emoji_used(),
+                space_at_start_or_end: bn.get_space_at_start_or_end(),
+                non_ascii_graphical: bn.get_non_ascii_graphical(),
+                remove_duplicated_non_alpha: bn.get_remove_duplicated_non_alpha(),
+            }
+        }
+        ActiveTool::ExifRemover => ScanRequest::ExifRemover { dirs, filters },
+        ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {
+            unreachable!("scan cannot be triggered from Home/Directories/Settings tab")
+        }
     }
 }

@@ -1,43 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Foreground layer for the Cedinia adaptive icon (108dp × 108dp canvas).
-  Content lives within the 18–90dp safe zone so nothing gets clipped.
-
-  Design: two overlapping documents (representing duplicate files) with a
-  folded top-right corner on the front one. Dark navy background (#1A2744)
-  is supplied by ic_launcher_background.xml.
--->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-
-    <!-- Back document (medium blue, slightly offset left/down) -->
-    <path
-        android:fillColor="#4A7DB8"
-        android:pathData="
-            M22,38 Q22,34 26,34 L60,34 Q64,34 64,38
-            L64,80 Q64,84 60,84 L26,84 Q22,84 22,80 Z"/>
-
-    <!-- Front document body (white), dog-ear cuts top-right corner -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="
-            M38,24 Q38,20 42,20 L72,20
-            L84,32
-            L84,74 Q84,78 80,78 L42,78 Q38,78 38,74 Z"/>
-
-    <!-- Dog-ear fold (light blue shadow) -->
-    <path
-        android:fillColor="#B0C8E0"
-        android:pathData="M72,20 L84,32 L72,32 Z"/>
-
-    <!-- Text lines on the front document -->
-    <path
-        android:strokeColor="#BBCFDF"
-        android:strokeWidth="3"
-        android:strokeLineCap="round"
-        android:pathData="M46,42 L76,42 M46,52 L76,52 M46,62 L62,62"/>
-
-</vector>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/ic_launcher_fg_src"
+    android:gravity="center" />

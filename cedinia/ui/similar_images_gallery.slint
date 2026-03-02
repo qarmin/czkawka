@@ -1,5 +1,3 @@
-
-
 import { CediniaColors } from "colors.slint";
 import { SimilarGroupCard, ScanState } from "common.slint";
 import { AppState } from "app_state.slint";
@@ -11,7 +9,7 @@ component GalleryImageCell {
     in property <image>  thumbnail;
     in property <string> img_name;
     in property <string> img_size;
-    in property <string> img_extra;
+    in property <[string]> img_val_str: [];
     in property <int>    flat_idx;
     in property <bool>   checked: false;
 
@@ -19,7 +17,7 @@ component GalleryImageCell {
 
     ta := TouchArea {
 
-        double-clicked => { AppState.toggle_file_checked(root.flat_idx); }
+        clicked => { AppState.toggle_file_checked(root.flat_idx); }
     }
 
     VerticalLayout {
@@ -60,9 +58,9 @@ component GalleryImageCell {
                 background: CediniaColors.accent;
                 z: 5;
                 Text {
-                    text: "✓";
+                    text: "OK";
                     color: #000000;
-                    font-size: 13px;
+                    font-size: 11px;
                     font-weight: 700;
                     horizontal-alignment: TextHorizontalAlignment.center;
                     vertical-alignment: TextVerticalAlignment.center;
@@ -83,8 +81,8 @@ component GalleryImageCell {
             color: CediniaColors.text_secondary;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
-        if root.img_extra != "" : Text {
-            text: root.img_extra;
+        if root.img_val_str.length > 0 && root.img_val_str[0] != "" : Text {
+            text: root.img_val_str[0];
             font-size: 10px;
             color: CediniaColors.text_secondary;
             horizontal-alignment: TextHorizontalAlignment.center;
@@ -96,6 +94,8 @@ component GalleryImageCell {
 
 component GalleryToggleBar {
     height: 52px;
+
+    in-out property <int> menu_state: 0;
 
     Rectangle {
         background: CediniaColors.bg_elevated;
@@ -109,13 +109,6 @@ component GalleryToggleBar {
             padding-bottom: 8px;
             spacing: 8px;
 
-            Text {
-                text: "Galeria podobnych obrazów";
-                font-size: 13px;
-                color: CediniaColors.text_secondary;
-                vertical-alignment: TextVerticalAlignment.center;
-                horizontal-stretch: 1.0;
-            }
 
             if AppState.selected_count > 0 : TouchButton {
                 label: "Usuń";
@@ -125,8 +118,44 @@ component GalleryToggleBar {
                 clicked => { AppState.request_gallery_delete(); }
             }
 
+            if AppState.selected_count > 0 : Rectangle {
+                width: selected_chip.preferred-width + 16px;
+                height: 28px;
+                border-radius: 14px;
+                background: CediniaColors.accent_muted;
+                vertical-stretch: 0.0;
+                y: (parent.height - self.height) / 2;
+                selected_chip := Text {
+                    text: "[" + AppState.selected_count + "]";
+                    color: CediniaColors.accent_light;
+                    font-size: 11px;
+                    font-weight: 700;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    vertical-alignment: TextVerticalAlignment.center;
+                }
+            }
+
+            Rectangle { horizontal-stretch: 1.0; }
+
+
             TouchButton {
-                label: "☰ Lista";
+                label: "Zaz.";
+                min_h: 36px;
+                bg: CediniaColors.bg_surface;
+                fg: CediniaColors.text_secondary;
+                clicked => { root.menu_state = 1; }
+            }
+
+            TouchButton {
+                label: "Odzn.";
+                min_h: 36px;
+                bg: CediniaColors.bg_surface;
+                fg: CediniaColors.text_secondary;
+                clicked => { root.menu_state = 2; }
+            }
+
+            TouchButton {
+                label: "Lista";
                 min_h: 36px;
                 bg: CediniaColors.bg_surface;
                 fg: CediniaColors.text_secondary;
@@ -143,9 +172,7 @@ export component SimilarImagesGallery {
     VerticalLayout {
         spacing: 0px;
 
-
-        GalleryToggleBar {}
-
+        toggle_bar := GalleryToggleBar {}
 
         if groups.length == 0 : Rectangle {
             vertical-stretch: 1.0;
@@ -211,7 +238,7 @@ export component SimilarImagesGallery {
                             thumbnail:  img.thumbnail;
                             img_name:   img.name;
                             img_size:   img.size;
-                            img_extra:  img.extra;
+                            img_val_str: img.val_str;
                             flat_idx:   img.flat_idx;
                             checked:    img.checked;
                         }
@@ -220,6 +247,170 @@ export component SimilarImagesGallery {
 
 
                 Rectangle { height: 1px; background: CediniaColors.divider; }
+            }
+        }
+    }
+
+
+
+    if toggle_bar.menu_state == 1 : Rectangle {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 50;
+        background: #00000099;
+        TouchArea {}
+
+        Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - popup_sel_vl.preferred-height - 24px) / 2;
+            width: min(parent.width - 48px, 300px);
+            height: popup_sel_vl.preferred-height + 24px;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #000000aa;
+            clip: true;
+
+            popup_sel_vl := VerticalLayout {
+                padding: 12px;
+                spacing: 6px;
+
+                Text {
+                    text: "Zaznaczanie";
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                TouchButton {
+                    label: "Zaznacz wszystko";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.text_primary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zaznacz poza jednym";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_one(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zaznacz poza największym (rozmiar)";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_largest(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zaznacz poza najmniejszym (rozmiar)";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_smallest(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zaznacz największy (rozmiar)";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_largest_per_group(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zaznacz najmniejszy (rozmiar)";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_smallest_per_group(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zaznacz poza największą rozdzielczością";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_highest_resolution(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zaznacz poza najmniejszą rozdzielczością";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_lowest_resolution(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zaznacz największą rozdzielczość";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_highest_resolution_per_group(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zaznacz najmniejszą rozdzielczość";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_lowest_resolution_per_group(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Odwróć zaznaczenie";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.text_secondary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.invert_selection(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zamknij";
+                    min_h: 40px; bg: CediniaColors.bg_elevated; fg: CediniaColors.text_disabled;
+                    horizontal-stretch: 1.0;
+                    clicked => { toggle_bar.menu_state = 0; }
+                }
+            }
+        }
+    }
+
+
+    if toggle_bar.menu_state == 2 : Rectangle {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 50;
+        background: #00000099;
+        TouchArea {}
+
+        Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - popup_desel_vl.preferred-height - 24px) / 2;
+            width: min(parent.width - 48px, 300px);
+            height: popup_desel_vl.preferred-height + 24px;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #000000aa;
+            clip: true;
+
+            popup_desel_vl := VerticalLayout {
+                padding: 12px;
+                spacing: 6px;
+
+                Text {
+                    text: "Odznaczanie";
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+                TouchButton {
+                    label: "Odznacz wszystko";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.text_primary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.deselect_all(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Odznacz poza jednym";
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.deselect_all_except_one(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: "Zamknij";
+                    min_h: 40px; bg: CediniaColors.bg_elevated; fg: CediniaColors.text_disabled;
+                    horizontal-stretch: 1.0;
+                    clicked => { toggle_bar.menu_state = 0; }
+                }
             }
         }
     }
@@ -425,7 +616,7 @@ export component SimilarImagesGallery {
 
         Text {
             text: AppState.scan_state == ScanState.Scanning
-                || AppState.scan_state == ScanState.Stopping ? "⏹" : "▶";
+                || AppState.scan_state == ScanState.Stopping ? "■" : "▶";
             font-size: 22px;
             color: AppState.scan_state == ScanState.Stopping ? #00000066 : #000000;
             horizontal-alignment: TextHorizontalAlignment.center;

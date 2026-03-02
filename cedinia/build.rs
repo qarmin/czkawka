@@ -17,7 +17,7 @@ fn compile_android_java() {
 
     let java_files = ["java/CediniaActivity.java", "java/CediniaFilePicker.java"];
 
-    let out_dir: PathBuf = env::var_os("OUT_DIR").unwrap().into();
+    let out_dir: PathBuf = env::var_os("OUT_DIR").expect("OUT_DIR environment variable not set").into();
     let out_class_dir = out_dir.join("java_classes");
 
     if out_class_dir.try_exists().unwrap_or(false) {
@@ -50,16 +50,14 @@ fn compile_android_java() {
         .output()
         .unwrap_or_else(|e| panic!("Could not run javac: {e}"));
 
-    if !status.status.success() {
-        panic!("Java compilation failed:\n{}", String::from_utf8_lossy(&status.stderr));
-    }
+    assert!(status.status.success(), "Java compilation failed:\n{}", String::from_utf8_lossy(&status.stderr));
 
     // Convert .class files to a single classes.dex.
     let dex_out = Dexer::new()
         .android_jar(&android_jar)
         .class_path(&out_class_dir)
         .collect_classes(&out_class_dir)
-        .unwrap()
+        .expect("Failed to collect compiled Java classes for DEX conversion")
         .release(release_mode)
         .android_min_api(21)
         .out_dir(&out_dir)
@@ -68,9 +66,7 @@ fn compile_android_java() {
         .output()
         .unwrap_or_else(|e| panic!("Error running D8: {e}"));
 
-    if !dex_out.status.success() {
-        panic!("Dex conversion failed:\n{}", String::from_utf8_lossy(&dex_out.stderr));
-    }
+    assert!(dex_out.status.success(), "Dex conversion failed:\n{}", String::from_utf8_lossy(&dex_out.stderr));
 
     for f in &java_files {
         println!("cargo:rerun-if-changed={f}");

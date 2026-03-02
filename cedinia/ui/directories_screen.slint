@@ -3,6 +3,7 @@
 import { CediniaColors } from "colors.slint";
 import { DirectoryEntry, VolumeEntry } from "common.slint";
 import { AppState } from "app_state.slint";
+import { Translations } from "translations.slint";
 import { TouchButton, SectionHeader, Divider } from "components.slint";
 
 component DirRow {
@@ -63,7 +64,7 @@ component DirRow {
                     clicked => { root.remove(); }
                 }
                 Text {
-                    text: "✕";
+                    text: "X";
                     color: CediniaColors.danger;
                     font-size: 18px;
                     horizontal-alignment: center;
@@ -82,7 +83,7 @@ export component DirectoriesScreen {
         height: parent.height;
         spacing: 0px;
 
-        
+
         if directories.length == 0 : Rectangle {}
 
         Flickable {
@@ -121,6 +122,7 @@ export component DirectoriesScreen {
                         } else {
                             AppState.remove_exclude_dir(entry.path);
                         }
+                        AppState.save_settings_now();
                     }
                 }
             }
@@ -142,23 +144,29 @@ export component DirectoriesScreen {
                 alignment: LayoutAlignment.stretch;
 
                 TouchButton {
-                    label: "+ Dodaj";
+                    label: Translations.directories_add_text;
                     horizontal-stretch: 1.0;
                     bg: CediniaColors.success.with-alpha(0.8);
                     fg: #000000;
-                    clicked => { AppState.pick_include_dir(); }
+                    clicked => {
+                        AppState.pick_include_dir();
+                        AppState.save_settings_now();
+                    }
                 }
 
                 TouchButton {
-                    label: "− Wyklucz";
+                    label: "- Wyklucz";
                     horizontal-stretch: 1.0;
                     bg: CediniaColors.danger.with-alpha(0.8);
                     fg: #ffffff;
-                    clicked => { AppState.pick_exclude_dir(); }
+                    clicked => {
+                        AppState.pick_exclude_dir();
+                        AppState.save_settings_now();
+                    }
                 }
 
                 TouchButton {
-                    label: "💾 Woluminy";
+                    label: Translations.directories_volume_header_text;
                     horizontal-stretch: 1.0;
                     bg: AppState.storage_volumes.length > 0 ? CediniaColors.accent_muted : CediniaColors.bg_elevated;
                     fg: AppState.storage_volumes.length > 0 ? CediniaColors.accent_light : CediniaColors.text_primary;
@@ -168,6 +176,157 @@ export component DirectoriesScreen {
                         } else {
                             AppState.list_storage_volumes();
                         }
+                    }
+                }
+            }
+        }
+    }
+
+
+    if AppState.storage_volumes.length > 0 : Rectangle {
+        x: 0;
+        y: root.height - self.height - 64px;
+        width: root.width;
+        height: min(vol_popup_layout.preferred-height, root.height - 64px - 8px);
+        background: CediniaColors.bg_elevated;
+        border-width: 1px;
+        border-color: CediniaColors.divider;
+        drop-shadow-blur: 16px;
+        drop-shadow-color: #00000066;
+
+        vol_popup_layout := VerticalLayout {
+            spacing: 0px;
+
+
+            Rectangle {
+                height: 44px;
+                background: CediniaColors.bg_surface;
+
+                HorizontalLayout {
+                    padding-left: 16px;
+                    padding-right: 8px;
+                    spacing: 8px;
+
+                    Text {
+                        text: "💾 Woluminy";
+                        color: CediniaColors.accent_light;
+                        font-size: 15px;
+                        font-weight: 700;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        horizontal-stretch: 1.0;
+                    }
+
+                    Rectangle {
+                        width: 36px;
+                        height: 36px;
+                        border-radius: 18px;
+                        vertical-stretch: 0.0;
+                        background: close_ta.has-hover ? CediniaColors.ripple : transparent;
+
+                        close_ta := TouchArea {
+                            clicked => { AppState.storage_volumes = []; }
+                        }
+                        Text {
+                            text: "X";
+                            color: CediniaColors.text_secondary;
+                            font-size: 16px;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+            }
+
+            Rectangle { height: 1px; background: CediniaColors.divider; }
+
+            Flickable {
+                vertical-stretch: 1.0;
+                viewport-height: max(vol_list.preferred-height, self.height);
+
+                vol_list := VerticalLayout {
+                    spacing: 0px;
+
+                    for vol in AppState.storage_volumes : VerticalLayout {
+                        spacing: 0px;
+
+                        Rectangle {
+                            height: 64px;
+                            background: CediniaColors.bg_surface;
+
+                            HorizontalLayout {
+                                padding-left: 12px;
+                                padding-right: 8px;
+                                padding-top: 8px;
+                                padding-bottom: 8px;
+                                spacing: 8px;
+                                alignment: LayoutAlignment.start;
+
+                                Rectangle {
+                                    width: 4px;
+                                    height: 40px;
+                                    border-radius: 2px;
+                                    vertical-stretch: 0.0;
+                                    background: vol.is_included ? CediniaColors.success
+                                              : vol.is_excluded ? CediniaColors.danger
+                                              : CediniaColors.text_disabled;
+                                }
+
+                                VerticalLayout {
+                                    alignment: LayoutAlignment.center;
+                                    horizontal-stretch: 1.0;
+                                    spacing: 2px;
+                                    Text {
+                                        text: vol.label != "" ? vol.label : vol.path;
+                                        color: CediniaColors.text_primary;
+                                        font-size: 13px;
+                                        font-weight: 600;
+                                        overflow: elide;
+                                    }
+                                    Text {
+                                        text: vol.path;
+                                        color: CediniaColors.text_secondary;
+                                        font-size: 11px;
+                                        overflow: elide;
+                                    }
+                                }
+
+                                TouchButton {
+                                    label: vol.is_included ? "X Uwzg." : "+ Dodaj";
+                                    min_h: 32px;
+                                    bg: vol.is_included
+                                        ? CediniaColors.success.with-alpha(0.2)
+                                        : CediniaColors.success.with-alpha(0.8);
+                                    fg: vol.is_included ? CediniaColors.success : #000000;
+                                    clicked => {
+                                        if (vol.is_included) {
+                                            AppState.remove_include_dir(vol.path);
+                                        } else {
+                                            AppState.add_include_dir(vol.path);
+                                        }
+                                        AppState.save_settings_now();
+                                    }
+                                }
+
+                                TouchButton {
+                                    label: vol.is_excluded ? "X Wyklucz." : "- Wyklucz";
+                                    min_h: 32px;
+                                    bg: vol.is_excluded
+                                        ? CediniaColors.danger.with-alpha(0.2)
+                                        : CediniaColors.danger.with-alpha(0.8);
+                                    fg: vol.is_excluded ? CediniaColors.danger : #ffffff;
+                                    clicked => {
+                                        if (vol.is_excluded) {
+                                            AppState.remove_exclude_dir(vol.path);
+                                        } else {
+                                            AppState.add_exclude_dir(vol.path);
+                                        }
+                                        AppState.save_settings_now();
+                                    }
+                                }
+                            }
+                        }
+
+                        Divider {}
                     }
                 }
             }

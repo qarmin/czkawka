@@ -17,6 +17,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -84,6 +85,34 @@ public class CediniaFilePicker {
             }, 0x4345_0010);
         }
         // Below API 23: permissions are granted at install time, nothing to do
+    }
+
+    // ── nav bar visibility ────────────────────────────────────────────────
+
+    /**
+     * Clears immersive / hide-navigation flags so the system nav bar (Back,
+     * Home) stays visible.  Re-applies the clear whenever Slint's renderer
+     * would hide it again.  Call once after Slint has been initialised.
+     */
+    public static void setupNavBar(final Activity activity) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final View decorView = activity.getWindow().getDecorView();
+                decorView.setSystemUiVisibility(0);
+                decorView.setOnSystemUiVisibilityChangeListener(
+                    new View.OnSystemUiVisibilityChangeListener() {
+                        @Override
+                        public void onSystemUiVisibilityChange(int visibility) {
+                            if ((visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0) {
+                                decorView.setSystemUiVisibility(0);
+                            }
+                        }
+                    }
+                );
+                Log.i(TAG, "setupNavBar: nav bar listener registered");
+            }
+        });
     }
 
     // ── called from Rust ──────────────────────────────────────────────────

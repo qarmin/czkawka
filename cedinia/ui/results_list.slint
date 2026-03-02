@@ -1,20 +1,26 @@
 
 
 import { CediniaColors } from "colors.slint";
-import { FileEntry, ScanState } from "common.slint";
+import { FileEntry, FileEntryIdx, ScanState } from "common.slint";
 import { AppState } from "app_state.slint";
-import { FileRow, TouchButton } from "components.slint";
+import { Translations } from "translations.slint";
+import { FileRow, TouchButton, StatusChip } from "components.slint";
 import { ListView } from "std-widgets.slint";
 
 export component ResultsList {
     in property <[FileEntry]> entries: [];
     in property <string>      tool_title: "Wyniki";
-    in property <string>      tool_emoji: "🔍";
+    in property <string>      tool_emoji: "?";
     in property <bool>        can_delete: true;
+    in property <bool>        can_rename: false;
+    in property <bool>        can_clean_exif: false;
 
     in property <bool>        is_grouped: false;
 
     in property <bool>        has_gallery_mode: false;
+    in property <bool>        has_size_select: false;
+    in property <bool>        has_resolution_select: false;
+
 
 
     property <int> menu_state: 0;
@@ -37,128 +43,61 @@ export component ResultsList {
                 padding-bottom: 8px;
                 spacing: 8px;
 
-
-                if root.menu_state == 0 : HorizontalLayout {
-                    spacing: 8px;
-                    horizontal-stretch: 1.0;
-
-                    if root.can_delete && AppState.selected_count > 0 : TouchButton {
-                        label: "🗑 Usuń";
-                        horizontal-stretch: 1.0;
-                        bg: CediniaColors.danger;
-                        fg: #ffffff;
-                        clicked => { AppState.delete_selected(); }
-                    }
-
-                    TouchButton {
-                        label: "☑ Zaznacz";
-                        horizontal-stretch: 1.0;
-                        bg: CediniaColors.bg_elevated;
-                        fg: CediniaColors.text_secondary;
-                        clicked => {
-                            if (root.is_grouped) {
-                                root.menu_state = 1;
-                            } else {
-                                AppState.select_all();
-                            }
-                        }
-                    }
-
-                    TouchButton {
-                        label: "✕ Odznacz";
-                        horizontal-stretch: 1.0;
-                        bg: CediniaColors.bg_elevated;
-                        fg: CediniaColors.text_secondary;
-                        clicked => {
-                            if (root.is_grouped) {
-                                root.menu_state = 2;
-                            } else {
-                                AppState.deselect_all();
-                            }
-                        }
-                    }
-
-                    if root.has_gallery_mode : TouchButton {
-                        label: AppState.similar_images_gallery_mode ? "☰" : "⊞";
-                        min_h: 36px;
-                        bg: AppState.similar_images_gallery_mode
-                            ? CediniaColors.accent.with-alpha(0.25)
-                            : CediniaColors.bg_elevated;
-                        fg: CediniaColors.text_secondary;
-                        clicked => { AppState.similar_images_gallery_mode = !AppState.similar_images_gallery_mode; }
-                    }
+                if AppState.selected_count > 0 : StatusChip {
+                    label: AppState.selected_count;
+                    chip_color: CediniaColors.accent_muted;
+                    text_color: CediniaColors.accent_light;
+                    vertical-stretch: 0.0;
                 }
 
-
-                if root.menu_state == 1 : HorizontalLayout {
-                    spacing: 8px;
-                    horizontal-stretch: 1.0;
-
-                    TouchButton {
-                        label: "←";
-                        min_h: 36px;
-                        bg: CediniaColors.bg_surface;
-                        fg: CediniaColors.text_secondary;
-                        clicked => { root.menu_state = 0; }
-                    }
-
-                    TouchButton {
-                        label: "Wszystko";
-                        horizontal-stretch: 1.0;
-                        bg: CediniaColors.bg_elevated;
-                        fg: CediniaColors.text_secondary;
-                        clicked => {
-                            AppState.select_all();
-                            root.menu_state = 0;
-                        }
-                    }
-
-                    TouchButton {
-                        label: "Poza jednym";
-                        horizontal-stretch: 1.0;
-                        bg: CediniaColors.bg_elevated;
-                        fg: CediniaColors.accent_light;
-                        clicked => {
-                            AppState.select_all_except_one();
-                            root.menu_state = 0;
-                        }
-                    }
+                if root.can_delete && AppState.selected_count > 0 : TouchButton {
+                    label: "X";
+                    min_h: 36px;
+                    bg: CediniaColors.danger;
+                    fg: #ffffff;
+                    clicked => { AppState.delete_selected(); }
                 }
 
+                if root.can_clean_exif && AppState.selected_count > 0 : TouchButton {
+                    label: "Clean";
+                    min_h: 36px;
+                    bg: CediniaColors.accent_muted;
+                    fg: CediniaColors.accent_light;
+                    clicked => { AppState.clean_exif_selected(); }
+                }
 
-                if root.menu_state == 2 : HorizontalLayout {
-                    spacing: 8px;
-                    horizontal-stretch: 1.0;
+                if root.can_rename && AppState.selected_count > 0 : TouchButton {
+                    label: "🏷";
+                    min_h: 36px;
+                    bg: CediniaColors.accent_muted;
+                    fg: CediniaColors.accent_light;
+                    clicked => { AppState.rename_selected(); }
+                }
 
-                    TouchButton {
-                        label: "←";
-                        min_h: 36px;
-                        bg: CediniaColors.bg_surface;
-                        fg: CediniaColors.text_secondary;
-                        clicked => { root.menu_state = 0; }
-                    }
+                Rectangle { horizontal-stretch: 1.0; }
 
-                    TouchButton {
-                        label: "Wszystko";
-                        horizontal-stretch: 1.0;
-                        bg: CediniaColors.bg_elevated;
-                        fg: CediniaColors.text_secondary;
-                        clicked => {
-                            AppState.deselect_all();
-                            root.menu_state = 0;
-                        }
-                    }
+                TouchButton {
+                    label: Translations.select_label_text;
+                    min_h: 36px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_secondary;
+                    clicked => { root.menu_state = 1; }
+                }
 
-                    TouchButton {
-                        label: "Poza jednym";
-                        horizontal-stretch: 1.0;
-                        bg: CediniaColors.bg_elevated;
-                        fg: CediniaColors.accent_light;
-                        clicked => {
-                            AppState.deselect_all_except_one();
-                            root.menu_state = 0;
-                        }
-                    }
+                TouchButton {
+                    label: Translations.deselect_label_text;
+                    min_h: 36px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_secondary;
+                    clicked => { root.menu_state = 2; }
+                }
+
+                if root.has_gallery_mode : TouchButton {
+                    label: AppState.similar_images_gallery_mode ? Translations.list_label_text : Translations.gallery_label_text;
+                    min_h: 36px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_secondary;
+                    clicked => { AppState.similar_images_gallery_mode = !AppState.similar_images_gallery_mode; }
                 }
             }
         }
@@ -168,14 +107,16 @@ export component ResultsList {
             vertical-stretch: 1.0;
 
             for entry[idx] in entries : FileRow {
-                name:      entry.name;
-                path:      entry.path;
-                size:      entry.size;
-                extra:     entry.extra;
+                name:      entry.val_str[FileEntryIdx.name_idx];
+                path:      entry.val_str[FileEntryIdx.path_idx];
+                size:      entry.val_str[FileEntryIdx.size_idx];
+                val_str:   entry.val_str;
                 checked:   entry.checked;
                 is_header: entry.is_header;
                 is_even:   mod(idx, 2) == 0;
                 toggle_checked => { AppState.toggle_file_checked(idx); }
+                open_item   => { AppState.open_path(entry.val_str[FileEntryIdx.path_idx] == "" ? entry.val_str[FileEntryIdx.name_idx] : entry.val_str[FileEntryIdx.path_idx] + "/" + entry.val_str[FileEntryIdx.name_idx]); }
+                open_parent => { AppState.open_parent_folder(entry.val_str[FileEntryIdx.path_idx]); }
             }
         }
 
@@ -196,19 +137,331 @@ export component ResultsList {
                 }
                 Text {
                     text: AppState.scan_state == ScanState.Scanning
-                        ? "Skanowanie w toku…"
+                        ? Translations.scanning_text
                         : AppState.scan_state == ScanState.Stopping
-                            ? "Zatrzymywanie…"
+                            ? Translations.stopping_text
                             : AppState.scan_state == ScanState.Done
-                                ? "Brak wyników"
-                                : "Naciśnij ▶ aby skanować";
+                                ? Translations.no_results_text
+                                : Translations.press_start_text;
                     color: CediniaColors.text_disabled;
                     font-size: 15px;
                     horizontal-alignment: TextHorizontalAlignment.center;
                 }
+
+                if !AppState.storage_permission_granted : Rectangle {
+                    height: perm_vl.preferred-height + 24px;
+                    width: min(parent.width - 48px, 320px);
+                    x: (parent.width - self.width) / 2;
+                    border-radius: 10px;
+                    background: CediniaColors.bg_elevated;
+                    border-width: 1px;
+                    border-color: CediniaColors.warning.with-alpha(0.5);
+
+                    perm_vl := VerticalLayout {
+                        padding: 12px;
+                        spacing: 10px;
+
+                        Text {
+                            text: Translations.no_permission_scan_warning_text;
+                            color: CediniaColors.warning;
+                            font-size: 13px;
+                            wrap: TextWrap.word-wrap;
+                            horizontal-alignment: TextHorizontalAlignment.center;
+                        }
+
+                        TouchArea {
+                            height: 40px;
+                            clicked => { AppState.request_storage_permission(); }
+
+                            Rectangle {
+                                border-radius: 8px;
+                                background: CediniaColors.accent_muted;
+
+                                Text {
+                                    text: Translations.grant_text;
+                                    color: CediniaColors.accent_light;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    horizontal-alignment: TextHorizontalAlignment.center;
+                                    vertical-alignment: TextVerticalAlignment.center;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+
+
+
+    if root.menu_state == 1 : Rectangle {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 50;
+        background: #00000099;
+        TouchArea {}
+
+        Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - popup_sel_vl.preferred-height - 24px) / 2;
+            width: min(parent.width - 48px, 300px);
+            height: popup_sel_vl.preferred-height + 24px;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #000000aa;
+            clip: true;
+
+            popup_sel_vl := VerticalLayout {
+                padding: 12px;
+                spacing: 6px;
+
+                Text {
+                    text: Translations.selection_popup_title_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                TouchButton {
+                    label: Translations.select_all_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.text_primary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all(); root.menu_state = 0; }
+                }
+
+                if root.is_grouped : TouchButton {
+                    label: Translations.select_except_one_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_one(); root.menu_state = 0; }
+                }
+
+                if root.has_size_select : TouchButton {
+                    label: Translations.select_except_largest_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_largest(); root.menu_state = 0; }
+                }
+
+                if root.has_size_select : TouchButton {
+                    label: Translations.select_except_smallest_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_smallest(); root.menu_state = 0; }
+                }
+
+                if root.has_size_select : TouchButton {
+                    label: Translations.select_largest_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_largest_per_group(); root.menu_state = 0; }
+                }
+
+                if root.has_size_select : TouchButton {
+                    label: Translations.select_smallest_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_smallest_per_group(); root.menu_state = 0; }
+                }
+
+                if root.has_resolution_select : TouchButton {
+                    label: Translations.select_except_highest_res_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_highest_resolution(); root.menu_state = 0; }
+                }
+
+                if root.has_resolution_select : TouchButton {
+                    label: Translations.select_except_lowest_res_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_lowest_resolution(); root.menu_state = 0; }
+                }
+
+                if root.has_resolution_select : TouchButton {
+                    label: Translations.select_highest_res_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_highest_resolution_per_group(); root.menu_state = 0; }
+                }
+
+                if root.has_resolution_select : TouchButton {
+                    label: Translations.select_lowest_res_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_lowest_resolution_per_group(); root.menu_state = 0; }
+                }
+
+                TouchButton {
+                    label: Translations.invert_selection_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.text_secondary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.invert_selection(); root.menu_state = 0; }
+                }
+
+                TouchButton {
+                    label: Translations.close_text;
+                    min_h: 40px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_disabled;
+                    horizontal-stretch: 1.0;
+                    clicked => { root.menu_state = 0; }
+                }
+            }
+        }
+    }
+
+
+
+    if root.menu_state == 2 : Rectangle {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 50;
+        background: #00000099;
+        TouchArea {}
+
+        Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - popup_desel_vl.preferred-height - 24px) / 2;
+            width: min(parent.width - 48px, 300px);
+            height: popup_desel_vl.preferred-height + 24px;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #000000aa;
+            clip: true;
+
+            popup_desel_vl := VerticalLayout {
+                padding: 12px;
+                spacing: 6px;
+
+                Text {
+                    text: Translations.deselection_popup_title_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                TouchButton {
+                    label: Translations.deselect_all_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.text_primary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.deselect_all(); root.menu_state = 0; }
+                }
+
+                if root.is_grouped : TouchButton {
+                    label: Translations.deselect_except_one_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.deselect_all_except_one(); root.menu_state = 0; }
+                }
+
+                TouchButton {
+                    label: Translations.close_text;
+                    min_h: 40px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_disabled;
+                    horizontal-stretch: 1.0;
+                    clicked => { root.menu_state = 0; }
+                }
+            }
+        }
+    }
+
+
+
+    if AppState.confirm_popup_visible : Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        z: 40;
+        background: #000000bb;
+
+        TouchArea {}
+
+        Rectangle {
+            x: parent.width / 2 - self.width / 2;
+            y: parent.height / 2 - self.height / 2;
+            width: min(parent.width - 32px, 400px);
+            height: confirm-card.preferred-height;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #000000cc;
+
+            confirm-card := VerticalLayout {
+                padding: 20px;
+                spacing: 12px;
+
+                Text {
+                    text: AppState.confirm_popup_message;
+                    color: CediniaColors.text_primary;
+                    font-size: 15px;
+                    font-weight: 600;
+                    wrap: TextWrap.word-wrap;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                HorizontalLayout {
+                    spacing: 8px;
+
+                    TouchButton {
+                        label: Translations.cancel_text;
+                        horizontal-stretch: 1.0;
+                        min_h: 44px;
+                        bg: CediniaColors.bg_surface;
+                        fg: CediniaColors.text_secondary;
+                        clicked => { AppState.confirm_popup_cancel(); }
+                    }
+
+                    TouchButton {
+                        label: (AppState.confirm_popup_action == "rename" || AppState.confirm_popup_action == "rename_bad_names") ? Translations.rename_text : Translations.delete_text;
+                        horizontal-stretch: 1.0;
+                        min_h: 44px;
+                        bg: (AppState.confirm_popup_action == "rename" || AppState.confirm_popup_action == "rename_bad_names") ? CediniaColors.accent_muted : CediniaColors.danger;
+                        fg: (AppState.confirm_popup_action == "rename" || AppState.confirm_popup_action == "rename_bad_names") ? CediniaColors.accent_light : #ffffff;
+                        clicked => { AppState.confirm_popup_ok(); }
+                    }
+                }
+            }
+        }
+    }
+
 
 
     if AppState.delete_errors_visible : Rectangle {
@@ -236,7 +489,7 @@ export component ResultsList {
                 spacing: 12px;
 
                 Text {
-                    text: "Nie udało się usunąć niektórych plików:";
+                    text: Translations.delete_errors_title_text;
                     color: CediniaColors.warning;
                     font-size: 15px;
                     font-weight: 600;
@@ -252,7 +505,7 @@ export component ResultsList {
                 }
 
                 TouchButton {
-                    label: "OK";
+                    label: Translations.ok_text;
                     min_h: 44px;
                     bg: CediniaColors.bg_surface;
                     fg: CediniaColors.text_secondary;
@@ -263,6 +516,7 @@ export component ResultsList {
     }
 
 
+
     Rectangle {
         x: root.width - self.width - 16px;
         y: root.height - self.height - 16px;
@@ -270,18 +524,19 @@ export component ResultsList {
         width: 56px;
         height: 56px;
         border-radius: 28px;
-        background: AppState.scan_state == ScanState.Scanning
-            ? CediniaColors.warning
-            : AppState.scan_state == ScanState.Stopping
-                ? CediniaColors.warning.with-alpha(0.5)
-                : CediniaColors.accent;
+        background: !AppState.storage_permission_granted
+            ? CediniaColors.text_disabled
+            : AppState.scan_state == ScanState.Scanning
+                ? CediniaColors.warning
+                : AppState.scan_state == ScanState.Stopping
+                    ? CediniaColors.warning.with-alpha(0.5)
+                    : CediniaColors.accent;
         drop-shadow-blur: 12px;
         drop-shadow-color: #00000088;
         animate background { duration: 200ms; }
 
         TouchArea {
-
-            enabled: AppState.scan_state != ScanState.Stopping;
+            enabled: AppState.storage_permission_granted && AppState.scan_state != ScanState.Stopping;
             clicked => {
                 if (AppState.scan_state == ScanState.Scanning) {
                     AppState.stop_requested();
@@ -295,7 +550,7 @@ export component ResultsList {
             text: AppState.scan_state == ScanState.Scanning || AppState.scan_state == ScanState.Stopping
                 ? "⏹" : "▶";
             font-size: 22px;
-            color: AppState.scan_state == ScanState.Stopping ? #00000066 : #000000;
+            color: (!AppState.storage_permission_granted || AppState.scan_state == ScanState.Stopping) ? #00000066 : #000000;
             horizontal-alignment: TextHorizontalAlignment.center;
             vertical-alignment: TextVerticalAlignment.center;
         }

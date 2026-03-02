@@ -395,7 +395,7 @@ fn generate_cache_for_results(vector_with_path: Vec<(String, String, TreePath)>,
                     filter: FirFilterType::Bilinear,
                 }),
             )
-            .and_then(get_pixbuf_from_dynamic_image)
+            .and_then(|e| get_pixbuf_from_dynamic_image(e.image))
             {
                 Ok(t) => {
                     pixbuf = t;

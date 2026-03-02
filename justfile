@@ -118,10 +118,27 @@ unused_features:
 
 ##################### ANDROID #####################
 
-android_build:
+keystore_dir := "cedinia/android/keystore"
+
+gen_keystores:
+    mkdir -p {{keystore_dir}}
+    [ -f {{keystore_dir}}/debug.keystore ] || keytool -genkey -v \
+        -keystore {{keystore_dir}}/debug.keystore \
+        -alias debug -keyalg RSA -keysize 2048 -validity 10000 \
+        -storepass 123456 -keypass 123456 \
+        -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, S=Debug, C=US" \
+        -noprompt
+    [ -f {{keystore_dir}}/release.keystore ] || keytool -genkey -v \
+        -keystore {{keystore_dir}}/release.keystore \
+        -alias release -keyalg RSA -keysize 2048 -validity 10000 \
+        -storepass 123456 -keypass 123456 \
+        -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
+        -noprompt
+
+android_build: gen_keystores
     ANDROID_HOME={{android_home}} ANDROID_NDK_ROOT={{android_ndk}} cargo apk build -p cedinia --lib
 
-android_build_release:
+android_build_release: gen_keystores
     ANDROID_HOME={{android_home}} ANDROID_NDK_ROOT={{android_ndk}} cargo apk build -p cedinia --lib --release
 
 android_install:
@@ -141,7 +158,7 @@ android_devices:
 
 android: android_build android_install android_run
 
-android_release: android_build_release android_install_release android_run
+androidr: android_build_release android_install_release android_run
 
 ##################### BENCHMARKS #####################
 

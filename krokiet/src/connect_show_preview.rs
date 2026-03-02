@@ -123,7 +123,7 @@ fn load_image(image_path: &Path) -> Option<(Timer, DynamicImage)> {
             filter: FirFilterType::Bilinear,
         }),
     ) {
-        Ok(img) => img,
+        Ok(img) => img.image,
         Err(e) => {
             error!("Failed to load image \"{}\": {e}", image_path.to_string_lossy());
             return None;

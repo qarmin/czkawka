@@ -8,9 +8,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-apk:
-    name: Build Android APK
+  build-apk-debug:
+    name: Build Android APK (debug)
     runs-on: ubuntu-latest
+    env:
+      NDK_VERSION: 26.3.11579264
 
     steps:
       - name: Checkout repository
@@ -25,21 +27,107 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android NDK
+      - name: Cache Android SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_SDK_ROOT }}/cmdline-tools
+            ${{ env.ANDROID_SDK_ROOT }}/ndk
+            ${{ env.ANDROID_SDK_ROOT }}/platforms
+            ${{ env.ANDROID_SDK_ROOT }}/platform-tools
+            ${{ env.ANDROID_SDK_ROOT }}/build-tools
+          key: ${{ runner.os }}-android-sdk-${{ env.NDK_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-
+
+      - name: Install Android NDK and tools
         run: |
           rustup target add aarch64-linux-android
-          cargo install cargo-apk
-          
-          sdkmanager --install "ndk;26.3.11579264"
-          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/26.3.11579264" >> $GITHUB_ENV
+          cargo install cargo-apk || true
 
+          yes | sdkmanager --install "ndk;${NDK_VERSION}"
+          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/${NDK_VERSION}" >> $GITHUB_ENV
+
+      - name: Cache Cargo (debug)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-debug-v1
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
       - name: Build APK (debug)
         run: |
           cargo apk build -p cedinia --lib
 
-      - name: Upload APK artifact
+      - name: Upload APK artifact (debug)
         uses: actions/upload-artifact@v4
         with:
           name: cedinia-debug
           path: target/debug/apk/cedinia.apk
+
+  build-apk-release:
+    name: Build Android APK (release)
+    runs-on: ubuntu-latest
+    env:
+      NDK_VERSION: 26.3.11579264
+    # Only run release job on pushes to master
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java (required by Android SDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Android SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_SDK_ROOT }}/cmdline-tools
+            ${{ env.ANDROID_SDK_ROOT }}/ndk
+            ${{ env.ANDROID_SDK_ROOT }}/platforms
+            ${{ env.ANDROID_SDK_ROOT }}/platform-tools
+            ${{ env.ANDROID_SDK_ROOT }}/build-tools
+          key: ${{ runner.os }}-android-sdk-${{ env.NDK_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-android-sdk-
+
+      - name: Install Android NDK and tools
+        run: |
+          rustup target add aarch64-linux-android
+          cargo install cargo-apk || true
+
+          yes | sdkmanager --install "ndk;${NDK_VERSION}"
+          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/${NDK_VERSION}" >> $GITHUB_ENV
+
+      - name: Cache Cargo (release)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-v1
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build APK (release)
+        run: |
+          cargo apk build -p cedinia --lib --release
+
+      - name: Upload APK artifact (release)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cedinia-release
+          path: target/release/apk/cedinia.apk
