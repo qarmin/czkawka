@@ -17,9 +17,6 @@ fn default_hash_type() -> String {
 fn default_hash_size() -> String {
     "16".to_string()
 }
-fn default_min_size_kb_idx() -> i32 {
-    1
-}
 fn ttrue() -> bool {
     true
 }
@@ -35,6 +32,25 @@ fn default_big_files_count() -> String {
 fn default_min_file_size_idx() -> i32 {
     0
 }
+fn default_hash_alg() -> String {
+    "mean".to_string()
+}
+fn default_image_filter() -> String {
+    "triangle".to_string()
+}
+fn default_same_music_check_method() -> String {
+    "tags".to_string()
+}
+fn default_excluded_items() -> String {
+    #[cfg(not(target_os = "android"))]
+    {
+        "*/.*".to_string()
+    }
+    #[cfg(target_os = "android")]
+    {
+        String::new()
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CediniaSettings {
@@ -44,7 +60,7 @@ pub struct CediniaSettings {
     pub ignore_hidden: bool,
     #[serde(default = "default_min_file_size_idx")]
     pub min_file_size_idx: i32,
-    #[serde(default)]
+    #[serde(default = "default_excluded_items")]
     pub excluded_items: String,
     #[serde(default)]
     pub allowed_extensions: String,
@@ -55,18 +71,59 @@ pub struct CediniaSettings {
     pub duplicates_check_method: String,
     #[serde(default = "default_hash_type")]
     pub duplicates_hash_type: String,
-    #[serde(default = "default_min_size_kb_idx")]
-    pub duplicates_min_size_kb_idx: i32,
 
     #[serde(default = "default_similarity_preset")]
     pub similar_images_similarity_preset: String,
     #[serde(default = "default_hash_size")]
     pub similar_images_hash_size: String,
+    #[serde(default = "default_hash_alg")]
+    pub similar_images_hash_alg: String,
+    #[serde(default = "default_image_filter")]
+    pub similar_images_image_filter: String,
+    #[serde(default)]
+    pub similar_images_ignore_same_size: bool,
 
     #[serde(default = "default_search_mode")]
     pub big_files_search_mode: String,
     #[serde(default = "default_big_files_count")]
     pub big_files_count: String,
+
+    #[serde(default = "ttrue")]
+    pub same_music_title: bool,
+    #[serde(default = "ttrue")]
+    pub same_music_artist: bool,
+    #[serde(default)]
+    pub same_music_year: bool,
+    #[serde(default)]
+    pub same_music_length: bool,
+    #[serde(default)]
+    pub same_music_genre: bool,
+    #[serde(default)]
+    pub same_music_bitrate: bool,
+    #[serde(default)]
+    pub same_music_approximate: bool,
+    #[serde(default = "default_same_music_check_method")]
+    pub same_music_check_method: String,
+
+    #[serde(default = "ttrue")]
+    pub broken_files_audio: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_pdf: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_archive: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_image: bool,
+
+    #[serde(default = "ttrue")]
+    pub bad_names_uppercase_extension: bool,
+    #[serde(default = "ttrue")]
+    pub bad_names_emoji_used: bool,
+    #[serde(default = "ttrue")]
+    pub bad_names_space_at_start_or_end: bool,
+    #[serde(default = "ttrue")]
+    pub bad_names_non_ascii_graphical: bool,
+    #[serde(default = "ttrue")]
+    pub bad_names_remove_duplicated_non_alpha: bool,
 }
 
 impl Default for CediniaSettings {
@@ -75,16 +132,99 @@ impl Default for CediniaSettings {
             use_cache: true,
             ignore_hidden: true,
             min_file_size_idx: default_min_file_size_idx(),
-            excluded_items: String::new(),
+            excluded_items: default_excluded_items(),
             allowed_extensions: String::new(),
             excluded_extensions: String::new(),
             duplicates_check_method: default_check_method(),
             duplicates_hash_type: default_hash_type(),
-            duplicates_min_size_kb_idx: default_min_size_kb_idx(),
             similar_images_similarity_preset: default_similarity_preset(),
             similar_images_hash_size: default_hash_size(),
+            similar_images_hash_alg: default_hash_alg(),
+            similar_images_image_filter: default_image_filter(),
+            similar_images_ignore_same_size: false,
             big_files_search_mode: default_search_mode(),
             big_files_count: default_big_files_count(),
+            same_music_title: true,
+            same_music_artist: true,
+            same_music_year: false,
+            same_music_length: false,
+            same_music_genre: false,
+            same_music_bitrate: false,
+            same_music_approximate: false,
+            same_music_check_method: default_same_music_check_method(),
+            broken_files_audio: true,
+            broken_files_pdf: true,
+            broken_files_archive: true,
+            broken_files_image: true,
+            bad_names_uppercase_extension: true,
+            bad_names_emoji_used: true,
+            bad_names_space_at_start_or_end: true,
+            bad_names_non_ascii_graphical: true,
+            bad_names_remove_duplicated_non_alpha: true,
+        }
+    }
+}
+
+fn get_dirs_file() -> Option<PathBuf> {
+    let config_folder = get_config_cache_path()?.config_folder;
+    Some(config_folder.join("cedinia_dirs.json"))
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+struct DirConfig {
+    included: Vec<String>,
+    excluded: Vec<String>,
+}
+
+pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf]) {
+    let Some(path) = get_dirs_file() else {
+        error!("Cannot determine dirs config path – dirs not saved");
+        return;
+    };
+    if let Some(parent) = path.parent()
+        && let Err(e) = std::fs::create_dir_all(parent)
+    {
+        error!("Cannot create config dir {}: {e}", parent.display());
+        return;
+    }
+    let config = DirConfig {
+        included: included.iter().map(|p| p.to_string_lossy().to_string()).collect(),
+        excluded: excluded.iter().map(|p| p.to_string_lossy().to_string()).collect(),
+    };
+    match serde_json::to_string_pretty(&config) {
+        Ok(json) => {
+            if let Err(e) = std::fs::write(&path, json) {
+                error!("Cannot write dirs to {}: {e}", path.display());
+            } else {
+                info!("Dirs saved to {}", path.display());
+            }
+        }
+        Err(e) => error!("Cannot serialize dirs: {e}"),
+    }
+}
+
+pub fn load_dirs() -> (Vec<PathBuf>, Vec<PathBuf>) {
+    let Some(path) = get_dirs_file() else {
+        return (vec![], vec![]);
+    };
+    if !path.is_file() {
+        return (vec![], vec![]);
+    }
+    match std::fs::read_to_string(&path) {
+        Ok(json) => match serde_json::from_str::<DirConfig>(&json) {
+            Ok(c) => {
+                let inc = c.included.iter().map(PathBuf::from).collect();
+                let exc = c.excluded.iter().map(PathBuf::from).collect();
+                (inc, exc)
+            }
+            Err(e) => {
+                error!("Cannot parse dirs config: {e}");
+                (vec![], vec![])
+            }
+        },
+        Err(e) => {
+            error!("Cannot read dirs config {}: {e}", path.display());
+            (vec![], vec![])
         }
     }
 }
@@ -129,11 +269,11 @@ pub fn save_settings(settings: &CediniaSettings) {
         return;
     };
 
-    if let Some(parent) = path.parent() {
-        if let Err(e) = std::fs::create_dir_all(parent) {
-            error!("Cannot create config dir {}: {e}", parent.display());
-            return;
-        }
+    if let Some(parent) = path.parent()
+        && let Err(e) = std::fs::create_dir_all(parent)
+    {
+        error!("Cannot create config dir {}: {e}", parent.display());
+        return;
     }
 
     match serde_json::to_string_pretty(settings) {
@@ -150,7 +290,7 @@ pub fn save_settings(settings: &CediniaSettings) {
 
 use slint::ComponentHandle;
 
-use crate::{BigFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SimilarImagesSettings};
+use crate::{BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings};
 
 pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     let items = StringComboBoxItems::new();
@@ -170,8 +310,6 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     win.global::<DuplicateSettings>().set_hash_type(ht_idx as i32);
     win.global::<DuplicateSettings>().set_hash_type_value(s.duplicates_hash_type.clone().into());
 
-    win.global::<DuplicateSettings>().set_min_size_kb_idx(s.duplicates_min_size_kb_idx);
-
     let sp_idx = StringComboBoxItems::idx_from_config_name(&s.similar_images_similarity_preset, &items.similarity_preset);
     win.global::<SimilarImagesSettings>().set_similarity_preset(sp_idx as i32);
     win.global::<SimilarImagesSettings>()
@@ -181,6 +319,16 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     win.global::<SimilarImagesSettings>().set_hash_size_idx(hs_idx as i32);
     win.global::<SimilarImagesSettings>().set_hash_size_value(s.similar_images_hash_size.clone().into());
 
+    let ha_idx = StringComboBoxItems::idx_from_config_name(&s.similar_images_hash_alg, &items.hash_alg);
+    win.global::<SimilarImagesSettings>().set_hash_alg_idx(ha_idx as i32);
+    win.global::<SimilarImagesSettings>().set_hash_alg_value(s.similar_images_hash_alg.clone().into());
+
+    let if_idx = StringComboBoxItems::idx_from_config_name(&s.similar_images_image_filter, &items.image_filter);
+    win.global::<SimilarImagesSettings>().set_image_filter_idx(if_idx as i32);
+    win.global::<SimilarImagesSettings>().set_image_filter_value(s.similar_images_image_filter.clone().into());
+
+    win.global::<SimilarImagesSettings>().set_ignore_same_size(s.similar_images_ignore_same_size);
+
     let sm_idx = StringComboBoxItems::idx_from_config_name(&s.big_files_search_mode, &items.biggest_files_method);
     win.global::<BigFilesSettings>().set_search_mode_idx(sm_idx as i32);
     win.global::<BigFilesSettings>().set_search_mode_value(s.big_files_search_mode.clone().into());
@@ -188,13 +336,41 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     let cnt_idx = StringComboBoxItems::idx_from_config_name(&s.big_files_count, &items.big_files_count);
     win.global::<BigFilesSettings>().set_count_idx(cnt_idx as i32);
     win.global::<BigFilesSettings>().set_count_value(s.big_files_count.clone().into());
+
+    let sm = win.global::<SameMusicSettings>();
+    sm.set_title(s.same_music_title);
+    sm.set_artist(s.same_music_artist);
+    sm.set_year(s.same_music_year);
+    sm.set_length(s.same_music_length);
+    sm.set_genre(s.same_music_genre);
+    sm.set_bitrate(s.same_music_bitrate);
+    sm.set_approximate(s.same_music_approximate);
+    let smc_idx = StringComboBoxItems::idx_from_config_name(&s.same_music_check_method, &items.same_music_check_method);
+    sm.set_check_method_idx(smc_idx as i32);
+    sm.set_check_method_value(s.same_music_check_method.clone().into());
+
+    let bf = win.global::<BrokenFilesSettings>();
+    bf.set_check_audio(s.broken_files_audio);
+    bf.set_check_pdf(s.broken_files_pdf);
+    bf.set_check_archive(s.broken_files_archive);
+    bf.set_check_image(s.broken_files_image);
+
+    let bn = win.global::<BadNamesSettings>();
+    bn.set_uppercase_extension(s.bad_names_uppercase_extension);
+    bn.set_emoji_used(s.bad_names_emoji_used);
+    bn.set_space_at_start_or_end(s.bad_names_space_at_start_or_end);
+    bn.set_non_ascii_graphical(s.bad_names_non_ascii_graphical);
+    bn.set_remove_duplicated_non_alpha(s.bad_names_remove_duplicated_non_alpha);
 }
 
 pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
     let g = win.global::<GeneralSettings>();
     let d = win.global::<DuplicateSettings>();
     let si = win.global::<SimilarImagesSettings>();
-    let bf = win.global::<BigFilesSettings>();
+    let bfiles = win.global::<BigFilesSettings>();
+    let sm = win.global::<SameMusicSettings>();
+    let bf = win.global::<BrokenFilesSettings>();
+    let bn = win.global::<BadNamesSettings>();
 
     CediniaSettings {
         use_cache: g.get_use_cache(),
@@ -205,10 +381,29 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         excluded_extensions: g.get_excluded_extensions().to_string(),
         duplicates_check_method: d.get_check_method_value().to_string(),
         duplicates_hash_type: d.get_hash_type_value().to_string(),
-        duplicates_min_size_kb_idx: d.get_min_size_kb_idx(),
         similar_images_similarity_preset: si.get_similarity_preset_value().to_string(),
         similar_images_hash_size: si.get_hash_size_value().to_string(),
-        big_files_search_mode: bf.get_search_mode_value().to_string(),
-        big_files_count: bf.get_count_value().to_string(),
+        similar_images_hash_alg: si.get_hash_alg_value().to_string(),
+        similar_images_image_filter: si.get_image_filter_value().to_string(),
+        similar_images_ignore_same_size: si.get_ignore_same_size(),
+        big_files_search_mode: bfiles.get_search_mode_value().to_string(),
+        big_files_count: bfiles.get_count_value().to_string(),
+        same_music_title: sm.get_title(),
+        same_music_artist: sm.get_artist(),
+        same_music_year: sm.get_year(),
+        same_music_length: sm.get_length(),
+        same_music_genre: sm.get_genre(),
+        same_music_bitrate: sm.get_bitrate(),
+        same_music_approximate: sm.get_approximate(),
+        same_music_check_method: sm.get_check_method_value().to_string(),
+        broken_files_audio: bf.get_check_audio(),
+        broken_files_pdf: bf.get_check_pdf(),
+        broken_files_archive: bf.get_check_archive(),
+        broken_files_image: bf.get_check_image(),
+        bad_names_uppercase_extension: bn.get_uppercase_extension(),
+        bad_names_emoji_used: bn.get_emoji_used(),
+        bad_names_space_at_start_or_end: bn.get_space_at_start_or_end(),
+        bad_names_non_ascii_graphical: bn.get_non_ascii_graphical(),
+        bad_names_remove_duplicated_non_alpha: bn.get_remove_duplicated_non_alpha(),
     }
 }

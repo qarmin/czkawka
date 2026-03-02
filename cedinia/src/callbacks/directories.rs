@@ -93,8 +93,8 @@ pub(crate) fn wire_directories(window: &MainWindow, included_dirs: Rc<std::cell:
     }
     {
         let weak = window.as_weak();
-        let inc = included_dirs.clone();
-        let exc = excluded_dirs.clone();
+        let inc = included_dirs;
+        let exc = excluded_dirs;
         window.global::<AppState>().on_list_storage_volumes(move || {
             let raw = detect_storage_volumes();
             let inc_set: Vec<String> = inc.borrow().iter().map(|p| p.to_string_lossy().to_string()).collect();

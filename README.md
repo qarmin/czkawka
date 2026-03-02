@@ -1,8 +1,9 @@
-![krokiet_logo](https://github.com/user-attachments/assets/f5e4b290-d001-4cf4-9f52-dab65a30e441)
-
+<div align="center"><img src="https://github.com/user-attachments/assets/f5e4b290-d001-4cf4-9f52-dab65a30e441" alt="krokiet_logo" width="600" /></div>
+     
 **Krokiet** ((IPA: [ˈkrɔcɛt]), "croquette" in Polish) new generation GUI frontend, simple, multiplatform, fast and free app to remove unnecessary files from your computer.
 
-![czkawka_logo](https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png)
+
+<div align="center"><img src="https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png" alt="czkawka_logo" width="600" /></div>
 
 **Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) older gtk4 GUI frontend, superseded by Krokiet, but still receiving bugfix updates.
 
@@ -17,9 +18,10 @@
 - **CLI frontend** - for easy automation
 - **GUI frontend** - uses Slint or GTK 4 frameworks
 - **Core library** - allows to reuse functionality in other apps
+- **Android app** - 
 - **No spying** - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - **Multilingual** - support multiple languages like Polish, English or Italian
-- Multiple tools to use:
+- **Multiple tools to use**:
     - **Duplicates** - Finds duplicates based on file name, size or hash
     - **Empty Folders** - Finds empty folders with the help of an advanced algorithm
     - **Big Files** - Finds the provided number of the biggest files in given location
@@ -175,6 +177,11 @@ Also, I really appreciate work of people that create crates on which Czkawka is 
 - **S** - That is nice, but I am thirsty...
 - **Y** - ...they work on Windows, Linux and macOS, and some people even port them to FreeBSD and Android...
 
+
+## AI Policy
+The vast majority of the code in this project was written by me(qarmin), without using AI. However, as AI tools have improved and can significantly simplify development and reduce boilerplate, I see no reason to forbid their use.
+
+That said, every pull request, whether created with AI or not, must meet proper quality standards. The author must be able to clearly explain what the code does, without relying on AI for that explanation. I manually review every PR and test each change, so the risk of incorrect code slipping through is low. Still, to avoid wasting time, please refrain from submitting AI Slop PRs.
 
 ## Officially Supported Projects
 Only this repository, [prebuild-binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  

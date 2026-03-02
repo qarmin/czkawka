@@ -1,10 +1,9 @@
-
-
-
 import { CediniaColors } from "colors.slint";
 import { TouchButton, Divider } from "components.slint";
-import { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings } from "app_state.slint";
+import { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings } from "app_state.slint";
 import { ToggleRow, SegmentRow, ToolGroupHeader, CategoryLabel, TextInputRow } from "settings_components.slint";
+import { SettingsTab } from "common.slint";
+import { Translations } from "translations.slint";
 
 
 
@@ -32,7 +31,7 @@ export component SettingsScreen {
                 spacing: 16px;
 
                 Text {
-                    text: "📊 Wyniki testu";
+                    text: Translations.collect_test_title_text;
                     color: CediniaColors.accent_light;
                     font-size: 18px;
                     font-weight: 700;
@@ -44,25 +43,25 @@ export component SettingsScreen {
                 GridLayout {
                     spacing: 8px;
                     Row {
-                        Text { text: "💾 Woluminy:"; color: CediniaColors.text_secondary; font-size: 14px; }
+                        Text { text: Translations.collect_test_volumes_text; color: CediniaColors.text_secondary; font-size: 14px; }
                         Text { text: AppState.collect_test_result.volumes; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
                     }
                     Row {
-                        Text { text: "📁 Foldery:"; color: CediniaColors.text_secondary; font-size: 14px; }
+                        Text { text: Translations.collect_test_folders_text; color: CediniaColors.text_secondary; font-size: 14px; }
                         Text { text: AppState.collect_test_result.folders; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
                     }
                     Row {
-                        Text { text: "📄 Pliki:"; color: CediniaColors.text_secondary; font-size: 14px; }
+                        Text { text: Translations.collect_test_files_text; color: CediniaColors.text_secondary; font-size: 14px; }
                         Text { text: AppState.collect_test_result.files; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
                     }
                     Row {
-                        Text { text: "⏱ Czas:"; color: CediniaColors.text_secondary; font-size: 14px; }
-                        Text { text: AppState.collect_test_result.elapsed_ms + " ms"; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                        Text { text: Translations.collect_test_time_text; color: CediniaColors.text_secondary; font-size: 14px; }
+                        Text { text: AppState.collect_test_result.elapsed_ms + Translations.collect_test_ms_text; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
                     }
                 }
 
                 TouchButton {
-                    label: "OK";
+                    label: Translations.ok_text;
                     bg: CediniaColors.accent;
                     fg: #000000;
                     clicked => { AppState.collect_test_done = false; }
@@ -72,7 +71,14 @@ export component SettingsScreen {
     }
 
 
-    property <int> active_tab: 0;
+    property <SettingsTab> active_tab: SettingsTab.General;
+
+
+    changed active_tab => {
+        if (active_tab == SettingsTab.Diagnostics && !AppState.diag_refresh_running) {
+            AppState.refresh_diag_cache_info();
+        }
+    }
 
     VerticalLayout {
         spacing: 0px;
@@ -88,28 +94,32 @@ export component SettingsScreen {
                 spacing: 0px;
                 alignment: LayoutAlignment.stretch;
 
-                for tab_label[ti] in ["Ogólne", "Narzędzia", "Diagnostyka"] : Rectangle {
+                for tab_info in [
+                    { label: Translations.settings_tab_general_text,      tab: SettingsTab.General      },
+                    { label: Translations.settings_tab_tools_text,         tab: SettingsTab.Tools        },
+                    { label: Translations.settings_tab_diagnostics_text,   tab: SettingsTab.Diagnostics  },
+                ] : Rectangle {
                     horizontal-stretch: 1.0;
                     background: transparent;
 
                     TouchArea {
-                        clicked => { active_tab = ti; }
+                        clicked => { active_tab = tab_info.tab; }
                     }
 
                     VerticalLayout {
                         Rectangle { vertical-stretch: 1.0; }
                         Rectangle {
                             height: 3px;
-                            background: active_tab == ti ? CediniaColors.accent : transparent;
+                            background: active_tab == tab_info.tab ? CediniaColors.accent : transparent;
                             animate background { duration: 150ms; }
                         }
                     }
 
                     Text {
-                        text: tab_label;
-                        color: active_tab == ti ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        text: tab_info.label;
+                        color: active_tab == tab_info.tab ? CediniaColors.accent_light : CediniaColors.text_secondary;
                         font-size: 13px;
-                        font-weight: active_tab == ti ? 700 : 400;
+                        font-weight: active_tab == tab_info.tab ? 700 : 400;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment: TextVerticalAlignment.center;
                         animate color { duration: 150ms; }
@@ -127,135 +137,198 @@ export component SettingsScreen {
                 spacing: 0px;
 
 
-                if active_tab == 0 : VerticalLayout {
+                if active_tab == SettingsTab.General : VerticalLayout {
                     spacing: 0px;
 
-                    CategoryLabel { label: "SKANOWANIE"; }
+                    CategoryLabel { label: Translations.settings_scan_label_text; }
 
                     ToggleRow {
-                        label: "Użyj pamięci podręcznej";
-                        description: "Przyspiesza kolejne skany (hash/obrazy)";
+                        label: Translations.settings_use_cache_text;
+                        description: Translations.settings_use_cache_desc_text;
                         value <=> GeneralSettings.use_cache;
                     }
                     Divider {}
                     ToggleRow {
-                        label: "Ignoruj ukryte pliki";
-                        description: "Pliki i foldery zaczynające się od '.'";
+                        label: Translations.settings_ignore_hidden_text;
+                        description: Translations.settings_ignore_hidden_desc_text;
                         value <=> GeneralSettings.ignore_hidden;
                     }
                     Divider {}
 
-                    CategoryLabel { label: "FILTRY (wszystkie narzędzia)"; }
+                    CategoryLabel { label: Translations.settings_filters_label_text; }
 
                     SegmentRow {
-                        label: "Min. rozmiar pliku";
-                        description: "Dotyczy narzędzi innych niż Duplikaty";
-                        options: ["Brak", "1 KB", "8 KB", "64 KB", "1 MB"];
+                        label: Translations.settings_min_file_size_text;
+                        options: GeneralSettings.min_file_size_options;
                         selected <=> GeneralSettings.min_file_size_idx;
                     }
                     Divider {}
 
                     TextInputRow {
-                        label: "WYKLUCZONE ELEMENTY (wzorce glob, oddzielone przecinkiem)";
-                        placeholder: "np. *.tmp, */.git/*, */node_modules/*";
+                        label: Translations.settings_excluded_items_text;
+                        placeholder: Translations.settings_excluded_items_placeholder_text;
                         value <=> GeneralSettings.excluded_items;
                     }
                     Divider {}
 
                     TextInputRow {
-                        label: "DOZWOLONE ROZSZERZENIA (puste = wszystkie)";
-                        placeholder: "np. jpg, png, mp4";
+                        label: Translations.settings_allowed_extensions_text;
+                        placeholder: Translations.settings_allowed_extensions_placeholder_text;
                         value <=> GeneralSettings.allowed_extensions;
                     }
                     Divider {}
 
                     TextInputRow {
-                        label: "WYKLUCZONE ROZSZERZENIA";
-                        placeholder: "np. bak, tmp, log";
+                        label: Translations.settings_excluded_extensions_text;
+                        placeholder: Translations.settings_excluded_extensions_placeholder_text;
                         value <=> GeneralSettings.excluded_extensions;
                     }
                     Divider {}
                 }
 
 
-                if active_tab == 1 : VerticalLayout {
+                if active_tab == SettingsTab.Tools : VerticalLayout {
                     spacing: 0px;
 
 
-                    ToolGroupHeader { label: "DUPLIKATY"; emoji: "📂"; }
+                    ToolGroupHeader { label: Translations.settings_duplicates_header_text; emoji: "📂"; }
 
-                    CategoryLabel { label: "METODA PORÓWNANIA"; }
+                    CategoryLabel { label: Translations.settings_check_method_label_text; }
                     SegmentRow {
-                        label: "Metoda";
-                        options: ["Hash", "Nazwa", "Rozm+Naz", "Rozmiar"];
+                        label: Translations.settings_check_method_text;
+                        options: DuplicateSettings.check_method_options;
                         selected <=> DuplicateSettings.check_method;
                     }
                     Divider {}
 
-                    CategoryLabel { label: "ALGORYTM HASH"; }
+                    CategoryLabel { label: Translations.settings_hash_type_label_text; }
                     SegmentRow {
-                        label: "Algorytm";
+                        label: Translations.settings_hash_type_text;
                         description: "Blake3 – najszybszy; CRC32/xxH3 – alternatywy";
-                        options: ["Blake3", "CRC32", "xxHash3"];
+                        options: DuplicateSettings.hash_type_options;
                         selected <=> DuplicateSettings.hash_type;
                     }
                     Divider {}
 
-                    CategoryLabel { label: "MINIMALNY ROZMIAR PLIKU"; }
+
+                    ToolGroupHeader { label: Translations.settings_similar_images_header_text; emoji: "🖼"; }
+
+                    CategoryLabel { label: Translations.settings_similarity_preset_text; }
                     SegmentRow {
-                        label: "Min. rozmiar";
-                        description: "Pliki mniejsze są ignorowane";
-                        options: ["1 KB", "8 KB", "64 KB", "1 MB"];
-                        selected <=> DuplicateSettings.min_size_kb_idx;
-                    }
-                    Divider {}
-
-
-                    ToolGroupHeader { label: "PODOBNE OBRAZY"; emoji: "🖼"; }
-
-                    CategoryLabel { label: "PRÓG PODOBIEŃSTWA"; }
-                    SegmentRow {
-                        label: "Próg";
+                        label: Translations.settings_similarity_preset_text;
                         description: "B.Wysoki = tylko niemal identyczne";
-                        options: ["B.Wys.", "Wysoki", "Średni", "Niski", "B.Niski", "Min."];
+                        options: SimilarImagesSettings.similarity_preset_options;
                         selected <=> SimilarImagesSettings.similarity_preset;
                     }
                     Divider {}
 
-                    CategoryLabel { label: "ROZMIAR HASH OBRAZU"; }
+                    CategoryLabel { label: Translations.settings_hash_size_text; }
                     SegmentRow {
-                        label: "Rozmiar hash";
+                        label: Translations.settings_hash_size_text;
                         description: "Większy = dokładniejszy, wolniejszy";
-                        options: ["8", "16", "32", "64"];
+                        options: SimilarImagesSettings.hash_size_options;
                         selected <=> SimilarImagesSettings.hash_size_idx;
                     }
                     Divider {}
 
-
-                    ToolGroupHeader { label: "DUŻE / MAŁE PLIKI"; emoji: "📦"; }
-
-                    CategoryLabel { label: "TRYB WYSZUKIWANIA"; }
+                    CategoryLabel { label: Translations.settings_hash_alg_text; }
                     SegmentRow {
-                        label: "Szukaj";
-                        options: ["Największe", "Najmniejsze"];
+                        label: Translations.settings_hash_alg_text;
+                        options: SimilarImagesSettings.hash_alg_options;
+                        selected <=> SimilarImagesSettings.hash_alg_idx;
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: Translations.settings_image_filter_text; }
+                    SegmentRow {
+                        label: Translations.settings_image_filter_text;
+                        options: SimilarImagesSettings.image_filter_options;
+                        selected <=> SimilarImagesSettings.image_filter_idx;
+                    }
+                    Divider {}
+
+                    ToggleRow { label: Translations.settings_ignore_same_size_text; value <=> SimilarImagesSettings.ignore_same_size; }
+                    Divider {}
+
+
+                    ToolGroupHeader { label: Translations.settings_big_files_header_text; emoji: "📦"; }
+
+                    CategoryLabel { label: Translations.settings_search_mode_text; }
+                    SegmentRow {
+                        label: Translations.settings_search_mode_text;
+                        options: BigFilesSettings.search_mode_options;
                         selected <=> BigFilesSettings.search_mode_idx;
                     }
                     Divider {}
 
-                    CategoryLabel { label: "LICZBA WYNIKÓW"; }
+                    CategoryLabel { label: Translations.settings_file_count_text; }
                     SegmentRow {
-                        label: "Ilość plików";
-                        options: ["5", "50", "500", "5000"];
+                        label: Translations.settings_file_count_text;
+                        options: BigFilesSettings.count_options;
                         selected <=> BigFilesSettings.count_idx;
                     }
+                    Divider {}
+
+
+                    ToolGroupHeader { label: Translations.settings_same_music_header_text; emoji: "🎵"; }
+
+                    CategoryLabel { label: Translations.settings_music_compare_tags_label_text; }
+                    ToggleRow { label: Translations.settings_music_title_text;   value <=> SameMusicSettings.title; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_music_artist_text; value <=> SameMusicSettings.artist; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_music_year_text;     value <=> SameMusicSettings.year; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_music_length_text;    value <=> SameMusicSettings.length; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_music_genre_text; value <=> SameMusicSettings.genre; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_music_bitrate_text; value <=> SameMusicSettings.bitrate; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_music_approx_text; value <=> SameMusicSettings.approximate; }
+                    Divider {}
+                    CategoryLabel { label: Translations.settings_music_check_method_text; }
+                    SegmentRow {
+                        label: Translations.settings_music_check_method_text;
+                        options: SameMusicSettings.check_method_options;
+                        selected <=> SameMusicSettings.check_method_idx;
+                    }
+                    Divider {}
+
+
+                    ToolGroupHeader { label: Translations.settings_broken_files_header_text; emoji: "⚠"; }
+
+                    CategoryLabel { label: Translations.settings_broken_files_types_label_text; }
+                    ToggleRow { label: Translations.settings_broken_image_text;  value <=> BrokenFilesSettings.check_image; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_broken_audio_text;   value <=> BrokenFilesSettings.check_audio; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_broken_pdf_text;     value <=> BrokenFilesSettings.check_pdf; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_broken_archive_text; value <=> BrokenFilesSettings.check_archive; }
+                    Divider {}
+
+
+                    ToolGroupHeader { label: Translations.settings_bad_names_header_text; emoji: "✏"; }
+
+                    CategoryLabel { label: Translations.settings_bad_names_checks_label_text; }
+                    ToggleRow { label: Translations.settings_bad_names_uppercase_ext_text; value <=> BadNamesSettings.uppercase_extension; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_bad_names_emoji_text; value <=> BadNamesSettings.emoji_used; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_bad_names_space_text; value <=> BadNamesSettings.space_at_start_or_end; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_bad_names_non_ascii_text; value <=> BadNamesSettings.non_ascii_graphical; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_bad_names_duplicated_text; value <=> BadNamesSettings.remove_duplicated_non_alpha; }
                     Divider {}
                 }
 
 
-                if active_tab == 2 : VerticalLayout {
+                if active_tab == SettingsTab.Diagnostics : VerticalLayout {
                     spacing: 0px;
 
-                    CategoryLabel { label: "DIAGNOSTYKA"; }
+                    CategoryLabel { label: Translations.diagnostics_header_text; }
 
                     Rectangle {
                         height: 72px;
@@ -288,7 +361,7 @@ export component SettingsScreen {
                             }
 
                             if !AppState.storage_permission_granted : TouchButton {
-                                label: "Przyznaj";
+                                label: Translations.grant_text;
                                 bg: CediniaColors.warning;
                                 fg: #000000;
                                 min_h: 44px;
@@ -313,7 +386,7 @@ export component SettingsScreen {
                                 horizontal-stretch: 1.0;
                                 spacing: 2px;
                                 Text {
-                                    text: "Test: zlicz wszystkie pliki";
+                                    text: Translations.diagnostics_collect_test_text;
                                     color: CediniaColors.text_primary;
                                     font-size: 15px;
                                 }
@@ -325,7 +398,7 @@ export component SettingsScreen {
                             }
 
                             if !AppState.collect_test_running : TouchButton {
-                                label: "▶ Uruchom";
+                                label: Translations.diagnostics_collect_test_run_text;
                                 bg: CediniaColors.accent;
                                 fg: #000000;
                                 min_h: 44px;
@@ -333,11 +406,59 @@ export component SettingsScreen {
                             }
 
                             if AppState.collect_test_running : TouchButton {
-                                label: "⏹ Stop";
+                                label: Translations.diagnostics_collect_test_stop_text;
                                 bg: CediniaColors.warning;
                                 fg: #000000;
                                 min_h: 44px;
                                 clicked => { AppState.stop_collect_test(); }
+                            }
+                        }
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: "CACHE"; }
+
+                    Rectangle {
+                        height: 72px;
+                        background: CediniaColors.bg_surface;
+                        HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 8px;
+
+                            VerticalLayout {
+                                alignment: LayoutAlignment.center;
+                                horizontal-stretch: 1.0;
+                                spacing: 2px;
+                                Text {
+                                    text: Translations.diagnostics_thumbnails_text + ": " + AppState.diag_thumbnails_size;
+                                    color: CediniaColors.text_primary;
+                                    font-size: 14px;
+                                }
+                                Text {
+                                    text: Translations.diagnostics_app_cache_text + ": " + AppState.diag_app_cache_size;
+                                    color: CediniaColors.text_secondary;
+                                    font-size: 12px;
+                                }
+                            }
+
+                            TouchButton {
+                                label: AppState.diag_refresh_running ? "..." : Translations.diagnostics_refresh_text;
+                                min_h: 36px;
+                                bg: CediniaColors.bg_elevated;
+                                fg: CediniaColors.text_secondary;
+                                enabled: !AppState.diag_refresh_running;
+                                clicked => { AppState.refresh_diag_cache_info(); }
+                            }
+
+                            TouchButton {
+                                label: Translations.diagnostics_clear_thumbnails_text;
+                                min_h: 36px;
+                                bg: CediniaColors.danger.with-alpha(0.7);
+                                fg: #ffffff;
+                                clicked => { AppState.clear_thumbnails_cache(); }
                             }
                         }
                     }
@@ -359,7 +480,7 @@ export component SettingsScreen {
                                 alignment: LayoutAlignment.center;
                                 horizontal-stretch: 1.0;
                                 Text {
-                                    text: "Cedinia 1.0";
+                                    text: "Cedinia 11.0.1";
                                     color: CediniaColors.text_primary;
                                     font-size: 16px;
                                     font-weight: 700;

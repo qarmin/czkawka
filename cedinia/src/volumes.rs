@@ -13,7 +13,7 @@ pub(crate) fn home_dir() -> PathBuf {
     }
     #[cfg(not(target_os = "android"))]
     {
-        std::env::var("HOME").map(PathBuf::from).unwrap_or_else(|_| PathBuf::from("/"))
+        std::env::var("HOME").map_or_else(|_| PathBuf::from("/"), PathBuf::from)
     }
 }
 
@@ -98,11 +98,14 @@ pub(crate) fn detect_storage_volumes() -> Vec<VolumeEntry> {
 pub(crate) fn classify_mountpoint(path: &str) -> &'static str {
     if path.contains("emulated/0") || path == "/sdcard" || path == "/storage/self/primary" || path == "/mnt/sdcard" {
         "💾 Pamięć wbudowana (internal)"
-    } else if path.contains("emulated/1") || path.contains("extSdCard") || path.contains("external_sd") || path.contains("sdcard1") || path.contains("sdcard2") {
-        "💳 Karta pamięci (SD card)"
-    } else if path.starts_with("/storage/") {
-        "💳 Karta pamięci (SD card)"
-    } else if path.starts_with("/mnt/media_rw/") {
+    } else if path.contains("emulated/1")
+        || path.contains("extSdCard")
+        || path.contains("external_sd")
+        || path.contains("sdcard1")
+        || path.contains("sdcard2")
+        || path.starts_with("/storage/")
+        || path.starts_with("/mnt/media_rw/")
+    {
         "💳 Karta pamięci (SD card)"
     } else {
         "📦 Wolumin pamięci"

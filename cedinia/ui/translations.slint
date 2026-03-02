@@ -1,0 +1,192 @@
+export global Translations {
+    // App / top bar titles
+    in-out property <string> app_name_text:                "Cedinia";
+    in-out property <string> tool_duplicate_files_text:    "Duplikaty";
+    in-out property <string> tool_empty_folders_text:      "Puste foldery";
+    in-out property <string> tool_similar_images_text:     "Podobne obrazy";
+    in-out property <string> tool_empty_files_text:        "Puste pliki";
+    in-out property <string> tool_temporary_files_text:    "Pliki tymczasowe";
+    in-out property <string> tool_big_files_text:          "Największe pliki";
+    in-out property <string> tool_broken_files_text:       "Uszkodzone pliki";
+    in-out property <string> tool_bad_extensions_text:     "Złe rozszerzenia";
+    in-out property <string> tool_same_music_text:         "Duplikaty muzyki";
+    in-out property <string> tool_bad_names_text:          "Złe nazwy";
+    in-out property <string> tool_exif_remover_text:       "Dane EXIF";
+    in-out property <string> tool_directories_text:        "Katalogi";
+    in-out property <string> tool_settings_text:           "Ustawienia";
+
+    // Home screen tool cards
+    in-out property <string> home_dup_description_text:        "Znajdź pliki o tej samej zawartości";
+    in-out property <string> home_empty_folders_description_text: "Katalogi bez zawartości";
+    in-out property <string> home_similar_images_description_text: "Znajdź wizualnie podobne zdjęcia";
+    in-out property <string> home_empty_files_description_text: "Pliki o zerowym rozmiarze";
+    in-out property <string> home_temp_files_description_text: "Tymczasowe i cache'owane pliki";
+    in-out property <string> home_big_files_description_text:  "50 największych plików na dysku";
+    in-out property <string> home_broken_files_description_text: "Pliki PDF, audio, obrazy, archiwa";
+    in-out property <string> home_bad_extensions_description_text: "Pliki z nieprawidłowym rozszerzeniem";
+    in-out property <string> home_same_music_description_text: "Podobne pliki audio wg tagów";
+    in-out property <string> home_bad_names_description_text:  "Pliki z problematycznymi znakami w nazwie";
+    in-out property <string> home_exif_description_text:       "Obrazy z metadanymi EXIF";
+
+    // Results list
+    in-out property <string> scanning_text:        "Skanowanie w toku...";
+    in-out property <string> stopping_text:        "Zatrzymywanie...";
+    in-out property <string> no_results_text:      "Brak wynikow";
+    in-out property <string> press_start_text:     "Nacisnij START aby skanowac";
+    in-out property <string> select_label_text:    "Zaz.";
+    in-out property <string> deselect_label_text:  "Odzn.";
+    in-out property <string> list_label_text:      "Lista";
+    in-out property <string> gallery_label_text:   "Gal.";
+
+    // Selection popup
+    in-out property <string> selection_popup_title_text:      "Zaznaczanie";
+    in-out property <string> select_all_text:                 "Zaznacz wszystko";
+    in-out property <string> select_except_one_text:          "Zaznacz poza jednym";
+    in-out property <string> select_except_largest_text:      "Zaznacz poza największym";
+    in-out property <string> select_except_smallest_text:     "Zaznacz poza najmniejszym";
+    in-out property <string> select_largest_text:             "Zaznacz największy";
+    in-out property <string> select_smallest_text:            "Zaznacz najmniejszy";
+    in-out property <string> select_except_highest_res_text:  "Zaznacz poza największą rozdzielczością";
+    in-out property <string> select_except_lowest_res_text:   "Zaznacz poza najmniejszą rozdzielczością";
+    in-out property <string> select_highest_res_text:         "Zaznacz największą rozdzielczość";
+    in-out property <string> select_lowest_res_text:          "Zaznacz najmniejszą rozdzielczość";
+    in-out property <string> invert_selection_text:           "Odwroc zaznaczenie";
+    in-out property <string> close_text:                      "Zamknij";
+
+    // Deselection popup
+    in-out property <string> deselection_popup_title_text:    "Odznaczanie";
+    in-out property <string> deselect_all_text:               "Odznacz wszystko";
+    in-out property <string> deselect_except_one_text:        "Odznacz poza jednym";
+
+    // Confirm popup
+    in-out property <string> cancel_text:                     "Anuluj";
+    in-out property <string> delete_text:                     "Usuń";
+    in-out property <string> rename_text:                     "Zmień nazwę";
+
+    // Delete errors popup
+    in-out property <string> delete_errors_title_text:        "Nie udalo sie usunac niektorych plikow:";
+    in-out property <string> ok_text:                         "OK";
+
+    // Stopping overlay
+    in-out property <string> stopping_overlay_title_text:     "■ Zatrzymywanie";
+    in-out property <string> stopping_overlay_body_text:      "Kończenie bieżącego skanu…\nProszę czekać.";
+
+    // Permission popup
+    in-out property <string> permission_title_text:           "🔒 Dostęp do plików";
+    in-out property <string> permission_body_text:            "Aby skanować pliki, aplikacja potrzebuje dostępu do pamięci urządzenia. Bez tego uprawnienia skanowanie nie będzie możliwe.";
+    in-out property <string> grant_text:                      "Przyznaj";
+    in-out property <string> no_permission_scan_warning_text: "Brak uprawnień do plików – przyznaj dostęp aby skanować";
+
+    // Settings screen
+    in-out property <string> settings_tab_general_text:       "Ogólne";
+    in-out property <string> settings_tab_tools_text:         "Narzędzia";
+    in-out property <string> settings_tab_diagnostics_text:   "Diagnostyka";
+
+    in-out property <string> settings_use_cache_text:         "Użyj pamięci podręcznej";
+    in-out property <string> settings_use_cache_desc_text:    "Przyspiesza kolejne skany (hash/obrazy)";
+    in-out property <string> settings_ignore_hidden_text:     "Ignoruj ukryte pliki";
+    in-out property <string> settings_ignore_hidden_desc_text: "Pliki i foldery zaczynające się od '.'";
+    in-out property <string> settings_scan_label_text:        "SKANOWANIE";
+    in-out property <string> settings_filters_label_text:     "FILTRY (wszystkie narzędzia)";
+    in-out property <string> settings_min_file_size_text:     "Min. rozmiar pliku";
+    in-out property <string> settings_excluded_items_text:    "WYKLUCZONE ELEMENTY (wzorce glob, oddzielone przecinkiem)";
+    in-out property <string> settings_excluded_items_placeholder_text: "np. *.tmp, */.git/*, */node_modules/*";
+    in-out property <string> settings_allowed_extensions_text: "DOZWOLONE ROZSZERZENIA (puste = wszystkie)";
+    in-out property <string> settings_allowed_extensions_placeholder_text: "np. jpg, png, mp4";
+    in-out property <string> settings_excluded_extensions_text: "WYKLUCZONE ROZSZERZENIA";
+    in-out property <string> settings_excluded_extensions_placeholder_text: "np. bak, tmp, log";
+
+    // Settings — Tools section labels
+    in-out property <string> settings_duplicates_header_text: "DUPLIKATY";
+    in-out property <string> settings_check_method_label_text: "METODA PORÓWNANIA";
+    in-out property <string> settings_check_method_text:      "Metoda";
+    in-out property <string> settings_hash_type_label_text:   "TYP HASHA";
+    in-out property <string> settings_hash_type_text:         "Typ hasha";
+    in-out property <string> settings_similar_images_header_text: "PODOBNE OBRAZY";
+    in-out property <string> settings_similarity_preset_text: "Próg podobieństwa";
+    in-out property <string> settings_hash_size_text:         "Rozmiar hasha";
+    in-out property <string> settings_hash_alg_text:          "Algorytm hasha";
+    in-out property <string> settings_image_filter_text:      "Filtr zmiany rozmiaru";
+    in-out property <string> settings_ignore_same_size_text:  "Ignoruj obrazy o tych samych wymiarach";
+    in-out property <string> settings_big_files_header_text:  "NAJWIĘKSZE PLIKI";
+    in-out property <string> settings_search_mode_text:       "Tryb wyszukiwania";
+    in-out property <string> settings_file_count_text:        "Liczba plików";
+    in-out property <string> settings_same_music_header_text: "DUPLIKATY MUZYKI";
+    in-out property <string> settings_music_check_method_text: "Tryb porównania";
+    in-out property <string> settings_music_compare_tags_label_text: "PORÓWNYWANE TAGI";
+    in-out property <string> settings_music_title_text:       "Tytuł";
+    in-out property <string> settings_music_artist_text:      "Artysta";
+    in-out property <string> settings_music_year_text:        "Rok";
+    in-out property <string> settings_music_length_text:      "Długość";
+    in-out property <string> settings_music_genre_text:       "Gatunek";
+    in-out property <string> settings_music_bitrate_text:     "Przepływność";
+    in-out property <string> settings_music_approx_text:      "Przybliżone porównywanie tagów";
+    in-out property <string> settings_broken_files_header_text: "USZKODZONE PLIKI";
+    in-out property <string> settings_broken_files_types_label_text: "SPRAWDZANE TYPY";
+    in-out property <string> settings_broken_audio_text:      "Dźwięk";
+    in-out property <string> settings_broken_pdf_text:        "PDF";
+    in-out property <string> settings_broken_archive_text:    "Archiwum";
+    in-out property <string> settings_broken_image_text:      "Obraz";
+    in-out property <string> settings_bad_names_header_text:  "ZŁE NAZWY";
+    in-out property <string> settings_bad_names_checks_label_text: "SPRAWDZENIA";
+    in-out property <string> settings_bad_names_uppercase_ext_text: "Wielkie litery w rozszerzeniu";
+    in-out property <string> settings_bad_names_emoji_text:   "Emoji w nazwie";
+    in-out property <string> settings_bad_names_space_text:   "Spacje na początku/końcu";
+    in-out property <string> settings_bad_names_non_ascii_text: "Znaki spoza ASCII";
+    in-out property <string> settings_bad_names_duplicated_text: "Powtarzające się znaki";
+
+    // Settings — Diagnostics tab
+    in-out property <string> diagnostics_header_text:         "DIAGNOSTYKA";
+    in-out property <string> diagnostics_thumbnails_text:     "Pamięć miniatur";
+    in-out property <string> diagnostics_app_cache_text:      "Pamięć aplikacji";
+    in-out property <string> diagnostics_refresh_text:        "Odśwież";
+    in-out property <string> diagnostics_clear_thumbnails_text: "Wyczyść miniatury";
+    in-out property <string> diagnostics_collect_test_text:   "Test skanowania";
+    in-out property <string> diagnostics_collect_test_run_text: "Uruchom";
+    in-out property <string> diagnostics_collect_test_stop_text: "Stop";
+
+    // Diagnostics collect-test popup
+    in-out property <string> collect_test_title_text:         "📊 Wyniki testu";
+    in-out property <string> collect_test_volumes_text:       "💾 Woluminy:";
+    in-out property <string> collect_test_folders_text:       "📁 Foldery:";
+    in-out property <string> collect_test_files_text:         "📄 Pliki:";
+    in-out property <string> collect_test_time_text:          "⏱ Czas:";
+    in-out property <string> collect_test_ms_text:            " ms";
+
+    // Directories screen
+    in-out property <string> directories_include_header_text: "Katalogi do skanowania";
+    in-out property <string> directories_exclude_header_text: "Katalogi wykluczone";
+    in-out property <string> directories_add_text:            "+ Dodaj";
+    in-out property <string> directories_volume_header_text:  "Woluminy / partycje";
+    in-out property <string> directories_volume_refresh_text: "Odśwież";
+    in-out property <string> directories_volume_add_text:     "Dodaj";
+
+    // Bottom nav
+    in-out property <string> nav_home_text:       "Start";
+    in-out property <string> nav_dirs_text:       "Katalogi";
+    in-out property <string> nav_settings_text:   "Ustawienia";
+
+    // Status messages set from Rust
+    in-out property <string> status_ready_text:                "Gotowy / Ready";
+    in-out property <string> status_stopped_text:              "Zatrzymano";
+    in-out property <string> status_no_results_text:           "Brak wyników";
+    in-out property <string> status_deleted_selected_text:     "Usunięto zaznaczone";
+    in-out property <string> status_deleted_with_errors_text:  "Usunięto z błędami";
+    in-out property <string> scan_not_started_text:            "Nie uruchomiono skanu";
+    in-out property <string> found_items_prefix_text:          "Znaleziono";
+    in-out property <string> found_items_suffix_text:          "elementów";
+    in-out property <string> deleted_items_prefix_text:        "Usunięto";
+    in-out property <string> deleted_items_suffix_text:        "elementów";
+    in-out property <string> deleted_errors_suffix_text:       "błędów";
+    in-out property <string> renamed_prefix_text:              "Zmieniono nazwy";
+    in-out property <string> renamed_files_suffix_text:        "plików";
+    in-out property <string> renamed_errors_suffix_text:       "błędów";
+    in-out property <string> cleaned_exif_prefix_text:         "Wyczyszczono EXIF z";
+    in-out property <string> cleaned_exif_suffix_text:         "plików";
+    in-out property <string> cleaned_exif_errors_suffix_text:  "błędów";
+
+    // Delete errors popup (more items)
+    in-out property <string> and_more_prefix_text:             "…i";
+    in-out property <string> and_more_suffix_text:             "więcej";
+}
+

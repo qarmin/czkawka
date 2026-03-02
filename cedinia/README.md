@@ -9,7 +9,7 @@ The name refers to the Battle of Cedynia in 972, a victory significant to the ea
 ## AI usage
 Because this project goes into parts of Android that I am not familiar with, I used a lot of AI assistance during development. I reviewed and guided every step myself, but AI helped speed things up.
 
-At first, I hoped to build the app without writing any Java code. However, accessing the file system and implementing a file picker on Android requires Java. Since I do not normally work with it, AI support was necessary. Without it, I would have needed to spend many days studying the JNI Rust bindings and Android documentation before I could move forward.
+AI is a tool, like any other thing like inteli sense, ....  it can be used bad or good, so I just use provided tools and try to use them good, to create good software()
 
 I do not expect this project to become anything serious. It will most likely remain a small side experiment. If that changes, I will review all AI generated code and rewrite it where needed so it works properly and matches my standards.
 

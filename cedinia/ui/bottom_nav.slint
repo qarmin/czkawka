@@ -4,6 +4,7 @@
 import { CediniaColors } from "colors.slint";
 import { ActiveTool } from "common.slint";
 import { AppState } from "app_state.slint";
+import { Translations } from "translations.slint";
 
 
 component NavItem {
@@ -75,17 +76,18 @@ component DynamicToolItem {
     property <ActiveTool> t: AppState.last_scan_tool;
 
     property <string> t_label:
-        t == ActiveTool.DuplicateFiles   ? "Duplikaty"
-      : t == ActiveTool.EmptyFolders     ? "Puste foldery"
-      : t == ActiveTool.SimilarImages    ? "Obrazy"
-      : t == ActiveTool.EmptyFiles       ? "Puste pliki"
-      : t == ActiveTool.TemporaryFiles   ? "Tymczasowe"
-      : t == ActiveTool.BigFiles         ? "Największe"
-      : t == ActiveTool.BrokenFiles      ? "Uszkodzone"
-      : t == ActiveTool.InvalidSymlinks  ? "Dowiązania"
-      : t == ActiveTool.BadExtensions    ? "Rozszerzenia"
-      : t == ActiveTool.SameMusic        ? "Muzyka"
-      : "Skanowanie";
+        t == ActiveTool.DuplicateFiles   ? Translations.tool_duplicate_files_text
+      : t == ActiveTool.EmptyFolders     ? Translations.tool_empty_folders_text
+      : t == ActiveTool.SimilarImages    ? Translations.tool_similar_images_text
+      : t == ActiveTool.EmptyFiles       ? Translations.tool_empty_files_text
+      : t == ActiveTool.TemporaryFiles   ? Translations.tool_temporary_files_text
+      : t == ActiveTool.BigFiles         ? Translations.tool_big_files_text
+      : t == ActiveTool.BrokenFiles      ? Translations.tool_broken_files_text
+      : t == ActiveTool.BadExtensions    ? Translations.tool_bad_extensions_text
+      : t == ActiveTool.SameMusic        ? Translations.tool_same_music_text
+      : t == ActiveTool.BadNames         ? Translations.tool_bad_names_text
+      : t == ActiveTool.ExifRemover      ? Translations.tool_exif_remover_text
+      : Translations.app_name_text;
 
     property <image> t_icon:
         t == ActiveTool.SimilarImages    ? @image-url("icons/image.svg")
@@ -164,7 +166,7 @@ export component BottomNavBar {
 
             NavItem {
                 horizontal-stretch: 1.0;
-                label: "Narzędzia";
+                label: Translations.nav_home_text;
                 tool: ActiveTool.Home;
                 icon: @image-url("icons/home.svg");
             }
@@ -175,14 +177,14 @@ export component BottomNavBar {
 
             NavItem {
                 horizontal-stretch: 1.0;
-                label: "Katalogi";
+                label: Translations.nav_dirs_text;
                 tool: ActiveTool.Directories;
                 icon: @image-url("icons/folder.svg");
             }
 
             NavItem {
                 horizontal-stretch: 1.0;
-                label: "Więcej";
+                label: Translations.nav_settings_text;
                 tool: ActiveTool.Settings;
                 icon: @image-url("icons/more.svg");
             }

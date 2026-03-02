@@ -184,6 +184,41 @@ pub fn launch_pick_directory(is_include: bool) {
     .unwrap_or_else(|e| log::error!("launch_pick_directory: JNI failed: {:?}", e));
 }
 
+pub fn setup_nav_bar() {
+    let Some(app) = APP_HANDLE.get() else {
+        log::error!("setup_nav_bar: AndroidApp not initialised");
+        return;
+    };
+    let Some(loader_ref) = DEX_LOADER_REF.get() else {
+        log::error!("setup_nav_bar: DEX loader not initialised");
+        return;
+    };
+
+    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    vm.attach_current_thread(|env| -> jni::errors::Result<()> {
+        let native_activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+        let class_name = env.new_string("CediniaFilePicker")?;
+        let picker_class_obj = env
+            .call_method(
+                loader_ref.as_obj(),
+                jni_str!("findClass"),
+                jni_sig!((name: java.lang.String) -> java.lang.Class),
+                &[JValue::Object(&class_name)],
+            )?
+            .l()?;
+        let picker_class: JClass = unsafe { JClass::from_raw(env, picker_class_obj.as_raw()) };
+        env.call_static_method(
+            &picker_class,
+            jni_str!("setupNavBar"),
+            jni_sig!((activity: android.app.Activity) -> void),
+            &[JValue::Object(&native_activity)],
+        )?;
+        log::info!("setup_nav_bar: Java call succeeded");
+        Ok(())
+    })
+    .unwrap_or_else(|e| log::error!("setup_nav_bar: JNI failed: {:?}", e));
+}
+
 pub fn check_storage_permission() -> bool {
     let Some(app) = APP_HANDLE.get() else { return false };
     let Some(loader_ref) = DEX_LOADER_REF.get() else { return false };

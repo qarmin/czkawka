@@ -34,3 +34,5 @@ charts*
 *__pycache__*/
 result
 .direnv
+cedinia/android/keystore/*.keystore
+cedinia/docs

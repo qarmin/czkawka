@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::fs::File;
 use std::panic;
 use std::path::Path;
@@ -29,7 +30,30 @@ pub(crate) fn decode_normal_image(path: &str) -> Result<DynamicImage, String> {
     Ok(img)
 }
 
-pub fn get_dynamic_image_from_path(path: &str, opts: Option<ImgResizeOptions>) -> Result<DynamicImage, String> {
+pub struct LoadedImage {
+    pub image: DynamicImage,
+    pub original_width: u32,
+    pub original_height: u32,
+}
+impl Debug for LoadedImage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LoadedImage")
+            .field("original_width", &self.original_width)
+            .field("original_height", &self.original_height)
+            .field(
+                "image",
+                &format!(
+                    "DynamicImage of type {:?} with dimensions {}x{}",
+                    self.image.color(),
+                    self.image.width(),
+                    self.image.height()
+                ),
+            )
+            .finish()
+    }
+}
+
+pub fn get_dynamic_image_from_path(path: &str, opts: Option<ImgResizeOptions>) -> Result<LoadedImage, String> {
     let path_lower = Path::new(path).extension().unwrap_or_default().to_string_lossy().to_lowercase();
 
     trace!("decoding file \"{path}\"");
@@ -48,23 +72,36 @@ pub fn get_dynamic_image_from_path(path: &str, opts: Option<ImgResizeOptions>) -
             return Err(flc!("core_image_too_large", width = img.width(), height = img.height(), max = MAXIMUM_IMAGE_PIXELS));
         }
 
-        if let Some(opts) = opts { Ok(resize_image(img, opts)) } else { Ok(img) }
+        let original_width = img.width();
+        let original_height = img.height();
+
+        if let Some(opts) = opts {
+            Ok((resize_image(img, opts), original_width, original_height))
+        } else {
+            Ok((img, original_width, original_height))
+        }
     });
 
     if let Ok(res) = res {
         match res {
-            Ok(t) => {
+            Ok((img, w, h)) => {
                 let rotation = get_rotation_from_exif(path).unwrap_or(None);
-                match rotation {
-                    Some(ExifOrientation::Normal) | None => Ok(t),
-                    Some(ExifOrientation::MirrorHorizontal) => Ok(t.fliph()),
-                    Some(ExifOrientation::Rotate180) => Ok(t.rotate180()),
-                    Some(ExifOrientation::MirrorVertical) => Ok(t.flipv()),
-                    Some(ExifOrientation::MirrorHorizontalAndRotate270CW) => Ok(t.fliph().rotate270()),
-                    Some(ExifOrientation::Rotate90CW) => Ok(t.rotate90()),
-                    Some(ExifOrientation::MirrorHorizontalAndRotate90CW) => Ok(t.fliph().rotate90()),
-                    Some(ExifOrientation::Rotate270CW) => Ok(t.rotate270()),
-                }
+                let img_rotated = match rotation {
+                    Some(ExifOrientation::Normal) | None => img,
+                    Some(ExifOrientation::MirrorHorizontal) => img.fliph(),
+                    Some(ExifOrientation::Rotate180) => img.rotate180(),
+                    Some(ExifOrientation::MirrorVertical) => img.flipv(),
+                    Some(ExifOrientation::MirrorHorizontalAndRotate270CW) => img.fliph().rotate270(),
+                    Some(ExifOrientation::Rotate90CW) => img.rotate90(),
+                    Some(ExifOrientation::MirrorHorizontalAndRotate90CW) => img.fliph().rotate90(),
+                    Some(ExifOrientation::Rotate270CW) => img.rotate270(),
+                };
+
+                Ok(LoadedImage {
+                    image: img_rotated,
+                    original_width: w,
+                    original_height: h,
+                })
             }
             Err(e) => Err(flc!("core_image_open_failed", path = path, reason = e)),
         }
@@ -249,8 +286,8 @@ mod tests {
 
     #[test]
     fn test_image_loading_and_exif_rotation() {
-        let normal_img = get_dynamic_image_from_path(TEST_NORMAL_IMAGE, None).unwrap();
-        let rotated_img = get_dynamic_image_from_path(TEST_ROTATED_IMAGE, None).unwrap();
+        let normal_img = get_dynamic_image_from_path(TEST_NORMAL_IMAGE, None).unwrap().image;
+        let rotated_img = get_dynamic_image_from_path(TEST_ROTATED_IMAGE, None).unwrap().image;
 
         assert!(normal_img.width() > 0 && normal_img.height() > 0);
         assert!(rotated_img.width() > 0 && rotated_img.height() > 0);

@@ -4,90 +4,286 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
+use crate::common::{INT_IDX_SIZE_HI, INT_IDX_SIZE_LO, IntDataSimilarImages, STR_IDX_NAME, STR_IDX_PATH, StrDataBadExtensions, StrDataBadNames};
 use crate::model::{count_checked, toggle_row};
-use crate::{ActiveTool, AppState, FileEntry, MainWindow};
+use crate::{ActiveTool, AppState, FileEntry, MainWindow, SimilarGroupCard, SimilarImageItem};
+
+#[cfg(not(target_os = "android"))]
+fn delete_path(path: &str) -> Result<(), String> {
+    trash::delete(path).map_err(|e| e.to_string())
+}
+
+#[cfg(target_os = "android")]
+fn delete_path(path: &str) -> Result<(), String> {
+    std::fs::remove_file(path).or_else(|_| std::fs::remove_dir_all(path)).map_err(|e| e.to_string())
+}
 
 pub(crate) enum DeleteEvent {
     Progress(usize, usize),
+
     Finished(Vec<String>, Vec<String>),
+
+    ListDeleteFinished(Vec<String>, Vec<String>),
+
+    ListRenameFinished(usize, Vec<String>),
+
+    ExifCleanFinished(Vec<String>, Vec<String>),
+}
+
+fn vm_of(model: &ModelRc<FileEntry>) -> Option<&VecModel<FileEntry>> {
+    model.as_any().downcast_ref::<VecModel<FileEntry>>()
+}
+
+fn size_from_entry(e: &FileEntry) -> u64 {
+    let hi = get_val_int(e, INT_IDX_SIZE_HI) as u64;
+    let lo = get_val_int(e, INT_IDX_SIZE_LO) as u64;
+    (hi << 32) | (lo & 0xFFFF_FFFF)
+}
+
+fn get_val_str(e: &FileEntry, idx: usize) -> String {
+    e.val_str.row_data(idx).map(|s| s.to_string()).unwrap_or_default()
+}
+
+fn get_val_int(e: &FileEntry, idx: usize) -> i32 {
+    e.val_int.row_data(idx).unwrap_or(0)
+}
+
+fn full_path_of(e: &FileEntry) -> String {
+    let name = get_val_str(e, STR_IDX_NAME);
+    let path = get_val_str(e, STR_IDX_PATH);
+    if path.is_empty() { name } else { format!("{path}/{name}") }
+}
+
+fn execute_delete_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteEvent>) {
+    let tool = win.global::<AppState>().get_active_tool();
+    let model = get_model_for_tool(win, tool);
+    let Some(vm) = vm_of(&model) else { return };
+
+    let items: Vec<FileEntry> = vm.iter().collect();
+    let to_delete: Vec<(usize, String)> = items
+        .iter()
+        .enumerate()
+        .filter(|(_, e)| e.checked && !e.is_header)
+        .map(|(i, e)| (i, full_path_of(e)))
+        .collect();
+
+    if to_delete.is_empty() {
+        return;
+    }
+
+    let total = to_delete.len();
+    win.global::<AppState>().set_delete_running(true);
+    win.global::<AppState>().set_delete_progress_text(slint::SharedString::from(format!("0 / {total}")));
+
+    std::thread::spawn(move || {
+        let mut deleted_paths: Vec<String> = Vec::new();
+        let mut errors: Vec<String> = Vec::new();
+
+        for (i, (_idx, path)) in to_delete.iter().enumerate() {
+            match delete_path(path) {
+                Ok(()) => {
+                    deleted_paths.push(path.clone());
+                }
+                Err(err) => errors.push(format!("{path}\n  {err}")),
+            }
+            if i % 5 == 4 || i + 1 == total {
+                let _ = tx.send(DeleteEvent::Progress(i + 1, total));
+            }
+        }
+        let _ = tx.send(DeleteEvent::ListDeleteFinished(deleted_paths, errors));
+    });
+}
+
+fn execute_rename_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteEvent>) {
+    let model = win.get_bad_extensions_model();
+    let Some(vm) = vm_of(&model) else { return };
+
+    let items: Vec<FileEntry> = vm.iter().collect();
+    let to_rename: Vec<(usize, String, String)> = items
+        .iter()
+        .enumerate()
+        .filter(|(_, e)| e.checked && !e.is_header)
+        .filter_map(|(i, e)| {
+            let full = full_path_of(e);
+            let proper_ext = get_val_str(e, StrDataBadExtensions::ProperExtension as usize);
+            if proper_ext.is_empty() {
+                return None;
+            }
+            Some((i, full, proper_ext))
+        })
+        .collect();
+
+    if to_rename.is_empty() {
+        return;
+    }
+
+    let total = to_rename.len();
+    win.global::<AppState>().set_delete_running(true);
+    win.global::<AppState>().set_delete_progress_text(slint::SharedString::from(format!("0 / {total}")));
+
+    std::thread::spawn(move || {
+        let mut renamed_indices: Vec<usize> = Vec::new();
+        let mut errors: Vec<String> = Vec::new();
+
+        for (i, (idx, full, proper_ext)) in to_rename.iter().enumerate() {
+            let src = std::path::Path::new(full.as_str());
+            let new_path = match src.file_stem() {
+                Some(stem) => {
+                    let parent = src.parent().unwrap_or(std::path::Path::new(""));
+                    parent.join(format!("{}.{}", stem.to_string_lossy(), proper_ext))
+                }
+                None => {
+                    errors.push(format!("{full}\n  Nie można odczytać nazwy pliku"));
+                    continue;
+                }
+            };
+            match std::fs::rename(full, &new_path) {
+                Ok(()) => renamed_indices.push(*idx),
+                Err(err) => errors.push(format!("{full}\n  {err}")),
+            }
+            if i % 5 == 4 || i + 1 == total {
+                let _ = tx.send(DeleteEvent::Progress(i + 1, total));
+            }
+        }
+        let renamed = renamed_indices.len();
+        let _ = tx.send(DeleteEvent::ListRenameFinished(renamed, errors));
+    });
+}
+
+fn execute_rename_bad_names(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteEvent>) {
+    let model = win.get_bad_names_model();
+    let Some(vm) = vm_of(&model) else { return };
+
+    let items: Vec<FileEntry> = vm.iter().collect();
+    let to_rename: Vec<(usize, String, String)> = items
+        .iter()
+        .enumerate()
+        .filter(|(_, e)| e.checked && !e.is_header)
+        .filter_map(|(i, e)| {
+            let new_name = get_val_str(e, StrDataBadNames::NewName as usize);
+            if new_name.is_empty() {
+                return None;
+            }
+            let full = full_path_of(e);
+            Some((i, full, new_name))
+        })
+        .collect();
+
+    if to_rename.is_empty() {
+        return;
+    }
+
+    let total = to_rename.len();
+    win.global::<AppState>().set_delete_running(true);
+    win.global::<AppState>().set_delete_progress_text(slint::SharedString::from(format!("0 / {total}")));
+
+    std::thread::spawn(move || {
+        let mut renamed_count = 0usize;
+        let mut errors: Vec<String> = Vec::new();
+
+        for (i, (_idx, full, new_name)) in to_rename.iter().enumerate() {
+            let src = std::path::Path::new(full.as_str());
+            let new_path = match src.parent() {
+                Some(parent) => parent.join(new_name),
+                None => {
+                    errors.push(format!("{full}\n  Nie można odczytać katalogu"));
+                    continue;
+                }
+            };
+            match std::fs::rename(full, &new_path) {
+                Ok(()) => renamed_count += 1,
+                Err(err) => errors.push(format!("{full}\n  {err}")),
+            }
+            if i % 5 == 4 || i + 1 == total {
+                let _ = tx.send(DeleteEvent::Progress(i + 1, total));
+            }
+        }
+        let _ = tx.send(DeleteEvent::ListRenameFinished(renamed_count, errors));
+    });
+}
+fn execute_clean_exif_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteEvent>) {
+    let model = win.get_exif_remover_model();
+    let Some(vm) = vm_of(&model) else { return };
+
+    let items: Vec<FileEntry> = vm.iter().collect();
+    let to_clean: Vec<(usize, String)> = items
+        .iter()
+        .enumerate()
+        .filter(|(_, e)| e.checked && !e.is_header)
+        .map(|(i, e)| (i, full_path_of(e)))
+        .collect();
+
+    if to_clean.is_empty() {
+        return;
+    }
+
+    let total = to_clean.len();
+    win.global::<AppState>().set_delete_running(true);
+    win.global::<AppState>().set_delete_progress_text(slint::SharedString::from(format!("0 / {total}")));
+
+    std::thread::spawn(move || {
+        let mut cleaned_paths: Vec<String> = Vec::new();
+        let mut errors: Vec<String> = Vec::new();
+
+        for (i, (_idx, path)) in to_clean.iter().enumerate() {
+            match clean_exif_all_tags(path) {
+                Ok(()) => cleaned_paths.push(path.clone()),
+                Err(e) => errors.push(format!("{path}\n  {e}")),
+            }
+            if i % 5 == 4 || i + 1 == total {
+                let _ = tx.send(DeleteEvent::Progress(i + 1, total));
+            }
+        }
+        let _ = tx.send(DeleteEvent::ExifCleanFinished(cleaned_paths, errors));
+    });
+}
+
+fn clean_exif_all_tags(path: &str) -> Result<(), String> {
+    use czkawka_core::tools::exif_remover::core::{clean_exif_tags, extract_exif_tags_public};
+    let tags = extract_exif_tags_public(std::path::Path::new(path))?;
+    clean_exif_tags(path, &tags, true).map(|_| ())
 }
 
 pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Sender<DeleteEvent>, delete_stop: Rc<std::cell::RefCell<Arc<AtomicBool>>>) {
     {
         let weak = window.as_weak();
+        let tx = delete_tx.clone();
+        window.global::<AppState>().on_clean_exif_selected(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_clean_exif_selected");
+            let model = win.get_exif_remover_model();
+            let n = count_checked(&model);
+            if n == 0 {
+                return;
+            }
+            let state = win.global::<AppState>();
+            state.set_confirm_popup_message(slint::SharedString::from(format!("Czy na pewno chcesz wyczyścić tagi EXIF z {n} zaznaczonych plików?")));
+            state.set_confirm_popup_action(slint::SharedString::from("clean_exif"));
+            state.set_confirm_popup_visible(true);
+            let _ = tx.clone();
+        });
+    }
+    {
+        let weak = window.as_weak();
+        let tx = delete_tx.clone();
         window.global::<AppState>().on_delete_selected(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_delete_selected");
             let tool = win.global::<AppState>().get_active_tool();
             let model = get_model_for_tool(&win, tool);
-
-            let mut deleted_indices: Vec<usize> = Vec::new();
-            let mut errors: Vec<String> = Vec::new();
-
-            for i in 0..model.row_count() {
-                let Some(e) = model.row_data(i) else { continue };
-                if !e.checked {
-                    continue;
-                }
-                let full = if e.path.is_empty() { e.name.to_string() } else { format!("{}/{}", e.path, e.name) };
-
-                let result = std::fs::remove_file(&full).or_else(|_| std::fs::remove_dir_all(&full));
-
-                match result {
-                    Ok(()) => deleted_indices.push(i),
-                    Err(err) => errors.push(format!("{full}\n  {err}")),
-                }
+            let n = count_checked(&model);
+            if n == 0 {
+                return;
             }
-
-            let model_vec = model.as_any().downcast_ref::<VecModel<FileEntry>>();
-            if let Some(vm) = model_vec {
-                for &idx in deleted_indices.iter().rev() {
-                    vm.remove(idx);
-                }
-
-                let mut to_remove_headers: Vec<usize> = Vec::new();
-                let n = vm.row_count();
-                let mut i = 0;
-                while i < n {
-                    if let Some(entry) = vm.row_data(i) {
-                        if entry.is_header {
-                            let next_is_non_header = vm.row_data(i + 1).map(|e| !e.is_header).unwrap_or(false);
-                            if !next_is_non_header {
-                                to_remove_headers.push(i);
-                            }
-                        }
-                    }
-                    i += 1;
-                }
-                for &idx in to_remove_headers.iter().rev() {
-                    vm.remove(idx);
-                }
-            }
-
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-
-            let deleted = deleted_indices.len();
-            let status = if errors.is_empty() {
-                format!("Usunięto {} elementów", deleted)
-            } else {
-                format!("Usunięto {deleted} elementów, {} błędów", errors.len())
-            };
-            win.global::<AppState>().set_status_message(slint::SharedString::from(status));
-
-            if !errors.is_empty() {
-                let displayed: Vec<&String> = errors.iter().take(10).collect();
-                let mut msg = displayed.iter().map(|s| s.as_str()).collect::<Vec<_>>().join("\n\n");
-                if errors.len() > 10 {
-                    msg.push_str(&format!("\n\n…i {} więcej", errors.len() - 10));
-                }
-                win.global::<AppState>().set_delete_errors_text(slint::SharedString::from(msg));
-                win.global::<AppState>().set_delete_errors_visible(true);
-            }
+            let state = win.global::<AppState>();
+            state.set_confirm_popup_message(slint::SharedString::from(format!("Czy na pewno chcesz usunąć {n} zaznaczonych elementów?")));
+            state.set_confirm_popup_action(slint::SharedString::from("delete"));
+            state.set_confirm_popup_visible(true);
+            let _ = tx.clone();
         });
     }
     {
         let weak = window.as_weak();
         window.global::<AppState>().on_select_all(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_all");
             let tool = win.global::<AppState>().get_active_tool();
             let model = get_model_for_tool(&win, tool);
             set_all_checked(&model, true);
@@ -98,7 +294,7 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
     {
         let weak = window.as_weak();
         window.global::<AppState>().on_deselect_all(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_deselect_all");
             let tool = win.global::<AppState>().get_active_tool();
             let model = get_model_for_tool(&win, tool);
             set_all_checked(&model, false);
@@ -109,7 +305,7 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
     {
         let weak = window.as_weak();
         window.global::<AppState>().on_select_all_except_one(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_one");
             let tool = win.global::<AppState>().get_active_tool();
             let model = get_model_for_tool(&win, tool);
             select_except_one_per_group(&model, true);
@@ -120,7 +316,7 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
     {
         let weak = window.as_weak();
         window.global::<AppState>().on_deselect_all_except_one(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_deselect_all_except_one");
             let tool = win.global::<AppState>().get_active_tool();
             let model = get_model_for_tool(&win, tool);
             select_except_one_per_group(&model, false);
@@ -131,11 +327,17 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
     {
         let weak = window.as_weak();
         window.global::<AppState>().on_invert_selection(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_invert_selection");
             let tool = win.global::<AppState>().get_active_tool();
             let model = get_model_for_tool(&win, tool);
-            for i in 0..model.row_count() {
-                toggle_row(&model, i);
+            if let Some(vm) = vm_of(&model) {
+                let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
+                for e in &mut items {
+                    if !e.is_header {
+                        e.checked = !e.checked;
+                    }
+                }
+                vm.set_vec(items);
             }
             sync_gallery_if_similar(&win, tool);
             win.global::<AppState>().set_selected_count(count_checked(&model));
@@ -143,8 +345,96 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
     }
     {
         let weak = window.as_weak();
+        window.global::<AppState>().on_select_largest_per_group(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_largest_per_group");
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            select_largest_per_group(&model);
+            sync_gallery_if_similar(&win, tool);
+            win.global::<AppState>().set_selected_count(count_checked(&model));
+        });
+    }
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_select_all_except_largest(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_largest");
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            select_all_except_largest(&model);
+            sync_gallery_if_similar(&win, tool);
+            win.global::<AppState>().set_selected_count(count_checked(&model));
+        });
+    }
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_select_smallest_per_group(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_smallest_per_group");
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            select_smallest_per_group(&model);
+            sync_gallery_if_similar(&win, tool);
+            win.global::<AppState>().set_selected_count(count_checked(&model));
+        });
+    }
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_select_all_except_smallest(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_smallest");
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            select_all_except_smallest(&model);
+            sync_gallery_if_similar(&win, tool);
+            win.global::<AppState>().set_selected_count(count_checked(&model));
+        });
+    }
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_select_highest_resolution_per_group(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_highest_resolution_per_group");
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            select_highest_resolution_per_group(&model);
+            sync_gallery_if_similar(&win, tool);
+            win.global::<AppState>().set_selected_count(count_checked(&model));
+        });
+    }
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_select_all_except_highest_resolution(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_highest_resolution");
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            select_all_except_highest_resolution(&model);
+            sync_gallery_if_similar(&win, tool);
+            win.global::<AppState>().set_selected_count(count_checked(&model));
+        });
+    }
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_select_lowest_resolution_per_group(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_lowest_resolution_per_group");
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            select_lowest_resolution_per_group(&model);
+            sync_gallery_if_similar(&win, tool);
+            win.global::<AppState>().set_selected_count(count_checked(&model));
+        });
+    }
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_select_all_except_lowest_resolution(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_lowest_resolution");
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            select_all_except_lowest_resolution(&model);
+            sync_gallery_if_similar(&win, tool);
+            win.global::<AppState>().set_selected_count(count_checked(&model));
+        });
+    }
+    {
+        let weak = window.as_weak();
         window.global::<AppState>().on_toggle_file_checked(move |idx| {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_toggle_file_checked");
             let tool = win.global::<AppState>().get_active_tool();
             let model = get_model_for_tool(&win, tool);
             toggle_row(&model, idx as usize);
@@ -157,29 +447,28 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
     {
         let weak = window.as_weak();
         window.global::<AppState>().on_request_gallery_delete(move || {
-            let win = weak.unwrap();
-            let groups = win.get_similar_images_groups();
+            let win = weak.upgrade().expect("MainWindow dropped in on_request_gallery_delete");
+            let groups: Vec<SimilarGroupCard> = win.get_similar_images_groups().iter().collect::<Vec<_>>();
+
             let mut total_images = 0i32;
             let mut total_groups = 0i32;
             let mut unsafe_groups = 0i32;
 
-            for gi in 0..groups.row_count() {
-                if let Some(group) = groups.row_data(gi) {
-                    let n = group.items.row_count();
-                    let checked = (0..n).filter(|&ii| group.items.row_data(ii).map(|it| it.checked).unwrap_or(false)).count();
-                    if checked > 0 {
-                        total_groups += 1;
-                        total_images += checked as i32;
-                        if checked == n {
-                            unsafe_groups += 1;
-                        }
+            for group in &groups {
+                let items: Vec<SimilarImageItem> = group.items.iter().collect::<Vec<_>>();
+                let checked = items.iter().filter(|it| it.checked).count();
+                if checked > 0 {
+                    total_groups += 1;
+                    total_images += checked as i32;
+                    if checked == items.len() {
+                        unsafe_groups += 1;
                     }
                 }
             }
 
-            let msg = slint::SharedString::from(format!("Zamierzasz usunąć {} obrazów w {} grupach?", total_images, total_groups));
+            let msg = slint::SharedString::from(format!("Zamierzasz usunąć {total_images} obrazów w {total_groups} grupach?"));
             let warn = if unsafe_groups > 0 {
-                slint::SharedString::from(format!("⚠ W {} grupach zaznaczono wszystkie elementy!", unsafe_groups))
+                slint::SharedString::from(format!("⚠ W {unsafe_groups} grupach zaznaczono wszystkie elementy!"))
             } else {
                 slint::SharedString::default()
             };
@@ -192,24 +481,23 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
     }
     {
         let weak = window.as_weak();
-        let tx = delete_tx;
+        let tx = delete_tx.clone();
         let stop_cell = Rc::clone(&delete_stop);
         window.global::<AppState>().on_confirm_gallery_delete(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped in on_confirm_gallery_delete");
 
-            let groups = win.get_similar_images_groups();
-            let mut files: Vec<String> = Vec::new();
-            for gi in 0..groups.row_count() {
-                if let Some(group) = groups.row_data(gi) {
-                    for ii in 0..group.items.row_count() {
-                        if let Some(item) = group.items.row_data(ii) {
-                            if item.checked {
-                                files.push(item.full_path.to_string());
-                            }
-                        }
-                    }
-                }
-            }
+            let files: Vec<String> = win
+                .get_similar_images_groups()
+                .iter()
+                .flat_map(|g: SimilarGroupCard| {
+                    g.items
+                        .iter()
+                        .filter(|it: &SimilarImageItem| it.checked)
+                        .map(|it: SimilarImageItem| it.full_path.to_string())
+                        .collect::<Vec<_>>()
+                })
+                .collect::<Vec<_>>();
+
             if files.is_empty() {
                 win.global::<AppState>().set_gallery_delete_popup_visible(false);
                 return;
@@ -233,17 +521,14 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
                     if new_stop.load(Ordering::Relaxed) {
                         break;
                     }
-
-                    match std::fs::remove_file(path) {
+                    match delete_path(path) {
                         Ok(()) => deleted.push(path.clone()),
-                        Err(e) => errors.push(format!("{}\n  {}", path, e)),
+                        Err(e) => errors.push(format!("{path}\n  {e}")),
                     }
-
                     if i % 5 == 4 || i + 1 == total {
                         let _ = tx.send(DeleteEvent::Progress(i + 1, total));
                     }
                 }
-
                 let _ = tx.send(DeleteEvent::Finished(deleted, errors));
             });
         });
@@ -251,6 +536,50 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
     {
         window.global::<AppState>().on_delete_stop_requested(move || {
             delete_stop.borrow().store(true, Ordering::Relaxed);
+        });
+    }
+    {
+        let weak = window.as_weak();
+        let tx = delete_tx.clone();
+        window.global::<AppState>().on_rename_selected(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_rename_selected");
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            let n = count_checked(&model);
+            if n == 0 {
+                return;
+            }
+            let state = win.global::<AppState>();
+            state.set_confirm_popup_message(slint::SharedString::from(format!("Czy na pewno chcesz zmienić nazwy {n} zaznaczonych plików?")));
+            let action = if tool == ActiveTool::BadNames { "rename_bad_names" } else { "rename" };
+            state.set_confirm_popup_action(slint::SharedString::from(action));
+            state.set_confirm_popup_visible(true);
+            let _ = tx.clone();
+        });
+    }
+    {
+        let weak = window.as_weak();
+        let tx_confirm = delete_tx;
+        window.global::<AppState>().on_confirm_popup_ok(move || {
+            let win = weak.upgrade().expect("MainWindow dropped in on_confirm_popup_ok");
+            let action = win.global::<AppState>().get_confirm_popup_action().to_string();
+            win.global::<AppState>().set_confirm_popup_visible(false);
+            match action.as_str() {
+                "delete" => execute_delete_selected(&win, tx_confirm.clone()),
+                "rename" => execute_rename_selected(&win, tx_confirm.clone()),
+                "rename_bad_names" => execute_rename_bad_names(&win, tx_confirm.clone()),
+                "clean_exif" => execute_clean_exif_selected(&win, tx_confirm.clone()),
+                _ => {}
+            }
+        });
+    }
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_confirm_popup_cancel(move || {
+            weak.upgrade()
+                .expect("MainWindow dropped in on_confirm_popup_cancel")
+                .global::<AppState>()
+                .set_confirm_popup_visible(false);
         });
     }
 }
@@ -264,51 +593,81 @@ pub(crate) fn get_model_for_tool(win: &MainWindow, tool: ActiveTool) -> ModelRc<
         ActiveTool::TemporaryFiles => win.get_temporary_files_model(),
         ActiveTool::BigFiles => win.get_big_files_model(),
         ActiveTool::BrokenFiles => win.get_broken_files_model(),
-        ActiveTool::InvalidSymlinks => win.get_invalid_symlinks_model(),
         ActiveTool::BadExtensions => win.get_bad_extensions_model(),
         ActiveTool::SameMusic => win.get_same_music_model(),
+        ActiveTool::BadNames => win.get_bad_names_model(),
+        ActiveTool::ExifRemover => win.get_exif_remover_model(),
         ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => ModelRc::new(VecModel::from(vec![])),
     }
 }
 
 pub(crate) fn set_all_checked(model: &ModelRc<FileEntry>, state: bool) {
-    for i in 0..model.row_count() {
-        if let Some(mut entry) = model.row_data(i) {
-            if !entry.is_header {
-                entry.checked = state;
-                model.set_row_data(i, entry);
+    if let Some(vm) = vm_of(model) {
+        let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
+        for e in &mut items {
+            if !e.is_header {
+                e.checked = state;
             }
         }
+        vm.set_vec(items);
     }
 }
 
 pub(crate) fn select_except_one_per_group(model: &ModelRc<FileEntry>, select: bool) {
-    let has_headers = (0..model.row_count()).any(|i| model.row_data(i).map(|e| e.is_header).unwrap_or(false));
+    let Some(vm) = vm_of(model) else { return };
+    let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
+    let has_headers = items.iter().any(|e| e.is_header);
 
     if !has_headers {
-        set_all_checked(model, select);
+        for e in &mut items {
+            if !e.is_header {
+                e.checked = select;
+            }
+        }
+        vm.set_vec(items);
         return;
     }
 
-    let mut first_in_group = false;
-    for i in 0..model.row_count() {
-        if let Some(mut entry) = model.row_data(i) {
-            if entry.is_header {
+    if select {
+        let mut first_in_group = false;
+        for e in &mut items {
+            if e.is_header {
                 first_in_group = true;
                 continue;
             }
-            let new_checked = if first_in_group {
+            e.checked = if first_in_group {
                 first_in_group = false;
-                !select
+                false
             } else {
-                select
+                true
             };
-            if entry.checked != new_checked {
-                entry.checked = new_checked;
-                model.set_row_data(i, entry);
+        }
+    } else {
+        let mut i = 0;
+        while i < items.len() {
+            if items[i].is_header {
+                let group_end = items[i + 1..].iter().position(|e| e.is_header).map_or(items.len(), |p| i + 1 + p);
+                let checked_count = items[i + 1..group_end].iter().filter(|e| e.checked).count();
+                if checked_count >= 2 {
+                    let mut kept = false;
+                    for j in i + 1..group_end {
+                        if items[j].checked {
+                            if kept {
+                                items[j].checked = false;
+                            } else {
+                                kept = true;
+                            }
+                        }
+                    }
+                }
+                i = group_end;
+                continue;
             }
+            i += 1;
         }
     }
+
+    vm.set_vec(items);
 }
 
 fn sync_gallery_if_similar(win: &MainWindow, tool: ActiveTool) {
@@ -317,21 +676,122 @@ fn sync_gallery_if_similar(win: &MainWindow, tool: ActiveTool) {
     }
 }
 
-pub(crate) fn sync_gallery_checked_from_flat(win: &MainWindow) {
-    let flat = win.get_similar_images_model();
-    let groups = win.get_similar_images_groups();
-    for gi in 0..groups.row_count() {
-        if let Some(group) = groups.row_data(gi) {
-            for ii in 0..group.items.row_count() {
-                if let Some(mut item) = group.items.row_data(ii) {
-                    if let Some(entry) = flat.row_data(item.flat_idx as usize) {
-                        if item.checked != entry.checked {
-                            item.checked = entry.checked;
-                            group.items.set_row_data(ii, item);
-                        }
-                    }
-                }
+pub(crate) fn select_largest_per_group(model: &ModelRc<FileEntry>) {
+    select_by_size_per_group(model, true, true);
+}
+
+pub(crate) fn select_all_except_largest(model: &ModelRc<FileEntry>) {
+    select_by_size_per_group(model, true, false);
+}
+
+pub(crate) fn select_smallest_per_group(model: &ModelRc<FileEntry>) {
+    select_by_size_per_group(model, false, true);
+}
+
+pub(crate) fn select_all_except_smallest(model: &ModelRc<FileEntry>) {
+    select_by_size_per_group(model, false, false);
+}
+
+fn select_by_size_per_group(model: &ModelRc<FileEntry>, largest: bool, select_target: bool) {
+    let Some(vm) = vm_of(model) else { return };
+    let mut items: Vec<FileEntry> = vm.iter().collect();
+
+    let mut i = 0;
+    while i < items.len() {
+        if items[i].is_header {
+            let group_end = items[i + 1..].iter().position(|e| e.is_header).map_or(items.len(), |p| i + 1 + p);
+
+            let target_idx = if largest {
+                items[i + 1..group_end].iter().enumerate().max_by_key(|(_, e)| size_from_entry(e)).map(|(j, _)| i + 1 + j)
+            } else {
+                items[i + 1..group_end].iter().enumerate().min_by_key(|(_, e)| size_from_entry(e)).map(|(j, _)| i + 1 + j)
+            };
+
+            for j in i + 1..group_end {
+                let is_target = target_idx == Some(j);
+                items[j].checked = if select_target { is_target } else { !is_target };
             }
+
+            i = group_end;
+            continue;
+        }
+        i += 1;
+    }
+
+    vm.set_vec(items);
+}
+
+fn resolution_from_entry(e: &FileEntry) -> u64 {
+    let w = get_val_int(e, IntDataSimilarImages::Width as usize) as u64;
+    let h = get_val_int(e, IntDataSimilarImages::Height as usize) as u64;
+    w * h
+}
+
+fn select_by_resolution_per_group(model: &ModelRc<FileEntry>, highest: bool, select_target: bool) {
+    let Some(vm) = vm_of(model) else { return };
+    let mut items: Vec<FileEntry> = vm.iter().collect();
+
+    let mut i = 0;
+    while i < items.len() {
+        if items[i].is_header {
+            let group_end = items[i + 1..].iter().position(|e| e.is_header).map_or(items.len(), |p| i + 1 + p);
+
+            let target_idx = if highest {
+                items[i + 1..group_end]
+                    .iter()
+                    .enumerate()
+                    .max_by_key(|(_, e)| resolution_from_entry(e))
+                    .map(|(j, _)| i + 1 + j)
+            } else {
+                items[i + 1..group_end]
+                    .iter()
+                    .enumerate()
+                    .min_by_key(|(_, e)| resolution_from_entry(e))
+                    .map(|(j, _)| i + 1 + j)
+            };
+
+            for j in i + 1..group_end {
+                let is_target = target_idx == Some(j);
+                items[j].checked = if select_target { is_target } else { !is_target };
+            }
+
+            i = group_end;
+            continue;
+        }
+        i += 1;
+    }
+    vm.set_vec(items);
+}
+
+pub(crate) fn select_highest_resolution_per_group(model: &ModelRc<FileEntry>) {
+    select_by_resolution_per_group(model, true, true);
+}
+pub(crate) fn select_all_except_highest_resolution(model: &ModelRc<FileEntry>) {
+    select_by_resolution_per_group(model, true, false);
+}
+pub(crate) fn select_lowest_resolution_per_group(model: &ModelRc<FileEntry>) {
+    select_by_resolution_per_group(model, false, true);
+}
+pub(crate) fn select_all_except_lowest_resolution(model: &ModelRc<FileEntry>) {
+    select_by_resolution_per_group(model, false, false);
+}
+pub(crate) fn sync_gallery_checked_from_flat(win: &MainWindow) {
+    let flat: Vec<FileEntry> = win.get_similar_images_model().iter().collect::<Vec<_>>();
+    let groups: Vec<SimilarGroupCard> = win.get_similar_images_groups().iter().collect::<Vec<_>>();
+
+    for group in &groups {
+        let mut items: Vec<SimilarImageItem> = group.items.iter().collect::<Vec<_>>();
+        let mut changed = false;
+        for item in &mut items {
+            if let Some(entry) = flat.get(item.flat_idx as usize)
+                && item.checked != entry.checked
+            {
+                item.checked = entry.checked;
+                changed = true;
+            }
+        }
+        if changed && let Some(vm) = group.items.as_any().downcast_ref::<VecModel<SimilarImageItem>>() {
+            vm.set_vec(items);
         }
     }
 }

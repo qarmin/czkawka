@@ -1,4 +1,10 @@
 
+export enum SettingsTab {
+    General,
+    Tools,
+    Diagnostics,
+}
+
 export enum ActiveTool {
     Home,
     DuplicateFiles,
@@ -8,9 +14,10 @@ export enum ActiveTool {
     TemporaryFiles,
     BigFiles,
     BrokenFiles,
-    InvalidSymlinks,
     BadExtensions,
     SameMusic,
+    BadNames,
+    ExifRemover,
     Directories,
     Settings,
 }
@@ -28,7 +35,8 @@ export struct SimilarImageItem {
     full_path:  string,
     name:       string,
     size:       string,
-    extra:      string,
+
+    val_str:    [string],
     flat_idx:   int,
     thumbnail:  image,
 
@@ -50,11 +58,14 @@ export struct ProgressData {
 export struct FileEntry {
     checked: bool,
     is_header: bool,
-    path: string,
-    name: string,
-    size: string,
-    modified: string,
-    extra: string,
+
+    val_str: [string],
+    val_int: [int],
+}
+export global FileEntryIdx {
+    out property <int> name_idx: 0;
+    out property <int> path_idx: 1;
+    out property <int> size_idx: 2;
 }
 export struct DirectoryEntry {
     path: string,

@@ -1,5 +1,6 @@
 import { CediniaColors } from "colors.slint";
 import { SectionHeader, TouchButton, Divider } from "components.slint";
+import { AppState } from "app_state.slint";
 
 
 export component ToggleRow {
@@ -14,7 +15,10 @@ export component ToggleRow {
         animate background { duration: 100ms; }
 
         ta := TouchArea {
-            clicked => { root.value = !root.value; }
+            clicked => {
+                root.value = !root.value;
+                AppState.save_settings_now();
+            }
         }
 
         HorizontalLayout {
@@ -109,7 +113,10 @@ export component SegmentRow {
                 animate background { duration: 100ms; }
 
                 TouchArea {
-                    clicked => { root.selected = i; }
+                    clicked => {
+                        root.selected = i;
+                        AppState.save_settings_now();
+                    }
                 }
 
                 Text {
@@ -214,6 +221,7 @@ export component TextInputRow {
                         font-size: 13px;
                         vertical-alignment: TextVerticalAlignment.center;
                         single-line: true;
+                        accepted => { AppState.save_settings_now(); }
                     }
                 }
 

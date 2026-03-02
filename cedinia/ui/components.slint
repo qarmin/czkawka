@@ -117,12 +117,14 @@ export component FileRow {
     in property <string>  name;
     in property <string>  path;
     in property <string>  size;
-    in property <string>  extra: "";
+    in property <[string]> val_str: [];
     in property <bool>    checked: false;
     in property <bool>    is_header: false;
     in property <bool>    is_even: false;
     callback toggle_checked();
     callback long_pressed();
+    callback open_item();
+    callback open_parent();
 
     height: root.is_header ? 36px : 64px;
 
@@ -145,6 +147,16 @@ export component FileRow {
 
         ta := TouchArea {
             clicked => { if (!root.is_header) { root.toggle_checked(); } }
+            pointer-event(e) => {
+                if (!root.is_header) {
+                    if (e.button == PointerEventButton.middle && e.kind == PointerEventKind.up) {
+                        root.open_item();
+                    }
+                    if (e.button == PointerEventButton.right && e.kind == PointerEventKind.up) {
+                        root.open_parent();
+                    }
+                }
+            }
         }
 
         if root.is_header : HorizontalLayout {
@@ -193,6 +205,7 @@ export component FileRow {
                     font-size: 14px;
                     font-weight: 600;
                     overflow: elide;
+                    wrap: no-wrap;
                 }
 
                 Text {
@@ -200,13 +213,15 @@ export component FileRow {
                     color: CediniaColors.text_secondary;
                     font-size: 11px;
                     overflow: elide;
+                    wrap: no-wrap;
                 }
 
-                if root.extra != "" : Text {
-                    text: root.extra;
+                if root.val_str.length > 0 && root.val_str[0] != "" : Text {
+                    text: root.val_str[0];
                     color: CediniaColors.text_secondary;
                     font-size: 11px;
                     overflow: elide;
+                    wrap: no-wrap;
                 }
             }
 

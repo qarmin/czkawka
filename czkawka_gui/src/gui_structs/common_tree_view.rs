@@ -563,7 +563,7 @@ pub(crate) fn show_preview(
                         filter: FirFilterType::Bilinear,
                     }),
                 ) {
-                    Ok(t) => t,
+                    Ok(t) => t.image,
                     Err(e) => {
                         add_text_to_text_view(text_view_errors, &flg!("preview_image_opening_failure", name = file_name, reason = e));
                         break 'dir;
