@@ -75,23 +75,23 @@ adb devices
 
 # Install and launch on a connected device
 adb install -r target/debug/apk/cedinia.apk
-adb shell am start -n rust.cedinia/android.app.NativeActivity
+adb shell am start -n io.github.qarmin.cedinia/android.app.NativeActivity
 
 # One-liner: build → install → launch
 cargo apk build -p cedinia --lib && \
   adb install -r target/debug/apk/cedinia.apk && \
-  adb shell am start -n rust.cedinia/android.app.NativeActivity
+  adb shell am start -n io.github.qarmin.cedinia/android.app.NativeActivity
 
 # Debugging: Live logs (Rust stdout/stderr, panics)
 adb logcat -s RustStdoutStderr:V
 
 # Full logcat filtered to Cedinia
-adb logcat -s RustStdoutStderr:V rust.cedinia:V AndroidRuntime:E
+adb logcat -s RustStdoutStderr:V io.github.qarmin.cedinia:V AndroidRuntime:E
 
 # Crash / panic backtrace: set RUST_BACKTRACE=1 before building
 RUST_BACKTRACE=1 cargo apk build -p cedinia --lib
 # Then check adb logcat -s RustStdoutStderr:V
 
 # Uninstall
-adb uninstall rust.cedinia
+adb uninstall io.github.qarmin.cedinia
 ```
