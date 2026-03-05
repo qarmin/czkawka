@@ -1655,7 +1655,6 @@ dependencies = [
  "serde",
  "serde_json",
  "winapi",
- "winresource",
 ]
 
 [[package]]
@@ -4315,7 +4314,6 @@ dependencies = [
  "serde_json",
  "slint",
  "slint-build",
- "winresource",
 ]
 
 [[package]]
@@ -9533,16 +9531,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a5364e9d77fcdeeaa6062ced926ee3381faa2ee02d3eb83a5c27a8825540829"
 dependencies = [
  "memchr",
-]
-
-[[package]]
-name = "winresource"
-version = "0.1.30"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e287ced0f21cd11f4035fe946fd3af145f068d1acb708afd248100f89ec7432d"
-dependencies = [
- "toml 0.9.12+spec-1.1.0",
- "version_check",
 ]
 
 [[package]]

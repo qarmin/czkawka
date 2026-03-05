@@ -52,16 +52,12 @@ rodio = { version = "0.22.0", default-features = false, features = ["playback", 
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
 #slint-build = { git = "https://github.com/slint-ui/slint.git" }
 slint-build = "1.15"
-winresource = "0.1"
 
 [features]
 default = ["winit_femtovg", "winit_software"]
 
 # Audio support
 audio = ["rodio"]
-
-# Bundles windows icon into executable
-add_windows_icon = []
 
 # Renderers
 skia_opengl = ["slint/renderer-skia-opengl"]
