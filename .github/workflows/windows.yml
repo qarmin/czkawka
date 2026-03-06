@@ -36,6 +36,8 @@ jobs:
           sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
+          
+          export WINEPREFIX=$(mktemp -d)
           wine rcedit-x64.exe windows_krokiet_on_linux.exe --set-icon krokiet/icons/krokiet_logo_flag.ico
 
       - name: Compile Krokiet Debug
@@ -45,6 +47,8 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           cargo build --target x86_64-pc-windows-gnu --bin krokiet
           mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux.exe
+          
+          export WINEPREFIX=$(mktemp -d)
           wine rcedit-x64.exe windows_krokiet_on_linux.exe --set-icon krokiet/icons/krokiet_logo_flag.ico
 
       - name: Pack with 7z
@@ -87,8 +91,7 @@ jobs:
       - name: Compile Krokiet Release
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          powershell -Command "(Get-Content Cargo.toml) -replace '#lto = ', 'lto = ' | Set-Content Cargo.toml"
-          powershell -Command "(Get-Content Cargo.toml) -replace '#codegen-units ', 'codegen-units ' | Set-Content Cargo.toml"
+          powershell -Command "(Get-Content Cargo.toml) -replace '#lto = ', 'lto = ' | Set-Content Cargo.toml; (Get-Content Cargo.toml) -replace '#codegen-units ', 'codegen-units ' | Set-Content Cargo.toml"
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
           mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
@@ -102,8 +105,8 @@ jobs:
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
         run: |
-          powershell -Command "(Get-Content Cargo.toml) -replace '^\[profile\.dev\.package.*', { '#' + \$_ } | Set-Content Cargo.toml"
-          powershell -Command "(Get-Content Cargo.toml) -replace '^opt-level = 3 # OPT PACKAGES', '#opt-level = 3 # OPT PACKAGES' | Set-Content Cargo.toml"
+          (Get-Content Cargo.toml) -replace '#lto = ','lto = ' -replace '#codegen-units ','codegen-units ' -replace '^\[profile\.dev\.package','#\[profile.dev.package' -replace '^opt-level = 3 # OPT PACKAGES','#opt-level = 3 # OPT PACKAGES' | Set-Content Cargo.toml
+          
           cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
           mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
           cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
@@ -112,6 +115,7 @@ jobs:
           mv target/debug/krokiet.exe windows_krokiet_on_windows_femtovg_wgpu.exe
           cargo build --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu"
           mv target/debug/krokiet.exe windows_krokiet_on_windows_all_backends.exe
+          
           Get-ChildItem windows_krokiet_on_windows_*.exe | ForEach-Object { ./rcedit-x64.exe $_.Name --set-icon krokiet/icons/krokiet_logo_flag.ico }
 
       - name: Upload artifacts
@@ -163,6 +167,8 @@ jobs:
           cargo build --target=x86_64-pc-windows-gnu --release --locked
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+          
+          export WINEPREFIX=$(mktemp -d)
           wine rcedit-x64.exe package/czkawka_gui.exe --set-icon czkawka_gui/icons/icon.ico
 
       - name: Cross compile for Windows - Debug
@@ -173,6 +179,8 @@ jobs:
           cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package/
+          
+          export WINEPREFIX=$(mktemp -d)
           wine rcedit-x64.exe package/czkawka_gui.exe --set-icon czkawka_gui/icons/icon.ico
 
       - name: Package
