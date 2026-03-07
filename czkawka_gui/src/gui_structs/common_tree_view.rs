@@ -1,8 +1,9 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use czkawka_core::common::image::{check_if_can_display_image, get_dynamic_image_from_path};
+use czkawka_core::common::image::{ImgResizeOptions, check_if_can_display_image, get_dynamic_image_from_path};
 use czkawka_core::common::traits::PrintResults;
+use czkawka_core::re_exported::FirFilterType;
 use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;
@@ -554,7 +555,14 @@ pub(crate) fn show_preview(
             }
 
             let mut pixbuf = if use_rust_preview {
-                let image = match get_dynamic_image_from_path(&file_name) {
+                let image = match get_dynamic_image_from_path(
+                    &file_name,
+                    Some(ImgResizeOptions {
+                        max_width: 1024,
+                        max_height: 1024,
+                        filter: FirFilterType::Bilinear,
+                    }),
+                ) {
                     Ok(t) => t,
                     Err(e) => {
                         add_text_to_text_view(text_view_errors, &flg!("preview_image_opening_failure", name = file_name, reason = e));

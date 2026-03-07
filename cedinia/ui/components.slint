@@ -1,0 +1,259 @@
+
+
+import { CediniaColors } from "colors.slint";
+
+
+
+
+export component TouchButton {
+    in property <string>  label;
+    in property <color>   bg:       CediniaColors.accent;
+    in property <color>   fg:       #000000;
+    in property <bool>    enabled:  true;
+    in property <length>  min_h:    52px;
+    callback clicked;
+
+    height: max(min_h, txt.preferred-height + 24px);
+    min-width: txt.preferred-width + 32px;
+
+    Rectangle {
+        border-radius: 8px;
+        background: ta.has-hover && root.enabled ? root.bg.brighter(0.15) : root.enabled ? root.bg : CediniaColors.bg_elevated;
+        animate background { duration: 120ms; }
+
+        ta := TouchArea {
+            enabled: root.enabled;
+            clicked => { root.clicked(); }
+        }
+
+        txt := Text {
+            text: root.label;
+            color: root.enabled ? root.fg : CediniaColors.text_disabled;
+            font-size: 16px;
+            font-weight: 600;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+}
+
+
+
+
+export component IconButton {
+    in property <image>  icon;
+    in property <string> tooltip;
+    in property <bool>   enabled: true;
+    in property <color>  tint: CediniaColors.text_primary;
+    callback clicked;
+
+    width: 48px;
+    height: 48px;
+
+    Rectangle {
+        border-radius: 24px;
+        background: ta.has-hover && root.enabled ? CediniaColors.ripple : transparent;
+        animate background { duration: 120ms; }
+
+        ta := TouchArea {
+            enabled: root.enabled;
+            clicked => { root.clicked(); }
+        }
+
+        Image {
+            source: root.icon;
+            colorize: root.enabled ? root.tint : CediniaColors.text_disabled;
+            width: 24px;
+            height: 24px;
+            horizontal-alignment: ImageHorizontalAlignment.center;
+            vertical-alignment: ImageVerticalAlignment.center;
+        }
+    }
+}
+
+
+
+
+export component SectionHeader {
+    in property <string> title;
+    in property <string> subtitle: "";
+
+    height: subtitle == "" ? 44px : 60px;
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: CediniaColors.bg_elevated;
+        border-width: 1px;
+        border-color: CediniaColors.divider;
+
+        VerticalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            alignment: LayoutAlignment.center;
+            spacing: 2px;
+
+            Text {
+                text: root.title;
+                color: CediniaColors.accent_light;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.8px;
+            }
+
+            if root.subtitle != "" : Text {
+                text: root.subtitle;
+                color: CediniaColors.text_secondary;
+                font-size: 12px;
+            }
+        }
+    }
+}
+
+
+
+
+export component FileRow {
+    in property <string>  name;
+    in property <string>  path;
+    in property <string>  size;
+    in property <string>  extra: "";
+    in property <bool>    checked: false;
+    in property <bool>    is_header: false;
+    in property <bool>    is_even: false;
+    callback toggle_checked();
+    callback long_pressed();
+
+    height: root.is_header ? 36px : 64px;
+
+    Rectangle {
+        background: root.is_header
+            ? CediniaColors.row_header
+            : root.checked
+                ? CediniaColors.row_selected
+                : root.is_even ? CediniaColors.row_alt : CediniaColors.row_normal;
+        animate background { duration: 80ms; }
+
+
+        if !root.is_header : Rectangle {
+            x: 0;
+            y: 0;
+            width: 4px;
+            height: parent.height;
+            background: root.checked ? CediniaColors.accent : transparent;
+        }
+
+        ta := TouchArea {
+            clicked => { if (!root.is_header) { root.toggle_checked(); } }
+        }
+
+        if root.is_header : HorizontalLayout {
+            padding-left: 12px;
+            padding-right: 12px;
+            alignment: LayoutAlignment.start;
+            spacing: 4px;
+            Text {
+                text: root.name;
+                color: CediniaColors.text_secondary;
+                font-size: 12px;
+                font-weight: 700;
+                vertical-alignment: TextVerticalAlignment.center;
+                overflow: elide;
+            }
+        }
+
+        if !root.is_header : HorizontalLayout {
+            padding-left: 12px;
+            padding-right: 8px;
+            spacing: 8px;
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+
+                Rectangle {
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 12px;
+                    border-width: 2px;
+                    border-color: root.checked ? CediniaColors.accent : CediniaColors.border;
+                    background: root.checked ? CediniaColors.accent : transparent;
+                    vertical-stretch: 0.0;
+                    animate background { duration: 80ms; }
+                }
+        }
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                spacing: 2px;
+                horizontal-stretch: 1.0;
+
+                Text {
+                    text: root.name;
+                    color: CediniaColors.text_primary;
+                    font-size: 14px;
+                    font-weight: 600;
+                    overflow: elide;
+                }
+
+                Text {
+                    text: root.path;
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                    overflow: elide;
+                }
+
+                if root.extra != "" : Text {
+                    text: root.extra;
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                    overflow: elide;
+                }
+            }
+
+            Text {
+                text: root.size;
+                color: CediniaColors.accent_light;
+                font-size: 12px;
+                font-weight: 700;
+                vertical-alignment: TextVerticalAlignment.center;
+                horizontal-alignment: TextHorizontalAlignment.right;
+                min-width: 60px;
+            }
+        }
+    }
+}
+
+
+
+
+export component Divider {
+    height: 1px;
+    Rectangle {
+        background: CediniaColors.divider;
+    }
+}
+
+
+
+
+export component StatusChip {
+    in property <string> label;
+    in property <color>  chip_color: CediniaColors.accent_muted;
+    in property <color>  text_color: CediniaColors.accent_light;
+
+    height: 24px;
+    min-width: txt.preferred-width + 16px;
+
+    Rectangle {
+        border-radius: 12px;
+        background: root.chip_color;
+        txt := Text {
+            text: root.label;
+            color: root.text_color;
+            font-size: 11px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+}

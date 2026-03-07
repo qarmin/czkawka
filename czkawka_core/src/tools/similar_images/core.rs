@@ -153,7 +153,7 @@ impl SimilarImages {
     }
 
     fn collect_image_file_entry(&self, mut file_entry: ImagesEntry) -> Result<ImagesEntry, String> {
-        let img = get_dynamic_image_from_path(&file_entry.path.to_string_lossy())?;
+        let img = get_dynamic_image_from_path(&file_entry.path.to_string_lossy(), None)?;
 
         let dimensions = img.dimensions();
 

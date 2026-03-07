@@ -1,0 +1,435 @@
+
+
+import { CediniaColors } from "colors.slint";
+import { SimilarGroupCard, ScanState } from "common.slint";
+import { AppState } from "app_state.slint";
+import { TouchButton } from "components.slint";
+import { ListView } from "std-widgets.slint";
+
+
+component GalleryImageCell {
+    in property <image>  thumbnail;
+    in property <string> img_name;
+    in property <string> img_size;
+    in property <string> img_extra;
+    in property <int>    flat_idx;
+    in property <bool>   checked: false;
+
+    width: 170px;
+
+    ta := TouchArea {
+
+        double-clicked => { AppState.toggle_file_checked(root.flat_idx); }
+    }
+
+    VerticalLayout {
+        padding: 4px;
+        spacing: 4px;
+
+
+        Rectangle {
+            height: 140px;
+            border-radius: 8px;
+            clip: true;
+
+            border-width: root.checked ? 3px : 0px;
+            border-color: CediniaColors.accent;
+            background: CediniaColors.bg_elevated;
+            animate border-width { duration: 100ms; }
+
+            Image {
+                width: parent.width;
+                height: parent.height;
+                source: root.thumbnail;
+                image-fit: ImageFit.cover;
+            }
+
+
+            Rectangle {
+                border-radius: 8px;
+                background: ta.pressed ? #ffffff22 : transparent;
+            }
+
+
+            if root.checked : Rectangle {
+                x: parent.width - 30px;
+                y: 6px;
+                width: 24px;
+                height: 24px;
+                border-radius: 12px;
+                background: CediniaColors.accent;
+                z: 5;
+                Text {
+                    text: "✓";
+                    color: #000000;
+                    font-size: 13px;
+                    font-weight: 700;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    vertical-alignment: TextVerticalAlignment.center;
+                }
+            }
+        }
+
+        Text {
+            text: root.img_name;
+            font-size: 11px;
+            color: root.checked ? CediniaColors.accent_light : CediniaColors.text_primary;
+            overflow: TextOverflow.elide;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
+        Text {
+            text: root.img_size;
+            font-size: 10px;
+            color: CediniaColors.text_secondary;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
+        if root.img_extra != "" : Text {
+            text: root.img_extra;
+            font-size: 10px;
+            color: CediniaColors.text_secondary;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            overflow: TextOverflow.elide;
+        }
+    }
+}
+
+
+component GalleryToggleBar {
+    height: 52px;
+
+    Rectangle {
+        background: CediniaColors.bg_elevated;
+        border-width: 1px;
+        border-color: CediniaColors.divider;
+
+        HorizontalLayout {
+            padding-left: 12px;
+            padding-right: 12px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            spacing: 8px;
+
+            Text {
+                text: "Galeria podobnych obrazów";
+                font-size: 13px;
+                color: CediniaColors.text_secondary;
+                vertical-alignment: TextVerticalAlignment.center;
+                horizontal-stretch: 1.0;
+            }
+
+            if AppState.selected_count > 0 : TouchButton {
+                label: "Usuń";
+                min_h: 36px;
+                bg: CediniaColors.danger;
+                fg: #ffffff;
+                clicked => { AppState.request_gallery_delete(); }
+            }
+
+            TouchButton {
+                label: "☰ Lista";
+                min_h: 36px;
+                bg: CediniaColors.bg_surface;
+                fg: CediniaColors.text_secondary;
+                clicked => { AppState.similar_images_gallery_mode = false; }
+            }
+        }
+    }
+}
+
+
+export component SimilarImagesGallery {
+    in property <[SimilarGroupCard]> groups: [];
+
+    VerticalLayout {
+        spacing: 0px;
+
+
+        GalleryToggleBar {}
+
+
+        if groups.length == 0 : Rectangle {
+            vertical-stretch: 1.0;
+            background: CediniaColors.bg_primary;
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                spacing: 12px;
+
+                Text {
+                    text: AppState.scan_state == ScanState.Scanning
+                        ? "Skanowanie w toku…"
+                        : "Brak wyników";
+                    color: CediniaColors.text_disabled;
+                    font-size: 15px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+            }
+        }
+
+
+        if groups.length > 0 : ListView {
+            vertical-stretch: 1.0;
+
+            for group in groups : VerticalLayout {
+                padding-left: 8px;
+                padding-right: 8px;
+                padding-top: 8px;
+                padding-bottom: 4px;
+                spacing: 6px;
+
+
+                Rectangle {
+                    height: 34px;
+                    border-radius: 8px;
+                    background: CediniaColors.accent.with-alpha(0.85);
+
+                    Text {
+                        x: 12px;
+                        y: 0px;
+                        height: parent.height;
+                        width: parent.width - 24px;
+                        text: group.label;
+                        color: #000000;
+                        font-size: 13px;
+                        font-weight: 700;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        overflow: TextOverflow.elide;
+                    }
+                }
+
+
+                Flickable {
+                    height: 210px;
+                    interactive: true;
+                    viewport-width: max(root.width - 16px, img-row.min-width);
+
+                    img-row := HorizontalLayout {
+                        alignment: LayoutAlignment.start;
+                        spacing: 6px;
+
+                        for img in group.items : GalleryImageCell {
+                            thumbnail:  img.thumbnail;
+                            img_name:   img.name;
+                            img_size:   img.size;
+                            img_extra:  img.extra;
+                            flat_idx:   img.flat_idx;
+                            checked:    img.checked;
+                        }
+                    }
+                }
+
+
+                Rectangle { height: 1px; background: CediniaColors.divider; }
+            }
+        }
+    }
+
+
+    if AppState.gallery_delete_popup_visible : Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        z: 25;
+        background: #000000bb;
+
+
+        TouchArea {}
+
+
+        Rectangle {
+            x: parent.width / 2 - self.width / 2;
+            y: parent.height / 2 - self.height / 2;
+            width: min(parent.width - 32px, 380px);
+            height: card.preferred-height;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 28px;
+            drop-shadow-color: #000000cc;
+
+            card := VerticalLayout {
+                padding: 24px;
+                spacing: 14px;
+
+                Text {
+                    text: AppState.gallery_delete_message;
+                    color: CediniaColors.text_primary;
+                    font-size: 16px;
+                    font-weight: 600;
+                    wrap: TextWrap.word-wrap;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                if AppState.gallery_delete_warning != "" : Text {
+                    text: AppState.gallery_delete_warning;
+                    color: CediniaColors.warning;
+                    font-size: 13px;
+                    wrap: TextWrap.word-wrap;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                HorizontalLayout {
+                    spacing: 10px;
+
+                    TouchButton {
+                        label: "Cofaj";
+                        horizontal-stretch: 1.0;
+                        min_h: 48px;
+                        bg: CediniaColors.bg_surface;
+                        fg: CediniaColors.text_secondary;
+                        clicked => { AppState.gallery_delete_popup_visible = false; }
+                    }
+
+                    TouchButton {
+                        label: "Tak, usuń";
+                        horizontal-stretch: 1.0;
+                        min_h: 48px;
+                        bg: CediniaColors.danger;
+                        fg: #ffffff;
+                        clicked => { AppState.confirm_gallery_delete(); }
+                    }
+                }
+            }
+        }
+    }
+
+
+    if AppState.delete_running : Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        z: 26;
+        background: #000000bb;
+
+        TouchArea {} 
+        Rectangle {
+            x: parent.width / 2 - self.width / 2;
+            y: parent.height / 2 - self.height / 2;
+            width: min(parent.width - 32px, 340px);
+            height: prog-card.preferred-height;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #000000cc;
+
+            prog-card := VerticalLayout {
+                padding: 24px;
+                spacing: 14px;
+
+                Text {
+                    text: "Usuwanie plików…";
+                    color: CediniaColors.text_primary;
+                    font-size: 16px;
+                    font-weight: 600;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                Text {
+                    text: AppState.delete_progress_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 13px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                TouchButton {
+                    label: "Zatrzymaj";
+                    min_h: 44px;
+                    bg: CediniaColors.warning;
+                    fg: #000000;
+                    clicked => { AppState.delete_stop_requested(); }
+                }
+            }
+        }
+    }
+
+
+    if AppState.delete_errors_visible : Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        z: 27;
+        background: #000000bb;
+
+        TouchArea {}
+
+        Rectangle {
+            x: parent.width / 2 - self.width / 2;
+            y: parent.height / 2 - self.height / 2;
+            width: min(parent.width - 32px, 400px);
+            height: err-card.preferred-height;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #000000cc;
+
+            err-card := VerticalLayout {
+                padding: 20px;
+                spacing: 12px;
+
+                Text {
+                    text: "Nie udało się usunąć niektórych plików:";
+                    color: CediniaColors.warning;
+                    font-size: 15px;
+                    font-weight: 600;
+                    wrap: TextWrap.word-wrap;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                Text {
+                    text: AppState.delete_errors_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                    wrap: TextWrap.word-wrap;
+                }
+
+                TouchButton {
+                    label: "OK";
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.text_secondary;
+                    clicked => { AppState.delete_errors_visible = false; }
+                }
+            }
+        }
+    }
+
+
+    Rectangle {
+        x: root.width - self.width - 16px;
+        y: root.height - self.height - 16px;
+        z: 20;
+        width: 56px;
+        height: 56px;
+        border-radius: 28px;
+        background: AppState.scan_state == ScanState.Scanning
+            ? CediniaColors.warning
+            : AppState.scan_state == ScanState.Stopping
+                ? CediniaColors.warning.with-alpha(0.5)
+                : CediniaColors.accent;
+        drop-shadow-blur: 12px;
+        drop-shadow-color: #00000088;
+        animate background { duration: 200ms; }
+
+        TouchArea {
+            enabled: AppState.scan_state != ScanState.Stopping;
+            clicked => {
+                if (AppState.scan_state == ScanState.Scanning) {
+                    AppState.stop_requested();
+                } else {
+                    AppState.scan_requested();
+                }
+            }
+        }
+
+        Text {
+            text: AppState.scan_state == ScanState.Scanning
+                || AppState.scan_state == ScanState.Stopping ? "⏹" : "▶";
+            font-size: 22px;
+            color: AppState.scan_state == ScanState.Stopping ? #00000066 : #000000;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            vertical-alignment: TextVerticalAlignment.center;
+        }
+    }
+}

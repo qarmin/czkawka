@@ -1,0 +1,384 @@
+
+
+
+import { CediniaColors } from "colors.slint";
+import { TouchButton, Divider } from "components.slint";
+import { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings } from "app_state.slint";
+import { ToggleRow, SegmentRow, ToolGroupHeader, CategoryLabel, TextInputRow } from "settings_components.slint";
+
+
+
+export component SettingsScreen {
+
+    if AppState.collect_test_done : Rectangle {
+        z: 100;
+        background: #00000099;
+        TouchArea { clicked => { AppState.collect_test_done = false; } }
+
+        Rectangle {
+            width: min(parent.width - 48px, 360px);
+            height: popup_content.preferred-height + 32px;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            border-radius: 16px;
+            background: CediniaColors.bg_elevated;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #00000088;
+
+            popup_content := VerticalLayout {
+                padding: 24px;
+                spacing: 16px;
+
+                Text {
+                    text: "📊 Wyniki testu";
+                    color: CediniaColors.accent_light;
+                    font-size: 18px;
+                    font-weight: 700;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                Rectangle { height: 1px; background: CediniaColors.divider; }
+
+                GridLayout {
+                    spacing: 8px;
+                    Row {
+                        Text { text: "💾 Woluminy:"; color: CediniaColors.text_secondary; font-size: 14px; }
+                        Text { text: AppState.collect_test_result.volumes; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                    }
+                    Row {
+                        Text { text: "📁 Foldery:"; color: CediniaColors.text_secondary; font-size: 14px; }
+                        Text { text: AppState.collect_test_result.folders; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                    }
+                    Row {
+                        Text { text: "📄 Pliki:"; color: CediniaColors.text_secondary; font-size: 14px; }
+                        Text { text: AppState.collect_test_result.files; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                    }
+                    Row {
+                        Text { text: "⏱ Czas:"; color: CediniaColors.text_secondary; font-size: 14px; }
+                        Text { text: AppState.collect_test_result.elapsed_ms + " ms"; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                    }
+                }
+
+                TouchButton {
+                    label: "OK";
+                    bg: CediniaColors.accent;
+                    fg: #000000;
+                    clicked => { AppState.collect_test_done = false; }
+                }
+            }
+        }
+    }
+
+
+    property <int> active_tab: 0;
+
+    VerticalLayout {
+        spacing: 0px;
+
+
+        Rectangle {
+            height: 44px;
+            background: CediniaColors.bg_surface;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+
+            HorizontalLayout {
+                spacing: 0px;
+                alignment: LayoutAlignment.stretch;
+
+                for tab_label[ti] in ["Ogólne", "Narzędzia", "Diagnostyka"] : Rectangle {
+                    horizontal-stretch: 1.0;
+                    background: transparent;
+
+                    TouchArea {
+                        clicked => { active_tab = ti; }
+                    }
+
+                    VerticalLayout {
+                        Rectangle { vertical-stretch: 1.0; }
+                        Rectangle {
+                            height: 3px;
+                            background: active_tab == ti ? CediniaColors.accent : transparent;
+                            animate background { duration: 150ms; }
+                        }
+                    }
+
+                    Text {
+                        text: tab_label;
+                        color: active_tab == ti ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        font-size: 13px;
+                        font-weight: active_tab == ti ? 700 : 400;
+                        horizontal-alignment: TextHorizontalAlignment.center;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        animate color { duration: 150ms; }
+                    }
+                }
+            }
+        }
+
+
+        Flickable {
+            vertical-stretch: 1.0;
+            viewport-height: max(tab_content.preferred-height, self.height);
+
+            tab_content := VerticalLayout {
+                spacing: 0px;
+
+
+                if active_tab == 0 : VerticalLayout {
+                    spacing: 0px;
+
+                    CategoryLabel { label: "SKANOWANIE"; }
+
+                    ToggleRow {
+                        label: "Użyj pamięci podręcznej";
+                        description: "Przyspiesza kolejne skany (hash/obrazy)";
+                        value <=> GeneralSettings.use_cache;
+                    }
+                    Divider {}
+                    ToggleRow {
+                        label: "Ignoruj ukryte pliki";
+                        description: "Pliki i foldery zaczynające się od '.'";
+                        value <=> GeneralSettings.ignore_hidden;
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: "FILTRY (wszystkie narzędzia)"; }
+
+                    SegmentRow {
+                        label: "Min. rozmiar pliku";
+                        description: "Dotyczy narzędzi innych niż Duplikaty";
+                        options: ["Brak", "1 KB", "8 KB", "64 KB", "1 MB"];
+                        selected <=> GeneralSettings.min_file_size_idx;
+                    }
+                    Divider {}
+
+                    TextInputRow {
+                        label: "WYKLUCZONE ELEMENTY (wzorce glob, oddzielone przecinkiem)";
+                        placeholder: "np. *.tmp, */.git/*, */node_modules/*";
+                        value <=> GeneralSettings.excluded_items;
+                    }
+                    Divider {}
+
+                    TextInputRow {
+                        label: "DOZWOLONE ROZSZERZENIA (puste = wszystkie)";
+                        placeholder: "np. jpg, png, mp4";
+                        value <=> GeneralSettings.allowed_extensions;
+                    }
+                    Divider {}
+
+                    TextInputRow {
+                        label: "WYKLUCZONE ROZSZERZENIA";
+                        placeholder: "np. bak, tmp, log";
+                        value <=> GeneralSettings.excluded_extensions;
+                    }
+                    Divider {}
+                }
+
+
+                if active_tab == 1 : VerticalLayout {
+                    spacing: 0px;
+
+
+                    ToolGroupHeader { label: "DUPLIKATY"; emoji: "📂"; }
+
+                    CategoryLabel { label: "METODA PORÓWNANIA"; }
+                    SegmentRow {
+                        label: "Metoda";
+                        options: ["Hash", "Nazwa", "Rozm+Naz", "Rozmiar"];
+                        selected <=> DuplicateSettings.check_method;
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: "ALGORYTM HASH"; }
+                    SegmentRow {
+                        label: "Algorytm";
+                        description: "Blake3 – najszybszy; CRC32/xxH3 – alternatywy";
+                        options: ["Blake3", "CRC32", "xxHash3"];
+                        selected <=> DuplicateSettings.hash_type;
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: "MINIMALNY ROZMIAR PLIKU"; }
+                    SegmentRow {
+                        label: "Min. rozmiar";
+                        description: "Pliki mniejsze są ignorowane";
+                        options: ["1 KB", "8 KB", "64 KB", "1 MB"];
+                        selected <=> DuplicateSettings.min_size_kb_idx;
+                    }
+                    Divider {}
+
+
+                    ToolGroupHeader { label: "PODOBNE OBRAZY"; emoji: "🖼"; }
+
+                    CategoryLabel { label: "PRÓG PODOBIEŃSTWA"; }
+                    SegmentRow {
+                        label: "Próg";
+                        description: "B.Wysoki = tylko niemal identyczne";
+                        options: ["B.Wys.", "Wysoki", "Średni", "Niski", "B.Niski", "Min."];
+                        selected <=> SimilarImagesSettings.similarity_preset;
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: "ROZMIAR HASH OBRAZU"; }
+                    SegmentRow {
+                        label: "Rozmiar hash";
+                        description: "Większy = dokładniejszy, wolniejszy";
+                        options: ["8", "16", "32", "64"];
+                        selected <=> SimilarImagesSettings.hash_size_idx;
+                    }
+                    Divider {}
+
+
+                    ToolGroupHeader { label: "DUŻE / MAŁE PLIKI"; emoji: "📦"; }
+
+                    CategoryLabel { label: "TRYB WYSZUKIWANIA"; }
+                    SegmentRow {
+                        label: "Szukaj";
+                        options: ["Największe", "Najmniejsze"];
+                        selected <=> BigFilesSettings.search_mode_idx;
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: "LICZBA WYNIKÓW"; }
+                    SegmentRow {
+                        label: "Ilość plików";
+                        options: ["5", "50", "500", "5000"];
+                        selected <=> BigFilesSettings.count_idx;
+                    }
+                    Divider {}
+                }
+
+
+                if active_tab == 2 : VerticalLayout {
+                    spacing: 0px;
+
+                    CategoryLabel { label: "DIAGNOSTYKA"; }
+
+                    Rectangle {
+                        height: 72px;
+                        background: CediniaColors.bg_surface;
+                        HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 12px;
+
+                            VerticalLayout {
+                                alignment: LayoutAlignment.center;
+                                horizontal-stretch: 1.0;
+                                spacing: 2px;
+                                Text {
+                                    text: "Dostęp do plików";
+                                    color: CediniaColors.text_primary;
+                                    font-size: 15px;
+                                }
+                                Text {
+                                    text: AppState.storage_permission_granted
+                                        ? "✅ Uprawnienie przyznane"
+                                        : "❌ Brak uprawnień – dotknij aby przyznać";
+                                    color: AppState.storage_permission_granted
+                                        ? CediniaColors.success
+                                        : CediniaColors.danger;
+                                    font-size: 12px;
+                                }
+                            }
+
+                            if !AppState.storage_permission_granted : TouchButton {
+                                label: "Przyznaj";
+                                bg: CediniaColors.warning;
+                                fg: #000000;
+                                min_h: 44px;
+                                clicked => { AppState.request_storage_permission(); }
+                            }
+                        }
+                    }
+                    Divider {}
+
+                    Rectangle {
+                        height: 72px;
+                        background: CediniaColors.bg_surface;
+                        HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 12px;
+
+                            VerticalLayout {
+                                alignment: LayoutAlignment.center;
+                                horizontal-stretch: 1.0;
+                                spacing: 2px;
+                                Text {
+                                    text: "Test: zlicz wszystkie pliki";
+                                    color: CediniaColors.text_primary;
+                                    font-size: 15px;
+                                }
+                                Text {
+                                    text: "Skanuje każdy wolumin rekurencyjnie";
+                                    color: CediniaColors.text_secondary;
+                                    font-size: 12px;
+                                }
+                            }
+
+                            if !AppState.collect_test_running : TouchButton {
+                                label: "▶ Uruchom";
+                                bg: CediniaColors.accent;
+                                fg: #000000;
+                                min_h: 44px;
+                                clicked => { AppState.run_collect_test(); }
+                            }
+
+                            if AppState.collect_test_running : TouchButton {
+                                label: "⏹ Stop";
+                                bg: CediniaColors.warning;
+                                fg: #000000;
+                                min_h: 44px;
+                                clicked => { AppState.stop_collect_test(); }
+                            }
+                        }
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: "O APLIKACJI"; }
+
+                    Rectangle {
+                        height: 80px;
+                        HorizontalLayout {
+                            padding: 16px;
+                            spacing: 12px;
+                            Text {
+                                text: "⚔";
+                                font-size: 36px;
+                                vertical-alignment: TextVerticalAlignment.center;
+                            }
+                            VerticalLayout {
+                                alignment: LayoutAlignment.center;
+                                horizontal-stretch: 1.0;
+                                Text {
+                                    text: "Cedinia 1.0";
+                                    color: CediniaColors.text_primary;
+                                    font-size: 16px;
+                                    font-weight: 700;
+                                }
+                                Text {
+                                    text: "Na cześć Bitwy pod Cedynią (972 n.e.)";
+                                    color: CediniaColors.text_secondary;
+                                    font-size: 12px;
+                                }
+                                Text {
+                                    text: "Frontend Czkawka Core • GPL-3.0";
+                                    color: CediniaColors.text_disabled;
+                                    font-size: 11px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

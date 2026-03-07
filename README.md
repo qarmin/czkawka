@@ -8,32 +8,32 @@
 
 ## Features
 
-- Written in memory-safe Rust - almost 100% unsafe code free
-- Amazingly fast - due to using more or less advanced algorithms and multithreading
-- Free, Open Source without ads
-- Multiplatform - runs on Linux, Windows, macOS, FreeBSD, x86, ARM, RISC-V and even Android
-- Cache support - second and further scans should be much faster than the first one
-- Easy to run, easy to compile - minimal runtime and build dependencies, portable version available
-- CLI frontend - for easy automation
-- GUI frontend - uses Slint or GTK 4 frameworks
-- Core library - allows to reuse functionality in other apps
-- No spying - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
-- Multilingual - support multiple languages like Polish, English or Italian
+- **Written in memory-safe Rust** - almost 100% unsafe code free
+- **Amazingly fast** - due multithreading and efficient algorithms
+- **Free, Open Source without any ads**
+- **Multiplatform** - runs on Linux, Windows, macOS, FreeBSD, x86, ARM, RISC-V and even Android
+- **Cache support** - second and further scans should be much faster than the first one
+- **Easy to run, easy to compile** - minimal runtime and build dependencies, portable version available
+- **CLI frontend** - for easy automation
+- **GUI frontend** - uses Slint or GTK 4 frameworks
+- **Core library** - allows to reuse functionality in other apps
+- **No spying** - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
+- **Multilingual** - support multiple languages like Polish, English or Italian
 - Multiple tools to use:
-    - Duplicates - Finds duplicates based on file name, size or hash
-    - Empty Folders - Finds empty folders with the help of an advanced algorithm
-    - Big Files - Finds the provided number of the biggest files in given location
-    - Empty Files - Looks for empty files across the drive
-    - Temporary Files - Finds temporary files
-    - Similar Images - Finds images which are not exactly the same (different resolution, watermarks)
-    - Similar Videos - Looks for visually similar videos
-    - Same Music - Searches for similar music by tags or by reading content and comparing it
-    - Invalid Symbolic Links - Shows symbolic links which point to non-existent files/directories
-    - Broken Files - Finds files that are invalid or corrupted
-    - Bad Extensions - Lists files whose content not match with their extension
-    - Exif Remover - Removes Exif metadata from various file types
-    - Video Optimizer - Crops from static parts and converts videos to more efficient formats
-    - Bad Names - Finds files with names that may be not wanted (e.g., containing special characters)
+    - **Duplicates** - Finds duplicates based on file name, size or hash
+    - **Empty Folders** - Finds empty folders with the help of an advanced algorithm
+    - **Big Files** - Finds the provided number of the biggest files in given location
+    - **Empty Files** - Looks for empty files across the drive
+    - **Temporary Files** - Finds temporary files
+    - **Similar Images** - Finds images which are not exactly the same (different resolution, watermarks)
+    - **Similar Videos** - Looks for visually similar videos
+    - **Same Music** - Searches for similar music by tags or by reading content and comparing it
+    - **Invalid Symbolic Links** - Shows symbolic links which point to non-existent files/directories
+    - **Broken Files** - Finds files that are invalid or corrupted
+    - **Bad Extensions** - Lists files whose content not match with their extension
+    - **Exif Remover** - Removes Exif metadata from various file types
+    - **Video Optimizer** - Crops from static parts and converts videos to more efficient formats
+    - **Bad Names** - Finds files with names that may be not wanted (e.g., containing special characters)
 
 ![Krokiet](https://github.com/user-attachments/assets/3cc7ec6a-3d6a-42cb-9d33-4b0f0c547af6)
 
@@ -144,11 +144,37 @@ Some projects work as wrappers around `czkawka_cli`. Without directly depending 
 
 Big thanks to Pádraig Brady, creator of fantastic FSlint, because without his work I wouldn't create this tool.
 
-Thanks also to all the people who create patches for this program, create and fix translations, make it available on other systems, create videos,
-articles about it etc.
+Thanks also to all the people who contributed to the project in every possible way
 
-Also, I really appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs
-to make it even better.
+Also, I really appreciate work of people that create crates on which Czkawka is based and for that I try to report bugs to make it even better.
+
+## How to help?
+
+- **Creating issues** - Mainly related to bugs, oddly behaving functionality, etc. As you can see from the issue tracker, there are plenty of ideas for new features, but most of them are either difficult to implement or not aligned with the vision of the project, which evolves slightly over time.
+- **Creating pull requests** - Bug fixes are of course very welcome. Regarding new features, it is best to consult with me before implementing them to confirm they align with the project vision.
+- **Updating translations** - The project uses the Crowdin platform, where translations can be created and updated. In the case of a new release and missing translations, I use machine translation, which is often inaccurate, so updating translations is highly appreciated.
+- **Creating packages for various platforms** - Due to the difficulties related to adding and maintaining support for each new platform, such as learning package formats like deb or rpm, creating installers and packages, I decided to mainly focus on providing prebuilt binaries. However, having the project available in distribution repositories or in projects such as Chocolatey, Homebrew or Winget would be beneficial for users who prefer centralized repositories.
+- **Creating articles, videos, tutorials, etc.** - Any material that helps people better understand this program and its capabilities is welcome.
+- **Recommending it to friends, family, coworkers, etc.** - This is probably the simplest way to help the project become even more popular, which gives me motivation to continue developing the program. Here are a few example ways to naturally mention this program in a regular conversation:
+
+**S** - Someone  
+**Y** - You  
+
+### Situation 1:
+
+- **S** - Hey Anon, I have a lot of junk on my disk, what should I do?
+- **Y** - Download Krokiet/Czkawka. They are completely free and works on almost every system.
+- **S** - Thanks man!
+
+### Situation 2:
+
+- **S** - I am so thirsty...
+- **Y** - Have you heard about Krokiet/Czkawka?
+- **S** - Wait, what?
+- **Y** - Krokiet and Czkawka, in case you did not know, let you clean unnecessary files from your disk. They are completely free...
+- **S** - That is nice, but I am thirsty...
+- **Y** - ...they work on Windows, Linux and macOS, and some people even port them to FreeBSD and Android...
+
 
 ## Officially Supported Projects
 Only this repository, [prebuild-binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  

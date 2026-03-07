@@ -2,6 +2,7 @@ use std::fs::File;
 use std::panic;
 use std::path::Path;
 
+use fast_image_resize::{FilterType as FirFilterType, ResizeAlg, ResizeOptions as FirResizeOptions, Resizer};
 use image::{DynamicImage, ImageReader};
 use log::{error, trace};
 use nom_exif::{ExifIter, ExifTag, MediaParser, MediaSource};
@@ -28,7 +29,7 @@ pub(crate) fn decode_normal_image(path: &str) -> Result<DynamicImage, String> {
     Ok(img)
 }
 
-pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
+pub fn get_dynamic_image_from_path(path: &str, opts: Option<ImgResizeOptions>) -> Result<DynamicImage, String> {
     let path_lower = Path::new(path).extension().unwrap_or_default().to_string_lossy().to_lowercase();
 
     trace!("decoding file \"{path}\"");
@@ -46,16 +47,13 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
         if img.width() as u64 * img.height() as u64 > MAXIMUM_IMAGE_PIXELS as u64 {
             return Err(flc!("core_image_too_large", width = img.width(), height = img.height(), max = MAXIMUM_IMAGE_PIXELS));
         }
-        Ok(img)
+
+        if let Some(opts) = opts { Ok(resize_image(img, opts)) } else { Ok(img) }
     });
 
     if let Ok(res) = res {
         match res {
             Ok(t) => {
-                if t.width() == 0 || t.height() == 0 {
-                    return Err(flc!("core_image_zero_dimensions", path = path));
-                }
-
                 let rotation = get_rotation_from_exif(path).unwrap_or(None);
                 match rotation {
                     Some(ExifOrientation::Normal) | None => Ok(t),
@@ -74,6 +72,37 @@ pub fn get_dynamic_image_from_path(path: &str) -> Result<DynamicImage, String> {
         let message = create_crash_message("Image-rs or libraw-rs or jxl-oxide", path, "https://github.com/image-rs/image/issues");
         error!("{message}");
         Err(message)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ImgResizeOptions {
+    pub max_width: u32,
+    pub max_height: u32,
+    pub filter: FirFilterType,
+}
+
+fn resize_image(img: DynamicImage, opts: ImgResizeOptions) -> DynamicImage {
+    let orig_w = img.width();
+    let orig_h = img.height();
+
+    if orig_w <= opts.max_width && orig_h <= opts.max_height {
+        return img;
+    }
+
+    let scale = f32::min(opts.max_width as f32 / orig_w as f32, opts.max_height as f32 / orig_h as f32);
+    let new_w = ((orig_w as f32 * scale) as u32).max(1).min(img.width());
+    let new_h = ((orig_h as f32 * scale) as u32).max(1).min(img.height());
+
+    let mut dst = DynamicImage::new(new_w, new_h, img.color());
+    let fir_opts = FirResizeOptions::new().resize_alg(ResizeAlg::Interpolation(opts.filter));
+
+    match Resizer::new().resize(&img, &mut dst, Some(&fir_opts)) {
+        Ok(()) => dst,
+        Err(_) => {
+            // Fall back to the image-rs built-in resizer if fast_image_resize fails, quite unlikely
+            img.resize(new_w, new_h, image::imageops::FilterType::Lanczos3)
+        }
     }
 }
 
@@ -220,8 +249,8 @@ mod tests {
 
     #[test]
     fn test_image_loading_and_exif_rotation() {
-        let normal_img = get_dynamic_image_from_path(TEST_NORMAL_IMAGE).unwrap();
-        let rotated_img = get_dynamic_image_from_path(TEST_ROTATED_IMAGE).unwrap();
+        let normal_img = get_dynamic_image_from_path(TEST_NORMAL_IMAGE, None).unwrap();
+        let rotated_img = get_dynamic_image_from_path(TEST_ROTATED_IMAGE, None).unwrap();
 
         assert!(normal_img.width() > 0 && normal_img.height() > 0);
         assert!(rotated_img.width() > 0 && rotated_img.height() > 0);
@@ -260,7 +289,7 @@ mod tests {
 
     #[test]
     fn test_error_handling() {
-        get_dynamic_image_from_path("nonexistent.jpg").unwrap_err();
+        get_dynamic_image_from_path("nonexistent.jpg", None).unwrap_err();
         decode_normal_image("nonexistent.jpg").unwrap_err();
         get_rotation_from_exif("nonexistent.jpg").unwrap_err();
     }
