@@ -155,10 +155,9 @@ export component SettingsScreen {
 
                     CategoryLabel { label: Translations.settings_filters_label_text; }
 
-                    DropdownRow {
-//                        label: Translations.settings_language_text;
-                        description: Translations.settings_language_restart_text;
-                        options: GeneralSettings.language_options;
+                    SegmentRow {
+                        label: Translations.settings_min_file_size_text;
+                        options: GeneralSettings.min_file_size_options;
                         selected <=> GeneralSettings.min_file_size_idx;
                     }
                     Divider {}
@@ -210,7 +209,6 @@ export component SettingsScreen {
 
                     ToolGroupHeader { label: Translations.settings_duplicates_header_text; emoji: "📂"; }
 
-                    CategoryLabel { label: Translations.settings_check_method_label_text; }
                     SegmentRow {
                         label: Translations.settings_check_method_text;
                         options: DuplicateSettings.check_method_options;
@@ -218,7 +216,6 @@ export component SettingsScreen {
                     }
                     Divider {}
 
-                    CategoryLabel { label: Translations.settings_hash_type_label_text; }
                     SegmentRow {
                         label: Translations.settings_hash_type_text;
                         description: Translations.settings_hash_type_desc_text;
@@ -230,7 +227,6 @@ export component SettingsScreen {
 
                     ToolGroupHeader { label: Translations.settings_similar_images_header_text; emoji: "🖼"; }
 
-                    CategoryLabel { label: Translations.settings_similarity_preset_text; }
                     SegmentRow {
                         label: Translations.settings_similarity_preset_text;
                         description: Translations.settings_similarity_desc_text;
@@ -239,7 +235,6 @@ export component SettingsScreen {
                     }
                     Divider {}
 
-                    CategoryLabel { label: Translations.settings_hash_size_text; }
                     SegmentRow {
                         label: Translations.settings_hash_size_text;
                         description: Translations.settings_hash_size_desc_text;
@@ -248,7 +243,6 @@ export component SettingsScreen {
                     }
                     Divider {}
 
-                    CategoryLabel { label: Translations.settings_hash_alg_text; }
                     SegmentRow {
                         label: Translations.settings_hash_alg_text;
                         options: SimilarImagesSettings.hash_alg_options;
@@ -256,7 +250,6 @@ export component SettingsScreen {
                     }
                     Divider {}
 
-                    CategoryLabel { label: Translations.settings_image_filter_text; }
                     SegmentRow {
                         label: Translations.settings_image_filter_text;
                         options: SimilarImagesSettings.image_filter_options;
@@ -270,7 +263,6 @@ export component SettingsScreen {
 
                     ToolGroupHeader { label: Translations.settings_big_files_header_text; emoji: "📦"; }
 
-                    CategoryLabel { label: Translations.settings_search_mode_text; }
                     SegmentRow {
                         label: Translations.settings_search_mode_text;
                         options: BigFilesSettings.search_mode_options;
@@ -278,7 +270,6 @@ export component SettingsScreen {
                     }
                     Divider {}
 
-                    CategoryLabel { label: Translations.settings_file_count_text; }
                     SegmentRow {
                         label: Translations.settings_file_count_text;
                         options: BigFilesSettings.count_options;
