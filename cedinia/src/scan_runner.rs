@@ -29,6 +29,7 @@ pub struct CommonFilters {
     pub allowed_extensions: Vec<String>,
     pub excluded_extensions: Vec<String>,
     pub min_file_size_bytes: u64,
+    pub max_file_size_bytes: Option<u64>,
 }
 
 #[derive(Debug)]
@@ -352,6 +353,9 @@ pub(crate) fn apply_filters<T: CommonData>(tool: &mut T, filters: &CommonFilters
     }
     if filters.min_file_size_bytes > 0 {
         tool.set_minimal_file_size(filters.min_file_size_bytes);
+    }
+    if let Some(max) = filters.max_file_size_bytes {
+        tool.set_maximal_file_size(max);
     }
 }
 

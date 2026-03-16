@@ -37,8 +37,31 @@ impl MinFileSize {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MaxFileSize {
+    SixteenKb,
+    OneMb,
+    TenMb,
+    HundredMb,
+    Unlimited,
+}
+
+impl MaxFileSize {
+    /// Returns `None` for Unlimited (no limit imposed).
+    pub fn to_bytes(self) -> Option<u64> {
+        match self {
+            Self::SixteenKb => Some(16 * 1_024),
+            Self::OneMb => Some(1_024 * 1_024),
+            Self::TenMb => Some(10 * 1_024 * 1_024),
+            Self::HundredMb => Some(100 * 1_024 * 1_024),
+            Self::Unlimited => None,
+        }
+    }
+}
+
 pub struct StringComboBoxItems {
     pub min_file_size: Vec<StringComboBoxItem<MinFileSize>>,
+    pub max_file_size: Vec<StringComboBoxItem<MaxFileSize>>,
     pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
     pub duplicates_hash_type: Vec<StringComboBoxItem<HashType>>,
     pub hash_size: Vec<StringComboBoxItem<u8>>,
@@ -64,6 +87,14 @@ impl StringComboBoxItems {
             ("8kb", "8 KB", MinFileSize::EightKb),
             ("64kb", "64 KB", MinFileSize::SixtyFourKb),
             ("1mb", "1 MB", MinFileSize::OneMb),
+        ]);
+
+        let max_file_size = Self::convert(&[
+            ("16kb", "16 KB", MaxFileSize::SixteenKb),
+            ("1mb", "1 MB", MaxFileSize::OneMb),
+            ("10mb", "10 MB", MaxFileSize::TenMb),
+            ("100mb", "100 MB", MaxFileSize::HundredMb),
+            ("unlimited", "Bez limitu", MaxFileSize::Unlimited),
         ]);
 
         let duplicates_check_method = Self::convert(&[
@@ -115,6 +146,7 @@ impl StringComboBoxItems {
 
         Self {
             min_file_size,
+            max_file_size,
             duplicates_check_method,
             duplicates_hash_type,
             hash_size,
@@ -146,6 +178,29 @@ impl StringComboBoxItems {
             warn!("Unknown config_name \"{config_name}\" in {items:?}, falling back to index 0");
             0
         })
+    }
+
+    /// Look up enum value by UI index. Use instead of `value_from_config_name` when only the
+    /// SegmentRow idx is available (the `_value` string property may be stale).
+    pub fn value_from_idx<T: Clone + Debug>(items: &[StringComboBoxItem<T>], idx: i32, default: T) -> T {
+        items.get(idx as usize).map_or_else(
+            || {
+                warn!("idx {idx} out of range in {items:?}, using default");
+                default
+            },
+            |e| e.value.clone(),
+        )
+    }
+
+    /// Look up the config_name string by UI index. Use in `collect_settings_from_gui`.
+    pub fn config_name_from_idx<T: Clone + Debug>(items: &[StringComboBoxItem<T>], idx: i32, default: &str) -> String {
+        items.get(idx as usize).map_or_else(
+            || {
+                warn!("idx {idx} out of range in {items:?}, defaulting to \"{default}\"");
+                default.to_string()
+            },
+            |e| e.config_name.clone(),
+        )
     }
 
     pub fn value_from_config_name<T: Clone + Debug>(config_name: &str, items: &[StringComboBoxItem<T>], default: T) -> T {

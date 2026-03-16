@@ -81,12 +81,19 @@ min_sdk_version = 21
 target_sdk_version = 34
 
 [package.metadata.android.application]
+label = "@string/app_name"
 icon = "@mipmap/ic_launcher"
 
 # Use our NativeActivity subclass so that onActivityResult is intercepted
 # and forwarded to CediniaFilePicker / the Rust JNI callback.
 [package.metadata.android.application.activity]
 name = "android.app.NativeActivity"
+# Prevent Android from destroying and recreating the Activity on common
+# configuration changes (nav-bar inset, keyboard, rotation, locale, …).
+# Without this, setSystemUiVisibility(0) in setupNavBar() causes a
+# screenSize change which Android defers until foreground → causes the
+# "every-other-time restart" pattern.
+config_changes = "orientation|keyboardHidden|screenSize|smallestScreenSize|navigation|uiMode|screenLayout|locale|density|fontScale"
 
 # Full external storage access (needed to scan /sdcard root on Android 11+)
 [[package.metadata.android.uses_permission]]

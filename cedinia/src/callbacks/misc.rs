@@ -8,7 +8,7 @@ use slint::ComponentHandle;
 use crate::settings::{collect_settings_from_gui, save_settings};
 use crate::thumbnail_loader::thumbnail_cache_dir;
 use crate::volumes::{count_files_and_dirs_stoppable, detect_storage_volumes};
-use crate::{AppState, CollectTestResult, MainWindow};
+use crate::{AppState, CollectTestResult, GeneralSettings, MainWindow};
 
 pub(crate) fn wire_open_path(window: &MainWindow) {
     #[cfg(not(target_os = "android"))]
@@ -169,6 +169,42 @@ pub(crate) fn wire_cache_info(window: &MainWindow) {
                 win.global::<AppState>().set_diag_thumbnails_size("0 B".into());
             }
         });
+    }
+
+    {
+        let weak = window.as_weak();
+        window.global::<AppState>().on_clear_app_cache(move || {
+            if let Some(cache_path) = czkawka_core::common::config_cache_path::get_config_cache_path() {
+                let _ = std::fs::remove_dir_all(&cache_path.cache_folder);
+            }
+            if let Some(win) = weak.upgrade() {
+                win.global::<AppState>().set_diag_app_cache_size("0 B".into());
+            }
+        });
+    }
+}
+
+pub(crate) fn wire_language_change(window: &MainWindow) {
+    let weak = window.as_weak();
+    window.global::<AppState>().on_apply_language_change(move || {
+        let win = weak.upgrade().expect("MainWindow dropped in on_apply_language_change");
+        let idx = win.global::<GeneralSettings>().get_language_idx();
+        let lang = if idx == 1 { "pl" } else { "en" };
+        crate::localizer_cedinia::apply_language_preference(lang);
+        crate::translations::translate_items(&win);
+    });
+}
+
+pub(crate) fn wire_open_url(window: &MainWindow) {
+    #[cfg(not(target_os = "android"))]
+    {
+        window.global::<AppState>().on_open_url(|url| {
+            let _ = std::process::Command::new("xdg-open").arg(url.as_str()).spawn();
+        });
+    }
+    #[cfg(target_os = "android")]
+    {
+        window.global::<AppState>().on_open_url(|_| {});
     }
 }
 

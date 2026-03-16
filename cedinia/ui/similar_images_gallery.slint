@@ -1,9 +1,9 @@
 import { CediniaColors } from "colors.slint";
-import { SimilarGroupCard, ScanState } from "common.slint";
+import { ScanState, SimilarGroupCard } from "common.slint";
 import { AppState } from "app_state.slint";
 import { TouchButton } from "components.slint";
 import { ListView } from "std-widgets.slint";
-
+import { Translations } from "translations.slint";
 
 component GalleryImageCell {
     in property <image>  thumbnail;
@@ -58,7 +58,7 @@ component GalleryImageCell {
                 background: CediniaColors.accent;
                 z: 5;
                 Text {
-                    text: "OK";
+                    text: Translations.ok_text;
                     color: #000000;
                     font-size: 11px;
                     font-weight: 700;
@@ -111,7 +111,7 @@ component GalleryToggleBar {
 
 
             if AppState.selected_count > 0 : TouchButton {
-                label: "Usuń";
+                label: Translations.gallery_delete_button_text;
                 min_h: 36px;
                 bg: CediniaColors.danger;
                 fg: #ffffff;
@@ -139,7 +139,7 @@ component GalleryToggleBar {
 
 
             TouchButton {
-                label: "Zaz.";
+                label: Translations.select_label_text;
                 min_h: 36px;
                 bg: CediniaColors.bg_surface;
                 fg: CediniaColors.text_secondary;
@@ -147,7 +147,7 @@ component GalleryToggleBar {
             }
 
             TouchButton {
-                label: "Odzn.";
+                label: Translations.deselect_label_text;
                 min_h: 36px;
                 bg: CediniaColors.bg_surface;
                 fg: CediniaColors.text_secondary;
@@ -155,7 +155,7 @@ component GalleryToggleBar {
             }
 
             TouchButton {
-                label: "Lista";
+                label: Translations.list_label_text;
                 min_h: 36px;
                 bg: CediniaColors.bg_surface;
                 fg: CediniaColors.text_secondary;
@@ -184,8 +184,8 @@ export component SimilarImagesGallery {
 
                 Text {
                     text: AppState.scan_state == ScanState.Scanning
-                        ? "Skanowanie w toku…"
-                        : "Brak wyników";
+                        ? Translations.scanning_fallback_text
+                        : Translations.no_results_text;
                     color: CediniaColors.text_disabled;
                     font-size: 15px;
                     horizontal-alignment: TextHorizontalAlignment.center;
@@ -277,7 +277,7 @@ export component SimilarImagesGallery {
                 spacing: 6px;
 
                 Text {
-                    text: "Zaznaczanie";
+                    text: Translations.selection_popup_title_text;
                     color: CediniaColors.text_secondary;
                     font-size: 12px;
                     font-weight: 700;
@@ -286,73 +286,73 @@ export component SimilarImagesGallery {
                 }
 
                 TouchButton {
-                    label: "Zaznacz wszystko";
+                    label: Translations.select_all_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.text_primary;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_all(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zaznacz poza jednym";
+                    label: Translations.select_except_one_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_all_except_one(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zaznacz poza największym (rozmiar)";
+                    label: Translations.select_except_largest_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_all_except_largest(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zaznacz poza najmniejszym (rozmiar)";
+                    label: Translations.select_except_smallest_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_all_except_smallest(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zaznacz największy (rozmiar)";
+                    label: Translations.select_largest_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_largest_per_group(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zaznacz najmniejszy (rozmiar)";
+                    label: Translations.select_smallest_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_smallest_per_group(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zaznacz poza największą rozdzielczością";
+                    label: Translations.select_except_highest_res_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_all_except_highest_resolution(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zaznacz poza najmniejszą rozdzielczością";
+                    label: Translations.select_except_lowest_res_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_all_except_lowest_resolution(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zaznacz największą rozdzielczość";
+                    label: Translations.select_highest_res_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_highest_resolution_per_group(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zaznacz najmniejszą rozdzielczość";
+                    label: Translations.select_lowest_res_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.select_lowest_resolution_per_group(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Odwróć zaznaczenie";
+                    label: Translations.invert_selection_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.text_secondary;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.invert_selection(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zamknij";
+                    label: Translations.close_text;
                     min_h: 40px; bg: CediniaColors.bg_elevated; fg: CediniaColors.text_disabled;
                     horizontal-stretch: 1.0;
                     clicked => { toggle_bar.menu_state = 0; }
@@ -386,7 +386,7 @@ export component SimilarImagesGallery {
                 spacing: 6px;
 
                 Text {
-                    text: "Odznaczanie";
+                    text: Translations.deselection_popup_title_text;
                     color: CediniaColors.text_secondary;
                     font-size: 12px;
                     font-weight: 700;
@@ -394,19 +394,19 @@ export component SimilarImagesGallery {
                     horizontal-alignment: TextHorizontalAlignment.center;
                 }
                 TouchButton {
-                    label: "Odznacz wszystko";
+                    label: Translations.deselect_all_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.text_primary;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.deselect_all(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Odznacz poza jednym";
+                    label: Translations.deselect_except_one_text;
                     min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
                     horizontal-stretch: 1.0;
                     clicked => { AppState.deselect_all_except_one(); toggle_bar.menu_state = 0; }
                 }
                 TouchButton {
-                    label: "Zamknij";
+                    label: Translations.close_text;
                     min_h: 40px; bg: CediniaColors.bg_elevated; fg: CediniaColors.text_disabled;
                     horizontal-stretch: 1.0;
                     clicked => { toggle_bar.menu_state = 0; }
@@ -463,7 +463,7 @@ export component SimilarImagesGallery {
                     spacing: 10px;
 
                     TouchButton {
-                        label: "Cofaj";
+                        label: Translations.gallery_back_text;
                         horizontal-stretch: 1.0;
                         min_h: 48px;
                         bg: CediniaColors.bg_surface;
@@ -472,7 +472,7 @@ export component SimilarImagesGallery {
                     }
 
                     TouchButton {
-                        label: "Tak, usuń";
+                        label: Translations.gallery_confirm_delete_text;
                         horizontal-stretch: 1.0;
                         min_h: 48px;
                         bg: CediniaColors.danger;
@@ -509,7 +509,7 @@ export component SimilarImagesGallery {
                 spacing: 14px;
 
                 Text {
-                    text: "Usuwanie plików…";
+                    text: Translations.deleting_files_text;
                     color: CediniaColors.text_primary;
                     font-size: 16px;
                     font-weight: 600;
@@ -524,7 +524,7 @@ export component SimilarImagesGallery {
                 }
 
                 TouchButton {
-                    label: "Zatrzymaj";
+                    label: Translations.stop_text;
                     min_h: 44px;
                     bg: CediniaColors.warning;
                     fg: #000000;
@@ -560,7 +560,7 @@ export component SimilarImagesGallery {
                 spacing: 12px;
 
                 Text {
-                    text: "Nie udało się usunąć niektórych plików:";
+                    text: Translations.delete_errors_title_text;
                     color: CediniaColors.warning;
                     font-size: 15px;
                     font-weight: 600;
@@ -576,7 +576,7 @@ export component SimilarImagesGallery {
                 }
 
                 TouchButton {
-                    label: "OK";
+                    label: Translations.ok_text;
                     min_h: 44px;
                     bg: CediniaColors.bg_surface;
                     fg: CediniaColors.text_secondary;

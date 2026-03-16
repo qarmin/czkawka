@@ -32,6 +32,12 @@ fn default_big_files_count() -> String {
 fn default_min_file_size_idx() -> i32 {
     0
 }
+fn default_max_file_size_idx() -> i32 {
+    4 // Unlimited
+}
+fn default_language() -> String {
+    "auto".to_string()
+}
 fn default_hash_alg() -> String {
     "mean".to_string()
 }
@@ -60,6 +66,10 @@ pub struct CediniaSettings {
     pub ignore_hidden: bool,
     #[serde(default = "default_min_file_size_idx")]
     pub min_file_size_idx: i32,
+    #[serde(default = "default_max_file_size_idx")]
+    pub max_file_size_idx: i32,
+    #[serde(default = "default_language")]
+    pub language: String,
     #[serde(default = "default_excluded_items")]
     pub excluded_items: String,
     #[serde(default)]
@@ -132,6 +142,8 @@ impl Default for CediniaSettings {
             use_cache: true,
             ignore_hidden: true,
             min_file_size_idx: default_min_file_size_idx(),
+            max_file_size_idx: default_max_file_size_idx(),
+            language: default_language(),
             excluded_items: default_excluded_items(),
             allowed_extensions: String::new(),
             excluded_extensions: String::new(),
@@ -298,6 +310,13 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     win.global::<GeneralSettings>().set_use_cache(s.use_cache);
     win.global::<GeneralSettings>().set_ignore_hidden(s.ignore_hidden);
     win.global::<GeneralSettings>().set_min_file_size_idx(s.min_file_size_idx);
+    win.global::<GeneralSettings>().set_max_file_size_idx(s.max_file_size_idx);
+    let lang_idx = match s.language.as_str() {
+        "pl" => 1,
+        "en" => 0,
+        _ => crate::localizer_cedinia::detect_os_language_idx(),
+    };
+    win.global::<GeneralSettings>().set_language_idx(lang_idx);
     win.global::<GeneralSettings>().set_excluded_items(s.excluded_items.clone().into());
     win.global::<GeneralSettings>().set_allowed_extensions(s.allowed_extensions.clone().into());
     win.global::<GeneralSettings>().set_excluded_extensions(s.excluded_extensions.clone().into());
@@ -364,6 +383,7 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
 }
 
 pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
+    let items = StringComboBoxItems::new();
     let g = win.global::<GeneralSettings>();
     let d = win.global::<DuplicateSettings>();
     let si = win.global::<SimilarImagesSettings>();
@@ -376,18 +396,47 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         use_cache: g.get_use_cache(),
         ignore_hidden: g.get_ignore_hidden(),
         min_file_size_idx: g.get_min_file_size_idx(),
+        max_file_size_idx: g.get_max_file_size_idx(),
+        language: match g.get_language_idx() {
+            1 => "pl".to_string(),
+            _ => "en".to_string(),
+        },
         excluded_items: g.get_excluded_items().to_string(),
         allowed_extensions: g.get_allowed_extensions().to_string(),
         excluded_extensions: g.get_excluded_extensions().to_string(),
-        duplicates_check_method: d.get_check_method_value().to_string(),
-        duplicates_hash_type: d.get_hash_type_value().to_string(),
-        similar_images_similarity_preset: si.get_similarity_preset_value().to_string(),
-        similar_images_hash_size: si.get_hash_size_value().to_string(),
-        similar_images_hash_alg: si.get_hash_alg_value().to_string(),
-        similar_images_image_filter: si.get_image_filter_value().to_string(),
+        duplicates_check_method: items
+            .duplicates_check_method
+            .get(d.get_check_method() as usize)
+            .map_or_else(|| panic!("Invalid check_method idx {} in GUI", d.get_check_method()), |e| e.config_name.clone()),
+        duplicates_hash_type: items
+            .duplicates_hash_type
+            .get(d.get_hash_type() as usize)
+            .map_or_else(|| panic!("Invalid hash_type idx {} in GUI", d.get_hash_type()), |e| e.config_name.clone()),
+        similar_images_similarity_preset: items
+            .similarity_preset
+            .get(si.get_similarity_preset() as usize)
+            .map_or_else(|| panic!("Invalid similarity_preset idx {} in GUI", si.get_similarity_preset()), |e| e.config_name.clone()),
+        similar_images_hash_size: items
+            .hash_size
+            .get(si.get_hash_size_idx() as usize)
+            .map_or_else(|| panic!("Invalid hash_size_idx {} in GUI", si.get_hash_size_idx()), |e| e.config_name.clone()),
+        similar_images_hash_alg: items
+            .hash_alg
+            .get(si.get_hash_alg_idx() as usize)
+            .map_or_else(|| panic!("Invalid hash_alg_idx {} in GUI", si.get_hash_alg_idx()), |e| e.config_name.clone()),
+        similar_images_image_filter: items
+            .image_filter
+            .get(si.get_image_filter_idx() as usize)
+            .map_or_else(|| panic!("Invalid image_filter_idx {} in GUI", si.get_image_filter_idx()), |e| e.config_name.clone()),
         similar_images_ignore_same_size: si.get_ignore_same_size(),
-        big_files_search_mode: bfiles.get_search_mode_value().to_string(),
-        big_files_count: bfiles.get_count_value().to_string(),
+        big_files_search_mode: items
+            .biggest_files_method
+            .get(bfiles.get_search_mode_idx() as usize)
+            .map_or_else(|| panic!("Invalid search_mode_idx {} in GUI", bfiles.get_search_mode_idx()), |e| e.config_name.clone()),
+        big_files_count: items
+            .big_files_count
+            .get(bfiles.get_count_idx() as usize)
+            .map_or_else(|| panic!("Invalid count_idx {} in GUI", bfiles.get_count_idx()), |e| e.config_name.clone()),
         same_music_title: sm.get_title(),
         same_music_artist: sm.get_artist(),
         same_music_year: sm.get_year(),
@@ -395,7 +444,10 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         same_music_genre: sm.get_genre(),
         same_music_bitrate: sm.get_bitrate(),
         same_music_approximate: sm.get_approximate(),
-        same_music_check_method: sm.get_check_method_value().to_string(),
+        same_music_check_method: items.same_music_check_method.get(sm.get_check_method_idx() as usize).map_or_else(
+            || panic!("Invalid same_music_check_method_idx {} in GUI", sm.get_check_method_idx()),
+            |e| e.config_name.clone(),
+        ),
         broken_files_audio: bf.get_check_audio(),
         broken_files_pdf: bf.get_check_pdf(),
         broken_files_archive: bf.get_check_archive(),

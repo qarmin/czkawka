@@ -9,8 +9,8 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use slint::{ComponentHandle, Model, ModelRc, SharedString, Timer, TimerMode, VecModel, Weak};
 
 use crate::callbacks::{
-    DeleteEvent, build_dir_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_open_path, wire_permission, wire_save_settings_now, wire_scan,
-    wire_selection,
+    DeleteEvent, build_dir_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_open_path, wire_open_url, wire_permission,
+    wire_save_settings_now, wire_scan, wire_selection,
 };
 use crate::model::make_file_model;
 use crate::scan_runner::{FileItem, ScanResult, ScanResultHandler, start_worker};
@@ -338,6 +338,7 @@ fn run_app_inner(
     let window = MainWindow::new().expect("Failed to create MainWindow");
 
     let loaded_settings = load_settings();
+    crate::localizer_cedinia::apply_language_preference(&loaded_settings.language);
     apply_settings_to_gui(&window, &loaded_settings);
     set_initial_gui_infos(&window);
     translate_items(&window);
@@ -403,6 +404,8 @@ fn run_app_inner(
     wire_directories(&window, included_dirs.clone(), excluded_dirs.clone());
     wire_collect_test(&window);
     wire_open_path(&window);
+    wire_language_change(&window);
+    wire_open_url(&window);
     wire_cache_info(&window);
     wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone());
 

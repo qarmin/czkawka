@@ -1,7 +1,4 @@
-
-
-import { ActiveTool, ScanState, ProgressData, VolumeEntry, CollectTestResult } from "common.slint";
-
+import { ActiveTool, CollectTestResult, ProgressData, ScanState, VolumeEntry } from "common.slint";
 
 export global GeneralSettings {
     in-out property <bool>   use_cache:           true;
@@ -9,6 +6,12 @@ export global GeneralSettings {
 
     in-out property <int>    min_file_size_idx:    0;
     in-out property <[string]> min_file_size_options: ["Brak", "1 KB", "8 KB", "64 KB", "1 MB"];
+
+    in-out property <int>    max_file_size_idx:    4;
+    in-out property <[string]> max_file_size_options: ["16 KB", "1 MB", "10 MB", "100 MB", "Bez limitu"];
+
+    in-out property <int>    language_idx:         0;
+    in-out property <[string]> language_options:   ["English", "Polski (Polish)"];
 
     in-out property <string> excluded_items:       "";
 
@@ -162,6 +165,10 @@ export global AppState {
     in-out property <bool>   diag_refresh_running:  false;
     callback refresh_diag_cache_info();
     callback clear_thumbnails_cache();
+    callback apply_language_change();
+    callback clear_app_cache();
+
+    callback open_url(string);
 
 
     in-out property <bool>   gallery_delete_popup_visible: false;

@@ -1,9 +1,6 @@
-
-
-
 import { CediniaColors } from "colors.slint";
-import { ActiveTool, ScanState, FileEntry, DirectoryEntry, SimilarGroupCard } from "common.slint";
-import { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings } from "app_state.slint";
+import { ActiveTool, DirectoryEntry, FileEntry, ScanState, SimilarGroupCard } from "common.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings } from "app_state.slint";
 import { TopAppBar } from "top_bar.slint";
 import { BottomNavBar } from "bottom_nav.slint";
 import { ScanProgressBar } from "scan_progress.slint";
@@ -14,6 +11,7 @@ import { HomeScreen } from "home_screen.slint";
 import { DirectoriesScreen } from "directories_screen.slint";
 import { TouchButton } from "components.slint";
 import { Translations } from "translations.slint";
+
 export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, Translations }
 export component MainWindow inherits Window {
     title: "Cedinia";
@@ -149,6 +147,7 @@ export component MainWindow inherits Window {
                 entries: broken_files_model;
                 tool_title: Translations.tool_broken_files_text;
                 tool_emoji: "⚠";
+                extra_as_line2: true;
             }
 
             if AppState.active_tool == ActiveTool.BadExtensions : ResultsList {
@@ -159,6 +158,7 @@ export component MainWindow inherits Window {
                 tool_emoji: "🏷";
                 can_delete: false;
                 can_rename: true;
+                extra_as_line2: true;
             }
 
             if AppState.active_tool == ActiveTool.SameMusic : ResultsList {
@@ -178,6 +178,7 @@ export component MainWindow inherits Window {
                 tool_title: Translations.tool_bad_names_text;
                 tool_emoji: "✏";
                 can_rename: true;
+                extra_as_line2: true;
             }
 
             if AppState.active_tool == ActiveTool.ExifRemover : ResultsList {

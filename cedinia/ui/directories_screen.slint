@@ -1,10 +1,8 @@
-
-
 import { CediniaColors } from "colors.slint";
-import { DirectoryEntry, VolumeEntry } from "common.slint";
+import { DirectoryEntry } from "common.slint";
 import { AppState } from "app_state.slint";
 import { Translations } from "translations.slint";
-import { TouchButton, SectionHeader, Divider } from "components.slint";
+import { Divider, TouchButton } from "components.slint";
 
 component DirRow {
     in property <string>  path;
@@ -46,7 +44,7 @@ component DirRow {
                     overflow: elide;
                 }
                 Text {
-                    text: root.is_included ? "Uwzględniony" : "Wykluczony";
+                    text: root.is_included ? Translations.directories_include_header_text : Translations.directories_exclude_header_text;
                     color: root.is_included ? CediniaColors.success : CediniaColors.danger;
                     font-size: 11px;
                 }
@@ -105,7 +103,7 @@ export component DirectoriesScreen {
                             color: CediniaColors.text_disabled;
                         }
                         Text {
-                            text: "Brak ścieżek – dodaj poniżej";
+                            text: Translations.no_paths_text;
                             color: CediniaColors.text_disabled;
                             font-size: 13px;
                             horizontal-alignment: TextHorizontalAlignment.center;
@@ -155,7 +153,7 @@ export component DirectoriesScreen {
                 }
 
                 TouchButton {
-                    label: "- Wyklucz";
+                    label: "- " + Translations.directories_exclude_header_text;
                     horizontal-stretch: 1.0;
                     bg: CediniaColors.danger.with-alpha(0.8);
                     fg: #ffffff;
@@ -208,7 +206,7 @@ export component DirectoriesScreen {
                     spacing: 8px;
 
                     Text {
-                        text: "💾 Woluminy";
+                        text: "💾 " + Translations.directories_volume_header_text;
                         color: CediniaColors.accent_light;
                         font-size: 15px;
                         font-weight: 700;
@@ -291,7 +289,7 @@ export component DirectoriesScreen {
                                 }
 
                                 TouchButton {
-                                    label: vol.is_included ? "X Uwzg." : "+ Dodaj";
+                                    label: vol.is_included ? "X " + Translations.directories_include_header_text : "+ " + Translations.directories_volume_add_text;
                                     min_h: 32px;
                                     bg: vol.is_included
                                         ? CediniaColors.success.with-alpha(0.2)
@@ -308,7 +306,7 @@ export component DirectoriesScreen {
                                 }
 
                                 TouchButton {
-                                    label: vol.is_excluded ? "X Wyklucz." : "- Wyklucz";
+                                    label: vol.is_excluded ? "X " + Translations.directories_exclude_header_text : "- " + Translations.directories_exclude_header_text;
                                     min_h: 32px;
                                     bg: vol.is_excluded
                                         ? CediniaColors.danger.with-alpha(0.2)

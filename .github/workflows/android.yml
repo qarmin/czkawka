@@ -125,9 +125,20 @@ jobs:
       - name: Build APK (release)
         run: |
           cargo apk build -p cedinia --lib --release
+          mv 
 
       - name: Upload APK artifact (release)
         uses: actions/upload-artifact@v4
         with:
           name: cedinia-release
           path: target/release/apk/cedinia.apk
+
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            target/release/apk/cedinia.apk
+          token: ${{ secrets.PAT_REPOSITORY }}

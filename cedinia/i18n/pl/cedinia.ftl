@@ -81,7 +81,7 @@ no_permission_scan_warning = Brak uprawnień do plików – przyznaj dostęp aby
 # Settings screen tabs
 settings_tab_general = Ogólne
 settings_tab_tools = Narzędzia
-settings_tab_diagnostics = Diagnostyka
+settings_tab_diagnostics = Info
 
 # Settings — General tab
 settings_use_cache = Użyj pamięci podręcznej
@@ -91,6 +91,8 @@ settings_ignore_hidden_desc = Pliki i foldery zaczynające się od '.'
 settings_scan_label = SKANOWANIE
 settings_filters_label = FILTRY (wszystkie narzędzia)
 settings_min_file_size = Min. rozmiar pliku
+settings_max_file_size = Maks. rozmiar pliku
+settings_language = Język
 settings_excluded_items = WYKLUCZONE ELEMENTY (wzorce glob, oddzielone przecinkiem)
 settings_excluded_items_placeholder = np. *.tmp, */.git/*, */node_modules/*
 settings_allowed_extensions = DOZWOLONE ROZSZERZENIA (puste = wszystkie)
@@ -143,9 +145,13 @@ diagnostics_thumbnails = Pamięć miniatur
 diagnostics_app_cache = Pamięć aplikacji
 diagnostics_refresh = Odśwież
 diagnostics_clear_thumbnails = Wyczyść miniatury
+diagnostics_clear_cache = Wyczyść cache
 diagnostics_collect_test = Test skanowania
 diagnostics_collect_test_run = Uruchom
 diagnostics_collect_test_stop = Stop
+about_repo = Repozytorium
+about_translate = Tłumaczenia
+about_donate = Wesprzyj
 
 # Collect-test result popup
 collect_test_title = 📊 Wyniki testu
@@ -159,7 +165,7 @@ collect_test_ms = " ms"
 directories_include_header = Katalogi do skanowania
 directories_exclude_header = Katalogi wykluczone
 directories_add = + Dodaj
-directories_volume_header = Woluminy / partycje
+directories_volume_header = Woluminy
 directories_volume_refresh = Odśwież
 directories_volume_add = Dodaj
 

@@ -1,9 +1,5 @@
-
-
 import { CediniaColors } from "colors.slint";
-
-
-
+import { FileEntryIdx } from "common.slint";
 
 export component TouchButton {
     in property <string>  label;
@@ -110,9 +106,6 @@ export component SectionHeader {
     }
 }
 
-
-
-
 export component FileRow {
     in property <string>  name;
     in property <string>  path;
@@ -121,12 +114,13 @@ export component FileRow {
     in property <bool>    checked: false;
     in property <bool>    is_header: false;
     in property <bool>    is_even: false;
+    in property <bool>    extra_as_line2: false;
     callback toggle_checked();
     callback long_pressed();
     callback open_item();
     callback open_parent();
 
-    height: root.is_header ? 36px : 64px;
+    height: root.is_header ? 36px : 80px;
 
     Rectangle {
         background: root.is_header
@@ -208,7 +202,14 @@ export component FileRow {
                     wrap: no-wrap;
                 }
 
-                Text {
+                if !root.extra_as_line2 : Text {
+                    text: root.path;
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                    wrap: word-wrap;
+                }
+
+                if root.extra_as_line2 && root.path != "" : Text {
                     text: root.path;
                     color: CediniaColors.text_secondary;
                     font-size: 11px;
@@ -216,12 +217,19 @@ export component FileRow {
                     wrap: no-wrap;
                 }
 
-                if root.val_str.length > 0 && root.val_str[0] != "" : Text {
-                    text: root.val_str[0];
-                    color: CediniaColors.text_secondary;
+                if !root.extra_as_line2 && root.val_str.length > FileEntryIdx.extra_idx && root.val_str[FileEntryIdx.extra_idx] != "" : Text {
+                    text: root.val_str[FileEntryIdx.extra_idx];
+                    color: CediniaColors.text_disabled;
                     font-size: 11px;
                     overflow: elide;
                     wrap: no-wrap;
+                }
+
+                if root.extra_as_line2 && root.val_str[FileEntryIdx.extra_idx] != "" : Text {
+                    text: root.val_str[FileEntryIdx.extra_idx];
+                    color: CediniaColors.text_disabled;
+                    font-size: 11px;
+                    wrap: word-wrap;
                 }
             }
 

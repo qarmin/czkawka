@@ -57,11 +57,9 @@ Each tool uses different technologies, so you can find instructions for each of 
 - [Czkawka GUI (GTK frontend)](czkawka_gui/README.md)</br>
 - [Czkawka CLI](czkawka_cli/README.md)</br>
 - [Czkawka Core](czkawka_core/README.md)</br>
+- [Cedinia](cedinia/README.md)</br>
 
 ## Comparison to other tools
-
-Bleachbit is a master at finding and removing temporary files, while Czkawka only finds the most basic ones. So these
-two apps shouldn't be compared directly or be considered as an alternative to one another.
 
 In this comparison remember, that even if app have same features they may work different(e.g. one app may have more
 options to choose than other).
@@ -127,7 +125,7 @@ console apps, then take a look at these:
 
 Czkawka exposes its common functionality through a crate called **`czkawka_core`**, which can be reused by other projects.
 
-It is written in Rust and is used by all Czkawka frontends (`czkawka_gui`, `czkawka_cli`, `krokiet`).
+It is written in Rust and is used by all Czkawka frontends (`czkawka_gui`, `czkawka_cli`, `krokiet`, `cedinia`).
 
 It is also used by external projects, such as:
 
@@ -194,9 +192,9 @@ If you use packages from unofficial sources, make sure they are safe.
 
 The entire code in this repository is licensed under the [MIT](https://mit-license.org/) license.
 
-All images are licensed under the [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license.
+All images and audio files are licensed under the [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license.
 
-The Czkawka GTK GUI and CLI applications are licensed under the [MIT](https://mit-license.org/) license, while the Krokiet is licensed under the [GPL-3.0-only](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
+The Czkawka GTK GUI and CLI applications are licensed under the [MIT](https://mit-license.org/) license, while the Krokiet/Cedinia(due Slint license requirements) are licensed under the [GPL-3.0-only](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
 
 ## Donations
 

@@ -33,10 +33,10 @@ from pathlib import Path
 
 # Legacy launcher icon: density → size in pixels
 MIPMAP_SIZES: dict[str, int] = {
-    "mdpi":     48,
-    "hdpi":     72,
-    "xhdpi":    96,
-    "xxhdpi":  144,
+    "mdpi": 48,
+    "hdpi": 72,
+    "xhdpi": 96,
+    "xxhdpi": 144,
     "xxxhdpi": 192,
 }
 
@@ -53,8 +53,10 @@ FOREGROUND_XML = """\
 
 # ── renderers ────────────────────────────────────────────────────────────────
 
+
 def render_cairosvg(svg: Path, out: Path, size: int) -> None:
-    import cairosvg  # type: ignore[import]
+    import cairosvg  # type: ignore
+
     out.parent.mkdir(parents=True, exist_ok=True)
     cairosvg.svg2png(url=str(svg), write_to=str(out), output_width=size, output_height=size)
 
@@ -64,7 +66,8 @@ def render_inkscape(svg: Path, out: Path, size: int) -> None:
     # Inkscape 1.x uses --export-filename; 0.9x used --export-png.
     result = subprocess.run(
         [
-            "inkscape", str(svg),
+            "inkscape",
+            str(svg),
             f"--export-filename={out}",
             f"--export-width={size}",
             f"--export-height={size}",
@@ -76,7 +79,8 @@ def render_inkscape(svg: Path, out: Path, size: int) -> None:
         # Fallback: try the old --export-png flag (Inkscape 0.9x)
         result2 = subprocess.run(
             [
-                "inkscape", str(svg),
+                "inkscape",
+                str(svg),
                 f"--export-png={out}",
                 f"--export-width={size}",
                 f"--export-height={size}",
@@ -85,12 +89,11 @@ def render_inkscape(svg: Path, out: Path, size: int) -> None:
             text=True,
         )
         if result2.returncode != 0:
-            raise RuntimeError(
-                f"inkscape failed (exit {result.returncode}):\n{result.stderr}\n{result2.stderr}"
-            )
+            raise RuntimeError(f"inkscape failed (exit {result.returncode}):\n{result.stderr}\n{result2.stderr}")
 
 
 # ── main ─────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     script_dir = Path(__file__).resolve().parent
@@ -110,7 +113,8 @@ def main() -> None:
 
     # Pick renderer
     try:
-        import cairosvg  # type: ignore[import]  # noqa: F401
+        import cairosvg
+
         render = render_cairosvg
         print("renderer: cairosvg")
     except ImportError:

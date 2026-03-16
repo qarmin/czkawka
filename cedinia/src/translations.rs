@@ -85,6 +85,13 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_scan_label_text(flc!("settings_scan_label").into());
     t.set_settings_filters_label_text(flc!("settings_filters_label").into());
     t.set_settings_min_file_size_text(flc!("settings_min_file_size").into());
+    t.set_settings_max_file_size_text(flc!("settings_max_file_size").into());
+    t.set_settings_language_text(flc!("settings_language").into());
+    t.set_settings_language_restart_text(flc!("settings_language_restart").into());
+    t.set_settings_common_label_text(flc!("settings_common_label").into());
+    t.set_settings_hash_type_desc_text(flc!("settings_hash_type_desc").into());
+    t.set_settings_similarity_desc_text(flc!("settings_similarity_desc").into());
+    t.set_settings_hash_size_desc_text(flc!("settings_hash_size_desc").into());
     t.set_settings_excluded_items_text(flc!("settings_excluded_items").into());
     t.set_settings_excluded_items_placeholder_text(flc!("settings_excluded_items_placeholder").into());
     t.set_settings_allowed_extensions_text(flc!("settings_allowed_extensions").into());
@@ -135,7 +142,9 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_diagnostics_app_cache_text(flc!("diagnostics_app_cache").into());
     t.set_diagnostics_refresh_text(flc!("diagnostics_refresh").into());
     t.set_diagnostics_clear_thumbnails_text(flc!("diagnostics_clear_thumbnails").into());
+    t.set_diagnostics_clear_cache_text(flc!("diagnostics_clear_cache").into());
     t.set_diagnostics_collect_test_text(flc!("diagnostics_collect_test").into());
+    t.set_diagnostics_collect_test_desc_text(flc!("diagnostics_collect_test_desc").into());
     t.set_diagnostics_collect_test_run_text(flc!("diagnostics_collect_test_run").into());
     t.set_diagnostics_collect_test_stop_text(flc!("diagnostics_collect_test_stop").into());
 
@@ -152,6 +161,18 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_directories_volume_header_text(flc!("directories_volume_header").into());
     t.set_directories_volume_refresh_text(flc!("directories_volume_refresh").into());
     t.set_directories_volume_add_text(flc!("directories_volume_add").into());
+    t.set_no_paths_text(flc!("no_paths").into());
+    t.set_gallery_delete_button_text(flc!("gallery_delete_button").into());
+    t.set_gallery_back_text(flc!("gallery_back").into());
+    t.set_gallery_confirm_delete_text(flc!("gallery_confirm_delete").into());
+    t.set_deleting_files_text(flc!("deleting_files").into());
+    t.set_stop_text(flc!("stop").into());
+    t.set_files_suffix_text(flc!("files_suffix").into());
+    t.set_scanning_fallback_text(flc!("scanning_fallback").into());
+    t.set_app_subtitle_text(flc!("app_subtitle").into());
+    t.set_app_license_text(flc!("app_license").into());
+    t.set_about_app_label_text(flc!("about_app_label").into());
+    t.set_cache_label_text(flc!("cache_label").into());
 
     t.set_nav_home_text(flc!("nav_home").into());
     t.set_nav_dirs_text(flc!("nav_dirs").into());
@@ -176,4 +197,8 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_cleaned_exif_errors_suffix_text(flc!("cleaned_exif_errors_suffix").into());
     t.set_and_more_prefix_text(flc!("and_more_prefix").into());
     t.set_and_more_suffix_text(flc!("and_more_suffix").into());
+
+    t.set_about_repo_text(flc!("about_repo").into());
+    t.set_about_translate_text(flc!("about_translate").into());
+    t.set_about_donate_text(flc!("about_donate").into());
 }

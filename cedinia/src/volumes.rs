@@ -92,6 +92,14 @@ pub(crate) fn detect_storage_volumes() -> Vec<VolumeEntry> {
     #[cfg(not(target_os = "android"))]
     let _ = candidates;
 
+    // Deduplicate by canonical path: /sdcard, /storage/emulated/0, /storage/self/primary
+    // are often symlinks pointing to the same directory.
+    let mut seen: std::collections::HashSet<PathBuf> = std::collections::HashSet::new();
+    result.retain(|v| {
+        let canonical = std::fs::canonicalize(v.path.as_str()).unwrap_or_else(|_| PathBuf::from(v.path.as_str()));
+        seen.insert(canonical)
+    });
+
     result
 }
 

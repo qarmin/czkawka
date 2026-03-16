@@ -22,7 +22,7 @@ home_empty_folders_description = Directories without content
 home_similar_images_description = Find visually similar photos
 home_empty_files_description = Files with zero size
 home_temp_files_description = Temporary and cached files
-home_big_files_description = 50 biggest files on disk
+home_big_files_description = Biggest/Smallest files on disk
 home_broken_files_description = PDF, audio, images, archives
 home_bad_extensions_description = Files with invalid extension
 home_same_music_description = Similar audio files by tags
@@ -81,7 +81,7 @@ no_permission_scan_warning = No file access – grant permission to scan
 # Settings screen tabs
 settings_tab_general = General
 settings_tab_tools = Tools
-settings_tab_diagnostics = Diagnostics
+settings_tab_diagnostics = Info
 
 # Settings — General tab
 settings_use_cache = Use cache
@@ -89,8 +89,12 @@ settings_use_cache_desc = Speeds up subsequent scans (hash/images)
 settings_ignore_hidden = Ignore hidden files
 settings_ignore_hidden_desc = Files and folders starting with '.'
 settings_scan_label = SCAN
-settings_filters_label = FILTERS (all tools)
+settings_filters_label = FILTERS (some tools)
 settings_min_file_size = Min. file size
+settings_max_file_size = Max. file size
+settings_language = Language
+settings_language_restart = Requires app restart
+settings_common_label = COMMON SETTINGS
 settings_excluded_items = EXCLUDED ITEMS (glob patterns, comma separated)
 settings_excluded_items_placeholder = e.g. *.tmp, */.git/*, */node_modules/*
 settings_allowed_extensions = ALLOWED EXTENSIONS (empty = all)
@@ -104,9 +108,12 @@ settings_check_method_label = COMPARISON METHOD
 settings_check_method = Method
 settings_hash_type_label = HASH TYPE
 settings_hash_type = Hash type
+settings_hash_type_desc = Blake3 – fastest; CRC32/xxH3 – alternatives
 settings_similar_images_header = SIMILAR IMAGES
 settings_similarity_preset = Similarity threshold
+settings_similarity_desc = Very High = only near-identical
 settings_hash_size = Hash size
+settings_hash_size_desc = Larger = more accurate, slower
 settings_hash_alg = Hash algorithm
 settings_image_filter = Resize filter
 settings_ignore_same_size = Ignore images with the same dimensions
@@ -143,9 +150,14 @@ diagnostics_thumbnails = Thumbnail cache
 diagnostics_app_cache = App cache
 diagnostics_refresh = Refresh
 diagnostics_clear_thumbnails = Clear thumbnails
+diagnostics_clear_cache = Clear cache
 diagnostics_collect_test = Scan test
+diagnostics_collect_test_desc = Scans each volume recursively
 diagnostics_collect_test_run = Run
 diagnostics_collect_test_stop = Stop
+about_repo = Repository
+about_translate = Translations
+about_donate = Support
 
 # Collect-test result popup
 collect_test_title = 📊 Test results
@@ -159,7 +171,8 @@ collect_test_ms = " ms"
 directories_include_header = Directories to scan
 directories_exclude_header = Excluded directories
 directories_add = + Add
-directories_volume_header = Volumes / partitions
+no_paths = No paths – add below
+directories_volume_header = Volumes
 directories_volume_refresh = Refresh
 directories_volume_add = Add
 
@@ -188,4 +201,17 @@ cleaned_exif_suffix = files
 cleaned_exif_errors_suffix = errors
 and_more_prefix = …and
 and_more_suffix = more
+
+# Gallery / delete popups
+gallery_delete_button = Delete
+gallery_back = Back
+gallery_confirm_delete = Yes, delete
+deleting_files = Deleting files…
+stop = Stop
+files_suffix = files
+scanning_fallback = Scanning…
+app_subtitle = In honour of the Battle of Cedynia (972 CE)
+app_license = Frontend for Czkawka Core  •  GPL-3.0
+about_app_label = ABOUT
+cache_label = CACHE
 

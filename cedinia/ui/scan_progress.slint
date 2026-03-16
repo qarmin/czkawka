@@ -1,8 +1,7 @@
-
-
 import { CediniaColors } from "colors.slint";
 import { AppState } from "app_state.slint";
 import { ScanState } from "common.slint";
+import { Translations } from "translations.slint";
 
 export component ScanProgressBar {
     visible: AppState.scan_state == ScanState.Scanning;
@@ -23,7 +22,7 @@ export component ScanProgressBar {
 
             HorizontalLayout {
                 Text {
-                    text: AppState.progress.step_name != "" ? AppState.progress.step_name : "Skanowanie…";
+                    text: AppState.progress.step_name != "" ? AppState.progress.step_name : Translations.scanning_fallback_text;
                     color: CediniaColors.text_secondary;
                     font-size: 12px;
                     horizontal-stretch: 1.0;
@@ -33,7 +32,7 @@ export component ScanProgressBar {
                 if !AppState.progress.is_indeterminate : Text {
                     text: AppState.progress.all_progress > 0
                         ? (AppState.progress.current_progress + " / " + AppState.progress.all_progress)
-                        : (AppState.progress.current_progress + " pl.");
+                        : (AppState.progress.current_progress + " " + Translations.files_suffix_text);
                     color: CediniaColors.accent_light;
                     font-size: 12px;
                     font-weight: 700;

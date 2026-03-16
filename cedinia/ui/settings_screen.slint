@@ -1,11 +1,9 @@
 import { CediniaColors } from "colors.slint";
-import { TouchButton, Divider } from "components.slint";
-import { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings } from "app_state.slint";
-import { ToggleRow, SegmentRow, ToolGroupHeader, CategoryLabel, TextInputRow } from "settings_components.slint";
+import { Divider, TouchButton } from "components.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings } from "app_state.slint";
+import { CategoryLabel, DropdownRow, SegmentRow, TextInputRow, ToggleRow, ToolGroupHeader } from "settings_components.slint";
 import { SettingsTab } from "common.slint";
 import { Translations } from "translations.slint";
-
-
 
 export component SettingsScreen {
 
@@ -157,12 +155,31 @@ export component SettingsScreen {
 
                     CategoryLabel { label: Translations.settings_filters_label_text; }
 
-                    SegmentRow {
-                        label: Translations.settings_min_file_size_text;
-                        options: GeneralSettings.min_file_size_options;
+                    DropdownRow {
+//                        label: Translations.settings_language_text;
+                        description: Translations.settings_language_restart_text;
+                        options: GeneralSettings.language_options;
                         selected <=> GeneralSettings.min_file_size_idx;
                     }
                     Divider {}
+
+                    SegmentRow {
+                        label: Translations.settings_max_file_size_text;
+                        options: GeneralSettings.max_file_size_options;
+                        selected <=> GeneralSettings.max_file_size_idx;
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: "LANGUAGE / JĘZYK"; } // This should not be translated
+
+                    DropdownRow {
+                        options: GeneralSettings.language_options;
+                        selected <=> GeneralSettings.language_idx;
+                        changed_selection(_) => { AppState.apply_language_change(); }
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: Translations.settings_common_label_text; }
 
                     TextInputRow {
                         label: Translations.settings_excluded_items_text;
@@ -204,7 +221,7 @@ export component SettingsScreen {
                     CategoryLabel { label: Translations.settings_hash_type_label_text; }
                     SegmentRow {
                         label: Translations.settings_hash_type_text;
-                        description: "Blake3 – najszybszy; CRC32/xxH3 – alternatywy";
+                        description: Translations.settings_hash_type_desc_text;
                         options: DuplicateSettings.hash_type_options;
                         selected <=> DuplicateSettings.hash_type;
                     }
@@ -216,7 +233,7 @@ export component SettingsScreen {
                     CategoryLabel { label: Translations.settings_similarity_preset_text; }
                     SegmentRow {
                         label: Translations.settings_similarity_preset_text;
-                        description: "B.Wysoki = tylko niemal identyczne";
+                        description: Translations.settings_similarity_desc_text;
                         options: SimilarImagesSettings.similarity_preset_options;
                         selected <=> SimilarImagesSettings.similarity_preset;
                     }
@@ -225,7 +242,7 @@ export component SettingsScreen {
                     CategoryLabel { label: Translations.settings_hash_size_text; }
                     SegmentRow {
                         label: Translations.settings_hash_size_text;
-                        description: "Większy = dokładniejszy, wolniejszy";
+                        description: Translations.settings_hash_size_desc_text;
                         options: SimilarImagesSettings.hash_size_options;
                         selected <=> SimilarImagesSettings.hash_size_idx;
                     }
@@ -330,6 +347,7 @@ export component SettingsScreen {
 
                     CategoryLabel { label: Translations.diagnostics_header_text; }
 
+                    // Storage permission row
                     Rectangle {
                         height: 72px;
                         background: CediniaColors.bg_surface;
@@ -345,14 +363,14 @@ export component SettingsScreen {
                                 horizontal-stretch: 1.0;
                                 spacing: 2px;
                                 Text {
-                                    text: "Dostęp do plików";
+                                    text: Translations.permission_title_text;
                                     color: CediniaColors.text_primary;
                                     font-size: 15px;
                                 }
                                 Text {
                                     text: AppState.storage_permission_granted
-                                        ? "✅ Uprawnienie przyznane"
-                                        : "❌ Brak uprawnień – dotknij aby przyznać";
+                                        ? "✅ " + Translations.grant_text
+                                        : "❌ " + Translations.no_permission_scan_warning_text;
                                     color: AppState.storage_permission_granted
                                         ? CediniaColors.success
                                         : CediniaColors.danger;
@@ -371,6 +389,7 @@ export component SettingsScreen {
                     }
                     Divider {}
 
+                    // Collect test row
                     Rectangle {
                         height: 72px;
                         background: CediniaColors.bg_surface;
@@ -391,7 +410,7 @@ export component SettingsScreen {
                                     font-size: 15px;
                                 }
                                 Text {
-                                    text: "Skanuje każdy wolumin rekurencyjnie";
+                                    text: Translations.diagnostics_collect_test_desc_text;
                                     color: CediniaColors.text_secondary;
                                     font-size: 12px;
                                 }
@@ -416,10 +435,11 @@ export component SettingsScreen {
                     }
                     Divider {}
 
-                    CategoryLabel { label: "CACHE"; }
+                    CategoryLabel { label: Translations.cache_label_text; }
 
+                    // Cache sizes + refresh row
                     Rectangle {
-                        height: 72px;
+                        height: 60px;
                         background: CediniaColors.bg_surface;
                         HorizontalLayout {
                             padding-left: 16px;
@@ -452,52 +472,133 @@ export component SettingsScreen {
                                 enabled: !AppState.diag_refresh_running;
                                 clicked => { AppState.refresh_diag_cache_info(); }
                             }
+                        }
+                    }
+                    Divider {}
+
+                    // Clear cache buttons row
+                    Rectangle {
+                        height: 56px;
+                        background: CediniaColors.bg_surface;
+                        HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 8px;
+                            padding-bottom: 8px;
+                            spacing: 8px;
 
                             TouchButton {
                                 label: Translations.diagnostics_clear_thumbnails_text;
-                                min_h: 36px;
+                                horizontal-stretch: 1.0;
+                                min_h: 40px;
                                 bg: CediniaColors.danger.with-alpha(0.7);
                                 fg: #ffffff;
                                 clicked => { AppState.clear_thumbnails_cache(); }
+                            }
+
+                            TouchButton {
+                                label: Translations.diagnostics_clear_cache_text;
+                                horizontal-stretch: 1.0;
+                                min_h: 40px;
+                                bg: CediniaColors.danger.with-alpha(0.5);
+                                fg: #ffffff;
+                                clicked => { AppState.clear_app_cache(); }
                             }
                         }
                     }
                     Divider {}
 
-                    CategoryLabel { label: "O APLIKACJI"; }
+                    CategoryLabel { label: Translations.about_app_label_text; }
 
+                    // Logo – full width, nothing beside it
                     Rectangle {
-                        height: 80px;
-                        HorizontalLayout {
-                            padding: 16px;
-                            spacing: 12px;
+                        height: 140px;
+                        background: CediniaColors.bg_surface;
+                        Image {
+                            source: @image-url("../icons/logo.svg");
+                            width: min(parent.width - 32px, 260px);
+                            height: 120px;
+                            x: (parent.width - self.width) / 2;
+                            y: (parent.height - self.height) / 2;
+                            image-fit: ImageFit.contain;
+                        }
+                    }
+                    Divider {}
+
+                    // App name and description
+                    Rectangle {
+                        background: CediniaColors.bg_surface;
+                        height: info_vl.preferred-height + 24px;
+                        info_vl := VerticalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 12px;
+                            padding-bottom: 12px;
+                            spacing: 4px;
+                            alignment: LayoutAlignment.center;
                             Text {
-                                text: "⚔";
-                                font-size: 36px;
-                                vertical-alignment: TextVerticalAlignment.center;
+                                text: "Cedinia 11.0.1";
+                                color: CediniaColors.text_primary;
+                                font-size: 18px;
+                                font-weight: 700;
+                                horizontal-alignment: TextHorizontalAlignment.center;
                             }
-                            VerticalLayout {
-                                alignment: LayoutAlignment.center;
-                                horizontal-stretch: 1.0;
-                                Text {
-                                    text: "Cedinia 11.0.1";
-                                    color: CediniaColors.text_primary;
-                                    font-size: 16px;
-                                    font-weight: 700;
-                                }
-                                Text {
-                                    text: "Na cześć Bitwy pod Cedynią (972 n.e.)";
-                                    color: CediniaColors.text_secondary;
-                                    font-size: 12px;
-                                }
-                                Text {
-                                    text: "Frontend Czkawka Core • GPL-3.0";
-                                    color: CediniaColors.text_disabled;
-                                    font-size: 11px;
-                                }
+                            Text {
+                                text: Translations.app_subtitle_text;
+                                color: CediniaColors.text_secondary;
+                                font-size: 13px;
+                                horizontal-alignment: TextHorizontalAlignment.center;
+                            }
+                            Text {
+                                text: Translations.app_license_text;
+                                color: CediniaColors.text_disabled;
+                                font-size: 11px;
+                                horizontal-alignment: TextHorizontalAlignment.center;
                             }
                         }
                     }
+                    Divider {}
+
+                    // Links row
+                    Rectangle {
+                        height: 56px;
+                        background: CediniaColors.bg_surface;
+                        HorizontalLayout {
+                            padding-left: 12px;
+                            padding-right: 12px;
+                            padding-top: 8px;
+                            padding-bottom: 8px;
+                            spacing: 8px;
+
+                            TouchButton {
+                                label: Translations.about_repo_text;
+                                horizontal-stretch: 1.0;
+                                min_h: 40px;
+                                bg: CediniaColors.accent_muted;
+                                fg: CediniaColors.accent_light;
+                                clicked => { AppState.open_url("https://github.com/qarmin/czkawka"); }
+                            }
+
+                            TouchButton {
+                                label: Translations.about_translate_text;
+                                horizontal-stretch: 1.0;
+                                min_h: 40px;
+                                bg: CediniaColors.accent_muted;
+                                fg: CediniaColors.accent_light;
+                                clicked => { AppState.open_url("https://crowdin.com/project/czkawka"); }
+                            }
+
+                            TouchButton {
+                                label: Translations.about_donate_text;
+                                horizontal-stretch: 1.0;
+                                min_h: 40px;
+                                bg: CediniaColors.accent_muted;
+                                fg: CediniaColors.accent_light;
+                                clicked => { AppState.open_url("https://github.com/sponsors/qarmin"); }
+                            }
+                        }
+                    }
+                    Divider {}
                 }
             }
         }

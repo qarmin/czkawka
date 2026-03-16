@@ -93,6 +93,7 @@ fn build_common_filters(win: &MainWindow) -> CommonFilters {
     let g = win.global::<GeneralSettings>();
     let items = StringComboBoxItems::new();
     let min_file_size_bytes = items.min_file_size.get(g.get_min_file_size_idx() as usize).map_or(0, |e| e.value.to_bytes());
+    let max_file_size_bytes = items.max_file_size.get(g.get_max_file_size_idx() as usize).and_then(|e| e.value.to_bytes());
     let split_csv = |s: slint::SharedString| -> Vec<String> { s.as_str().split(',').map(|p| p.trim().to_string()).filter(|p| !p.is_empty()).collect() };
     let mut excluded_items = split_csv(g.get_excluded_items());
     let cache_dir = crate::thumbnail_loader::thumbnail_cache_dir();
@@ -108,6 +109,7 @@ fn build_common_filters(win: &MainWindow) -> CommonFilters {
         allowed_extensions: split_csv(g.get_allowed_extensions()),
         excluded_extensions: split_csv(g.get_excluded_extensions()),
         min_file_size_bytes,
+        max_file_size_bytes,
     }
 }
 
@@ -119,8 +121,8 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>) ->
         let d = win.global::<DuplicateSettings>();
         ScanRequest::DuplicateFiles {
             dirs: dirs.clone(),
-            check_method: StringComboBoxItems::value_from_config_name(&d.get_check_method_value(), &items.duplicates_check_method, CheckingMethod::Hash),
-            hash_type: StringComboBoxItems::value_from_config_name(&d.get_hash_type_value(), &items.duplicates_hash_type, HashType::Blake3),
+            check_method: StringComboBoxItems::value_from_idx(&items.duplicates_check_method, d.get_check_method(), CheckingMethod::Hash),
+            hash_type: StringComboBoxItems::value_from_idx(&items.duplicates_hash_type, d.get_hash_type(), HashType::Blake3),
             use_cache: win.global::<GeneralSettings>().get_use_cache(),
             filters: filters.clone(),
         }
@@ -133,10 +135,10 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>) ->
             let s = win.global::<SimilarImagesSettings>();
             ScanRequest::SimilarImages {
                 dirs,
-                similarity_preset: StringComboBoxItems::value_from_config_name(&s.get_similarity_preset_value(), &items.similarity_preset, SimilarityPreset::Medium),
-                hash_size: StringComboBoxItems::value_from_config_name(&s.get_hash_size_value(), &items.hash_size, 16),
-                hash_alg: StringComboBoxItems::value_from_config_name(&s.get_hash_alg_value(), &items.hash_alg, HashAlg::Mean),
-                image_filter: StringComboBoxItems::value_from_config_name(&s.get_image_filter_value(), &items.image_filter, FilterType::Triangle),
+                similarity_preset: StringComboBoxItems::value_from_idx(&items.similarity_preset, s.get_similarity_preset(), SimilarityPreset::Medium),
+                hash_size: StringComboBoxItems::value_from_idx(&items.hash_size, s.get_hash_size_idx(), 16),
+                hash_alg: StringComboBoxItems::value_from_idx(&items.hash_alg, s.get_hash_alg_idx(), HashAlg::Mean),
+                image_filter: StringComboBoxItems::value_from_idx(&items.image_filter, s.get_image_filter_idx(), FilterType::Triangle),
                 ignore_same_size: s.get_ignore_same_size(),
                 filters,
             }
@@ -147,8 +149,8 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>) ->
             let b = win.global::<BigFilesSettings>();
             ScanRequest::BigFiles {
                 dirs,
-                search_mode: StringComboBoxItems::value_from_config_name(&b.get_search_mode_value(), &items.biggest_files_method, SearchMode::BiggestFiles),
-                count: StringComboBoxItems::value_from_config_name(&b.get_count_value(), &items.big_files_count, 50),
+                search_mode: StringComboBoxItems::value_from_idx(&items.biggest_files_method, b.get_search_mode_idx(), SearchMode::BiggestFiles),
+                count: StringComboBoxItems::value_from_idx(&items.big_files_count, b.get_count_idx(), 50),
                 filters,
             }
         }
@@ -205,7 +207,7 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>) ->
                 filters,
                 music_similarity: sim.bits(),
                 approximate: m.get_approximate(),
-                check_method: StringComboBoxItems::value_from_config_name(&m.get_check_method_value(), &items.same_music_check_method, CheckingMethod::AudioTags),
+                check_method: StringComboBoxItems::value_from_idx(&items.same_music_check_method, m.get_check_method_idx(), CheckingMethod::AudioTags),
             }
         }
         ActiveTool::BadNames => {

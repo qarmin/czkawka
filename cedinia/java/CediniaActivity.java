@@ -37,6 +37,16 @@ public class CediniaActivity extends NativeActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        // Move the task to the background instead of finishing the Activity.
+        // This mirrors the Home-button behaviour: tapping the launcher icon
+        // will resume the existing instance rather than recreating it from
+        // scratch (which is the default NativeActivity behaviour when back
+        // is pressed on the root activity).
+        moveTaskToBack(true);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         CediniaFilePicker.handleActivityResult(this, requestCode, resultCode, data);

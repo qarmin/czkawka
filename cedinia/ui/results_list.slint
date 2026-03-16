@@ -1,10 +1,8 @@
-
-
 import { CediniaColors } from "colors.slint";
 import { FileEntry, FileEntryIdx, ScanState } from "common.slint";
 import { AppState } from "app_state.slint";
 import { Translations } from "translations.slint";
-import { FileRow, TouchButton, StatusChip } from "components.slint";
+import { FileRow, StatusChip, TouchButton } from "components.slint";
 import { ListView } from "std-widgets.slint";
 
 export component ResultsList {
@@ -20,8 +18,7 @@ export component ResultsList {
     in property <bool>        has_gallery_mode: false;
     in property <bool>        has_size_select: false;
     in property <bool>        has_resolution_select: false;
-
-
+    in property <bool>        extra_as_line2: false;
 
     property <int> menu_state: 0;
 
@@ -42,13 +39,6 @@ export component ResultsList {
                 padding-top: 8px;
                 padding-bottom: 8px;
                 spacing: 8px;
-
-                if AppState.selected_count > 0 : StatusChip {
-                    label: AppState.selected_count;
-                    chip_color: CediniaColors.accent_muted;
-                    text_color: CediniaColors.accent_light;
-                    vertical-stretch: 0.0;
-                }
 
                 if root.can_delete && AppState.selected_count > 0 : TouchButton {
                     label: "X";
@@ -72,6 +62,13 @@ export component ResultsList {
                     bg: CediniaColors.accent_muted;
                     fg: CediniaColors.accent_light;
                     clicked => { AppState.rename_selected(); }
+                }
+
+                if AppState.selected_count > 0 : StatusChip {
+                    label: AppState.selected_count;
+                    chip_color: CediniaColors.accent_muted;
+                    text_color: CediniaColors.accent_light;
+                    vertical-stretch: 0.0;
                 }
 
                 Rectangle { horizontal-stretch: 1.0; }
@@ -107,13 +104,14 @@ export component ResultsList {
             vertical-stretch: 1.0;
 
             for entry[idx] in entries : FileRow {
-                name:      entry.val_str[FileEntryIdx.name_idx];
-                path:      entry.val_str[FileEntryIdx.path_idx];
-                size:      entry.val_str[FileEntryIdx.size_idx];
-                val_str:   entry.val_str;
-                checked:   entry.checked;
-                is_header: entry.is_header;
-                is_even:   mod(idx, 2) == 0;
+                name:           entry.val_str[FileEntryIdx.name_idx];
+                path:           entry.val_str[FileEntryIdx.path_idx];
+                size:           entry.val_str[FileEntryIdx.size_idx];
+                val_str:        entry.val_str;
+                checked:        entry.checked;
+                is_header:      entry.is_header;
+                is_even:        mod(idx, 2) == 0;
+                extra_as_line2: root.extra_as_line2 && !entry.is_header;
                 toggle_checked => { AppState.toggle_file_checked(idx); }
                 open_item   => { AppState.open_path(entry.val_str[FileEntryIdx.path_idx] == "" ? entry.val_str[FileEntryIdx.name_idx] : entry.val_str[FileEntryIdx.path_idx] + "/" + entry.val_str[FileEntryIdx.name_idx]); }
                 open_parent => { AppState.open_parent_folder(entry.val_str[FileEntryIdx.path_idx]); }
