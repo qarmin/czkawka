@@ -59,6 +59,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
+      - name: Generate keystores
+        run: just gen_keystores
+
       - name: Build APK (debug)
         run: |
           cargo apk build -p cedinia --lib
@@ -121,6 +124,9 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-release-v1
           restore-keys: |
             ${{ runner.os }}-cargo-
+
+      - name: Generate keystores
+        run: just gen_keystores
 
       - name: Build APK (release)
         run: |
