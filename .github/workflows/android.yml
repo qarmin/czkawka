@@ -60,7 +60,11 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Generate keystores
-        run: just gen_keystores
+        run: |
+          sudo apt update || true
+          sudo apt install -y just
+          
+          just gen_keystores
 
       - name: Build APK (debug)
         run: |
