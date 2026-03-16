@@ -18,7 +18,7 @@
 - **CLI frontend** - for easy automation
 - **GUI frontend** - uses Slint or GTK 4 frameworks
 - **Core library** - allows to reuse functionality in other apps
-- **Android app** - 
+- **Android app** - experimental touch-friendly frontend for Android devices
 - **No spying** - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
 - **Multilingual** - support multiple languages like Polish, English or Italian
 - **Multiple tools to use**:
