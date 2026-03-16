@@ -1,4 +1,4 @@
-name: Quality
+name: 🧹 Quality
 on:
   push:
   pull_request:

@@ -153,7 +153,7 @@ fn main() {
 }
 
 fn hash_image(hash_image: &str) -> Result<(), String> {
-    let img = get_dynamic_image_from_path(hash_image)?;
+    let img = get_dynamic_image_from_path(hash_image, None)?.image;
 
     let hasher_config = HasherConfig::new().hash_size(HASH_SIZE, HASH_SIZE).hash_alg(HASH_ALG).resize_filter(FILTER_TYPE);
     let hasher = hasher_config.to_hasher();
