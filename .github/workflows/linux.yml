@@ -17,7 +17,7 @@ jobs:
       matrix:
         os: [ubuntu-22.04, ubuntu-22.04-arm]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup env
         run: |
@@ -89,7 +89,7 @@ jobs:
             linux_krokiet_all_backends_${{ env.ARCHNAME }}
 
       - name: Store
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
@@ -118,7 +118,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup env
         run: |
@@ -190,7 +190,7 @@ jobs:
             linux_krokiet_heif_raw_all_backends_${{ env.ARCHNAME }}
 
       - name: Store
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}-heif-libraw
           path: |
@@ -218,7 +218,7 @@ jobs:
   linux-cli-musl:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install basic libraries
         run: |
@@ -248,7 +248,7 @@ jobs:
           mv target/x86_64-unknown-linux-musl/debug/czkawka_cli linux_czkawka_cli_musl
 
       - name: Store Linux CLI
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: czkawka_cli-${{ runner.os }}-musl
           path: |
@@ -270,7 +270,7 @@ jobs:
     if: ${{ github.ref != 'refs/heads/master' }}
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install basic libraries
         run: |
@@ -291,7 +291,7 @@ jobs:
           mv target/i686-unknown-linux-gnu/debug/krokiet linux_krokiet_32bit
 
       - name: Store
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: all-32bit-${{ runner.os }}-${{ runner.arch }}-debug
           path: |
@@ -302,7 +302,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/master' }} # Runs only in master, because it is really time consuming
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install basic libraries
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
@@ -341,7 +341,7 @@ jobs:
   linux-tests:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install basic libraries
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
@@ -358,7 +358,7 @@ jobs:
   linux-regression-tests-on-minimal-rust-version:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install basic libraries
         run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev ffmpeg -y
@@ -385,7 +385,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup rust version and target
         run: |

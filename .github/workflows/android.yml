@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Java (required by Android SDK)
         uses: actions/setup-java@v4
@@ -81,7 +81,7 @@ jobs:
           mv target/debug/apk/cedinia.apk cedinia.apk
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: cedinia-${{ env.VERS }}
           path: cedinia.apk

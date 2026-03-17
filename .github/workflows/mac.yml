@@ -17,7 +17,7 @@ jobs:
       matrix:
         os: [macos-latest, macos-15-intel]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup env
         run: |
@@ -103,7 +103,7 @@ jobs:
           mv target/fastci/krokiet mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}
 
       - name: Store MacOS
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
