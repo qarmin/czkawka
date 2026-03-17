@@ -1,0 +1,350 @@
+import { CediniaColors } from "colors.slint";
+import { AppState } from "app_state.slint";
+
+export component ToggleRow {
+    in property <string> label;
+    in property <string> description: "";
+    in-out property <bool> value;
+
+    height: root.description == "" ? 56px : 72px;
+
+    Rectangle {
+        background: ta.has-hover ? CediniaColors.bg_elevated : transparent;
+        animate background { duration: 100ms; }
+
+        ta := TouchArea {
+            clicked => {
+                root.value = !root.value;
+                AppState.save_settings_now();
+            }
+        }
+
+        HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            spacing: 12px;
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                horizontal-stretch: 1.0;
+                spacing: 2px;
+                Text {
+                    text: root.label;
+                    color: CediniaColors.text_primary;
+                    font-size: 15px;
+                }
+                if root.description != "" : Text {
+                    text: root.description;
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    wrap: word-wrap;
+                }
+            }
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                Rectangle {
+                    width: 50px;
+                    height: 28px;
+                    vertical-stretch: 0.0;
+                    border-radius: 14px;
+                    background: root.value ? CediniaColors.accent : CediniaColors.bg_elevated;
+                    animate background { duration: 150ms; }
+
+                    Rectangle {
+                        x: root.value ? parent.width - self.height - 2px : 2px;
+                        y: 2px;
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 12px;
+                        background: #ffffff;
+                        animate x { duration: 150ms; easing: ease-out; }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+export component SegmentRow {
+    in property <string>   label;
+    in property <string>   description: "";
+    in property <[string]> options;
+    in-out property <int>  selected;
+
+    height: root.description == "" ? 72px : 88px;
+
+    VerticalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        spacing: 6px;
+
+        HorizontalLayout {
+            VerticalLayout {
+                horizontal-stretch: 1.0;
+                alignment: LayoutAlignment.center;
+                Text {
+                    text: root.label;
+                    color: CediniaColors.text_primary;
+                    font-size: 14px;
+                }
+                if root.description != "" : Text {
+                    text: root.description;
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 4px;
+            for opt[i] in root.options : Rectangle {
+                horizontal-stretch: 1.0;
+                height: 30px;
+                border-radius: 6px;
+                background: root.selected == i ? CediniaColors.accent_muted : CediniaColors.bg_elevated;
+                border-width: 1px;
+                border-color: root.selected == i ? CediniaColors.accent_light : CediniaColors.divider;
+                animate background { duration: 100ms; }
+
+                TouchArea {
+                    clicked => {
+                        root.selected = i;
+                        AppState.save_settings_now();
+                    }
+                }
+
+                Text {
+                    text: opt;
+                    color: root.selected == i ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                    font-size: 11px;
+                    font-weight: root.selected == i ? 700 : 400;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    overflow: elide;
+                }
+            }
+        }
+    }
+}
+
+
+export component ToolGroupHeader inherits Rectangle {
+    in property <string> label;
+    in property <string> emoji: "";
+
+    height: 40px;
+    background: CediniaColors.accent_muted;
+
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+
+        Text {
+            text: (root.emoji != "" ? root.emoji + "  " : "") + root.label;
+            color: CediniaColors.accent_light;
+            font-size: 12px;
+            font-weight: 700;
+            vertical-alignment: TextVerticalAlignment.center;
+            letter-spacing: 0.8px;
+        }
+    }
+}
+
+
+export component CategoryLabel inherits Rectangle {
+    in property <string> label;
+
+    height: 28px;
+    background: CediniaColors.bg_primary;
+
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+
+        Text {
+            text: label;
+            color: CediniaColors.text_disabled;
+            font-size: 10px;
+            font-weight: 700;
+            vertical-alignment: TextVerticalAlignment.center;
+            letter-spacing: 1px;
+        }
+    }
+}
+
+
+export component DropdownRow {
+//    in property <string>   label;
+    in property <string>   description: "";
+    in property <[string]> options;
+    in-out property <int>  selected;
+    callback changed_selection(int);
+
+    height: description == "" ? 56px : 72px;
+
+    Rectangle {
+        background: row_ta.has-hover ? CediniaColors.bg_elevated : CediniaColors.bg_surface;
+        animate background { duration: 100ms; }
+
+        row_ta := TouchArea {
+            clicked => { dropdown.show(); }
+        }
+
+        HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            spacing: 12px;
+            alignment: LayoutAlignment.center;
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                horizontal-stretch: 1.0;
+                spacing: 2px;
+//                Text {
+//                    text: root.label;
+//                    color: CediniaColors.text_primary;
+//                    font-size: 15px;
+//                }
+//                if root.description != "" :
+                Text {
+                    text: root.description;
+                    color: CediniaColors.text_disabled;
+                    font-size: 11px;
+                    wrap: word-wrap;
+                }
+            }
+
+            Text {
+                text: root.options[root.selected];
+                color: CediniaColors.accent_light;
+                font-size: 13px;
+                font-weight: 700;
+                vertical-alignment: TextVerticalAlignment.center;
+                overflow: TextOverflow.elide;
+                max-width: 180px;
+            }
+        }
+    }
+
+    dropdown := PopupWindow {
+        x: 16px;
+        y: root.height;
+        width: root.width - 32px;
+
+        Rectangle {
+            background: CediniaColors.bg_elevated;
+            border-radius: 8px;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+            drop-shadow-blur: 16px;
+            drop-shadow-color: #000000aa;
+            clip: true;
+
+            VerticalLayout {
+                for opt[i] in root.options : Rectangle {
+                    height: 48px;
+                    background: item_ta.has-hover ? CediniaColors.accent_muted : (i == root.selected ? CediniaColors.accent_muted.with-alpha(0.5) : transparent);
+                    animate background { duration: 80ms; }
+
+                    item_ta := TouchArea {
+                        clicked => {
+                            root.selected = i;
+                            root.changed_selection(i);
+                            AppState.save_settings_now();
+                            dropdown.close();
+                        }
+                    }
+
+                    HorizontalLayout {
+                        padding-left: 20px;
+                        padding-right: 16px;
+                        spacing: 8px;
+
+                        Text {
+                            text: opt;
+                            color: i == root.selected ? CediniaColors.accent_light : CediniaColors.text_primary;
+                            font-size: 15px;
+                            font-weight: i == root.selected ? 700 : 400;
+                            vertical-alignment: TextVerticalAlignment.center;
+                            horizontal-stretch: 1;
+                        }
+
+                        if i == root.selected : Text {
+                            text: "✓";
+                            color: CediniaColors.accent_light;
+                            font-size: 14px;
+                            vertical-alignment: TextVerticalAlignment.center;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+export component TextInputRow {
+    in property <string> label;
+    in property <string> placeholder: "";
+    in-out property <string> value;
+
+    height: 68px;
+
+    Rectangle {
+        background: CediniaColors.bg_surface;
+
+        VerticalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            spacing: 4px;
+
+            Text {
+                text: root.label;
+                color: CediniaColors.text_secondary;
+                font-size: 11px;
+                font-weight: 600;
+            }
+
+            Rectangle {
+                height: 36px;
+                border-radius: 6px;
+                background: CediniaColors.bg_elevated;
+                border-width: 1px;
+                border-color: inp.has-focus ? CediniaColors.accent : CediniaColors.divider;
+                animate border-color { duration: 120ms; }
+
+                HorizontalLayout {
+                    padding-left: 10px;
+                    padding-right: 10px;
+
+                    inp := TextInput {
+                        text <=> root.value;
+                        color: CediniaColors.text_primary;
+                        font-size: 13px;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        single-line: true;
+                        accepted => { AppState.save_settings_now(); }
+                    }
+                }
+
+
+                if inp.text == "" && !inp.has-focus : Text {
+                    x: 10px;
+                    y: 0px;
+                    height: parent.height;
+                    width: parent.width - 20px;
+                    text: root.placeholder;
+                    color: CediniaColors.text_disabled;
+                    font-size: 13px;
+                    vertical-alignment: TextVerticalAlignment.center;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,225 @@
+export global Translations {
+    // App / top bar titles
+    in-out property <string> app_name_text:                "Cedinia";
+    in-out property <string> tool_duplicate_files_text:    "Duplicates";
+    in-out property <string> tool_empty_folders_text:      "Empty Folders";
+    in-out property <string> tool_similar_images_text:     "Similar Images";
+    in-out property <string> tool_empty_files_text:        "Empty Files";
+    in-out property <string> tool_temporary_files_text:    "Temporary Files";
+    in-out property <string> tool_big_files_text:          "Biggest Files";
+    in-out property <string> tool_broken_files_text:       "Broken Files";
+    in-out property <string> tool_bad_extensions_text:     "Bad Extensions";
+    in-out property <string> tool_same_music_text:         "Duplicate Music";
+    in-out property <string> tool_bad_names_text:          "Bad Names";
+    in-out property <string> tool_exif_remover_text:       "EXIF Data";
+    in-out property <string> tool_directories_text:        "Directories";
+    in-out property <string> tool_settings_text:           "Settings";
+
+    // Home screen tool cards
+    in-out property <string> home_dup_description_text:        "Find files with identical content";
+    in-out property <string> home_empty_folders_description_text: "Directories without content";
+    in-out property <string> home_similar_images_description_text: "Find visually similar photos";
+    in-out property <string> home_empty_files_description_text: "Files with zero size";
+    in-out property <string> home_temp_files_description_text: "Temporary and cached files";
+    in-out property <string> home_big_files_description_text:  "Biggest/Smallest files on disk";
+    in-out property <string> home_broken_files_description_text: "PDF, audio, images, archives";
+    in-out property <string> home_bad_extensions_description_text: "Files with incorrect extension";
+    in-out property <string> home_same_music_description_text: "Similar audio files by tags";
+    in-out property <string> home_bad_names_description_text:  "Files with problematic characters in name";
+    in-out property <string> home_exif_description_text:       "Images with EXIF metadata";
+
+    // Results list
+    in-out property <string> scanning_text:        "Scanning…";
+    in-out property <string> stopping_text:        "Stopping…";
+    in-out property <string> no_results_text:      "No results";
+    in-out property <string> press_start_text:     "Press START to scan";
+    in-out property <string> select_label_text:    "Sel.";
+    in-out property <string> deselect_label_text:  "Des.";
+    in-out property <string> list_label_text:      "List";
+    in-out property <string> gallery_label_text:   "Gal.";
+
+    // Selection popup
+    in-out property <string> selection_popup_title_text:      "Select";
+    in-out property <string> select_all_text:                 "Select all";
+    in-out property <string> select_except_one_text:          "Select except one";
+    in-out property <string> select_except_largest_text:      "Select except largest";
+    in-out property <string> select_except_smallest_text:     "Select except smallest";
+    in-out property <string> select_largest_text:             "Select largest";
+    in-out property <string> select_smallest_text:            "Select smallest";
+    in-out property <string> select_except_highest_res_text:  "Select except highest resolution";
+    in-out property <string> select_except_lowest_res_text:   "Select except lowest resolution";
+    in-out property <string> select_highest_res_text:         "Select highest resolution";
+    in-out property <string> select_lowest_res_text:          "Select lowest resolution";
+    in-out property <string> invert_selection_text:           "Invert selection";
+    in-out property <string> close_text:                      "Close";
+
+    // Deselection popup
+    in-out property <string> deselection_popup_title_text:    "Deselect";
+    in-out property <string> deselect_all_text:               "Deselect all";
+    in-out property <string> deselect_except_one_text:        "Deselect except one";
+
+    // Confirm popup
+    in-out property <string> cancel_text:                     "Cancel";
+    in-out property <string> delete_text:                     "Delete";
+    in-out property <string> rename_text:                     "Rename";
+
+    // Delete errors popup
+    in-out property <string> delete_errors_title_text:        "Failed to delete some files:";
+    in-out property <string> ok_text:                         "OK";
+
+    // Stopping overlay
+    in-out property <string> stopping_overlay_title_text:     "■ Stopping";
+    in-out property <string> stopping_overlay_body_text:      "Finishing current scan…\nPlease wait.";
+
+    // Permission popup
+    in-out property <string> permission_title_text:           "🔒 File Access";
+    in-out property <string> permission_body_text:            "To scan files, the app needs access to device storage. Without this permission, scanning will not be possible.";
+    in-out property <string> grant_text:                      "Grant";
+    in-out property <string> no_permission_scan_warning_text: "No file permission – grant access to scan";
+
+    // Settings screen
+    in-out property <string> settings_tab_general_text:       "General";
+    in-out property <string> settings_tab_tools_text:         "Tools";
+    in-out property <string> settings_tab_diagnostics_text:   "Info";
+
+    in-out property <string> settings_use_cache_text:         "Use cache";
+    in-out property <string> settings_use_cache_desc_text:    "Speeds up subsequent scans (hash/images)";
+    in-out property <string> settings_ignore_hidden_text:     "Ignore hidden files";
+    in-out property <string> settings_ignore_hidden_desc_text: "Files and folders starting with '.'";
+    in-out property <string> settings_scan_label_text:        "SCANNING";
+    in-out property <string> settings_filters_label_text:     "FILTERS (all tools)";
+    in-out property <string> settings_min_file_size_text:     "Min. file size";
+    in-out property <string> settings_excluded_items_text:    "EXCLUDED ITEMS (glob patterns, comma-separated)";
+    in-out property <string> settings_excluded_items_placeholder_text: "e.g. *.tmp, */.git/*, */node_modules/*";
+    in-out property <string> settings_allowed_extensions_text: "ALLOWED EXTENSIONS (empty = all)";
+    in-out property <string> settings_allowed_extensions_placeholder_text: "e.g. jpg, png, mp4";
+    in-out property <string> settings_excluded_extensions_text: "EXCLUDED EXTENSIONS";
+    in-out property <string> settings_excluded_extensions_placeholder_text: "e.g. bak, tmp, log";
+
+    // Settings — Tools section labels
+    in-out property <string> settings_duplicates_header_text: "DUPLICATES";
+    in-out property <string> settings_check_method_label_text: "COMPARISON METHOD";
+    in-out property <string> settings_check_method_text:      "Method";
+    in-out property <string> settings_hash_type_label_text:   "HASH TYPE";
+    in-out property <string> settings_hash_type_text:         "Hash type";
+    in-out property <string> settings_similar_images_header_text: "SIMILAR IMAGES";
+    in-out property <string> settings_similarity_preset_text: "Similarity threshold";
+    in-out property <string> settings_hash_size_text:         "Hash size";
+    in-out property <string> settings_hash_alg_text:          "Hash algorithm";
+    in-out property <string> settings_image_filter_text:      "Resize filter";
+    in-out property <string> settings_ignore_same_size_text:  "Ignore images with the same dimensions";
+    in-out property <string> settings_big_files_header_text:  "BIGGEST FILES";
+    in-out property <string> settings_search_mode_text:       "Search mode";
+    in-out property <string> settings_file_count_text:        "File count";
+    in-out property <string> settings_same_music_header_text: "DUPLICATE MUSIC";
+    in-out property <string> settings_music_check_method_text: "Comparison mode";
+    in-out property <string> settings_music_compare_tags_label_text: "COMPARED TAGS";
+    in-out property <string> settings_music_title_text:       "Title";
+    in-out property <string> settings_music_artist_text:      "Artist";
+    in-out property <string> settings_music_year_text:        "Year";
+    in-out property <string> settings_music_length_text:      "Length";
+    in-out property <string> settings_music_genre_text:       "Genre";
+    in-out property <string> settings_music_bitrate_text:     "Bitrate";
+    in-out property <string> settings_music_approx_text:      "Approximate tag comparison";
+    in-out property <string> settings_broken_files_header_text: "BROKEN FILES";
+    in-out property <string> settings_broken_files_types_label_text: "CHECKED TYPES";
+    in-out property <string> settings_broken_audio_text:      "Audio";
+    in-out property <string> settings_broken_pdf_text:        "PDF";
+    in-out property <string> settings_broken_archive_text:    "Archive";
+    in-out property <string> settings_broken_image_text:      "Image";
+    in-out property <string> settings_bad_names_header_text:  "BAD NAMES";
+    in-out property <string> settings_bad_names_checks_label_text: "CHECKS";
+    in-out property <string> settings_bad_names_uppercase_ext_text: "Uppercase extension";
+    in-out property <string> settings_bad_names_emoji_text:   "Emoji in name";
+    in-out property <string> settings_bad_names_space_text:   "Spaces at start/end";
+    in-out property <string> settings_bad_names_non_ascii_text: "Non-ASCII characters";
+    in-out property <string> settings_bad_names_duplicated_text: "Duplicated characters";
+
+    // Settings — General: new filter strings
+    in-out property <string> settings_max_file_size_text:     "Max. file size";
+    in-out property <string> settings_language_text:          "Language";
+    in-out property <string> settings_language_restart_text:  "Requires app restart";
+    in-out property <string> settings_common_label_text:      "COMMON SETTINGS";
+
+    // Settings — Tools descriptions
+    in-out property <string> settings_hash_type_desc_text:    "Blake3 – fastest; CRC32/xxH3 – alternatives";
+    in-out property <string> settings_similarity_desc_text:   "Very High = only near-identical";
+    in-out property <string> settings_hash_size_desc_text:    "Larger = more accurate, slower";
+
+    // Settings — Info/Diagnostics tab
+    in-out property <string> diagnostics_header_text:         "DIAGNOSTICS";
+    in-out property <string> diagnostics_thumbnails_text:     "Thumbnails";
+    in-out property <string> diagnostics_app_cache_text:      "App cache";
+    in-out property <string> diagnostics_refresh_text:        "Refresh";
+    in-out property <string> diagnostics_clear_thumbnails_text: "Clear thumbnails";
+    in-out property <string> diagnostics_clear_cache_text:    "Clear cache";
+    in-out property <string> diagnostics_collect_test_text:   "Scan test";
+    in-out property <string> diagnostics_collect_test_desc_text: "Scans each volume recursively";
+    in-out property <string> diagnostics_collect_test_run_text: "Run";
+    in-out property <string> diagnostics_collect_test_stop_text: "Stop";
+
+    // About section links
+    in-out property <string> about_repo_text:                 "Repository";
+    in-out property <string> about_donate_text:               "Donate";
+    in-out property <string> about_translate_text:            "Translations";
+
+    // Diagnostics collect-test popup
+    in-out property <string> collect_test_title_text:         "📊 Test results";
+    in-out property <string> collect_test_volumes_text:       "💾 Volumes:";
+    in-out property <string> collect_test_folders_text:       "📁 Folders:";
+    in-out property <string> collect_test_files_text:         "📄 Files:";
+    in-out property <string> collect_test_time_text:          "⏱ Time:";
+    in-out property <string> collect_test_ms_text:            " ms";
+
+    // Directories screen
+    in-out property <string> directories_include_header_text: "Directories to scan";
+    in-out property <string> directories_exclude_header_text: "Excluded directories";
+    in-out property <string> directories_add_text:            "+ Add";
+    in-out property <string> directories_volume_header_text:  "Volumes";
+    in-out property <string> directories_volume_refresh_text: "Refresh";
+    in-out property <string> directories_volume_add_text:     "Add";
+    in-out property <string> no_paths_text:                   "No paths – add below";
+
+    // Gallery / delete popups
+    in-out property <string> gallery_delete_button_text:      "Delete";
+    in-out property <string> gallery_back_text:               "Back";
+    in-out property <string> gallery_confirm_delete_text:     "Yes, delete";
+    in-out property <string> deleting_files_text:             "Deleting files…";
+    in-out property <string> stop_text:                       "Stop";
+    in-out property <string> files_suffix_text:               "files";
+    in-out property <string> scanning_fallback_text:          "Scanning…";
+
+    // About section in diagnostics tab
+    in-out property <string> about_app_label_text:            "ABOUT";
+    in-out property <string> cache_label_text:                "CACHE";
+    in-out property <string> app_subtitle_text:               "In honour of the Battle of Cedynia (972 CE)";
+    in-out property <string> app_license_text:                "Frontend for Czkawka Core  •  GPL-3.0";
+
+    // Bottom nav
+    in-out property <string> nav_home_text:       "Home";
+    in-out property <string> nav_dirs_text:       "Directories";
+    in-out property <string> nav_settings_text:   "Settings";
+
+    // Status messages set from Rust
+    in-out property <string> status_ready_text:                "Ready";
+    in-out property <string> status_stopped_text:              "Stopped";
+    in-out property <string> status_no_results_text:           "No results";
+    in-out property <string> status_deleted_selected_text:     "Deleted selected";
+    in-out property <string> status_deleted_with_errors_text:  "Deleted with errors";
+    in-out property <string> scan_not_started_text:            "Scan not started";
+    in-out property <string> found_items_prefix_text:          "Found";
+    in-out property <string> found_items_suffix_text:          "items";
+    in-out property <string> deleted_items_prefix_text:        "Deleted";
+    in-out property <string> deleted_items_suffix_text:        "items";
+    in-out property <string> deleted_errors_suffix_text:       "errors";
+    in-out property <string> renamed_prefix_text:              "Renamed";
+    in-out property <string> renamed_files_suffix_text:        "files";
+    in-out property <string> renamed_errors_suffix_text:       "errors";
+    in-out property <string> cleaned_exif_prefix_text:         "Cleaned EXIF from";
+    in-out property <string> cleaned_exif_suffix_text:         "files";
+    in-out property <string> cleaned_exif_errors_suffix_text:  "errors";
+
+    // Delete errors popup (more items)
+    in-out property <string> and_more_prefix_text:             "…and";
+    in-out property <string> and_more_suffix_text:             "more";
+}

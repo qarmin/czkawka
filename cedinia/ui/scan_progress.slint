@@ -1,0 +1,74 @@
+import { CediniaColors } from "colors.slint";
+import { AppState } from "app_state.slint";
+import { ScanState } from "common.slint";
+import { Translations } from "translations.slint";
+
+export component ScanProgressBar {
+    visible: AppState.scan_state == ScanState.Scanning;
+    height: self.visible ? 52px : 0px;
+    animate height { duration: 200ms; easing: ease; }
+
+    Rectangle {
+        background: CediniaColors.bg_surface;
+        border-width: 1px;
+        border-color: CediniaColors.divider;
+
+        VerticalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            padding-top: 6px;
+            padding-bottom: 6px;
+            spacing: 4px;
+
+            HorizontalLayout {
+                Text {
+                    text: AppState.progress.step_name != "" ? AppState.progress.step_name : Translations.scanning_fallback_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    horizontal-stretch: 1.0;
+                    overflow: elide;
+                }
+
+                if !AppState.progress.is_indeterminate : Text {
+                    text: AppState.progress.all_progress > 0
+                        ? (AppState.progress.current_progress + " / " + AppState.progress.all_progress)
+                        : (AppState.progress.current_progress + " " + Translations.files_suffix_text);
+                    color: CediniaColors.accent_light;
+                    font-size: 12px;
+                    font-weight: 700;
+                }
+                if AppState.progress.is_indeterminate : Text {
+                    text: "…";
+                    color: CediniaColors.text_disabled;
+                    font-size: 12px;
+                    font-weight: 700;
+                }
+            }
+
+
+            if !AppState.progress.is_indeterminate && AppState.progress.all_progress > 0 : Rectangle {
+                horizontal-stretch: 1.0;
+                height: 4px;
+                border-radius: 2px;
+                background: CediniaColors.bg_elevated;
+
+                Rectangle {
+                    x: 0;
+                    height: parent.height;
+                    width: parent.width * AppState.progress.current_progress / AppState.progress.all_progress;
+                    border-radius: 2px;
+                    background: CediniaColors.accent;
+                    animate width { duration: 300ms; easing: ease-out; }
+                }
+            }
+
+
+            if AppState.progress.is_indeterminate : Rectangle {
+                horizontal-stretch: 1.0;
+                height: 4px;
+                border-radius: 2px;
+                background: CediniaColors.accent.with-alpha(0.35);
+            }
+        }
+    }
+}

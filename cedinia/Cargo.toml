@@ -1,0 +1,117 @@
+[package]
+name = "cedinia"
+version = "11.0.1"
+authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
+edition = "2024"
+rust-version = "1.92.0"
+description = "Android touch-friendly GUI for Czkawka Core – named after the Battle of Cedynia (972 AD)"
+license = "GPL-3.0-only"
+homepage = "https://github.com/qarmin/czkawka"
+repository = "https://github.com/qarmin/czkawka"
+build = "build.rs"
+
+# Android requires a cdylib crate type
+[lib]
+name = "cedinia"
+crate-type = ["cdylib", "rlib"]
+
+
+[dependencies]
+czkawka_core = { version = "11.0.1", path = "../czkawka_core" }
+crossbeam-channel = "0.5"
+log = "0.4"
+humansize = "2.1"
+filetime = "0.2"
+serde = "1.0"
+serde_json = "1.0"
+image = { version = "0.25" }
+fast_image_resize = { version = "6.0.0", features = ["image"] }
+
+slint = { version = "1.15.0", default-features = false, features = [
+    "std",
+    "compat-1-2",
+] }
+
+# Translations
+i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
+i18n-embed-fl = "0.10"
+rust-embed = { version = "8.5", features = ["debug-embed"] }
+
+
+[target.'cfg(target_os = "android")'.dependencies]
+slint = { version = "1.15.0", default-features = false, features = [
+    "std",
+    "compat-1-2",
+    "backend-android-activity-06",
+] }
+android-activity = { version = "0.6", features = ["native-activity"] }
+# JNI bindings needed by file_picker_android.rs
+jni = { version = "0.22.1", default-features = false }
+# Log to Android logcat
+android_logger = "0.15.1"
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+rfd = { version = "0.17", default-features = false, features = ["xdg-portal"] }
+trash = "5.2.5"
+slint = { version = "1.15.0", default-features = false, features = [
+    "std",
+    "compat-1-2",
+    "backend-winit",
+    "renderer-winit-femtovg",
+    "renderer-winit-software",
+] }
+
+[build-dependencies]
+slint-build = "1.15"
+# Used by build.rs to compile Java helpers to DEX when cross-compiling for Android.
+# The build.rs itself guards on TARGET containing "android" so this is a no-op on desktop.
+android-build = "0.1.2"
+
+[features]
+default = []
+
+# ── Android packaging metadata (used by cargo-apk) ───────────────────────────
+[package.metadata.android]
+package = "io.github.qarmin.cedinia"
+label = "Cedinia"
+resources = "res"
+
+[package.metadata.android.sdk]
+min_sdk_version = 21
+target_sdk_version = 34
+
+[package.metadata.android.application]
+label = "@string/app_name"
+icon = "@mipmap/ic_launcher"
+
+# Use our NativeActivity subclass so that onActivityResult is intercepted
+# and forwarded to CediniaFilePicker / the Rust JNI callback.
+[package.metadata.android.application.activity]
+name = "android.app.NativeActivity"
+# Prevent Android from destroying and recreating the Activity on common
+# configuration changes (nav-bar inset, keyboard, rotation, locale, …).
+# Without this, setSystemUiVisibility(0) in setupNavBar() causes a
+# screenSize change which Android defers until foreground → causes the
+# "every-other-time restart" pattern.
+config_changes = "orientation|keyboardHidden|screenSize|smallestScreenSize|navigation|uiMode|screenLayout|locale|density|fontScale"
+
+# Full external storage access (needed to scan /sdcard root on Android 11+)
+[[package.metadata.android.uses_permission]]
+name = "android.permission.MANAGE_EXTERNAL_STORAGE"
+
+[[package.metadata.android.uses_permission]]
+name = "android.permission.READ_EXTERNAL_STORAGE"
+
+[[package.metadata.android.uses_permission]]
+name = "android.permission.WRITE_EXTERNAL_STORAGE"
+
+[package.metadata.android.signing.dev]
+path = "android/keystore/debug.keystore"
+keystore_password = "123456"
+
+[package.metadata.android.signing.release]
+path = "android/keystore/release.keystore"
+keystore_password = "123456"
+
+[lints]
+workspace = true

@@ -3,7 +3,8 @@ members = [
     "czkawka_core",
     "czkawka_cli",
     "czkawka_gui",
-    "krokiet"
+    "krokiet",
+    "cedinia"
 ]
 exclude = [
     "misc/test_read_perf",
@@ -12,6 +13,14 @@ exclude = [
     "ci_tester",
 ]
 resolver = "3"
+
+# android-activity 0.6.0 panics when ANativeActivity_onCreate is called a second
+# time (Activity recreation) because ndk_context::initialize_android_context
+# asserts previous.is_none().  The fix (OnceLock, init once with Application ref)
+# is merged to main but not yet released.  Remove this patch once 0.6.1+ ships.
+# Affects only android-activity ^0.6 (cedinia); Slint's ^0.5 dependency is unaffected.
+[patch.crates-io]
+android-activity = { git = "https://github.com/rust-mobile/android-activity", rev = "43de2770b91b1b8ff870f00551f89f04062216cc" }
 
 [profile.release]
 # panic = "unwind" in opposite to "abort", allows to catch panic!()
@@ -76,6 +85,7 @@ clippy.too_many_arguments = "allow" # Sometimes such functions are needed
 clippy.type_complexity = "allow" # Sometimes such types are needed
 clippy.collapsible_else_if = "allow" # Sometimes it is more readable
 clippy.iter_on_single_items = "allow" # Allows to extend slice items, without needing to converting it when number of items change
+clippy.needless_range_loop = "allow" # Sometimes it is more readable
 
 clippy.doc_broken_link = "warn"
 clippy.ip_constant = "warn"

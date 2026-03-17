@@ -1,8 +1,17 @@
 import os
 import re
+import sys
 
 script_path = os.path.dirname(os.path.abspath(__file__))
-ui_path = f"{script_path}/../krokiet/ui"
+
+if len(sys.argv) < 2:
+    print("Usage: python delete_unused_krokiet_slint_imports.py <folder>")
+    print("  Example: python delete_unused_krokiet_slint_imports.py krokiet")
+    print("  Example: python delete_unused_krokiet_slint_imports.py cedinia")
+    sys.exit(1)
+
+folder = sys.argv[1]
+ui_path = f"{script_path}/../{folder}/ui"
 
 collected_files = [
     os.path.join(root, file) for root, _, files in os.walk(ui_path) for file in files if file.endswith(".slint")

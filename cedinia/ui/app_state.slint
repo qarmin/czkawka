@@ -1,0 +1,195 @@
+import { ActiveTool, CollectTestResult, ProgressData, ScanState, VolumeEntry } from "common.slint";
+
+export global GeneralSettings {
+    in-out property <bool>   use_cache:           true;
+    in-out property <bool>   ignore_hidden:        true;
+
+    in-out property <int>    min_file_size_idx:    0;
+    in-out property <[string]> min_file_size_options: ["Brak", "1 KB", "8 KB", "64 KB", "1 MB"];
+
+    in-out property <int>    max_file_size_idx:    4;
+    in-out property <[string]> max_file_size_options: ["16 KB", "1 MB", "10 MB", "100 MB", "Bez limitu"];
+
+    in-out property <int>    language_idx:         0;
+    in-out property <[string]> language_options:   ["English", "Polski (Polish)"];
+
+    in-out property <string> excluded_items:       "";
+
+    in-out property <string> allowed_extensions:   "";
+
+    in-out property <string> excluded_extensions:  "";
+}
+
+
+export global DuplicateSettings {
+    in-out property <int>    check_method:         0;
+    in-out property <string> check_method_value:   "hash";
+    in-out property <[string]> check_method_options: ["Hash", "Nazwa", "Rozm+Naz", "Rozmiar"];
+
+    in-out property <int>    hash_type:            0;
+    in-out property <string> hash_type_value:      "blake3";
+    in-out property <[string]> hash_type_options:  ["Blake3", "CRC32", "XXH3"];
+}
+
+
+export global SimilarImagesSettings {
+    in-out property <int>    similarity_preset:       2;
+    in-out property <string> similarity_preset_value: "medium";
+    in-out property <[string]> similarity_preset_options: ["B.Wys.", "Wysoki", "Średni", "Niski", "B.Niski", "Min."];
+
+    in-out property <int>    hash_size_idx:           1;
+    in-out property <string> hash_size_value:         "16";
+    in-out property <[string]> hash_size_options:     ["8", "16", "32", "64"];
+
+    in-out property <int>    hash_alg_idx:            0;
+    in-out property <string> hash_alg_value:          "mean";
+    in-out property <[string]> hash_alg_options:      ["Mean", "Gradient", "D.Grad.", "V.Grad.", "Median", "Blockhash"];
+
+    in-out property <int>    image_filter_idx:        1;
+    in-out property <string> image_filter_value:      "triangle";
+    in-out property <[string]> image_filter_options:  ["Nearest", "Triangle", "CatmullRom", "Gaussian", "Lanczos3"];
+
+    in-out property <bool>   ignore_same_size:        false;
+}
+
+
+export global SameMusicSettings {
+    in-out property <bool>   title:              true;
+    in-out property <bool>   artist:             true;
+    in-out property <bool>   year:               false;
+    in-out property <bool>   length:             false;
+    in-out property <bool>   genre:              false;
+    in-out property <bool>   bitrate:            false;
+    in-out property <bool>   approximate:        false;
+    in-out property <int>    check_method_idx:   0;
+    in-out property <string> check_method_value: "tags";
+    in-out property <[string]> check_method_options: ["Tagi", "Audio"];
+}
+
+
+export global BrokenFilesSettings {
+    in-out property <bool> check_audio:   true;
+    in-out property <bool> check_pdf:     true;
+    in-out property <bool> check_archive: true;
+    in-out property <bool> check_image:   true;
+}
+
+
+export global BadNamesSettings {
+    in-out property <bool> uppercase_extension:         true;
+    in-out property <bool> emoji_used:                  true;
+    in-out property <bool> space_at_start_or_end:       true;
+    in-out property <bool> non_ascii_graphical:         true;
+    in-out property <bool> remove_duplicated_non_alpha: true;
+}
+
+
+export global BigFilesSettings {
+    in-out property <int>    search_mode_idx:   0;
+    in-out property <string> search_mode_value: "biggest";
+    in-out property <[string]> search_mode_options: ["Największe", "Najmniejsze"];
+
+    in-out property <int>    count_idx:         1;
+    in-out property <string> count_value:       "50";
+    in-out property <[string]> count_options:   ["5", "50", "500", "5000"];
+}
+
+
+export global AppState {
+    in-out property <ActiveTool> active_tool:    ActiveTool.Home;
+
+    in-out property <ActiveTool> last_scan_tool: ActiveTool.DuplicateFiles;
+    in-out property <ScanState>  scan_state:  ScanState.Idle;
+    in-out property <ProgressData> progress: { step_name: "", current_progress: 0, all_progress: 0, is_indeterminate: false };
+    in-out property <string>     status_message: "Gotowy / Ready";
+    in-out property <bool>       show_included_dirs: false;
+    in-out property <bool>       show_excluded_dirs: false;
+    in-out property <bool>       bottom_sheet_open: false;
+    in-out property <string>     bottom_sheet_title: "";
+    in-out property <int>        selected_count: 0;
+
+
+    in-out property <length> inset_top:    0px;
+    in-out property <length> inset_bottom: 0px;
+
+
+    callback tool_changed(ActiveTool);
+    callback scan_requested();
+    callback stop_requested();
+    callback delete_selected();
+    callback rename_selected();
+    callback clean_exif_selected();
+    callback select_all();
+    callback deselect_all();
+    callback select_all_except_one();
+    callback deselect_all_except_one();
+    callback invert_selection();
+    callback select_largest_per_group();
+    callback select_all_except_largest();
+    callback select_smallest_per_group();
+    callback select_all_except_smallest();
+    callback select_highest_resolution_per_group();
+    callback select_all_except_highest_resolution();
+    callback select_lowest_resolution_per_group();
+    callback select_all_except_lowest_resolution();
+    callback toggle_file_checked(int);
+    callback pick_include_dir();
+    callback pick_exclude_dir();
+    callback add_include_dir(string);
+    callback remove_include_dir(string);
+    callback add_exclude_dir(string);
+    callback remove_exclude_dir(string);
+
+    in-out property <[VolumeEntry]> storage_volumes: [];
+    callback list_storage_volumes();
+    callback save_settings_now();
+
+    callback open_path(string);
+    callback open_parent_folder(string);
+
+    callback request_storage_permission();
+    in-out property <bool> storage_permission_granted: true;
+    in-out property <bool> show_permission_popup: false;
+
+    callback run_collect_test();
+    callback stop_collect_test();
+    in-out property <CollectTestResult> collect_test_result: { volumes: 0, files: 0, folders: 0, elapsed_ms: 0 };
+    in-out property <bool> collect_test_running: false;
+    in-out property <bool> collect_test_done: false;
+
+    in-out property <bool> similar_images_gallery_mode: true;
+
+
+    in-out property <string> diag_thumbnails_size: "–";
+    in-out property <string> diag_app_cache_size:  "–";
+    in-out property <bool>   diag_refresh_running:  false;
+    callback refresh_diag_cache_info();
+    callback clear_thumbnails_cache();
+    callback apply_language_change();
+    callback clear_app_cache();
+
+    callback open_url(string);
+
+
+    in-out property <bool>   gallery_delete_popup_visible: false;
+    in-out property <string> gallery_delete_message:       "";
+    in-out property <string> gallery_delete_warning:       "";
+    callback request_gallery_delete();
+    callback confirm_gallery_delete();
+
+
+    in-out property <bool>   delete_running:        false;
+    in-out property <string> delete_progress_text:  "";
+    callback delete_stop_requested();
+
+
+    in-out property <bool>   delete_errors_visible: false;
+    in-out property <string> delete_errors_text:    "";
+
+
+    in-out property <bool>   confirm_popup_visible: false;
+    in-out property <string> confirm_popup_message: "";
+    in-out property <string> confirm_popup_action:  "";
+    callback confirm_popup_ok();
+    callback confirm_popup_cancel();
+}

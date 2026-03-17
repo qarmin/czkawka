@@ -58,7 +58,23 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 folder = sys.argv[1]
-rust_translation_content = open(f"{folder}/src/connect_translation.rs", "r", encoding="utf-8").read()
+
+# Support both krokiet (connect_translation.rs) and cedinia (translations.rs)
+translation_rs_candidates = [
+    f"{folder}/src/connect_translation.rs",
+    f"{folder}/src/translations.rs",
+]
+rust_translation_file = None
+for candidate in translation_rs_candidates:
+    if os.path.exists(candidate):
+        rust_translation_file = candidate
+        break
+
+if rust_translation_file is None:
+    print(f"Error: Could not find a translation Rust file in {folder}/src/ (tried: {translation_rs_candidates})")
+    sys.exit(1)
+
+rust_translation_content = open(rust_translation_file, "r", encoding="utf-8").read()
 
 missing_in_slint = []
 
@@ -72,9 +88,12 @@ arguments = extract_slint_properties(f"{folder}/ui/translations.slint")
 print(f"Found {len(arguments)} arguments in translations.slint")
 
 # Check if all arguments are used in Slint files
+# Skip arguments that are intentionally set from Rust (set_xxx) and not needed in Slint directly
 for argument in arguments:
     if f"Translations.{argument}" not in slint_files_content:
-        missing_in_slint.append(argument)
+        # If the argument is set from Rust, it's intentionally Rust-side — don't flag it
+        if f"set_{argument}(" not in rust_translation_content:
+            missing_in_slint.append(argument)
 missing_in_slint.sort()
 
 missing_in_rust = []
@@ -88,7 +107,10 @@ if len(missing_in_rust) > 0:
         "---- Arguments not used in Rust translation file: " + ", ".join(format_green(arg) for arg in missing_in_rust)
     )
 if len(missing_in_slint) > 0:
-    print("---- Arguments not used in Slint files: " + ", ".join(format_green(arg) for arg in missing_in_slint))
+    print(
+        "---- Arguments not used in Slint files(you need to bind them in slint like Translation.translation_item or remove): "
+        + ", ".join(format_green(arg) for arg in missing_in_slint)
+    )
 
 if len(missing_in_slint) > 0 or len(missing_in_rust) > 0:
     sys.exit(1)

@@ -1,4 +1,5 @@
 import re
+import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -23,12 +24,12 @@ def extract_settings_properties(settings_file: Path) -> Dict[str, str]:
     return properties
 
 
-def find_rust_files(project_root: Path) -> List[Path]:
+def find_rust_files(project_root: Path, folder: str) -> List[Path]:
     rust_files = []
-    krokiet_src = project_root / "krokiet" / "src"
+    src_dir = project_root / folder / "src"
 
-    if krokiet_src.exists():
-        for rust_file in krokiet_src.rglob("*.rs"):
+    if src_dir.exists():
+        for rust_file in src_dir.rglob("*.rs"):
             rust_files.append(rust_file)
 
     return rust_files
@@ -65,7 +66,14 @@ def main() -> None:
     script_dir = Path(__file__).parent
     project_root = script_dir.parent
 
-    settings_file = project_root / "krokiet" / "ui" / "settings.slint"
+    if len(sys.argv) < 2:
+        print("Usage: python find_unused_settings_properties.py <folder>")
+        print("  Example: python find_unused_settings_properties.py krokiet")
+        print("  Example: python find_unused_settings_properties.py cedinia")
+        sys.exit(1)
+
+    folder = sys.argv[1]
+    settings_file = project_root / folder / "ui" / "settings.slint"
 
     if not settings_file.exists():
         print(f"Error: Settings file not found at {settings_file}")
@@ -76,7 +84,7 @@ def main() -> None:
     print(f"Found {len(properties)} properties in settings.slint\n")
 
     print("Finding Rust files...")
-    rust_files = find_rust_files(project_root)
+    rust_files = find_rust_files(project_root, folder)
     print(f"Found {len(rust_files)} Rust files to check\n")
 
     # Check each property

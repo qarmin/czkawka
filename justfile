@@ -1,4 +1,13 @@
 set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
+set export := true
+
+# Android related commands require these env variables to be set in your shell:
+# export ANDROID_HOME=~/android-sdk
+# export ANDROID_NDK_HOME=~/android-sdk/ndk/26.x.x
+
+adb := "adb"
+apk_package := "io.github.qarmin.cedinia"
+apk_activity := "android.app.NativeActivity"
 
 build_all: && fix
     cargo build --release
@@ -76,13 +85,8 @@ clip:
 fix:
     ruff format --line-length 120 --no-cache
     mypy misc --strict
-    python3 misc/delete_unused_krokiet_slint_imports.py
-    python3 misc/find_unused_fluent_translations.py czkawka_gui
-    python3 misc/find_unused_fluent_translations.py krokiet
-    python3 misc/find_unused_fluent_translations.py czkawka_core
-    python3 misc/find_unused_slint_translations.py krokiet
-    python3 misc/find_unused_callbacks.py krokiet
-    # python3 misc/find_unused_settings_properties.py
+
+    bash misc/run_checks.sh
 
     cargo +nightly fmt
     cargo clippy --fix --allow-dirty --allow-staged --all-features --all-targets
@@ -108,6 +112,55 @@ unused_features:
     xdg-open czkawka_cli/report.html
     xdg-open czkawka_core/report.html
     xdg-open czkawka_gui/report.html
+
+##################### ANDROID #####################
+
+keystore_dir := "cedinia/android/keystore"
+
+gen_keystores:
+    mkdir -p {{keystore_dir}}
+    [ -f {{keystore_dir}}/debug.keystore ] || keytool -genkey -v \
+        -keystore {{keystore_dir}}/debug.keystore \
+        -alias debug -keyalg RSA -keysize 2048 -validity 10000 \
+        -storepass 123456 -keypass 123456 \
+        -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, S=Debug, C=US" \
+        -noprompt
+    [ -f {{keystore_dir}}/release.keystore ] || keytool -genkey -v \
+        -keystore {{keystore_dir}}/release.keystore \
+        -alias release -keyalg RSA -keysize 2048 -validity 10000 \
+        -storepass 123456 -keypass 123456 \
+        -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
+        -noprompt
+
+android_build: gen_keystores
+    cargo apk build -p cedinia --lib
+
+android_build_release: gen_keystores
+    cargo apk build -p cedinia --lib --release
+
+android_install:
+    {{adb}} install -r target/debug/apk/cedinia.apk
+
+android_install_release:
+    {{adb}} install -r target/release/apk/cedinia.apk
+
+android_run:
+    {{adb}} shell am start -n {{apk_package}}/{{apk_activity}}
+
+android_log:
+    {{adb}} logcat -s RustStdoutStderr:V *:S
+
+android_logc:
+    {{adb}} logcat | grep edinia
+
+android_devices:
+    {{adb}} devices -l
+
+android: android_build android_install android_run
+
+androidr: android_build_release android_install_release android_run
+
+##################### BENCHMARKS #####################
 
 prepare_binaries:
     mkdir -p benchmarks

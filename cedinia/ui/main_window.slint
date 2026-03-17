@@ -1,0 +1,301 @@
+import { CediniaColors } from "colors.slint";
+import { ActiveTool, DirectoryEntry, FileEntry, ScanState, SimilarGroupCard } from "common.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings } from "app_state.slint";
+import { TopAppBar } from "top_bar.slint";
+import { BottomNavBar } from "bottom_nav.slint";
+import { ScanProgressBar } from "scan_progress.slint";
+import { ResultsList } from "results_list.slint";
+import { SimilarImagesGallery } from "similar_images_gallery.slint";
+import { SettingsScreen } from "settings_screen.slint";
+import { HomeScreen } from "home_screen.slint";
+import { DirectoriesScreen } from "directories_screen.slint";
+import { TouchButton } from "components.slint";
+import { Translations } from "translations.slint";
+
+export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, Translations }
+export component MainWindow inherits Window {
+    title: "Cedinia";
+    background: CediniaColors.bg_primary;
+
+    min-width: 320px;
+    min-height: 480px;
+    preferred-width: 390px;
+    preferred-height: 844px;
+
+    in-out property <[FileEntry]>        duplicate_files_model:    [];
+    in-out property <[FileEntry]>        empty_folder_model:       [];
+    in-out property <[FileEntry]>        similar_images_model:     [];
+    in-out property <[SimilarGroupCard]> similar_images_groups:    [];
+    in-out property <[FileEntry]>        empty_files_model:        [];
+    in-out property <[FileEntry]>        temporary_files_model:    [];
+    in-out property <[FileEntry]>        big_files_model:          [];
+    in-out property <[FileEntry]>        broken_files_model:       [];
+    in-out property <[FileEntry]>        bad_extensions_model:     [];
+    in-out property <[FileEntry]>        same_music_model:         [];
+    in-out property <[FileEntry]>        bad_names_model:          [];
+    in-out property <[FileEntry]>        exif_remover_model:       [];
+    in-out property <[DirectoryEntry]>   directories_model:        [];
+
+    VerticalLayout {
+        spacing: 0px;
+        width: parent.width;
+        padding-top:    root.safe-area-insets.top;
+        padding-bottom: max(AppState.inset_bottom, root.safe-area-insets.bottom);
+
+        TopAppBar {
+            title: AppState.active_tool == ActiveTool.Home             ? Translations.app_name_text
+                 : AppState.active_tool == ActiveTool.DuplicateFiles   ? Translations.tool_duplicate_files_text
+                 : AppState.active_tool == ActiveTool.EmptyFolders     ? Translations.tool_empty_folders_text
+                 : AppState.active_tool == ActiveTool.SimilarImages    ? Translations.tool_similar_images_text
+                 : AppState.active_tool == ActiveTool.EmptyFiles       ? Translations.tool_empty_files_text
+                 : AppState.active_tool == ActiveTool.TemporaryFiles   ? Translations.tool_temporary_files_text
+                 : AppState.active_tool == ActiveTool.BigFiles         ? Translations.tool_big_files_text
+                 : AppState.active_tool == ActiveTool.BrokenFiles      ? Translations.tool_broken_files_text
+                 : AppState.active_tool == ActiveTool.BadExtensions    ? Translations.tool_bad_extensions_text
+                 : AppState.active_tool == ActiveTool.SameMusic        ? Translations.tool_same_music_text
+                 : AppState.active_tool == ActiveTool.BadNames         ? Translations.tool_bad_names_text
+                 : AppState.active_tool == ActiveTool.ExifRemover      ? Translations.tool_exif_remover_text
+                 : AppState.active_tool == ActiveTool.Directories      ? Translations.tool_directories_text
+                 : AppState.active_tool == ActiveTool.Settings         ? Translations.tool_settings_text
+                 : Translations.app_name_text;
+        }
+
+        ScanProgressBar {}
+
+        Rectangle {
+            vertical-stretch: 1.0;
+            background: CediniaColors.bg_primary;
+
+            if AppState.active_tool == ActiveTool.Home : HomeScreen {
+                height: parent.height;
+                width: parent.width;
+            }
+
+            if AppState.active_tool == ActiveTool.Settings : SettingsScreen {
+                height: parent.height;
+                width: parent.width;
+            }
+
+            if AppState.active_tool == ActiveTool.Directories : DirectoriesScreen {
+                height: parent.height;
+                width: parent.width;
+                directories: directories_model;
+            }
+
+            if AppState.active_tool == ActiveTool.DuplicateFiles : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: duplicate_files_model;
+                tool_title: Translations.tool_duplicate_files_text;
+                tool_emoji: "📂";
+                is_grouped: true;
+            }
+
+            if AppState.active_tool == ActiveTool.EmptyFolders : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: empty_folder_model;
+                tool_title: Translations.tool_empty_folders_text;
+                tool_emoji: "📁";
+            }
+
+            if AppState.active_tool == ActiveTool.SimilarImages && !AppState.similar_images_gallery_mode : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: similar_images_model;
+                tool_title: Translations.tool_similar_images_text;
+                tool_emoji: "🖼";
+                is_grouped: true;
+                has_gallery_mode: true;
+                has_size_select: true;
+                has_resolution_select: true;
+            }
+
+            if AppState.active_tool == ActiveTool.SimilarImages && AppState.similar_images_gallery_mode : SimilarImagesGallery {
+                height: parent.height;
+                width: parent.width;
+                groups: similar_images_groups;
+            }
+
+            if AppState.active_tool == ActiveTool.EmptyFiles : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: empty_files_model;
+                tool_title: Translations.tool_empty_files_text;
+                tool_emoji: "📄";
+            }
+
+            if AppState.active_tool == ActiveTool.TemporaryFiles : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: temporary_files_model;
+                tool_title: Translations.tool_temporary_files_text;
+                tool_emoji: "🗑";
+            }
+
+            if AppState.active_tool == ActiveTool.BigFiles : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: big_files_model;
+                tool_title: Translations.tool_big_files_text;
+                tool_emoji: "📦";
+            }
+
+            if AppState.active_tool == ActiveTool.BrokenFiles : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: broken_files_model;
+                tool_title: Translations.tool_broken_files_text;
+                tool_emoji: "⚠";
+                extra_as_line2: true;
+            }
+
+            if AppState.active_tool == ActiveTool.BadExtensions : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: bad_extensions_model;
+                tool_title: Translations.tool_bad_extensions_text;
+                tool_emoji: "🏷";
+                can_delete: false;
+                can_rename: true;
+                extra_as_line2: true;
+            }
+
+            if AppState.active_tool == ActiveTool.SameMusic : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: same_music_model;
+                tool_title: Translations.tool_same_music_text;
+                tool_emoji: "🎵";
+                is_grouped: true;
+                has_size_select: true;
+            }
+
+            if AppState.active_tool == ActiveTool.BadNames : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: bad_names_model;
+                tool_title: Translations.tool_bad_names_text;
+                tool_emoji: "✏";
+                can_rename: true;
+                extra_as_line2: true;
+            }
+
+            if AppState.active_tool == ActiveTool.ExifRemover : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: exif_remover_model;
+                tool_title: Translations.tool_exif_remover_text;
+                tool_emoji: "📷";
+                can_delete: false;
+                can_clean_exif: true;
+            }
+        }
+
+        BottomNavBar {}
+    }
+
+
+    if AppState.scan_state == ScanState.Stopping : Rectangle {
+        z: 150;
+        background: #000000bb;
+
+        Rectangle {
+            width: min(parent.width - 48px, 300px);
+            height: stopping_content.preferred-height + 48px;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            border-radius: 16px;
+            background: CediniaColors.bg_elevated;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #00000088;
+
+            stopping_content := VerticalLayout {
+                padding: 24px;
+                spacing: 12px;
+                alignment: LayoutAlignment.center;
+
+                Text {
+                    text: Translations.stopping_overlay_title_text;
+                    font-size: 17px;
+                    font-weight: 700;
+                    color: CediniaColors.warning;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+                Text {
+                    text: Translations.stopping_overlay_body_text;
+                    font-size: 13px;
+                    color: CediniaColors.text_secondary;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    wrap: word-wrap;
+                }
+            }
+        }
+    }
+
+
+    if AppState.show_permission_popup : Rectangle {
+        z: 200;
+        background: #00000099;
+        TouchArea { clicked => { AppState.show_permission_popup = false; } }
+
+        Rectangle {
+            width: min(parent.width - 48px, 340px);
+            height: perm_popup.preferred-height + 32px;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            border-radius: 16px;
+            background: CediniaColors.bg_elevated;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #00000088;
+
+            perm_popup := VerticalLayout {
+                padding: 24px;
+                spacing: 16px;
+
+                Text {
+                    text: Translations.permission_title_text;
+                    color: CediniaColors.warning;
+                    font-size: 18px;
+                    font-weight: 700;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                Text {
+                    text: Translations.permission_body_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 13px;
+                    wrap: word-wrap;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                HorizontalLayout {
+                    spacing: 12px;
+                    TouchButton {
+                        label: Translations.cancel_text;
+                        bg: CediniaColors.bg_surface;
+                        fg: CediniaColors.text_secondary;
+                        min_h: 48px;
+                        horizontal-stretch: 1.0;
+                        clicked => { AppState.show_permission_popup = false; }
+                    }
+                    TouchButton {
+                        label: Translations.grant_text;
+                        bg: CediniaColors.accent;
+                        fg: #000000;
+                        min_h: 48px;
+                        horizontal-stretch: 1.0;
+                        clicked => {
+                            AppState.request_storage_permission();
+                            AppState.show_permission_popup = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

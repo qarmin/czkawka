@@ -29,7 +29,7 @@ pub struct GuiCompareImages {
     pub shared_numbers_of_groups: Rc<RefCell<u32>>,
     pub shared_current_of_groups: Rc<RefCell<u32>>,
     pub shared_current_path: Rc<RefCell<Option<TreePath>>>,
-    pub shared_image_cache: Rc<RefCell<Vec<(String, String, gtk4::Image, gtk4::Image, TreePath)>>>,
+    pub shared_image_cache: Rc<RefCell<Vec<(String, String, gtk4::Picture, gtk4::Picture, TreePath)>>>,
     pub shared_using_for_preview: Rc<RefCell<(Option<TreePath>, Option<TreePath>)>>,
 }
 

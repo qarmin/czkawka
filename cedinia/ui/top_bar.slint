@@ -1,0 +1,65 @@
+import { CediniaColors } from "colors.slint";
+import { AppState } from "app_state.slint";
+import { ScanState } from "common.slint";
+
+export component TopAppBar {
+    in property <string> title: "Cedinia";
+    height: 56px;
+
+    Rectangle {
+        background: CediniaColors.bg_elevated;
+        drop-shadow-color: #00000066;
+        drop-shadow-blur: 6px;
+        drop-shadow-offset-y: 2px;
+
+        HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 12px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            spacing: 10px;
+            alignment: LayoutAlignment.start;
+
+
+            Image {
+                source: @image-url("../icons/logo.svg");
+                width: 48px;
+                height: 48px;
+                horizontal-alignment: ImageHorizontalAlignment.center;
+                vertical-alignment: ImageVerticalAlignment.center;
+            }
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                horizontal-stretch: 1.0;
+                spacing: 2px;
+                Text {
+                    text: root.title;
+                    color: CediniaColors.accent_light;
+                    font-size: 18px;
+                    font-weight: 700;
+                }
+                Text {
+                    text: AppState.status_message;
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                    overflow: elide;
+                }
+            }
+
+
+            if AppState.scan_state == ScanState.Scanning : Rectangle {
+                width: 10px;
+                height: 10px;
+                border-radius: 5px;
+                background: CediniaColors.accent;
+                vertical-stretch: 0.0;
+                animate opacity {
+                    duration: 800ms;
+                    iteration-count: -1;
+                    easing: ease-in-out;
+                }
+            }
+        }
+    }
+}

@@ -78,7 +78,7 @@ pub fn filtering_messages(record: &Record) -> bool {
         //     return false;
         // }
 
-        ["krokiet", "czkawka", "log_panics"].iter().any(|t| module_path.starts_with(t))
+        ["krokiet", "czkawka", "log_panics", "cedinia"].iter().any(|t| module_path.starts_with(t))
     } else {
         true
     }
