@@ -319,6 +319,9 @@ impl ScanResultHandler for GuiHandler {
                             crate::flc!("status_no_results")
                         };
                         win.global::<AppState>().set_status_message(SharedString::from(status));
+                        if win.global::<crate::GeneralSettings>().get_show_notification() {
+                            crate::notifications::send_scan_completed(file_count);
+                        }
                     }
                 })
                 .expect("Failed to invoke progress update in event loop");

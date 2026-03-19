@@ -140,6 +140,10 @@ pub fn init(app: &AndroidApp) {
 static APP_HANDLE: std::sync::OnceLock<AndroidApp> = std::sync::OnceLock::new();
 static DEX_LOADER_REF: std::sync::OnceLock<Global<JObject<'static>>> = std::sync::OnceLock::new();
 
+pub fn get_android_app() -> Option<&'static AndroidApp> {
+    APP_HANDLE.get()
+}
+
 pub fn launch_pick_directory(is_include: bool) {
     log::info!("launch_pick_directory: is_include={}", is_include);
     let Some(app) = APP_HANDLE.get() else {

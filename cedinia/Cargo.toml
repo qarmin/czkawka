@@ -53,6 +53,7 @@ android_logger = "0.15.1"
 [target.'cfg(not(target_os = "android"))'.dependencies]
 rfd = { version = "0.17", default-features = false, features = ["xdg-portal"] }
 trash = "5.2.5"
+notify-rust = "4"
 slint = { version = "1.15.0", default-features = false, features = [
     "std",
     "compat-1-2",
@@ -104,6 +105,10 @@ name = "android.permission.READ_EXTERNAL_STORAGE"
 
 [[package.metadata.android.uses_permission]]
 name = "android.permission.WRITE_EXTERNAL_STORAGE"
+
+# Required on Android 13+ (API 33) to post system notifications
+[[package.metadata.android.uses_permission]]
+name = "android.permission.POST_NOTIFICATIONS"
 
 [package.metadata.android.signing.dev]
 path = "android/keystore/debug.keystore"

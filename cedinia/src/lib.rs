@@ -8,6 +8,7 @@ pub mod common;
 mod file_picker_android;
 pub mod localizer_cedinia;
 mod model;
+mod notifications;
 mod scan_runner;
 mod scanners;
 mod set_initial_gui_infos;

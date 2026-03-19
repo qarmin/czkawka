@@ -82,6 +82,8 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_use_cache_desc_text(flc!("settings_use_cache_desc").into());
     t.set_settings_ignore_hidden_text(flc!("settings_ignore_hidden").into());
     t.set_settings_ignore_hidden_desc_text(flc!("settings_ignore_hidden_desc").into());
+    t.set_settings_show_notification_text(flc!("settings_show_notification").into());
+    t.set_settings_show_notification_desc_text(flc!("settings_show_notification_desc").into());
     t.set_settings_scan_label_text(flc!("settings_scan_label").into());
     t.set_settings_filters_label_text(flc!("settings_filters_label").into());
     t.set_settings_min_file_size_text(flc!("settings_min_file_size").into());

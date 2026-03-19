@@ -152,6 +152,12 @@ export component SettingsScreen {
                         value <=> GeneralSettings.ignore_hidden;
                     }
                     Divider {}
+                    ToggleRow {
+                        label: Translations.settings_show_notification_text;
+                        description: Translations.settings_show_notification_desc_text;
+                        value <=> GeneralSettings.show_notification;
+                    }
+                    Divider {}
 
                     CategoryLabel { label: Translations.settings_filters_label_text; }
 

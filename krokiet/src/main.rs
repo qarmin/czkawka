@@ -49,6 +49,7 @@ use crate::settings::{connect_changing_settings_preset, create_default_settings_
 use crate::shared_models::SharedModels;
 
 mod audio_player;
+mod notification_manager;
 mod clear_outdated_video_thumbnails;
 mod common;
 mod connect_clean_cache;
@@ -112,6 +113,9 @@ fn main() {
 
     #[cfg(feature = "audio")]
     app.global::<GuiState>().set_audio_feature_enabled(true);
+
+    #[cfg(feature = "notifications")]
+    app.global::<GuiState>().set_notifications_feature_enabled(true);
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let stop_flag: Arc<AtomicBool> = Arc::default();

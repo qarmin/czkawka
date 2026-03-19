@@ -64,6 +64,8 @@ pub struct CediniaSettings {
     pub use_cache: bool,
     #[serde(default = "ttrue")]
     pub ignore_hidden: bool,
+    #[serde(default)]
+    pub show_notification: bool,
     #[serde(default = "default_min_file_size_idx")]
     pub min_file_size_idx: i32,
     #[serde(default = "default_max_file_size_idx")]
@@ -141,6 +143,7 @@ impl Default for CediniaSettings {
         Self {
             use_cache: true,
             ignore_hidden: true,
+            show_notification: false,
             min_file_size_idx: default_min_file_size_idx(),
             max_file_size_idx: default_max_file_size_idx(),
             language: default_language(),
@@ -309,6 +312,7 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
 
     win.global::<GeneralSettings>().set_use_cache(s.use_cache);
     win.global::<GeneralSettings>().set_ignore_hidden(s.ignore_hidden);
+    win.global::<GeneralSettings>().set_show_notification(s.show_notification);
     win.global::<GeneralSettings>().set_min_file_size_idx(s.min_file_size_idx);
     win.global::<GeneralSettings>().set_max_file_size_idx(s.max_file_size_idx);
     let lang_idx = match s.language.as_str() {
@@ -395,6 +399,7 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
     CediniaSettings {
         use_cache: g.get_use_cache(),
         ignore_hidden: g.get_ignore_hidden(),
+        show_notification: g.get_show_notification(),
         min_file_size_idx: g.get_min_file_size_idx(),
         max_file_size_idx: g.get_max_file_size_idx(),
         language: match g.get_language_idx() {

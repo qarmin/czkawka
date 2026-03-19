@@ -47,6 +47,7 @@ slint = { version = "1.15.0", default-features = false, features = [
 ] }
 
 rodio = { version = "0.22.0", default-features = false, features = ["playback", "symphonia-all"], optional = true }
+notify-rust = { version = "4" }
 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
@@ -54,10 +55,13 @@ rodio = { version = "0.22.0", default-features = false, features = ["playback", 
 slint-build = "1.15"
 
 [features]
-default = ["winit_femtovg", "winit_software"]
+default = ["winit_femtovg", "winit_software", "notifications"]
 
 # Audio support
 audio = ["rodio"]
+
+# Desktop notification support
+notifications = []
 
 # Renderers
 skia_opengl = ["slint/renderer-skia-opengl"]
