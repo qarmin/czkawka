@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::thread;
+use crate::flc;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::model::{CheckingMethod, HashType};
@@ -286,44 +287,44 @@ fn stage_uses_bytes(stage: CurrentStage) -> bool {
     )
 }
 
-fn stage_label(stage: CurrentStage) -> &'static str {
+fn stage_label(stage: CurrentStage) -> String {
     match stage {
-        CurrentStage::CollectingFiles => "Zbieranie plików",
-        CurrentStage::DuplicateScanningName => "Skanowanie po nazwie",
-        CurrentStage::DuplicateScanningSizeName => "Skanowanie po nazwie i rozmiarze",
-        CurrentStage::DuplicateScanningSize => "Skanowanie po rozmiarze",
-        CurrentStage::DuplicatePreHashing => "Pre-hash",
-        CurrentStage::DuplicateFullHashing => "Haszowanie",
+        CurrentStage::CollectingFiles => flc!("stage_collecting_files"),
+        CurrentStage::DuplicateScanningName => flc!("stage_scanning_name"),
+        CurrentStage::DuplicateScanningSizeName => flc!("stage_scanning_size_name"),
+        CurrentStage::DuplicateScanningSize => flc!("stage_scanning_size"),
+        CurrentStage::DuplicatePreHashing => flc!("stage_pre_hash"),
+        CurrentStage::DuplicateFullHashing => flc!("stage_full_hash"),
         CurrentStage::DuplicateCacheLoading
         | CurrentStage::DuplicatePreHashCacheLoading
         | CurrentStage::SameMusicCacheLoadingTags
         | CurrentStage::SameMusicCacheLoadingFingerprints
-        | CurrentStage::ExifRemoverCacheLoading => "Ładowanie cache",
+        | CurrentStage::ExifRemoverCacheLoading => flc!("stage_loading_cache"),
         CurrentStage::DuplicateCacheSaving
         | CurrentStage::DuplicatePreHashCacheSaving
         | CurrentStage::SameMusicCacheSavingTags
         | CurrentStage::SameMusicCacheSavingFingerprints
-        | CurrentStage::ExifRemoverCacheSaving => "Zapisywanie cache",
-        CurrentStage::SimilarImagesCalculatingHashes => "Obliczanie hashy obrazów",
-        CurrentStage::SimilarImagesComparingHashes => "Porównywanie obrazów",
-        CurrentStage::SimilarVideosCalculatingHashes => "Obliczanie hashy wideo",
-        CurrentStage::BrokenFilesChecking => "Sprawdzanie plików",
-        CurrentStage::BadExtensionsChecking => "Sprawdzanie rozszerzeń",
-        CurrentStage::BadNamesChecking => "Sprawdzanie nazw",
-        CurrentStage::SameMusicReadingTags => "Odczyt tagów muzycznych",
-        CurrentStage::SameMusicComparingTags => "Porównywanie tagów",
-        CurrentStage::SameMusicCalculatingFingerprints => "Obliczanie odcisków muzycznych",
-        CurrentStage::SameMusicComparingFingerprints => "Porównywanie odcisków muzycznych",
-        CurrentStage::ExifRemoverExtractingTags => "Odczyt tagów EXIF",
-        CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails => "Tworzenie miniatur wideo",
-        CurrentStage::VideoOptimizerProcessingVideos => "Przetwarzanie wideo",
-        CurrentStage::DeletingFiles => "Usuwanie plików",
-        CurrentStage::RenamingFiles => "Zmiana nazw plików",
-        CurrentStage::MovingFiles => "Przenoszenie plików",
-        CurrentStage::HardlinkingFiles => "Tworzenie hardlinków",
-        CurrentStage::SymlinkingFiles => "Tworzenie dowiązań",
-        CurrentStage::OptimizingVideos => "Optymalizacja wideo",
-        CurrentStage::CleaningExif => "Czyszczenie EXIF",
+        | CurrentStage::ExifRemoverCacheSaving => flc!("stage_saving_cache"),
+        CurrentStage::SimilarImagesCalculatingHashes => flc!("stage_calculating_image_hashes"),
+        CurrentStage::SimilarImagesComparingHashes => flc!("stage_comparing_images"),
+        CurrentStage::SimilarVideosCalculatingHashes => flc!("stage_calculating_video_hashes"),
+        CurrentStage::BrokenFilesChecking => flc!("stage_checking_files"),
+        CurrentStage::BadExtensionsChecking => flc!("stage_checking_extensions"),
+        CurrentStage::BadNamesChecking => flc!("stage_checking_names"),
+        CurrentStage::SameMusicReadingTags => flc!("stage_reading_music_tags"),
+        CurrentStage::SameMusicComparingTags => flc!("stage_comparing_tags"),
+        CurrentStage::SameMusicCalculatingFingerprints => flc!("stage_calculating_music_fingerprints"),
+        CurrentStage::SameMusicComparingFingerprints => flc!("stage_comparing_fingerprints"),
+        CurrentStage::ExifRemoverExtractingTags => flc!("stage_extracting_exif"),
+        CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails => flc!("stage_creating_video_thumbnails"),
+        CurrentStage::VideoOptimizerProcessingVideos => flc!("stage_processing_videos"),
+        CurrentStage::DeletingFiles => flc!("stage_deleting"),
+        CurrentStage::RenamingFiles => flc!("stage_renaming"),
+        CurrentStage::MovingFiles => flc!("stage_moving"),
+        CurrentStage::HardlinkingFiles => flc!("stage_hardlinking"),
+        CurrentStage::SymlinkingFiles => flc!("stage_symlinking"),
+        CurrentStage::OptimizingVideos => flc!("stage_optimizing_videos"),
+        CurrentStage::CleaningExif => flc!("stage_cleaning_exif"),
     }
 }
 
@@ -332,7 +333,7 @@ fn stage_label_full(pd: &CoreProgress) -> String {
     let label = if stage_uses_bytes(pd.sstage) && pd.bytes_to_check > 0 {
         format!("{base}  ({} / {})", fmt_size(pd.bytes_checked), fmt_size(pd.bytes_to_check))
     } else {
-        base.to_string()
+        base
     };
     if pd.max_stage_idx > 0 {
         format!("{}/{}\u{2002}{label}", pd.current_stage_idx + 1, pd.max_stage_idx + 1)

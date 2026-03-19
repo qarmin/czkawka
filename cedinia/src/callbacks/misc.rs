@@ -69,8 +69,8 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
                 let mut total_folders: i32 = 0;
                 let mut stopped = false;
                 'outer: for vol in &volumes {
-                    let root = std::path::Path::new(vol.path.as_str());
-                    let (f, d) = count_files_and_dirs_stoppable(root, &stop2, &mut stopped);
+                    let canonical = std::fs::canonicalize(vol.path.as_str()).unwrap_or_else(|_| std::path::PathBuf::from(vol.path.as_str()));
+                    let (f, d) = count_files_and_dirs_stoppable(&canonical, &stop2, &mut stopped);
                     total_files = total_files.saturating_add(f);
                     total_folders = total_folders.saturating_add(d);
                     if stopped {
@@ -88,9 +88,7 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
                     if let Some(win) = weak2.upgrade() {
                         win.global::<AppState>().set_collect_test_result(result);
                         win.global::<AppState>().set_collect_test_running(false);
-                        if !stopped {
-                            win.global::<AppState>().set_collect_test_done(true);
-                        }
+                        win.global::<AppState>().set_collect_test_done(true);
                     }
                 });
             });
@@ -204,7 +202,9 @@ pub(crate) fn wire_open_url(window: &MainWindow) {
     }
     #[cfg(target_os = "android")]
     {
-        window.global::<AppState>().on_open_url(|_| {});
+        window.global::<AppState>().on_open_url(|url| {
+            crate::file_picker_android::open_url(url.as_str());
+        });
     }
 }
 

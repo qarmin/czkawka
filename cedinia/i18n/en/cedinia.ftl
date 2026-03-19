@@ -215,3 +215,33 @@ app_license = Frontend for Czkawka Core  •  GPL-3.0
 about_app_label = ABOUT
 cache_label = CACHE
 
+# Scan stage labels (shown during scan progress)
+stage_collecting_files = Collecting files
+stage_scanning_name = Scanning by name
+stage_scanning_size_name = Scanning by name and size
+stage_scanning_size = Scanning by size
+stage_pre_hash = Pre-hashing
+stage_full_hash = Hashing
+stage_loading_cache = Loading cache
+stage_saving_cache = Saving cache
+stage_calculating_image_hashes = Calculating image hashes
+stage_comparing_images = Comparing images
+stage_calculating_video_hashes = Calculating video hashes
+stage_checking_files = Checking files
+stage_checking_extensions = Checking extensions
+stage_checking_names = Checking names
+stage_reading_music_tags = Reading music tags
+stage_comparing_tags = Comparing tags
+stage_calculating_music_fingerprints = Calculating music fingerprints
+stage_comparing_fingerprints = Comparing fingerprints
+stage_extracting_exif = Reading EXIF tags
+stage_creating_video_thumbnails = Creating video thumbnails
+stage_processing_videos = Processing videos
+stage_deleting = Deleting files
+stage_renaming = Renaming files
+stage_moving = Moving files
+stage_hardlinking = Creating hard links
+stage_symlinking = Creating symlinks
+stage_optimizing_videos = Optimizing videos
+stage_cleaning_exif = Cleaning EXIF
+

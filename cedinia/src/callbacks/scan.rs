@@ -14,7 +14,7 @@ use crate::scan_runner::{CommonFilters, ScanRequest};
 use crate::settings::gui_settings_values::StringComboBoxItems;
 use crate::{
     ActiveTool, AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, FileEntry, GeneralSettings, MainWindow, SameMusicSettings, ScanState,
-    SimilarGroupCard, SimilarImagesSettings,
+    SimilarGroupCard, SimilarImagesSettings, flc,
 };
 
 pub(crate) fn wire_scan(
@@ -34,7 +34,7 @@ pub(crate) fn wire_scan(
             let win = weak.upgrade().expect("MainWindow dropped in on_scan_requested");
             scan_gen2.fetch_add(1, Ordering::SeqCst);
             win.global::<AppState>().set_scan_state(ScanState::Scanning);
-            win.global::<AppState>().set_status_message(SharedString::from("Skanowanie…"));
+            win.global::<AppState>().set_status_message(SharedString::from(flc!("scanning_fallback")));
             stop.store(false, Ordering::Relaxed);
             let dirs = inc.borrow().clone();
             let tool = win.global::<AppState>().get_active_tool();

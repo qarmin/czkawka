@@ -93,6 +93,8 @@ settings_filters_label = FILTRY (niektóre narzędzia)
 settings_min_file_size = Min. rozmiar pliku
 settings_max_file_size = Maks. rozmiar pliku
 settings_language = Język
+settings_language_restart = Wymaga restartu aplikacji
+settings_common_label = USTAWIENIA OGÓLNE
 settings_excluded_items = WYKLUCZONE ELEMENTY (wzorce glob, oddzielone przecinkiem)
 settings_excluded_items_placeholder = np. *.tmp, */.git/*, */node_modules/*
 settings_allowed_extensions = DOZWOLONE ROZSZERZENIA (puste = wszystkie)
@@ -106,9 +108,12 @@ settings_check_method_label = METODA PORÓWNANIA
 settings_check_method = Metoda
 settings_hash_type_label = TYP HASHA
 settings_hash_type = Typ hasha
+settings_hash_type_desc = Blake3 – najszybszy; CRC32/xxH3 – alternatywy
 settings_similar_images_header = PODOBNE OBRAZY
 settings_similarity_preset = Próg podobieństwa
+settings_similarity_desc = Bardzo wysoka = tylko prawie identyczne
 settings_hash_size = Rozmiar hasha
+settings_hash_size_desc = Większy = dokładniejszy, wolniejszy
 settings_hash_alg = Algorytm hasha
 settings_image_filter = Filtr zmiany rozmiaru
 settings_ignore_same_size = Ignoruj obrazy o tych samych wymiarach
@@ -147,6 +152,7 @@ diagnostics_refresh = Odśwież
 diagnostics_clear_thumbnails = Wyczyść miniatury
 diagnostics_clear_cache = Wyczyść cache
 diagnostics_collect_test = Test skanowania
+diagnostics_collect_test_desc = Skanuje każdy wolumin rekurencyjnie
 diagnostics_collect_test_run = Uruchom
 diagnostics_collect_test_stop = Stop
 about_repo = Repozytorium
@@ -165,6 +171,7 @@ collect_test_ms = " ms"
 directories_include_header = Katalogi do skanowania
 directories_exclude_header = Katalogi wykluczone
 directories_add = + Dodaj
+no_paths = Brak ścieżek – dodaj poniżej
 directories_volume_header = Woluminy
 directories_volume_refresh = Odśwież
 directories_volume_add = Dodaj
@@ -194,4 +201,47 @@ cleaned_exif_suffix = plików
 cleaned_exif_errors_suffix = błędów
 and_more_prefix = …i
 and_more_suffix = więcej
+
+# Gallery / delete popups
+gallery_delete_button = Usuń
+gallery_back = Wstecz
+gallery_confirm_delete = Tak, usuń
+deleting_files = Usuwanie plików…
+stop = Stop
+files_suffix = plików
+scanning_fallback = Skanowanie…
+app_subtitle = Ku czci Bitwy pod Cedynią (972 r.)
+app_license = Frontend dla Czkawka Core  •  GPL-3.0
+about_app_label = O APLIKACJI
+cache_label = PAMIĘĆ PODRĘCZNA
+
+# Scan stage labels (shown during scan progress)
+stage_collecting_files = Zbieranie plików
+stage_scanning_name = Skanowanie po nazwie
+stage_scanning_size_name = Skanowanie po nazwie i rozmiarze
+stage_scanning_size = Skanowanie po rozmiarze
+stage_pre_hash = Pre-hash
+stage_full_hash = Haszowanie
+stage_loading_cache = Ładowanie cache
+stage_saving_cache = Zapisywanie cache
+stage_calculating_image_hashes = Obliczanie hashy obrazów
+stage_comparing_images = Porównywanie obrazów
+stage_calculating_video_hashes = Obliczanie hashy wideo
+stage_checking_files = Sprawdzanie plików
+stage_checking_extensions = Sprawdzanie rozszerzeń
+stage_checking_names = Sprawdzanie nazw
+stage_reading_music_tags = Odczyt tagów muzycznych
+stage_comparing_tags = Porównywanie tagów
+stage_calculating_music_fingerprints = Obliczanie odcisków muzycznych
+stage_comparing_fingerprints = Porównywanie odcisków muzycznych
+stage_extracting_exif = Odczyt tagów EXIF
+stage_creating_video_thumbnails = Tworzenie miniatur wideo
+stage_processing_videos = Przetwarzanie wideo
+stage_deleting = Usuwanie plików
+stage_renaming = Zmiana nazw plików
+stage_moving = Przenoszenie plików
+stage_hardlinking = Tworzenie hardlinków
+stage_symlinking = Tworzenie dowiązań
+stage_optimizing_videos = Optymalizacja wideo
+stage_cleaning_exif = Czyszczenie EXIF
 

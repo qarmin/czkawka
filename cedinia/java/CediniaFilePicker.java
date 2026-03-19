@@ -117,6 +117,22 @@ public class CediniaFilePicker {
 
     // ── called from Rust ──────────────────────────────────────────────────
 
+    /** Open a URL in the system browser. */
+    public static void openUrl(final Activity activity, final String url) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    activity.startActivity(intent);
+                } catch (Exception e) {
+                    Log.e(TAG, "openUrl: failed to open " + url + ": " + e);
+                }
+            }
+        });
+    }
+
     /** Launch the folder picker for an "include" directory. */
     public static void pickIncludeDirectory(Activity activity) {
         Log.i(TAG, "pickIncludeDirectory called, API=" + Build.VERSION.SDK_INT
