@@ -99,8 +99,14 @@ jobs:
     name: Build Android APK (Multi-ABI)
     runs-on: ubuntu-latest
     env:
+      # NDK releases: https://developer.android.com/ndk/downloads/revision_history
+      # Latest stable NDK r27 (27.2.12479018); r28+ may drop armv7 support
       NDK_VERSION: 27.2.12479018
+      # API levels & cumulative device share: https://apilevels.com/
+      # 21=Android 5.0 (99.8%), 26=Android 8.0 (94.8%), 28=Android 9.0 (91.8%)
+      # Google Play min target SDK policy: https://developer.android.com/google/play/requirements/target-sdk
       MIN_SDK_VERSION: 26
+      # target_sdk_version: Google Play requires ≥34 now, ≥35 from 2025-08-31
       TARGET_SDK_VERSION: 35
 
     steps:

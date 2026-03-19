@@ -96,49 +96,68 @@ fn send_notification(title: &str, body: &str) {
         )?;
 
         // ── Build notification ────────────────────────────────────────────
-        // Use raw JNI descriptors for Notification$Builder (inner class)
-        // to avoid the dot→slash conversion issue with jni_sig!.
+        // jni_sig! cannot express Notification$Builder (inner class with '$'),
+        // so we parse the raw JNI descriptors via RuntimeMethodSignature.
+        use jni::signature::RuntimeMethodSignature;
+
+        let sig_ctor =
+            RuntimeMethodSignature::from_str("(Landroid/content/Context;Ljava/lang/String;)V")
+                .unwrap();
         let builder = env.new_object(
-            "android/app/Notification$Builder",
-            "(Landroid/content/Context;Ljava/lang/String;)V",
+            jni_str!("android/app/Notification$Builder"),
+            &sig_ctor.method_signature(),
             &[JValue::Object(&activity), JValue::Object(&channel_id_str)],
         )?;
 
         let title_jstr = env.new_string(&title)?;
+        let sig_set_text = RuntimeMethodSignature::from_str(
+            "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;",
+        )
+        .unwrap();
         env.call_method(
             &builder,
-            "setContentTitle",
-            "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;",
+            jni_str!("setContentTitle"),
+            &sig_set_text.method_signature(),
             &[JValue::Object(&title_jstr)],
         )?;
 
         let body_jstr = env.new_string(&body)?;
         env.call_method(
             &builder,
-            "setContentText",
-            "(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;",
+            jni_str!("setContentText"),
+            &sig_set_text.method_signature(),
             &[JValue::Object(&body_jstr)],
         )?;
 
         // Use android.R.drawable.ic_dialog_info (17301624) as a fallback
         // small icon – every Android version ships it.
+        let sig_set_icon = RuntimeMethodSignature::from_str(
+            "(I)Landroid/app/Notification$Builder;",
+        )
+        .unwrap();
         env.call_method(
             &builder,
-            "setSmallIcon",
-            "(I)Landroid/app/Notification$Builder;",
+            jni_str!("setSmallIcon"),
+            &sig_set_icon.method_signature(),
             &[JValue::Int(17301624)],
         )?;
 
         // AUTO_CANCEL = true so the notification dismisses itself on tap.
+        let sig_set_bool = RuntimeMethodSignature::from_str(
+            "(Z)Landroid/app/Notification$Builder;",
+        )
+        .unwrap();
         env.call_method(
             &builder,
-            "setAutoCancel",
-            "(Z)Landroid/app/Notification$Builder;",
-            &[JValue::Bool(1)],
+            jni_str!("setAutoCancel"),
+            &sig_set_bool.method_signature(),
+            &[JValue::Bool(true)],
         )?;
 
+        let sig_build =
+            RuntimeMethodSignature::from_str("()Landroid/app/Notification;").unwrap();
         let notification: JObject = env
-            .call_method(&builder, "build", "()Landroid/app/Notification;", &[])?
+            .call_method(&builder, jni_str!("build"), &sig_build.method_signature(), &[])?
             .l()?;
 
         env.call_method(
