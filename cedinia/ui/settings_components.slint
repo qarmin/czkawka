@@ -203,24 +203,6 @@ export component DropdownRow {
             spacing: 12px;
             alignment: LayoutAlignment.center;
 
-            VerticalLayout {
-                alignment: LayoutAlignment.center;
-                horizontal-stretch: 1.0;
-                spacing: 2px;
-//                Text {
-//                    text: root.label;
-//                    color: CediniaColors.text_primary;
-//                    font-size: 15px;
-//                }
-//                if root.description != "" :
-                Text {
-                    text: root.description;
-                    color: CediniaColors.text_disabled;
-                    font-size: 11px;
-                    wrap: word-wrap;
-                }
-            }
-
             Text {
                 text: root.options[root.selected];
                 color: CediniaColors.accent_light;
