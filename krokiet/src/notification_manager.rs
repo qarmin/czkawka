@@ -9,12 +9,11 @@ pub fn send_scan_completed_notification(tool: &str, body: &str) {
         }
 
         // Fallback: notify-rust (covers macOS, Windows and Linux without notify-send)
-        match notify_rust::Notification::new()
-            .summary(tool)
-            .body(body)
-            .urgency(notify_rust::Urgency::Normal)
-            .show()
-        {
+        let mut notif = notify_rust::Notification::new();
+        notif.summary(tool).body(body);
+        #[cfg(all(unix, not(target_os = "macos")))]
+        notif.urgency(notify_rust::Urgency::Normal);
+        match notif.show() {
             Ok(_) => log::info!("Desktop notification sent"),
             Err(e) => eprintln!("Failed to send desktop notification: {e}"),
         }

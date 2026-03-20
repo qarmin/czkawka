@@ -164,7 +164,7 @@ jobs:
         run: |
           source "$HOME/.cargo/env"
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
-          cargo build --target=x86_64-pc-windows-gnu --release --locked
+          cargo build --target=x86_64-pc-windows-gnu --release --locked -p czkawka_gui -p czkawka_cli
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
           
@@ -176,7 +176,7 @@ jobs:
         run: |
           source "$HOME/.cargo/env"
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
-          cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci
+          cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci -p czkawka_gui -p czkawka_cli
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package/
           
