@@ -49,7 +49,6 @@ use crate::settings::{connect_changing_settings_preset, create_default_settings_
 use crate::shared_models::SharedModels;
 
 mod audio_player;
-mod notification_manager;
 mod clear_outdated_video_thumbnails;
 mod common;
 mod connect_clean_cache;
@@ -71,6 +70,7 @@ mod create_calculate_task_size;
 mod file_actions;
 mod localizer_krokiet;
 mod model_operations;
+mod notification_manager;
 mod set_initial_gui_info;
 mod set_initial_scroll_list_data_indexes;
 mod settings;

@@ -2,6 +2,7 @@ use std::cmp::Reverse;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::thread;
+
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use log::debug;

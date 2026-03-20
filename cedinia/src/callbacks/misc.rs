@@ -58,6 +58,7 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
             stop.store(false, Ordering::Relaxed);
             win.global::<AppState>().set_collect_test_running(true);
             win.global::<AppState>().set_collect_test_done(false);
+            win.global::<AppState>().set_collect_test_cancelled(false);
 
             let weak2 = win.as_weak();
             let stop2 = stop.clone();
@@ -102,6 +103,7 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
             stop.store(true, Ordering::Relaxed);
             if let Some(win) = weak.upgrade() {
                 win.global::<AppState>().set_collect_test_running(false);
+                win.global::<AppState>().set_collect_test_cancelled(true);
             }
         });
     }
@@ -190,6 +192,15 @@ pub(crate) fn wire_language_change(window: &MainWindow) {
         let lang = if idx == 1 { "pl" } else { "en" };
         crate::localizer_cedinia::apply_language_preference(lang);
         crate::translations::translate_items(&win);
+    });
+}
+
+pub(crate) fn wire_notification_settings(window: &MainWindow) {
+    let blocked = !crate::notifications::are_system_notifications_enabled();
+    window.global::<AppState>().set_system_notifications_blocked(blocked);
+
+    window.global::<AppState>().on_open_notification_settings(|| {
+        crate::notifications::open_system_notification_settings();
     });
 }
 

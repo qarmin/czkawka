@@ -5,14 +5,17 @@ export component ToggleRow {
     in property <string> label;
     in property <string> description: "";
     in-out property <bool> value;
+    in property <bool> enabled: true;
 
     height: root.description == "" ? 56px : 72px;
+    opacity: root.enabled ? 1.0 : 0.4;
 
     Rectangle {
-        background: ta.has-hover ? CediniaColors.bg_elevated : transparent;
+        background: ta.has-hover && root.enabled ? CediniaColors.bg_elevated : transparent;
         animate background { duration: 100ms; }
 
         ta := TouchArea {
+            enabled: root.enabled;
             clicked => {
                 root.value = !root.value;
                 AppState.save_settings_now();

@@ -84,7 +84,12 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
         if !stopped_search && sd.basic_settings.play_audio_on_scan_completion {
             sd.audio_player.play_scan_completed();
         }
-        let result_message = flk!("rust_found_broken_files", items_found = items_found, time = scanning_time_str, size = format_size(size, BINARY));
+        let result_message = flk!(
+            "rust_found_broken_files",
+            items_found = items_found,
+            time = scanning_time_str,
+            size = format_size(size, BINARY)
+        );
         if !stopped_search && sd.basic_settings.show_notification_on_scan_completion {
             crate::notification_manager::send_scan_completed_notification("Broken Files", &result_message);
         }

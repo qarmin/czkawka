@@ -136,9 +136,20 @@ fn write_duplicate_results(
             sd.audio_player.play_scan_completed();
         }
         let result_message = if lost_space > 0 {
-            flk!("rust_found_duplicate_files", items_found = items_found, groups = groups, size = format_size(lost_space, BINARY), time = scanning_time_str)
+            flk!(
+                "rust_found_duplicate_files",
+                items_found = items_found,
+                groups = groups,
+                size = format_size(lost_space, BINARY),
+                time = scanning_time_str
+            )
         } else {
-            flk!("rust_found_duplicate_files_no_lost_space", items_found = items_found, groups = groups, time = scanning_time_str)
+            flk!(
+                "rust_found_duplicate_files_no_lost_space",
+                items_found = items_found,
+                groups = groups,
+                time = scanning_time_str
+            )
         };
         if !stopped_search && sd.basic_settings.show_notification_on_scan_completion {
             crate::notification_manager::send_scan_completed_notification("Duplicate Files", &result_message);

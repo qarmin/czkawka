@@ -86,8 +86,12 @@ export global Translations {
     in-out property <string> settings_use_cache_desc_text:    "Speeds up subsequent scans (hash/images)";
     in-out property <string> settings_ignore_hidden_text:     "Ignore hidden files";
     in-out property <string> settings_ignore_hidden_desc_text: "Files and folders starting with '.'";
-    in-out property <string> settings_show_notification_text:     "Notify when scan finishes";
-    in-out property <string> settings_show_notification_desc_text: "Show a system notification on scan completion";
+    in-out property <string> settings_show_notification_text:          "Notify when scan finishes";
+    in-out property <string> settings_show_notification_desc_text:     "Show a system notification on scan completion";
+    in-out property <string> settings_notify_only_background_text:     "Only when in background";
+    in-out property <string> settings_notify_only_background_desc_text: "Skip notification if the app is visible";
+    in-out property <string> notifications_disabled_banner_text:       "🔔 Notifications disabled";
+    in-out property <string> notifications_enable_button_text:         "Enable";
     in-out property <string> settings_scan_label_text:        "SCANNING";
     in-out property <string> settings_filters_label_text:     "FILTERS (all tools)";
     in-out property <string> settings_min_file_size_text:     "Min. file size";
@@ -159,6 +163,9 @@ export global Translations {
     in-out property <string> diagnostics_collect_test_desc_text: "Scans each volume recursively";
     in-out property <string> diagnostics_collect_test_run_text: "Run";
     in-out property <string> diagnostics_collect_test_stop_text: "Stop";
+    in-out property <string> collect_test_cancelled_text:        "⛔ Stopped by user";
+    in-out property <string> diag_confirm_clear_thumbnails_text: "Clear all thumbnail cache?";
+    in-out property <string> diag_confirm_clear_cache_text:      "Clear all app cache?";
 
     // About section links
     in-out property <string> about_repo_text:                 "Repository";
@@ -175,7 +182,7 @@ export global Translations {
 
     // Directories screen
     in-out property <string> directories_include_header_text: "Directories to scan";
-    in-out property <string> directories_exclude_header_text: "Excluded directories";
+    in-out property <string> directories_exclude_header_text: "Excluded";
     in-out property <string> directories_add_text:            "+ Add";
     in-out property <string> directories_volume_header_text:  "Volumes";
     in-out property <string> directories_volume_refresh_text: "Refresh";

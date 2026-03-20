@@ -84,6 +84,10 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_ignore_hidden_desc_text(flc!("settings_ignore_hidden_desc").into());
     t.set_settings_show_notification_text(flc!("settings_show_notification").into());
     t.set_settings_show_notification_desc_text(flc!("settings_show_notification_desc").into());
+    t.set_settings_notify_only_background_text(flc!("settings_notify_only_background").into());
+    t.set_settings_notify_only_background_desc_text(flc!("settings_notify_only_background_desc").into());
+    t.set_notifications_disabled_banner_text(flc!("notifications_disabled_banner").into());
+    t.set_notifications_enable_button_text(flc!("notifications_enable_button").into());
     t.set_settings_scan_label_text(flc!("settings_scan_label").into());
     t.set_settings_filters_label_text(flc!("settings_filters_label").into());
     t.set_settings_min_file_size_text(flc!("settings_min_file_size").into());
@@ -149,6 +153,9 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_diagnostics_collect_test_desc_text(flc!("diagnostics_collect_test_desc").into());
     t.set_diagnostics_collect_test_run_text(flc!("diagnostics_collect_test_run").into());
     t.set_diagnostics_collect_test_stop_text(flc!("diagnostics_collect_test_stop").into());
+    t.set_collect_test_cancelled_text(flc!("collect_test_cancelled").into());
+    t.set_diag_confirm_clear_thumbnails_text(flc!("diag_confirm_clear_thumbnails").into());
+    t.set_diag_confirm_clear_cache_text(flc!("diag_confirm_clear_cache").into());
 
     t.set_collect_test_title_text(flc!("collect_test_title").into());
     t.set_collect_test_volumes_text(flc!("collect_test_volumes").into());

@@ -7,6 +7,68 @@ import { Translations } from "translations.slint";
 
 export component SettingsScreen {
 
+    if diag_confirm_action != "" : Rectangle {
+        z: 100;
+        background: #00000099;
+        TouchArea { clicked => { diag_confirm_action = ""; } }
+
+        Rectangle {
+            width: min(parent.width - 48px, 360px);
+            height: diag_confirm_content.preferred-height + 32px;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            border-radius: 16px;
+            background: CediniaColors.bg_elevated;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #00000088;
+
+            diag_confirm_content := VerticalLayout {
+                padding: 24px;
+                spacing: 16px;
+
+                Text {
+                    text: diag_confirm_action == "thumbnails"
+                        ? Translations.diag_confirm_clear_thumbnails_text
+                        : Translations.diag_confirm_clear_cache_text;
+                    color: CediniaColors.text_primary;
+                    font-size: 16px;
+                    font-weight: 600;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    wrap: word-wrap;
+                }
+
+                HorizontalLayout {
+                    spacing: 12px;
+
+                    TouchButton {
+                        label: Translations.cancel_text;
+                        horizontal-stretch: 1.0;
+                        bg: CediniaColors.bg_elevated;
+                        fg: CediniaColors.text_secondary;
+                        clicked => { diag_confirm_action = ""; }
+                    }
+
+                    TouchButton {
+                        label: Translations.ok_text;
+                        horizontal-stretch: 1.0;
+                        bg: CediniaColors.danger;
+                        fg: #ffffff;
+                        clicked => {
+                            if diag_confirm_action == "thumbnails" {
+                                AppState.clear_thumbnails_cache();
+                            } else {
+                                AppState.clear_app_cache();
+                            }
+                            diag_confirm_action = "";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if AppState.collect_test_done : Rectangle {
         z: 100;
         background: #00000099;
@@ -70,6 +132,7 @@ export component SettingsScreen {
 
 
     property <SettingsTab> active_tab: SettingsTab.General;
+    property <string> diag_confirm_action: "";
 
 
     changed active_tab => {
@@ -127,6 +190,36 @@ export component SettingsScreen {
         }
 
 
+        if active_tab == SettingsTab.General && AppState.system_notifications_blocked : Rectangle {
+            height: 52px;
+            background: CediniaColors.warning.with-alpha(0.12);
+            border-width: 1px;
+            border-color: CediniaColors.warning.with-alpha(0.5);
+
+            HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 12px;
+                spacing: 8px;
+
+                Text {
+                    text: Translations.notifications_disabled_banner_text;
+                    color: CediniaColors.warning;
+                    font-size: 13px;
+                    font-weight: 600;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    horizontal-stretch: 1.0;
+                }
+
+                TouchButton {
+                    label: Translations.notifications_enable_button_text;
+                    bg: CediniaColors.warning;
+                    fg: #000000;
+                    min_h: 36px;
+                    clicked => { AppState.open_notification_settings(); }
+                }
+            }
+        }
+
         Flickable {
             vertical-stretch: 1.0;
             viewport-height: max(tab_content.preferred-height, self.height);
@@ -156,6 +249,13 @@ export component SettingsScreen {
                         label: Translations.settings_show_notification_text;
                         description: Translations.settings_show_notification_desc_text;
                         value <=> GeneralSettings.show_notification;
+                    }
+                    Divider {}
+                    ToggleRow {
+                        label: Translations.settings_notify_only_background_text;
+                        description: Translations.settings_notify_only_background_desc_text;
+                        value <=> GeneralSettings.notify_only_background;
+                        enabled: GeneralSettings.show_notification;
                     }
                     Divider {}
 
@@ -388,9 +488,9 @@ export component SettingsScreen {
 
                     // Collect test row
                     Rectangle {
-                        height: 72px;
+                        height: collect_test_hl.preferred-height + 20px;
                         background: CediniaColors.bg_surface;
-                        HorizontalLayout {
+                        collect_test_hl := HorizontalLayout {
                             padding-left: 16px;
                             padding-right: 16px;
                             padding-top: 10px;
@@ -410,6 +510,12 @@ export component SettingsScreen {
                                     text: Translations.diagnostics_collect_test_desc_text;
                                     color: CediniaColors.text_secondary;
                                     font-size: 12px;
+                                }
+                                if AppState.collect_test_cancelled : Text {
+                                    text: Translations.collect_test_cancelled_text;
+                                    color: CediniaColors.warning;
+                                    font-size: 11px;
+                                    font-weight: 600;
                                 }
                             }
 
@@ -490,7 +596,7 @@ export component SettingsScreen {
                                 min_h: 40px;
                                 bg: CediniaColors.danger.with-alpha(0.7);
                                 fg: #ffffff;
-                                clicked => { AppState.clear_thumbnails_cache(); }
+                                clicked => { diag_confirm_action = "thumbnails"; }
                             }
 
                             TouchButton {
@@ -499,7 +605,7 @@ export component SettingsScreen {
                                 min_h: 40px;
                                 bg: CediniaColors.danger.with-alpha(0.5);
                                 fg: #ffffff;
-                                clicked => { AppState.clear_app_cache(); }
+                                clicked => { diag_confirm_action = "cache"; }
                             }
                         }
                     }

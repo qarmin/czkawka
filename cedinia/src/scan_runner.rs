@@ -2,7 +2,6 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::thread;
-use crate::flc;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::model::{CheckingMethod, HashType};
@@ -12,6 +11,7 @@ use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::SimilarityPreset;
 
+use crate::flc;
 use crate::scanners::{
     scan_bad_extensions, scan_bad_names, scan_big_files, scan_broken_files, scan_duplicate_files, scan_empty_files, scan_empty_folders, scan_exif_remover, scan_same_music,
     scan_similar_images, scan_temporary_files,

@@ -1,5 +1,5 @@
-#[allow(dead_code)]
-#[allow(unused_variables)]
+use log::error;
+
 pub fn send_scan_completed_notification(tool: &str, body: &str) {
     #[cfg(feature = "notifications")]
     {
@@ -15,23 +15,25 @@ pub fn send_scan_completed_notification(tool: &str, body: &str) {
         notif.urgency(notify_rust::Urgency::Normal);
         match notif.show() {
             Ok(_) => log::info!("Desktop notification sent"),
-            Err(e) => eprintln!("Failed to send desktop notification: {e}"),
+            Err(e) => error!("Failed to send desktop notification: {e}"),
         }
     }
 }
 
 #[cfg(target_os = "linux")]
 fn try_notify_send(summary: &str, body: &str) -> bool {
-    match std::process::Command::new("notify-send")
-        .arg("--app-name=krokiet")
-        .arg(summary)
-        .arg(body)
-        .status()
-    {
+    match std::process::Command::new("notify-send").arg("--app-name=krokiet").arg(summary).arg(body).status() {
         Ok(s) if s.success() => {
             log::info!("Desktop notification sent via notify-send");
             true
         }
-        _ => false,
+        Err(e) => {
+            error!("Failed to execute notify-send: {e}");
+            false
+        }
+        Ok(failed) => {
+            error!("notify-send exited with non-zero status: {failed}");
+            false
+        }
     }
 }

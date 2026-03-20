@@ -1,9 +1,10 @@
 import { ActiveTool, CollectTestResult, ProgressData, ScanState, VolumeEntry } from "common.slint";
 
 export global GeneralSettings {
-    in-out property <bool>   use_cache:           true;
-    in-out property <bool>   ignore_hidden:        true;
-    in-out property <bool>   show_notification:    false;
+    in-out property <bool>   use_cache:                   true;
+    in-out property <bool>   ignore_hidden:               true;
+    in-out property <bool>   show_notification:           false;
+    in-out property <bool>   notify_only_background:      true;
 
     in-out property <int>    min_file_size_idx:    0;
     in-out property <[string]> min_file_size_options: ["Brak", "1 KB", "8 KB", "64 KB", "1 MB"];
@@ -155,8 +156,9 @@ export global AppState {
     callback run_collect_test();
     callback stop_collect_test();
     in-out property <CollectTestResult> collect_test_result: { volumes: 0, files: 0, folders: 0, elapsed_ms: 0 };
-    in-out property <bool> collect_test_running: false;
-    in-out property <bool> collect_test_done: false;
+    in-out property <bool> collect_test_running:   false;
+    in-out property <bool> collect_test_done:      false;
+    in-out property <bool> collect_test_cancelled: false;
 
     in-out property <bool> similar_images_gallery_mode: true;
 
@@ -170,6 +172,9 @@ export global AppState {
     callback clear_app_cache();
 
     callback open_url(string);
+
+    in-out property <bool> system_notifications_blocked: false;
+    callback open_notification_settings();
 
 
     in-out property <bool>   gallery_delete_popup_visible: false;

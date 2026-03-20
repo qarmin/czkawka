@@ -9,8 +9,8 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use slint::{ComponentHandle, Model, ModelRc, SharedString, Timer, TimerMode, VecModel, Weak};
 
 use crate::callbacks::{
-    DeleteEvent, build_dir_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_open_path, wire_open_url, wire_permission,
-    wire_save_settings_now, wire_scan, wire_selection,
+    DeleteEvent, build_dir_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_notification_settings, wire_open_path,
+    wire_open_url, wire_permission, wire_save_settings_now, wire_scan, wire_selection,
 };
 use crate::model::make_file_model;
 use crate::scan_runner::{FileItem, ScanResult, ScanResultHandler, start_worker};
@@ -320,7 +320,8 @@ impl ScanResultHandler for GuiHandler {
                         };
                         win.global::<AppState>().set_status_message(SharedString::from(status));
                         if win.global::<crate::GeneralSettings>().get_show_notification() {
-                            crate::notifications::send_scan_completed(file_count);
+                            let only_bg = win.global::<crate::GeneralSettings>().get_notify_only_background();
+                            crate::notifications::send_scan_completed(file_count, only_bg);
                         }
                     }
                 })
@@ -403,6 +404,7 @@ fn run_app_inner(
 
     wire_scan(&window, stop_flag, scan_tx, included_dirs.clone(), scan_gen.clone());
     wire_permission(&window);
+    wire_notification_settings(&window);
     wire_selection(&window, delete_tx, Rc::clone(&delete_stop));
     wire_directories(&window, included_dirs.clone(), excluded_dirs.clone());
     wire_collect_test(&window);
@@ -611,6 +613,8 @@ fn run_app_inner(
                 perm_poll_counter = 0;
                 let granted = crate::file_picker_android::check_storage_permission();
                 win.global::<AppState>().set_storage_permission_granted(granted);
+                let blocked = !crate::notifications::are_system_notifications_enabled();
+                win.global::<AppState>().set_system_notifications_blocked(blocked);
             }
         }
     });
