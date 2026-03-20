@@ -49,7 +49,7 @@ export component ResultsList {
                 }
 
                 if root.can_clean_exif && AppState.selected_count > 0 : TouchButton {
-                    label: "Clean";
+                    label: "🏷";
                     min_h: 36px;
                     bg: CediniaColors.accent_muted;
                     fg: CediniaColors.accent_light;
@@ -110,6 +110,7 @@ export component ResultsList {
                 val_str:        entry.val_str;
                 checked:        entry.checked;
                 is_header:      entry.is_header;
+                is_reference:   entry.is_reference;
                 is_even:        mod(idx, 2) == 0;
                 extra_as_line2: root.extra_as_line2 && !entry.is_header;
                 toggle_checked => { AppState.toggle_file_checked(idx); }

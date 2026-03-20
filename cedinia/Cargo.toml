@@ -4,7 +4,7 @@ version = "11.0.1"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
 rust-version = "1.92.0"
-description = "Android touch-friendly GUI for Czkawka Core – named after the Battle of Cedynia (972 AD)"
+description = "Android touch-friendly GUI for Czkawka Core - named after the Battle of Cedynia (972 AD)"
 license = "GPL-3.0-only"
 homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
@@ -85,8 +85,9 @@ target_sdk_version = 34
 label = "@string/app_name"
 icon = "@mipmap/ic_launcher"
 
-# Use our NativeActivity subclass so that onActivityResult is intercepted
-# and forwarded to CediniaFilePicker / the Rust JNI callback.
+# Plain NativeActivity is fine; onActivityResult is handled by a headless
+# CediniaPickerFragment (android.app.Fragment) attached at runtime from the
+# dynamically-loaded DEX — no manifest activity subclass needed.
 [package.metadata.android.application.activity]
 name = "android.app.NativeActivity"
 # Prevent Android from destroying and recreating the Activity on common

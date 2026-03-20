@@ -46,8 +46,8 @@ Changelog about each version can be found in [CHANGELOG.md](Changelog.md).
 New releases can be found in [Github releases](https://github.com/qarmin/czkawka/releases) and nightly builds also in [Nightly releases](https://github.com/qarmin/czkawka/releases/tag/Nightly)
 
 You can read more about the 11.0.0 release, its new features, and the issues that were fixed in the following articles:
-- English article – https://medium.com/@qarmin/czkawka-krokiet-11-0-0f6cea385934
-- Polish article – https://medium.com/@qarmin/czkawka-krokiet-11-0-c95ee35eccc2
+- English article - https://medium.com/@qarmin/czkawka-krokiet-11-0-0f6cea385934
+- Polish article - https://medium.com/@qarmin/czkawka-krokiet-11-0-c95ee35eccc2
 
 ## Usage, installation, compilation, requirements, license
 
@@ -131,15 +131,15 @@ It is written in Rust and is used by all Czkawka frontends (`czkawka_gui`, `czka
 It is also used by external projects, such as:
 
 - **Czkawka Tauri** - https://github.com/shixinhuang99/czkawka-tauri - A Tauri-based GUI frontend for Czkawka.
-- **page-dewarp** – https://github.com/lmmx/page-dewarp - A library for dewarping document images using a cubic sheet model.
+- **page-dewarp** - https://github.com/lmmx/page-dewarp - A library for dewarping document images using a cubic sheet model.
 
 Bindings are also available for:
 
-- **Python** – https://pypi.org/project/czkawka/
+- **Python** - https://pypi.org/project/czkawka/
 
 Some projects work as wrappers around `czkawka_cli`. Without directly depending on `czkawka_core`, they allow simple scanning and retrieving results in JSON format:
 
-- **Schluckauf** – https://github.com/fadykuzman/schluckauf
+- **Schluckauf** - https://github.com/fadykuzman/schluckauf
 
 ## Thanks
 

@@ -113,6 +113,15 @@ unused_features:
     xdg-open czkawka_core/report.html
     xdg-open czkawka_gui/report.html
 
+##################### LICENSES #####################
+
+# Generate third-party license file for Cedinia.
+# Requires: cargo install cargo-license
+gen_cedinia_licenses:
+    cargo metadata --format-version 1 \
+        | python3 misc/gen_cedinia_licenses.py > cedinia/THIRD_PARTY_LICENSES.txt
+    @echo "Generated cedinia/THIRD_PARTY_LICENSES.txt ($(wc -l < cedinia/THIRD_PARTY_LICENSES.txt) lines)"
+
 ##################### ANDROID #####################
 
 keystore_dir := "cedinia/android/keystore"

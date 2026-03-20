@@ -55,13 +55,10 @@ notify-rust = { version = "4" }
 slint-build = "1.15"
 
 [features]
-default = ["winit_femtovg", "winit_software", "notifications"]
+default = ["winit_femtovg", "winit_software"]
 
 # Audio support
 audio = ["rodio"]
-
-# Desktop notification support
-notifications = []
 
 # Renderers
 skia_opengl = ["slint/renderer-skia-opengl"]

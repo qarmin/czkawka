@@ -47,6 +47,26 @@ pub(crate) fn wire_permission(window: &MainWindow) {
     }
 }
 
+fn format_duration_ms(ms: u128) -> slint::SharedString {
+    let s = if ms < 1_000 {
+        format!("{ms} ms")
+    } else if ms < 60_000 {
+        let secs = ms / 1_000;
+        let rem = ms % 1_000;
+        if rem == 0 { format!("{secs} s") } else { format!("{secs} s {rem} ms") }
+    } else {
+        let min = ms / 60_000;
+        let secs = (ms % 60_000) / 1_000;
+        let rem = ms % 1_000;
+        if rem == 0 {
+            format!("{min} min {secs} s")
+        } else {
+            format!("{min} min {secs} s {rem} ms")
+        }
+    };
+    slint::SharedString::from(s)
+}
+
 pub(crate) fn wire_collect_test(window: &MainWindow) {
     let collect_stop_flag: Arc<AtomicBool> = Arc::new(AtomicBool::new(false));
 
@@ -78,12 +98,12 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
                         break 'outer;
                     }
                 }
-                let elapsed_ms = start.elapsed().as_millis() as i32;
+                let elapsed_time = format_duration_ms(start.elapsed().as_millis());
                 let result = CollectTestResult {
                     volumes: volume_count,
                     files: total_files,
                     folders: total_folders,
-                    elapsed_ms,
+                    elapsed_time,
                 };
                 let _ = slint::invoke_from_event_loop(move || {
                     if let Some(win) = weak2.upgrade() {
@@ -219,12 +239,29 @@ pub(crate) fn wire_open_url(window: &MainWindow) {
     }
 }
 
-pub(crate) fn wire_save_settings_now(window: &MainWindow, included_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>, excluded_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>) {
+pub(crate) fn wire_licenses_popup(window: &MainWindow) {
+    let licenses_text = include_str!("../../THIRD_PARTY_LICENSES.txt");
+    window.global::<AppState>().set_licenses_text(slint::SharedString::from(licenses_text));
+
+    let weak = window.as_weak();
+    window.global::<AppState>().on_show_third_party_licenses(move || {
+        if let Some(win) = weak.upgrade() {
+            win.global::<AppState>().set_licenses_popup_visible(true);
+        }
+    });
+}
+
+pub(crate) fn wire_save_settings_now(
+    window: &MainWindow,
+    included_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
+    excluded_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
+    referenced_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
+) {
     let weak = window.as_weak();
     window.global::<AppState>().on_save_settings_now(move || {
         let win = weak.upgrade().expect("Failed to upgrade app :(");
         let settings = collect_settings_from_gui(&win);
         save_settings(&settings);
-        crate::settings::save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow());
+        crate::settings::save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow(), &referenced_dirs.borrow());
     });
 }

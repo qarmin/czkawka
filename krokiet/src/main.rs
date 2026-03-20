@@ -114,7 +114,6 @@ fn main() {
     #[cfg(feature = "audio")]
     app.global::<GuiState>().set_audio_feature_enabled(true);
 
-    #[cfg(feature = "notifications")]
     app.global::<GuiState>().set_notifications_feature_enabled(true);
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();

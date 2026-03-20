@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-gen_android_icons.py – Generate cedinia Android icon files from an SVG.
+gen_android_icons.py - Generate cedinia Android icon files from an SVG.
 
 Reads:
   cedinia/icons/logo.svg          (or a path you pass as the first argument)
@@ -19,8 +19,8 @@ The existing ic_launcher_background.xml and mipmap-anydpi-v26/ic_launcher.xml
 are NOT modified (they already reference the correct resource names).
 
 Requires one of:
-  cairosvg   – pip install cairosvg
-  inkscape   – system package / https://inkscape.org
+  cairosvg   - pip install cairosvg
+  inkscape   - system package / https://inkscape.org
 
 Usage:
   python misc/gen_android_icons.py
@@ -119,7 +119,7 @@ def main() -> None:
         print("renderer: cairosvg")
     except ImportError:
         render = render_inkscape
-        print("renderer: inkscape  (cairosvg not found – install with: pip install cairosvg)")
+        print("renderer: inkscape  (cairosvg not found - install with: pip install cairosvg)")
 
     print(f"source  : {svg}")
     print()
@@ -147,7 +147,7 @@ def main() -> None:
     print("Done.")
     print()
     print("Note: ic_launcher_background.xml and mipmap-anydpi-v26/ic_launcher.xml")
-    print("      are NOT modified – they already reference the correct resource names.")
+    print("      are NOT modified - they already reference the correct resource names.")
 
 
 if __name__ == "__main__":

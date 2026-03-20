@@ -1,30 +1,14 @@
 use log::error;
 
-/// Send a system notification that the scan has completed.
-///
-/// On desktop, uses `notify-rust`. On Android, uses JNI to call
-/// `NotificationManager.notify()` (silent no-op if the permission is not
-/// granted on API 33+).
-///
-/// If `only_when_background` is true, the notification is skipped when the
-/// app is currently in the foreground (Android: checked via ActivityManager;
-/// desktop: never skipped, since focus can't be reliably detected here).
 pub fn send_scan_completed(file_count: usize, only_when_background: bool) {
     if only_when_background && is_app_in_foreground() {
         return;
     }
     let title = "Cedinia";
-    let body = format!("Scan completed – {file_count} items found");
+    let body = crate::flc!("scan_completed_notification", file_count = file_count);
     send_notification(title, &body);
 }
 
-// ── Foreground detection ──────────────────────────────────────────────────────
-
-/// Returns `true` when the app is currently visible to the user.
-/// On Android this queries `ActivityManager.getRunningAppProcesses()` and
-/// checks that our process has `IMPORTANCE_FOREGROUND` (100).
-/// On other platforms it always returns `false` so notifications are never
-/// suppressed (there is no reliable cross-platform window-focus API here).
 fn is_app_in_foreground() -> bool {
     #[cfg(target_os = "android")]
     {
@@ -50,7 +34,6 @@ fn is_app_in_foreground_android() -> bool {
 
         let activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
 
-        // Get ActivityManager service ("activity" is the well-known service name)
         let svc_name: JObject = env.new_string("activity")?.into();
         let am: JObject = env
             .call_method(
@@ -65,7 +48,6 @@ fn is_app_in_foreground_android() -> bool {
             return Ok(false);
         }
 
-        // List<RunningAppProcessInfo> getRunningAppProcesses()
         let processes: JObject = env.call_method(&am, jni_str!("getRunningAppProcesses"), jni_sig!(() -> java.util.List), &[])?.l()?;
 
         if processes.is_null() {
@@ -85,7 +67,7 @@ fn is_app_in_foreground_android() -> bool {
             let pid: i32 = env.get_field(&item, jni_str!("pid"), &int_sig)?.i()?;
             if pid == my_pid {
                 let importance: i32 = env.get_field(&item, jni_str!("importance"), &int_sig)?.i()?;
-                // IMPORTANCE_FOREGROUND = 100
+
                 return Ok(importance == 100);
             }
         }
@@ -96,11 +78,6 @@ fn is_app_in_foreground_android() -> bool {
     result.unwrap_or(false)
 }
 
-// ── System notification permission ───────────────────────────────────────────
-
-/// Returns `true` when the OS has **not** blocked notifications for this app.
-/// On Android this calls `NotificationManager.areNotificationsEnabled()`.
-/// On other platforms it always returns `true`.
 pub fn are_system_notifications_enabled() -> bool {
     #[cfg(target_os = "android")]
     {
@@ -112,8 +89,6 @@ pub fn are_system_notifications_enabled() -> bool {
     }
 }
 
-/// Opens the system notification settings page for this app so the user can
-/// unblock notifications. No-op on non-Android platforms.
 pub fn open_system_notification_settings() {
     #[cfg(target_os = "android")]
     open_system_notification_settings_android();
@@ -188,8 +163,6 @@ fn open_system_notification_settings_android() {
     });
 }
 
-// ── Desktop implementation ────────────────────────────────────────────────────
-
 #[cfg(not(target_os = "android"))]
 fn send_notification(title: &str, body: &str) {
     let title = title.to_string();
@@ -225,8 +198,6 @@ fn try_notify_send(summary: &str, body: &str) -> bool {
     }
 }
 
-// ── Android implementation ────────────────────────────────────────────────────
-
 #[cfg(target_os = "android")]
 fn send_notification(title: &str, body: &str) {
     let Some(app) = crate::file_picker_android::get_android_app() else {
@@ -237,7 +208,6 @@ fn send_notification(title: &str, body: &str) {
     let title = title.to_string();
     let body = body.to_string();
 
-    // Spawn a background thread so we don't block the Slint event loop.
     std::thread::spawn(move || {
         use jni::objects::{JObject, JValue};
         use jni::signature::RuntimeMethodSignature;
@@ -247,10 +217,6 @@ fn send_notification(title: &str, body: &str) {
         let result = vm.attach_current_thread(|env| -> jni::errors::Result<()> {
             let activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
 
-            // ── Resolve app icon via Resources.getIdentifier ──────────────
-            // Avoids hardcoding a system resource ID that may differ across
-            // Android versions. Falls back to android.R.drawable.ic_dialog_info
-            // (0x01080011 = 17301521) if the mipmap is not found.
             let icon_id = {
                 let resources: JObject = env
                     .call_method(&activity, jni_str!("getResources"), jni_sig!(() -> android.content.res.Resources), &[])?
@@ -266,13 +232,12 @@ fn send_notification(title: &str, body: &str) {
                         &[JValue::Object(&icon_name), JValue::Object(&icon_type), JValue::Object(&pkg)],
                     )?
                     .i()?;
-                if id != 0 { id } else { 17301521 } // 0x01080011 = ic_dialog_info
+                if id != 0 { id } else { 17301521 }
             };
 
-            // ── Notification channel (required for API 26+) ───────────────
             let channel_id_str = env.new_string("cedinia_scan")?;
             let channel_name_str = env.new_string("Scan notifications")?;
-            // IMPORTANCE_DEFAULT = 3
+
             let channel = env.new_object(
                 jni_str!("android/app/NotificationChannel"),
                 jni_sig!((id: java.lang.String, name: java.lang.CharSequence, importance: int) -> void),
@@ -301,9 +266,6 @@ fn send_notification(title: &str, body: &str) {
                 &[JValue::Object(&channel)],
             )?;
 
-            // ── Build notification ────────────────────────────────────────
-            // jni_sig! cannot express Notification$Builder (inner class with '$'),
-            // so we use RuntimeMethodSignature for those descriptors.
             let sig_ctor = RuntimeMethodSignature::from_str("(Landroid/content/Context;Ljava/lang/String;)V").unwrap();
             let builder = env.new_object(
                 jni_str!("android/app/Notification$Builder"),

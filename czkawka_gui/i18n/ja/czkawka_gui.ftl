@@ -7,7 +7,7 @@ window_compare_images = 画像を比較
 general_ok_button = Ok
 general_close_button = 閉じる
 # Krokiet info dialog
-krokiet_info_title = Krokiet – 新バージョン Czkawka
+krokiet_info_title = Krokiet - 新バージョン Czkawka
 krokiet_info_message = 
         Krokietは、Czkawka GTK GUIの新しい、改良され、高速かつ信頼性の高いバージョンです！
  

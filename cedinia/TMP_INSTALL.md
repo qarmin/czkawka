@@ -39,14 +39,14 @@ rustup target add aarch64-linux-android armv7-linux-androideabi
 cargo build -p cedinia
 cargo run -p cedinia
 
-# ── Android – one-time setup ──────────────────────────────────────────────────
+# ── Android - one-time setup ──────────────────────────────────────────────────
 just gen_keystores          # generate debug + release keystores (run once)
 
-# ── Android – build, install & launch ─────────────────────────────────────────
+# ── Android - build, install & launch ─────────────────────────────────────────
 just android                # debug:   build → install → launch
 just androidr               # release: build → install → launch
 
-# ── Android – individual steps ────────────────────────────────────────────────
+# ── Android - individual steps ────────────────────────────────────────────────
 just android_build          # build debug APK
 just android_build_release  # build release APK
 just android_install        # install debug APK to connected device

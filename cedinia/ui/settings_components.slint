@@ -76,8 +76,6 @@ export component SegmentRow {
     in property <[string]> options;
     in-out property <int>  selected;
 
-    height: root.description == "" ? 72px : 88px;
-
     VerticalLayout {
         padding-left: 16px;
         padding-right: 16px;
@@ -92,11 +90,13 @@ export component SegmentRow {
                 Text {
                     text: root.label;
                     color: CediniaColors.text_primary;
+                    wrap: TextWrap.word-wrap;
                     font-size: 14px;
                 }
                 if root.description != "" : Text {
                     text: root.description;
                     color: CediniaColors.text_secondary;
+                    wrap: TextWrap.word-wrap;
                     font-size: 11px;
                 }
             }
@@ -181,7 +181,6 @@ export component CategoryLabel inherits Rectangle {
 
 
 export component DropdownRow {
-//    in property <string>   label;
     in property <string>   description: "";
     in property <[string]> options;
     in-out property <int>  selected;
@@ -256,13 +255,6 @@ export component DropdownRow {
                             font-weight: i == root.selected ? 700 : 400;
                             vertical-alignment: TextVerticalAlignment.center;
                             horizontal-stretch: 1;
-                        }
-
-                        if i == root.selected : Text {
-                            text: "✓";
-                            color: CediniaColors.accent_light;
-                            font-size: 14px;
-                            vertical-alignment: TextVerticalAlignment.center;
                         }
                     }
                 }

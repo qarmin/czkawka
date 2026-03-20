@@ -9,8 +9,8 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use slint::{ComponentHandle, Model, ModelRc, SharedString, Timer, TimerMode, VecModel, Weak};
 
 use crate::callbacks::{
-    DeleteEvent, build_dir_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_notification_settings, wire_open_path,
-    wire_open_url, wire_permission, wire_save_settings_now, wire_scan, wire_selection,
+    DeleteEvent, build_excluded_model, build_included_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_licenses_popup,
+    wire_notification_settings, wire_open_path, wire_open_url, wire_permission, wire_save_settings_now, wire_scan, wire_selection,
 };
 use crate::model::make_file_model;
 use crate::scan_runner::{FileItem, ScanResult, ScanResultHandler, start_worker};
@@ -27,6 +27,7 @@ thread_local! {
         slint::Weak<MainWindow>,
         Rc<std::cell::RefCell<Vec<PathBuf>>>,
         Rc<std::cell::RefCell<Vec<PathBuf>>>,
+        Rc<std::cell::RefCell<Vec<PathBuf>>>,
     )>> = const { std::cell::RefCell::new(None) };
 }
 
@@ -35,18 +36,19 @@ pub fn on_directory_picked(path: String, is_include: bool) {
     log::info!("on_directory_picked: path='{}' is_include={}", path, is_include);
     DIR_STATE.with(|cell| {
         let guard = cell.borrow();
-        if let Some((weak, inc, exc)) = guard.as_ref() {
+        if let Some((weak, inc, exc, refr)) = guard.as_ref() {
             if let Some(win) = weak.upgrade() {
                 if is_include {
                     inc.borrow_mut().push(PathBuf::from(&path));
                 } else {
                     exc.borrow_mut().push(PathBuf::from(&path));
                 }
-                win.set_directories_model(build_dir_model(&inc.borrow(), &exc.borrow()));
+                win.set_included_dirs_model(build_included_model(&inc.borrow(), &refr.borrow()));
+                win.set_excluded_dirs_model(build_excluded_model(&exc.borrow()));
 
                 let settings = crate::settings::collect_settings_from_gui(&win);
                 crate::settings::save_settings(&settings);
-                crate::settings::save_dirs(&inc.borrow(), &exc.borrow());
+                crate::settings::save_dirs(&inc.borrow(), &exc.borrow(), &refr.borrow());
             }
         }
     });
@@ -145,6 +147,7 @@ fn rebuild_similar_images_after_delete(win: &MainWindow, deleted: &std::collecti
             new_flat.push(FileEntry {
                 checked: false,
                 is_header: true,
+                is_reference: false,
                 val_str: ModelRc::new(VecModel::from(vec![
                     group.label.clone(),
                     SharedString::default(),
@@ -160,6 +163,7 @@ fn rebuild_similar_images_after_delete(win: &MainWindow, deleted: &std::collecti
                 new_flat.push(FileEntry {
                     checked: false,
                     is_header: false,
+                    is_reference: false,
                     val_str: item.val_str.clone(),
                     val_int: ModelRc::new(VecModel::from(vec![])),
                 });
@@ -344,12 +348,15 @@ fn run_app_inner(
     let loaded_settings = load_settings();
     crate::localizer_cedinia::apply_language_preference(&loaded_settings.language);
     apply_settings_to_gui(&window, &loaded_settings);
-    set_initial_gui_infos(&window);
     translate_items(&window);
+    set_initial_gui_infos(&window);
     window.global::<AppState>().set_status_message(SharedString::from(crate::flc!("status_ready")));
 
     let bot_lp = inset_bottom_px / scale;
     window.global::<AppState>().set_inset_bottom(bot_lp);
+
+    #[cfg(target_os = "android")]
+    window.global::<AppState>().set_is_desktop(false);
 
     #[cfg(target_os = "android")]
     {
@@ -373,9 +380,10 @@ fn run_app_inner(
         }
     }
 
-    let (saved_included, saved_excluded) = load_dirs();
+    let (saved_included, saved_excluded, saved_referenced) = load_dirs();
     let included_dirs = Rc::new(std::cell::RefCell::new(if saved_included.is_empty() { vec![home_dir()] } else { saved_included }));
     let excluded_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>> = Rc::new(std::cell::RefCell::new(saved_excluded));
+    let referenced_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>> = Rc::new(std::cell::RefCell::new(saved_referenced));
     let scan_gen: Arc<AtomicU32> = Arc::new(AtomicU32::new(0));
 
     let (thumb_tx, thumb_rx) = std::sync::mpsc::channel::<crate::thumbnail_loader::ThumbnailResult>();
@@ -393,26 +401,28 @@ fn run_app_inner(
 
     #[cfg(target_os = "android")]
     DIR_STATE.with(|cell| {
-        *cell.borrow_mut() = Some((window.as_weak(), included_dirs.clone(), excluded_dirs.clone()));
+        *cell.borrow_mut() = Some((window.as_weak(), included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone()));
     });
 
-    window.set_directories_model(build_dir_model(&included_dirs.borrow(), &excluded_dirs.borrow()));
+    window.set_included_dirs_model(build_included_model(&included_dirs.borrow(), &referenced_dirs.borrow()));
+    window.set_excluded_dirs_model(build_excluded_model(&excluded_dirs.borrow()));
 
     let (delete_tx, delete_rx) = std::sync::mpsc::channel::<DeleteEvent>();
     let delete_rx = Rc::new(std::cell::RefCell::new(delete_rx));
     let delete_stop: Rc<std::cell::RefCell<Arc<AtomicBool>>> = Rc::new(std::cell::RefCell::new(Arc::new(AtomicBool::new(false))));
 
-    wire_scan(&window, stop_flag, scan_tx, included_dirs.clone(), scan_gen.clone());
+    wire_scan(&window, stop_flag, scan_tx, included_dirs.clone(), referenced_dirs.clone(), scan_gen.clone());
     wire_permission(&window);
     wire_notification_settings(&window);
     wire_selection(&window, delete_tx, Rc::clone(&delete_stop));
-    wire_directories(&window, included_dirs.clone(), excluded_dirs.clone());
+    wire_directories(&window, included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone());
     wire_collect_test(&window);
     wire_open_path(&window);
     wire_language_change(&window);
     wire_open_url(&window);
     wire_cache_info(&window);
-    wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone());
+    wire_licenses_popup(&window);
+    wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone());
 
     let weak = window.as_weak();
     let thumb_rx = Rc::new(std::cell::RefCell::new(thumb_rx));
@@ -623,7 +633,7 @@ fn run_app_inner(
 
     let current_settings = collect_settings_from_gui(&window);
     save_settings(&current_settings);
-    save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow());
+    save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow(), &referenced_dirs.borrow());
 }
 
 pub(crate) fn setup_logger_cache() {

@@ -1,7 +1,7 @@
 import { CediniaColors } from "colors.slint";
 import { ScanState, SimilarGroupCard } from "common.slint";
 import { AppState } from "app_state.slint";
-import { TouchButton } from "components.slint";
+import { StatusChip, TouchButton } from "components.slint";
 import { ListView } from "std-widgets.slint";
 import { Translations } from "translations.slint";
 
@@ -109,39 +109,27 @@ component GalleryToggleBar {
             padding-bottom: 8px;
             spacing: 8px;
 
-
             if AppState.selected_count > 0 : TouchButton {
-                label: Translations.gallery_delete_button_text;
+                label: "X";
                 min_h: 36px;
                 bg: CediniaColors.danger;
                 fg: #ffffff;
                 clicked => { AppState.request_gallery_delete(); }
             }
 
-            if AppState.selected_count > 0 : Rectangle {
-                width: selected_chip.preferred-width + 16px;
-                height: 28px;
-                border-radius: 14px;
-                background: CediniaColors.accent_muted;
+            if AppState.selected_count > 0 : StatusChip {
+                label: AppState.selected_count;
+                chip_color: CediniaColors.accent_muted;
+                text_color: CediniaColors.accent_light;
                 vertical-stretch: 0.0;
-                y: (parent.height - self.height) / 2;
-                selected_chip := Text {
-                    text: "[" + AppState.selected_count + "]";
-                    color: CediniaColors.accent_light;
-                    font-size: 11px;
-                    font-weight: 700;
-                    horizontal-alignment: TextHorizontalAlignment.center;
-                    vertical-alignment: TextVerticalAlignment.center;
-                }
             }
 
             Rectangle { horizontal-stretch: 1.0; }
 
-
             TouchButton {
                 label: Translations.select_label_text;
                 min_h: 36px;
-                bg: CediniaColors.bg_surface;
+                bg: CediniaColors.bg_elevated;
                 fg: CediniaColors.text_secondary;
                 clicked => { root.menu_state = 1; }
             }
@@ -149,7 +137,7 @@ component GalleryToggleBar {
             TouchButton {
                 label: Translations.deselect_label_text;
                 min_h: 36px;
-                bg: CediniaColors.bg_surface;
+                bg: CediniaColors.bg_elevated;
                 fg: CediniaColors.text_secondary;
                 clicked => { root.menu_state = 2; }
             }
@@ -157,7 +145,7 @@ component GalleryToggleBar {
             TouchButton {
                 label: Translations.list_label_text;
                 min_h: 36px;
-                bg: CediniaColors.bg_surface;
+                bg: CediniaColors.bg_elevated;
                 fg: CediniaColors.text_secondary;
                 clicked => { AppState.similar_images_gallery_mode = false; }
             }
@@ -452,7 +440,7 @@ export component SimilarImagesGallery {
                 }
 
                 if AppState.gallery_delete_warning != "" : Text {
-                    text: AppState.gallery_delete_warning;
+                    text: "⚠ " + AppState.gallery_delete_warning;
                     color: CediniaColors.warning;
                     font-size: 13px;
                     wrap: TextWrap.word-wrap;

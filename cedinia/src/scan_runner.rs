@@ -20,6 +20,9 @@ use crate::scanners::{
 #[derive(Debug, Clone)]
 pub struct FileItem {
     pub is_header: bool,
+    /// True only when this item is the "reference" original in a referenced-mode scan.
+    /// Always false in normal (non-referenced) mode and for all non-reference items.
+    pub is_reference: bool,
     pub val_str: Vec<String>,
     pub val_int: Vec<i32>,
 }
@@ -31,6 +34,9 @@ pub struct CommonFilters {
     pub excluded_extensions: Vec<String>,
     pub min_file_size_bytes: u64,
     pub max_file_size_bytes: Option<u64>,
+    /// Reference directories – set on the tool via CommonData::set_reference_paths.
+    /// When non-empty, tools that support referenced mode use their *_referenced() result methods.
+    pub referenced_dirs: Vec<PathBuf>,
 }
 
 #[derive(Debug)]
@@ -336,7 +342,7 @@ fn stage_label_full(pd: &CoreProgress) -> String {
         base
     };
     if pd.max_stage_idx > 0 {
-        format!("{}/{}\u{2002}{label}", pd.current_stage_idx + 1, pd.max_stage_idx + 1)
+        format!("{}/{}  {label}", pd.current_stage_idx + 1, pd.max_stage_idx + 1)
     } else {
         label
     }
@@ -358,6 +364,8 @@ pub(crate) fn apply_filters<T: CommonData>(tool: &mut T, filters: &CommonFilters
     if let Some(max) = filters.max_file_size_bytes {
         tool.set_maximal_file_size(max);
     }
+    // All CommonData tools support reference paths; setting them enables referenced-mode results.
+    tool.set_reference_paths(filters.referenced_dirs.clone());
 }
 
 pub(crate) fn spawn_progress_forwarder<H: ScanResultHandler + Sync>(handler: Arc<H>, scan_id: u32) -> (Sender<CoreProgress>, thread::JoinHandle<()>) {

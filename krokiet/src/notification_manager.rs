@@ -1,22 +1,19 @@
 use log::error;
 
 pub fn send_scan_completed_notification(tool: &str, body: &str) {
-    #[cfg(feature = "notifications")]
-    {
-        #[cfg(target_os = "linux")]
-        if try_notify_send(tool, body) {
-            return;
-        }
+    #[cfg(target_os = "linux")]
+    if try_notify_send(tool, body) {
+        return;
+    }
 
-        // Fallback: notify-rust (covers macOS, Windows and Linux without notify-send)
-        let mut notif = notify_rust::Notification::new();
-        notif.summary(tool).body(body);
-        #[cfg(all(unix, not(target_os = "macos")))]
-        notif.urgency(notify_rust::Urgency::Normal);
-        match notif.show() {
-            Ok(_) => log::info!("Desktop notification sent"),
-            Err(e) => error!("Failed to send desktop notification: {e}"),
-        }
+    // Fallback: notify-rust (covers macOS, Windows and Linux without notify-send)
+    let mut notif = notify_rust::Notification::new();
+    notif.summary(tool).body(body);
+    #[cfg(all(unix, not(target_os = "macos")))]
+    notif.urgency(notify_rust::Urgency::Normal);
+    match notif.show() {
+        Ok(_) => log::info!("Desktop notification sent"),
+        Err(e) => error!("Failed to send desktop notification: {e}"),
     }
 }
 

@@ -144,8 +144,8 @@ pub fn get_android_app() -> Option<&'static AndroidApp> {
     APP_HANDLE.get()
 }
 
-pub fn launch_pick_directory(is_include: bool) {
-    log::info!("launch_pick_directory: is_include={}", is_include);
+pub fn launch_pick_directory(is_include: bool, start_path: &str) {
+    log::info!("launch_pick_directory: is_include={} start_path='{}'", is_include, start_path);
     let Some(app) = APP_HANDLE.get() else {
         log::error!("launch_pick_directory: AndroidApp not initialised");
         return;
@@ -175,12 +175,13 @@ pub fn launch_pick_directory(is_include: bool) {
         } else {
             jni_str!("pickExcludeDirectory")
         };
-        log::info!("launch_pick_directory: calling Java CediniaFilePicker method");
+        let j_start = env.new_string(start_path)?;
+        log::info!("launch_pick_directory: calling Java CediniaFilePicker method with start_path");
         env.call_static_method(
             &picker_class,
             method,
-            jni_sig!((activity: android.app.Activity) -> void),
-            &[JValue::Object(&native_activity)],
+            jni_sig!((activity: android.app.Activity, startPath: java.lang.String) -> void),
+            &[JValue::Object(&native_activity), JValue::Object(&j_start)],
         )?;
         log::info!("launch_pick_directory: Java call succeeded");
         Ok(())

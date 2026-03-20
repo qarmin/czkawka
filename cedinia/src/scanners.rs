@@ -12,15 +12,23 @@ use crate::common::{
 };
 use crate::scan_runner::{CommonFilters, FileItem, ScanResultHandler, apply_filters, file_name, fmt_date, fmt_size, parent_str, size_to_hi_lo, spawn_progress_forwarder};
 
-fn base_item(is_header: bool, name: String, path: String, size_str: String, modified_str: String, mod_secs: u64, size_bytes: u64) -> FileItem {
+fn base_item(name: String, path: String, size_str: String, modified_str: String, mod_secs: u64, size_bytes: u64) -> FileItem {
     let (mod_hi, mod_lo) = size_to_hi_lo(mod_secs);
     let (size_hi, size_lo) = size_to_hi_lo(size_bytes);
     let val_str: [String; STR_BASE_COUNT] = [name, path, size_str, modified_str];
     let val_int: [i32; INT_BASE_COUNT] = [mod_hi, mod_lo, size_hi, size_lo];
     FileItem {
-        is_header,
+        is_header: false,
+        is_reference: false,
         val_str: val_str.into(),
         val_int: val_int.into(),
+    }
+}
+
+fn ref_base_item(name: String, path: String, size_str: String, modified_str: String, mod_secs: u64, size_bytes: u64) -> FileItem {
+    FileItem {
+        is_reference: true,
+        ..base_item(name, path, size_str, modified_str, mod_secs, size_bytes)
     }
 }
 
@@ -29,6 +37,7 @@ fn header_item(label: String) -> FileItem {
     let val_int: [i32; INT_BASE_COUNT] = [0, 0, 0, 0];
     FileItem {
         is_header: true,
+        is_reference: false,
         val_str: val_str.into(),
         val_int: val_int.into(),
     }
@@ -58,39 +67,100 @@ pub(crate) fn scan_duplicate_files<H: ScanResultHandler>(
     handler: &Arc<H>,
     scan_id: u32,
 ) -> Vec<FileItem> {
-    use czkawka_core::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters};
+    use czkawka_core::common::model::CheckingMethod;
+    use czkawka_core::tools::duplicate::{DuplicateEntry, DuplicateFinder, DuplicateFinderParameters};
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
     let params = DuplicateFinderParameters::new(check_method, hash_type, use_cache, 8 * 1024, 0, false);
     let mut tool = DuplicateFinder::new(params);
     tool.set_included_paths(dirs);
-    apply_filters(&mut tool, filters);
+    apply_filters(&mut tool, filters); // includes set_reference_paths
     tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
+
+    let use_ref = tool.get_use_reference();
+
+    // Collect (optional_reference_file, duplicate_files) pairs
+    let mut groups: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)> = if use_ref {
+        match check_method {
+            CheckingMethod::Hash => tool
+                .get_files_with_identical_hashes_referenced()
+                .values()
+                .flatten()
+                .cloned()
+                .map(|(orig, others)| (Some(orig), others))
+                .collect(),
+            CheckingMethod::Name => tool
+                .get_files_with_identical_name_referenced()
+                .values()
+                .cloned()
+                .map(|(orig, others)| (Some(orig), others))
+                .collect(),
+            CheckingMethod::Size => tool
+                .get_files_with_identical_size_referenced()
+                .values()
+                .cloned()
+                .map(|(orig, others)| (Some(orig), others))
+                .collect(),
+            CheckingMethod::SizeName => tool
+                .get_files_with_identical_size_names_referenced()
+                .values()
+                .cloned()
+                .map(|(orig, others)| (Some(orig), others))
+                .collect(),
+            _ => vec![],
+        }
+    } else {
+        match check_method {
+            CheckingMethod::Hash => tool.get_files_sorted_by_hash().values().flatten().cloned().map(|group| (None, group)).collect(),
+            CheckingMethod::Name => tool.get_files_sorted_by_names().values().cloned().map(|group| (None, group)).collect(),
+            CheckingMethod::Size => tool.get_files_sorted_by_size().values().cloned().map(|group| (None, group)).collect(),
+            CheckingMethod::SizeName => tool.get_files_sorted_by_size_name().values().cloned().map(|group| (None, group)).collect(),
+            _ => vec![],
+        }
+    };
+
+    // Sort by total group size descending
+    groups.sort_by_key(|(ref_f, dups)| {
+        let total: u64 = dups.iter().map(|f| f.size).sum::<u64>() + ref_f.as_ref().map_or(0, |f| f.size);
+        Reverse(total)
+    });
+
     let mut items: Vec<FileItem> = Vec::new();
-    for groups in tool.get_files_sorted_by_hash().values().rev() {
-        let mut sorted_groups: Vec<&Vec<_>> = groups.iter().collect();
-        sorted_groups.sort_by_key(|g| Reverse(g.len()));
-        for group in sorted_groups {
-            if group.len() < 2 {
-                continue;
-            }
-            let file_size = group[0].size;
-            let total = fmt_size(file_size * group.len() as u64);
-            let per = fmt_size(file_size);
-            items.push(header_item(format!("{} pliki  \u{00d7}  {} / plik  =  {} \u{0142}\u{0105}cznie", group.len(), per, total)));
-            for fe in group {
-                items.push(base_item(
-                    false,
-                    file_name(&fe.path),
-                    parent_str(&fe.path),
-                    fmt_size(fe.size),
-                    fmt_date(fe.modified_date),
-                    fe.modified_date,
-                    fe.size,
-                ));
-            }
+    for (ref_file, dup_files) in groups {
+        let group_len = dup_files.len() + usize::from(ref_file.is_some());
+        if group_len < 2 {
+            continue;
+        }
+        let file_size = ref_file.as_ref().map(|f| f.size).or_else(|| dup_files.first().map(|f| f.size)).unwrap_or(0);
+        let total = fmt_size(file_size * group_len as u64);
+        let per = fmt_size(file_size);
+        items.push(header_item(crate::flc!(
+            "duplicates_group_header",
+            count = group_len,
+            per_file = per.as_str(),
+            total = total.as_str()
+        )));
+        if let Some(ref_fe) = ref_file {
+            items.push(ref_base_item(
+                file_name(&ref_fe.path),
+                parent_str(&ref_fe.path),
+                fmt_size(ref_fe.size),
+                fmt_date(ref_fe.modified_date),
+                ref_fe.modified_date,
+                ref_fe.size,
+            ));
+        }
+        for fe in &dup_files {
+            items.push(base_item(
+                file_name(&fe.path),
+                parent_str(&fe.path),
+                fmt_size(fe.size),
+                fmt_date(fe.modified_date),
+                fe.modified_date,
+                fe.size,
+            ));
         }
     }
     items
@@ -108,17 +178,7 @@ pub(crate) fn scan_empty_folders<H: ScanResultHandler>(dirs: Vec<PathBuf>, filte
     let mut items: Vec<FileItem> = tool
         .get_empty_folder_list()
         .values()
-        .map(|fe| {
-            base_item(
-                false,
-                file_name(&fe.path),
-                parent_str(&fe.path),
-                String::new(),
-                fmt_date(fe.modified_date),
-                fe.modified_date,
-                0,
-            )
-        })
+        .map(|fe| base_item(file_name(&fe.path), parent_str(&fe.path), String::new(), fmt_date(fe.modified_date), fe.modified_date, 0))
         .collect();
     items.sort_by(|a, b| item_path(a).cmp(item_path(b)).then(item_name(a).cmp(item_name(b))));
     items
@@ -136,7 +196,7 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     handler: &Arc<H>,
     scan_id: u32,
 ) -> Vec<FileItem> {
-    use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
+    use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
     let max_diff = return_similarity_from_similarity_preset(similarity_preset, hash_size);
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
     let params = SimilarImagesParameters::new(max_diff, hash_size, hash_alg, image_filter, ignore_same_size);
@@ -147,30 +207,48 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
-    let raw_groups: &Vec<Vec<_>> = tool.get_similar_images();
-    let mut groups_with_size: Vec<(&Vec<_>, u64)> = raw_groups
-        .iter()
-        .filter(|g| g.len() >= 2)
-        .map(|g| {
-            let total: u64 = g.iter().map(|img| img.size).sum();
-            (g, total)
-        })
-        .collect();
-    groups_with_size.sort_by_key(|&(_, total)| Reverse(total));
+
+    // Collect (optional_reference, group) pairs – same pattern as duplicate_files
+    let use_ref = tool.get_use_reference();
+    let mut groups: Vec<(Option<_>, Vec<_>)> = if use_ref {
+        tool.get_similar_images_referenced().iter().cloned().map(|(orig, others)| (Some(orig), others)).collect()
+    } else {
+        tool.get_similar_images().iter().cloned().map(|g| (None, g)).collect()
+    };
+
+    // Sort by total group size descending
+    groups.sort_by_key(|(ref_img, imgs)| {
+        let total: u64 = imgs.iter().map(|i| i.size).sum::<u64>() + ref_img.as_ref().map_or(0, |i| i.size);
+        Reverse(total)
+    });
+
     let mut items: Vec<FileItem> = Vec::new();
-    for (group, _) in groups_with_size {
-        items.push(header_item(format!("{} podobnych obraz\u{00f3}w", group.len())));
-        for img in group {
-            let dims = format!("{}\u{00d7}{}  \u{0394}{}", img.width, img.height, img.difference);
+    for (ref_img, dup_imgs) in groups {
+        let group_len = dup_imgs.len() + usize::from(ref_img.is_some());
+        if group_len < 2 {
+            continue;
+        }
+        items.push(header_item(crate::flc!("similar_images_group_header", count = group_len)));
+
+        let make_img_item = |img: &ImagesEntry, is_reference: bool| {
+            let dims = format!("{}×{}  Δ{}", img.width, img.height, img.difference);
             let (mod_hi, mod_lo) = size_to_hi_lo(img.modified_date);
             let (size_hi, size_lo) = size_to_hi_lo(img.size);
             let val_str: [String; MAX_STR_DATA_SIMILAR_IMAGES] = [file_name(&img.path), parent_str(&img.path), fmt_size(img.size), fmt_date(img.modified_date), dims];
             let val_int: [i32; MAX_INT_DATA_SIMILAR_IMAGES] = [mod_hi, mod_lo, size_hi, size_lo, img.width as i32, img.height as i32, img.difference as i32];
-            items.push(FileItem {
+            FileItem {
                 is_header: false,
+                is_reference,
                 val_str: val_str.into(),
                 val_int: val_int.into(),
-            });
+            }
+        };
+
+        if let Some(ref_i) = ref_img.as_ref() {
+            items.push(make_img_item(ref_i, true));
+        }
+        for img in &dup_imgs {
+            items.push(make_img_item(img, false));
         }
     }
     items
@@ -191,7 +269,6 @@ pub(crate) fn scan_empty_files<H: ScanResultHandler>(dirs: Vec<PathBuf>, filters
         .iter()
         .map(|fe| {
             base_item(
-                false,
                 file_name(&fe.path),
                 parent_str(&fe.path),
                 fmt_size(fe.size),
@@ -220,7 +297,6 @@ pub(crate) fn scan_temporary_files<H: ScanResultHandler>(dirs: Vec<PathBuf>, fil
         .iter()
         .map(|fe| {
             base_item(
-                false,
                 file_name(&fe.path),
                 parent_str(&fe.path),
                 fmt_size(fe.size),
@@ -257,7 +333,6 @@ pub(crate) fn scan_big_files<H: ScanResultHandler>(
         .iter()
         .map(|fe| {
             base_item(
-                false,
                 file_name(&fe.path),
                 parent_str(&fe.path),
                 fmt_size(fe.size),
@@ -302,6 +377,7 @@ pub(crate) fn scan_broken_files<H: ScanResultHandler>(
             let val_int: [i32; INT_BASE_COUNT] = [mod_hi, mod_lo, 0, 0];
             FileItem {
                 is_header: false,
+                is_reference: false,
                 val_str: val_str.into(),
                 val_int: val_int.into(),
             }
@@ -333,12 +409,13 @@ pub(crate) fn scan_bad_extensions<H: ScanResultHandler>(dirs: Vec<PathBuf>, filt
                 parent_str(&be.path),
                 fmt_size(be.size),
                 fmt_date(be.modified_date),
-                format!(".{} \u{2192} .{}", be.current_extension, be.proper_extension),
+                format!(".{} → .{}", be.current_extension, be.proper_extension),
                 be.proper_extension.clone(),
             ];
             let val_int: [i32; INT_BASE_COUNT] = [mod_hi, mod_lo, size_hi, size_lo];
             FileItem {
                 is_header: false,
+                is_reference: false,
                 val_str: val_str.into(),
                 val_int: val_int.into(),
             }
@@ -397,6 +474,7 @@ pub(crate) fn scan_bad_names<H: ScanResultHandler>(
             let val_int: [i32; INT_BASE_COUNT] = [mod_hi, mod_lo, 0, 0];
             FileItem {
                 is_header: false,
+                is_reference: false,
                 val_str: val_str.into(),
                 val_int: val_int.into(),
             }
@@ -429,6 +507,7 @@ pub(crate) fn scan_exif_remover<H: ScanResultHandler>(dirs: Vec<PathBuf>, filter
                 ee.size,
                 FileItem {
                     is_header: false,
+                    is_reference: false,
                     val_str: val_str.into(),
                     val_int: val_int.into(),
                 },
@@ -459,38 +538,54 @@ pub(crate) fn scan_same_music<H: ScanResultHandler>(
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
-    let raw_groups = tool.get_duplicated_music_entries();
-    let mut groups_with_size: Vec<(&Vec<_>, u64)> = raw_groups
-        .iter()
-        .filter(|g| g.len() >= 2)
-        .map(|g| {
-            let total: u64 = g.iter().map(|me| me.size).sum();
-            (g, total)
-        })
-        .collect();
-    groups_with_size.sort_by_key(|&(_, total)| Reverse(total));
+    use czkawka_core::tools::same_music::MusicEntry;
+    let use_ref = tool.get_use_reference();
+    let mut groups: Vec<(Option<MusicEntry>, Vec<MusicEntry>)> = if use_ref {
+        tool.get_similar_music_referenced().iter().cloned().map(|(orig, others)| (Some(orig), others)).collect()
+    } else {
+        tool.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect()
+    };
+
+    // Sort by total group size descending
+    groups.sort_by_key(|(ref_me, dups)| {
+        let total: u64 = dups.iter().map(|me| me.size).sum::<u64>() + ref_me.as_ref().map_or(0, |me| me.size);
+        Reverse(total)
+    });
+
+    let make_music_item = |me: &MusicEntry, is_reference: bool| {
+        let artist = if me.track_artist.is_empty() { "?" } else { &me.track_artist };
+        let title = if me.track_title.is_empty() { "?" } else { &me.track_title };
+        let (mod_hi, mod_lo) = size_to_hi_lo(me.modified_date);
+        let (size_hi, size_lo) = size_to_hi_lo(me.size);
+        let val_str: [String; MAX_STR_DATA_SAME_MUSIC] = [
+            file_name(&me.path),
+            parent_str(&me.path),
+            fmt_size(me.size),
+            fmt_date(me.modified_date),
+            format!("{artist} - {title}"),
+            title.to_string(),
+        ];
+        let val_int: [i32; INT_BASE_COUNT] = [mod_hi, mod_lo, size_hi, size_lo];
+        FileItem {
+            is_header: false,
+            is_reference,
+            val_str: val_str.into(),
+            val_int: val_int.into(),
+        }
+    };
+
     let mut items: Vec<FileItem> = Vec::new();
-    for (group, _) in groups_with_size {
-        items.push(header_item(format!("{} podobnych utw\u{00f3}r\u{00f3}w", group.len())));
-        for me in group {
-            let artist = if me.track_artist.is_empty() { "?" } else { &me.track_artist };
-            let title = if me.track_title.is_empty() { "?" } else { &me.track_title };
-            let (mod_hi, mod_lo) = size_to_hi_lo(me.modified_date);
-            let (size_hi, size_lo) = size_to_hi_lo(me.size);
-            let val_str: [String; MAX_STR_DATA_SAME_MUSIC] = [
-                file_name(&me.path),
-                parent_str(&me.path),
-                fmt_size(me.size),
-                fmt_date(me.modified_date),
-                format!("{artist} \u{2013} {title}"),
-                title.to_string(),
-            ];
-            let val_int: [i32; INT_BASE_COUNT] = [mod_hi, mod_lo, size_hi, size_lo];
-            items.push(FileItem {
-                is_header: false,
-                val_str: val_str.into(),
-                val_int: val_int.into(),
-            });
+    for (ref_me, dup_mes) in &groups {
+        let group_len = dup_mes.len() + usize::from(ref_me.is_some());
+        if group_len < 2 {
+            continue;
+        }
+        items.push(header_item(crate::flc!("same_music_group_header", count = group_len)));
+        if let Some(ref_m) = ref_me.as_ref() {
+            items.push(make_music_item(ref_m, true));
+        }
+        for me in dup_mes {
+            items.push(make_music_item(me, false));
         }
     }
     items

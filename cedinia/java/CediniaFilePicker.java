@@ -38,10 +38,10 @@ public class CediniaFilePicker {
      */
     public static boolean hasStoragePermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= 30) {
-            // Android 11+ – MANAGE_EXTERNAL_STORAGE
+            // Android 11+ - MANAGE_EXTERNAL_STORAGE
             return Environment.isExternalStorageManager();
         } else if (Build.VERSION.SDK_INT >= 23) {
-            // Android 6-10 – runtime READ_EXTERNAL_STORAGE
+            // Android 6-10 - runtime READ_EXTERNAL_STORAGE
             return activity.checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE")
                     == PackageManager.PERMISSION_GRANTED;
         } else {
@@ -90,27 +90,48 @@ public class CediniaFilePicker {
     // ── nav bar visibility ────────────────────────────────────────────────
 
     /**
-     * Clears immersive / hide-navigation flags so the system nav bar (Back,
-     * Home) stays visible.  Re-applies the clear whenever Slint's renderer
-     * would hide it again.  Call once after Slint has been initialised.
+     * Enables the "swipe from bottom edge to temporarily reveal the system nav bar"
+     * (immersive-sticky) behaviour.  When the navigation bar is hidden by Slint's
+     * renderer, a swipe from the bottom shows it transiently and it auto-hides again.
+     *
+     * API 30+: WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE.
+     * API <30:  adds SYSTEM_UI_FLAG_IMMERSIVE_STICKY whenever HIDE_NAVIGATION is set.
      */
     public static void setupNavBar(final Activity activity) {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final View decorView = activity.getWindow().getDecorView();
-                decorView.setSystemUiVisibility(0);
-                decorView.setOnSystemUiVisibilityChangeListener(
-                    new View.OnSystemUiVisibilityChangeListener() {
-                        @Override
-                        public void onSystemUiVisibilityChange(int visibility) {
-                            if ((visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0) {
-                                decorView.setSystemUiVisibility(0);
+                if (Build.VERSION.SDK_INT >= 30) {
+                    android.view.WindowInsetsController controller =
+                            activity.getWindow().getInsetsController();
+                    if (controller != null) {
+                        controller.setSystemBarsBehavior(
+                            android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                        Log.i(TAG, "setupNavBar: BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE set (API 30+)");
+                    } else {
+                        Log.w(TAG, "setupNavBar: InsetsController is null");
+                    }
+                } else {
+                    final View decorView = activity.getWindow().getDecorView();
+                    decorView.setOnSystemUiVisibilityChangeListener(
+                        new View.OnSystemUiVisibilityChangeListener() {
+                            @Override
+                            public void onSystemUiVisibilityChange(int visibility) {
+                                if ((visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
+                                        && (visibility & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) == 0) {
+                                    decorView.setSystemUiVisibility(
+                                        visibility | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                                }
                             }
                         }
+                    );
+                    int current = decorView.getSystemUiVisibility();
+                    if ((current & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0) {
+                        decorView.setSystemUiVisibility(
+                            current | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
                     }
-                );
-                Log.i(TAG, "setupNavBar: nav bar listener registered");
+                    Log.i(TAG, "setupNavBar: IMMERSIVE_STICKY listener configured (API < 30)");
+                }
             }
         });
     }
@@ -133,38 +154,48 @@ public class CediniaFilePicker {
         });
     }
 
-    /** Launch the folder picker for an "include" directory. */
+    /** Launch the folder picker for an "include" directory (no initial path). */
     public static void pickIncludeDirectory(Activity activity) {
         Log.i(TAG, "pickIncludeDirectory called, API=" + Build.VERSION.SDK_INT
                 + " activity=" + activity.getClass().getName());
-        launchPicker(activity, true);
+        launchPicker(activity, true, "");
     }
 
-    /** Launch the folder picker for an "exclude" directory. */
+    /** Launch the folder picker for an "include" directory starting at startPath. */
+    public static void pickIncludeDirectory(Activity activity, String startPath) {
+        Log.i(TAG, "pickIncludeDirectory called, API=" + Build.VERSION.SDK_INT
+                + " startPath='" + startPath + "'");
+        launchPicker(activity, true, startPath);
+    }
+
+    /** Launch the folder picker for an "exclude" directory (no initial path). */
     public static void pickExcludeDirectory(Activity activity) {
         Log.i(TAG, "pickExcludeDirectory called, API=" + Build.VERSION.SDK_INT
                 + " activity=" + activity.getClass().getName());
-        launchPicker(activity, false);
+        launchPicker(activity, false, "");
+    }
+
+    /** Launch the folder picker for an "exclude" directory starting at startPath. */
+    public static void pickExcludeDirectory(Activity activity, String startPath) {
+        Log.i(TAG, "pickExcludeDirectory called, API=" + Build.VERSION.SDK_INT
+                + " startPath='" + startPath + "'");
+        launchPicker(activity, false, startPath);
     }
 
     // ── internal ──────────────────────────────────────────────────────────
 
-    private static void launchPicker(final Activity activity, final boolean isInclude) {
-        // Try the SAF picker via startActivityForResult only when running in
-        // a CediniaActivity subclass that can intercept onActivityResult.
-        String activityClass = activity.getClass().getName();
-        if (activityClass.contains("CediniaActivity")) {
-            Log.i(TAG, "launchPicker: using SAF startActivityForResult");
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            intent.addFlags(
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-            activity.startActivityForResult(intent,
-                    isInclude ? REQ_INCLUDE : REQ_EXCLUDE);
-        } else {
-            // NativeActivity does not intercept onActivityResult via Rust,
-            // so we fall back to a simple path-entry dialog.
-            Log.w(TAG, "launchPicker: NativeActivity detected – using path-entry dialog");
+    private static void launchPicker(final Activity activity, final boolean isInclude,
+                                     final String startPath) {
+        // Use a headless Fragment so that startActivityForResult / onActivityResult
+        // works correctly with a plain NativeActivity (no subclass required).
+        try {
+            Log.i(TAG, "launchPicker: launching via CediniaPickerFragment"
+                    + " isInclude=" + isInclude + " startPath='" + startPath + "'");
+            CediniaPickerFragment.launch(activity, isInclude, startPath);
+        } catch (Exception e) {
+            // Fallback: if the Fragment approach fails for any reason, offer a
+            // text-entry dialog so the user can still type a path manually.
+            Log.w(TAG, "launchPicker: Fragment approach failed (" + e + "), falling back to dialog");
             showPathDialog(activity, isInclude);
         }
     }
@@ -230,7 +261,7 @@ public class CediniaFilePicker {
             return;
         }
         if (resultCode != Activity.RESULT_OK || data == null) {
-            Log.i(TAG, "handleActivityResult: cancelled or null data – resultCode=" + resultCode);
+            Log.i(TAG, "handleActivityResult: cancelled or null data - resultCode=" + resultCode);
             return;
         }
 
@@ -247,20 +278,20 @@ public class CediniaFilePicker {
         onDirectoryPicked(path, isInclude);
     }
 
-    private static void persistPermission(Activity activity, Uri treeUri) {
+    static void persistPermission(Activity activity, Uri treeUri) {
         try {
             int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
             activity.getContentResolver().takePersistableUriPermission(treeUri, flags);
             Log.d(TAG, "persistPermission: ok for " + treeUri);
         } catch (SecurityException e) {
-            Log.d(TAG, "persistPermission: provider does not support persistable perms – " + e.getMessage());
+            Log.d(TAG, "persistPermission: provider does not support persistable perms - " + e.getMessage());
         }
     }
 
     /**
      * Best-effort conversion of a SAF tree URI to a filesystem path.
      */
-    private static String resolveTreeUriToPath(Uri treeUri) {
+    static String resolveTreeUriToPath(Uri treeUri) {
         Log.d(TAG, "resolveTreeUriToPath: input=" + treeUri);
         try {
             Uri docUri = DocumentsContract.buildDocumentUriUsingTree(

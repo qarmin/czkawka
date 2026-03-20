@@ -69,7 +69,7 @@ pub(crate) fn detect_storage_volumes() -> Vec<VolumeEntry> {
             let label = classify_mountpoint(mountpoint);
             result.push(VolumeEntry {
                 path: SharedString::from(mountpoint.as_str()),
-                label: SharedString::from(label),
+                label: SharedString::from(label.as_str()),
                 is_included: false,
                 is_excluded: false,
             });
@@ -83,7 +83,7 @@ pub(crate) fn detect_storage_volumes() -> Vec<VolumeEntry> {
             let label = classify_mountpoint(path);
             result.push(VolumeEntry {
                 path: SharedString::from(*path),
-                label: SharedString::from(label),
+                label: SharedString::from(label.as_str()),
                 is_included: false,
                 is_excluded: false,
             });
@@ -92,8 +92,6 @@ pub(crate) fn detect_storage_volumes() -> Vec<VolumeEntry> {
     #[cfg(not(target_os = "android"))]
     let _ = candidates;
 
-    // Deduplicate by canonical path: /sdcard, /storage/emulated/0, /storage/self/primary
-    // are often symlinks pointing to the same directory.
     let mut seen: std::collections::HashSet<PathBuf> = std::collections::HashSet::new();
     result.retain(|v| {
         let canonical = std::fs::canonicalize(v.path.as_str()).unwrap_or_else(|_| PathBuf::from(v.path.as_str()));
@@ -103,9 +101,9 @@ pub(crate) fn detect_storage_volumes() -> Vec<VolumeEntry> {
     result
 }
 
-pub(crate) fn classify_mountpoint(path: &str) -> &'static str {
+pub(crate) fn classify_mountpoint(path: &str) -> String {
     if path.contains("emulated/0") || path == "/sdcard" || path == "/storage/self/primary" || path == "/mnt/sdcard" {
-        "💾 Pamięć wbudowana (internal)"
+        crate::flc!("volume_internal_storage")
     } else if path.contains("emulated/1")
         || path.contains("extSdCard")
         || path.contains("external_sd")
@@ -114,9 +112,9 @@ pub(crate) fn classify_mountpoint(path: &str) -> &'static str {
         || path.starts_with("/storage/")
         || path.starts_with("/mnt/media_rw/")
     {
-        "💳 Karta pamięci (SD card)"
+        crate::flc!("volume_sd_card")
     } else {
-        "📦 Wolumin pamięci"
+        crate::flc!("volume_storage")
     }
 }
 

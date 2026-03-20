@@ -160,7 +160,7 @@ main_check_box_broken_files_image = 이미지
 main_check_box_broken_files_video = 비디오
 main_check_box_broken_files_video_tooltip = ffmpeg/ffprobe를 사용하여 비디오 파일 유효성 검사합니다. 상당히 느리고 파일이 잘 재생되더라도 형식에 민감한 오류를 감지할 수 있습니다.
 check_button_general_same_size = 같은 파일크기 무시
-check_button_general_same_size_tooltip = 동일한 크기의 파일은 결과에서 제외합니다 – 대부분 1:1 중복일 가능성이 높습니다
+check_button_general_same_size_tooltip = 동일한 크기의 파일은 결과에서 제외합니다 - 대부분 1:1 중복일 가능성이 높습니다
 main_label_size_bytes_tooltip = 스캔할 파일의 크기입니다
 # Upper window
 upper_tree_view_included_folder_column_title = 검색할 폴더

@@ -7,7 +7,7 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
     let items = StringComboBoxItems::new();
 
     fn display_names<T: std::fmt::Debug + Clone>(items: &[crate::settings::gui_settings_values::StringComboBoxItem<T>]) -> Vec<SharedString> {
-        items.iter().map(|e| SharedString::from(e.display_name.as_str())).collect()
+        items.iter().map(|e| SharedString::from(e.translated_display_name())).collect()
     }
 
     let general = app.global::<GeneralSettings>();

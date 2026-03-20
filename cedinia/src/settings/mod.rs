@@ -29,11 +29,11 @@ fn default_search_mode() -> String {
 fn default_big_files_count() -> String {
     "50".to_string()
 }
-fn default_min_file_size_idx() -> i32 {
-    0
+fn default_min_file_size() -> String {
+    "none".to_string()
 }
-fn default_max_file_size_idx() -> i32 {
-    4 // Unlimited
+fn default_max_file_size() -> String {
+    "unlimited".to_string()
 }
 fn default_language() -> String {
     "auto".to_string()
@@ -68,10 +68,10 @@ pub struct CediniaSettings {
     pub show_notification: bool,
     #[serde(default = "ttrue")]
     pub notify_only_background: bool,
-    #[serde(default = "default_min_file_size_idx")]
-    pub min_file_size_idx: i32,
-    #[serde(default = "default_max_file_size_idx")]
-    pub max_file_size_idx: i32,
+    #[serde(default = "default_min_file_size")]
+    pub min_file_size: String,
+    #[serde(default = "default_max_file_size")]
+    pub max_file_size: String,
     #[serde(default = "default_language")]
     pub language: String,
     #[serde(default = "default_excluded_items")]
@@ -147,8 +147,8 @@ impl Default for CediniaSettings {
             ignore_hidden: true,
             show_notification: false,
             notify_only_background: true,
-            min_file_size_idx: default_min_file_size_idx(),
-            max_file_size_idx: default_max_file_size_idx(),
+            min_file_size: default_min_file_size(),
+            max_file_size: default_max_file_size(),
             language: default_language(),
             excluded_items: default_excluded_items(),
             allowed_extensions: String::new(),
@@ -192,11 +192,13 @@ fn get_dirs_file() -> Option<PathBuf> {
 struct DirConfig {
     included: Vec<String>,
     excluded: Vec<String>,
+    #[serde(default)]
+    referenced: Vec<String>,
 }
 
-pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf]) {
+pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf], referenced: &[PathBuf]) {
     let Some(path) = get_dirs_file() else {
-        error!("Cannot determine dirs config path – dirs not saved");
+        error!("Cannot determine dirs config path - dirs not saved");
         return;
     };
     if let Some(parent) = path.parent()
@@ -208,6 +210,7 @@ pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf]) {
     let config = DirConfig {
         included: included.iter().map(|p| p.to_string_lossy().to_string()).collect(),
         excluded: excluded.iter().map(|p| p.to_string_lossy().to_string()).collect(),
+        referenced: referenced.iter().map(|p| p.to_string_lossy().to_string()).collect(),
     };
     match serde_json::to_string_pretty(&config) {
         Ok(json) => {
@@ -221,28 +224,29 @@ pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf]) {
     }
 }
 
-pub fn load_dirs() -> (Vec<PathBuf>, Vec<PathBuf>) {
+pub fn load_dirs() -> (Vec<PathBuf>, Vec<PathBuf>, Vec<PathBuf>) {
     let Some(path) = get_dirs_file() else {
-        return (vec![], vec![]);
+        return (vec![], vec![], vec![]);
     };
     if !path.is_file() {
-        return (vec![], vec![]);
+        return (vec![], vec![], vec![]);
     }
     match std::fs::read_to_string(&path) {
         Ok(json) => match serde_json::from_str::<DirConfig>(&json) {
             Ok(c) => {
                 let inc = c.included.iter().map(PathBuf::from).collect();
                 let exc = c.excluded.iter().map(PathBuf::from).collect();
-                (inc, exc)
+                let refr = c.referenced.iter().map(PathBuf::from).collect();
+                (inc, exc, refr)
             }
             Err(e) => {
                 error!("Cannot parse dirs config: {e}");
-                (vec![], vec![])
+                (vec![], vec![], vec![])
             }
         },
         Err(e) => {
             error!("Cannot read dirs config {}: {e}", path.display());
-            (vec![], vec![])
+            (vec![], vec![], vec![])
         }
     }
 }
@@ -254,12 +258,12 @@ fn get_config_file() -> Option<PathBuf> {
 
 pub fn load_settings() -> CediniaSettings {
     let Some(path) = get_config_file() else {
-        info!("Cannot determine config path – using defaults");
+        info!("Cannot determine config path - using defaults");
         return CediniaSettings::default();
     };
 
     if !path.is_file() {
-        info!("Settings file does not exist yet – using defaults");
+        info!("Settings file does not exist yet - using defaults");
         return CediniaSettings::default();
     }
 
@@ -270,12 +274,12 @@ pub fn load_settings() -> CediniaSettings {
                 s
             }
             Err(e) => {
-                error!("Cannot parse settings from {}: {e} – using defaults", path.display());
+                error!("Cannot parse settings from {}: {e} - using defaults", path.display());
                 CediniaSettings::default()
             }
         },
         Err(e) => {
-            error!("Cannot read settings file {}: {e} – using defaults", path.display());
+            error!("Cannot read settings file {}: {e} - using defaults", path.display());
             CediniaSettings::default()
         }
     }
@@ -283,7 +287,7 @@ pub fn load_settings() -> CediniaSettings {
 
 pub fn save_settings(settings: &CediniaSettings) {
     let Some(path) = get_config_file() else {
-        error!("Cannot determine config path – settings not saved");
+        error!("Cannot determine config path - settings not saved");
         return;
     };
 
@@ -317,13 +321,14 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     win.global::<GeneralSettings>().set_ignore_hidden(s.ignore_hidden);
     win.global::<GeneralSettings>().set_show_notification(s.show_notification);
     win.global::<GeneralSettings>().set_notify_only_background(s.notify_only_background);
-    win.global::<GeneralSettings>().set_min_file_size_idx(s.min_file_size_idx);
-    win.global::<GeneralSettings>().set_max_file_size_idx(s.max_file_size_idx);
-    let lang_idx = match s.language.as_str() {
-        "pl" => 1,
-        "en" => 0,
-        _ => crate::localizer_cedinia::detect_os_language_idx(),
-    };
+    let min_idx = StringComboBoxItems::idx_from_config_name(&s.min_file_size, &items.min_file_size);
+    win.global::<GeneralSettings>().set_min_file_size_idx(min_idx as i32);
+    let max_idx = StringComboBoxItems::idx_from_config_name(&s.max_file_size, &items.max_file_size);
+    win.global::<GeneralSettings>().set_max_file_size_idx(max_idx as i32);
+    let lang_idx = crate::localizer_cedinia::LANGUAGE_LIST
+        .iter()
+        .position(|&c| c == s.language.as_str())
+        .unwrap_or_else(|| crate::localizer_cedinia::detect_os_language_idx() as usize) as i32;
     win.global::<GeneralSettings>().set_language_idx(lang_idx);
     win.global::<GeneralSettings>().set_excluded_items(s.excluded_items.clone().into());
     win.global::<GeneralSettings>().set_allowed_extensions(s.allowed_extensions.clone().into());
@@ -405,12 +410,11 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         ignore_hidden: g.get_ignore_hidden(),
         show_notification: g.get_show_notification(),
         notify_only_background: g.get_notify_only_background(),
-        min_file_size_idx: g.get_min_file_size_idx(),
-        max_file_size_idx: g.get_max_file_size_idx(),
-        language: match g.get_language_idx() {
-            1 => "pl".to_string(),
-            _ => "en".to_string(),
-        },
+        min_file_size: StringComboBoxItems::config_name_from_idx(&items.min_file_size, g.get_min_file_size_idx(), "none"),
+        max_file_size: StringComboBoxItems::config_name_from_idx(&items.max_file_size, g.get_max_file_size_idx(), "unlimited"),
+        language: crate::localizer_cedinia::LANGUAGE_LIST
+            .get(g.get_language_idx() as usize)
+            .map_or_else(|| "en".to_string(), |&s| s.to_string()),
         excluded_items: g.get_excluded_items().to_string(),
         allowed_extensions: g.get_allowed_extensions().to_string(),
         excluded_extensions: g.get_excluded_extensions().to_string(),

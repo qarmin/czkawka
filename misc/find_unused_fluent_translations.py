@@ -68,6 +68,8 @@ for ftl_file in ftl_files:
     keys = extract_ftl_keys(ftl_file)
     print(f"Found {len(keys)} keys in {ftl_file}")
     for key in keys:
+        if key.startswith("option_"):
+            continue
         if f'"{key}"' not in rust_content:
             unused.append(key)
     if unused:

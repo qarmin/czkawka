@@ -1,7 +1,6 @@
 use std::cmp::Reverse;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
-use std::thread;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -36,7 +35,6 @@ impl BigFile {
             .build()
             .run();
 
-        thread::sleep(std::time::Duration::from_secs(4));
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 let mut all_files = grouped_file_entries.into_values().flatten().collect::<Vec<_>>();

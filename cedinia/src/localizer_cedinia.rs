@@ -23,36 +23,37 @@ pub(crate) fn localizer_cedinia() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_CEDINIA, &Localizations))
 }
 
-/// Returns 1 for Polish, 0 for English – determined by the OS locale.
-/// Used to pick the default UI index when no explicit language has been saved.
+/// All supported UI languages in display order. Index 0 is the fallback (English).
+pub const LANGUAGE_LIST: &[&str] = &["en", "pl"];
+
 pub(crate) fn detect_os_language_idx() -> i32 {
     #[cfg(not(target_os = "android"))]
     {
         let requested = i18n_embed::DesktopLanguageRequester::requested_languages();
-        if requested.iter().any(|l| l.language.as_str() == "pl") {
-            return 1;
+        if let Some(lang) = requested.first() {
+            let short = lang.language.as_str();
+            for (idx, &code) in LANGUAGE_LIST.iter().enumerate() {
+                if short == code {
+                    return idx as i32;
+                }
+            }
         }
     }
     0
 }
 
-/// Load the given language preference. "auto" uses the OS locale; "pl"/"en" forces a specific
-/// language. Call this before `translate_items`.
 pub(crate) fn apply_language_preference(lang: &str) {
     let localizer = localizer_cedinia();
-    match lang {
-        "pl" | "en" => {
-            if let Ok(lang_id) = lang.parse::<i18n_embed::unic_langid::LanguageIdentifier>() {
-                let _ = localizer.select(&[lang_id]);
-            }
+    if LANGUAGE_LIST.contains(&lang) {
+        if let Ok(lang_id) = lang.parse::<i18n_embed::unic_langid::LanguageIdentifier>() {
+            let _ = localizer.select(&[lang_id]);
         }
-        _ => {
-            // "auto" – use the OS-requested languages on desktop
-            #[cfg(not(target_os = "android"))]
-            {
-                let requested = i18n_embed::DesktopLanguageRequester::requested_languages();
-                let _ = localizer.select(&requested);
-            }
+    } else {
+        // "auto" or unknown → use system language
+        #[cfg(not(target_os = "android"))]
+        {
+            let requested = i18n_embed::DesktopLanguageRequester::requested_languages();
+            let _ = localizer.select(&requested);
         }
     }
 }

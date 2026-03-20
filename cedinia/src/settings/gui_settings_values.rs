@@ -13,7 +13,19 @@ where
 {
     pub config_name: String,
     pub display_name: String,
+    /// When set, `translated_display_name()` does a runtime i18n lookup.
+    pub i18n_key: Option<String>,
     pub value: T,
+}
+
+impl<T: Clone + Debug> StringComboBoxItem<T> {
+    pub fn translated_display_name(&self) -> String {
+        if let Some(key) = &self.i18n_key {
+            crate::localizer_cedinia::LANGUAGE_LOADER_CEDINIA.get(key)
+        } else {
+            self.display_name.clone()
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -47,7 +59,6 @@ pub enum MaxFileSize {
 }
 
 impl MaxFileSize {
-    /// Returns `None` for Unlimited (no limit imposed).
     pub fn to_bytes(self) -> Option<u64> {
         match self {
             Self::SixteenKb => Some(16 * 1_024),
@@ -81,50 +92,68 @@ impl Default for StringComboBoxItems {
 
 impl StringComboBoxItems {
     pub fn new() -> Self {
-        let min_file_size = Self::convert(&[
-            ("none", "Brak", MinFileSize::None),
-            ("1kb", "1 KB", MinFileSize::OneKb),
-            ("8kb", "8 KB", MinFileSize::EightKb),
-            ("64kb", "64 KB", MinFileSize::SixtyFourKb),
-            ("1mb", "1 MB", MinFileSize::OneMb),
-        ]);
+        // Translated via i18n runtime lookup
+        let min_file_size = Self::convert_i18n(
+            &[
+                ("none", MinFileSize::None),
+                ("1kb", MinFileSize::OneKb),
+                ("8kb", MinFileSize::EightKb),
+                ("64kb", MinFileSize::SixtyFourKb),
+                ("1mb", MinFileSize::OneMb),
+            ],
+            "option_min_size",
+        );
 
-        let max_file_size = Self::convert(&[
-            ("16kb", "16 KB", MaxFileSize::SixteenKb),
-            ("1mb", "1 MB", MaxFileSize::OneMb),
-            ("10mb", "10 MB", MaxFileSize::TenMb),
-            ("100mb", "100 MB", MaxFileSize::HundredMb),
-            ("unlimited", "Bez limitu", MaxFileSize::Unlimited),
-        ]);
+        let max_file_size = Self::convert_i18n(
+            &[
+                ("16kb", MaxFileSize::SixteenKb),
+                ("1mb", MaxFileSize::OneMb),
+                ("10mb", MaxFileSize::TenMb),
+                ("100mb", MaxFileSize::HundredMb),
+                ("unlimited", MaxFileSize::Unlimited),
+            ],
+            "option_max_size",
+        );
 
-        let duplicates_check_method = Self::convert(&[
-            ("hash", "Hash", CheckingMethod::Hash),
-            ("name", "Nazwa", CheckingMethod::Name),
-            ("size_and_name", "Rozm+Naz", CheckingMethod::SizeName),
-            ("size", "Rozmiar", CheckingMethod::Size),
-        ]);
+        let duplicates_check_method = Self::convert_i18n(
+            &[
+                ("hash", CheckingMethod::Hash),
+                ("name", CheckingMethod::Name),
+                ("size_and_name", CheckingMethod::SizeName),
+                ("size", CheckingMethod::Size),
+            ],
+            "option_check_method",
+        );
 
+        // Hash type names are proper nouns – not translated
         let duplicates_hash_type = Self::convert(&[
             ("blake3", "Blake3", HashType::Blake3),
             ("crc32", "CRC32", HashType::Crc32),
             ("xxh3", "XXH3", HashType::Xxh3),
         ]);
 
+        // Sizes are numbers – not translated
         let hash_size = Self::convert(&[("8", "8", 8u8), ("16", "16", 16), ("32", "32", 32), ("64", "64", 64)]);
 
-        let biggest_files_method = Self::convert(&[("biggest", "Największe", SearchMode::BiggestFiles), ("smallest", "Najmniejsze", SearchMode::SmallestFiles)]);
+        let biggest_files_method = Self::convert_i18n(&[("biggest", SearchMode::BiggestFiles), ("smallest", SearchMode::SmallestFiles)], "option_search_mode");
 
+        // Counts are numbers – not translated
         let big_files_count = Self::convert(&[("5", "5", 5usize), ("50", "50", 50), ("500", "500", 500), ("5000", "5000", 5000)]);
 
-        let similarity_preset = Self::convert(&[
-            ("very_high", "B.Wys.", SimilarityPreset::VeryHigh),
-            ("high", "Wysoki", SimilarityPreset::High),
-            ("medium", "Średni", SimilarityPreset::Medium),
-            ("small", "Niski", SimilarityPreset::Small),
-            ("very_small", "B.Niski", SimilarityPreset::VerySmall),
-            ("minimal", "Min.", SimilarityPreset::Minimal),
-        ]);
+        // Config names aligned with FTL keys: "low" / "very_low" instead of "small" / "very_small"
+        let similarity_preset = Self::convert_i18n(
+            &[
+                ("very_high", SimilarityPreset::VeryHigh),
+                ("high", SimilarityPreset::High),
+                ("medium", SimilarityPreset::Medium),
+                ("low", SimilarityPreset::Small),
+                ("very_low", SimilarityPreset::VerySmall),
+                ("minimal", SimilarityPreset::Minimal),
+            ],
+            "option_similarity",
+        );
 
+        // Algorithm names are proper nouns – not translated
         let hash_alg = Self::convert(&[
             ("mean", "Mean", HashAlg::Mean),
             ("gradient", "Gradient", HashAlg::Gradient),
@@ -134,6 +163,7 @@ impl StringComboBoxItems {
             ("blockhash", "Blockhash", HashAlg::Blockhash),
         ]);
 
+        // Filter names are proper nouns – not translated
         let image_filter = Self::convert(&[
             ("nearest", "Nearest", FilterType::Nearest),
             ("triangle", "Triangle", FilterType::Triangle),
@@ -142,7 +172,7 @@ impl StringComboBoxItems {
             ("lanczos3", "Lanczos3", FilterType::Lanczos3),
         ]);
 
-        let same_music_check_method = Self::convert(&[("tags", "Tagi", CheckingMethod::AudioTags), ("audio", "Audio", CheckingMethod::AudioContent)]);
+        let same_music_check_method = Self::convert_i18n(&[("tags", CheckingMethod::AudioTags), ("audio", CheckingMethod::AudioContent)], "option_music_method");
 
         Self {
             min_file_size,
@@ -159,6 +189,7 @@ impl StringComboBoxItems {
         }
     }
 
+    /// Build items with static (non-translated) display names.
     fn convert<T>(input: &[(&str, &str, T)]) -> Vec<StringComboBoxItem<T>>
     where
         T: Clone + Debug,
@@ -168,6 +199,23 @@ impl StringComboBoxItems {
             .map(|(config_name, display_name, value)| StringComboBoxItem {
                 config_name: config_name.to_string(),
                 display_name: display_name.to_string(),
+                i18n_key: None,
+                value: value.clone(),
+            })
+            .collect()
+    }
+
+    /// Build items whose display names are looked up at runtime via `{key_prefix}_{config_name}`.
+    fn convert_i18n<T>(input: &[(&str, T)], key_prefix: &str) -> Vec<StringComboBoxItem<T>>
+    where
+        T: Clone + Debug,
+    {
+        input
+            .iter()
+            .map(|(config_name, value)| StringComboBoxItem {
+                config_name: config_name.to_string(),
+                display_name: config_name.to_string(),
+                i18n_key: Some(format!("{key_prefix}_{config_name}")),
                 value: value.clone(),
             })
             .collect()
@@ -180,8 +228,6 @@ impl StringComboBoxItems {
         })
     }
 
-    /// Look up enum value by UI index. Use instead of `value_from_config_name` when only the
-    /// SegmentRow idx is available (the `_value` string property may be stale).
     pub fn value_from_idx<T: Clone + Debug>(items: &[StringComboBoxItem<T>], idx: i32, default: T) -> T {
         items.get(idx as usize).map_or_else(
             || {
@@ -192,7 +238,6 @@ impl StringComboBoxItems {
         )
     }
 
-    /// Look up the config_name string by UI index. Use in `collect_settings_from_gui`.
     pub fn config_name_from_idx<T: Clone + Debug>(items: &[StringComboBoxItem<T>], idx: i32, default: &str) -> String {
         items.get(idx as usize).map_or_else(
             || {

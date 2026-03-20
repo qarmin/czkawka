@@ -12,6 +12,7 @@ pub fn make_file_model(items: Vec<FileItem>) -> ModelRc<FileEntry> {
             FileEntry {
                 checked: false,
                 is_header: item.is_header,
+                is_reference: item.is_reference,
                 val_str: ModelRc::new(VecModel::from(val_str)),
                 val_int: ModelRc::new(VecModel::from(val_int)),
             }
@@ -26,6 +27,7 @@ pub fn toggle_row(model: &ModelRc<FileEntry>, index: usize) {
         let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
         if let Some(entry) = items.get_mut(index)
             && !entry.is_header
+            && !entry.is_reference
         {
             entry.checked = !entry.checked;
         }
