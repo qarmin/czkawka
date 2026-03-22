@@ -58,6 +58,12 @@ jobs:
           sed -i "s/min_sdk_version = .*/min_sdk_version = ${MIN_SDK_VERSION}/" cedinia/Cargo.toml
           sed -i "s/target_sdk_version = .*/target_sdk_version = ${TARGET_SDK_VERSION}/" cedinia/Cargo.toml
 
+      - name: Patch Cargo.toml - enable LTO and codegen-units for release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          sed -i 's/#lto = /lto = /g' Cargo.toml
+          sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
+
       - name: Build APK (release)
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
@@ -73,33 +79,26 @@ jobs:
           mv target/debug/apk/cedinia.apk cedinia.apk
 
       - name: Set up Gradle for AAB build
-        if: ${{ github.ref == 'refs/heads/master' }}
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.9'
 
-      - name: Build AAB (release)
-        if: ${{ github.ref == 'refs/heads/master' }}
+      - name: Build AAB
         run: |
           mkdir -p cedinia/android/app/src/main/jniLibs/arm64-v8a
-          cp target/aarch64-linux-android/release/libcedinia.so \
+          cp target/aarch64-linux-android/${{ env.VERS }}/libcedinia.so \
              cedinia/android/app/src/main/jniLibs/arm64-v8a/
           cd cedinia/android
           gradle bundleRelease
           mv app/build/outputs/bundle/release/app-release.aab ../../cedinia.aab
 
-      - name: Upload APK artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v6
         with:
-          name: cedinia-${{ env.VERS }}
-          path: cedinia.apk
-
-      - name: Upload AAB artifact
-        if: ${{ github.ref == 'refs/heads/master' }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: cedinia-aab-release
-          path: cedinia.aab
+          name: cedinia-${{ env.VERS }}-apk
+          path: |
+            cedinia.aab
+            cedinia.apk
 
       - name: Release
         uses: softprops/action-gh-release@v2

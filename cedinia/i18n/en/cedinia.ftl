@@ -124,6 +124,8 @@ settings_hash_size_desc = Larger sizes, have less false positives, but also find
 settings_hash_alg = Hash algorithm
 settings_image_filter = Resize filter
 settings_ignore_same_size = Ignore images with the same dimensions
+settings_gallery_image_fit_cover = Gallery: crop to square
+settings_gallery_image_fit_cover_desc = Fill the tile; disable to keep original aspect ratio
 settings_big_files_header = BIGGEST FILES
 settings_search_mode = Search mode
 settings_file_count = File count
@@ -333,3 +335,9 @@ path_edit_placeholder = Enter path...
 path_edit_not_exists = Path does not exist
 path_edit_is_dir = Directory
 path_edit_is_file = File
+path_edit_no_newlines = Paths cannot contain newlines — Enter key is not allowed
+
+ctx_menu_title = Open
+ctx_open_file = Open file
+ctx_open_folder = Open folder
+

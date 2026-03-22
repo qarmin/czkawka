@@ -220,7 +220,11 @@ pub(crate) fn wire_directories(
         let weak = window.as_weak();
         window.global::<AppState>().on_path_edit_check(move |path| {
             if let Some(win) = weak.upgrade() {
-                update_path_edit_status(&win, path.as_str());
+                let clean: String = path.chars().filter(|&c| c != '\n' && c != '\r').collect();
+                if clean.len() != path.len() {
+                    win.global::<AppState>().set_path_edit_value(clean.clone().into());
+                }
+                update_path_edit_status(&win, &clean);
             }
         });
     }
@@ -407,12 +411,10 @@ fn walk_dir(root: &std::path::Path, stop: &Arc<AtomicBool>, cb: &mut impl FnMut(
     true
 }
 
-/// Returns the canonical form of a path, falling back to the original if canonicalize fails.
 fn canonical_or_original(p: &PathBuf) -> PathBuf {
     std::fs::canonicalize(p).unwrap_or_else(|_| p.clone())
 }
 
-/// Remove dirs that are children of other dirs in the same list to prevent double-counting.
 fn deduplicate_dirs(dirs: &[PathBuf]) -> Vec<PathBuf> {
     let canonical: Vec<PathBuf> = dirs.iter().map(canonical_or_original).collect();
     canonical
@@ -428,12 +430,10 @@ fn compute_dir_stats(included: &[PathBuf], excluded: &[PathBuf], referenced: &[P
     let mut total: u64 = 0;
     let mut last_progress = std::time::Instant::now();
 
-    // Deduplicate: canonicalize and remove dirs that are children of other dirs in the same list
     let dedup_included = deduplicate_dirs(included);
     let dedup_excluded = deduplicate_dirs(excluded);
     let dedup_referenced = deduplicate_dirs(referenced);
 
-    // Track already-seen canonical file paths to avoid double-counting across overlapping dirs
     let mut seen_files: std::collections::HashSet<PathBuf> = std::collections::HashSet::new();
 
     for dir in &dedup_included {

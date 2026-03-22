@@ -52,6 +52,7 @@ export global SimilarImagesSettings {
     in-out property <[string]> image_filter_options:  ["Nearest", "Triangle", "CatmullRom", "Gaussian", "Lanczos3"];
 
     in-out property <bool>   ignore_same_size:        false;
+    in-out property <bool>   gallery_image_fit_cover: true;
 }
 
 
@@ -191,6 +192,12 @@ export global AppState {
     in-out property <bool> collect_test_cancelled: false;
 
     in-out property <bool> similar_images_gallery_mode: true;
+
+    in-out property <length> gallery_scroll_y:     0px;
+    in-out property <float>  gallery_max_scroll_f: 0.0;
+    // total_delta: full swipe displacement (px)  vel: EMA velocity at release (px per touch-event)
+    callback gallery_swiped(float, float);
+    callback gallery_stop_momentum();
 
 
     in-out property <string> diag_thumbnails_size: "-";

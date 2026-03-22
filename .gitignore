@@ -40,3 +40,4 @@ cedinia/android/app/src/main/jniLibs/
 cedinia/android/.gradle/
 cedinia/docs
 *.aab
+*.gz

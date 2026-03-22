@@ -124,6 +124,8 @@ settings_hash_size_desc = Większy = dokładniejszy, wolniejszy
 settings_hash_alg = Algorytm hasha
 settings_image_filter = Filtr zmiany rozmiaru
 settings_ignore_same_size = Ignoruj obrazy o tych samych wymiarach
+settings_gallery_image_fit_cover = Galeria: kadruj do kwadratu
+settings_gallery_image_fit_cover_desc = Wypełnia kafelek; wyłącz, by zachować proporcje obrazu
 settings_big_files_header = NAJWIĘKSZE PLIKI
 settings_search_mode = Tryb wyszukiwania
 settings_file_count = Liczba plików
@@ -332,3 +334,9 @@ path_edit_placeholder = Wpisz sciezke...
 path_edit_not_exists = Sciezka nie istnieje
 path_edit_is_dir = Katalog
 path_edit_is_file = Plik
+path_edit_no_newlines = Ścieżki nie mogą zawierać znaku nowej linii — klawisz Enter jest niedozwolony
+
+ctx_menu_title = Otwórz
+ctx_open_file = Otwórz plik
+ctx_open_folder = Otwórz folder
+

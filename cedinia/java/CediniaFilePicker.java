@@ -154,6 +154,141 @@ public class CediniaFilePicker {
         });
     }
 
+    // ── MIME type helper ──────────────────────────────────────────────────
+
+    private static String getMimeType(String path) {
+        int dot = path.lastIndexOf('.');
+        if (dot < 0) return "*/*";
+        switch (path.substring(dot + 1).toLowerCase()) {
+            case "jpg": case "jpeg": return "image/jpeg";
+            case "png":  return "image/png";
+            case "gif":  return "image/gif";
+            case "webp": return "image/webp";
+            case "bmp":  return "image/bmp";
+            case "heic": case "heif": return "image/heic";
+            case "mp3":  return "audio/mpeg";
+            case "flac": return "audio/flac";
+            case "ogg":  return "audio/ogg";
+            case "m4a":  return "audio/mp4";
+            case "wav":  return "audio/wav";
+            case "mp4":  return "video/mp4";
+            case "mkv":  return "video/x-matroska";
+            case "avi":  return "video/avi";
+            case "mov":  return "video/quicktime";
+            case "pdf":  return "application/pdf";
+            case "zip":  return "application/zip";
+            case "txt":  return "text/plain";
+            default:     return "*/*";
+        }
+    }
+
+    /**
+     * Query MediaStore for a content:// URI matching the given filesystem path.
+     * Returns null if the file is not indexed in MediaStore.
+     */
+    private static Uri queryMediaStoreUri(Activity activity, String path) {
+        String[] projection = { android.provider.MediaStore.MediaColumns._ID };
+        String   selection  = android.provider.MediaStore.MediaColumns.DATA + "=?";
+        String[] args       = { path };
+        Uri[] collections = {
+            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            android.provider.MediaStore.Files.getContentUri("external"),
+        };
+        for (Uri col : collections) {
+            try {
+                android.database.Cursor c = activity.getContentResolver().query(
+                    col, projection, selection, args, null);
+                if (c != null) {
+                    try {
+                        if (c.moveToFirst()) {
+                            long id = c.getLong(0);
+                            return Uri.withAppendedPath(col, String.valueOf(id));
+                        }
+                    } finally {
+                        c.close();
+                    }
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "queryMediaStoreUri: " + col + " skipped: " + e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Open a file using the system default handler.
+     * On API 26+ (minSdk) uses a MediaStore content:// URI so file:// exposure
+     * exceptions are avoided.  Falls back to opening the parent folder when no
+     * MediaStore entry exists for the file.
+     */
+    public static void openFile(final Activity activity, final String path) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Uri contentUri = queryMediaStoreUri(activity, path);
+                    if (contentUri == null) {
+                        Log.w(TAG, "openFile: no MediaStore entry for " + path + " – opening folder");
+                        String parent = new java.io.File(path).getParent();
+                        if (parent != null) openFolderInternal(activity, parent);
+                        return;
+                    }
+                    String mime = getMimeType(path);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(contentUri, mime);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                                  | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    activity.startActivity(intent);
+                    Log.i(TAG, "openFile: launched for " + path);
+                } catch (Exception e) {
+                    Log.e(TAG, "openFile: failed for " + path + ": " + e);
+                }
+            }
+        });
+    }
+
+    private static void openFolderInternal(Activity activity, String path) {
+        try {
+            // Strip known prefixes to get the path relative to the primary volume root.
+            String rel = path;
+            if (rel.startsWith("/storage/emulated/0/")) {
+                rel = rel.substring("/storage/emulated/0/".length());
+            } else if (rel.startsWith("/sdcard/")) {
+                rel = rel.substring("/sdcard/".length());
+            } else {
+                // Non-primary volume or unrecognised prefix – just show a toast-level fallback.
+                Log.w(TAG, "openFolder: non-primary path, skipping: " + path);
+                return;
+            }
+            // Use the DocumentsUI content URI understood by the built-in Files app.
+            Uri folderUri = Uri.parse(
+                "content://com.android.externalstorage.documents/document/primary:"
+                + Uri.encode(rel));
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(folderUri, DocumentsContract.Document.MIME_TYPE_DIR);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            activity.startActivity(intent);
+            Log.i(TAG, "openFolder: launched for " + path);
+        } catch (Exception e) {
+            Log.e(TAG, "openFolder: failed for " + path + ": " + e);
+        }
+    }
+
+    /**
+     * Open the folder at {@code path} in the system file manager.
+     * Called from Rust via JNI.
+     */
+    public static void openFolder(final Activity activity, final String path) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                openFolderInternal(activity, path);
+            }
+        });
+    }
+
     /** Launch the folder picker for an "include" directory (no initial path). */
     public static void pickIncludeDirectory(Activity activity) {
         Log.i(TAG, "pickIncludeDirectory called, API=" + Build.VERSION.SDK_INT

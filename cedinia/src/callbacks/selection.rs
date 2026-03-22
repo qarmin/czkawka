@@ -629,7 +629,6 @@ pub(crate) fn select_except_one_per_group(model: &ModelRc<FileEntry>, select: bo
     }
 
     if select {
-        // Skip reference items; leave the first non-reference item per group unchecked (the "one")
         let mut first_non_ref_in_group = false;
         for e in &mut items {
             if e.is_header {

@@ -10,6 +10,7 @@ use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::SimilarityPreset;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
+use crate::model::count_checked;
 use crate::scan_runner::{CommonFilters, ScanRequest};
 use crate::settings::gui_settings_values::StringComboBoxItems;
 use crate::{
@@ -63,9 +64,13 @@ pub(crate) fn wire_scan(
             let win = weak.upgrade().expect("MainWindow dropped in on_tool_changed");
 
             match tool {
-                ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {}
-                _ => {
+                ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {
                     win.global::<AppState>().set_selected_count(0);
+                }
+                _ => {
+                    let model = super::selection::get_model_for_tool(&win, tool);
+                    let count = count_checked(&model);
+                    win.global::<AppState>().set_selected_count(count);
                     win.global::<AppState>().set_status_message(SharedString::default());
                 }
             }

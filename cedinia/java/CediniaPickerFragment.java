@@ -133,7 +133,7 @@ public class CediniaPickerFragment extends Fragment {
                 Log.d(TAG, "buildInitialUri: unrecognised path, skipping: " + path);
                 return null;
             }
-            Uri uri = DocumentsContract.buildTreeDocumentUri(
+            Uri uri = DocumentsContract.buildDocumentUri(
                     "com.android.externalstorage.documents", docId);
             Log.d(TAG, "buildInitialUri: path='" + path + "' → docId='" + docId + "' uri=" + uri);
             return uri;

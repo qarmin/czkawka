@@ -96,6 +96,8 @@ pub struct CediniaSettings {
     pub similar_images_image_filter: String,
     #[serde(default)]
     pub similar_images_ignore_same_size: bool,
+    #[serde(default)]
+    pub gallery_image_fit_cover: bool,
 
     #[serde(default = "default_search_mode")]
     pub big_files_search_mode: String,
@@ -142,44 +144,7 @@ pub struct CediniaSettings {
 
 impl Default for CediniaSettings {
     fn default() -> Self {
-        Self {
-            use_cache: true,
-            ignore_hidden: true,
-            show_notification: false,
-            notify_only_background: true,
-            min_file_size: default_min_file_size(),
-            max_file_size: default_max_file_size(),
-            language: default_language(),
-            excluded_items: default_excluded_items(),
-            allowed_extensions: String::new(),
-            excluded_extensions: String::new(),
-            duplicates_check_method: default_check_method(),
-            duplicates_hash_type: default_hash_type(),
-            similar_images_similarity_preset: default_similarity_preset(),
-            similar_images_hash_size: default_hash_size(),
-            similar_images_hash_alg: default_hash_alg(),
-            similar_images_image_filter: default_image_filter(),
-            similar_images_ignore_same_size: false,
-            big_files_search_mode: default_search_mode(),
-            big_files_count: default_big_files_count(),
-            same_music_title: true,
-            same_music_artist: true,
-            same_music_year: false,
-            same_music_length: false,
-            same_music_genre: false,
-            same_music_bitrate: false,
-            same_music_approximate: false,
-            same_music_check_method: default_same_music_check_method(),
-            broken_files_audio: true,
-            broken_files_pdf: true,
-            broken_files_archive: true,
-            broken_files_image: true,
-            bad_names_uppercase_extension: true,
-            bad_names_emoji_used: true,
-            bad_names_space_at_start_or_end: true,
-            bad_names_non_ascii_graphical: true,
-            bad_names_remove_duplicated_non_alpha: true,
-        }
+        serde_json::from_str("{}").expect("Cannot fail creating {} from string")
     }
 }
 
@@ -360,6 +325,7 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     win.global::<SimilarImagesSettings>().set_image_filter_value(s.similar_images_image_filter.clone().into());
 
     win.global::<SimilarImagesSettings>().set_ignore_same_size(s.similar_images_ignore_same_size);
+    win.global::<SimilarImagesSettings>().set_gallery_image_fit_cover(s.gallery_image_fit_cover);
 
     let sm_idx = StringComboBoxItems::idx_from_config_name(&s.big_files_search_mode, &items.biggest_files_method);
     win.global::<BigFilesSettings>().set_search_mode_idx(sm_idx as i32);
@@ -443,6 +409,7 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
             .get(si.get_image_filter_idx() as usize)
             .map_or_else(|| panic!("Invalid image_filter_idx {} in GUI", si.get_image_filter_idx()), |e| e.config_name.clone()),
         similar_images_ignore_same_size: si.get_ignore_same_size(),
+        gallery_image_fit_cover: si.get_gallery_image_fit_cover(),
         big_files_search_mode: items
             .biggest_files_method
             .get(bfiles.get_search_mode_idx() as usize)

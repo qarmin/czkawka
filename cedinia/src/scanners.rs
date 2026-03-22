@@ -73,7 +73,7 @@ pub(crate) fn scan_duplicate_files<H: ScanResultHandler>(
     let params = DuplicateFinderParameters::new(check_method, hash_type, use_cache, 8 * 1024, 0, false);
     let mut tool = DuplicateFinder::new(params);
     tool.set_included_paths(dirs);
-    apply_filters(&mut tool, filters); // includes set_reference_paths
+    apply_filters(&mut tool, filters);
     tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
@@ -81,7 +81,6 @@ pub(crate) fn scan_duplicate_files<H: ScanResultHandler>(
 
     let use_ref = tool.get_use_reference();
 
-    // Collect (optional_reference_file, duplicate_files) pairs
     let mut groups: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)> = if use_ref {
         match check_method {
             CheckingMethod::Hash => tool
@@ -121,7 +120,6 @@ pub(crate) fn scan_duplicate_files<H: ScanResultHandler>(
         }
     };
 
-    // Sort by total group size descending
     groups.sort_by_key(|(ref_f, dups)| {
         let total: u64 = dups.iter().map(|f| f.size).sum::<u64>() + ref_f.as_ref().map_or(0, |f| f.size);
         Reverse(total)
@@ -208,7 +206,6 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
 
-    // Collect (optional_reference, group) pairs – same pattern as duplicate_files
     let use_ref = tool.get_use_reference();
     let mut groups: Vec<(Option<_>, Vec<_>)> = if use_ref {
         tool.get_similar_images_referenced().iter().cloned().map(|(orig, others)| (Some(orig), others)).collect()
@@ -216,7 +213,6 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
         tool.get_similar_images().iter().cloned().map(|g| (None, g)).collect()
     };
 
-    // Sort by total group size descending
     groups.sort_by_key(|(ref_img, imgs)| {
         let total: u64 = imgs.iter().map(|i| i.size).sum::<u64>() + ref_img.as_ref().map_or(0, |i| i.size);
         Reverse(total)
@@ -546,7 +542,6 @@ pub(crate) fn scan_same_music<H: ScanResultHandler>(
         tool.get_duplicated_music_entries().iter().cloned().map(|items| (None, items)).collect()
     };
 
-    // Sort by total group size descending
     groups.sort_by_key(|(ref_me, dups)| {
         let total: u64 = dups.iter().map(|me| me.size).sum::<u64>() + ref_me.as_ref().map_or(0, |me| me.size);
         Reverse(total)

@@ -180,6 +180,8 @@ export component DirectoriesScreen {
     in property <[DirectoryEntry]> included_directories: [];
     in property <[DirectoryEntry]> excluded_directories: [];
 
+    property <bool> path_enter_error: false;
+
     // ── Main layout ───────────────────────────────────────────────────────────
     VerticalLayout {
         height: parent.height;
@@ -616,6 +618,7 @@ export component DirectoriesScreen {
                                     vertical-stretch: 0.0;
                                     cp_inc_edit_ta := TouchArea {
                                         clicked => {
+                                            path_enter_error = false;
                                             AppState.path_edit_value = vol.path;
                                             AppState.path_edit_is_include = true;
                                             AppState.path_edit_check(vol.path);
@@ -663,6 +666,7 @@ export component DirectoriesScreen {
                                     vertical-stretch: 0.0;
                                     cp_exc_edit_ta := TouchArea {
                                         clicked => {
+                                            path_enter_error = false;
                                             AppState.path_edit_value = vol.path;
                                             AppState.path_edit_is_include = false;
                                             AppState.path_edit_check(vol.path);
@@ -725,20 +729,32 @@ export component DirectoriesScreen {
                     background: CediniaColors.bg_elevated;
                     border-width: 1px;
                     border-color: CediniaColors.divider;
-                    height: 44px;
+                    height: path_input.preferred-height + 20px;
 
                     path_input := TextInput {
-                        x: 12px;
-                        y: (parent.height - self.height) / 2;
-                        width: parent.width - 24px;
+                        x: 10px;
+                        y: 10px;
+                        width: parent.width - 20px;
                         text: AppState.path_edit_value;
                         color: CediniaColors.text_primary;
                         font-size: 13px;
+                        single-line: false;
+                        wrap: word-wrap;
+                        accepted => {
+                            path_enter_error = true;
+                        }
                         edited => {
+                            path_enter_error = false;
                             AppState.path_edit_value = self.text;
                             AppState.path_edit_check(self.text);
                         }
                     }
+                }
+
+                if path_enter_error : Text {
+                    text: "E " + Translations.path_edit_no_newlines_text;
+                    color: CediniaColors.danger;
+                    font-size: 12px;
                 }
 
                 // Path existence status
@@ -747,7 +763,7 @@ export component DirectoriesScreen {
                         ? (AppState.path_edit_path_is_dir
                             ? "📁 " + Translations.path_edit_is_dir_text
                             : "📄 " + Translations.path_edit_is_file_text)
-                        : "✗ " + Translations.path_edit_not_exists_text;
+                        : "X " + Translations.path_edit_not_exists_text;
                     color: AppState.path_edit_path_exists ? CediniaColors.success : CediniaColors.danger;
                     font-size: 12px;
                 }

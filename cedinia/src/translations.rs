@@ -117,6 +117,8 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_hash_alg_text(flc!("settings_hash_alg").into());
     t.set_settings_image_filter_text(flc!("settings_image_filter").into());
     t.set_settings_ignore_same_size_text(flc!("settings_ignore_same_size").into());
+    t.set_settings_gallery_image_fit_cover_text(flc!("settings_gallery_image_fit_cover").into());
+    t.set_settings_gallery_image_fit_cover_desc_text(flc!("settings_gallery_image_fit_cover_desc").into());
     t.set_settings_big_files_header_text(flc!("settings_big_files_header").into());
     t.set_settings_search_mode_text(flc!("settings_search_mode").into());
     t.set_settings_file_count_text(flc!("settings_file_count").into());
@@ -235,10 +237,15 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_path_edit_not_exists_text(flc!("path_edit_not_exists").into());
     t.set_path_edit_is_dir_text(flc!("path_edit_is_dir").into());
     t.set_path_edit_is_file_text(flc!("path_edit_is_file").into());
+    t.set_path_edit_no_newlines_text(flc!("path_edit_no_newlines").into());
 
     t.set_licenses_label_text(flc!("licenses_label").into());
     t.set_third_party_licenses_text(flc!("third_party_licenses").into());
     t.set_licenses_popup_title_text(flc!("licenses_popup_title").into());
+
+    t.set_ctx_menu_title_text(flc!("ctx_menu_title").into());
+    t.set_ctx_open_file_text(flc!("ctx_open_file").into());
+    t.set_ctx_open_folder_text(flc!("ctx_open_folder").into());
 
     use std::fmt::Debug;
 

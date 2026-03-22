@@ -24,8 +24,14 @@ pub(crate) fn wire_open_path(window: &MainWindow) {
     }
     #[cfg(target_os = "android")]
     {
-        window.global::<AppState>().on_open_path(|_| {});
-        window.global::<AppState>().on_open_parent_folder(|_| {});
+        window.global::<AppState>().on_open_path(|path| {
+            crate::file_picker_android::open_file(path.as_str());
+        });
+        window.global::<AppState>().on_open_parent_folder(|path| {
+            if !path.is_empty() {
+                crate::file_picker_android::open_folder(path.as_str());
+            }
+        });
     }
 }
 

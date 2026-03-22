@@ -22,6 +22,11 @@ export component ResultsList {
 
     property <int> menu_state: 0;
 
+    // Context menu (long-press)
+    property <bool>   ctx_open_visible: false;
+    property <string> ctx_open_file:    "";
+    property <string> ctx_open_folder:  "";
+
 
     VerticalLayout {
         spacing: 0px;
@@ -116,6 +121,13 @@ export component ResultsList {
                 toggle_checked => { AppState.toggle_file_checked(idx); }
                 open_item   => { AppState.open_path(entry.val_str[FileEntryIdx.path_idx] == "" ? entry.val_str[FileEntryIdx.name_idx] : entry.val_str[FileEntryIdx.path_idx] + "/" + entry.val_str[FileEntryIdx.name_idx]); }
                 open_parent => { AppState.open_parent_folder(entry.val_str[FileEntryIdx.path_idx]); }
+                long_pressed => {
+                    root.ctx_open_file   = entry.val_str[FileEntryIdx.path_idx] == ""
+                        ? entry.val_str[FileEntryIdx.name_idx]
+                        : entry.val_str[FileEntryIdx.path_idx] + "/" + entry.val_str[FileEntryIdx.name_idx];
+                    root.ctx_open_folder = entry.val_str[FileEntryIdx.path_idx];
+                    root.ctx_open_visible = true;
+                }
             }
         }
 
@@ -192,6 +204,69 @@ export component ResultsList {
         }
     }
 
+
+
+    if root.ctx_open_visible : Rectangle {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 55;
+        background: #00000099;
+        TouchArea { clicked => { root.ctx_open_visible = false; } }
+
+        Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - ctx_open_vl.preferred-height - 24px) / 2;
+            width: min(parent.width - 48px, 300px);
+            height: ctx_open_vl.preferred-height + 24px;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #000000aa;
+            clip: true;
+
+            ctx_open_vl := VerticalLayout {
+                padding: 12px;
+                spacing: 6px;
+
+                Text {
+                    text: Translations.ctx_menu_title_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                TouchButton {
+                    label: Translations.ctx_open_file_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.text_primary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.open_path(root.ctx_open_file); root.ctx_open_visible = false; }
+                }
+
+                TouchButton {
+                    label: Translations.ctx_open_folder_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.open_parent_folder(root.ctx_open_folder); root.ctx_open_visible = false; }
+                }
+
+                TouchButton {
+                    label: Translations.close_text;
+                    min_h: 40px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_disabled;
+                    horizontal-stretch: 1.0;
+                    clicked => { root.ctx_open_visible = false; }
+                }
+            }
+        }
+    }
 
 
     if root.menu_state == 1 : Rectangle {

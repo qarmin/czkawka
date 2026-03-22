@@ -131,6 +131,10 @@ pub fn init(app: &AndroidApp) {
 
         let loader_global: Global<JObject<'static>> = env.new_global_ref(dex_loader)?;
         let _ = DEX_LOADER_REF.set(loader_global);
+
+        let activity_global: Global<JObject<'static>> = env.new_global_ref(&native_activity)?;
+        let _ = ACTIVITY_GLOBAL_REF.set(activity_global);
+
         log::info!("file_picker_android::init: complete");
         Ok(())
     })
@@ -140,8 +144,14 @@ pub fn init(app: &AndroidApp) {
 static APP_HANDLE: std::sync::OnceLock<AndroidApp> = std::sync::OnceLock::new();
 static DEX_LOADER_REF: std::sync::OnceLock<Global<JObject<'static>>> = std::sync::OnceLock::new();
 
+static ACTIVITY_GLOBAL_REF: std::sync::OnceLock<Global<JObject<'static>>> = std::sync::OnceLock::new();
+
 pub fn get_android_app() -> Option<&'static AndroidApp> {
     APP_HANDLE.get()
+}
+
+pub(crate) fn get_activity_global_ref() -> Option<&'static Global<JObject<'static>>> {
+    ACTIVITY_GLOBAL_REF.get()
 }
 
 pub fn launch_pick_directory(is_include: bool, start_path: &str) {
@@ -154,10 +164,14 @@ pub fn launch_pick_directory(is_include: bool, start_path: &str) {
         log::error!("launch_pick_directory: DEX loader not initialised");
         return;
     };
+    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+        log::error!("launch_pick_directory: activity global ref not initialised");
+        return;
+    };
 
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
-        let native_activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+        let native_activity = activity_ref.as_obj();
 
         let class_name = env.new_string("CediniaFilePicker")?;
         let picker_class_obj = env
@@ -198,11 +212,15 @@ pub fn open_url(url: &str) {
         log::error!("open_url: DEX loader not initialised");
         return;
     };
+    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+        log::error!("open_url: activity global ref not initialised");
+        return;
+    };
 
     let url = url.to_string();
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
-        let native_activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+        let native_activity = activity_ref.as_obj();
         let class_name = env.new_string("CediniaFilePicker")?;
         let picker_class_obj = env
             .call_method(
@@ -226,6 +244,88 @@ pub fn open_url(url: &str) {
     .unwrap_or_else(|e| log::error!("open_url: JNI failed: {:?}", e));
 }
 
+pub fn open_file(path: &str) {
+    let Some(app) = APP_HANDLE.get() else {
+        log::error!("open_file: AndroidApp not initialised");
+        return;
+    };
+    let Some(loader_ref) = DEX_LOADER_REF.get() else {
+        log::error!("open_file: DEX loader not initialised");
+        return;
+    };
+    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+        log::error!("open_file: activity global ref not initialised");
+        return;
+    };
+
+    let path = path.to_string();
+    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    vm.attach_current_thread(|env| -> jni::errors::Result<()> {
+        let native_activity = activity_ref.as_obj();
+        let class_name = env.new_string("CediniaFilePicker")?;
+        let picker_class_obj = env
+            .call_method(
+                loader_ref.as_obj(),
+                jni_str!("findClass"),
+                jni_sig!((name: java.lang.String) -> java.lang.Class),
+                &[JValue::Object(&class_name)],
+            )?
+            .l()?;
+        let picker_class: JClass = unsafe { JClass::from_raw(env, picker_class_obj.as_raw()) };
+        let j_path = env.new_string(&path)?;
+        env.call_static_method(
+            &picker_class,
+            jni_str!("openFile"),
+            jni_sig!((activity: android.app.Activity, path: java.lang.String) -> void),
+            &[JValue::Object(&native_activity), JValue::Object(&j_path)],
+        )?;
+        log::info!("open_file: Java call succeeded for {}", path);
+        Ok(())
+    })
+    .unwrap_or_else(|e| log::error!("open_file: JNI failed: {:?}", e));
+}
+
+pub fn open_folder(path: &str) {
+    let Some(app) = APP_HANDLE.get() else {
+        log::error!("open_folder: AndroidApp not initialised");
+        return;
+    };
+    let Some(loader_ref) = DEX_LOADER_REF.get() else {
+        log::error!("open_folder: DEX loader not initialised");
+        return;
+    };
+    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+        log::error!("open_folder: activity global ref not initialised");
+        return;
+    };
+
+    let path = path.to_string();
+    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    vm.attach_current_thread(|env| -> jni::errors::Result<()> {
+        let native_activity = activity_ref.as_obj();
+        let class_name = env.new_string("CediniaFilePicker")?;
+        let picker_class_obj = env
+            .call_method(
+                loader_ref.as_obj(),
+                jni_str!("findClass"),
+                jni_sig!((name: java.lang.String) -> java.lang.Class),
+                &[JValue::Object(&class_name)],
+            )?
+            .l()?;
+        let picker_class: JClass = unsafe { JClass::from_raw(env, picker_class_obj.as_raw()) };
+        let j_path = env.new_string(&path)?;
+        env.call_static_method(
+            &picker_class,
+            jni_str!("openFolder"),
+            jni_sig!((activity: android.app.Activity, path: java.lang.String) -> void),
+            &[JValue::Object(&native_activity), JValue::Object(&j_path)],
+        )?;
+        log::info!("open_folder: Java call succeeded for {}", path);
+        Ok(())
+    })
+    .unwrap_or_else(|e| log::error!("open_folder: JNI failed: {:?}", e));
+}
+
 pub fn setup_nav_bar() {
     let Some(app) = APP_HANDLE.get() else {
         log::error!("setup_nav_bar: AndroidApp not initialised");
@@ -235,10 +335,14 @@ pub fn setup_nav_bar() {
         log::error!("setup_nav_bar: DEX loader not initialised");
         return;
     };
+    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+        log::error!("setup_nav_bar: activity global ref not initialised");
+        return;
+    };
 
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
-        let native_activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+        let native_activity = activity_ref.as_obj();
         let class_name = env.new_string("CediniaFilePicker")?;
         let picker_class_obj = env
             .call_method(
@@ -264,11 +368,12 @@ pub fn setup_nav_bar() {
 pub fn check_storage_permission() -> bool {
     let Some(app) = APP_HANDLE.get() else { return false };
     let Some(loader_ref) = DEX_LOADER_REF.get() else { return false };
+    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else { return false };
 
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
     let mut result = false;
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
-        let native_activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+        let native_activity = activity_ref.as_obj();
         let class_name = env.new_string("CediniaFilePicker")?;
         let picker_class_obj = env
             .call_method(
@@ -297,10 +402,11 @@ pub fn check_storage_permission() -> bool {
 pub fn request_storage_permission() {
     let Some(app) = APP_HANDLE.get() else { return };
     let Some(loader_ref) = DEX_LOADER_REF.get() else { return };
+    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else { return };
 
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
-        let native_activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+        let native_activity = activity_ref.as_obj();
         let class_name = env.new_string("CediniaFilePicker")?;
         let picker_class_obj = env
             .call_method(

@@ -1,5 +1,3 @@
-use log::error;
-
 pub fn send_scan_completed(file_count: usize, only_when_background: bool) {
     if only_when_background && is_app_in_foreground() {
         return;
@@ -25,6 +23,9 @@ fn is_app_in_foreground_android() -> bool {
     let Some(app) = crate::file_picker_android::get_android_app() else {
         return false;
     };
+    let Some(activity_global) = crate::file_picker_android::get_activity_global_ref() else {
+        return false;
+    };
 
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
     let result = vm.attach_current_thread(|env| -> jni::errors::Result<bool> {
@@ -32,7 +33,7 @@ fn is_app_in_foreground_android() -> bool {
         use jni::signature::{FieldSignature, RuntimeFieldSignature};
         use jni::{jni_sig, jni_str};
 
-        let activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+        let activity = activity_global.as_obj();
 
         let svc_name: JObject = env.new_string("activity")?.into();
         let am: JObject = env
@@ -99,12 +100,15 @@ fn are_system_notifications_enabled_android() -> bool {
     let Some(app) = crate::file_picker_android::get_android_app() else {
         return true;
     };
+    let Some(activity_global) = crate::file_picker_android::get_activity_global_ref() else {
+        return true;
+    };
     let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
     let result = vm.attach_current_thread(|env| -> jni::errors::Result<bool> {
         use jni::objects::{JObject, JValue};
         use jni::{jni_sig, jni_str};
 
-        let activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+        let activity = activity_global.as_obj();
 
         let svc_name: JObject = env.new_string("notification")?.into();
         let nm: JObject = env
@@ -131,13 +135,16 @@ fn open_system_notification_settings_android() {
     let Some(app) = crate::file_picker_android::get_android_app() else {
         return;
     };
+    let Some(activity_global) = crate::file_picker_android::get_activity_global_ref() else {
+        return;
+    };
     std::thread::spawn(move || {
         use jni::objects::{JObject, JValue};
         use jni::{jni_sig, jni_str};
 
         let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
         let _ = vm.attach_current_thread(|env| -> jni::errors::Result<()> {
-            let activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+            let activity = activity_global.as_obj();
 
             let pkg: JObject = env.call_method(&activity, jni_str!("getPackageName"), jni_sig!(() -> java.lang.String), &[])?.l()?;
 
@@ -178,7 +185,7 @@ fn send_notification(title: &str, body: &str) {
         #[cfg(all(unix, not(target_os = "macos")))]
         notif.urgency(notify_rust::Urgency::Normal);
         if let Err(e) = notif.show() {
-            error!("Failed to send desktop notification: {e}");
+            log::error!("Failed to send desktop notification: {e}");
         }
     });
 }
@@ -188,11 +195,11 @@ fn try_notify_send(summary: &str, body: &str) -> bool {
     match std::process::Command::new("notify-send").arg("--app-name=cedinia").arg(summary).arg(body).status() {
         Ok(s) if s.success() => true,
         Err(e) => {
-            error!("Failed to execute notify-send: {e}");
+            log::error!("Failed to execute notify-send: {e}");
             false
         }
         Ok(failed) => {
-            error!("notify-send exited with non-zero status: {failed}");
+            log::error!("notify-send exited with non-zero status: {failed}");
             false
         }
     }
@@ -202,6 +209,10 @@ fn try_notify_send(summary: &str, body: &str) -> bool {
 fn send_notification(title: &str, body: &str) {
     let Some(app) = crate::file_picker_android::get_android_app() else {
         log::warn!("send_notification: AndroidApp not initialised");
+        return;
+    };
+    let Some(activity_global) = crate::file_picker_android::get_activity_global_ref() else {
+        log::warn!("send_notification: activity global ref not initialised");
         return;
     };
 
@@ -215,7 +226,7 @@ fn send_notification(title: &str, body: &str) {
 
         let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
         let result = vm.attach_current_thread(|env| -> jni::errors::Result<()> {
-            let activity = unsafe { JObject::from_raw(env, app.activity_as_ptr() as *mut _) };
+            let activity = activity_global.as_obj();
 
             let icon_id = {
                 let resources: JObject = env

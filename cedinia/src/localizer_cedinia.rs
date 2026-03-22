@@ -23,7 +23,6 @@ pub(crate) fn localizer_cedinia() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_CEDINIA, &Localizations))
 }
 
-/// All supported UI languages in display order. Index 0 is the fallback (English).
 pub const LANGUAGE_LIST: &[&str] = &["en", "pl"];
 
 pub(crate) fn detect_os_language_idx() -> i32 {
@@ -49,7 +48,6 @@ pub(crate) fn apply_language_preference(lang: &str) {
             let _ = localizer.select(&[lang_id]);
         }
     } else {
-        // "auto" or unknown → use system language
         #[cfg(not(target_os = "android"))]
         {
             let requested = i18n_embed::DesktopLanguageRequester::requested_languages();

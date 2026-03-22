@@ -366,6 +366,13 @@ export component SettingsScreen {
                     ToggleRow { label: Translations.settings_ignore_same_size_text; value <=> SimilarImagesSettings.ignore_same_size; }
                     Divider {}
 
+                    ToggleRow {
+                        label: Translations.settings_gallery_image_fit_cover_text;
+                        description: Translations.settings_gallery_image_fit_cover_desc_text;
+                        value <=> SimilarImagesSettings.gallery_image_fit_cover;
+                    }
+                    Divider {}
+
 
                     ToolGroupHeader { label: Translations.settings_big_files_header_text; emoji: "📦"; }
 

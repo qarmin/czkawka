@@ -114,6 +114,8 @@ export global Translations {
     in-out property <string> settings_hash_alg_text:          "Hash algorithm";
     in-out property <string> settings_image_filter_text:      "Resize filter";
     in-out property <string> settings_ignore_same_size_text:  "Ignore images with the same dimensions";
+    in-out property <string> settings_gallery_image_fit_cover_text: "Gallery: crop to square";
+    in-out property <string> settings_gallery_image_fit_cover_desc_text: "Fill the tile; disable to keep original aspect ratio";
     in-out property <string> settings_big_files_header_text:  "BIGGEST FILES";
     in-out property <string> settings_search_mode_text:       "Search mode";
     in-out property <string> settings_file_count_text:        "File count";
@@ -209,6 +211,12 @@ export global Translations {
     in-out property <string> path_edit_not_exists_text: "Path does not exist";
     in-out property <string> path_edit_is_dir_text: "Directory";
     in-out property <string> path_edit_is_file_text: "File";
+    in-out property <string> path_edit_no_newlines_text: "Paths cannot contain newlines — Enter key is not allowed";
+
+    // Context menu (long-press on a result row or gallery tile)
+    in-out property <string> ctx_menu_title_text:             "Open";
+    in-out property <string> ctx_open_file_text:              "Open file";
+    in-out property <string> ctx_open_folder_text:            "Open folder";
 
     // Gallery / delete popups
     in-out property <string> gallery_delete_button_text:      "Delete";
@@ -223,7 +231,7 @@ export global Translations {
     in-out property <string> about_app_label_text:            "ABOUT";
     in-out property <string> cache_label_text:                "CACHE";
     in-out property <string> app_subtitle_text:               "In honour of the Battle of Cedynia (972 CE)";
-    in-out property <string> app_license_text:                "Frontend for Czkawka Core  •  GPL-3.0";
+    in-out property <string> app_license_text:                "Frontend for Czkawka Core";
 
     // Bottom nav
     in-out property <string> nav_home_text:       "Home";
