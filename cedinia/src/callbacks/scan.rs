@@ -79,7 +79,7 @@ pub(crate) fn wire_scan(
 }
 
 fn empty_entries() -> ModelRc<FileEntry> {
-    ModelRc::new(VecModel::from(vec![]))
+    ModelRc::new(VecModel::from(Vec::new()))
 }
 
 fn clear_tool_results(win: &MainWindow, tool: ActiveTool) {
@@ -88,7 +88,7 @@ fn clear_tool_results(win: &MainWindow, tool: ActiveTool) {
         ActiveTool::EmptyFolders => win.set_empty_folder_model(empty_entries()),
         ActiveTool::SimilarImages => {
             win.set_similar_images_model(empty_entries());
-            win.set_similar_images_groups(ModelRc::new(VecModel::<SimilarGroupCard>::from(vec![])));
+            win.set_similar_images_groups(ModelRc::new(VecModel::<SimilarGroupCard>::from(Vec::new())));
         }
         ActiveTool::EmptyFiles => win.set_empty_files_model(empty_entries()),
         ActiveTool::TemporaryFiles => win.set_temporary_files_model(empty_entries()),

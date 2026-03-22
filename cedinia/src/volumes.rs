@@ -32,7 +32,7 @@ pub(crate) fn detect_storage_volumes() -> Vec<VolumeEntry> {
         "/mnt/media_rw",
     ];
     #[cfg(not(target_os = "android"))]
-    let candidates: Vec<&str> = vec![];
+    let candidates: Vec<&str> = Vec::new();
 
     let mut mounts: Vec<(String, String)> = Vec::new();
     if let Ok(content) = std::fs::read_to_string("/proc/mounts") {

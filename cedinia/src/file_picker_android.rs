@@ -55,9 +55,11 @@ unsafe extern "system" fn Java_CediniaFilePicker_onDirectoryPicked(mut unowned: 
 
 pub fn init(app: &AndroidApp) {
     log::info!("file_picker_android::init: starting");
-    APP_HANDLE.get_or_init(|| app.clone());
+    // Always update APP_HANDLE so that after Activity recreation the new
+    // AndroidApp (with a valid vm_as_ptr) replaces the stale one.
+    *APP_HANDLE.lock().expect("APP_HANDLE mutex poisoned") = Some(app.clone());
 
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let vm = try_jvm(app).expect("init: vm_as_ptr is null at app startup");
     let dex_data: &'static [u8] = include_bytes!(concat!(env!("OUT_DIR"), "/classes.dex"));
     log::info!("file_picker_android::init: DEX size={}", dex_data.len());
 
@@ -130,10 +132,10 @@ pub fn init(app: &AndroidApp) {
         log::info!("file_picker_android::init: native method registered");
 
         let loader_global: Global<JObject<'static>> = env.new_global_ref(dex_loader)?;
-        let _ = DEX_LOADER_REF.set(loader_global);
+        *DEX_LOADER_REF.lock().expect("DEX_LOADER_REF mutex poisoned") = Some(Arc::new(loader_global));
 
         let activity_global: Global<JObject<'static>> = env.new_global_ref(&native_activity)?;
-        let _ = ACTIVITY_GLOBAL_REF.set(activity_global);
+        *ACTIVITY_GLOBAL_REF.lock().expect("ACTIVITY_GLOBAL_REF mutex poisoned") = Some(Arc::new(activity_global));
 
         log::info!("file_picker_android::init: complete");
         Ok(())
@@ -141,38 +143,59 @@ pub fn init(app: &AndroidApp) {
     .expect("init JNI attachment failed");
 }
 
-static APP_HANDLE: std::sync::OnceLock<AndroidApp> = std::sync::OnceLock::new();
-static DEX_LOADER_REF: std::sync::OnceLock<Global<JObject<'static>>> = std::sync::OnceLock::new();
+// These are behind Mutex<Option<...>> so they can be updated each time the
+// Android Activity is recreated (process is reused but Activity restarts).
+static APP_HANDLE: Mutex<Option<AndroidApp>> = Mutex::new(None);
+static DEX_LOADER_REF: Mutex<Option<Arc<Global<JObject<'static>>>>> = Mutex::new(None);
+static ACTIVITY_GLOBAL_REF: Mutex<Option<Arc<Global<JObject<'static>>>>> = Mutex::new(None);
 
-static ACTIVITY_GLOBAL_REF: std::sync::OnceLock<Global<JObject<'static>>> = std::sync::OnceLock::new();
-
-pub fn get_android_app() -> Option<&'static AndroidApp> {
-    APP_HANDLE.get()
+pub fn get_android_app() -> Option<AndroidApp> {
+    APP_HANDLE.lock().ok()?.clone()
 }
 
-pub(crate) fn get_activity_global_ref() -> Option<&'static Global<JObject<'static>>> {
-    ACTIVITY_GLOBAL_REF.get()
+pub(crate) fn get_activity_global_ref() -> Option<Arc<Global<JObject<'static>>>> {
+    ACTIVITY_GLOBAL_REF.lock().ok()?.clone()
+}
+
+fn get_loader() -> Option<Arc<Global<JObject<'static>>>> {
+    DEX_LOADER_REF.lock().ok()?.clone()
+}
+
+/// Returns `Some(JavaVM)` if the VM pointer is still valid, or `None` when the
+/// Android activity is paused / stopped and `vm_as_ptr()` has become null.
+///
+/// All JNI calls that may run from a Slint timer (rather than a direct user
+/// interaction) must use this guard to avoid the
+/// `assertion failed: !ptr.is_null()` panic inside `jni::JavaVM::from_raw`.
+pub fn try_jvm(app: &AndroidApp) -> Option<jni::JavaVM> {
+    let ptr = app.vm_as_ptr();
+    if ptr.is_null() {
+        return None;
+    }
+    Some(unsafe { jni::JavaVM::from_raw(ptr as *mut _) })
 }
 
 pub fn launch_pick_directory(is_include: bool, start_path: &str) {
     log::info!("launch_pick_directory: is_include={} start_path='{}'", is_include, start_path);
-    let Some(app) = APP_HANDLE.get() else {
+    let Some(app) = get_android_app() else {
         log::error!("launch_pick_directory: AndroidApp not initialised");
         return;
     };
-    let Some(loader_ref) = DEX_LOADER_REF.get() else {
+    let Some(loader_ref) = get_loader() else {
         log::error!("launch_pick_directory: DEX loader not initialised");
         return;
     };
-    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+    let Some(activity_ref) = get_activity_global_ref() else {
         log::error!("launch_pick_directory: activity global ref not initialised");
         return;
     };
 
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let Some(vm) = try_jvm(&app) else {
+        log::debug!("launch_pick_directory: vm_as_ptr is null, skipping");
+        return;
+    };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
         let native_activity = activity_ref.as_obj();
-
         let class_name = env.new_string("CediniaFilePicker")?;
         let picker_class_obj = env
             .call_method(
@@ -204,21 +227,23 @@ pub fn launch_pick_directory(is_include: bool, start_path: &str) {
 }
 
 pub fn open_url(url: &str) {
-    let Some(app) = APP_HANDLE.get() else {
+    let Some(app) = get_android_app() else {
         log::error!("open_url: AndroidApp not initialised");
         return;
     };
-    let Some(loader_ref) = DEX_LOADER_REF.get() else {
+    let Some(loader_ref) = get_loader() else {
         log::error!("open_url: DEX loader not initialised");
         return;
     };
-    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+    let Some(activity_ref) = get_activity_global_ref() else {
         log::error!("open_url: activity global ref not initialised");
         return;
     };
 
     let url = url.to_string();
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let Some(vm) = try_jvm(&app) else {
+        return;
+    };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
         let native_activity = activity_ref.as_obj();
         let class_name = env.new_string("CediniaFilePicker")?;
@@ -245,21 +270,23 @@ pub fn open_url(url: &str) {
 }
 
 pub fn open_file(path: &str) {
-    let Some(app) = APP_HANDLE.get() else {
+    let Some(app) = get_android_app() else {
         log::error!("open_file: AndroidApp not initialised");
         return;
     };
-    let Some(loader_ref) = DEX_LOADER_REF.get() else {
+    let Some(loader_ref) = get_loader() else {
         log::error!("open_file: DEX loader not initialised");
         return;
     };
-    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+    let Some(activity_ref) = get_activity_global_ref() else {
         log::error!("open_file: activity global ref not initialised");
         return;
     };
 
     let path = path.to_string();
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let Some(vm) = try_jvm(&app) else {
+        return;
+    };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
         let native_activity = activity_ref.as_obj();
         let class_name = env.new_string("CediniaFilePicker")?;
@@ -286,21 +313,23 @@ pub fn open_file(path: &str) {
 }
 
 pub fn open_folder(path: &str) {
-    let Some(app) = APP_HANDLE.get() else {
+    let Some(app) = get_android_app() else {
         log::error!("open_folder: AndroidApp not initialised");
         return;
     };
-    let Some(loader_ref) = DEX_LOADER_REF.get() else {
+    let Some(loader_ref) = get_loader() else {
         log::error!("open_folder: DEX loader not initialised");
         return;
     };
-    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+    let Some(activity_ref) = get_activity_global_ref() else {
         log::error!("open_folder: activity global ref not initialised");
         return;
     };
 
     let path = path.to_string();
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let Some(vm) = try_jvm(&app) else {
+        return;
+    };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
         let native_activity = activity_ref.as_obj();
         let class_name = env.new_string("CediniaFilePicker")?;
@@ -327,20 +356,22 @@ pub fn open_folder(path: &str) {
 }
 
 pub fn setup_nav_bar() {
-    let Some(app) = APP_HANDLE.get() else {
+    let Some(app) = get_android_app() else {
         log::error!("setup_nav_bar: AndroidApp not initialised");
         return;
     };
-    let Some(loader_ref) = DEX_LOADER_REF.get() else {
+    let Some(loader_ref) = get_loader() else {
         log::error!("setup_nav_bar: DEX loader not initialised");
         return;
     };
-    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else {
+    let Some(activity_ref) = get_activity_global_ref() else {
         log::error!("setup_nav_bar: activity global ref not initialised");
         return;
     };
 
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let Some(vm) = try_jvm(&app) else {
+        return;
+    };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
         let native_activity = activity_ref.as_obj();
         let class_name = env.new_string("CediniaFilePicker")?;
@@ -366,11 +397,14 @@ pub fn setup_nav_bar() {
 }
 
 pub fn check_storage_permission() -> bool {
-    let Some(app) = APP_HANDLE.get() else { return false };
-    let Some(loader_ref) = DEX_LOADER_REF.get() else { return false };
-    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else { return false };
+    let Some(app) = get_android_app() else { return false };
+    let Some(loader_ref) = get_loader() else { return false };
+    let Some(activity_ref) = get_activity_global_ref() else { return false };
 
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let Some(vm) = try_jvm(&app) else {
+        log::debug!("check_storage_permission: vm_as_ptr is null (app paused?), returning false");
+        return false;
+    };
     let mut result = false;
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
         let native_activity = activity_ref.as_obj();
@@ -400,11 +434,14 @@ pub fn check_storage_permission() -> bool {
 }
 
 pub fn request_storage_permission() {
-    let Some(app) = APP_HANDLE.get() else { return };
-    let Some(loader_ref) = DEX_LOADER_REF.get() else { return };
-    let Some(activity_ref) = ACTIVITY_GLOBAL_REF.get() else { return };
+    let Some(app) = get_android_app() else { return };
+    let Some(loader_ref) = get_loader() else { return };
+    let Some(activity_ref) = get_activity_global_ref() else { return };
 
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let Some(vm) = try_jvm(&app) else {
+        log::debug!("request_storage_permission: vm_as_ptr is null (app paused?), skipping");
+        return;
+    };
     vm.attach_current_thread(|env| -> jni::errors::Result<()> {
         let native_activity = activity_ref.as_obj();
         let class_name = env.new_string("CediniaFilePicker")?;

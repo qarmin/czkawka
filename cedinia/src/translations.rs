@@ -152,7 +152,9 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_diagnostics_app_cache_text(flc!("diagnostics_app_cache").into());
     t.set_diagnostics_refresh_text(flc!("diagnostics_refresh").into());
     t.set_diagnostics_clear_thumbnails_text(flc!("diagnostics_clear_thumbnails").into());
+    t.set_diagnostics_open_thumbnails_folder_text(flc!("diagnostics_open_thumbnails_folder").into());
     t.set_diagnostics_clear_cache_text(flc!("diagnostics_clear_cache").into());
+    t.set_diagnostics_open_cache_folder_text(flc!("diagnostics_open_cache_folder").into());
     t.set_diagnostics_collect_test_text(flc!("diagnostics_collect_test").into());
     t.set_diagnostics_collect_test_desc_text(flc!("diagnostics_collect_test_desc").into());
     t.set_diagnostics_collect_test_run_text(flc!("diagnostics_collect_test_run").into());

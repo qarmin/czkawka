@@ -24,7 +24,6 @@ humansize = "2.1"
 image = "0.25"
 rayon = "1.10"
 fs_extra = "1.3" # TODO replace with less buggy library
-fast_image_resize = { version = "6.0.0", features = ["image"] }
 num_enum = "0.7.5"
 regex = "1.11"
 
@@ -32,10 +31,6 @@ regex = "1.11"
 i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.10"
 rust-embed = { version = "8.5", features = ["debug-embed"] }
-
-
-# Easier cross-compilation of app to e.g. 32 bit os, by using dlopen instead of linking libraries at compile time
-fontique = { version = "0.7.0", default-features = false, features = ["fontconfig-dlopen"] }
 
 # Try to use only needed features from https://github.com/slint-ui/slint/blob/master/api/rs/slint/Cargo.toml#L23-L31
 #slint = { path = "/home/rafal/test/slint/api/rs/slint/", default-features = false, features = ["std",

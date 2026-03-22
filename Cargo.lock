@@ -166,12 +166,15 @@ dependencies = [
 [[package]]
 name = "android-activity"
 version = "0.6.0"
-source = "git+https://github.com/rust-mobile/android-activity?rev=43de2770b91b1b8ff870f00551f89f04062216cc#43de2770b91b1b8ff870f00551f89f04062216cc"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef6978589202a00cd7e118380c448a08b6ed394c3a8df3a430d0898e3a42d046"
 dependencies = [
  "android-properties",
  "bitflags 2.11.0",
  "cc",
- "jni 0.22.4",
+ "cesu8",
+ "jni 0.21.1",
+ "jni-sys 0.3.0",
  "libc",
  "log",
  "ndk 0.9.0",
@@ -4456,8 +4459,6 @@ dependencies = [
  "chrono",
  "crossbeam-channel",
  "czkawka_core",
- "fast_image_resize 6.0.0",
- "fontique",
  "fs_extra",
  "home",
  "humansize",

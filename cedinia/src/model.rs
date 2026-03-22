@@ -55,7 +55,7 @@ mod tests {
             is_header,
             is_reference,
             val_str: ModelRc::new(VecModel::from(vec![SharedString::from("test")])),
-            val_int: ModelRc::new(VecModel::from(vec![])),
+            val_int: ModelRc::new(VecModel::from(Vec::new())),
         }
     }
 
@@ -65,7 +65,7 @@ mod tests {
 
     #[test]
     fn count_checked_empty_model() {
-        assert_eq!(count_checked(&make_model(vec![])), 0);
+        assert_eq!(count_checked(&make_model(Vec::new())), 0);
     }
 
     #[test]
@@ -128,7 +128,7 @@ mod tests {
                 is_header: true,
                 is_reference: false,
                 val_str: vec!["Group 1".to_string()],
-                val_int: vec![],
+                val_int: Vec::new(),
             },
             FileItem {
                 is_header: false,

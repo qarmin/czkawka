@@ -84,9 +84,9 @@ component DynamicToolItem {
       : Translations.app_name_text;
 
     property <image> t_icon:
-        t == ActiveTool.SimilarImages    ? @image-url("icons/image.svg")
-      : t == ActiveTool.EmptyFolders     ? @image-url("icons/folder_empty.svg")
-      : @image-url("icons/duplicate.svg");
+        t == ActiveTool.SimilarImages    ? @image-url("../icons/cedinia_image.svg")
+      : t == ActiveTool.EmptyFolders     ? @image-url("../icons/cedinia_folder_empty.svg")
+      : @image-url("../icons/cedinia_duplicate.svg");
 
     property <bool> is_active: AppState.active_tool == root.t;
 
@@ -98,7 +98,7 @@ component DynamicToolItem {
 
         ta := TouchArea {
             clicked => {
-                if AppState.active_tool != root.t {
+                if (AppState.active_tool != root.t) {
                     AppState.active_tool = root.t;
                     AppState.tool_changed(root.t);
                 }
@@ -159,7 +159,7 @@ export component BottomNavBar {
                 horizontal-stretch: 1.0;
                 label: Translations.nav_home_text;
                 tool: ActiveTool.Home;
-                icon: @image-url("icons/home.svg");
+                icon: @image-url("../icons/cedinia_home.svg");
             }
 
             DynamicToolItem {
@@ -170,14 +170,14 @@ export component BottomNavBar {
                 horizontal-stretch: 1.0;
                 label: Translations.nav_dirs_text;
                 tool: ActiveTool.Directories;
-                icon: @image-url("icons/folder.svg");
+                icon: @image-url("../icons/cedinia_folder.svg");
             }
 
             NavItem {
                 horizontal-stretch: 1.0;
                 label: Translations.nav_settings_text;
                 tool: ActiveTool.Settings;
-                icon: @image-url("icons/more.svg");
+                icon: @image-url("../icons/cedinia_more.svg");
             }
         }
     }

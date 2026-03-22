@@ -160,7 +160,9 @@ diagnostics_thumbnails = Thumbnail cache
 diagnostics_app_cache = App cache
 diagnostics_refresh = Refresh
 diagnostics_clear_thumbnails = Clear thumbnails
+diagnostics_open_thumbnails_folder = Open folder
 diagnostics_clear_cache = Clear cache
+diagnostics_open_cache_folder = Open folder
 diagnostics_collect_test = File access test
 diagnostics_collect_test_desc = Check how many files are accessible
 diagnostics_collect_test_run = Run
@@ -338,6 +340,6 @@ path_edit_is_file = File
 path_edit_no_newlines = Paths cannot contain newlines — Enter key is not allowed
 
 ctx_menu_title = Open
-ctx_open_file = Open file
-ctx_open_folder = Open folder
+ctx_open_file = Open item
+ctx_open_folder = Open parent folder
 

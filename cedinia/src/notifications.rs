@@ -27,7 +27,9 @@ fn is_app_in_foreground_android() -> bool {
         return false;
     };
 
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let Some(vm) = crate::file_picker_android::try_jvm(&app) else {
+        return false;
+    };
     let result = vm.attach_current_thread(|env| -> jni::errors::Result<bool> {
         use jni::objects::{JObject, JValue};
         use jni::signature::{FieldSignature, RuntimeFieldSignature};
@@ -103,7 +105,9 @@ fn are_system_notifications_enabled_android() -> bool {
     let Some(activity_global) = crate::file_picker_android::get_activity_global_ref() else {
         return true;
     };
-    let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+    let Some(vm) = crate::file_picker_android::try_jvm(&app) else {
+        return false;
+    };
     let result = vm.attach_current_thread(|env| -> jni::errors::Result<bool> {
         use jni::objects::{JObject, JValue};
         use jni::{jni_sig, jni_str};
@@ -142,7 +146,9 @@ fn open_system_notification_settings_android() {
         use jni::objects::{JObject, JValue};
         use jni::{jni_sig, jni_str};
 
-        let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+        let Some(vm) = crate::file_picker_android::try_jvm(&app) else {
+            return;
+        };
         let _ = vm.attach_current_thread(|env| -> jni::errors::Result<()> {
             let activity = activity_global.as_obj();
 
@@ -224,7 +230,9 @@ fn send_notification(title: &str, body: &str) {
         use jni::signature::RuntimeMethodSignature;
         use jni::{jni_sig, jni_str};
 
-        let vm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr() as *mut _) };
+        let Some(vm) = crate::file_picker_android::try_jvm(&app) else {
+            return;
+        };
         let result = vm.attach_current_thread(|env| -> jni::errors::Result<()> {
             let activity = activity_global.as_obj();
 

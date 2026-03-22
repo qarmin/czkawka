@@ -7,6 +7,10 @@
 
 **Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) older gtk4 GUI frontend, superseded by Krokiet, but still receiving bugfix updates.
 
+<div align="center"><img src="https://github.com/user-attachments/assets/ed6dfeea-a984-49e8-a621-8d6ae521c760" alt="cedinia_logo" width="600" /></div>
+
+**Cedinia** - experimental Android touch friendly GUI frontend for Czkawka Core, built with Slint.
+
 ## Features
 
 - **Written in memory-safe Rust** - almost 100% unsafe code free

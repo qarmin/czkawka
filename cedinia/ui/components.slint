@@ -125,6 +125,21 @@ export component FileRow {
     // `clicked` event (fired on finger-up) doesn't also toggle selection.
     property <bool> lp_fired: false;
 
+    // Set by the parent MomentumScrollView via `scroll_swiping: scroll_view.is_swiping`.
+    // When the scroll SGR claims the pointer gesture it stops forwarding pointer
+    // events to child TouchAreas, so the only reliable way to cancel the
+    // long-press timer during a scroll is to watch this flag directly.
+    in property <bool> scroll_swiping: false;
+    changed scroll_swiping => {
+        if root.scroll_swiping { lp_timer.running = false; }
+    }
+
+    // Stored press coordinates for the dead-zone check.
+    // On Android even a stationary finger generates tiny move events;
+    // we only cancel the timer when the finger actually drifts > 8 px.
+    property <length> _lp_start_x: 0px;
+    property <length> _lp_start_y: 0px;
+
     height: root.is_header ? 36px : 80px;
 
     Rectangle {
@@ -159,10 +174,22 @@ export component FileRow {
             pointer-event(e) => {
                 if (!root.is_header) {
                     if (e.kind == PointerEventKind.down) {
+                        root._lp_start_x = ta.mouse-x;
+                        root._lp_start_y = ta.mouse-y;
                         lp_timer.running = true;
                         lp_timer.restart();
-                    } else if (e.kind == PointerEventKind.up || e.kind == PointerEventKind.move) {
+                    } else if (e.kind == PointerEventKind.up) {
                         lp_timer.running = false;
+                    } else if (e.kind == PointerEventKind.move) {
+                        // 8 px dead zone – on Android even a stationary finger
+                        // produces micro-move events that would otherwise cancel
+                        // the long-press timer immediately.
+                        if (ta.mouse-x - root._lp_start_x > 8px
+                                || root._lp_start_x - ta.mouse-x > 8px
+                                || ta.mouse-y - root._lp_start_y > 8px
+                                || root._lp_start_y - ta.mouse-y > 8px) {
+                            lp_timer.running = false;
+                        }
                     }
                     if (e.button == PointerEventButton.middle && e.kind == PointerEventKind.up) {
                         root.open_item();

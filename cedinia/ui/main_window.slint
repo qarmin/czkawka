@@ -202,6 +202,8 @@ export component MainWindow inherits Window {
     if AppState.scan_state == ScanState.Stopping : Rectangle {
         z: 150;
         background: #000000bb;
+        // Block all pointer events so nothing behind the overlay is clickable.
+        TouchArea {}
 
         Rectangle {
             width: min(parent.width - 48px, 300px);

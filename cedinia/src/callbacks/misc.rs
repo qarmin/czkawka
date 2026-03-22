@@ -198,6 +198,14 @@ pub(crate) fn wire_cache_info(window: &MainWindow) {
     }
 
     {
+        window.global::<AppState>().on_open_thumbnails_folder(move || {
+            let dir = thumbnail_cache_dir();
+            let _ = std::fs::create_dir_all(&dir);
+            open_dir(&dir);
+        });
+    }
+
+    {
         let weak = window.as_weak();
         window.global::<AppState>().on_clear_app_cache(move || {
             if let Some(cache_path) = czkawka_core::common::config_cache_path::get_config_cache_path() {
@@ -207,6 +215,28 @@ pub(crate) fn wire_cache_info(window: &MainWindow) {
                 win.global::<AppState>().set_diag_app_cache_size("0 B".into());
             }
         });
+    }
+
+    {
+        window.global::<AppState>().on_open_app_cache_folder(move || {
+            if let Some(cache_path) = czkawka_core::common::config_cache_path::get_config_cache_path() {
+                let _ = std::fs::create_dir_all(&cache_path.cache_folder);
+                open_dir(&cache_path.cache_folder);
+            }
+        });
+    }
+}
+
+fn open_dir(path: &Path) {
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = std::process::Command::new("xdg-open").arg(path).spawn();
+    }
+    #[cfg(target_os = "android")]
+    {
+        if let Some(s) = path.to_str() {
+            crate::file_picker_android::open_folder(s);
+        }
     }
 }
 

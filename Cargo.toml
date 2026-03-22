@@ -19,8 +19,8 @@ resolver = "3"
 # asserts previous.is_none().  The fix (OnceLock, init once with Application ref)
 # is merged to main but not yet released.  Remove this patch once 0.6.1+ ships.
 # Affects only android-activity ^0.6 (cedinia); Slint's ^0.5 dependency is unaffected.
-[patch.crates-io]
-android-activity = { git = "https://github.com/rust-mobile/android-activity", rev = "43de2770b91b1b8ff870f00551f89f04062216cc" }
+#[patch.crates-io]
+#android-activity = { git = "https://github.com/rust-mobile/android-activity", rev = "43de2770b91b1b8ff870f00551f89f04062216cc" }
 
 [profile.release]
 # panic = "unwind" in opposite to "abort", allows to catch panic!()

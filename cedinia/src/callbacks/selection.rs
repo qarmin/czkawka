@@ -597,7 +597,7 @@ pub(crate) fn get_model_for_tool(win: &MainWindow, tool: ActiveTool) -> ModelRc<
         ActiveTool::SameMusic => win.get_same_music_model(),
         ActiveTool::BadNames => win.get_bad_names_model(),
         ActiveTool::ExifRemover => win.get_exif_remover_model(),
-        ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => ModelRc::new(VecModel::from(vec![])),
+        ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => ModelRc::new(VecModel::from(Vec::new())),
     }
 }
 

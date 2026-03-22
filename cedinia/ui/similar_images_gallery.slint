@@ -3,6 +3,7 @@ import { ScanState, SimilarGroupCard } from "common.slint";
 import { AppState, SimilarImagesSettings } from "app_state.slint";
 import { StatusChip, TouchButton } from "components.slint";
 import { Translations } from "translations.slint";
+import { MomentumScrollView } from "momentum_scroll.slint";
 
 component GalleryImageCell {
     in property <image>  thumbnail;
@@ -14,11 +15,34 @@ component GalleryImageCell {
     in property <bool>   checked: false;
     in property <bool>   is_reference: false;
 
-    // Fired on long-press: (full_file_path, parent_folder_path)
-    callback cell_long_pressed(string, string);
+    // Set to true when the horizontal or vertical SwipeGestureHandler claims
+    // the pointer gesture.  Once either SGR is swiping it stops forwarding
+    // pointer events to child elements, so the dead-zone check in pointer-event
+    // never fires again.  Watching this directly is the only reliable way to
+    // cancel the long-press timer during a gallery scroll.
+    in property <bool> any_sgr_swiping: false;
+
+    // Fired on long-press: (full_file_path, parent_folder_path, item_name)
+    callback cell_long_pressed(string, string, string);
 
     // Suppresses the clicked event that fires right after the long-press timer.
     property <bool> lp_fired: false;
+
+    // Stored press coordinates for the 30 px dead-zone check (Android).
+    property <length> _lp_start_x: 0px;
+    property <length> _lp_start_y: 0px;
+    // Tracks the most-recent pointer position so the timer can re-check
+    // displacement even after the TouchArea stops receiving move events
+    // (i.e. when a SwipeGestureHandler has claimed the gesture).
+    property <length> _lp_cur_x:   0px;
+    property <length> _lp_cur_y:   0px;
+
+    // Cancel immediately when either SGR takes over the swipe gesture.
+    changed any_sgr_swiping => {
+        if (root.any_sgr_swiping) {
+            cell_lp_timer.running = false;
+        }
+    }
 
     width: 170px;
 
@@ -32,10 +56,25 @@ component GalleryImageCell {
         }
         pointer-event(e) => {
             if (e.kind == PointerEventKind.down) {
+                root._lp_start_x = ta.mouse-x;
+                root._lp_start_y = ta.mouse-y;
+                root._lp_cur_x   = ta.mouse-x;
+                root._lp_cur_y   = ta.mouse-y;
                 cell_lp_timer.running = true;
                 cell_lp_timer.restart();
-            } else if (e.kind == PointerEventKind.up || e.kind == PointerEventKind.move) {
+            } else if (e.kind == PointerEventKind.up) {
                 cell_lp_timer.running = false;
+            } else if (e.kind == PointerEventKind.move) {
+                root._lp_cur_x = ta.mouse-x;
+                root._lp_cur_y = ta.mouse-y;
+                // 30 px dead zone – cancels on real scroll gestures while
+                // tolerating Android micro-moves on a stationary finger.
+                if (ta.mouse-x - root._lp_start_x > 30px
+                        || root._lp_start_x - ta.mouse-x > 30px
+                        || ta.mouse-y - root._lp_start_y > 30px
+                        || root._lp_start_y - ta.mouse-y > 30px) {
+                    cell_lp_timer.running = false;
+                }
             }
         }
     }
@@ -45,10 +84,19 @@ component GalleryImageCell {
         running: false;
         triggered => {
             self.running = false;
+            // Final guard: even if any_sgr_swiping didn't cancel in time,
+            // refuse to fire if the finger has drifted beyond the dead zone.
+            if (root._lp_cur_x - root._lp_start_x > 30px
+                    || root._lp_start_x - root._lp_cur_x > 30px
+                    || root._lp_cur_y - root._lp_start_y > 30px
+                    || root._lp_start_y - root._lp_cur_y > 30px) {
+                return;
+            }
             root.lp_fired = true;
             root.cell_long_pressed(
                 root.img_full_path,
-                root.img_val_str.length > 1 ? root.img_val_str[1] : ""
+                root.img_val_str.length > 1 ? root.img_val_str[1] : "",
+                root.img_name
             );
         }
     }
@@ -116,7 +164,7 @@ component GalleryImageCell {
         // Size and path grouped together with tight spacing so there is no
         // visible gap between the file-size line and the directory line.
         VerticalLayout {
-            spacing: 1px;
+            spacing: 0px;
 
             Text {
                 text: root.img_val_str.length > 4 && root.img_val_str[4] != ""
@@ -125,6 +173,7 @@ component GalleryImageCell {
                 font-size: 10px;
                 color: CediniaColors.text_secondary;
                 horizontal-alignment: TextHorizontalAlignment.center;
+                wrap: no-wrap;
                 overflow: TextOverflow.elide;
             }
             if root.img_val_str.length > 1 && root.img_val_str[1] != "" : Rectangle {
@@ -210,197 +259,6 @@ component GalleryToggleBar {
 }
 
 
-component GalleryScroller {
-    in property <[SimilarGroupCard]> groups;
-
-    // Bubbles up the long-press event: (full_file_path, parent_folder_path)
-    callback ctx_long_pressed(string, string);
-
-    // Derived scroll bounds
-    property <length> max_scroll: max(0px, inner_vl.preferred-height - root.height);
-
-    // Set to true while any inner horizontal sgr is in flight.
-    // Blocks v_sgr from claiming a vertical gesture during that period —
-    // specifically during direction reversals where sgr.swiping can briefly
-    // drop to false before the finger is actually lifted.
-    // Cleared only in sgr.swiped (finger up), NOT when sgr.swiping goes false.
-    property <bool> _h_locked: false;
-
-    // Stop momentum as soon as the user touches the scroller again.
-    property <bool> _swiping: v_sgr.swiping;
-    changed _swiping => {
-        if _swiping {
-            AppState.gallery_stop_momentum();
-            // Reset velocity state so the previous gesture's EMA doesn't bleed in.
-            _vel_ema        = 0.0;
-            _vel_prev_delta = 0.0;
-        }
-    }
-
-    // ── Velocity tracking for natural momentum ────────────────────────────────
-    // Uses only v_sgr built-in properties (swiping, current/pressed-position).
-    // These have NO layout dependencies, so the ChangeTracker is safe and will
-    // never trigger "Recursion detected".
-    //
-    // _vel_ema  : exponential moving-average of velocity (px per touch-event).
-    //             Decays to ~0 in ≈2-3 events (~30 ms) when the finger is still,
-    //             which eliminates the "catapult" effect on slow-but-long swipes.
-    property <float> _vel_ema:        0.0;
-    property <float> _vel_prev_delta: 0.0;
-    property <float> live_swipe_delta_y: v_sgr.swiping
-        ? (v_sgr.current-position.y - v_sgr.pressed-position.y) / 1px
-        : 0.0;
-    changed live_swipe_delta_y => {
-        if v_sgr.swiping {
-            let inc = live_swipe_delta_y - _vel_prev_delta;
-            // EMA: 40 % new sample, 60 % history.  Half-life ≈ 1.4 touch events.
-            _vel_ema        = inc * 0.4 + _vel_ema * 0.6;
-            _vel_prev_delta = live_swipe_delta_y;
-        } else {
-            // Gesture ended – reset anchor; retain _vel_ema for the swiped callback.
-            _vel_prev_delta = 0.0;
-        }
-    }
-    // ─────────────────────────────────────────────────────────────────────────
-
-    // Scrollbar indicator geometry
-    property <float> content_f:  max(1.0, inner_vl.preferred-height / 1px);
-    property <float> viewport_f: root.height / 1px;
-    property <float> ind_h_f:    max(30.0, viewport_f * viewport_f / content_f);
-    property <length> ind_h:     ind_h_f * 1px;
-    property <float>  scroll_ratio: max_scroll > 0px
-        ? max(0.0, min(1.0, -AppState.gallery_scroll_y / max_scroll))
-        : 0.0;
-
-    v_sgr := SwipeGestureHandler {
-        handle-swipe-up: !_h_locked;
-        handle-swipe-down: !_h_locked;
-        swiped => {
-            // Keep the Rust-side max-scroll bound in sync.  Reading max_scroll
-            // here (in an event callback, not a property binding) is safe:
-            // there is no "current binding being evaluated", so Slint's
-            // recursion guard can never trigger.
-            AppState.gallery_max_scroll_f = max_scroll / 1px;
-            // Pass total displacement (for position commit) AND EMA velocity at
-            // release (for momentum).  Using velocity instead of total delta
-            // prevents the catapult on slow-but-long swipes.
-            AppState.gallery_swiped(
-                (self.current-position.y - self.pressed-position.y) / 1px,
-                _vel_ema
-            );
-        }
-        Rectangle {
-            clip: true;
-            inner_vl := VerticalLayout {
-                property <length> live_y: 0px;
-                // AppState.gallery_scroll_y is updated by the swiped callback in
-                // the same event frame that live_y resets to 0, so there is no snap.
-                y: AppState.gallery_scroll_y + live_y;
-                height: self.preferred-height;
-                states [
-                    swiping when v_sgr.swiping : {
-                        live_y: v_sgr.current-position.y - v_sgr.pressed-position.y;
-                    }
-                ]
-                for group in root.groups : VerticalLayout {
-                    padding-left: 8px;
-                    padding-right: 8px;
-                    padding-top: 8px;
-                    padding-bottom: 4px;
-                    spacing: 6px;
-
-                    Rectangle {
-                        height: 34px;
-                        border-radius: 8px;
-                        background: CediniaColors.accent.with-alpha(0.85);
-                        Text {
-                            x: 12px;
-                            y: 0px;
-                            height: parent.height;
-                            width: parent.width - 24px;
-                            text: group.label;
-                            color: #000000;
-                            font-size: 13px;
-                            font-weight: 700;
-                            vertical-alignment: TextVerticalAlignment.center;
-                            overflow: TextOverflow.elide;
-                        }
-                    }
-
-                    sgr := SwipeGestureHandler {
-                        property <length> committed_x: 0px;
-                        handle-swipe-left: true;
-                        handle-swipe-right: true;
-                        height: 244px;
-                        swiped => {
-                            // Horizontal gesture finished (finger lifted) — release the lock
-                            // so the outer vertical handler can work again.
-                            root._h_locked = false;
-                            self.committed_x = self.committed_x + self.current-position.x - self.pressed-position.x;
-                            if self.committed_x > 0px { self.committed_x = 0px; }
-                            if hl.preferred-width <= sgr.width {
-                                self.committed_x = 0px;
-                            } else if self.committed_x < -(hl.preferred-width - sgr.width) {
-                                self.committed_x = -(hl.preferred-width - sgr.width);
-                            }
-                        }
-                        Rectangle {
-                            clip: true;
-                            hl := HorizontalLayout {
-                                property <length> live_offset: 0px;
-                                x: sgr.committed_x + live_offset;
-                                alignment: LayoutAlignment.start;
-                                spacing: 6px;
-                                states [
-                                    swiping when sgr.swiping : {
-                                        live_offset: sgr.current-position.x - sgr.pressed-position.x;
-                                    }
-                                ]
-                                for img in group.items : GalleryImageCell {
-                                    thumbnail:    img.thumbnail;
-                                    img_name:     img.name;
-                                    img_size:     img.size;
-                                    img_val_str:  img.val_str;
-                                    img_full_path: img.full_path;
-                                    flat_idx:     img.flat_idx;
-                                    checked:      img.checked;
-                                    is_reference: img.is_reference;
-                                    cell_long_pressed(f, d) => { root.ctx_long_pressed(f, d); }
-                                }
-                            }
-                        }
-                    }
-
-                    // When this row's horizontal swipe is confirmed by Slint (sgr.swiping
-                    // becomes true), lock out the outer vertical handler immediately.
-                    // Safe: depends only on sgr.swiping (a SwipeGestureHandler built-in bool),
-                    // no layout properties → no "Recursion detected" risk.
-                    property <bool> _row_swiping: sgr.swiping;
-                    changed _row_swiping => {
-                        if _row_swiping { root._h_locked = true; }
-                        // Do NOT clear on false — only swiped() clears the lock.
-                        // This keeps v_sgr disabled during direction reversals where
-                        // sgr.swiping briefly drops to false before the finger lifts.
-                    }
-
-                    Rectangle { height: 1px; background: CediniaColors.divider; }
-                }
-            }
-        }
-    }
-
-    // Scrollbar indicator — shown only when content overflows
-    if max_scroll > 0px : Rectangle {
-        x: root.width - 8px;
-        y: scroll_ratio * (root.height - ind_h);
-        width: 4px;
-        height: ind_h;
-        border-radius: 2px;
-        background: CediniaColors.text_disabled.with-alpha(0.5);
-        z: 5;
-    }
-}
-
 export component SimilarImagesGallery {
     in property <[SimilarGroupCard]> groups: [];
 
@@ -408,6 +266,12 @@ export component SimilarImagesGallery {
     property <bool>   ctx_open_visible: false;
     property <string> ctx_open_file:    "";
     property <string> ctx_open_folder:  "";
+    property <string> ctx_item_name:    "";
+
+    // Set to true while any per-row horizontal SGR is active so the vertical
+    // MomentumScrollView does not steal the gesture during reversals.
+    // Cleared only in the horizontal sgr.swiped handler (on finger-up).
+    property <bool> _h_locked: false;
 
     VerticalLayout {
         spacing: 0px;
@@ -433,14 +297,105 @@ export component SimilarImagesGallery {
             }
         }
 
-
-        if groups.length > 0 : GalleryScroller {
+        // Inline the scroller directly (like ResultsList does) so that
+        // vertical-stretch: 1.0 is applied to a real element in the layout,
+        // not wrapped inside an intermediate component.
+        if groups.length > 0 : gallery_scroll := MomentumScrollView {
             vertical-stretch: 1.0;
-            groups: groups;
-            ctx_long_pressed(f, d) => {
-                root.ctx_open_file   = f;
-                root.ctx_open_folder = d;
-                root.ctx_open_visible = true;
+            scroll_y <=> AppState.gallery_scroll_y;
+            lock_vertical: root._h_locked;
+            swiped(d, v, m) => {
+                AppState.gallery_max_scroll_f = m;
+                AppState.gallery_swiped(d, v);
+            }
+            stop_momentum => { AppState.gallery_stop_momentum(); }
+
+            for group in root.groups : VerticalLayout {
+                padding-left: 8px;
+                padding-right: 8px;
+                padding-top: 8px;
+                padding-bottom: 4px;
+                spacing: 6px;
+
+                Rectangle {
+                    height: 34px;
+                    border-radius: 8px;
+                    background: CediniaColors.accent.with-alpha(0.85);
+                    Text {
+                        x: 12px;
+                        y: 0px;
+                        height: parent.height;
+                        width: parent.width - 24px;
+                        text: group.label;
+                        color: #000000;
+                        font-size: 13px;
+                        font-weight: 700;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        overflow: TextOverflow.elide;
+                    }
+                }
+
+                sgr := SwipeGestureHandler {
+                    property <length> committed_x: 0px;
+                    handle-swipe-left: true;
+                    handle-swipe-right: true;
+                    height: 244px;
+                    swiped => {
+                        // Horizontal gesture finished — release the lock so the
+                        // outer MomentumScrollView can handle verticals again.
+                        root._h_locked = false;
+                        self.committed_x = self.committed_x + self.current-position.x - self.pressed-position.x;
+                        if self.committed_x > 0px { self.committed_x = 0px; }
+                        if hl.preferred-width <= sgr.width {
+                            self.committed_x = 0px;
+                        } else if self.committed_x < -(hl.preferred-width - sgr.width) {
+                            self.committed_x = -(hl.preferred-width - sgr.width);
+                        }
+                    }
+                    Rectangle {
+                        clip: true;
+                        hl := HorizontalLayout {
+                            property <length> live_offset: 0px;
+                            x: sgr.committed_x + live_offset;
+                            alignment: LayoutAlignment.start;
+                            spacing: 6px;
+                            states [
+                                swiping when sgr.swiping : {
+                                    live_offset: sgr.current-position.x - sgr.pressed-position.x;
+                                }
+                            ]
+                            for img in group.items : GalleryImageCell {
+                                thumbnail:       img.thumbnail;
+                                img_name:        img.name;
+                                img_size:        img.size;
+                                img_val_str:     img.val_str;
+                                img_full_path:   img.full_path;
+                                flat_idx:        img.flat_idx;
+                                checked:         img.checked;
+                                is_reference:    img.is_reference;
+                                // Cancel long-press when either the horizontal or the
+                                // vertical (MomentumScrollView) SGR claims the gesture.
+                                any_sgr_swiping: sgr.swiping || gallery_scroll.is_swiping;
+                                cell_long_pressed(f, d, n) => {
+                                    root.ctx_open_file   = f;
+                                    root.ctx_open_folder = d;
+                                    root.ctx_item_name   = n;
+                                    root.ctx_open_visible = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // When the horizontal swipe is confirmed, lock the vertical SGR.
+                // Safe: depends only on sgr.swiping — no layout properties.
+                property <bool> _row_swiping: sgr.swiping;
+                changed _row_swiping => {
+                    if _row_swiping { root._h_locked = true; }
+                    // Do NOT clear on false — only swiped() clears the lock.
+                }
+
+                Rectangle { height: 1px; background: CediniaColors.divider; }
             }
         }
     }
@@ -470,13 +425,23 @@ export component SimilarImagesGallery {
                 padding: 12px;
                 spacing: 6px;
 
+                // Item name — lets the user see exactly what will be opened.
                 Text {
-                    text: Translations.ctx_menu_title_text;
-                    color: CediniaColors.text_secondary;
-                    font-size: 12px;
+                    text: root.ctx_item_name != "" ? root.ctx_item_name : Translations.ctx_menu_title_text;
+                    color: CediniaColors.text_primary;
+                    font-size: 13px;
                     font-weight: 700;
-                    letter-spacing: 0.5px;
                     horizontal-alignment: TextHorizontalAlignment.center;
+                    wrap: word-wrap;
+                }
+
+                // Parent folder path — shown in a smaller, muted colour.
+                if root.ctx_open_folder != "" : Text {
+                    text: root.ctx_open_folder;
+                    color: CediniaColors.text_disabled;
+                    font-size: 10px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    wrap: word-wrap;
                 }
 
                 TouchButton {

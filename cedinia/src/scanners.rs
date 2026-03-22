@@ -108,7 +108,7 @@ pub(crate) fn scan_duplicate_files<H: ScanResultHandler>(
                 .cloned()
                 .map(|(orig, others)| (Some(orig), others))
                 .collect(),
-            _ => vec![],
+            _ => Vec::new(),
         }
     } else {
         match check_method {
@@ -116,7 +116,7 @@ pub(crate) fn scan_duplicate_files<H: ScanResultHandler>(
             CheckingMethod::Name => tool.get_files_sorted_by_names().values().cloned().map(|group| (None, group)).collect(),
             CheckingMethod::Size => tool.get_files_sorted_by_size().values().cloned().map(|group| (None, group)).collect(),
             CheckingMethod::SizeName => tool.get_files_sorted_by_size_name().values().cloned().map(|group| (None, group)).collect(),
-            _ => vec![],
+            _ => Vec::new(),
         }
     };
 
@@ -483,7 +483,7 @@ pub(crate) fn scan_bad_names<H: ScanResultHandler>(
 pub(crate) fn scan_exif_remover<H: ScanResultHandler>(dirs: Vec<PathBuf>, filters: &CommonFilters, stop: &Arc<AtomicBool>, handler: &Arc<H>, scan_id: u32) -> Vec<FileItem> {
     use czkawka_core::tools::exif_remover::{ExifRemover, ExifRemoverParameters};
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
-    let params = ExifRemoverParameters::new(vec![]);
+    let params = ExifRemoverParameters::new(Vec::new());
     let mut tool = ExifRemover::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);

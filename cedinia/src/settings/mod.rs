@@ -191,10 +191,10 @@ pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf], referenced: &[PathB
 
 pub fn load_dirs() -> (Vec<PathBuf>, Vec<PathBuf>, Vec<PathBuf>) {
     let Some(path) = get_dirs_file() else {
-        return (vec![], vec![], vec![]);
+        return (Vec::new(), Vec::new(), Vec::new());
     };
     if !path.is_file() {
-        return (vec![], vec![], vec![]);
+        return (Vec::new(), Vec::new(), Vec::new());
     }
     match std::fs::read_to_string(&path) {
         Ok(json) => match serde_json::from_str::<DirConfig>(&json) {
@@ -206,12 +206,12 @@ pub fn load_dirs() -> (Vec<PathBuf>, Vec<PathBuf>, Vec<PathBuf>) {
             }
             Err(e) => {
                 error!("Cannot parse dirs config: {e}");
-                (vec![], vec![], vec![])
+                (Vec::new(), Vec::new(), Vec::new())
             }
         },
         Err(e) => {
             error!("Cannot read dirs config {}: {e}", path.display());
-            (vec![], vec![], vec![])
+            (Vec::new(), Vec::new(), Vec::new())
         }
     }
 }

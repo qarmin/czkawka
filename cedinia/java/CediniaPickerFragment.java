@@ -11,6 +11,7 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
@@ -32,15 +33,22 @@ public class CediniaPickerFragment extends Fragment {
         final CediniaPickerFragment frag = new CediniaPickerFragment();
         frag.mIsInclude = isInclude;
         frag.mStartPath = (startPath != null) ? startPath : "";
+        final String tag = "cedinia_picker_" + (isInclude ? "inc" : "exc");
         // Run on the UI thread in case we are called from a background thread.
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    activity.getFragmentManager()
-                            .beginTransaction()
-                            .add(frag, "cedinia_picker_" + (isInclude ? "inc" : "exc"))
-                            .commitAllowingStateLoss();
+                    android.app.FragmentManager fm = activity.getFragmentManager();
+                    android.app.FragmentTransaction tx = fm.beginTransaction();
+                    // Remove any stale picker fragment left over from a previous attempt
+                    // (e.g. after the activity was recreated while the picker was open).
+                    Fragment existing = fm.findFragmentByTag(tag);
+                    if (existing != null) {
+                        Log.i(TAG, "launch: removing stale fragment with tag " + tag);
+                        tx.remove(existing);
+                    }
+                    tx.add(frag, tag).commitAllowingStateLoss();
                 } catch (Exception e) {
                     Log.e(TAG, "launch: fragment commit failed: " + e);
                 }
@@ -52,6 +60,19 @@ public class CediniaPickerFragment extends Fragment {
     private String  mStartPath = "";
     /** Guard so the SAF intent is only fired once even if onStart() is re-entered. */
     private boolean mPickerLaunched;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            // This fragment is being restored after the activity was recreated
+            // (e.g. the user backgrounded the app while the picker was open).
+            // Do not relaunch the picker automatically – the user will tap the
+            // button again to start a fresh pick.
+            Log.i(TAG, "onCreate: restored from saved state, detaching immediately");
+            detachSelf();
+        }
+    }
 
     @Override
     public void onStart() {
