@@ -169,6 +169,17 @@ android: android_build android_install android_run
 
 androidr: android_build_release android_install_release android_run
 
+# Build a signed release AAB suitable for Google Play Store upload.
+# Requires gradle 8.9+ in PATH (e.g. sdk install gradle 8.9 via sdkman).
+# The libcedinia.so is compiled by cargo-apk and the DEX is already embedded
+# in the .so via include_bytes! – no separate Java compilation is needed.
+android_build_aab: android_build_release
+    mkdir -p cedinia/android/app/src/main/jniLibs/arm64-v8a
+    cp target/aarch64-linux-android/release/libcedinia.so cedinia/android/app/src/main/jniLibs/arm64-v8a/
+    cd cedinia/android && gradle bundleRelease
+    cp cedinia/android/app/build/outputs/bundle/release/app-release.aab cedinia.aab
+    @echo "AAB built: cedinia.aab"
+
 ##################### BENCHMARKS #####################
 
 prepare_binaries:
