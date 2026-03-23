@@ -22,7 +22,7 @@ class RenameDialog(QDialog):
 
         label = QLabel(msg)
         label.setWordWrap(True)
-        label.setStyleSheet("font-size: 13px; padding: 10px;")
+        label.setContentsMargins(10, 10, 10, 10)
         layout.addWidget(label)
 
         buttons = QDialogButtonBox(

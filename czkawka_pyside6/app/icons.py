@@ -1,45 +1,37 @@
-"""SVG icon resources for Czkawka PySide6 interface.
+"""Icon resources for Czkawka PySide6 interface.
 
-Uses the same SVG icons as the Krokiet (Slint) interface.
-Icons are embedded as strings to avoid file path issues.
+KDE-compliant icon strategy:
+  1. Try QIcon.fromTheme() with standard XDG/FreeDesktop icon names
+  2. Fall back to the embedded SVG icons from the Krokiet icon set
+
+This ensures the app looks native on KDE/Plasma (Breeze icons) and
+other desktops while still working when no icon theme is installed.
 """
 
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtGui import QIcon, QPixmap, QPainter, QImage
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtSvg import QSvgRenderer
-from PySide6.QtGui import QPainter, QImage
 from functools import lru_cache
 
-# Fill color applied to icons for dark theme visibility
-_ICON_FILL = "#cccccc"
-_ICON_FILL_GREEN = "#6fbf73"
-_ICON_FILL_RED = "#e57373"
 
-
-def _colorize_svg(svg: str, fill: str = _ICON_FILL) -> str:
-    """Inject fill color into SVG for dark theme visibility."""
-    # Add fill to root svg or g elements
-    if 'fill="none"' not in svg and f'fill="{fill}"' not in svg:
-        svg = svg.replace("<svg ", f'<svg fill="{fill}" ', 1)
-    # Override existing fills (except fill="none")
-    import re
-    svg = re.sub(r'fill="#(?:000000|161616|000)"', f'fill="{fill}"', svg)
-    svg = re.sub(r'stroke="#(?:000000|000)"', f'stroke="{fill}"', svg)
-    return svg
+def _themed_icon(xdg_name: str, fallback_svg: str, size: int = 24) -> QIcon:
+    """Return XDG theme icon if available, otherwise render the fallback SVG."""
+    icon = QIcon.fromTheme(xdg_name)
+    if not icon.isNull():
+        return icon
+    return _svg_to_icon(fallback_svg, size)
 
 
 @lru_cache(maxsize=64)
-def _svg_to_icon(svg_data: str, fill: str = _ICON_FILL, size: int = 24) -> QIcon:
-    """Convert SVG string to QIcon with specified fill color."""
-    colored = _colorize_svg(svg_data, fill)
-    renderer = QSvgRenderer(colored.encode("utf-8"))
+def _svg_to_icon(svg_data: str, size: int = 24) -> QIcon:
+    """Render SVG string to QIcon. No color injection — respects original SVG."""
+    renderer = QSvgRenderer(svg_data.encode("utf-8"))
     image = QImage(QSize(size, size), QImage.Format_ARGB32_Premultiplied)
     image.fill(Qt.transparent)
     painter = QPainter(image)
     renderer.render(painter)
     painter.end()
-    pixmap = QPixmap.fromImage(image)
-    return QIcon(pixmap)
+    return QIcon(QPixmap.fromImage(image))
 
 
 # ─── Raw SVG data ───────────────────────────────────────────
@@ -79,53 +71,57 @@ INFO_SVG = '''<svg enable-background="new 0 0 512 512" viewBox="0 0 512 512" xml
 
 # ─── Icon accessor functions ────────────────────────────────
 
+# ─── XDG theme name → fallback SVG mapping ─────────────────
+# Standard FreeDesktop icon names are tried first (Breeze, Adwaita, etc.)
+# If the theme doesn't have them, the embedded Krokiet SVG is used.
+
 def icon_search(size=24):
-    return _svg_to_icon(SEARCH_SVG, _ICON_FILL_GREEN, size)
+    return _themed_icon("system-search", SEARCH_SVG, size)
 
 def icon_stop(size=24):
-    return _svg_to_icon(STOP_SVG, _ICON_FILL_RED, size)
+    return _themed_icon("process-stop", STOP_SVG, size)
 
 def icon_delete(size=24):
-    return _svg_to_icon(DELETE_SVG, _ICON_FILL_RED, size)
+    return _themed_icon("edit-delete", DELETE_SVG, size)
 
 def icon_move(size=24):
-    return _svg_to_icon(MOVE_SVG, _ICON_FILL, size)
+    return _themed_icon("folder-move", MOVE_SVG, size)
 
 def icon_save(size=24):
-    return _svg_to_icon(SAVE_SVG, _ICON_FILL, size)
+    return _themed_icon("document-save", SAVE_SVG, size)
 
 def icon_select(size=24):
-    return _svg_to_icon(SELECT_SVG, _ICON_FILL, size)
+    return _themed_icon("edit-select-all", SELECT_SVG, size)
 
 def icon_sort(size=24):
-    return _svg_to_icon(SORT_SVG, _ICON_FILL, size)
+    return _themed_icon("view-sort", SORT_SVG, size)
 
 def icon_hardlink(size=24):
-    return _svg_to_icon(HARDLINK_SVG, _ICON_FILL, size)
+    return _themed_icon("edit-link", HARDLINK_SVG, size)
 
 def icon_symlink(size=24):
-    return _svg_to_icon(SYMLINK_SVG, _ICON_FILL, size)
+    return _themed_icon("edit-link", SYMLINK_SVG, size)
 
 def icon_rename(size=24):
-    return _svg_to_icon(RENAME_SVG, _ICON_FILL, size)
+    return _themed_icon("edit-rename", RENAME_SVG, size)
 
 def icon_clean(size=24):
-    return _svg_to_icon(CLEAN_SVG, _ICON_FILL, size)
+    return _themed_icon("edit-clear-all", CLEAN_SVG, size)
 
 def icon_optimize(size=24):
-    return _svg_to_icon(OPTIMIZE_SVG, _ICON_FILL, size)
+    return _themed_icon("configure", OPTIMIZE_SVG, size)
 
 def icon_settings(size=24):
-    return _svg_to_icon(SETTINGS_SVG, _ICON_FILL, size)
+    return _themed_icon("configure", SETTINGS_SVG, size)
 
 def icon_subsettings(size=24):
-    return _svg_to_icon(SUBSETTINGS_SVG, _ICON_FILL, size)
+    return _themed_icon("preferences-other", SUBSETTINGS_SVG, size)
 
 def icon_dir(size=24):
-    return _svg_to_icon(DIR_SVG, _ICON_FILL, size)
+    return _themed_icon("folder", DIR_SVG, size)
 
 def icon_info(size=24):
-    return _svg_to_icon(INFO_SVG, _ICON_FILL, size)
+    return _themed_icon("dialog-information", INFO_SVG, size)
 
 
 def app_logo_path() -> str:

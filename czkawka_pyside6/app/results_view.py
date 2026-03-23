@@ -17,16 +17,34 @@ class ResultsView(QWidget):
     item_activated = Signal(object)  # ResultEntry
     context_menu_requested = Signal(object, object)  # QPoint, ResultEntry
 
-    # Colors
-    HEADER_BG = QColor(60, 60, 80)
-    HEADER_FG = QColor(220, 220, 255)
-    SELECTED_BG = QColor(40, 80, 40)
+    # Group header uses the system highlight color (darkened) so it works on
+    # both light and dark themes.  Computed lazily on first result display.
+    _header_colors_ready = False
+    HEADER_BG = QColor()
+    HEADER_FG = QColor()
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._active_tab = ActiveTab.DUPLICATE_FILES
         self._results: list[ResultEntry] = []
         self._setup_ui()
+
+    def _ensure_header_colors(self):
+        """Derive group header colors from the system palette."""
+        if self._header_colors_ready:
+            return
+        from PySide6.QtWidgets import QApplication
+        palette = QApplication.instance().palette()
+        # Use a midpoint between window and highlight for header background
+        win = palette.color(palette.Window)
+        hi = palette.color(palette.Highlight)
+        self.HEADER_BG = QColor(
+            (win.red() + hi.red()) // 2,
+            (win.green() + hi.green()) // 2,
+            (win.blue() + hi.blue()) // 2,
+        )
+        self.HEADER_FG = palette.color(palette.HighlightedText)
+        self._header_colors_ready = True
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -35,11 +53,10 @@ class ResultsView(QWidget):
         # Summary bar
         summary_layout = QHBoxLayout()
         self._summary_label = QLabel("No results")
-        self._summary_label.setStyleSheet("padding: 4px;")
         summary_layout.addWidget(self._summary_label)
         self._selection_label = QLabel("")
         self._selection_label.setAlignment(Qt.AlignRight)
-        self._selection_label.setStyleSheet("padding: 4px; color: #aaa;")
+        self._selection_label.setEnabled(False)
         summary_layout.addWidget(self._selection_label)
         layout.addLayout(summary_layout)
 
@@ -66,6 +83,7 @@ class ResultsView(QWidget):
                 header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
 
     def set_results(self, results: list[ResultEntry]):
+        self._ensure_header_colors()
         self._results = results
         self._tree.blockSignals(True)
         self._tree.clear()
