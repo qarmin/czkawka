@@ -113,6 +113,7 @@ export component FileRow {
     in property <[string]> val_str: [];
     in property <bool>    checked: false;
     in property <bool>    is_header: false;
+    in property <bool>    is_reference: false;
     in property <bool>    is_even: false;
     in property <bool>    extra_as_line2: false;
     callback toggle_checked();
@@ -120,29 +121,76 @@ export component FileRow {
     callback open_item();
     callback open_parent();
 
+    // Set to true when the long-press timer fires so the subsequent
+    // `clicked` event (fired on finger-up) doesn't also toggle selection.
+    property <bool> lp_fired: false;
+
+    // Set by the parent MomentumScrollView via `scroll_swiping: scroll_view.is_swiping`.
+    // When the scroll SGR claims the pointer gesture it stops forwarding pointer
+    // events to child TouchAreas, so the only reliable way to cancel the
+    // long-press timer during a scroll is to watch this flag directly.
+    in property <bool> scroll_swiping: false;
+    changed scroll_swiping => {
+        if root.scroll_swiping { lp_timer.running = false; }
+    }
+
+    // Stored press coordinates for the dead-zone check.
+    // On Android even a stationary finger generates tiny move events;
+    // we only cancel the timer when the finger actually drifts > 8 px.
+    property <length> _lp_start_x: 0px;
+    property <length> _lp_start_y: 0px;
+
     height: root.is_header ? 36px : 80px;
 
     Rectangle {
         background: root.is_header
             ? CediniaColors.row_header
-            : root.checked
-                ? CediniaColors.row_selected
-                : root.is_even ? CediniaColors.row_alt : CediniaColors.row_normal;
+            : root.is_reference
+                ? CediniaColors.row_header.brighter(0.35)
+                : root.checked
+                    ? CediniaColors.row_selected
+                    : root.is_even ? CediniaColors.row_alt : CediniaColors.row_normal;
         animate background { duration: 80ms; }
 
-
+        // Left accent bar – muted for reference, coloured for selected, hidden otherwise
         if !root.is_header : Rectangle {
             x: 0;
             y: 0;
             width: 4px;
             height: parent.height;
-            background: root.checked ? CediniaColors.accent : transparent;
+            background: root.is_reference
+                ? CediniaColors.text_secondary.with-alpha(0.4)
+                : root.checked ? CediniaColors.accent : transparent;
         }
 
         ta := TouchArea {
-            clicked => { if (!root.is_header) { root.toggle_checked(); } }
+            clicked => {
+                if (root.lp_fired) {
+                    root.lp_fired = false;
+                } else if (!root.is_header && !root.is_reference) {
+                    root.toggle_checked();
+                }
+            }
             pointer-event(e) => {
                 if (!root.is_header) {
+                    if (e.kind == PointerEventKind.down) {
+                        root._lp_start_x = ta.mouse-x;
+                        root._lp_start_y = ta.mouse-y;
+                        lp_timer.running = true;
+                        lp_timer.restart();
+                    } else if (e.kind == PointerEventKind.up) {
+                        lp_timer.running = false;
+                    } else if (e.kind == PointerEventKind.move) {
+                        // 8 px dead zone – on Android even a stationary finger
+                        // produces micro-move events that would otherwise cancel
+                        // the long-press timer immediately.
+                        if (ta.mouse-x - root._lp_start_x > 8px
+                                || root._lp_start_x - ta.mouse-x > 8px
+                                || ta.mouse-y - root._lp_start_y > 8px
+                                || root._lp_start_y - ta.mouse-y > 8px) {
+                            lp_timer.running = false;
+                        }
+                    }
                     if (e.button == PointerEventButton.middle && e.kind == PointerEventKind.up) {
                         root.open_item();
                     }
@@ -153,6 +201,15 @@ export component FileRow {
             }
         }
 
+        lp_timer := Timer {
+            interval: 500ms;
+            running: false;
+            triggered => {
+                self.running = false;
+                root.lp_fired = true;
+                root.long_pressed();
+            }
+        }
         if root.is_header : HorizontalLayout {
             padding-left: 12px;
             padding-right: 12px;
@@ -176,7 +233,8 @@ export component FileRow {
             VerticalLayout {
                 alignment: LayoutAlignment.center;
 
-                Rectangle {
+                // Reference items show a star instead of a checkbox
+                if !root.is_reference : Rectangle {
                     width: 24px;
                     height: 24px;
                     border-radius: 12px;
@@ -186,7 +244,16 @@ export component FileRow {
                     vertical-stretch: 0.0;
                     animate background { duration: 80ms; }
                 }
-        }
+                if root.is_reference : Text {
+                    text: "R";
+                    color: CediniaColors.text_secondary;
+                    font-size: 14px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    width: 24px;
+                    height: 24px;
+                }
+            }
 
             VerticalLayout {
                 alignment: LayoutAlignment.center;
@@ -195,7 +262,7 @@ export component FileRow {
 
                 Text {
                     text: root.name;
-                    color: CediniaColors.text_primary;
+                    color: root.is_reference ? CediniaColors.text_secondary : CediniaColors.text_primary;
                     font-size: 14px;
                     font-weight: 600;
                     overflow: elide;
@@ -235,7 +302,7 @@ export component FileRow {
 
             Text {
                 text: root.size;
-                color: CediniaColors.accent_light;
+                color: root.is_reference ? CediniaColors.text_secondary : CediniaColors.accent_light;
                 font-size: 12px;
                 font-weight: 700;
                 vertical-alignment: TextVerticalAlignment.center;

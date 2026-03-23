@@ -56,7 +56,11 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages_
         if !stopped_search && sd.basic_settings.play_audio_on_scan_completion {
             sd.audio_player.play_scan_completed();
         }
-        app.invoke_scan_ended(flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str).into());
+        let result_message = flk!("rust_found_empty_files", items_found = items_found, time = scanning_time_str);
+        if !stopped_search && sd.basic_settings.show_notification_on_scan_completion {
+            crate::notification_manager::send_scan_completed_notification("Empty Files", &result_message);
+        }
+        app.invoke_scan_ended(result_message.into());
     }
     app.global::<GuiState>().set_info_text(messages_data.messages.into());
     reset_selection_at_end(app, ActiveTab::EmptyFiles);

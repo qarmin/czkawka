@@ -211,7 +211,7 @@ pub(super) fn build_custom_select_columns(active_tab: ActiveTab) -> Vec<CustomSe
             col_int_pair!(format!("{} [KB]", size), IntDataVideoOptimizer::SizePart1),
             col_date!(&mod_date, IntDataVideoOptimizer::ModificationDatePart1),
         ],
-        ActiveTab::Settings | ActiveTab::About => vec![],
+        ActiveTab::Settings | ActiveTab::About => Vec::new(),
     }
 }
 
@@ -581,7 +581,7 @@ mod tests {
         let mut rows = get_model_vec(3);
         rows[0].checked = true;
         let model = create_model_from_model_vec(&rows);
-        let cols: Vec<CustomSelectColumnModel> = vec![];
+        let cols: Vec<CustomSelectColumnModel> = Vec::new();
 
         let (checked, unchecked, new_model) = select_custom_columns(&model, ActiveTab::BigFiles, true, &cols, false, false);
 

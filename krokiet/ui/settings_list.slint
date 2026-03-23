@@ -342,6 +342,20 @@ export component SettingsList inherits VerticalLayout {
                 hint_text: Translations.settings_audio_env_variable_hint_text;
             }
 
+            CheckBoxComponent {
+                enabled <=> GuiState.notifications_feature_enabled;
+                name <=> Translations.settings_show_notification_on_scan_completion_text;
+                model <=> Settings.show_notification_on_scan_completion;
+            }
+
+            if !GuiState.notifications_feature_enabled: HintText {
+                hint_text: Translations.settings_notification_feature_hint_text;
+            }
+
+            if GuiState.notifications_feature_enabled: HintText {
+                hint_text: Translations.settings_notification_focused_hint_text;
+            }
+
             HeaderText {
                 text <=> Translations.settings_general_settings_text;
             }

@@ -274,6 +274,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_manual_application_scale(basic_settings.manual_application_scale);
     settings.set_use_manual_application_scale(basic_settings.use_manual_application_scale);
     settings.set_play_audio_on_scan_completion(basic_settings.play_audio_on_scan_completion);
+    settings.set_show_notification_on_scan_completion(basic_settings.show_notification_on_scan_completion);
 
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
@@ -828,6 +829,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let manual_application_scale = settings.get_manual_application_scale().clamp(0.5, 3.0);
     let use_manual_application_scale = settings.get_use_manual_application_scale();
     let play_audio_on_scan_completion = settings.get_play_audio_on_scan_completion();
+    let show_notification_on_scan_completion = settings.get_show_notification_on_scan_completion();
     BasicSettings {
         language,
         default_preset,
@@ -842,5 +844,6 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         manual_application_scale,
         use_manual_application_scale,
         play_audio_on_scan_completion,
+        show_notification_on_scan_completion,
     }
 }

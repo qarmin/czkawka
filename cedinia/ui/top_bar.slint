@@ -13,51 +13,53 @@ export component TopAppBar {
         drop-shadow-offset-y: 2px;
 
         HorizontalLayout {
+            height: parent.height;
             padding-left: 16px;
             padding-right: 12px;
-            padding-top: 8px;
-            padding-bottom: 8px;
             spacing: 10px;
             alignment: LayoutAlignment.start;
-
-
-            Image {
-                source: @image-url("../icons/logo.svg");
-                width: 48px;
-                height: 48px;
-                horizontal-alignment: ImageHorizontalAlignment.center;
-                vertical-alignment: ImageVerticalAlignment.center;
+        
+            VerticalLayout {
+                Rectangle {}
+                Image {
+                    source: @image-url("../icons/cedinia_logo.svg");
+                    width: 48px;
+                    height: 48px;
+                    horizontal-alignment: ImageHorizontalAlignment.center;
+                    vertical-alignment: ImageVerticalAlignment.center;
+                }
+                Rectangle {}
             }
 
             VerticalLayout {
                 alignment: LayoutAlignment.center;
                 horizontal-stretch: 1.0;
                 spacing: 2px;
-                Text {
-                    text: root.title;
-                    color: CediniaColors.accent_light;
-                    font-size: 18px;
-                    font-weight: 700;
+                HorizontalLayout {
+                    Text {
+                        text: root.title;
+                        color: CediniaColors.accent_light;
+                        font-size: 18px;
+                        font-weight: 700;
+                    }
+                    if AppState.scan_state == ScanState.Scanning : Rectangle {
+                        width: 10px;
+                        height: 10px;
+                        border-radius: 5px;
+                        background: CediniaColors.accent;
+                        vertical-stretch: 0.0;
+                        animate opacity {
+                            duration: 800ms;
+                            iteration-count: -1;
+                            easing: ease-in-out;
+                        }
+                    }
                 }
                 Text {
                     text: AppState.status_message;
                     color: CediniaColors.text_secondary;
                     font-size: 11px;
                     overflow: elide;
-                }
-            }
-
-
-            if AppState.scan_state == ScanState.Scanning : Rectangle {
-                width: 10px;
-                height: 10px;
-                border-radius: 5px;
-                background: CediniaColors.accent;
-                vertical-stretch: 0.0;
-                animate opacity {
-                    duration: 800ms;
-                    iteration-count: -1;
-                    easing: ease-in-out;
                 }
             }
         }

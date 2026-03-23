@@ -29,11 +29,11 @@ fn default_search_mode() -> String {
 fn default_big_files_count() -> String {
     "50".to_string()
 }
-fn default_min_file_size_idx() -> i32 {
-    0
+fn default_min_file_size() -> String {
+    "none".to_string()
 }
-fn default_max_file_size_idx() -> i32 {
-    4 // Unlimited
+fn default_max_file_size() -> String {
+    "unlimited".to_string()
 }
 fn default_language() -> String {
     "auto".to_string()
@@ -64,10 +64,14 @@ pub struct CediniaSettings {
     pub use_cache: bool,
     #[serde(default = "ttrue")]
     pub ignore_hidden: bool,
-    #[serde(default = "default_min_file_size_idx")]
-    pub min_file_size_idx: i32,
-    #[serde(default = "default_max_file_size_idx")]
-    pub max_file_size_idx: i32,
+    #[serde(default)]
+    pub show_notification: bool,
+    #[serde(default = "ttrue")]
+    pub notify_only_background: bool,
+    #[serde(default = "default_min_file_size")]
+    pub min_file_size: String,
+    #[serde(default = "default_max_file_size")]
+    pub max_file_size: String,
     #[serde(default = "default_language")]
     pub language: String,
     #[serde(default = "default_excluded_items")]
@@ -92,6 +96,8 @@ pub struct CediniaSettings {
     pub similar_images_image_filter: String,
     #[serde(default)]
     pub similar_images_ignore_same_size: bool,
+    #[serde(default)]
+    pub gallery_image_fit_cover: bool,
 
     #[serde(default = "default_search_mode")]
     pub big_files_search_mode: String,
@@ -138,42 +144,7 @@ pub struct CediniaSettings {
 
 impl Default for CediniaSettings {
     fn default() -> Self {
-        Self {
-            use_cache: true,
-            ignore_hidden: true,
-            min_file_size_idx: default_min_file_size_idx(),
-            max_file_size_idx: default_max_file_size_idx(),
-            language: default_language(),
-            excluded_items: default_excluded_items(),
-            allowed_extensions: String::new(),
-            excluded_extensions: String::new(),
-            duplicates_check_method: default_check_method(),
-            duplicates_hash_type: default_hash_type(),
-            similar_images_similarity_preset: default_similarity_preset(),
-            similar_images_hash_size: default_hash_size(),
-            similar_images_hash_alg: default_hash_alg(),
-            similar_images_image_filter: default_image_filter(),
-            similar_images_ignore_same_size: false,
-            big_files_search_mode: default_search_mode(),
-            big_files_count: default_big_files_count(),
-            same_music_title: true,
-            same_music_artist: true,
-            same_music_year: false,
-            same_music_length: false,
-            same_music_genre: false,
-            same_music_bitrate: false,
-            same_music_approximate: false,
-            same_music_check_method: default_same_music_check_method(),
-            broken_files_audio: true,
-            broken_files_pdf: true,
-            broken_files_archive: true,
-            broken_files_image: true,
-            bad_names_uppercase_extension: true,
-            bad_names_emoji_used: true,
-            bad_names_space_at_start_or_end: true,
-            bad_names_non_ascii_graphical: true,
-            bad_names_remove_duplicated_non_alpha: true,
-        }
+        serde_json::from_str("{}").expect("Cannot fail creating {} from string")
     }
 }
 
@@ -186,11 +157,13 @@ fn get_dirs_file() -> Option<PathBuf> {
 struct DirConfig {
     included: Vec<String>,
     excluded: Vec<String>,
+    #[serde(default)]
+    referenced: Vec<String>,
 }
 
-pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf]) {
+pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf], referenced: &[PathBuf]) {
     let Some(path) = get_dirs_file() else {
-        error!("Cannot determine dirs config path – dirs not saved");
+        error!("Cannot determine dirs config path - dirs not saved");
         return;
     };
     if let Some(parent) = path.parent()
@@ -202,6 +175,7 @@ pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf]) {
     let config = DirConfig {
         included: included.iter().map(|p| p.to_string_lossy().to_string()).collect(),
         excluded: excluded.iter().map(|p| p.to_string_lossy().to_string()).collect(),
+        referenced: referenced.iter().map(|p| p.to_string_lossy().to_string()).collect(),
     };
     match serde_json::to_string_pretty(&config) {
         Ok(json) => {
@@ -215,28 +189,29 @@ pub fn save_dirs(included: &[PathBuf], excluded: &[PathBuf]) {
     }
 }
 
-pub fn load_dirs() -> (Vec<PathBuf>, Vec<PathBuf>) {
+pub fn load_dirs() -> (Vec<PathBuf>, Vec<PathBuf>, Vec<PathBuf>) {
     let Some(path) = get_dirs_file() else {
-        return (vec![], vec![]);
+        return (Vec::new(), Vec::new(), Vec::new());
     };
     if !path.is_file() {
-        return (vec![], vec![]);
+        return (Vec::new(), Vec::new(), Vec::new());
     }
     match std::fs::read_to_string(&path) {
         Ok(json) => match serde_json::from_str::<DirConfig>(&json) {
             Ok(c) => {
                 let inc = c.included.iter().map(PathBuf::from).collect();
                 let exc = c.excluded.iter().map(PathBuf::from).collect();
-                (inc, exc)
+                let refr = c.referenced.iter().map(PathBuf::from).collect();
+                (inc, exc, refr)
             }
             Err(e) => {
                 error!("Cannot parse dirs config: {e}");
-                (vec![], vec![])
+                (Vec::new(), Vec::new(), Vec::new())
             }
         },
         Err(e) => {
             error!("Cannot read dirs config {}: {e}", path.display());
-            (vec![], vec![])
+            (Vec::new(), Vec::new(), Vec::new())
         }
     }
 }
@@ -248,12 +223,12 @@ fn get_config_file() -> Option<PathBuf> {
 
 pub fn load_settings() -> CediniaSettings {
     let Some(path) = get_config_file() else {
-        info!("Cannot determine config path – using defaults");
+        info!("Cannot determine config path - using defaults");
         return CediniaSettings::default();
     };
 
     if !path.is_file() {
-        info!("Settings file does not exist yet – using defaults");
+        info!("Settings file does not exist yet - using defaults");
         return CediniaSettings::default();
     }
 
@@ -264,12 +239,12 @@ pub fn load_settings() -> CediniaSettings {
                 s
             }
             Err(e) => {
-                error!("Cannot parse settings from {}: {e} – using defaults", path.display());
+                error!("Cannot parse settings from {}: {e} - using defaults", path.display());
                 CediniaSettings::default()
             }
         },
         Err(e) => {
-            error!("Cannot read settings file {}: {e} – using defaults", path.display());
+            error!("Cannot read settings file {}: {e} - using defaults", path.display());
             CediniaSettings::default()
         }
     }
@@ -277,7 +252,7 @@ pub fn load_settings() -> CediniaSettings {
 
 pub fn save_settings(settings: &CediniaSettings) {
     let Some(path) = get_config_file() else {
-        error!("Cannot determine config path – settings not saved");
+        error!("Cannot determine config path - settings not saved");
         return;
     };
 
@@ -309,13 +284,16 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
 
     win.global::<GeneralSettings>().set_use_cache(s.use_cache);
     win.global::<GeneralSettings>().set_ignore_hidden(s.ignore_hidden);
-    win.global::<GeneralSettings>().set_min_file_size_idx(s.min_file_size_idx);
-    win.global::<GeneralSettings>().set_max_file_size_idx(s.max_file_size_idx);
-    let lang_idx = match s.language.as_str() {
-        "pl" => 1,
-        "en" => 0,
-        _ => crate::localizer_cedinia::detect_os_language_idx(),
-    };
+    win.global::<GeneralSettings>().set_show_notification(s.show_notification);
+    win.global::<GeneralSettings>().set_notify_only_background(s.notify_only_background);
+    let min_idx = StringComboBoxItems::idx_from_config_name(&s.min_file_size, &items.min_file_size);
+    win.global::<GeneralSettings>().set_min_file_size_idx(min_idx as i32);
+    let max_idx = StringComboBoxItems::idx_from_config_name(&s.max_file_size, &items.max_file_size);
+    win.global::<GeneralSettings>().set_max_file_size_idx(max_idx as i32);
+    let lang_idx = crate::localizer_cedinia::LANGUAGE_LIST
+        .iter()
+        .position(|&c| c == s.language.as_str())
+        .unwrap_or_else(|| crate::localizer_cedinia::detect_os_language_idx() as usize) as i32;
     win.global::<GeneralSettings>().set_language_idx(lang_idx);
     win.global::<GeneralSettings>().set_excluded_items(s.excluded_items.clone().into());
     win.global::<GeneralSettings>().set_allowed_extensions(s.allowed_extensions.clone().into());
@@ -347,6 +325,7 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     win.global::<SimilarImagesSettings>().set_image_filter_value(s.similar_images_image_filter.clone().into());
 
     win.global::<SimilarImagesSettings>().set_ignore_same_size(s.similar_images_ignore_same_size);
+    win.global::<SimilarImagesSettings>().set_gallery_image_fit_cover(s.gallery_image_fit_cover);
 
     let sm_idx = StringComboBoxItems::idx_from_config_name(&s.big_files_search_mode, &items.biggest_files_method);
     win.global::<BigFilesSettings>().set_search_mode_idx(sm_idx as i32);
@@ -395,12 +374,13 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
     CediniaSettings {
         use_cache: g.get_use_cache(),
         ignore_hidden: g.get_ignore_hidden(),
-        min_file_size_idx: g.get_min_file_size_idx(),
-        max_file_size_idx: g.get_max_file_size_idx(),
-        language: match g.get_language_idx() {
-            1 => "pl".to_string(),
-            _ => "en".to_string(),
-        },
+        show_notification: g.get_show_notification(),
+        notify_only_background: g.get_notify_only_background(),
+        min_file_size: StringComboBoxItems::config_name_from_idx(&items.min_file_size, g.get_min_file_size_idx(), "none"),
+        max_file_size: StringComboBoxItems::config_name_from_idx(&items.max_file_size, g.get_max_file_size_idx(), "unlimited"),
+        language: crate::localizer_cedinia::LANGUAGE_LIST
+            .get(g.get_language_idx() as usize)
+            .map_or_else(|| "en".to_string(), |&s| s.to_string()),
         excluded_items: g.get_excluded_items().to_string(),
         allowed_extensions: g.get_allowed_extensions().to_string(),
         excluded_extensions: g.get_excluded_extensions().to_string(),
@@ -429,6 +409,7 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
             .get(si.get_image_filter_idx() as usize)
             .map_or_else(|| panic!("Invalid image_filter_idx {} in GUI", si.get_image_filter_idx()), |e| e.config_name.clone()),
         similar_images_ignore_same_size: si.get_ignore_same_size(),
+        gallery_image_fit_cover: si.get_gallery_image_fit_cover(),
         big_files_search_mode: items
             .biggest_files_method
             .get(bfiles.get_search_mode_idx() as usize)

@@ -10,11 +10,12 @@ use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::SimilarityPreset;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
+use crate::model::count_checked;
 use crate::scan_runner::{CommonFilters, ScanRequest};
 use crate::settings::gui_settings_values::StringComboBoxItems;
 use crate::{
     ActiveTool, AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, FileEntry, GeneralSettings, MainWindow, SameMusicSettings, ScanState,
-    SimilarGroupCard, SimilarImagesSettings,
+    SimilarGroupCard, SimilarImagesSettings, flc,
 };
 
 pub(crate) fn wire_scan(
@@ -22,11 +23,13 @@ pub(crate) fn wire_scan(
     stop_flag: Arc<AtomicBool>,
     scan_tx: Rc<Sender<ScanRequest>>,
     included_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
+    referenced_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
     scan_gen: Arc<AtomicU32>,
 ) {
     {
         let weak = window.as_weak();
         let inc = included_dirs;
+        let refr = referenced_dirs;
         let stop = stop_flag.clone();
         let tx = scan_tx.clone();
         let scan_gen2 = scan_gen;
@@ -34,12 +37,13 @@ pub(crate) fn wire_scan(
             let win = weak.upgrade().expect("MainWindow dropped in on_scan_requested");
             scan_gen2.fetch_add(1, Ordering::SeqCst);
             win.global::<AppState>().set_scan_state(ScanState::Scanning);
-            win.global::<AppState>().set_status_message(SharedString::from("Skanowanie…"));
+            win.global::<AppState>().set_status_message(SharedString::from(flc!("scanning_fallback")));
             stop.store(false, Ordering::Relaxed);
             let dirs = inc.borrow().clone();
+            let refs = refr.borrow().clone();
             let tool = win.global::<AppState>().get_active_tool();
             clear_tool_results(&win, tool);
-            let req = build_scan_request(&win, tool, dirs);
+            let req = build_scan_request(&win, tool, dirs, refs);
             let _ = tx.send(req);
         });
     }
@@ -56,16 +60,26 @@ pub(crate) fn wire_scan(
     }
     {
         let weak = window.as_weak();
-        window.global::<AppState>().on_tool_changed(move |_| {
+        window.global::<AppState>().on_tool_changed(move |tool| {
             let win = weak.upgrade().expect("MainWindow dropped in on_tool_changed");
-            win.global::<AppState>().set_selected_count(0);
-            win.global::<AppState>().set_status_message(SharedString::default());
+
+            match tool {
+                ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {
+                    win.global::<AppState>().set_selected_count(0);
+                }
+                _ => {
+                    let model = super::selection::get_model_for_tool(&win, tool);
+                    let count = count_checked(&model);
+                    win.global::<AppState>().set_selected_count(count);
+                    win.global::<AppState>().set_status_message(SharedString::default());
+                }
+            }
         });
     }
 }
 
 fn empty_entries() -> ModelRc<FileEntry> {
-    ModelRc::new(VecModel::from(vec![]))
+    ModelRc::new(VecModel::from(Vec::new()))
 }
 
 fn clear_tool_results(win: &MainWindow, tool: ActiveTool) {
@@ -74,7 +88,7 @@ fn clear_tool_results(win: &MainWindow, tool: ActiveTool) {
         ActiveTool::EmptyFolders => win.set_empty_folder_model(empty_entries()),
         ActiveTool::SimilarImages => {
             win.set_similar_images_model(empty_entries());
-            win.set_similar_images_groups(ModelRc::new(VecModel::<SimilarGroupCard>::from(vec![])));
+            win.set_similar_images_groups(ModelRc::new(VecModel::<SimilarGroupCard>::from(Vec::new())));
         }
         ActiveTool::EmptyFiles => win.set_empty_files_model(empty_entries()),
         ActiveTool::TemporaryFiles => win.set_temporary_files_model(empty_entries()),
@@ -89,7 +103,7 @@ fn clear_tool_results(win: &MainWindow, tool: ActiveTool) {
     win.global::<AppState>().set_selected_count(0);
 }
 
-fn build_common_filters(win: &MainWindow) -> CommonFilters {
+fn build_common_filters(win: &MainWindow, referenced_dirs: Vec<PathBuf>) -> CommonFilters {
     let g = win.global::<GeneralSettings>();
     let items = StringComboBoxItems::new();
     let min_file_size_bytes = items.min_file_size.get(g.get_min_file_size_idx() as usize).map_or(0, |e| e.value.to_bytes());
@@ -110,11 +124,12 @@ fn build_common_filters(win: &MainWindow) -> CommonFilters {
         excluded_extensions: split_csv(g.get_excluded_extensions()),
         min_file_size_bytes,
         max_file_size_bytes,
+        referenced_dirs,
     }
 }
 
-fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>) -> ScanRequest {
-    let filters = build_common_filters(win);
+fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, referenced_dirs: Vec<PathBuf>) -> ScanRequest {
+    let filters = build_common_filters(win, referenced_dirs);
     let items = StringComboBoxItems::new();
 
     let duplicate_request = || {

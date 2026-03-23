@@ -34,7 +34,8 @@ export component MainWindow inherits Window {
     in-out property <[FileEntry]>        same_music_model:         [];
     in-out property <[FileEntry]>        bad_names_model:          [];
     in-out property <[FileEntry]>        exif_remover_model:       [];
-    in-out property <[DirectoryEntry]>   directories_model:        [];
+    in-out property <[DirectoryEntry]>   included_dirs_model:      [];
+    in-out property <[DirectoryEntry]>   excluded_dirs_model:      [];
 
     VerticalLayout {
         spacing: 0px;
@@ -79,7 +80,8 @@ export component MainWindow inherits Window {
             if AppState.active_tool == ActiveTool.Directories : DirectoriesScreen {
                 height: parent.height;
                 width: parent.width;
-                directories: directories_model;
+                included_directories: included_dirs_model;
+                excluded_directories: excluded_dirs_model;
             }
 
             if AppState.active_tool == ActiveTool.DuplicateFiles : ResultsList {
@@ -178,6 +180,7 @@ export component MainWindow inherits Window {
                 tool_title: Translations.tool_bad_names_text;
                 tool_emoji: "✏";
                 can_rename: true;
+                can_delete: false;
                 extra_as_line2: true;
             }
 
@@ -199,6 +202,8 @@ export component MainWindow inherits Window {
     if AppState.scan_state == ScanState.Stopping : Rectangle {
         z: 150;
         background: #000000bb;
+        // Block all pointer events so nothing behind the overlay is clickable.
+        TouchArea {}
 
         Rectangle {
             width: min(parent.width - 48px, 300px);

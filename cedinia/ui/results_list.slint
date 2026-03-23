@@ -3,7 +3,7 @@ import { FileEntry, FileEntryIdx, ScanState } from "common.slint";
 import { AppState } from "app_state.slint";
 import { Translations } from "translations.slint";
 import { FileRow, StatusChip, TouchButton } from "components.slint";
-import { ListView } from "std-widgets.slint";
+import { MomentumScrollView } from "momentum_scroll.slint";
 
 export component ResultsList {
     in property <[FileEntry]> entries: [];
@@ -21,6 +21,12 @@ export component ResultsList {
     in property <bool>        extra_as_line2: false;
 
     property <int> menu_state: 0;
+
+    // Context menu (long-press)
+    property <bool>   ctx_open_visible: false;
+    property <string> ctx_open_file:    "";
+    property <string> ctx_open_folder:  "";
+    property <string> ctx_item_name:    "";
 
 
     VerticalLayout {
@@ -49,7 +55,7 @@ export component ResultsList {
                 }
 
                 if root.can_clean_exif && AppState.selected_count > 0 : TouchButton {
-                    label: "Clean";
+                    label: "🏷";
                     min_h: 36px;
                     bg: CediniaColors.accent_muted;
                     fg: CediniaColors.accent_light;
@@ -100,8 +106,14 @@ export component ResultsList {
         }
 
 
-        if entries.length > 0 : ListView {
+        if entries.length > 0 : scroll_view := MomentumScrollView {
             vertical-stretch: 1.0;
+            scroll_y <=> AppState.list_scroll_y;
+            swiped(d, v, m) => {
+                AppState.list_max_scroll_f = m;
+                AppState.list_swiped(d, v);
+            }
+            stop_momentum => { AppState.list_stop_momentum(); }
 
             for entry[idx] in entries : FileRow {
                 name:           entry.val_str[FileEntryIdx.name_idx];
@@ -110,11 +122,22 @@ export component ResultsList {
                 val_str:        entry.val_str;
                 checked:        entry.checked;
                 is_header:      entry.is_header;
+                is_reference:   entry.is_reference;
                 is_even:        mod(idx, 2) == 0;
                 extra_as_line2: root.extra_as_line2 && !entry.is_header;
+                // Cancel long-press when the scroll SGR claims the gesture.
+                scroll_swiping: scroll_view.is_swiping;
                 toggle_checked => { AppState.toggle_file_checked(idx); }
                 open_item   => { AppState.open_path(entry.val_str[FileEntryIdx.path_idx] == "" ? entry.val_str[FileEntryIdx.name_idx] : entry.val_str[FileEntryIdx.path_idx] + "/" + entry.val_str[FileEntryIdx.name_idx]); }
                 open_parent => { AppState.open_parent_folder(entry.val_str[FileEntryIdx.path_idx]); }
+                long_pressed => {
+                    root.ctx_item_name   = entry.val_str[FileEntryIdx.name_idx];
+                    root.ctx_open_file   = entry.val_str[FileEntryIdx.path_idx] == ""
+                        ? entry.val_str[FileEntryIdx.name_idx]
+                        : entry.val_str[FileEntryIdx.path_idx] + "/" + entry.val_str[FileEntryIdx.name_idx];
+                    root.ctx_open_folder = entry.val_str[FileEntryIdx.path_idx];
+                    root.ctx_open_visible = true;
+                }
             }
         }
 
@@ -191,6 +214,79 @@ export component ResultsList {
         }
     }
 
+
+
+    if root.ctx_open_visible : Rectangle {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 55;
+        background: #00000099;
+        TouchArea { clicked => { root.ctx_open_visible = false; } }
+
+        Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - ctx_open_vl.preferred-height - 24px) / 2;
+            width: min(parent.width - 48px, 300px);
+            height: ctx_open_vl.preferred-height + 24px;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #000000aa;
+            clip: true;
+
+            ctx_open_vl := VerticalLayout {
+                padding: 12px;
+                spacing: 6px;
+
+                // Item name — lets the user see exactly what will be opened.
+                Text {
+                    text: root.ctx_item_name != "" ? root.ctx_item_name : Translations.ctx_menu_title_text;
+                    color: CediniaColors.text_primary;
+                    font-size: 13px;
+                    font-weight: 700;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    wrap: word-wrap;
+                }
+
+                // Parent folder path — shown in a smaller, muted colour.
+                if root.ctx_open_folder != "" : Text {
+                    text: root.ctx_open_folder;
+                    color: CediniaColors.text_disabled;
+                    font-size: 10px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    wrap: word-wrap;
+                }
+
+                TouchButton {
+                    label: Translations.ctx_open_file_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.text_primary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.open_path(root.ctx_open_file); root.ctx_open_visible = false; }
+                }
+
+                TouchButton {
+                    label: Translations.ctx_open_folder_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.open_parent_folder(root.ctx_open_folder); root.ctx_open_visible = false; }
+                }
+
+                TouchButton {
+                    label: Translations.close_text;
+                    min_h: 40px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_disabled;
+                    horizontal-stretch: 1.0;
+                    clicked => { root.ctx_open_visible = false; }
+                }
+            }
+        }
+    }
 
 
     if root.menu_state == 1 : Rectangle {

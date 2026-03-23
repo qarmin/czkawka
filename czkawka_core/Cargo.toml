@@ -34,7 +34,7 @@ lofty = "0.23"
 
 # Needed by broken files
 zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
-lopdf = "0.39.0"
+lopdf = "0.40.0"
 
 # Needed by audio similarity feature
 rusty-chromaprint = "0.3"

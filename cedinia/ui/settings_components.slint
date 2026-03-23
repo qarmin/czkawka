@@ -5,14 +5,17 @@ export component ToggleRow {
     in property <string> label;
     in property <string> description: "";
     in-out property <bool> value;
+    in property <bool> enabled: true;
 
     height: root.description == "" ? 56px : 72px;
+    opacity: root.enabled ? 1.0 : 0.4;
 
     Rectangle {
-        background: ta.has-hover ? CediniaColors.bg_elevated : transparent;
+        background: ta.has-hover && root.enabled ? CediniaColors.bg_elevated : transparent;
         animate background { duration: 100ms; }
 
         ta := TouchArea {
+            enabled: root.enabled;
             clicked => {
                 root.value = !root.value;
                 AppState.save_settings_now();
@@ -73,8 +76,6 @@ export component SegmentRow {
     in property <[string]> options;
     in-out property <int>  selected;
 
-    height: root.description == "" ? 72px : 88px;
-
     VerticalLayout {
         padding-left: 16px;
         padding-right: 16px;
@@ -89,11 +90,13 @@ export component SegmentRow {
                 Text {
                     text: root.label;
                     color: CediniaColors.text_primary;
+                    wrap: TextWrap.word-wrap;
                     font-size: 14px;
                 }
                 if root.description != "" : Text {
                     text: root.description;
                     color: CediniaColors.text_secondary;
+                    wrap: TextWrap.word-wrap;
                     font-size: 11px;
                 }
             }
@@ -178,7 +181,6 @@ export component CategoryLabel inherits Rectangle {
 
 
 export component DropdownRow {
-//    in property <string>   label;
     in property <string>   description: "";
     in property <[string]> options;
     in-out property <int>  selected;
@@ -199,24 +201,6 @@ export component DropdownRow {
             padding-right: 16px;
             spacing: 12px;
             alignment: LayoutAlignment.center;
-
-            VerticalLayout {
-                alignment: LayoutAlignment.center;
-                horizontal-stretch: 1.0;
-                spacing: 2px;
-//                Text {
-//                    text: root.label;
-//                    color: CediniaColors.text_primary;
-//                    font-size: 15px;
-//                }
-//                if root.description != "" :
-                Text {
-                    text: root.description;
-                    color: CediniaColors.text_disabled;
-                    font-size: 11px;
-                    wrap: word-wrap;
-                }
-            }
 
             Text {
                 text: root.options[root.selected];
@@ -271,13 +255,6 @@ export component DropdownRow {
                             font-weight: i == root.selected ? 700 : 400;
                             vertical-alignment: TextVerticalAlignment.center;
                             horizontal-stretch: 1;
-                        }
-
-                        if i == root.selected : Text {
-                            text: "✓";
-                            color: CediniaColors.accent_light;
-                            font-size: 14px;
-                            vertical-alignment: TextVerticalAlignment.center;
                         }
                     }
                 }

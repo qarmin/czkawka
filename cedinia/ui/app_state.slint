@@ -1,8 +1,10 @@
 import { ActiveTool, CollectTestResult, ProgressData, ScanState, VolumeEntry } from "common.slint";
 
 export global GeneralSettings {
-    in-out property <bool>   use_cache:           true;
-    in-out property <bool>   ignore_hidden:        true;
+    in-out property <bool>   use_cache:                   true;
+    in-out property <bool>   ignore_hidden:               true;
+    in-out property <bool>   show_notification:           false;
+    in-out property <bool>   notify_only_background:      true;
 
     in-out property <int>    min_file_size_idx:    0;
     in-out property <[string]> min_file_size_options: ["Brak", "1 KB", "8 KB", "64 KB", "1 MB"];
@@ -35,7 +37,7 @@ export global DuplicateSettings {
 export global SimilarImagesSettings {
     in-out property <int>    similarity_preset:       2;
     in-out property <string> similarity_preset_value: "medium";
-    in-out property <[string]> similarity_preset_options: ["B.Wys.", "Wysoki", "Średni", "Niski", "B.Niski", "Min."];
+    in-out property <[string]> similarity_preset_options: ["V.High", "High", "Medium", "Low", "V.Low", "Min."];
 
     in-out property <int>    hash_size_idx:           1;
     in-out property <string> hash_size_value:         "16";
@@ -50,6 +52,7 @@ export global SimilarImagesSettings {
     in-out property <[string]> image_filter_options:  ["Nearest", "Triangle", "CatmullRom", "Gaussian", "Lanczos3"];
 
     in-out property <bool>   ignore_same_size:        false;
+    in-out property <bool>   gallery_image_fit_cover: true;
 }
 
 
@@ -63,7 +66,7 @@ export global SameMusicSettings {
     in-out property <bool>   approximate:        false;
     in-out property <int>    check_method_idx:   0;
     in-out property <string> check_method_value: "tags";
-    in-out property <[string]> check_method_options: ["Tagi", "Audio"];
+    in-out property <[string]> check_method_options: ["Tags", "Audio"];
 }
 
 
@@ -87,7 +90,7 @@ export global BadNamesSettings {
 export global BigFilesSettings {
     in-out property <int>    search_mode_idx:   0;
     in-out property <string> search_mode_value: "biggest";
-    in-out property <[string]> search_mode_options: ["Największe", "Najmniejsze"];
+    in-out property <[string]> search_mode_options: ["Biggest", "Smallest"];
 
     in-out property <int>    count_idx:         1;
     in-out property <string> count_value:       "50";
@@ -96,6 +99,7 @@ export global BigFilesSettings {
 
 
 export global AppState {
+    in-out property <bool>       is_desktop:      true;
     in-out property <ActiveTool> active_tool:    ActiveTool.Home;
 
     in-out property <ActiveTool> last_scan_tool: ActiveTool.DuplicateFiles;
@@ -139,10 +143,39 @@ export global AppState {
     callback remove_include_dir(string);
     callback add_exclude_dir(string);
     callback remove_exclude_dir(string);
+    callback toggle_referenced_dir(string);
 
     in-out property <[VolumeEntry]> storage_volumes: [];
     callback list_storage_volumes();
     callback save_settings_now();
+
+    // Custom Paths popup
+    in-out property <bool>   custom_paths_popup_visible: false;
+    callback pick_include_from(string);
+    callback pick_exclude_from(string);
+
+    // Path edit popup
+    in-out property <bool>   path_edit_popup_visible: false;
+    in-out property <string> path_edit_value: "";
+    in-out property <bool>   path_edit_is_include: true;
+    in-out property <bool>   path_edit_path_exists: false;
+    in-out property <bool>   path_edit_path_is_dir: false;
+    callback path_edit_check(string);
+    callback path_edit_confirm();
+
+    // Directory statistics check
+    in-out property <bool>   dirs_check_popup_visible: false;
+    in-out property <bool>   dirs_check_running: false;
+    in-out property <bool>   dirs_check_done: false;
+    in-out property <string> dirs_check_included_text: "-";
+    in-out property <string> dirs_check_excluded_text: "-";
+    in-out property <string> dirs_check_referenced_text: "-";
+    in-out property <string> dirs_check_would_scan_text: "-";
+    in-out property <string> dirs_check_processable_text: "-";
+    in-out property <string> dirs_check_progress_text: "";
+    in-out property <bool>   dirs_check_no_processable: false;
+    callback start_dirs_check();
+    callback stop_dirs_check();
 
     callback open_path(string);
     callback open_parent_folder(string);
@@ -153,22 +186,40 @@ export global AppState {
 
     callback run_collect_test();
     callback stop_collect_test();
-    in-out property <CollectTestResult> collect_test_result: { volumes: 0, files: 0, folders: 0, elapsed_ms: 0 };
-    in-out property <bool> collect_test_running: false;
-    in-out property <bool> collect_test_done: false;
+    in-out property <CollectTestResult> collect_test_result: { volumes: 0, files: 0, folders: 0, elapsed_time: "" };
+    in-out property <bool> collect_test_running:   false;
+    in-out property <bool> collect_test_done:      false;
+    in-out property <bool> collect_test_cancelled: false;
 
     in-out property <bool> similar_images_gallery_mode: true;
 
+    in-out property <length> gallery_scroll_y:     0px;
+    in-out property <float>  gallery_max_scroll_f: 0.0;
+    // total_delta: full swipe displacement (px)  vel: EMA velocity at release (px per touch-event)
+    callback gallery_swiped(float, float);
+    callback gallery_stop_momentum();
 
-    in-out property <string> diag_thumbnails_size: "–";
-    in-out property <string> diag_app_cache_size:  "–";
+    // Scroll state for the regular (list) result views.
+    in-out property <length> list_scroll_y:     0px;
+    in-out property <float>  list_max_scroll_f: 0.0;
+    callback list_swiped(float, float);
+    callback list_stop_momentum();
+
+
+    in-out property <string> diag_thumbnails_size: "-";
+    in-out property <string> diag_app_cache_size:  "-";
     in-out property <bool>   diag_refresh_running:  false;
     callback refresh_diag_cache_info();
     callback clear_thumbnails_cache();
-    callback apply_language_change();
+    callback open_thumbnails_folder();
     callback clear_app_cache();
+    callback open_app_cache_folder();
+    callback apply_language_change();
 
     callback open_url(string);
+
+    in-out property <bool> system_notifications_blocked: false;
+    callback open_notification_settings();
 
 
     in-out property <bool>   gallery_delete_popup_visible: false;
@@ -192,4 +243,9 @@ export global AppState {
     in-out property <string> confirm_popup_action:  "";
     callback confirm_popup_ok();
     callback confirm_popup_cancel();
+
+
+    in-out property <bool>   licenses_popup_visible: false;
+    in-out property <string> licenses_text: "";
+    callback show_third_party_licenses();
 }

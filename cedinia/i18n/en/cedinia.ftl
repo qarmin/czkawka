@@ -1,4 +1,4 @@
-# Cedinia – English (fallback)
+# Cedinia - English (fallback)
 
 # App / top bar titles
 app_name = Cedinia
@@ -69,25 +69,32 @@ delete_errors_title = Failed to delete some files:
 ok = OK
 
 # Stopping overlay
-stopping_overlay_title = ■ Stopping
-stopping_overlay_body = Finishing current scan…\nPlease wait.
+stopping_overlay_title = Stopping
+stopping_overlay_body = Finishing current scan...
+    Please wait.
 
 # Permission popup
-permission_title = 🔒 File Access
+permission_title = File Access
 permission_body = To scan files, the app needs access to device storage. Without this permission, scanning will not be possible.
 grant = Grant
-no_permission_scan_warning = No file access – grant permission to scan
+no_permission_scan_warning = No file access - grant permission to scan
 
 # Settings screen tabs
 settings_tab_general = General
 settings_tab_tools = Tools
 settings_tab_diagnostics = Info
 
-# Settings — General tab
+# Settings - General tab
 settings_use_cache = Use cache
 settings_use_cache_desc = Speeds up subsequent scans (hash/images)
 settings_ignore_hidden = Ignore hidden files
 settings_ignore_hidden_desc = Files and folders starting with '.'
+settings_show_notification = Notify when scan finishes
+settings_show_notification_desc = Show a system notification on scan completion
+settings_notify_only_background = Only when in background
+settings_notify_only_background_desc = Skip notification if the app is visible
+notifications_disabled_banner = Notifications disabled
+notifications_enable_button = Enable
 settings_scan_label = SCAN
 settings_filters_label = FILTERS (some tools)
 settings_min_file_size = Min. file size
@@ -102,21 +109,23 @@ settings_allowed_extensions_placeholder = e.g. jpg, png, mp4
 settings_excluded_extensions = EXCLUDED EXTENSIONS
 settings_excluded_extensions_placeholder = e.g. bak, tmp, log
 
-# Settings — Tools section labels
+# Settings - Tools section labels
 settings_duplicates_header = DUPLICATES
 settings_check_method_label = COMPARISON METHOD
 settings_check_method = Method
 settings_hash_type_label = HASH TYPE
 settings_hash_type = Hash type
-settings_hash_type_desc = Blake3 – fastest; CRC32/xxH3 – alternatives
+settings_hash_type_desc = Blake3 - is recommended option, CRC32 have small chance of false positives
 settings_similar_images_header = SIMILAR IMAGES
 settings_similarity_preset = Similarity threshold
 settings_similarity_desc = Very High = only near-identical
 settings_hash_size = Hash size
-settings_hash_size_desc = Larger = more accurate, slower
+settings_hash_size_desc = Larger sizes, have less false positives, but also finds less similar images
 settings_hash_alg = Hash algorithm
 settings_image_filter = Resize filter
 settings_ignore_same_size = Ignore images with the same dimensions
+settings_gallery_image_fit_cover = Gallery: crop to square
+settings_gallery_image_fit_cover_desc = Fill the tile; disable to keep original aspect ratio
 settings_big_files_header = BIGGEST FILES
 settings_search_mode = Search mode
 settings_file_count = File count
@@ -131,6 +140,7 @@ settings_music_genre = Genre
 settings_music_bitrate = Bitrate
 settings_music_approx = Approximate tag comparison
 settings_broken_files_header = BROKEN FILES
+settings_broken_files_note = Resource-intensive scan. For best performance use Krokiet on desktop.
 settings_broken_files_types_label = CHECKED TYPES
 settings_broken_audio = Audio
 settings_broken_pdf = PDF
@@ -144,34 +154,45 @@ settings_bad_names_space = Spaces at start/end
 settings_bad_names_non_ascii = Non-ASCII characters
 settings_bad_names_duplicated = Repeated characters
 
-# Settings — Diagnostics tab
+# Settings - Diagnostics tab
 diagnostics_header = DIAGNOSTICS
 diagnostics_thumbnails = Thumbnail cache
 diagnostics_app_cache = App cache
 diagnostics_refresh = Refresh
 diagnostics_clear_thumbnails = Clear thumbnails
+diagnostics_open_thumbnails_folder = Open folder
 diagnostics_clear_cache = Clear cache
-diagnostics_collect_test = Scan test
-diagnostics_collect_test_desc = Scans each volume recursively
+diagnostics_open_cache_folder = Open folder
+diagnostics_collect_test = File access test
+diagnostics_collect_test_desc = Check how many files are accessible
 diagnostics_collect_test_run = Run
 diagnostics_collect_test_stop = Stop
+collect_test_cancelled = Stopped by user
+diag_confirm_clear_thumbnails = Clear all thumbnail cache?
+diag_confirm_clear_cache = Clear all app cache?
 about_repo = Repository
 about_translate = Translations
 about_donate = Support
 
 # Collect-test result popup
-collect_test_title = 📊 Test results
-collect_test_volumes = 💾 Volumes:
-collect_test_folders = 📁 Folders:
-collect_test_files = 📄 Files:
-collect_test_time = ⏱ Time:
-collect_test_ms = " ms"
+collect_test_title = Test results
+collect_test_volumes = Volumes:
+collect_test_folders = Folders:
+collect_test_files = Files:
+collect_test_time = Time:
+
+# Licenses
+licenses_label = LICENSE
+third_party_licenses = Third-party licenses
+licenses_popup_title = Third-party Licenses
 
 # Directories screen
-directories_include_header = Directories to scan
-directories_exclude_header = Excluded directories
-directories_add = + Add
-no_paths = No paths – add below
+directories_include_header = Include
+directories_included = Included
+directories_exclude_header = Exclude
+directories_excluded_header = Excluded
+directories_add = Include
+no_paths = No paths - add below
 directories_volume_header = Volumes
 directories_volume_refresh = Refresh
 directories_volume_add = Add
@@ -199,19 +220,126 @@ renamed_errors_suffix = errors
 cleaned_exif_prefix = Cleaned EXIF from
 cleaned_exif_suffix = files
 cleaned_exif_errors_suffix = errors
-and_more_prefix = …and
+and_more_prefix = ...and
 and_more_suffix = more
 
 # Gallery / delete popups
 gallery_delete_button = Delete
 gallery_back = Back
 gallery_confirm_delete = Yes, delete
-deleting_files = Deleting files…
+deleting_files = Deleting files...
 stop = Stop
 files_suffix = files
-scanning_fallback = Scanning…
+scanning_fallback = Scanning...
 app_subtitle = In honour of the Battle of Cedynia (972 CE)
-app_license = Frontend for Czkawka Core  •  GPL-3.0
+app_license = Frontend for Czkawka Core - GPL-3.0
 about_app_label = ABOUT
 cache_label = CACHE
+
+# Notification
+scan_completed_notification = Scan completed - { $file_count } items found
+
+# Confirm popups (set from Rust)
+confirm_clean_exif = Are you sure you want to clean EXIF tags from { $n } selected files?
+confirm_delete_items = Are you sure you want to delete { $n } selected items?
+gallery_confirm_delete_msg = You are about to delete { $total_images } images in { $total_groups } groups.
+gallery_confirm_delete_warning = All items are selected in { $unsafe_groups } groups!
+
+# Settings - SameMusic fingerprint warning
+same_music_fingerprint_warning = Calculating and comparing audio fingerprints is very resource-intensive and may take a long time. It is recommended to use Krokiet on a desktop system for this task.
+
+# Scan stage labels (shown during scan progress)
+stage_collecting_files = Collecting files
+stage_scanning_name = Scanning by name
+stage_scanning_size_name = Scanning by name and size
+stage_scanning_size = Scanning by size
+stage_pre_hash = Pre-hashing
+stage_full_hash = Hashing
+stage_loading_cache = Loading cache
+stage_saving_cache = Saving cache
+stage_calculating_image_hashes = Calculating image hashes
+stage_comparing_images = Comparing images
+stage_calculating_video_hashes = Calculating video hashes
+stage_checking_files = Checking files
+stage_checking_extensions = Checking extensions
+stage_checking_names = Checking names
+stage_reading_music_tags = Reading music tags
+stage_comparing_tags = Comparing tags
+stage_calculating_music_fingerprints = Calculating music fingerprints
+stage_comparing_fingerprints = Comparing fingerprints
+stage_extracting_exif = Reading EXIF tags
+stage_creating_video_thumbnails = Creating video thumbnails
+stage_processing_videos = Processing videos
+stage_deleting = Deleting files
+stage_renaming = Renaming files
+stage_moving = Moving files
+stage_hardlinking = Creating hard links
+stage_symlinking = Creating symlinks
+stage_optimizing_videos = Optimizing videos
+stage_cleaning_exif = Cleaning EXIF
+
+# Group headers in scan results
+duplicates_group_header = { $count } files  x  { $per_file } / file  =  { $total } total
+similar_images_group_header = { $count } similar images
+same_music_group_header = { $count } similar tracks
+
+# Rename confirmation
+confirm_rename_items = Are you sure you want to rename { $n } selected files?
+
+# Combo-box option labels (translatable display names)
+option_search_mode_biggest = Biggest
+option_search_mode_smallest = Smallest
+option_similarity_very_high = V.High
+option_similarity_high = High
+option_similarity_medium = Medium
+option_similarity_low = Low
+option_similarity_very_low = V.Low
+option_similarity_minimal = Min.
+option_check_method_hash = Hash
+option_check_method_name = Name
+option_check_method_size_and_name = Size+Name
+option_check_method_size = Size
+option_music_method_tags = Tags
+option_music_method_audio = Audio
+option_min_size_none = None
+option_min_size_1kb = 1 KB
+option_min_size_8kb = 8 KB
+option_min_size_64kb = 64 KB
+option_min_size_1mb = 1 MB
+option_max_size_16kb = 16 KB
+option_max_size_1mb = 1 MB
+option_max_size_10mb = 10 MB
+option_max_size_100mb = 100 MB
+option_max_size_unlimited = Unlimited
+
+# Volume labels (shown in the directories screen)
+volume_internal_storage = Internal Storage
+volume_sd_card = Memory Card (SD Card)
+volume_storage = Storage Volume
+
+# Directories screen
+directories_referenced_tooltip = Referenced (not deleted)
+directories_include_section_header = INCLUDED
+directories_exclude_section_header = EXCLUDED
+directories_custom_paths = Custom Paths
+directories_check_button = Analyze
+directories_check_popup_title = Directory Statistics
+directories_check_label_included = Included paths:
+directories_check_label_excluded = Excluded paths:
+directories_check_label_referenced = Reference paths:
+directories_check_label_would_scan = Files to scan:
+directories_check_label_processable = Processable files:
+directories_check_scanning = Scanning...
+directories_check_warning_no_processable = No processable files found - verify your included/excluded folders
+path_edit_title_include = Add to Include
+path_edit_title_exclude = Add to Exclude
+path_edit_placeholder = Enter path...
+path_edit_not_exists = Path does not exist
+path_edit_is_dir = Directory
+path_edit_is_file = File
+path_edit_no_newlines = Paths cannot contain newlines — Enter key is not allowed
+
+ctx_menu_title = Open
+ctx_open_file = Open item
+ctx_open_folder = Open parent folder
 

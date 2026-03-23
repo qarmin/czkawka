@@ -68,14 +68,14 @@ export global Translations {
     in-out property <string> ok_text:                         "OK";
 
     // Stopping overlay
-    in-out property <string> stopping_overlay_title_text:     "■ Stopping";
+    in-out property <string> stopping_overlay_title_text:     "Stopping";
     in-out property <string> stopping_overlay_body_text:      "Finishing current scan…\nPlease wait.";
 
     // Permission popup
-    in-out property <string> permission_title_text:           "🔒 File Access";
+    in-out property <string> permission_title_text:           "File Access";
     in-out property <string> permission_body_text:            "To scan files, the app needs access to device storage. Without this permission, scanning will not be possible.";
     in-out property <string> grant_text:                      "Grant";
-    in-out property <string> no_permission_scan_warning_text: "No file permission – grant access to scan";
+    in-out property <string> no_permission_scan_warning_text: "No file permission - grant access to scan";
 
     // Settings screen
     in-out property <string> settings_tab_general_text:       "General";
@@ -86,6 +86,12 @@ export global Translations {
     in-out property <string> settings_use_cache_desc_text:    "Speeds up subsequent scans (hash/images)";
     in-out property <string> settings_ignore_hidden_text:     "Ignore hidden files";
     in-out property <string> settings_ignore_hidden_desc_text: "Files and folders starting with '.'";
+    in-out property <string> settings_show_notification_text:          "Notify when scan finishes";
+    in-out property <string> settings_show_notification_desc_text:     "Show a system notification on scan completion";
+    in-out property <string> settings_notify_only_background_text:     "Only when in background";
+    in-out property <string> settings_notify_only_background_desc_text: "Skip notification if the app is visible";
+    in-out property <string> notifications_disabled_banner_text:       "Notifications disabled";
+    in-out property <string> notifications_enable_button_text:         "Enable";
     in-out property <string> settings_scan_label_text:        "SCANNING";
     in-out property <string> settings_filters_label_text:     "FILTERS (all tools)";
     in-out property <string> settings_min_file_size_text:     "Min. file size";
@@ -108,6 +114,8 @@ export global Translations {
     in-out property <string> settings_hash_alg_text:          "Hash algorithm";
     in-out property <string> settings_image_filter_text:      "Resize filter";
     in-out property <string> settings_ignore_same_size_text:  "Ignore images with the same dimensions";
+    in-out property <string> settings_gallery_image_fit_cover_text: "Gallery: crop to square";
+    in-out property <string> settings_gallery_image_fit_cover_desc_text: "Fill the tile; disable to keep original aspect ratio";
     in-out property <string> settings_big_files_header_text:  "BIGGEST FILES";
     in-out property <string> settings_search_mode_text:       "Search mode";
     in-out property <string> settings_file_count_text:        "File count";
@@ -122,6 +130,7 @@ export global Translations {
     in-out property <string> settings_music_bitrate_text:     "Bitrate";
     in-out property <string> settings_music_approx_text:      "Approximate tag comparison";
     in-out property <string> settings_broken_files_header_text: "BROKEN FILES";
+    in-out property <string> settings_broken_files_note_text: "⚠ Resource-intensive scan. For best performance use Krokiet on desktop.";
     in-out property <string> settings_broken_files_types_label_text: "CHECKED TYPES";
     in-out property <string> settings_broken_audio_text:      "Audio";
     in-out property <string> settings_broken_pdf_text:        "PDF";
@@ -142,7 +151,7 @@ export global Translations {
     in-out property <string> settings_common_label_text:      "COMMON SETTINGS";
 
     // Settings — Tools descriptions
-    in-out property <string> settings_hash_type_desc_text:    "Blake3 – fastest; CRC32/xxH3 – alternatives";
+    in-out property <string> settings_hash_type_desc_text:    "Blake3 - fastest; CRC32/xxH3 - alternatives";
     in-out property <string> settings_similarity_desc_text:   "Very High = only near-identical";
     in-out property <string> settings_hash_size_desc_text:    "Larger = more accurate, slower";
 
@@ -152,11 +161,16 @@ export global Translations {
     in-out property <string> diagnostics_app_cache_text:      "App cache";
     in-out property <string> diagnostics_refresh_text:        "Refresh";
     in-out property <string> diagnostics_clear_thumbnails_text: "Clear thumbnails";
+    in-out property <string> diagnostics_open_thumbnails_folder_text: "Open folder";
     in-out property <string> diagnostics_clear_cache_text:    "Clear cache";
-    in-out property <string> diagnostics_collect_test_text:   "Scan test";
-    in-out property <string> diagnostics_collect_test_desc_text: "Scans each volume recursively";
+    in-out property <string> diagnostics_open_cache_folder_text: "Open folder";
+    in-out property <string> diagnostics_collect_test_text:   "File access test";
+    in-out property <string> diagnostics_collect_test_desc_text: "Check how many files are accessible";
     in-out property <string> diagnostics_collect_test_run_text: "Run";
     in-out property <string> diagnostics_collect_test_stop_text: "Stop";
+    in-out property <string> collect_test_cancelled_text:        "Stopped by user";
+    in-out property <string> diag_confirm_clear_thumbnails_text: "Clear all thumbnail cache?";
+    in-out property <string> diag_confirm_clear_cache_text:      "Clear all app cache?";
 
     // About section links
     in-out property <string> about_repo_text:                 "Repository";
@@ -164,21 +178,47 @@ export global Translations {
     in-out property <string> about_translate_text:            "Translations";
 
     // Diagnostics collect-test popup
-    in-out property <string> collect_test_title_text:         "📊 Test results";
-    in-out property <string> collect_test_volumes_text:       "💾 Volumes:";
-    in-out property <string> collect_test_folders_text:       "📁 Folders:";
-    in-out property <string> collect_test_files_text:         "📄 Files:";
-    in-out property <string> collect_test_time_text:          "⏱ Time:";
-    in-out property <string> collect_test_ms_text:            " ms";
+    in-out property <string> collect_test_title_text:         "Test results";
+    in-out property <string> collect_test_volumes_text:       "Volumes:";
+    in-out property <string> collect_test_folders_text:       "Folders:";
+    in-out property <string> collect_test_files_text:         "Files:";
+    in-out property <string> collect_test_time_text:          "Time:";
 
     // Directories screen
-    in-out property <string> directories_include_header_text: "Directories to scan";
-    in-out property <string> directories_exclude_header_text: "Excluded directories";
-    in-out property <string> directories_add_text:            "+ Add";
+    in-out property <string> directories_include_header_text: "Include";
+    in-out property <string> directories_included_text:       "Included";
+    in-out property <string> directories_exclude_header_text: "Exclude";
+    in-out property <string> directories_excluded_header_text: "Excluded";
+    in-out property <string> directories_add_text:            "Add";
     in-out property <string> directories_volume_header_text:  "Volumes";
     in-out property <string> directories_volume_refresh_text: "Refresh";
     in-out property <string> directories_volume_add_text:     "Add";
-    in-out property <string> no_paths_text:                   "No paths – add below";
+    in-out property <string> no_paths_text:                   "No paths - add below";
+    in-out property <string> directories_referenced_tooltip_text: "Referenced (not deleted)";
+    in-out property <string> directories_include_section_header_text: "INCLUDED";
+    in-out property <string> directories_exclude_section_header_text: "EXCLUDED";
+    in-out property <string> directories_custom_paths_text: "Custom Paths";
+    in-out property <string> directories_check_button_text: "Analyze";
+    in-out property <string> directories_check_popup_title_text: "Directory Statistics";
+    in-out property <string> directories_check_label_included_text: "Included paths:";
+    in-out property <string> directories_check_label_excluded_text: "Excluded paths:";
+    in-out property <string> directories_check_label_referenced_text: "Reference paths:";
+    in-out property <string> directories_check_label_would_scan_text: "Files to scan:";
+    in-out property <string> directories_check_label_processable_text: "Processable files:";
+    in-out property <string> directories_check_scanning_text: "Scanning...";
+    in-out property <string> directories_check_warning_no_processable_text: "No processable files found - verify your included/excluded folders";
+    in-out property <string> path_edit_title_include_text: "Add to Include";
+    in-out property <string> path_edit_title_exclude_text: "Add to Exclude";
+    in-out property <string> path_edit_placeholder_text: "Enter path...";
+    in-out property <string> path_edit_not_exists_text: "Path does not exist";
+    in-out property <string> path_edit_is_dir_text: "Directory";
+    in-out property <string> path_edit_is_file_text: "File";
+    in-out property <string> path_edit_no_newlines_text: "Paths cannot contain newlines — Enter key is not allowed";
+
+    // Context menu (long-press on a result row or gallery tile)
+    in-out property <string> ctx_menu_title_text:             "Open";
+    in-out property <string> ctx_open_file_text:              "Open item";
+    in-out property <string> ctx_open_folder_text:            "Open parent folder";
 
     // Gallery / delete popups
     in-out property <string> gallery_delete_button_text:      "Delete";
@@ -193,7 +233,7 @@ export global Translations {
     in-out property <string> about_app_label_text:            "ABOUT";
     in-out property <string> cache_label_text:                "CACHE";
     in-out property <string> app_subtitle_text:               "In honour of the Battle of Cedynia (972 CE)";
-    in-out property <string> app_license_text:                "Frontend for Czkawka Core  •  GPL-3.0";
+    in-out property <string> app_license_text:                "Frontend for Czkawka Core";
 
     // Bottom nav
     in-out property <string> nav_home_text:       "Home";
@@ -220,6 +260,14 @@ export global Translations {
     in-out property <string> cleaned_exif_errors_suffix_text:  "errors";
 
     // Delete errors popup (more items)
-    in-out property <string> and_more_prefix_text:             "…and";
+    in-out property <string> and_more_prefix_text:             "...and";
     in-out property <string> and_more_suffix_text:             "more";
+
+    // Settings — SameMusic fingerprint warning
+    in-out property <string> same_music_fingerprint_warning_text: "Calculating and comparing audio fingerprints is very resource-intensive and may take a long time. It is recommended to use Krokiet on a desktop system for this task.";
+
+    // Licenses section
+    in-out property <string> licenses_label_text:           "LICENSE";
+    in-out property <string> third_party_licenses_text:     "Third-party licenses";
+    in-out property <string> licenses_popup_title_text:     "Third-party Licenses";
 }

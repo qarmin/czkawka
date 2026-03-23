@@ -1,4 +1,4 @@
-# Cedinia – Polski (Polish)
+# Cedinia - Polski (Polish)
 
 # App / top bar titles
 app_name = Cedinia
@@ -69,14 +69,15 @@ delete_errors_title = Nie udalo sie usunac niektorych plikow:
 ok = OK
 
 # Stopping overlay
-stopping_overlay_title = ■ Zatrzymywanie
-stopping_overlay_body = Kończenie bieżącego skanu…\nProszę czekać.
+stopping_overlay_title = Zatrzymywanie
+stopping_overlay_body = Kończenie bieżącego skanu…
+    Proszę czekać.
 
 # Permission popup
-permission_title = 🔒 Dostęp do plików
+permission_title = Dostęp do plików
 permission_body = Aby skanować pliki, aplikacja potrzebuje dostępu do pamięci urządzenia. Bez tego uprawnienia skanowanie nie będzie możliwe.
 grant = Przyznaj
-no_permission_scan_warning = Brak uprawnień do plików – przyznaj dostęp aby skanować
+no_permission_scan_warning = Brak uprawnień do plików - przyznaj dostęp aby skanować
 
 # Settings screen tabs
 settings_tab_general = Ogólne
@@ -88,11 +89,19 @@ settings_use_cache = Użyj pamięci podręcznej
 settings_use_cache_desc = Przyspiesza kolejne skany (hash/obrazy)
 settings_ignore_hidden = Ignoruj ukryte pliki
 settings_ignore_hidden_desc = Pliki i foldery zaczynające się od '.'
+settings_show_notification = Powiadom po zakończeniu skanu
+settings_show_notification_desc = Pokaż systemowe powiadomienie po zakończeniu skanu
+settings_notify_only_background = Tylko gdy w tle
+settings_notify_only_background_desc = Pomiń powiadomienie jeśli aplikacja jest widoczna
+notifications_disabled_banner = Powiadomienia wyłączone
+notifications_enable_button = Włącz
 settings_scan_label = SKANOWANIE
 settings_filters_label = FILTRY (niektóre narzędzia)
 settings_min_file_size = Min. rozmiar pliku
 settings_max_file_size = Maks. rozmiar pliku
 settings_language = Język
+settings_language_restart = Wymaga restartu aplikacji
+settings_common_label = USTAWIENIA OGÓLNE
 settings_excluded_items = WYKLUCZONE ELEMENTY (wzorce glob, oddzielone przecinkiem)
 settings_excluded_items_placeholder = np. *.tmp, */.git/*, */node_modules/*
 settings_allowed_extensions = DOZWOLONE ROZSZERZENIA (puste = wszystkie)
@@ -106,12 +115,17 @@ settings_check_method_label = METODA PORÓWNANIA
 settings_check_method = Metoda
 settings_hash_type_label = TYP HASHA
 settings_hash_type = Typ hasha
+settings_hash_type_desc = Blake3 - najszybszy; CRC32/xxH3 - alternatywy
 settings_similar_images_header = PODOBNE OBRAZY
 settings_similarity_preset = Próg podobieństwa
+settings_similarity_desc = Bardzo wysoka = tylko prawie identyczne
 settings_hash_size = Rozmiar hasha
+settings_hash_size_desc = Większy = dokładniejszy, wolniejszy
 settings_hash_alg = Algorytm hasha
 settings_image_filter = Filtr zmiany rozmiaru
 settings_ignore_same_size = Ignoruj obrazy o tych samych wymiarach
+settings_gallery_image_fit_cover = Galeria: kadruj do kwadratu
+settings_gallery_image_fit_cover_desc = Wypełnia kafelek; wyłącz, by zachować proporcje obrazu
 settings_big_files_header = NAJWIĘKSZE PLIKI
 settings_search_mode = Tryb wyszukiwania
 settings_file_count = Liczba plików
@@ -126,6 +140,7 @@ settings_music_genre = Gatunek
 settings_music_bitrate = Przepływność
 settings_music_approx = Przybliżone porównywanie tagów
 settings_broken_files_header = USZKODZONE PLIKI
+settings_broken_files_note = ⚠ Zasobożerna operacja. Dla lepszej wydajności użyj aplikacji Krokiet na komputerze.
 settings_broken_files_types_label = SPRAWDZANE TYPY
 settings_broken_audio = Dźwięk
 settings_broken_pdf = PDF
@@ -145,26 +160,38 @@ diagnostics_thumbnails = Pamięć miniatur
 diagnostics_app_cache = Pamięć aplikacji
 diagnostics_refresh = Odśwież
 diagnostics_clear_thumbnails = Wyczyść miniatury
+diagnostics_open_thumbnails_folder = Otwórz folder
 diagnostics_clear_cache = Wyczyść cache
+diagnostics_open_cache_folder = Otwórz folder
 diagnostics_collect_test = Test skanowania
+diagnostics_collect_test_desc = Skanuje każdy wolumin rekurencyjnie
 diagnostics_collect_test_run = Uruchom
 diagnostics_collect_test_stop = Stop
+collect_test_cancelled = Zatrzymano przez użytkownika
+diag_confirm_clear_thumbnails = Wyczyścić cache miniatur?
+diag_confirm_clear_cache = Wyczyścić cache aplikacji?
 about_repo = Repozytorium
 about_translate = Tłumaczenia
 about_donate = Wesprzyj
 
 # Collect-test result popup
-collect_test_title = 📊 Wyniki testu
-collect_test_volumes = 💾 Woluminy:
-collect_test_folders = 📁 Foldery:
-collect_test_files = 📄 Pliki:
-collect_test_time = ⏱ Czas:
-collect_test_ms = " ms"
+collect_test_title = Wyniki testu
+collect_test_volumes = Woluminy:
+collect_test_folders = Foldery:
+collect_test_files = Pliki:
+collect_test_time = Czas:
+
+# Licenses
+licenses_label = LICENCJA
+third_party_licenses = Licencje zewnętrzne
+licenses_popup_title = Licencje zewnętrzne
 
 # Directories screen
 directories_include_header = Katalogi do skanowania
+directories_included = Dodano
 directories_exclude_header = Katalogi wykluczone
 directories_add = + Dodaj
+no_paths = Brak ścieżek - dodaj poniżej
 directories_volume_header = Woluminy
 directories_volume_refresh = Odśwież
 directories_volume_add = Dodaj
@@ -194,4 +221,124 @@ cleaned_exif_suffix = plików
 cleaned_exif_errors_suffix = błędów
 and_more_prefix = …i
 and_more_suffix = więcej
+
+# Gallery / delete popups
+gallery_delete_button = Usuń
+gallery_back = Wstecz
+gallery_confirm_delete = Tak, usuń
+deleting_files = Usuwanie plików…
+stop = Stop
+files_suffix = plików
+scanning_fallback = Skanowanie…
+app_subtitle = Ku czci Bitwy pod Cedynią (972 r.)
+app_license = Frontend dla Czkawka Core  •  GPL-3.0
+about_app_label = O APLIKACJI
+cache_label = PAMIĘĆ PODRĘCZNA
+
+# Notification
+scan_completed_notification = Skan zakończony - znaleziono { $file_count } elementów
+
+# Confirm popups (set from Rust)
+confirm_clean_exif = Czy na pewno chcesz wyczyścić tagi EXIF z { $n } zaznaczonych plików?
+confirm_delete_items = Czy na pewno chcesz usunąć { $n } zaznaczonych elementów?
+gallery_confirm_delete_msg = Zamierzasz usunąć { $total_images } obrazów w { $total_groups } grupach.
+gallery_confirm_delete_warning = W { $unsafe_groups } grupach zaznaczono wszystkie elementy!
+
+# Settings — SameMusic fingerprint warning
+same_music_fingerprint_warning = Porównanie na podstawie zawartości (odciski muzyczne) jest bardzo zasobochłonne i może trwać długo.
+
+# Scan stage labels (shown during scan progress)
+stage_collecting_files = Zbieranie plików
+stage_scanning_name = Skanowanie po nazwie
+stage_scanning_size_name = Skanowanie po nazwie i rozmiarze
+stage_scanning_size = Skanowanie po rozmiarze
+stage_pre_hash = Pre-hash
+stage_full_hash = Haszowanie
+stage_loading_cache = Ładowanie cache
+stage_saving_cache = Zapisywanie cache
+stage_calculating_image_hashes = Obliczanie hashy obrazów
+stage_comparing_images = Porównywanie obrazów
+stage_calculating_video_hashes = Obliczanie hashy wideo
+stage_checking_files = Sprawdzanie plików
+stage_checking_extensions = Sprawdzanie rozszerzeń
+stage_checking_names = Sprawdzanie nazw
+stage_reading_music_tags = Odczyt tagów muzycznych
+stage_comparing_tags = Porównywanie tagów
+stage_calculating_music_fingerprints = Obliczanie odcisków muzycznych
+stage_comparing_fingerprints = Porównywanie odcisków muzycznych
+stage_extracting_exif = Odczyt tagów EXIF
+stage_creating_video_thumbnails = Tworzenie miniatur wideo
+stage_processing_videos = Przetwarzanie wideo
+stage_deleting = Usuwanie plików
+stage_renaming = Zmiana nazw plików
+stage_moving = Przenoszenie plików
+stage_hardlinking = Tworzenie hardlinków
+stage_symlinking = Tworzenie dowiązań
+stage_optimizing_videos = Optymalizacja wideo
+stage_cleaning_exif = Czyszczenie EXIF
+
+# Group headers in scan results
+duplicates_group_header = { $count } pliki  x  { $per_file } / plik  =  { $total } łącznie
+similar_images_group_header = { $count } podobnych obrazów
+same_music_group_header = { $count } podobnych utworów
+
+# Rename confirmation
+confirm_rename_items = Czy na pewno chcesz zmienić nazwy { $n } zaznaczonych plików?
+
+# Combo-box option labels (translatable display names)
+option_search_mode_biggest = Największe
+option_search_mode_smallest = Najmniejsze
+option_similarity_very_high = B.Wys.
+option_similarity_high = Wysoki
+option_similarity_medium = Średni
+option_similarity_low = Niski
+option_similarity_very_low = B.Niski
+option_similarity_minimal = Min.
+option_check_method_hash = Hash
+option_check_method_name = Nazwa
+option_check_method_size_and_name = Rozm+Naz
+option_check_method_size = Rozmiar
+option_music_method_tags = Tagi
+option_music_method_audio = Audio
+option_min_size_none = Brak
+option_min_size_1kb = 1 KB
+option_min_size_8kb = 8 KB
+option_min_size_64kb = 64 KB
+option_min_size_1mb = 1 MB
+option_max_size_16kb = 16 KB
+option_max_size_1mb = 1 MB
+option_max_size_10mb = 10 MB
+option_max_size_100mb = 100 MB
+option_max_size_unlimited = Bez limitu
+
+# Volume labels (shown in the directories screen)
+volume_internal_storage = 💾 Pamięć wbudowana
+volume_sd_card = 💳 Karta pamięci (SD card)
+volume_storage = 📦 Wolumin pamięci
+
+# Directories screen
+directories_referenced_tooltip = Referencyjny (nie kasowany)
+directories_include_section_header = ZAWIERANE
+directories_exclude_section_header = WYKLUCZONE
+directories_custom_paths = Sciezki wlasne
+directories_check_button = Analizuj
+directories_check_popup_title = Statystyki katalogow
+directories_check_label_included = Sciezki dolaczone:
+directories_check_label_excluded = Sciezki wykluczone:
+directories_check_label_referenced = Sciezki referencyjne:
+directories_check_label_would_scan = Pliki do skanowania:
+directories_check_label_processable = Pliki do przetworzenia:
+directories_check_scanning = Skanowanie...
+directories_check_warning_no_processable = Brak plikow do przetworzenia - zweryfikuj katalogi dolaczone/wykluczone
+path_edit_title_include = Dodaj do dolaczonych
+path_edit_title_exclude = Dodaj do wykluczonych
+path_edit_placeholder = Wpisz sciezke...
+path_edit_not_exists = Sciezka nie istnieje
+path_edit_is_dir = Katalog
+path_edit_is_file = Plik
+path_edit_no_newlines = Ścieżki nie mogą zawierać znaku nowej linii — klawisz Enter jest niedozwolony
+
+ctx_menu_title = Otwórz
+ctx_open_file = Otwórz plik
+ctx_open_folder = Otwórz folder
 

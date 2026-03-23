@@ -13,7 +13,7 @@ jobs:
   krokiet-compiled-on-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install dependencies
         run: |
@@ -57,7 +57,7 @@ jobs:
             windows_krokiet_on_linux.exe
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: krokiet-windows-on-linux-${{ github.sha }}
           path: |
@@ -78,7 +78,7 @@ jobs:
   krokiet-compiled-on-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup rust version
         run: |
@@ -119,7 +119,7 @@ jobs:
           Get-ChildItem windows_krokiet_on_windows_*.exe | ForEach-Object { ./rcedit-x64.exe $_.Name --set-icon krokiet/icons/krokiet_logo_flag.ico }
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: krokiet-windows-on-windows-${{ github.sha }}
           path: |
@@ -146,7 +146,7 @@ jobs:
     container:
       image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.12
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install additional dependencies
         # gio is for the build script
         run: |
@@ -164,7 +164,7 @@ jobs:
         run: |
           source "$HOME/.cargo/env"
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
-          cargo build --target=x86_64-pc-windows-gnu --release --locked
+          cargo build --target=x86_64-pc-windows-gnu --release --locked -p czkawka_gui -p czkawka_cli
           cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
           
@@ -176,7 +176,7 @@ jobs:
         run: |
           source "$HOME/.cargo/env"
           export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
-          cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci
+          cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci -p czkawka_gui -p czkawka_cli
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package/
           cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package/
           
@@ -212,7 +212,7 @@ jobs:
           mv libGLESv2.dll package/
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: czkawka-windows-${{ github.sha }}-4.12
           path: |
@@ -239,7 +239,7 @@ jobs:
   windows-tests:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup rust version
         run: |

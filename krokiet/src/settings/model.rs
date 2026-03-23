@@ -277,6 +277,8 @@ pub struct BasicSettings {
     pub use_manual_application_scale: bool,
     #[serde(default = "ttrue")]
     pub play_audio_on_scan_completion: bool,
+    #[serde(default)]
+    pub show_notification_on_scan_completion: bool,
 }
 
 impl Default for BasicSettings {

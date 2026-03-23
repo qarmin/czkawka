@@ -11,9 +11,9 @@ On Linux, it is even possible (with eyra) to avoid libc entirely and use a fully
 If you want to use the similar videos tool, you need to install ffmpeg (runtime dependency).  
 If you want to use heif/libraw/libavif (build/runtime dependency), you need to install the required packages.
 
-- macOS: `brew install ffmpeg libraw libheif libavif dav1d` – [ffmpeg formula](https://formulae.brew.sh/formula/ffmpeg)
+- macOS: `brew install ffmpeg libraw libheif libavif dav1d` - [ffmpeg formula](https://formulae.brew.sh/formula/ffmpeg)
 - Linux: `sudo apt install ffmpeg libraw-dev libheif-dev libavif-dev libdav1d-dev`
-- Windows: `choco install ffmpeg` – or, if not working, download from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) and
+- Windows: `choco install ffmpeg` - or, if not working, download from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) and
   unpack to the location with `czkawka_cli.exe`. Heif and libraw are not supported on Windows.
 
 ## Compilation

@@ -1,6 +1,7 @@
-use slint::ComponentHandle;
+use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
-use crate::{MainWindow, Translations, flc};
+use crate::settings::gui_settings_values::StringComboBoxItems;
+use crate::{BigFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings, Translations, flc};
 
 pub(crate) fn translate_items(app: &MainWindow) {
     let t = app.global::<Translations>();
@@ -82,6 +83,12 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_use_cache_desc_text(flc!("settings_use_cache_desc").into());
     t.set_settings_ignore_hidden_text(flc!("settings_ignore_hidden").into());
     t.set_settings_ignore_hidden_desc_text(flc!("settings_ignore_hidden_desc").into());
+    t.set_settings_show_notification_text(flc!("settings_show_notification").into());
+    t.set_settings_show_notification_desc_text(flc!("settings_show_notification_desc").into());
+    t.set_settings_notify_only_background_text(flc!("settings_notify_only_background").into());
+    t.set_settings_notify_only_background_desc_text(flc!("settings_notify_only_background_desc").into());
+    t.set_notifications_disabled_banner_text(flc!("notifications_disabled_banner").into());
+    t.set_notifications_enable_button_text(flc!("notifications_enable_button").into());
     t.set_settings_scan_label_text(flc!("settings_scan_label").into());
     t.set_settings_filters_label_text(flc!("settings_filters_label").into());
     t.set_settings_min_file_size_text(flc!("settings_min_file_size").into());
@@ -110,6 +117,8 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_hash_alg_text(flc!("settings_hash_alg").into());
     t.set_settings_image_filter_text(flc!("settings_image_filter").into());
     t.set_settings_ignore_same_size_text(flc!("settings_ignore_same_size").into());
+    t.set_settings_gallery_image_fit_cover_text(flc!("settings_gallery_image_fit_cover").into());
+    t.set_settings_gallery_image_fit_cover_desc_text(flc!("settings_gallery_image_fit_cover_desc").into());
     t.set_settings_big_files_header_text(flc!("settings_big_files_header").into());
     t.set_settings_search_mode_text(flc!("settings_search_mode").into());
     t.set_settings_file_count_text(flc!("settings_file_count").into());
@@ -124,6 +133,7 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_music_bitrate_text(flc!("settings_music_bitrate").into());
     t.set_settings_music_approx_text(flc!("settings_music_approx").into());
     t.set_settings_broken_files_header_text(flc!("settings_broken_files_header").into());
+    t.set_settings_broken_files_note_text(flc!("settings_broken_files_note").into());
     t.set_settings_broken_files_types_label_text(flc!("settings_broken_files_types_label").into());
     t.set_settings_broken_audio_text(flc!("settings_broken_audio").into());
     t.set_settings_broken_pdf_text(flc!("settings_broken_pdf").into());
@@ -142,21 +152,27 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_diagnostics_app_cache_text(flc!("diagnostics_app_cache").into());
     t.set_diagnostics_refresh_text(flc!("diagnostics_refresh").into());
     t.set_diagnostics_clear_thumbnails_text(flc!("diagnostics_clear_thumbnails").into());
+    t.set_diagnostics_open_thumbnails_folder_text(flc!("diagnostics_open_thumbnails_folder").into());
     t.set_diagnostics_clear_cache_text(flc!("diagnostics_clear_cache").into());
+    t.set_diagnostics_open_cache_folder_text(flc!("diagnostics_open_cache_folder").into());
     t.set_diagnostics_collect_test_text(flc!("diagnostics_collect_test").into());
     t.set_diagnostics_collect_test_desc_text(flc!("diagnostics_collect_test_desc").into());
     t.set_diagnostics_collect_test_run_text(flc!("diagnostics_collect_test_run").into());
     t.set_diagnostics_collect_test_stop_text(flc!("diagnostics_collect_test_stop").into());
+    t.set_collect_test_cancelled_text(flc!("collect_test_cancelled").into());
+    t.set_diag_confirm_clear_thumbnails_text(flc!("diag_confirm_clear_thumbnails").into());
+    t.set_diag_confirm_clear_cache_text(flc!("diag_confirm_clear_cache").into());
 
     t.set_collect_test_title_text(flc!("collect_test_title").into());
     t.set_collect_test_volumes_text(flc!("collect_test_volumes").into());
     t.set_collect_test_folders_text(flc!("collect_test_folders").into());
     t.set_collect_test_files_text(flc!("collect_test_files").into());
     t.set_collect_test_time_text(flc!("collect_test_time").into());
-    t.set_collect_test_ms_text(flc!("collect_test_ms").into());
 
     t.set_directories_include_header_text(flc!("directories_include_header").into());
+    t.set_directories_included_text(flc!("directories_included").into());
     t.set_directories_exclude_header_text(flc!("directories_exclude_header").into());
+    t.set_directories_excluded_header_text(flc!("directories_excluded_header").into());
     t.set_directories_add_text(flc!("directories_add").into());
     t.set_directories_volume_header_text(flc!("directories_volume_header").into());
     t.set_directories_volume_refresh_text(flc!("directories_volume_refresh").into());
@@ -201,4 +217,61 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_about_repo_text(flc!("about_repo").into());
     t.set_about_translate_text(flc!("about_translate").into());
     t.set_about_donate_text(flc!("about_donate").into());
+
+    t.set_same_music_fingerprint_warning_text(flc!("same_music_fingerprint_warning").into());
+
+    t.set_directories_referenced_tooltip_text(flc!("directories_referenced_tooltip").into());
+    t.set_directories_include_section_header_text(flc!("directories_include_section_header").into());
+    t.set_directories_exclude_section_header_text(flc!("directories_exclude_section_header").into());
+    t.set_directories_custom_paths_text(flc!("directories_custom_paths").into());
+    t.set_directories_check_button_text(flc!("directories_check_button").into());
+    t.set_directories_check_popup_title_text(flc!("directories_check_popup_title").into());
+    t.set_directories_check_label_included_text(flc!("directories_check_label_included").into());
+    t.set_directories_check_label_excluded_text(flc!("directories_check_label_excluded").into());
+    t.set_directories_check_label_referenced_text(flc!("directories_check_label_referenced").into());
+    t.set_directories_check_label_would_scan_text(flc!("directories_check_label_would_scan").into());
+    t.set_directories_check_label_processable_text(flc!("directories_check_label_processable").into());
+    t.set_directories_check_scanning_text(flc!("directories_check_scanning").into());
+    t.set_directories_check_warning_no_processable_text(flc!("directories_check_warning_no_processable").into());
+    t.set_path_edit_title_include_text(flc!("path_edit_title_include").into());
+    t.set_path_edit_title_exclude_text(flc!("path_edit_title_exclude").into());
+    t.set_path_edit_placeholder_text(flc!("path_edit_placeholder").into());
+    t.set_path_edit_not_exists_text(flc!("path_edit_not_exists").into());
+    t.set_path_edit_is_dir_text(flc!("path_edit_is_dir").into());
+    t.set_path_edit_is_file_text(flc!("path_edit_is_file").into());
+    t.set_path_edit_no_newlines_text(flc!("path_edit_no_newlines").into());
+
+    t.set_licenses_label_text(flc!("licenses_label").into());
+    t.set_third_party_licenses_text(flc!("third_party_licenses").into());
+    t.set_licenses_popup_title_text(flc!("licenses_popup_title").into());
+
+    t.set_ctx_menu_title_text(flc!("ctx_menu_title").into());
+    t.set_ctx_open_file_text(flc!("ctx_open_file").into());
+    t.set_ctx_open_folder_text(flc!("ctx_open_folder").into());
+
+    use std::fmt::Debug;
+
+    use crate::settings::gui_settings_values::StringComboBoxItem;
+
+    fn make_options<T: Clone + Debug>(items: &[StringComboBoxItem<T>]) -> ModelRc<SharedString> {
+        ModelRc::new(VecModel::from(items.iter().map(|i| SharedString::from(i.translated_display_name())).collect::<Vec<_>>()))
+    }
+
+    let combo_items = StringComboBoxItems::new();
+
+    let g = app.global::<GeneralSettings>();
+    g.set_min_file_size_options(make_options(&combo_items.min_file_size));
+    g.set_max_file_size_options(make_options(&combo_items.max_file_size));
+
+    let dup = app.global::<DuplicateSettings>();
+    dup.set_check_method_options(make_options(&combo_items.duplicates_check_method));
+
+    let bfs = app.global::<BigFilesSettings>();
+    bfs.set_search_mode_options(make_options(&combo_items.biggest_files_method));
+
+    let si = app.global::<SimilarImagesSettings>();
+    si.set_similarity_preset_options(make_options(&combo_items.similarity_preset));
+
+    let sm = app.global::<SameMusicSettings>();
+    sm.set_check_method_options(make_options(&combo_items.same_music_check_method));
 }

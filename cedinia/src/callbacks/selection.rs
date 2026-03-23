@@ -63,7 +63,7 @@ fn execute_delete_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteE
     let to_delete: Vec<(usize, String)> = items
         .iter()
         .enumerate()
-        .filter(|(_, e)| e.checked && !e.is_header)
+        .filter(|(_, e)| e.checked && !e.is_header && !e.is_reference)
         .map(|(i, e)| (i, full_path_of(e)))
         .collect();
 
@@ -256,7 +256,7 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
                 return;
             }
             let state = win.global::<AppState>();
-            state.set_confirm_popup_message(slint::SharedString::from(format!("Czy na pewno chcesz wyczyścić tagi EXIF z {n} zaznaczonych plików?")));
+            state.set_confirm_popup_message(slint::SharedString::from(crate::flc!("confirm_clean_exif", n = n)));
             state.set_confirm_popup_action(slint::SharedString::from("clean_exif"));
             state.set_confirm_popup_visible(true);
             let _ = tx.clone();
@@ -274,7 +274,7 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
                 return;
             }
             let state = win.global::<AppState>();
-            state.set_confirm_popup_message(slint::SharedString::from(format!("Czy na pewno chcesz usunąć {n} zaznaczonych elementów?")));
+            state.set_confirm_popup_message(slint::SharedString::from(crate::flc!("confirm_delete_items", n = n)));
             state.set_confirm_popup_action(slint::SharedString::from("delete"));
             state.set_confirm_popup_visible(true);
             let _ = tx.clone();
@@ -333,7 +333,7 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
             if let Some(vm) = vm_of(&model) {
                 let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
                 for e in &mut items {
-                    if !e.is_header {
+                    if !e.is_header && !e.is_reference {
                         e.checked = !e.checked;
                     }
                 }
@@ -466,9 +466,9 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
                 }
             }
 
-            let msg = slint::SharedString::from(format!("Zamierzasz usunąć {total_images} obrazów w {total_groups} grupach?"));
+            let msg = slint::SharedString::from(crate::flc!("gallery_confirm_delete_msg", total_images = total_images, total_groups = total_groups));
             let warn = if unsafe_groups > 0 {
-                slint::SharedString::from(format!("⚠ W {unsafe_groups} grupach zaznaczono wszystkie elementy!"))
+                slint::SharedString::from(crate::flc!("gallery_confirm_delete_warning", unsafe_groups = unsafe_groups))
             } else {
                 slint::SharedString::default()
             };
@@ -550,7 +550,7 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
                 return;
             }
             let state = win.global::<AppState>();
-            state.set_confirm_popup_message(slint::SharedString::from(format!("Czy na pewno chcesz zmienić nazwy {n} zaznaczonych plików?")));
+            state.set_confirm_popup_message(slint::SharedString::from(crate::flc!("confirm_rename_items", n = n)));
             let action = if tool == ActiveTool::BadNames { "rename_bad_names" } else { "rename" };
             state.set_confirm_popup_action(slint::SharedString::from(action));
             state.set_confirm_popup_visible(true);
@@ -597,7 +597,7 @@ pub(crate) fn get_model_for_tool(win: &MainWindow, tool: ActiveTool) -> ModelRc<
         ActiveTool::SameMusic => win.get_same_music_model(),
         ActiveTool::BadNames => win.get_bad_names_model(),
         ActiveTool::ExifRemover => win.get_exif_remover_model(),
-        ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => ModelRc::new(VecModel::from(vec![])),
+        ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => ModelRc::new(VecModel::from(Vec::new())),
     }
 }
 
@@ -605,7 +605,7 @@ pub(crate) fn set_all_checked(model: &ModelRc<FileEntry>, state: bool) {
     if let Some(vm) = vm_of(model) {
         let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
         for e in &mut items {
-            if !e.is_header {
+            if !e.is_header && !e.is_reference {
                 e.checked = state;
             }
         }
@@ -629,14 +629,17 @@ pub(crate) fn select_except_one_per_group(model: &ModelRc<FileEntry>, select: bo
     }
 
     if select {
-        let mut first_in_group = false;
+        let mut first_non_ref_in_group = false;
         for e in &mut items {
             if e.is_header {
-                first_in_group = true;
+                first_non_ref_in_group = true;
                 continue;
             }
-            e.checked = if first_in_group {
-                first_in_group = false;
+            if e.is_reference {
+                continue;
+            }
+            e.checked = if first_non_ref_in_group {
+                first_non_ref_in_group = false;
                 false
             } else {
                 true
@@ -702,12 +705,25 @@ fn select_by_size_per_group(model: &ModelRc<FileEntry>, largest: bool, select_ta
             let group_end = items[i + 1..].iter().position(|e| e.is_header).map_or(items.len(), |p| i + 1 + p);
 
             let target_idx = if largest {
-                items[i + 1..group_end].iter().enumerate().max_by_key(|(_, e)| size_from_entry(e)).map(|(j, _)| i + 1 + j)
+                items[i + 1..group_end]
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, e)| !e.is_reference)
+                    .max_by_key(|(_, e)| size_from_entry(e))
+                    .map(|(j, _)| i + 1 + j)
             } else {
-                items[i + 1..group_end].iter().enumerate().min_by_key(|(_, e)| size_from_entry(e)).map(|(j, _)| i + 1 + j)
+                items[i + 1..group_end]
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, e)| !e.is_reference)
+                    .min_by_key(|(_, e)| size_from_entry(e))
+                    .map(|(j, _)| i + 1 + j)
             };
 
             for j in i + 1..group_end {
+                if items[j].is_reference {
+                    continue;
+                }
                 let is_target = target_idx == Some(j);
                 items[j].checked = if select_target { is_target } else { !is_target };
             }
@@ -740,17 +756,22 @@ fn select_by_resolution_per_group(model: &ModelRc<FileEntry>, highest: bool, sel
                 items[i + 1..group_end]
                     .iter()
                     .enumerate()
+                    .filter(|(_, e)| !e.is_reference)
                     .max_by_key(|(_, e)| resolution_from_entry(e))
                     .map(|(j, _)| i + 1 + j)
             } else {
                 items[i + 1..group_end]
                     .iter()
                     .enumerate()
+                    .filter(|(_, e)| !e.is_reference)
                     .min_by_key(|(_, e)| resolution_from_entry(e))
                     .map(|(j, _)| i + 1 + j)
             };
 
             for j in i + 1..group_end {
+                if items[j].is_reference {
+                    continue;
+                }
                 let is_target = target_idx == Some(j);
                 items[j].checked = if select_target { is_target } else { !is_target };
             }

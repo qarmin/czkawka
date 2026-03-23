@@ -114,7 +114,11 @@ fn write_video_optimizer_transcode_results(
         if !stopped_search && sd.basic_settings.play_audio_on_scan_completion {
             sd.audio_player.play_scan_completed();
         }
-        app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
+        let result_message = flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str);
+        if !stopped_search && sd.basic_settings.show_notification_on_scan_completion {
+            crate::notification_manager::send_scan_completed_notification("Video Optimizer", &result_message);
+        }
+        app.invoke_scan_ended(result_message.into());
     }
     app.global::<GuiState>().set_info_text(messages_data.messages.into());
     reset_selection_at_end(app, ActiveTab::VideoOptimizer);
@@ -147,7 +151,11 @@ fn write_video_optimizer_crop_results(
         if !stopped_search && sd.basic_settings.play_audio_on_scan_completion {
             sd.audio_player.play_scan_completed();
         }
-        app.invoke_scan_ended(flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str).into());
+        let result_message = flk!("rust_found_video_optimizer", items_found = items_found, time = scanning_time_str);
+        if !stopped_search && sd.basic_settings.show_notification_on_scan_completion {
+            crate::notification_manager::send_scan_completed_notification("Video Optimizer", &result_message);
+        }
+        app.invoke_scan_ended(result_message.into());
     }
     app.global::<GuiState>().set_info_text(messages_data.messages.into());
     reset_selection_at_end(app, ActiveTab::VideoOptimizer);

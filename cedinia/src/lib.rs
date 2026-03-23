@@ -8,6 +8,7 @@ pub mod common;
 mod file_picker_android;
 pub mod localizer_cedinia;
 mod model;
+mod notifications;
 mod scan_runner;
 mod scanners;
 mod set_initial_gui_infos;
@@ -60,9 +61,6 @@ fn setup_android_paths(android_app: &slint::android::AndroidApp) {
 #[cfg(target_os = "android")]
 #[unsafe(no_mangle)]
 fn android_main(android_app: slint::android::AndroidApp) {
-    // Init logcat logging FIRST so every log::* call and every panic message
-    // appears under `adb logcat -s cedinia`.  Without this all output goes to
-    // stdout/stderr which Android silently discards for native code.
     android_logger::init_once(android_logger::Config::default().with_max_level(log::LevelFilter::Debug).with_tag("cedinia"));
     setup_android_paths(&android_app);
     crate::app::setup_logger_cache();

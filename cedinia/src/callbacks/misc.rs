@@ -24,8 +24,14 @@ pub(crate) fn wire_open_path(window: &MainWindow) {
     }
     #[cfg(target_os = "android")]
     {
-        window.global::<AppState>().on_open_path(|_| {});
-        window.global::<AppState>().on_open_parent_folder(|_| {});
+        window.global::<AppState>().on_open_path(|path| {
+            crate::file_picker_android::open_file(path.as_str());
+        });
+        window.global::<AppState>().on_open_parent_folder(|path| {
+            if !path.is_empty() {
+                crate::file_picker_android::open_folder(path.as_str());
+            }
+        });
     }
 }
 
@@ -47,6 +53,26 @@ pub(crate) fn wire_permission(window: &MainWindow) {
     }
 }
 
+fn format_duration_ms(ms: u128) -> slint::SharedString {
+    let s = if ms < 1_000 {
+        format!("{ms} ms")
+    } else if ms < 60_000 {
+        let secs = ms / 1_000;
+        let rem = ms % 1_000;
+        if rem == 0 { format!("{secs} s") } else { format!("{secs} s {rem} ms") }
+    } else {
+        let min = ms / 60_000;
+        let secs = (ms % 60_000) / 1_000;
+        let rem = ms % 1_000;
+        if rem == 0 {
+            format!("{min} min {secs} s")
+        } else {
+            format!("{min} min {secs} s {rem} ms")
+        }
+    };
+    slint::SharedString::from(s)
+}
+
 pub(crate) fn wire_collect_test(window: &MainWindow) {
     let collect_stop_flag: Arc<AtomicBool> = Arc::new(AtomicBool::new(false));
 
@@ -58,6 +84,7 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
             stop.store(false, Ordering::Relaxed);
             win.global::<AppState>().set_collect_test_running(true);
             win.global::<AppState>().set_collect_test_done(false);
+            win.global::<AppState>().set_collect_test_cancelled(false);
 
             let weak2 = win.as_weak();
             let stop2 = stop.clone();
@@ -69,28 +96,26 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
                 let mut total_folders: i32 = 0;
                 let mut stopped = false;
                 'outer: for vol in &volumes {
-                    let root = std::path::Path::new(vol.path.as_str());
-                    let (f, d) = count_files_and_dirs_stoppable(root, &stop2, &mut stopped);
+                    let canonical = std::fs::canonicalize(vol.path.as_str()).unwrap_or_else(|_| std::path::PathBuf::from(vol.path.as_str()));
+                    let (f, d) = count_files_and_dirs_stoppable(&canonical, &stop2, &mut stopped);
                     total_files = total_files.saturating_add(f);
                     total_folders = total_folders.saturating_add(d);
                     if stopped {
                         break 'outer;
                     }
                 }
-                let elapsed_ms = start.elapsed().as_millis() as i32;
+                let elapsed_time = format_duration_ms(start.elapsed().as_millis());
                 let result = CollectTestResult {
                     volumes: volume_count,
                     files: total_files,
                     folders: total_folders,
-                    elapsed_ms,
+                    elapsed_time,
                 };
                 let _ = slint::invoke_from_event_loop(move || {
                     if let Some(win) = weak2.upgrade() {
                         win.global::<AppState>().set_collect_test_result(result);
                         win.global::<AppState>().set_collect_test_running(false);
-                        if !stopped {
-                            win.global::<AppState>().set_collect_test_done(true);
-                        }
+                        win.global::<AppState>().set_collect_test_done(true);
                     }
                 });
             });
@@ -104,6 +129,7 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
             stop.store(true, Ordering::Relaxed);
             if let Some(win) = weak.upgrade() {
                 win.global::<AppState>().set_collect_test_running(false);
+                win.global::<AppState>().set_collect_test_cancelled(true);
             }
         });
     }
@@ -172,6 +198,14 @@ pub(crate) fn wire_cache_info(window: &MainWindow) {
     }
 
     {
+        window.global::<AppState>().on_open_thumbnails_folder(move || {
+            let dir = thumbnail_cache_dir();
+            let _ = std::fs::create_dir_all(&dir);
+            open_dir(&dir);
+        });
+    }
+
+    {
         let weak = window.as_weak();
         window.global::<AppState>().on_clear_app_cache(move || {
             if let Some(cache_path) = czkawka_core::common::config_cache_path::get_config_cache_path() {
@@ -181,6 +215,28 @@ pub(crate) fn wire_cache_info(window: &MainWindow) {
                 win.global::<AppState>().set_diag_app_cache_size("0 B".into());
             }
         });
+    }
+
+    {
+        window.global::<AppState>().on_open_app_cache_folder(move || {
+            if let Some(cache_path) = czkawka_core::common::config_cache_path::get_config_cache_path() {
+                let _ = std::fs::create_dir_all(&cache_path.cache_folder);
+                open_dir(&cache_path.cache_folder);
+            }
+        });
+    }
+}
+
+fn open_dir(path: &Path) {
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = std::process::Command::new("xdg-open").arg(path).spawn();
+    }
+    #[cfg(target_os = "android")]
+    {
+        if let Some(s) = path.to_str() {
+            crate::file_picker_android::open_folder(s);
+        }
     }
 }
 
@@ -195,6 +251,15 @@ pub(crate) fn wire_language_change(window: &MainWindow) {
     });
 }
 
+pub(crate) fn wire_notification_settings(window: &MainWindow) {
+    let blocked = !crate::notifications::are_system_notifications_enabled();
+    window.global::<AppState>().set_system_notifications_blocked(blocked);
+
+    window.global::<AppState>().on_open_notification_settings(|| {
+        crate::notifications::open_system_notification_settings();
+    });
+}
+
 pub(crate) fn wire_open_url(window: &MainWindow) {
     #[cfg(not(target_os = "android"))]
     {
@@ -204,16 +269,35 @@ pub(crate) fn wire_open_url(window: &MainWindow) {
     }
     #[cfg(target_os = "android")]
     {
-        window.global::<AppState>().on_open_url(|_| {});
+        window.global::<AppState>().on_open_url(|url| {
+            crate::file_picker_android::open_url(url.as_str());
+        });
     }
 }
 
-pub(crate) fn wire_save_settings_now(window: &MainWindow, included_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>, excluded_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>) {
+pub(crate) fn wire_licenses_popup(window: &MainWindow) {
+    let licenses_text = include_str!("../../THIRD_PARTY_LICENSES.txt");
+    window.global::<AppState>().set_licenses_text(slint::SharedString::from(licenses_text));
+
+    let weak = window.as_weak();
+    window.global::<AppState>().on_show_third_party_licenses(move || {
+        if let Some(win) = weak.upgrade() {
+            win.global::<AppState>().set_licenses_popup_visible(true);
+        }
+    });
+}
+
+pub(crate) fn wire_save_settings_now(
+    window: &MainWindow,
+    included_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
+    excluded_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
+    referenced_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
+) {
     let weak = window.as_weak();
     window.global::<AppState>().on_save_settings_now(move || {
         let win = weak.upgrade().expect("Failed to upgrade app :(");
         let settings = collect_settings_from_gui(&win);
         save_settings(&settings);
-        crate::settings::save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow());
+        crate::settings::save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow(), &referenced_dirs.borrow());
     });
 }

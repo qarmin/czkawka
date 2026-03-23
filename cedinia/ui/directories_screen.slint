@@ -3,57 +3,127 @@ import { DirectoryEntry } from "common.slint";
 import { AppState } from "app_state.slint";
 import { Translations } from "translations.slint";
 import { Divider, TouchButton } from "components.slint";
+import { ScrollView } from "std-widgets.slint";
+
+component SectionHeader {
+    in property <string> title;
+    height: 32px;
+
+    Rectangle {
+        background: CediniaColors.bg_elevated;
+        HorizontalLayout {
+            padding-left: 12px;
+            padding-right: 12px;
+            alignment: LayoutAlignment.start;
+            Text {
+                text: root.title;
+                color: CediniaColors.text_secondary;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                vertical-alignment: TextVerticalAlignment.center;
+            }
+        }
+        Divider {}
+    }
+}
 
 component DirRow {
     in property <string>  path;
     in property <bool>    is_included;
+    in property <bool>    is_referenced;
+    in property <bool>    exists: true;
     callback remove();
+    callback toggle_referenced();
 
-    height: 56px;
+    min-height: 52px;
 
     Rectangle {
-        background: ta.has-hover ? CediniaColors.bg_elevated : CediniaColors.bg_surface;
         animate background { duration: 100ms; }
 
         HorizontalLayout {
+            width: parent.width;
+            height: root.preferred-height;
             padding-left: 12px;
             padding-right: 8px;
+            padding-top: 6px;
+            padding-bottom: 6px;
             spacing: 8px;
             alignment: LayoutAlignment.start;
 
-
-            Rectangle {
-                width: 4px;
-                height: 36px;
-                border-radius: 2px;
-                background: root.is_included ? CediniaColors.success : CediniaColors.danger;
-                vertical-stretch: 0.0;
+            VerticalLayout {
+                horizontal-stretch: 0.0;
+                alignment: center;
+                Rectangle {
+                    width: 4px;
+                    height: 36px;
+                    border-radius: 2px;
+                    background: !root.exists ? CediniaColors.warning
+                              : root.is_included ? CediniaColors.success
+                              : CediniaColors.danger;
+                    vertical-stretch: 0.0;
+                }
             }
 
-            ta := TouchArea {
-                horizontal-stretch: 1.0;
+            if root.is_included : Rectangle {
+                horizontal-stretch: 0.0;
+                width: 36px;
+
+                ref_ta := TouchArea {
+                    clicked => { root.toggle_referenced(); }
+                }
+                Rectangle {
+                    x: 7px;
+                    y: (parent.height - 22px) / 2;
+                    width: 22px;
+                    height: 22px;
+                    border-radius: 4px;
+                    border-width: 2px;
+                    border-color: root.is_referenced ? CediniaColors.accent : CediniaColors.text_disabled;
+                    background: root.is_referenced ? CediniaColors.accent_muted : transparent;
+                    animate border-color { duration: 100ms; }
+                    animate background { duration: 100ms; }
+
+                    if root.is_referenced : Text {
+                        text: "R";
+                        color: CediniaColors.accent_light;
+                        font-size: 11px;
+                        font-weight: 700;
+                        horizontal-alignment: TextHorizontalAlignment.center;
+                        vertical-alignment: TextVerticalAlignment.center;
+                    }
+                }
             }
 
             VerticalLayout {
                 alignment: LayoutAlignment.center;
                 horizontal-stretch: 1.0;
+                preferred-width: 20000px;
+                spacing: 2px;
                 Text {
                     text: root.path;
-                    color: CediniaColors.text_primary;
+                    color: root.exists ? CediniaColors.text_primary : CediniaColors.text_secondary;
                     font-size: 13px;
-                    overflow: elide;
+                    wrap: word-wrap;
+                    min-width: 0;
                 }
-                Text {
-                    text: root.is_included ? Translations.directories_include_header_text : Translations.directories_exclude_header_text;
-                    color: root.is_included ? CediniaColors.success : CediniaColors.danger;
-                    font-size: 11px;
+                if !root.exists : Text {
+                    text: "⚠ " + Translations.path_edit_not_exists_text;
+                    color: CediniaColors.warning;
+                    font-size: 10px;
+                    min-width: 0;
+                }
+                if root.is_referenced : Text {
+                    text: Translations.directories_referenced_tooltip_text;
+                    color: CediniaColors.accent_light;
+                    font-size: 10px;
+                    min-width: 0;
                 }
             }
 
-
             Rectangle {
+                horizontal-stretch: 0.0;
                 width: 40px;
-                height: 40px;
                 border-radius: 20px;
                 background: rm_ta.has-hover ? CediniaColors.danger.with-alpha(0.2) : transparent;
                 vertical-stretch: 0.0;
@@ -61,12 +131,15 @@ component DirRow {
                 rm_ta := TouchArea {
                     clicked => { root.remove(); }
                 }
-                Text {
-                    text: "X";
-                    color: CediniaColors.danger;
-                    font-size: 18px;
-                    horizontal-alignment: center;
-                    vertical-alignment: center;
+                VerticalLayout {
+                    alignment: LayoutAlignment.center;
+                    Text {
+                        text: "X";
+                        color: CediniaColors.danger;
+                        font-size: 18px;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
                 }
             }
         }
@@ -74,64 +147,120 @@ component DirRow {
     }
 }
 
-export component DirectoriesScreen {
-    in property <[DirectoryEntry]> directories: [];
+component StatRow {
+    in property <string> label;
+    in property <string> value;
+    in property <brush>  fg: CediniaColors.text_primary;
+    height: 28px;
 
+    HorizontalLayout {
+        padding-left: 4px;
+        spacing: 8px;
+        Text {
+            text: root.label;
+            color: CediniaColors.text_secondary;
+            font-size: 13px;
+            min-width: 160px;
+            horizontal-stretch: 0.0;
+            vertical-alignment: center;
+        }
+        Text {
+            text: root.value;
+            color: root.fg;
+            font-size: 13px;
+            font-weight: 600;
+            horizontal-stretch: 1.0;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+    }
+}
+
+export component DirectoriesScreen {
+    in property <[DirectoryEntry]> included_directories: [];
+    in property <[DirectoryEntry]> excluded_directories: [];
+
+    property <bool> path_enter_error: false;
+
+    // ── Main layout ───────────────────────────────────────────────────────────
     VerticalLayout {
         height: parent.height;
         spacing: 0px;
 
-
-        if directories.length == 0 : Rectangle {}
-
-        Flickable {
+        ScrollView {
             vertical-stretch: 1.0;
-            viewport-height: max(dir_layout.preferred-height, self.height);
+            viewport-height: dir_layout.preferred-height;
 
             dir_layout := VerticalLayout {
                 spacing: 0px;
+                width: parent.width;
 
-                if directories.length == 0 : Rectangle {
-                    height: 120px;
+                SectionHeader { title: Translations.directories_include_section_header_text; }
+
+                if included_directories.length == 0 : Rectangle {
+                    height: 80px;
                     VerticalLayout {
                         alignment: LayoutAlignment.center;
-                        spacing: 8px;
+                        spacing: 4px;
                         Text {
                             text: "📂";
-                            font-size: 36px;
+                            font-size: 28px;
                             horizontal-alignment: TextHorizontalAlignment.center;
                             color: CediniaColors.text_disabled;
                         }
                         Text {
                             text: Translations.no_paths_text;
                             color: CediniaColors.text_disabled;
-                            font-size: 13px;
+                            font-size: 12px;
                             horizontal-alignment: TextHorizontalAlignment.center;
                         }
                     }
                 }
 
-                for entry in directories : DirRow {
+                for entry in included_directories : DirRow {
                     path: entry.path;
-                    is_included: entry.is_included;
+                    is_included: true;
+                    is_referenced: entry.is_referenced;
+                    exists: entry.exists;
+                    toggle_referenced => { AppState.toggle_referenced_dir(entry.path); }
                     remove => {
-                        if (entry.is_included) {
-                            AppState.remove_include_dir(entry.path);
-                        } else {
-                            AppState.remove_exclude_dir(entry.path);
-                        }
+                        AppState.remove_include_dir(entry.path);
+                        AppState.save_settings_now();
+                    }
+                }
+
+                SectionHeader { title: Translations.directories_exclude_section_header_text; }
+
+                if excluded_directories.length == 0 : Rectangle {
+                    height: 48px;
+                    Text {
+                        text: Translations.no_paths_text;
+                        color: CediniaColors.text_disabled;
+                        font-size: 12px;
+                        horizontal-alignment: TextHorizontalAlignment.center;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        width: parent.width;
+                        height: parent.height;
+                    }
+                }
+
+                for entry in excluded_directories : DirRow {
+                    path: entry.path;
+                    is_included: false;
+                    is_referenced: false;
+                    exists: entry.exists;
+                    remove => {
+                        AppState.remove_exclude_dir(entry.path);
                         AppState.save_settings_now();
                     }
                 }
             }
         }
-        Rectangle {}
 
-
-
+        // Bottom bar: Volumes + Custom Paths + Analyze
         Rectangle {
             vertical-stretch: 0.0;
-            height: 64px;
+            height: 74px;
             background: CediniaColors.bg_surface;
             border-width: 1px;
             border-color: CediniaColors.divider;
@@ -141,51 +270,68 @@ export component DirectoriesScreen {
                 spacing: 10px;
                 alignment: LayoutAlignment.stretch;
 
-                TouchButton {
-                    label: Translations.directories_add_text;
-                    horizontal-stretch: 1.0;
-                    bg: CediniaColors.success.with-alpha(0.8);
-                    fg: #000000;
-                    clicked => {
-                        AppState.pick_include_dir();
-                        AppState.save_settings_now();
+                VerticalLayout {
+                    alignment: LayoutAlignment.center;
+                    TouchButton {
+                        label: Translations.directories_volume_header_text;
+                        horizontal-stretch: 1.0;
+                        bg: AppState.storage_volumes.length > 0 && !AppState.custom_paths_popup_visible
+                            ? CediniaColors.accent_muted : CediniaColors.bg_elevated;
+                        fg: AppState.storage_volumes.length > 0 && !AppState.custom_paths_popup_visible
+                            ? CediniaColors.accent_light : CediniaColors.text_primary;
+                        clicked => {
+                            if (!AppState.custom_paths_popup_visible && AppState.storage_volumes.length > 0) {
+                                AppState.storage_volumes = [];
+                            } else {
+                                AppState.custom_paths_popup_visible = false;
+                                AppState.list_storage_volumes();
+                            }
+                        }
                     }
                 }
 
                 TouchButton {
-                    label: "- " + Translations.directories_exclude_header_text;
+                    label: Translations.directories_custom_paths_text;
                     horizontal-stretch: 1.0;
-                    bg: CediniaColors.danger.with-alpha(0.8);
-                    fg: #ffffff;
+                    bg: AppState.custom_paths_popup_visible ? CediniaColors.accent_muted : CediniaColors.bg_elevated;
+                    fg: AppState.custom_paths_popup_visible ? CediniaColors.accent_light : CediniaColors.text_primary;
                     clicked => {
-                        AppState.pick_exclude_dir();
-                        AppState.save_settings_now();
-                    }
-                }
-
-                TouchButton {
-                    label: Translations.directories_volume_header_text;
-                    horizontal-stretch: 1.0;
-                    bg: AppState.storage_volumes.length > 0 ? CediniaColors.accent_muted : CediniaColors.bg_elevated;
-                    fg: AppState.storage_volumes.length > 0 ? CediniaColors.accent_light : CediniaColors.text_primary;
-                    clicked => {
-                        if (AppState.storage_volumes.length > 0) {
+                        if (AppState.custom_paths_popup_visible) {
+                            AppState.custom_paths_popup_visible = false;
                             AppState.storage_volumes = [];
                         } else {
                             AppState.list_storage_volumes();
+                            AppState.custom_paths_popup_visible = true;
                         }
+                    }
+                }
+
+                TouchButton {
+                    label: Translations.directories_check_button_text;
+                    horizontal-stretch: 1.0;
+                    bg: AppState.dirs_check_popup_visible ? CediniaColors.accent_muted : CediniaColors.bg_elevated;
+                    fg: AppState.dirs_check_popup_visible ? CediniaColors.accent_light : CediniaColors.text_primary;
+                    clicked => {
+                        AppState.dirs_check_included_text = "-";
+                        AppState.dirs_check_excluded_text = "-";
+                        AppState.dirs_check_referenced_text = "-";
+                        AppState.dirs_check_would_scan_text = "-";
+                        AppState.dirs_check_processable_text = "-";
+                        AppState.dirs_check_progress_text = "";
+                        AppState.dirs_check_no_processable = false;
+                        AppState.dirs_check_popup_visible = true;
                     }
                 }
             }
         }
     }
 
-
-    if AppState.storage_volumes.length > 0 : Rectangle {
+    // ── Volumes popup ─────────────────────────────────────────────────────────
+    if AppState.storage_volumes.length > 0 && !AppState.custom_paths_popup_visible : Rectangle {
         x: 0;
-        y: root.height - self.height - 64px;
+        y: root.height - self.height - 74px;
         width: root.width;
-        height: min(vol_popup_layout.preferred-height, root.height - 64px - 8px);
+        height: min(vol_popup_layout.preferred-height, root.height - 74px - 8px);
         background: CediniaColors.bg_elevated;
         border-width: 1px;
         border-color: CediniaColors.divider;
@@ -194,7 +340,6 @@ export component DirectoriesScreen {
 
         vol_popup_layout := VerticalLayout {
             spacing: 0px;
-
 
             Rectangle {
                 height: 44px;
@@ -214,22 +359,25 @@ export component DirectoriesScreen {
                         horizontal-stretch: 1.0;
                     }
 
-                    Rectangle {
-                        width: 36px;
-                        height: 36px;
-                        border-radius: 18px;
-                        vertical-stretch: 0.0;
-                        background: close_ta.has-hover ? CediniaColors.ripple : transparent;
+                    VerticalLayout {
+                        alignment: LayoutAlignment.center;
+                        Rectangle {
+                            width: 36px;
+                            height: 36px;
+                            border-radius: 18px;
+                            vertical-stretch: 0.0;
+                            background: vol_close_ta.has-hover ? CediniaColors.ripple : transparent;
 
-                        close_ta := TouchArea {
-                            clicked => { AppState.storage_volumes = []; }
-                        }
-                        Text {
-                            text: "X";
-                            color: CediniaColors.text_secondary;
-                            font-size: 16px;
-                            horizontal-alignment: center;
-                            vertical-alignment: center;
+                            vol_close_ta := TouchArea {
+                                clicked => { AppState.storage_volumes = []; }
+                            }
+                            Text {
+                                text: "X";
+                                color: CediniaColors.text_secondary;
+                                font-size: 16px;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
                         }
                     }
                 }
@@ -271,6 +419,7 @@ export component DirectoriesScreen {
 
                                 VerticalLayout {
                                     alignment: LayoutAlignment.center;
+                                    preferred-width: 20000px;
                                     horizontal-stretch: 1.0;
                                     spacing: 2px;
                                     Text {
@@ -288,8 +437,8 @@ export component DirectoriesScreen {
                                     }
                                 }
 
-                                TouchButton {
-                                    label: vol.is_included ? "X " + Translations.directories_include_header_text : "+ " + Translations.directories_volume_add_text;
+                                if !vol.is_excluded : TouchButton {
+                                    label: vol.is_included ? Translations.directories_included_text : "+ " + Translations.directories_volume_add_text;
                                     min_h: 32px;
                                     bg: vol.is_included
                                         ? CediniaColors.success.with-alpha(0.2)
@@ -305,8 +454,8 @@ export component DirectoriesScreen {
                                     }
                                 }
 
-                                TouchButton {
-                                    label: vol.is_excluded ? "X " + Translations.directories_exclude_header_text : "- " + Translations.directories_exclude_header_text;
+                                if !vol.is_included : TouchButton {
+                                    label: vol.is_excluded ? Translations.directories_excluded_header_text : "- " + Translations.directories_exclude_header_text;
                                     min_h: 32px;
                                     bg: vol.is_excluded
                                         ? CediniaColors.danger.with-alpha(0.2)
@@ -325,6 +474,458 @@ export component DirectoriesScreen {
                         }
 
                         Divider {}
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Custom Paths popup ────────────────────────────────────────────────────
+    if AppState.custom_paths_popup_visible : Rectangle {
+        x: 0;
+        y: root.height - self.height - 74px;
+        width: root.width;
+        height: min(cp_layout.preferred-height, root.height - 74px - 8px);
+        background: CediniaColors.bg_elevated;
+        border-width: 1px;
+        border-color: CediniaColors.divider;
+        drop-shadow-blur: 16px;
+        drop-shadow-color: #00000066;
+
+        cp_layout := VerticalLayout {
+            spacing: 0px;
+
+            Rectangle {
+                height: 44px;
+                background: CediniaColors.bg_surface;
+
+                HorizontalLayout {
+                    padding-left: 16px;
+                    padding-right: 8px;
+                    spacing: 8px;
+
+                    Text {
+                        text: "📁 " + Translations.directories_custom_paths_text;
+                        color: CediniaColors.accent_light;
+                        font-size: 15px;
+                        font-weight: 700;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        horizontal-stretch: 1.0;
+                    }
+
+                    VerticalLayout {
+                        alignment: LayoutAlignment.center;
+                        Rectangle {
+                            width: 36px;
+                            height: 36px;
+                            border-radius: 18px;
+                            vertical-stretch: 0.0;
+                            background: cp_close_ta.has-hover ? CediniaColors.ripple : transparent;
+
+                            cp_close_ta := TouchArea {
+                                clicked => {
+                                    AppState.custom_paths_popup_visible = false;
+                                    AppState.storage_volumes = [];
+                                }
+                            }
+                            Text {
+                                text: "X";
+                                color: CediniaColors.text_secondary;
+                                font-size: 16px;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle { height: 1px; background: CediniaColors.divider; }
+
+            Flickable {
+                vertical-stretch: 1.0;
+                viewport-height: max(cp_list.preferred-height, self.height);
+
+                cp_list := VerticalLayout {
+                    spacing: 0px;
+
+                    for vol in AppState.storage_volumes : VerticalLayout {
+                        spacing: 0px;
+
+                        Rectangle {
+                            height: 72px;
+                            background: CediniaColors.bg_surface;
+
+                            HorizontalLayout {
+                                padding-left: 12px;
+                                padding-right: 8px;
+                                padding-top: 8px;
+                                padding-bottom: 8px;
+                                spacing: 6px;
+                                alignment: LayoutAlignment.start;
+
+                                VerticalLayout {
+                                    alignment: LayoutAlignment.center;
+                                    preferred-width: 20000px;
+                                    horizontal-stretch: 1.0;
+                                    spacing: 2px;
+                                    Text {
+                                        text: vol.label != "" ? vol.label : vol.path;
+                                        color: CediniaColors.text_primary;
+                                        font-size: 13px;
+                                        font-weight: 600;
+                                        overflow: elide;
+                                        min-width: 0;
+                                    }
+                                    Text {
+                                        text: vol.path;
+                                        color: CediniaColors.text_secondary;
+                                        font-size: 11px;
+                                        overflow: elide;
+                                        min-width: 0;
+                                    }
+                                }
+
+                                // Green: 📁 include via folder picker
+                                Rectangle {
+                                    width: 42px;
+                                    height: parent.height - 16px;
+                                    border-radius: 8px;
+                                    background: cp_inc_folder_ta.has-hover
+                                        ? CediniaColors.success.with-alpha(0.35)
+                                        : CediniaColors.success.with-alpha(0.18);
+                                    vertical-stretch: 0.0;
+                                    cp_inc_folder_ta := TouchArea {
+                                        clicked => { AppState.pick_include_from(vol.path); }
+                                    }
+                                    Text {
+                                        text: "📁";
+                                        font-size: 17px;
+                                        color: CediniaColors.success;
+                                        horizontal-alignment: center;
+                                        vertical-alignment: center;
+                                    }
+                                }
+
+                                // Green: ✏ include via text edit
+                                Rectangle {
+                                    width: 42px;
+                                    height: parent.height - 16px;
+                                    border-radius: 8px;
+                                    background: cp_inc_edit_ta.has-hover
+                                        ? CediniaColors.success.with-alpha(0.35)
+                                        : CediniaColors.success.with-alpha(0.18);
+                                    vertical-stretch: 0.0;
+                                    cp_inc_edit_ta := TouchArea {
+                                        clicked => {
+                                            path_enter_error = false;
+                                            AppState.path_edit_value = vol.path;
+                                            AppState.path_edit_is_include = true;
+                                            AppState.path_edit_check(vol.path);
+                                            AppState.path_edit_popup_visible = true;
+                                        }
+                                    }
+                                    Text {
+                                        text: "📝";
+                                        font-size: 17px;
+                                        color: CediniaColors.success;
+                                        horizontal-alignment: center;
+                                        vertical-alignment: center;
+                                    }
+                                }
+
+                                // Red: 📁 exclude via folder picker
+                                Rectangle {
+                                    width: 42px;
+                                    height: parent.height - 16px;
+                                    border-radius: 8px;
+                                    background: cp_exc_folder_ta.has-hover
+                                        ? CediniaColors.danger.with-alpha(0.35)
+                                        : CediniaColors.danger.with-alpha(0.18);
+                                    vertical-stretch: 0.0;
+                                    cp_exc_folder_ta := TouchArea {
+                                        clicked => { AppState.pick_exclude_from(vol.path); }
+                                    }
+                                    Text {
+                                        text: "📁";
+                                        font-size: 17px;
+                                        color: CediniaColors.danger;
+                                        horizontal-alignment: center;
+                                        vertical-alignment: center;
+                                    }
+                                }
+
+                                // Red: ✏ exclude via text edit
+                                Rectangle {
+                                    width: 42px;
+                                    height: parent.height - 16px;
+                                    border-radius: 8px;
+                                    background: cp_exc_edit_ta.has-hover
+                                        ? CediniaColors.danger.with-alpha(0.35)
+                                        : CediniaColors.danger.with-alpha(0.18);
+                                    vertical-stretch: 0.0;
+                                    cp_exc_edit_ta := TouchArea {
+                                        clicked => {
+                                            path_enter_error = false;
+                                            AppState.path_edit_value = vol.path;
+                                            AppState.path_edit_is_include = false;
+                                            AppState.path_edit_check(vol.path);
+                                            AppState.path_edit_popup_visible = true;
+                                        }
+                                    }
+                                    Text {
+                                        text: "📝";
+                                        font-size: 17px;
+                                        color: CediniaColors.danger;
+                                        horizontal-alignment: center;
+                                        vertical-alignment: center;
+                                    }
+                                }
+                            }
+                        }
+
+                        Divider {}
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Path edit popup (centered overlay) ────────────────────────────────────
+    if AppState.path_edit_popup_visible : Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        background: #00000066;
+
+        TouchArea { }  // consume clicks on overlay
+
+        Rectangle {
+            x: (root.width - self.width) / 2;
+            y: (root.height - self.height) / 2;
+            width: min(root.width - 32px, 420px);
+            height: path_edit_layout.preferred-height + 32px;
+            background: CediniaColors.bg_surface;
+            border-radius: 12px;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #00000099;
+
+            path_edit_layout := VerticalLayout {
+                padding: 16px;
+                spacing: 12px;
+
+                Text {
+                    text: AppState.path_edit_is_include
+                        ? Translations.path_edit_title_include_text
+                        : Translations.path_edit_title_exclude_text;
+                    color: AppState.path_edit_is_include ? CediniaColors.success : CediniaColors.danger;
+                    font-size: 15px;
+                    font-weight: 700;
+                }
+
+                Rectangle {
+                    border-radius: 8px;
+                    background: CediniaColors.bg_elevated;
+                    border-width: 1px;
+                    border-color: CediniaColors.divider;
+                    height: path_input.preferred-height + 20px;
+
+                    path_input := TextInput {
+                        x: 10px;
+                        y: 10px;
+                        width: parent.width - 20px;
+                        text: AppState.path_edit_value;
+                        color: CediniaColors.text_primary;
+                        font-size: 13px;
+                        single-line: false;
+                        wrap: word-wrap;
+                        accepted => {
+                            path_enter_error = true;
+                        }
+                        edited => {
+                            path_enter_error = false;
+                            AppState.path_edit_value = self.text;
+                            AppState.path_edit_check(self.text);
+                        }
+                    }
+                }
+
+                if path_enter_error : Text {
+                    text: "E " + Translations.path_edit_no_newlines_text;
+                    color: CediniaColors.danger;
+                    font-size: 12px;
+                }
+
+                // Path existence status
+                if AppState.path_edit_value != "" : Text {
+                    text: AppState.path_edit_path_exists
+                        ? (AppState.path_edit_path_is_dir
+                            ? "📁 " + Translations.path_edit_is_dir_text
+                            : "📄 " + Translations.path_edit_is_file_text)
+                        : "X " + Translations.path_edit_not_exists_text;
+                    color: AppState.path_edit_path_exists ? CediniaColors.success : CediniaColors.danger;
+                    font-size: 12px;
+                }
+
+                HorizontalLayout {
+                    spacing: 8px;
+
+                    TouchButton {
+                        label: Translations.cancel_text;
+                        horizontal-stretch: 1.0;
+                        bg: CediniaColors.bg_elevated;
+                        fg: CediniaColors.text_primary;
+                        clicked => { AppState.path_edit_popup_visible = false; }
+                    }
+                    TouchButton {
+                        label: "+ " + Translations.directories_add_text;
+                        horizontal-stretch: 1.0;
+                        bg: AppState.path_edit_is_include
+                            ? CediniaColors.success.with-alpha(0.8)
+                            : CediniaColors.danger.with-alpha(0.8);
+                        fg: AppState.path_edit_is_include ? #000000 : #ffffff;
+                        clicked => {
+                            AppState.path_edit_confirm();
+                            AppState.save_settings_now();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Directory statistics popup (centered overlay) ─────────────────────────
+    if AppState.dirs_check_popup_visible : Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        background: #00000066;
+
+        TouchArea { }  // consume clicks on overlay
+
+        Rectangle {
+            x: (root.width - self.width) / 2;
+            y: (root.height - self.height) / 2;
+            width: min(root.width - 32px, 480px);
+            height: dirs_check_content.preferred-height + 32px;
+            background: CediniaColors.bg_surface;
+            border-radius: 12px;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #00000099;
+
+            dirs_check_content := VerticalLayout {
+                padding: 16px;
+                spacing: 10px;
+
+                // Title row
+                HorizontalLayout {
+                    spacing: 8px;
+                    Text {
+                        text: Translations.directories_check_popup_title_text;
+                        color: CediniaColors.text_primary;
+                        font-size: 16px;
+                        font-weight: 700;
+                        horizontal-stretch: 1.0;
+                        vertical-alignment: center;
+                    }
+                    TouchButton {
+                        label: "X";
+                        min_h: 32px;
+                        bg: CediniaColors.bg_elevated;
+                        fg: CediniaColors.text_secondary;
+                        clicked => {
+                            AppState.stop_dirs_check();
+                            AppState.dirs_check_popup_visible = false;
+                        }
+                    }
+                }
+
+                Rectangle { height: 1px; background: CediniaColors.divider; }
+
+                StatRow {
+                    label: Translations.directories_check_label_included_text;
+                    value: AppState.dirs_check_included_text;
+                    fg: CediniaColors.success;
+                }
+                StatRow {
+                    label: Translations.directories_check_label_excluded_text;
+                    value: AppState.dirs_check_excluded_text;
+                    fg: CediniaColors.danger;
+                }
+                StatRow {
+                    label: Translations.directories_check_label_referenced_text;
+                    value: AppState.dirs_check_referenced_text;
+                    fg: CediniaColors.accent_light;
+                }
+
+                Rectangle { height: 1px; background: CediniaColors.divider; }
+
+                StatRow {
+                    label: Translations.directories_check_label_would_scan_text;
+                    value: AppState.dirs_check_would_scan_text;
+                    fg: CediniaColors.text_primary;
+                }
+                StatRow {
+                    label: Translations.directories_check_label_processable_text;
+                    value: AppState.dirs_check_processable_text;
+                    fg: CediniaColors.text_primary;
+                }
+
+                if AppState.dirs_check_done && AppState.dirs_check_no_processable : Rectangle {
+                    background: CediniaColors.danger.with-alpha(0.1);
+                    border-radius: 6px;
+                    border-width: 1px;
+                    border-color: CediniaColors.danger.with-alpha(0.4);
+                    height: warn_layout.preferred-height + 16px;
+
+                    warn_layout := HorizontalLayout {
+                        padding: 8px;
+                        spacing: 6px;
+                        Text {
+                            text: "⚠";
+                            font-size: 14px;
+                            color: CediniaColors.danger;
+                            horizontal-stretch: 0.0;
+                            vertical-alignment: center;
+                        }
+                        Text {
+                            text: Translations.directories_check_warning_no_processable_text;
+                            color: CediniaColors.danger;
+                            font-size: 12px;
+                            horizontal-stretch: 1.0;
+                            vertical-alignment: center;
+                            wrap: word-wrap;
+                        }
+                    }
+                }
+
+                if AppState.dirs_check_running : Text {
+                    text: Translations.directories_check_scanning_text
+                        + (AppState.dirs_check_progress_text != "" ? " " + AppState.dirs_check_progress_text : "");
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    horizontal-alignment: center;
+                }
+
+                HorizontalLayout {
+                    spacing: 8px;
+
+                    if !AppState.dirs_check_running : TouchButton {
+                        label: Translations.directories_check_button_text;
+                        horizontal-stretch: 1.0;
+                        bg: CediniaColors.accent_muted;
+                        fg: CediniaColors.accent_light;
+                        clicked => { AppState.start_dirs_check(); }
+                    }
+
+                    if AppState.dirs_check_running : TouchButton {
+                        label: Translations.stop_text;
+                        horizontal-stretch: 1.0;
+                        bg: CediniaColors.danger.with-alpha(0.3);
+                        fg: CediniaColors.danger;
+                        clicked => { AppState.stop_dirs_check(); }
                     }
                 }
             }

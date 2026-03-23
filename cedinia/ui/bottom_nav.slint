@@ -17,7 +17,6 @@ component NavItem {
         height: root.height;
         background: ta.has-hover ? CediniaColors.ripple : transparent;
         animate background { duration: 100ms; }
-        border-radius: 8px;
 
         ta := TouchArea {
             clicked => {
@@ -31,11 +30,10 @@ component NavItem {
         VerticalLayout {
             alignment: LayoutAlignment.center;
             spacing: 3px;
-            padding-top: 6px;
             padding-bottom: 6px;
 
             Rectangle {
-                height: 3px;
+                height: 5px;
                 horizontal-stretch: 0.0;
                 background: root.is_active ? CediniaColors.accent : transparent;
                 border-radius: 2px;
@@ -86,9 +84,9 @@ component DynamicToolItem {
       : Translations.app_name_text;
 
     property <image> t_icon:
-        t == ActiveTool.SimilarImages    ? @image-url("icons/image.svg")
-      : t == ActiveTool.EmptyFolders     ? @image-url("icons/folder_empty.svg")
-      : @image-url("icons/duplicate.svg");
+        t == ActiveTool.SimilarImages    ? @image-url("../icons/cedinia_image.svg")
+      : t == ActiveTool.EmptyFolders     ? @image-url("../icons/cedinia_folder_empty.svg")
+      : @image-url("../icons/cedinia_duplicate.svg");
 
     property <bool> is_active: AppState.active_tool == root.t;
 
@@ -97,11 +95,10 @@ component DynamicToolItem {
         height: root.height;
         background: ta.has-hover ? CediniaColors.ripple : transparent;
         animate background { duration: 100ms; }
-        border-radius: 8px;
 
         ta := TouchArea {
             clicked => {
-                if AppState.active_tool != root.t {
+                if (AppState.active_tool != root.t) {
                     AppState.active_tool = root.t;
                     AppState.tool_changed(root.t);
                 }
@@ -111,15 +108,13 @@ component DynamicToolItem {
         VerticalLayout {
             alignment: LayoutAlignment.center;
             spacing: 3px;
-            padding-top: 6px;
             padding-bottom: 6px;
 
             Rectangle {
-                height: 3px;
+                height: 5px;
                 horizontal-stretch: 0.0;
                 background: root.is_active ? CediniaColors.accent : transparent;
-                border-radius: 2px;
-                animate background { duration: 150ms; }
+                animate background { duration: 250ms; }
             }
 
             Image {
@@ -127,7 +122,7 @@ component DynamicToolItem {
                 colorize: root.is_active ? CediniaColors.nav_active : CediniaColors.nav_inactive;
                 horizontal-alignment: ImageHorizontalAlignment.center;
                 vertical-alignment: ImageVerticalAlignment.center;
-                animate colorize { duration: 150ms; }
+                animate colorize { duration: 250ms; }
             }
 
             Text {
@@ -137,7 +132,7 @@ component DynamicToolItem {
                 font-weight: root.is_active ? 700 : 400;
                 horizontal-alignment: TextHorizontalAlignment.center;
                 overflow: elide;
-                animate color { duration: 150ms; }
+                animate color { duration: 250ms; }
             }
         }
     }
@@ -164,7 +159,7 @@ export component BottomNavBar {
                 horizontal-stretch: 1.0;
                 label: Translations.nav_home_text;
                 tool: ActiveTool.Home;
-                icon: @image-url("icons/home.svg");
+                icon: @image-url("../icons/cedinia_home.svg");
             }
 
             DynamicToolItem {
@@ -175,14 +170,14 @@ export component BottomNavBar {
                 horizontal-stretch: 1.0;
                 label: Translations.nav_dirs_text;
                 tool: ActiveTool.Directories;
-                icon: @image-url("icons/folder.svg");
+                icon: @image-url("../icons/cedinia_folder.svg");
             }
 
             NavItem {
                 horizontal-stretch: 1.0;
                 label: Translations.nav_settings_text;
                 tool: ActiveTool.Settings;
-                icon: @image-url("icons/more.svg");
+                icon: @image-url("../icons/cedinia_more.svg");
             }
         }
     }

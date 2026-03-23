@@ -7,6 +7,68 @@ import { Translations } from "translations.slint";
 
 export component SettingsScreen {
 
+    if diag_confirm_action != "" : Rectangle {
+        z: 100;
+        background: #00000099;
+        TouchArea { clicked => { diag_confirm_action = ""; } }
+
+        Rectangle {
+            width: min(parent.width - 48px, 360px);
+            height: diag_confirm_content.preferred-height + 32px;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            border-radius: 16px;
+            background: CediniaColors.bg_elevated;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #00000088;
+
+            diag_confirm_content := VerticalLayout {
+                padding: 24px;
+                spacing: 16px;
+
+                Text {
+                    text: diag_confirm_action == "thumbnails"
+                        ? Translations.diag_confirm_clear_thumbnails_text
+                        : Translations.diag_confirm_clear_cache_text;
+                    color: CediniaColors.text_primary;
+                    font-size: 16px;
+                    font-weight: 600;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    wrap: word-wrap;
+                }
+
+                HorizontalLayout {
+                    spacing: 12px;
+
+                    TouchButton {
+                        label: Translations.cancel_text;
+                        horizontal-stretch: 1.0;
+                        bg: CediniaColors.bg_elevated;
+                        fg: CediniaColors.text_secondary;
+                        clicked => { diag_confirm_action = ""; }
+                    }
+
+                    TouchButton {
+                        label: Translations.ok_text;
+                        horizontal-stretch: 1.0;
+                        bg: CediniaColors.danger;
+                        fg: #ffffff;
+                        clicked => {
+                            if (diag_confirm_action == "thumbnails") {
+                                AppState.clear_thumbnails_cache();
+                            } else {
+                                AppState.clear_app_cache();
+                            }
+                            diag_confirm_action = "";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if AppState.collect_test_done : Rectangle {
         z: 100;
         background: #00000099;
@@ -54,7 +116,7 @@ export component SettingsScreen {
                     }
                     Row {
                         Text { text: Translations.collect_test_time_text; color: CediniaColors.text_secondary; font-size: 14px; }
-                        Text { text: AppState.collect_test_result.elapsed_ms + Translations.collect_test_ms_text; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                        Text { text: AppState.collect_test_result.elapsed_time; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
                     }
                 }
 
@@ -70,6 +132,7 @@ export component SettingsScreen {
 
 
     property <SettingsTab> active_tab: SettingsTab.General;
+    property <string> diag_confirm_action: "";
 
 
     changed active_tab => {
@@ -127,6 +190,36 @@ export component SettingsScreen {
         }
 
 
+        if active_tab == SettingsTab.General && AppState.system_notifications_blocked : Rectangle {
+            height: 52px;
+            background: CediniaColors.warning.with-alpha(0.12);
+            border-width: 1px;
+            border-color: CediniaColors.warning.with-alpha(0.5);
+
+            HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 12px;
+                spacing: 8px;
+
+                Text {
+                    text: "🔔 " + Translations.notifications_disabled_banner_text;
+                    color: CediniaColors.warning;
+                    font-size: 13px;
+                    font-weight: 600;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    horizontal-stretch: 1.0;
+                }
+
+                TouchButton {
+                    label: Translations.notifications_enable_button_text;
+                    bg: CediniaColors.warning;
+                    fg: #000000;
+                    min_h: 36px;
+                    clicked => { AppState.open_notification_settings(); }
+                }
+            }
+        }
+
         Flickable {
             vertical-stretch: 1.0;
             viewport-height: max(tab_content.preferred-height, self.height);
@@ -152,6 +245,19 @@ export component SettingsScreen {
                         value <=> GeneralSettings.ignore_hidden;
                     }
                     Divider {}
+                    ToggleRow {
+                        label: Translations.settings_show_notification_text;
+                        description: Translations.settings_show_notification_desc_text;
+                        value <=> GeneralSettings.show_notification;
+                    }
+                    Divider {}
+                    ToggleRow {
+                        label: Translations.settings_notify_only_background_text;
+                        description: Translations.settings_notify_only_background_desc_text;
+                        value <=> GeneralSettings.notify_only_background;
+                        enabled: GeneralSettings.show_notification;
+                    }
+                    Divider {}
 
                     CategoryLabel { label: Translations.settings_filters_label_text; }
 
@@ -174,7 +280,7 @@ export component SettingsScreen {
                     DropdownRow {
                         options: GeneralSettings.language_options;
                         selected <=> GeneralSettings.language_idx;
-                        changed_selection(_) => { AppState.apply_language_change(); }
+                        changed_selection(not_used) => { AppState.apply_language_change(); }
                     }
                     Divider {}
 
@@ -260,6 +366,13 @@ export component SettingsScreen {
                     ToggleRow { label: Translations.settings_ignore_same_size_text; value <=> SimilarImagesSettings.ignore_same_size; }
                     Divider {}
 
+                    ToggleRow {
+                        label: Translations.settings_gallery_image_fit_cover_text;
+                        description: Translations.settings_gallery_image_fit_cover_desc_text;
+                        value <=> SimilarImagesSettings.gallery_image_fit_cover;
+                    }
+                    Divider {}
+
 
                     ToolGroupHeader { label: Translations.settings_big_files_header_text; emoji: "📦"; }
 
@@ -303,8 +416,46 @@ export component SettingsScreen {
                     }
                     Divider {}
 
+                    if SameMusicSettings.check_method_idx == 1 : Rectangle {
+                        height: fp_text.preferred-height + 24px;
+                        background: CediniaColors.warning.with-alpha(0.10);
+                        border-width: 1px;
+                        border-color: CediniaColors.warning.with-alpha(0.40);
+                        Text {
+                            x: 12px;
+                            y: (parent.height - self.preferred-height) / 2;
+                            text: "⚠";
+                            color: CediniaColors.warning;
+                            font-size: 14px;
+                        }
+                        fp_text := Text {
+                            x: 32px;
+                            y: 12px;
+                            width: parent.width - 44px;
+                            text: Translations.same_music_fingerprint_warning_text;
+                            color: CediniaColors.warning;
+                            font-size: 12px;
+                            wrap: word-wrap;
+                        }
+                    }
+                    Divider {}
+
 
                     ToolGroupHeader { label: Translations.settings_broken_files_header_text; emoji: "⚠"; }
+
+                    Rectangle {
+                        height: note_text.preferred-height + 16px;
+                        background: CediniaColors.bg_elevated;
+                        note_text := Text {
+                            x: 16px;
+                            y: 8px;
+                            width: parent.width - 32px;
+                            text: Translations.settings_broken_files_note_text;
+                            color: CediniaColors.text_secondary;
+                            font-size: 12px;
+                            wrap: word-wrap;
+                        }
+                    }
 
                     CategoryLabel { label: Translations.settings_broken_files_types_label_text; }
                     ToggleRow { label: Translations.settings_broken_image_text;  value <=> BrokenFilesSettings.check_image; }
@@ -336,177 +487,14 @@ export component SettingsScreen {
                 if active_tab == SettingsTab.Diagnostics : VerticalLayout {
                     spacing: 0px;
 
-                    CategoryLabel { label: Translations.diagnostics_header_text; }
-
-                    // Storage permission row
-                    Rectangle {
-                        height: 72px;
-                        background: CediniaColors.bg_surface;
-                        HorizontalLayout {
-                            padding-left: 16px;
-                            padding-right: 16px;
-                            padding-top: 10px;
-                            padding-bottom: 10px;
-                            spacing: 12px;
-
-                            VerticalLayout {
-                                alignment: LayoutAlignment.center;
-                                horizontal-stretch: 1.0;
-                                spacing: 2px;
-                                Text {
-                                    text: Translations.permission_title_text;
-                                    color: CediniaColors.text_primary;
-                                    font-size: 15px;
-                                }
-                                Text {
-                                    text: AppState.storage_permission_granted
-                                        ? "✅ " + Translations.grant_text
-                                        : "❌ " + Translations.no_permission_scan_warning_text;
-                                    color: AppState.storage_permission_granted
-                                        ? CediniaColors.success
-                                        : CediniaColors.danger;
-                                    font-size: 12px;
-                                }
-                            }
-
-                            if !AppState.storage_permission_granted : TouchButton {
-                                label: Translations.grant_text;
-                                bg: CediniaColors.warning;
-                                fg: #000000;
-                                min_h: 44px;
-                                clicked => { AppState.request_storage_permission(); }
-                            }
-                        }
-                    }
-                    Divider {}
-
-                    // Collect test row
-                    Rectangle {
-                        height: 72px;
-                        background: CediniaColors.bg_surface;
-                        HorizontalLayout {
-                            padding-left: 16px;
-                            padding-right: 16px;
-                            padding-top: 10px;
-                            padding-bottom: 10px;
-                            spacing: 12px;
-
-                            VerticalLayout {
-                                alignment: LayoutAlignment.center;
-                                horizontal-stretch: 1.0;
-                                spacing: 2px;
-                                Text {
-                                    text: Translations.diagnostics_collect_test_text;
-                                    color: CediniaColors.text_primary;
-                                    font-size: 15px;
-                                }
-                                Text {
-                                    text: Translations.diagnostics_collect_test_desc_text;
-                                    color: CediniaColors.text_secondary;
-                                    font-size: 12px;
-                                }
-                            }
-
-                            if !AppState.collect_test_running : TouchButton {
-                                label: Translations.diagnostics_collect_test_run_text;
-                                bg: CediniaColors.accent;
-                                fg: #000000;
-                                min_h: 44px;
-                                clicked => { AppState.run_collect_test(); }
-                            }
-
-                            if AppState.collect_test_running : TouchButton {
-                                label: Translations.diagnostics_collect_test_stop_text;
-                                bg: CediniaColors.warning;
-                                fg: #000000;
-                                min_h: 44px;
-                                clicked => { AppState.stop_collect_test(); }
-                            }
-                        }
-                    }
-                    Divider {}
-
-                    CategoryLabel { label: Translations.cache_label_text; }
-
-                    // Cache sizes + refresh row
-                    Rectangle {
-                        height: 60px;
-                        background: CediniaColors.bg_surface;
-                        HorizontalLayout {
-                            padding-left: 16px;
-                            padding-right: 16px;
-                            padding-top: 10px;
-                            padding-bottom: 10px;
-                            spacing: 8px;
-
-                            VerticalLayout {
-                                alignment: LayoutAlignment.center;
-                                horizontal-stretch: 1.0;
-                                spacing: 2px;
-                                Text {
-                                    text: Translations.diagnostics_thumbnails_text + ": " + AppState.diag_thumbnails_size;
-                                    color: CediniaColors.text_primary;
-                                    font-size: 14px;
-                                }
-                                Text {
-                                    text: Translations.diagnostics_app_cache_text + ": " + AppState.diag_app_cache_size;
-                                    color: CediniaColors.text_secondary;
-                                    font-size: 12px;
-                                }
-                            }
-
-                            TouchButton {
-                                label: AppState.diag_refresh_running ? "..." : Translations.diagnostics_refresh_text;
-                                min_h: 36px;
-                                bg: CediniaColors.bg_elevated;
-                                fg: CediniaColors.text_secondary;
-                                enabled: !AppState.diag_refresh_running;
-                                clicked => { AppState.refresh_diag_cache_info(); }
-                            }
-                        }
-                    }
-                    Divider {}
-
-                    // Clear cache buttons row
-                    Rectangle {
-                        height: 56px;
-                        background: CediniaColors.bg_surface;
-                        HorizontalLayout {
-                            padding-left: 16px;
-                            padding-right: 16px;
-                            padding-top: 8px;
-                            padding-bottom: 8px;
-                            spacing: 8px;
-
-                            TouchButton {
-                                label: Translations.diagnostics_clear_thumbnails_text;
-                                horizontal-stretch: 1.0;
-                                min_h: 40px;
-                                bg: CediniaColors.danger.with-alpha(0.7);
-                                fg: #ffffff;
-                                clicked => { AppState.clear_thumbnails_cache(); }
-                            }
-
-                            TouchButton {
-                                label: Translations.diagnostics_clear_cache_text;
-                                horizontal-stretch: 1.0;
-                                min_h: 40px;
-                                bg: CediniaColors.danger.with-alpha(0.5);
-                                fg: #ffffff;
-                                clicked => { AppState.clear_app_cache(); }
-                            }
-                        }
-                    }
-                    Divider {}
-
                     CategoryLabel { label: Translations.about_app_label_text; }
 
-                    // Logo – full width, nothing beside it
+                    // Logo - full width, nothing beside it
                     Rectangle {
                         height: 140px;
                         background: CediniaColors.bg_surface;
                         Image {
-                            source: @image-url("../icons/logo.svg");
+                            source: @image-url("../icons/cedinia_logo.svg");
                             width: min(parent.width - 32px, 260px);
                             height: 120px;
                             x: (parent.width - self.width) / 2;
@@ -514,12 +502,11 @@ export component SettingsScreen {
                             image-fit: ImageFit.contain;
                         }
                     }
-                    Divider {}
 
                     // App name and description
                     Rectangle {
                         background: CediniaColors.bg_surface;
-                        height: info_vl.preferred-height + 24px;
+                        height: info_vl.preferred-height;
                         info_vl := VerticalLayout {
                             padding-left: 16px;
                             padding-right: 16px;
@@ -548,7 +535,6 @@ export component SettingsScreen {
                             }
                         }
                     }
-                    Divider {}
 
                     // Links row
                     Rectangle {
@@ -590,6 +576,281 @@ export component SettingsScreen {
                         }
                     }
                     Divider {}
+
+                    CategoryLabel { label: Translations.diagnostics_header_text; }
+
+                    // Storage permission row
+                    Rectangle {
+                        height: 72px;
+                        background: CediniaColors.bg_surface;
+                        HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 12px;
+
+                            VerticalLayout {
+                                alignment: LayoutAlignment.center;
+                                horizontal-stretch: 1.0;
+                                spacing: 2px;
+                                Text {
+                                    text: "🔒 " + Translations.permission_title_text;
+                                    color: CediniaColors.text_primary;
+                                    font-size: 15px;
+                                }
+                                Text {
+                                    text: AppState.storage_permission_granted
+                                        ? Translations.grant_text
+                                        : Translations.no_permission_scan_warning_text;
+                                    color: AppState.storage_permission_granted
+                                        ? CediniaColors.success
+                                        : CediniaColors.danger;
+                                    font-size: 12px;
+                                }
+                            }
+
+                            if !AppState.storage_permission_granted : TouchButton {
+                                label: Translations.grant_text;
+                                bg: CediniaColors.warning;
+                                fg: #000000;
+                                min_h: 44px;
+                                clicked => { AppState.request_storage_permission(); }
+                            }
+                        }
+                    }
+                    Divider {}
+
+                    // Collect test row
+                    Rectangle {
+                        height: collect_test_hl.preferred-height;
+                        background: CediniaColors.bg_surface;
+                        collect_test_hl := HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 12px;
+
+                            VerticalLayout {
+                                alignment: LayoutAlignment.center;
+                                horizontal-stretch: 1.0;
+                                spacing: 2px;
+                                Text {
+                                    text: Translations.diagnostics_collect_test_text;
+                                    color: CediniaColors.text_primary;
+                                    font-size: 15px;
+                                }
+                                Text {
+                                    text: Translations.diagnostics_collect_test_desc_text;
+                                    color: CediniaColors.text_secondary;
+                                    font-size: 12px;
+                                }
+                                if AppState.collect_test_cancelled : Text {
+                                    text: Translations.collect_test_cancelled_text;
+                                    color: CediniaColors.warning;
+                                    font-size: 11px;
+                                    font-weight: 600;
+                                }
+                            }
+                            VerticalLayout {
+                                alignment: center;
+                                TouchButton {
+                                    label: AppState.collect_test_running ? Translations.diagnostics_collect_test_stop_text: Translations.diagnostics_collect_test_run_text;
+                                    bg: AppState.collect_test_running ? CediniaColors.warning: CediniaColors.accent;
+                                    fg: #000000;
+                                    min_h: 44px;
+                                    clicked => { 
+                                        if (AppState.collect_test_running) {
+                                            AppState.stop_collect_test(); 
+                                        } else {
+                                            AppState.run_collect_test();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Divider {}
+
+                    CategoryLabel { label: Translations.cache_label_text; }
+
+                    // Cache sizes row
+                    Rectangle {
+                        height: 56px;
+                        background: CediniaColors.bg_surface;
+                        VerticalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            alignment: LayoutAlignment.center;
+                            spacing: 2px;
+                            Text {
+                                text: Translations.diagnostics_thumbnails_text + ": " + AppState.diag_thumbnails_size;
+                                color: CediniaColors.text_primary;
+                                font-size: 14px;
+                            }
+                            Text {
+                                text: Translations.diagnostics_app_cache_text + ": " + AppState.diag_app_cache_size;
+                                color: CediniaColors.text_secondary;
+                                font-size: 12px;
+                            }
+                        }
+                    }
+                    Divider {}
+
+                    // Clear cache buttons row
+                    Rectangle {
+                        height: 56px;
+                        background: CediniaColors.bg_surface;
+                        HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 8px;
+                            padding-bottom: 8px;
+                            spacing: 8px;
+
+                            TouchButton {
+                                label: Translations.diagnostics_clear_thumbnails_text;
+                                horizontal-stretch: 1.0;
+                                min_h: 40px;
+                                bg: CediniaColors.danger.with-alpha(0.7);
+                                fg: #ffffff;
+                                clicked => { diag_confirm_action = "thumbnails"; }
+                            }
+
+                            TouchButton {
+                                label: Translations.diagnostics_clear_cache_text;
+                                horizontal-stretch: 1.0;
+                                min_h: 40px;
+                                bg: CediniaColors.danger.with-alpha(0.5);
+                                fg: #ffffff;
+                                clicked => { diag_confirm_action = "cache"; }
+                            }
+                        }
+                    }
+
+
+                    CategoryLabel { label: Translations.licenses_label_text; }
+
+                    Rectangle {
+                        height: lic_row_hl.preferred-height;
+                        background: CediniaColors.bg_surface;
+                        lic_row_hl := HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 12px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 12px;
+
+                            VerticalLayout {
+                                alignment: LayoutAlignment.center;
+                                horizontal-stretch: 1.0;
+                                spacing: 2px;
+                                Text {
+                                    text: "Cedinia";
+                                    color: CediniaColors.text_primary;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                }
+                                Text {
+                                    text: "GPL-3.0-or-later";
+                                    color: CediniaColors.success;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                }
+                            }
+
+                            VerticalLayout {
+                                alignment: LayoutAlignment.center;
+                                TouchButton {
+                                    label: Translations.third_party_licenses_text;
+                                    min_h: 44px;
+                                    bg: CediniaColors.accent_muted;
+                                    fg: CediniaColors.accent_light;
+                                    clicked => { AppState.show_third_party_licenses(); }
+                                }
+                            }
+                        }
+                    }
+                    Divider {}
+                }
+            }
+        }
+    }
+
+    // ── Third-party licenses popup ────────────────────────────────────────
+    if AppState.licenses_popup_visible : Rectangle {
+        z: 100;
+        x: 0; y: 0;
+        width: root.width; height: root.height;
+        background: #00000099;
+        TouchArea { clicked => { AppState.licenses_popup_visible = false; } }
+
+        Rectangle {
+            x: 16px;
+            y: 32px;
+            width: root.width - 32px;
+            height: root.height - 64px;
+            background: CediniaColors.bg_surface;
+            border-radius: 12px;
+            clip: true;
+
+            VerticalLayout {
+                spacing: 0px;
+
+                Rectangle {
+                    height: 52px;
+                    background: CediniaColors.bg_surface;
+                    HorizontalLayout {
+                        padding-left: 16px;
+                        padding-right: 8px;
+                        spacing: 8px;
+                        Text {
+                            text: Translations.licenses_popup_title_text;
+                            color: CediniaColors.accent_light;
+                            font-size: 15px;
+                            font-weight: 700;
+                            vertical-alignment: TextVerticalAlignment.center;
+                            horizontal-stretch: 1.0;
+                        }
+                        VerticalLayout {
+                            alignment: LayoutAlignment.center;
+                            Rectangle {
+                                width: 36px;
+                                height: 36px;
+                                border-radius: 18px;
+                                vertical-stretch: 0.0;
+                                background: lic_close_ta.has-hover ? CediniaColors.ripple : transparent;
+                                lic_close_ta := TouchArea {
+                                    clicked => { AppState.licenses_popup_visible = false; }
+                                }
+                                Text {
+                                    text: "X";
+                                    color: CediniaColors.text_secondary;
+                                    font-size: 16px;
+                                    horizontal-alignment: center;
+                                    vertical-alignment: center;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Rectangle { height: 1px; background: CediniaColors.divider; }
+
+                Flickable {
+                    vertical-stretch: 1.0;
+                    viewport-height: max(lic_text.preferred-height + 24px, self.height);
+
+                    lic_text := Text {
+                        x: 12px;
+                        y: 12px;
+                        width: parent.width - 24px;
+                        text: AppState.licenses_text;
+                        color: CediniaColors.text_secondary;
+                        font-size: 11px;
+                        wrap: word-wrap;
+                    }
                 }
             }
         }

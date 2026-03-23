@@ -9,8 +9,8 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use slint::{ComponentHandle, Model, ModelRc, SharedString, Timer, TimerMode, VecModel, Weak};
 
 use crate::callbacks::{
-    DeleteEvent, build_dir_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_open_path, wire_open_url, wire_permission,
-    wire_save_settings_now, wire_scan, wire_selection,
+    DeleteEvent, build_excluded_model, build_included_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_licenses_popup,
+    wire_notification_settings, wire_open_path, wire_open_url, wire_permission, wire_save_settings_now, wire_scan, wire_selection,
 };
 use crate::model::make_file_model;
 use crate::scan_runner::{FileItem, ScanResult, ScanResultHandler, start_worker};
@@ -27,6 +27,7 @@ thread_local! {
         slint::Weak<MainWindow>,
         Rc<std::cell::RefCell<Vec<PathBuf>>>,
         Rc<std::cell::RefCell<Vec<PathBuf>>>,
+        Rc<std::cell::RefCell<Vec<PathBuf>>>,
     )>> = const { std::cell::RefCell::new(None) };
 }
 
@@ -35,18 +36,19 @@ pub fn on_directory_picked(path: String, is_include: bool) {
     log::info!("on_directory_picked: path='{}' is_include={}", path, is_include);
     DIR_STATE.with(|cell| {
         let guard = cell.borrow();
-        if let Some((weak, inc, exc)) = guard.as_ref() {
+        if let Some((weak, inc, exc, refr)) = guard.as_ref() {
             if let Some(win) = weak.upgrade() {
                 if is_include {
                     inc.borrow_mut().push(PathBuf::from(&path));
                 } else {
                     exc.borrow_mut().push(PathBuf::from(&path));
                 }
-                win.set_directories_model(build_dir_model(&inc.borrow(), &exc.borrow()));
+                win.set_included_dirs_model(build_included_model(&inc.borrow(), &refr.borrow()));
+                win.set_excluded_dirs_model(build_excluded_model(&exc.borrow()));
 
                 let settings = crate::settings::collect_settings_from_gui(&win);
                 crate::settings::save_settings(&settings);
-                crate::settings::save_dirs(&inc.borrow(), &exc.borrow());
+                crate::settings::save_dirs(&inc.borrow(), &exc.borrow(), &refr.borrow());
             }
         }
     });
@@ -101,6 +103,7 @@ fn build_gallery_groups(items: &[FileItem], placeholder: &slint::Image) -> Vec<S
                 flat_idx: flat_idx as i32,
                 thumbnail: placeholder.clone(),
                 checked: false,
+                is_reference: item.is_reference,
             });
         }
     }
@@ -145,13 +148,14 @@ fn rebuild_similar_images_after_delete(win: &MainWindow, deleted: &std::collecti
             new_flat.push(FileEntry {
                 checked: false,
                 is_header: true,
+                is_reference: false,
                 val_str: ModelRc::new(VecModel::from(vec![
                     group.label.clone(),
                     SharedString::default(),
                     SharedString::default(),
                     SharedString::default(),
                 ])),
-                val_int: ModelRc::new(VecModel::from(vec![])),
+                val_int: ModelRc::new(VecModel::from(Vec::new())),
             });
 
             let mut final_items: Vec<SimilarImageItem> = Vec::new();
@@ -160,8 +164,9 @@ fn rebuild_similar_images_after_delete(win: &MainWindow, deleted: &std::collecti
                 new_flat.push(FileEntry {
                     checked: false,
                     is_header: false,
+                    is_reference: false,
                     val_str: item.val_str.clone(),
-                    val_int: ModelRc::new(VecModel::from(vec![])),
+                    val_int: ModelRc::new(VecModel::from(Vec::new())),
                 });
                 final_items.push(item);
             }
@@ -232,6 +237,8 @@ impl ScanResultHandler for GuiHandler {
                     let groups = build_gallery_groups(&items, &ph);
                     win.set_similar_images_model(make_file_model(items));
                     win.set_similar_images_groups(ModelRc::new(VecModel::from(groups)));
+
+                    win.global::<AppState>().set_gallery_scroll_y(0.0);
 
                     let mut cancel_guard = thumb_cancel.lock().unwrap();
                     cancel_guard.store(true, Ordering::Relaxed);
@@ -319,6 +326,10 @@ impl ScanResultHandler for GuiHandler {
                             crate::flc!("status_no_results")
                         };
                         win.global::<AppState>().set_status_message(SharedString::from(status));
+                        if win.global::<crate::GeneralSettings>().get_show_notification() {
+                            let only_bg = win.global::<crate::GeneralSettings>().get_notify_only_background();
+                            crate::notifications::send_scan_completed(file_count, only_bg);
+                        }
                     }
                 })
                 .expect("Failed to invoke progress update in event loop");
@@ -340,12 +351,15 @@ fn run_app_inner(
     let loaded_settings = load_settings();
     crate::localizer_cedinia::apply_language_preference(&loaded_settings.language);
     apply_settings_to_gui(&window, &loaded_settings);
-    set_initial_gui_infos(&window);
     translate_items(&window);
+    set_initial_gui_infos(&window);
     window.global::<AppState>().set_status_message(SharedString::from(crate::flc!("status_ready")));
 
     let bot_lp = inset_bottom_px / scale;
     window.global::<AppState>().set_inset_bottom(bot_lp);
+
+    #[cfg(target_os = "android")]
+    window.global::<AppState>().set_is_desktop(false);
 
     #[cfg(target_os = "android")]
     {
@@ -369,9 +383,10 @@ fn run_app_inner(
         }
     }
 
-    let (saved_included, saved_excluded) = load_dirs();
+    let (saved_included, saved_excluded, saved_referenced) = load_dirs();
     let included_dirs = Rc::new(std::cell::RefCell::new(if saved_included.is_empty() { vec![home_dir()] } else { saved_included }));
     let excluded_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>> = Rc::new(std::cell::RefCell::new(saved_excluded));
+    let referenced_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>> = Rc::new(std::cell::RefCell::new(saved_referenced));
     let scan_gen: Arc<AtomicU32> = Arc::new(AtomicU32::new(0));
 
     let (thumb_tx, thumb_rx) = std::sync::mpsc::channel::<crate::thumbnail_loader::ThumbnailResult>();
@@ -389,25 +404,147 @@ fn run_app_inner(
 
     #[cfg(target_os = "android")]
     DIR_STATE.with(|cell| {
-        *cell.borrow_mut() = Some((window.as_weak(), included_dirs.clone(), excluded_dirs.clone()));
+        *cell.borrow_mut() = Some((window.as_weak(), included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone()));
     });
 
-    window.set_directories_model(build_dir_model(&included_dirs.borrow(), &excluded_dirs.borrow()));
+    window.set_included_dirs_model(build_included_model(&included_dirs.borrow(), &referenced_dirs.borrow()));
+    window.set_excluded_dirs_model(build_excluded_model(&excluded_dirs.borrow()));
 
     let (delete_tx, delete_rx) = std::sync::mpsc::channel::<DeleteEvent>();
     let delete_rx = Rc::new(std::cell::RefCell::new(delete_rx));
     let delete_stop: Rc<std::cell::RefCell<Arc<AtomicBool>>> = Rc::new(std::cell::RefCell::new(Arc::new(AtomicBool::new(false))));
 
-    wire_scan(&window, stop_flag, scan_tx, included_dirs.clone(), scan_gen.clone());
+    wire_scan(&window, stop_flag, scan_tx, included_dirs.clone(), referenced_dirs.clone(), scan_gen.clone());
     wire_permission(&window);
+    wire_notification_settings(&window);
     wire_selection(&window, delete_tx, Rc::clone(&delete_stop));
-    wire_directories(&window, included_dirs.clone(), excluded_dirs.clone());
+    wire_directories(&window, included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone());
     wire_collect_test(&window);
     wire_open_path(&window);
     wire_language_change(&window);
     wire_open_url(&window);
     wire_cache_info(&window);
-    wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone());
+    wire_licenses_popup(&window);
+    wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone());
+
+    let gallery_momentum: Rc<std::cell::RefCell<f32>> = Rc::new(std::cell::RefCell::new(0.0));
+    let list_momentum: Rc<std::cell::RefCell<f32>> = Rc::new(std::cell::RefCell::new(0.0));
+    let list_max_scroll: Rc<std::cell::RefCell<f32>> = Rc::new(std::cell::RefCell::new(0.0));
+
+    {
+        let weak_g = window.as_weak();
+        let mom = Rc::clone(&gallery_momentum);
+        window.global::<AppState>().on_gallery_swiped(move |total_delta, vel_px| {
+            if let Some(win) = weak_g.upgrade() {
+                let current = win.global::<AppState>().get_gallery_scroll_y();
+                let max_scroll = win.global::<AppState>().get_gallery_max_scroll_f();
+
+                let new_y = (current + total_delta).clamp(-max_scroll, 0.0);
+                win.global::<AppState>().set_gallery_scroll_y(new_y);
+
+                const VEL_THRESHOLD: f32 = 4.0;
+                *mom.borrow_mut() = if vel_px.abs() < VEL_THRESHOLD { 0.0 } else { vel_px * 1.5 };
+            }
+        });
+    }
+
+    {
+        let mom = Rc::clone(&gallery_momentum);
+        window.global::<AppState>().on_gallery_stop_momentum(move || {
+            *mom.borrow_mut() = 0.0;
+        });
+    }
+
+    {
+        let weak_l = window.as_weak();
+        let mom_l = Rc::clone(&list_momentum);
+        let max_l = Rc::clone(&list_max_scroll);
+        window.global::<AppState>().on_list_swiped(move |total_delta, vel_px| {
+            if let Some(win) = weak_l.upgrade() {
+                let current = win.global::<AppState>().get_list_scroll_y();
+                let max_scroll = win.global::<AppState>().get_list_max_scroll_f();
+
+                let new_y = (current + total_delta).clamp(-max_scroll, 0.0);
+                win.global::<AppState>().set_list_scroll_y(new_y);
+
+                // Keep a local copy so the momentum timer doesn't need an extra
+                // AppState round-trip every frame.
+                *max_l.borrow_mut() = max_scroll;
+
+                const VEL_THRESHOLD: f32 = 4.0;
+                *mom_l.borrow_mut() = if vel_px.abs() < VEL_THRESHOLD { 0.0 } else { vel_px * 1.5 };
+            }
+        });
+    }
+
+    {
+        let mom_l = Rc::clone(&list_momentum);
+        window.global::<AppState>().on_list_stop_momentum(move || {
+            *mom_l.borrow_mut() = 0.0;
+        });
+    }
+
+    let scroll_timer = Timer::default();
+    {
+        let weak_sc = window.as_weak();
+        let mom_sc = Rc::clone(&gallery_momentum);
+        let list_mom_sc = Rc::clone(&list_momentum);
+        let list_max_sc = Rc::clone(&list_max_scroll);
+        scroll_timer.start(TimerMode::Repeated, std::time::Duration::from_millis(16), move || {
+            // ── Gallery fling ─────────────────────────────────────────────
+            {
+                let mut mom = mom_sc.borrow_mut();
+                if mom.abs() > 0.3 {
+                    if let Some(win) = weak_sc.upgrade() {
+                        let current = win.global::<AppState>().get_gallery_scroll_y();
+                        let max_scroll = win.global::<AppState>().get_gallery_max_scroll_f();
+                        let new_y = (current + *mom).clamp(-max_scroll, 0.0);
+                        win.global::<AppState>().set_gallery_scroll_y(new_y);
+
+                        *mom *= 0.95;
+
+                        if new_y >= 0.0 || new_y <= -max_scroll {
+                            *mom = 0.0;
+                        }
+                    }
+                } else if let Some(win) = weak_sc.upgrade() {
+                    let max_s = win.global::<AppState>().get_gallery_max_scroll_f();
+                    let cur = win.global::<AppState>().get_gallery_scroll_y();
+                    if max_s > 0.0 && cur < -max_s {
+                        win.global::<AppState>().set_gallery_scroll_y(-max_s);
+                    } else if cur > 0.0 {
+                        win.global::<AppState>().set_gallery_scroll_y(0.0);
+                    }
+                }
+            }
+            // ── List fling ────────────────────────────────────────────────
+            {
+                let mut mom = list_mom_sc.borrow_mut();
+                if mom.abs() > 0.3 {
+                    if let Some(win) = weak_sc.upgrade() {
+                        let current = win.global::<AppState>().get_list_scroll_y();
+                        let max_scroll = *list_max_sc.borrow();
+                        let new_y = (current + *mom).clamp(-max_scroll, 0.0);
+                        win.global::<AppState>().set_list_scroll_y(new_y);
+
+                        *mom *= 0.95;
+
+                        if new_y >= 0.0 || new_y <= -max_scroll {
+                            *mom = 0.0;
+                        }
+                    }
+                } else if let Some(win) = weak_sc.upgrade() {
+                    let max_s = *list_max_sc.borrow();
+                    let cur = win.global::<AppState>().get_list_scroll_y();
+                    if max_s > 0.0 && cur < -max_s {
+                        win.global::<AppState>().set_list_scroll_y(-max_s);
+                    } else if cur > 0.0 {
+                        win.global::<AppState>().set_list_scroll_y(0.0);
+                    }
+                }
+            }
+        });
+    }
 
     let weak = window.as_weak();
     let thumb_rx = Rc::new(std::cell::RefCell::new(thumb_rx));
@@ -601,6 +738,7 @@ fn run_app_inner(
                 }
             }
         }
+
         #[cfg(target_os = "android")]
         {
             perm_poll_counter += 1;
@@ -608,6 +746,8 @@ fn run_app_inner(
                 perm_poll_counter = 0;
                 let granted = crate::file_picker_android::check_storage_permission();
                 win.global::<AppState>().set_storage_permission_granted(granted);
+                let blocked = !crate::notifications::are_system_notifications_enabled();
+                win.global::<AppState>().set_system_notifications_blocked(blocked);
             }
         }
     });
@@ -616,7 +756,7 @@ fn run_app_inner(
 
     let current_settings = collect_settings_from_gui(&window);
     save_settings(&current_settings);
-    save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow());
+    save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow(), &referenced_dirs.borrow());
 }
 
 pub(crate) fn setup_logger_cache() {

@@ -30,8 +30,8 @@ pub fn get_config_cache_path() -> Option<ConfigCachePath> {
 /// calling `set_config_cache_path`, so that `czkawka_core` stays package-agnostic.
 ///
 /// Android paths used:
-///   cache  – $DATA_DIR/cache/<name>
-///   config – $DATA_DIR/files/<name>
+///   cache  - $DATA_DIR/cache/<name>
+///   config - $DATA_DIR/files/<name>
 #[cfg(target_os = "android")]
 fn android_default_dirs(cache_name: &str, config_name: &str) -> (Option<PathBuf>, Option<PathBuf>) {
     let base = match env::var("DATA_DIR").or_else(|_| env::var("HOME")) {

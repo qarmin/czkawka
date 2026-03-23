@@ -35,4 +35,9 @@ charts*
 result
 .direnv
 cedinia/android/keystore/*.keystore
+cedinia/android/app/build/
+cedinia/android/app/src/main/jniLibs/
+cedinia/android/.gradle/
 cedinia/docs
+*.aab
+*.gz

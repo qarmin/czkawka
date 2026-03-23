@@ -1,0 +1,154 @@
+import { CediniaColors } from "colors.slint";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MomentumScrollView
+//
+// A vertically-scrolling container with natural fling / inertia driven by Rust.
+//
+// Minimal wiring example:
+//
+//   scroll_view := MomentumScrollView {
+//       vertical-stretch: 1.0;
+//       scroll_y  <=> AppState.foo_scroll_y;
+//       swiped(d, v, m) => {
+//           AppState.foo_max_scroll_f = m;   // keep Rust's bounds in sync
+//           AppState.foo_swiped(d, v);
+//       }
+//       stop_momentum => { AppState.foo_stop_momentum(); }
+//
+//       // Children are laid out vertically inside the scrollable area.
+//       SomeRow { ... }
+//   }
+//
+// To cancel long-press timers in children when the scroll gesture is claimed:
+//
+//   SomeRow {
+//       scroll_swiping: scroll_view.is_swiping;
+//   }
+//
+// Optional property:
+//   lock_vertical  – when true the vertical SGR will not claim new gestures
+//                    (used by the gallery when a horizontal per-row SGR owns
+//                     the pointer).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export component MomentumScrollView {
+
+    // ── Public interface ──────────────────────────────────────────────────
+
+    // Scroll offset (negative = scrolled down).  Driven by Rust during fling.
+    in-out property <length> scroll_y: 0px;
+
+    // When true the vertical SGR will not claim new gestures.
+    in property <bool> lock_vertical: false;
+
+    // True while the user's finger is actively dragging the content.
+    // Children can bind their lp-cancel property to this value.
+    out property <bool> is_swiping: sgr.swiping;
+
+    // Fired on finger-up.
+    //   total_delta  : full vertical displacement of this gesture (px)
+    //   vel_ema      : EMA velocity at release (px per touch-event)
+    //   max_scroll_f : current scroll bound in px; pass to Rust so it can
+    //                  clamp the fling without an extra AppState round-trip
+    callback swiped(float /*total_delta*/, float /*vel_ema*/, float /*max_scroll_f*/);
+
+    // Stop any ongoing fling animation (call when user touches again).
+    callback stop_momentum();
+
+    // ── Internal scroll geometry ──────────────────────────────────────────
+
+    property <length> max_scroll: max(0px, content_vl.preferred-height - root.height);
+
+    // ── Scrollbar indicator ───────────────────────────────────────────────
+
+    property <float> content_f:   max(1.0, content_vl.preferred-height / 1px);
+    property <float> viewport_f:  root.height / 1px;
+    property <float> ind_h_f:     max(30.0, viewport_f * viewport_f / content_f);
+    property <length> ind_h:      ind_h_f * 1px;
+    property <float>  scroll_ratio: max_scroll > 0px
+        ? max(0.0, min(1.0, -root.scroll_y / max_scroll))
+        : 0.0;
+
+    // ── EMA velocity tracking ─────────────────────────────────────────────
+    // Uses only sgr built-in properties (swiping, current/pressed-position).
+    // These have NO layout dependencies → ChangeTracker is safe and will
+    // never trigger "Recursion detected".
+    //
+    // vel_ema : exponential moving-average of velocity (px per touch-event).
+    //           Decays to ~0 in ≈2-3 events when the finger is still, which
+    //           eliminates the "catapult" effect on slow-but-long swipes.
+
+    property <float> vel_ema:        0.0;
+    property <float> vel_prev_delta: 0.0;
+
+    property <float> live_delta_y: sgr.swiping
+        ? (sgr.current-position.y - sgr.pressed-position.y) / 1px
+        : 0.0;
+    changed live_delta_y => {
+        if sgr.swiping {
+            let inc = live_delta_y - vel_prev_delta;
+            // EMA: 40 % new sample, 60 % history.  Half-life ≈ 1.4 events.
+            vel_ema        = inc * 0.4 + vel_ema * 0.6;
+            vel_prev_delta = live_delta_y;
+        } else {
+            // Gesture ended – reset anchor; retain vel_ema for the swiped callback.
+            vel_prev_delta = 0.0;
+        }
+    }
+
+    // Stop any ongoing fling the moment the user's finger lands.
+    property <bool> touch_active: sgr.swiping;
+    changed touch_active => {
+        if touch_active {
+            root.stop_momentum();
+            // Reset velocity state so the previous gesture's EMA doesn't bleed in.
+            vel_ema        = 0.0;
+            vel_prev_delta = 0.0;
+        }
+    }
+
+    // ── Layout ────────────────────────────────────────────────────────────
+
+    sgr := SwipeGestureHandler {
+        handle-swipe-up:   !root.lock_vertical;
+        handle-swipe-down: !root.lock_vertical;
+
+        swiped => {
+            root.swiped(
+                (self.current-position.y - self.pressed-position.y) / 1px,
+                vel_ema,
+                max_scroll / 1px
+            );
+        }
+
+        Rectangle {
+            clip: true;
+
+            content_vl := VerticalLayout {
+                property <length> live_y: 0px;
+                // scroll_y is updated by the swiped callback in the same event
+                // frame that live_y resets to 0, so there is no visible snap.
+                y: root.scroll_y + live_y;
+                height: self.preferred-height;
+                states [
+                    swiping when sgr.swiping : {
+                        live_y: sgr.current-position.y - sgr.pressed-position.y;
+                    }
+                ]
+                @children
+            }
+        }
+    }
+
+    // Scrollbar pill — only visible when content overflows the viewport.
+    if max_scroll > 0px : Rectangle {
+        x: root.width - 8px;
+        y: scroll_ratio * (root.height - ind_h);
+        width: 4px;
+        height: ind_h;
+        border-radius: 2px;
+        background: CediniaColors.text_disabled.with-alpha(0.5);
+        z: 5;
+    }
+}

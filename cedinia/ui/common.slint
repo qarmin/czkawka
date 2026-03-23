@@ -31,16 +31,16 @@ export enum ScanState {
 
 
 export struct SimilarImageItem {
-    full_path:  string,
-    name:       string,
-    size:       string,
+    full_path:   string,
+    name:        string,
+    size:        string,
 
-    val_str:    [string],
-    flat_idx:   int,
-    thumbnail:  image,
+    val_str:     [string],
+    flat_idx:    int,
+    thumbnail:   image,
 
-
-    checked:    bool,
+    checked:     bool,
+    is_reference: bool,
 }
 
 
@@ -57,6 +57,7 @@ export struct ProgressData {
 export struct FileEntry {
     checked: bool,
     is_header: bool,
+    is_reference: bool,
 
     val_str: [string],
     val_int: [int],
@@ -70,6 +71,8 @@ export global FileEntryIdx {
 export struct DirectoryEntry {
     path: string,
     is_included: bool,
+    is_referenced: bool,
+    exists: bool,
 }
 export struct VolumeEntry {
     path: string,
@@ -81,5 +84,5 @@ export struct CollectTestResult {
     volumes:      int,
     files:        int,
     folders:      int,
-    elapsed_ms:   int,
+    elapsed_time: string,
 }

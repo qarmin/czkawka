@@ -21,7 +21,7 @@ krokiet_info_message =
 
         PS: Tato zpráva by měla být zobrazena pouze jednou. Pokud se zobrazí znovu, nastavte proměnnou CZKAWKA_DONT_ANNOY_ME na libovolnou neprázdnou hodnotu.
 # Main window
-music_title_checkbox = Hlava 1 – Celkem
+music_title_checkbox = Hlava 1 - Celkem
 music_artist_checkbox = Umělec
 music_year_checkbox = Rok
 music_bitrate_checkbox = Přenosová rychlost

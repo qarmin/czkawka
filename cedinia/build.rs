@@ -15,7 +15,7 @@ fn main() {
 fn compile_android_java() {
     use android_build::{Dexer, JavaBuild};
 
-    let java_files = ["java/CediniaActivity.java", "java/CediniaFilePicker.java"];
+    let java_files = ["java/CediniaActivity.java", "java/CediniaFilePicker.java", "java/CediniaPickerFragment.java"];
 
     let out_dir: PathBuf = env::var_os("OUT_DIR").expect("OUT_DIR environment variable not set").into();
     let out_class_dir = out_dir.join("java_classes");
