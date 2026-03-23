@@ -122,11 +122,7 @@ pub(crate) fn connect_progress_json(progress_receiver: &Receiver<ProgressData>) 
         };
 
         if let Ok(json) = serde_json::to_string(&progress_data) {
-            // Wrap in an object that includes the human-readable stage name
-            let _ = writeln!(
-                stderr,
-                "{{\"progress\":{json},\"stage_name\":\"{stage_name}\"}}"
-            );
+            let _ = writeln!(stderr, "{{\"progress\":{json},\"stage_name\":\"{stage_name}\"}}");
         }
     }
 }
