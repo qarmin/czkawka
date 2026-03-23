@@ -79,6 +79,7 @@ class AppState(QObject):
         config_file = self._config_path / "settings.json"
         data = {
             "included_paths": self.settings.included_paths,
+            "reference_paths": list(self.settings.reference_paths),
             "excluded_paths": self.settings.excluded_paths,
             "excluded_items": self.settings.excluded_items,
             "allowed_extensions": self.settings.allowed_extensions,
@@ -109,6 +110,7 @@ class AppState(QObject):
                 data = json.loads(config_file.read_text())
                 s = self.settings
                 s.included_paths = data.get("included_paths", s.included_paths)
+                s.reference_paths = set(data.get("reference_paths", []))
                 s.excluded_paths = data.get("excluded_paths", s.excluded_paths)
                 s.excluded_items = data.get("excluded_items", s.excluded_items)
                 s.allowed_extensions = data.get("allowed_extensions", s.allowed_extensions)

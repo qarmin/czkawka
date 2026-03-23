@@ -187,6 +187,15 @@ class ScanWorker(QObject):
         if s.thread_number > 0:
             cmd.extend(["-T", str(s.thread_number)])
 
+        # Reference directories (only for grouped tools that support -r)
+        if s.reference_paths and self.tab in (
+            ActiveTab.DUPLICATE_FILES, ActiveTab.SIMILAR_IMAGES,
+            ActiveTab.SIMILAR_VIDEOS, ActiveTab.SIMILAR_MUSIC,
+        ):
+            ref_dirs = [p for p in s.reference_paths if p in s.included_paths]
+            if ref_dirs:
+                cmd.extend(["-r", ",".join(ref_dirs)])
+
         # Tool-specific args
         if self.tab == ActiveTab.DUPLICATE_FILES:
             cmd.extend(["-s", ts.dup_check_method.value])
