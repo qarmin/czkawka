@@ -10,24 +10,47 @@ class SaveDialog:
     """Save/load results to/from file."""
 
     @staticmethod
-    def save(parent, results: list, save_as_json: bool = False) -> bool:
+    def save(parent, results: list, save_as_json: bool = False,
+             tool_name: str = "") -> bool:
+        # Build a task-specific default filename
+        slug = tool_name.lower().replace(" ", "_") if tool_name else "results"
+        from datetime import datetime
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        default_name = f"czkawka_{slug}_{stamp}"
+
         if save_as_json:
             filter_str = "JSON Files (*.json);;All Files (*)"
             default_ext = ".json"
         else:
-            filter_str = "Text Files (*.txt);;JSON Files (*.json);;All Files (*)"
+            filter_str = "Text Files (*.txt);;JSON Files (*.json);;CSV Files (*.csv);;All Files (*)"
             default_ext = ".txt"
 
         path, selected_filter = QFileDialog.getSaveFileName(
-            parent, "Save Results", f"results{default_ext}", filter_str
+            parent, f"Save {tool_name or 'Results'}",
+            f"{default_name}{default_ext}", filter_str
         )
         if not path:
             return False
 
         use_json = save_as_json or path.endswith(".json") or "JSON" in selected_filter
+        use_csv = path.endswith(".csv") or "CSV" in selected_filter
 
         try:
-            if use_json:
+            if use_csv:
+                import csv
+                with open(path, "w", newline="") as f:
+                    writer = csv.writer(f)
+                    # Write header from first non-header entry
+                    cols = []
+                    for entry in results:
+                        if not entry.header_row:
+                            cols = [k for k in entry.values.keys() if not k.startswith("__")]
+                            writer.writerow(cols)
+                            break
+                    for entry in results:
+                        if not entry.header_row:
+                            writer.writerow([entry.values.get(k, "") for k in cols])
+            elif use_json:
                 data = []
                 for entry in results:
                     if entry.header_row:

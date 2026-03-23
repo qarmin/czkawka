@@ -5,7 +5,7 @@ use std::thread;
 
 use clap::Parser;
 use commands::Commands;
-use crossbeam_channel::{Receiver, Sender, unbounded};
+use crossbeam_channel::{Receiver, Sender, bounded};
 use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::image::register_image_decoding_hooks;
@@ -66,7 +66,7 @@ fn main() {
     }
 
     let json_progress = command.get_json_progress();
-    let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
+    let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = bounded(256);
     let stop_flag = Arc::new(AtomicBool::new(false));
     let store_flag_cloned = stop_flag.clone();
 

@@ -1,3 +1,5 @@
+import os
+
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListWidget,
     QPushButton, QFileDialog, QTextEdit, QStackedWidget,
@@ -16,6 +18,7 @@ class BottomPanel(QWidget):
         super().__init__(parent)
         self._settings = settings
         self.setMaximumHeight(200)
+        self.setAcceptDrops(True)
         self._setup_ui()
 
     def _setup_ui(self):
@@ -133,6 +136,19 @@ class BottomPanel(QWidget):
             self._exc_list.takeItem(row)
             self._settings.excluded_paths.pop(row)
             self.directories_changed.emit()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        for url in event.mimeData().urls():
+            path = url.toLocalFile()
+            if path and os.path.isdir(path):
+                if path not in self._settings.included_paths:
+                    self._settings.included_paths.append(path)
+                    self._inc_list.addItem(path)
+                    self.directories_changed.emit()
 
     def refresh_lists(self):
         self._inc_list.clear()

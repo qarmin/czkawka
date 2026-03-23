@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QHeaderView,
-    QAbstractItemView, QMenu, QLabel, QHBoxLayout
+    QAbstractItemView, QMenu, QLabel, QHBoxLayout, QLineEdit
 )
 from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QColor, QBrush, QFont, QAction
@@ -80,8 +80,72 @@ class ResultsView(QWidget):
         # Resizable columns
         header.setSectionResizeMode(QHeaderView.Interactive)
         header.setStretchLastSection(True)
+        header.setContextMenuPolicy(Qt.CustomContextMenu)
+        header.customContextMenuRequested.connect(self._on_header_context_menu)
+
+        # Filter bar
+        self._filter_edit = QLineEdit()
+        self._filter_edit.setPlaceholderText("Filter results by filename or path...")
+        self._filter_edit.setClearButtonEnabled(True)
+        self._filter_edit.textChanged.connect(self._apply_filter)
+        layout.addWidget(self._filter_edit)
 
         layout.addWidget(self._tree)
+
+    def _on_header_context_menu(self, pos):
+        """Right-click header to show/hide columns."""
+        columns = TAB_COLUMNS.get(self._active_tab, [])
+        menu = QMenu(self)
+        header = self._tree.header()
+        for i, col_name in enumerate(columns):
+            if i == 0:  # Don't hide selection column
+                continue
+            action = QAction(col_name, self)
+            action.setCheckable(True)
+            action.setChecked(not header.isSectionHidden(i))
+            action.toggled.connect(lambda checked, idx=i: header.setSectionHidden(idx, not checked))
+            menu.addAction(action)
+        menu.exec_(header.mapToGlobal(pos))
+
+    def _apply_filter(self, text: str):
+        """Show/hide tree items based on filter text."""
+        text = text.lower()
+        for i in range(self._tree.topLevelItemCount()):
+            item = self._tree.topLevelItem(i)
+            entry = item.data(0, Qt.UserRole)
+            if not entry:
+                continue
+            if entry.header_row:
+                # Show header if any child in its group matches
+                item.setHidden(False)  # Will be hidden later if no children visible
+                continue
+            if not text:
+                item.setHidden(False)
+            else:
+                name = str(entry.values.get("File Name", "")).lower()
+                path = str(entry.values.get("Path", "")).lower()
+                full = str(entry.values.get("__full_path", "")).lower()
+                item.setHidden(text not in name and text not in path and text not in full)
+
+        # Hide group headers with no visible children
+        if text and self._active_tab in GROUPED_TABS:
+            i = 0
+            while i < self._tree.topLevelItemCount():
+                item = self._tree.topLevelItem(i)
+                entry = item.data(0, Qt.UserRole)
+                if entry and entry.header_row:
+                    # Check if any following non-header items are visible
+                    has_visible = False
+                    for j in range(i + 1, self._tree.topLevelItemCount()):
+                        next_item = self._tree.topLevelItem(j)
+                        next_entry = next_item.data(0, Qt.UserRole)
+                        if next_entry and next_entry.header_row:
+                            break
+                        if not next_item.isHidden():
+                            has_visible = True
+                            break
+                    item.setHidden(not has_visible)
+                i += 1
 
     def set_active_tab(self, tab: ActiveTab):
         self._active_tab = tab
@@ -288,6 +352,15 @@ class ResultsView(QWidget):
                 deselect_action.triggered.connect(lambda: self._set_check(item, False))
                 menu.addAction(deselect_action)
 
+                # Compare action (when 2 items are selected)
+                selected_items = self._tree.selectedItems()
+                data_items = [it for it in selected_items if it.data(0, Qt.UserRole) and not it.data(0, Qt.UserRole).header_row]
+                if len(data_items) == 2:
+                    menu.addSeparator()
+                    compare_action = QAction("Compare Selected", self)
+                    compare_action.triggered.connect(lambda: self._compare_items(data_items[0], data_items[1]))
+                    menu.addAction(compare_action)
+
                 menu.exec_(self._tree.viewport().mapToGlobal(pos))
 
     def _open_file(self, entry: ResultEntry):
@@ -316,6 +389,14 @@ class ResultsView(QWidget):
 
     def _set_check(self, item, checked):
         item.setCheckState(0, Qt.Checked if checked else Qt.Unchecked)
+
+    def _compare_items(self, item1, item2):
+        from .dialogs.diff_dialog import DiffDialog
+        entry1 = item1.data(0, Qt.UserRole)
+        entry2 = item2.data(0, Qt.UserRole)
+        if entry1 and entry2:
+            dialog = DiffDialog(entry1, entry2, self)
+            dialog.exec()
 
     # ── Summary / selection ──────────────────────────────────
 
