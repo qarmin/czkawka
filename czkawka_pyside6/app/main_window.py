@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSplitter,
     QStatusBar, QMessageBox, QLabel, QApplication
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QStandardPaths
 from PySide6.QtGui import QPalette, QColor
 
 from .state import AppState
@@ -485,83 +485,29 @@ class MainWindow(QMainWindow):
         self._bottom_panel.refresh_lists()
 
     def _apply_theme(self):
-        """Apply dark theme to the application."""
-        if not self._state.settings.dark_theme:
-            return
+        """Apply minimal styling that works with the system theme.
 
+        KDE compliance: we inherit the desktop theme (Breeze, Adwaita, etc.)
+        and only add small layout tweaks that don't override colors.
+        """
         app = QApplication.instance()
-        palette = QPalette()
 
-        # Dark theme colors
-        palette.setColor(QPalette.Window, QColor(43, 43, 43))
-        palette.setColor(QPalette.WindowText, QColor(210, 210, 210))
-        palette.setColor(QPalette.Base, QColor(30, 30, 30))
-        palette.setColor(QPalette.AlternateBase, QColor(38, 38, 38))
-        palette.setColor(QPalette.ToolTipBase, QColor(50, 50, 50))
-        palette.setColor(QPalette.ToolTipText, QColor(210, 210, 210))
-        palette.setColor(QPalette.Text, QColor(210, 210, 210))
-        palette.setColor(QPalette.Button, QColor(53, 53, 53))
-        palette.setColor(QPalette.ButtonText, QColor(210, 210, 210))
-        palette.setColor(QPalette.BrightText, QColor(255, 255, 255))
-        palette.setColor(QPalette.Link, QColor(86, 140, 210))
-        palette.setColor(QPalette.Highlight, QColor(60, 100, 150))
-        palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
-        palette.setColor(QPalette.Disabled, QPalette.Text, QColor(128, 128, 128))
-        palette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor(128, 128, 128))
-
-        app.setPalette(palette)
-
-        # Additional stylesheet
+        # Only apply layout polish — no color overrides so the system
+        # theme (Breeze dark/light, Adwaita, etc.) is fully respected.
         app.setStyleSheet("""
-            QMainWindow { background-color: #2b2b2b; }
-            QSplitter::handle { background-color: #404040; width: 2px; }
-            QTreeWidget { border: 1px solid #404040; }
+            QSplitter::handle { width: 2px; }
             QTreeWidget::item { padding: 2px; }
-            QTreeWidget::item:alternate { background-color: #262626; }
-            QTreeWidget::item:selected { background-color: #3c6496; }
-            QListWidget { border: 1px solid #404040; }
             QListWidget::item { padding: 3px; }
-            QListWidget::item:selected { background-color: #3c6496; }
-            QGroupBox { border: 1px solid #505050; border-radius: 4px;
-                        margin-top: 8px; padding-top: 8px; }
-            QGroupBox::title { subcontrol-origin: margin; left: 10px;
-                               padding: 0 4px; }
-            QPushButton { padding: 5px 12px; border: 1px solid #555;
-                          border-radius: 3px; background-color: #404040; }
-            QPushButton:hover { background-color: #505050; }
-            QPushButton:pressed { background-color: #353535; }
-            QPushButton:disabled { background-color: #333; color: #666; }
-            QComboBox { padding: 4px; border: 1px solid #555;
-                        border-radius: 3px; background-color: #404040; }
-            QComboBox:hover { background-color: #505050; }
-            QComboBox QAbstractItemView { background-color: #353535;
-                                          border: 1px solid #555;
-                                          selection-background-color: #3c6496; }
-            QLineEdit { padding: 4px; border: 1px solid #555;
-                        border-radius: 3px; background-color: #353535; }
-            QSpinBox { padding: 4px; border: 1px solid #555;
-                       border-radius: 3px; background-color: #353535; }
-            QSlider::groove:horizontal { height: 6px; background: #404040;
-                                         border-radius: 3px; }
-            QSlider::handle:horizontal { width: 14px; margin: -4px 0;
-                                          background: #888; border-radius: 7px; }
-            QSlider::handle:horizontal:hover { background: #aaa; }
-            QProgressBar { border: 1px solid #555; border-radius: 3px;
-                           text-align: center; background-color: #353535; }
-            QProgressBar::chunk { background-color: #3c6496; border-radius: 2px; }
+            QGroupBox { border-radius: 4px; margin-top: 8px; padding-top: 8px; }
+            QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }
+            QPushButton { padding: 5px 12px; }
+            QComboBox { padding: 4px; }
+            QLineEdit { padding: 4px; }
+            QSpinBox { padding: 4px; }
+            QProgressBar { text-align: center; }
             QScrollArea { border: none; }
-            QTabWidget::pane { border: 1px solid #555; }
-            QTabBar::tab { padding: 6px 16px; border: 1px solid #555;
-                           border-bottom: none; border-radius: 3px 3px 0 0;
-                           background-color: #353535; }
-            QTabBar::tab:selected { background-color: #404040; }
-            QTabBar::tab:hover { background-color: #505050; }
-            QStatusBar { background-color: #2b2b2b; border-top: 1px solid #404040; }
             QCheckBox { spacing: 6px; }
-            QCheckBox::indicator { width: 16px; height: 16px; }
-            QTextEdit { border: 1px solid #404040; background-color: #1e1e1e; }
-            QHeaderView::section { background-color: #353535; padding: 4px;
-                                    border: 1px solid #404040; }
+            QHeaderView::section { padding: 4px; }
         """)
 
     def _auto_detect_cli(self):

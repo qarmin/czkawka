@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, QStandardPaths
 from .models import (
     ActiveTab, AppSettings, ToolSettings, ResultEntry, ScanProgress
 )
@@ -32,7 +32,9 @@ class AppState(QObject):
         self.progress = ScanProgress()
         self.info_text = ""
         self.preview_image_path = ""
-        self._config_path = Path.home() / ".config" / "czkawka_pyside6"
+        # Use QStandardPaths for XDG-compliant config location
+        config_dir = QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation)
+        self._config_path = Path(config_dir) if config_dir else Path.home() / ".config" / "czkawka"
         self._config_path.mkdir(parents=True, exist_ok=True)
         self.load_settings()
 

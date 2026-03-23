@@ -27,7 +27,9 @@ class PreviewPanel(QWidget):
         layout.setContentsMargins(4, 4, 4, 4)
 
         self._title = QLabel("Preview")
-        self._title.setStyleSheet("font-weight: bold; font-size: 12px; padding: 2px;")
+        font = self._title.font()
+        font.setBold(True)
+        self._title.setFont(font)
         self._title.setAlignment(Qt.AlignCenter)
         layout.addWidget(self._title)
 
@@ -35,16 +37,14 @@ class PreviewPanel(QWidget):
         self._image_label.setAlignment(Qt.AlignCenter)
         self._image_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self._image_label.setMinimumSize(QSize(180, 180))
-        self._image_label.setStyleSheet(
-            "background-color: #1a1a1a; border: 1px solid #333; border-radius: 4px;"
-        )
+        self._image_label.setFrameShape(QLabel.StyledPanel)
         self._image_label.setScaledContents(False)
         layout.addWidget(self._image_label)
 
         self._info_label = QLabel()
         self._info_label.setAlignment(Qt.AlignCenter)
         self._info_label.setWordWrap(True)
-        self._info_label.setStyleSheet("color: #888; font-size: 10px; padding: 2px;")
+        self._info_label.setEnabled(False)
         layout.addWidget(self._info_label)
 
     def show_preview(self, file_path: str):

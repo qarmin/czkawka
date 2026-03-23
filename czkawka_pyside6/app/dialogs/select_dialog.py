@@ -30,7 +30,7 @@ class SelectDialog(QDialog):
         layout = QVBoxLayout(self)
 
         label = QLabel("Choose selection mode:")
-        label.setStyleSheet("font-size: 13px; padding: 4px;")
+        label.setContentsMargins(4, 4, 4, 4)
         layout.addWidget(label)
 
         for mode, name in self.MODES:
