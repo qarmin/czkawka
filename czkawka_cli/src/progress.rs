@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::time::Duration;
 
 use crossbeam_channel::Receiver;
@@ -95,6 +96,39 @@ pub(crate) fn get_progress_message(progress_data: &ProgressData) -> String {
         | CurrentStage::ExifRemoverCacheSaving => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
     }
     .to_string()
+}
+
+/// Output progress data as JSON lines to stderr for machine consumption.
+/// Each line is a complete JSON object that can be parsed independently.
+pub(crate) fn connect_progress_json(progress_receiver: &Receiver<ProgressData>) {
+    let stderr = std::io::stderr();
+    let mut stderr = stderr.lock();
+    while let Ok(progress_data) = progress_receiver.recv() {
+        // Build a JSON object with human-readable stage name included
+        let stage_name = if progress_data.sstage == CurrentStage::CollectingFiles {
+            if progress_data.tool_type == ToolType::EmptyFolders {
+                "Collecting folders".to_string()
+            } else {
+                "Collecting files".to_string()
+            }
+        } else if progress_data.sstage.check_if_loading_saving_cache() {
+            if progress_data.sstage.check_if_loading_cache() {
+                "Loading cache".to_string()
+            } else {
+                "Saving cache".to_string()
+            }
+        } else {
+            get_progress_message(&progress_data)
+        };
+
+        if let Ok(json) = serde_json::to_string(&progress_data) {
+            // Wrap in an object that includes the human-readable stage name
+            let _ = writeln!(
+                stderr,
+                "{{\"progress\":{json},\"stage_name\":\"{stage_name}\"}}"
+            );
+        }
+    }
 }
 
 pub(crate) fn get_progress_bar_for_collect_files() -> ProgressBar {

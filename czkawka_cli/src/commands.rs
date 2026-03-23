@@ -115,6 +115,27 @@ pub enum Commands {
     ExifRemover(ExifRemoverArgs),
 }
 
+impl Commands {
+    pub fn get_json_progress(&self) -> bool {
+        match self {
+            Commands::Duplicates(a) => a.common_cli_items.json_progress,
+            Commands::EmptyFolders(a) => a.common_cli_items.json_progress,
+            Commands::BiggestFiles(a) => a.common_cli_items.json_progress,
+            Commands::EmptyFiles(a) => a.common_cli_items.json_progress,
+            Commands::Temporary(a) => a.common_cli_items.json_progress,
+            Commands::SimilarImages(a) => a.common_cli_items.json_progress,
+            Commands::SameMusic(a) => a.common_cli_items.json_progress,
+            Commands::InvalidSymlinks(a) => a.common_cli_items.json_progress,
+            Commands::BrokenFiles(a) => a.common_cli_items.json_progress,
+            Commands::SimilarVideos(a) => a.common_cli_items.json_progress,
+            Commands::BadExtensions(a) => a.common_cli_items.json_progress,
+            Commands::BadNames(a) => a.common_cli_items.json_progress,
+            Commands::VideoOptimizer(a) => a.common_cli_items.json_progress,
+            Commands::ExifRemover(a) => a.common_cli_items.json_progress,
+        }
+    }
+}
+
 #[derive(Debug, clap::Args)]
 pub struct DuplicatesArgs {
     #[clap(flatten)]
@@ -848,6 +869,14 @@ pub struct CommonCliItems {
         long_help = "Disables the cache system. This will make scanning slower but ensures fresh results without cached data."
     )]
     pub disable_cache: bool,
+    #[clap(
+        long,
+        help = "Output progress as JSON lines to stderr",
+        long_help = "Outputs progress data as JSON lines to stderr for machine consumption. \
+                      Each line is a JSON object with fields: sstage, current_stage_idx, max_stage_idx, \
+                      entries_checked, entries_to_check, bytes_checked, bytes_to_check, tool_type."
+    )]
+    pub json_progress: bool,
 }
 
 #[derive(Debug, clap::Args, Clone, Copy)]

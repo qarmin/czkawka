@@ -44,13 +44,57 @@ czkawka_cli dup --help
 
 Example usage:
 ```shell
-czkawka dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo
-czkawka empty-folders -d /home/rafal/rr /home/gateway -f results.txt
-czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt
-czkawka empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
-czkawka temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D
-czkawka music -d /home/rafal -e /home/rafal/Pulpit -z "artist,year, ARTISTALBUM, ALBUM___tiTlE"  -f results.txt
-czkawka symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
+czkawka_cli dup -d /home/rafal -e /home/rafal/Obrazy  -m 25 -x 7z rar IMAGE -s hash -f results.txt -D aeo
+czkawka_cli empty-folders -d /home/rafal/rr /home/gateway -f results.txt
+czkawka_cli big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -x VIDEO -f results.txt
+czkawka_cli empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
+czkawka_cli temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D
+czkawka_cli music -d /home/rafal -e /home/rafal/Pulpit -z "artist,year, ARTISTALBUM, ALBUM___tiTlE"  -f results.txt
+czkawka_cli symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
+```
+
+## JSON output
+
+Results can be saved as compact or pretty-printed JSON:
+
+```shell
+czkawka_cli dup -d /home/user --compact-file-to-save results.json
+czkawka_cli dup -d /home/user --pretty-json-file-to-save results.json
+```
+
+## Machine-readable progress (`--json-progress`)
+
+The `--json-progress` flag outputs real-time progress data as JSON lines to stderr. This is used by GUI frontends (such as the PySide6 frontend) to display accurate progress bars.
+
+Each line is a JSON object with the following structure:
+```json
+{
+  "progress": {
+    "sstage": "DuplicatePreHashing",
+    "checking_method": "Hash",
+    "current_stage_idx": 2,
+    "max_stage_idx": 6,
+    "entries_checked": 50000,
+    "entries_to_check": 94500,
+    "bytes_checked": 204800000,
+    "bytes_to_check": 387072000,
+    "tool_type": "Duplicate"
+  },
+  "stage_name": "Calculating prehashes"
+}
+```
+
+Fields:
+- `sstage` - Internal stage identifier (e.g., `CollectingFiles`, `DuplicateFullHashing`, `SimilarImagesComparingHashes`)
+- `current_stage_idx` / `max_stage_idx` - Current stage number and total stages (e.g., 2/6 for duplicates)
+- `entries_checked` / `entries_to_check` - Files processed and total to process
+- `bytes_checked` / `bytes_to_check` - Bytes processed and total (for hashing stages)
+- `stage_name` - Human-readable stage description
+
+Example usage:
+```shell
+# Capture progress on stderr while saving results to JSON
+czkawka_cli dup -d /home/user --json-progress -N --compact-file-to-save results.json 2>progress.jsonl
 ```
 
 ## LICENSE

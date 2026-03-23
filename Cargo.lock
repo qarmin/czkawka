@@ -1638,6 +1638,7 @@ dependencies = [
  "humansize",
  "indicatif",
  "log",
+ "serde_json",
 ]
 
 [[package]]
