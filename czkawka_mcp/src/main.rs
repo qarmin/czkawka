@@ -23,9 +23,7 @@ use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
-use czkawka_core::tools::video_optimizer::{
-    VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeParams,
-};
+use czkawka_core::tools::video_optimizer::{VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerParameters, VideoTranscodeParams};
 use rmcp::model::{CallToolResult, Content, ServerCapabilities, ServerInfo};
 use rmcp::{ServerHandler, ServiceExt, tool};
 use schemars::JsonSchema;
@@ -102,10 +100,12 @@ fn run_and_serialize<T: AllTraits + PrintResults>(tool: &mut T) -> String {
     }
 }
 
+#[expect(clippy::unnecessary_wraps)]
 fn ok_result(json: String) -> Result<CallToolResult, rmcp::Error> {
     Ok(CallToolResult::success(vec![Content::text(json)]))
 }
 
+#[expect(clippy::unnecessary_wraps)]
 fn err_result(msg: String) -> Result<CallToolResult, rmcp::Error> {
     Ok(CallToolResult::error(vec![Content::text(msg)]))
 }
@@ -281,7 +281,9 @@ struct FindExifTagsParams {
 
 #[tool(tool_box)]
 impl CzkawkaServer {
-    #[tool(description = "Find duplicate files by hash, name, or size in specified directories. Returns groups of duplicate files. Read-only analysis, no files are modified or deleted.")]
+    #[tool(
+        description = "Find duplicate files by hash, name, or size in specified directories. Returns groups of duplicate files. Read-only analysis, no files are modified or deleted."
+    )]
     fn find_duplicates(&self, #[tool(aggr)] params: FindDuplicatesParams) -> Result<CallToolResult, rmcp::Error> {
         use czkawka_core::common::model::CheckingMethod;
         use czkawka_core::common::model::HashType;
@@ -301,9 +303,9 @@ impl CzkawkaServer {
         let dup_params = DuplicateFinderParameters::new(
             check_method,
             hash_type,
-            true,  // use_prehash_cache
-            0,     // minimal_cached_file_size
-            0,     // minimal_prehash_cache_file_size
+            true, // use_prehash_cache
+            0,    // minimal_cached_file_size
+            0,    // minimal_prehash_cache_file_size
             params.case_sensitive_name_comparison.unwrap_or(false),
         );
         let mut tool = DuplicateFinder::new(dup_params);
@@ -380,13 +382,7 @@ impl CzkawkaServer {
         let hash_size = params.hash_size.unwrap_or(16);
         let max_difference = params.max_difference.unwrap_or(3);
 
-        let si_params = SimilarImagesParameters::new(
-            max_difference,
-            hash_size,
-            hash_alg,
-            image_filter,
-            params.ignore_same_size.unwrap_or(false),
-        );
+        let si_params = SimilarImagesParameters::new(max_difference, hash_size, hash_alg, image_filter, params.ignore_same_size.unwrap_or(false));
         let mut tool = SimilarImages::new(si_params);
 
         apply_common(&mut tool, &params.common, params.reference_directories.as_deref());
@@ -415,12 +411,7 @@ impl CzkawkaServer {
         let music_similarity = if search_method == CheckingMethod::AudioTags {
             let sim_val = params.music_similarity.unwrap_or(0);
             if sim_val == 0 {
-                MusicSimilarity::TRACK_TITLE
-                    | MusicSimilarity::TRACK_ARTIST
-                    | MusicSimilarity::YEAR
-                    | MusicSimilarity::BITRATE
-                    | MusicSimilarity::GENRE
-                    | MusicSimilarity::LENGTH
+                MusicSimilarity::TRACK_TITLE | MusicSimilarity::TRACK_ARTIST | MusicSimilarity::YEAR | MusicSimilarity::BITRATE | MusicSimilarity::GENRE | MusicSimilarity::LENGTH
             } else {
                 MusicSimilarity::TRACK_TITLE
             }
@@ -433,8 +424,8 @@ impl CzkawkaServer {
             music_similarity,
             params.approximate_comparison.unwrap_or(false),
             search_method,
-            10.0, // minimum_segment_duration
-            2.0,  // maximum_difference
+            10.0,  // minimum_segment_duration
+            2.0,   // maximum_difference
             false, // compare_fingerprints_only_with_similar_titles
         );
         let mut tool = SameMusic::new(sm_params);
@@ -492,10 +483,10 @@ impl CzkawkaServer {
         let sv_params = SimilarVideosParameters::new(
             params.tolerance.unwrap_or(10),
             params.ignore_same_size.unwrap_or(false),
-            15,                  // skip_forward_amount (default)
-            10,                  // scan_duration (default, must be 2..=60)
-            Cropdetect::None,    // crop_detect
-            false,               // generate_thumbnails (no sense in MCP)
+            15,               // skip_forward_amount (default)
+            10,               // scan_duration (default, must be 2..=60)
+            Cropdetect::None, // crop_detect
+            false,            // generate_thumbnails (no sense in MCP)
             10,
             false,
             2,
@@ -541,7 +532,9 @@ impl CzkawkaServer {
         ok_result(run_and_serialize(&mut tool))
     }
 
-    #[tool(description = "Analyze videos for optimization opportunities (find videos that could be transcoded to better codecs or have black bars cropped). Read-only analysis, no files are modified.")]
+    #[tool(
+        description = "Analyze videos for optimization opportunities (find videos that could be transcoded to better codecs or have black bars cropped). Read-only analysis, no files are modified."
+    )]
     fn analyze_videos(&self, #[tool(aggr)] params: FindVideoOptimizerParams) -> Result<CallToolResult, rmcp::Error> {
         let mode = params.mode.as_deref().unwrap_or("transcode");
 
@@ -569,10 +562,10 @@ impl CzkawkaServer {
             "crop" => {
                 let vo_params = VideoOptimizerParameters::VideoCrop(VideoCropParams::with_custom_params(
                     VideoCroppingMechanism::BlackBars,
-                    16,   // black_pixel_threshold
-                    3,    // black_bar_percentage
-                    10,   // max_samples
-                    10,   // min_crop_size
+                    16,    // black_pixel_threshold
+                    3,     // black_bar_percentage
+                    10,    // max_samples
+                    10,    // min_crop_size
                     false, // generate_thumbnails
                     50,
                     false,
@@ -588,10 +581,7 @@ impl CzkawkaServer {
 
     #[tool(description = "Find image files that contain EXIF metadata tags (GPS location, camera info, etc). Read-only analysis, no tags are removed.")]
     fn find_exif_tags(&self, #[tool(aggr)] params: FindExifTagsParams) -> Result<CallToolResult, rmcp::Error> {
-        let ignored_tags_vec: Vec<String> = params
-            .ignored_tags
-            .map(|s| s.split(',').map(|tag| tag.trim().to_string()).collect())
-            .unwrap_or_default();
+        let ignored_tags_vec: Vec<String> = params.ignored_tags.map(|s| s.split(',').map(|tag| tag.trim().to_string()).collect()).unwrap_or_default();
 
         let er_params = ExifRemoverParameters::new(ignored_tags_vec);
         let mut tool = ExifRemover::new(er_params);
