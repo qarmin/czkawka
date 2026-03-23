@@ -6,7 +6,7 @@ use xxhash_rust::xxh3::Xxh3;
 use crate::common::traits::ResultEntry;
 use crate::tools::duplicate::MyHasher;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Default, Serialize, Deserialize)]
 pub enum ToolType {
     Duplicate,
     EmptyFolders,
