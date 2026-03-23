@@ -96,22 +96,6 @@ class LeftPanel(QWidget):
         # Tool list
         self._tool_list = QListWidget()
         self._tool_list.setSpacing(1)
-        font = QFont()
-        font.setPointSize(10)
-        self._tool_list.setFont(font)
-        self._tool_list.setStyleSheet("""
-            QListWidget::item {
-                padding: 4px 8px;
-                border-left: 3px solid transparent;
-            }
-            QListWidget::item:selected {
-                border-left: 3px solid #6fbf73;
-                background-color: #353535;
-            }
-            QListWidget::item:hover {
-                background-color: #49494926;
-            }
-        """)
 
         for tab in self.TOOL_TABS:
             item = QListWidgetItem(TAB_DISPLAY_NAMES[tab])
@@ -126,7 +110,7 @@ class LeftPanel(QWidget):
         # Version label
         version_label = QLabel("Czkawka PySide6 v11.0.1")
         version_label.setAlignment(Qt.AlignCenter)
-        version_label.setStyleSheet("color: #666; font-size: 9px; padding: 2px;")
+        version_label.setEnabled(False)
         layout.addWidget(version_label)
 
     def _on_item_changed(self, current, previous):

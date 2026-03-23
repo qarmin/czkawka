@@ -25,7 +25,10 @@ class SettingsPanel(QWidget):
         # Header
         header = QHBoxLayout()
         title = QLabel("Settings")
-        title.setStyleSheet("font-weight: bold; font-size: 16px; padding: 4px;")
+        font = title.font()
+        font.setBold(True)
+        font.setPointSize(font.pointSize() + 2)
+        title.setFont(font)
         header.addWidget(title)
         header.addStretch()
         close_btn = QPushButton("Close")

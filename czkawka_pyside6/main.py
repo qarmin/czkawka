@@ -22,29 +22,24 @@ import os
 
 
 def main():
-    # Set environment for better HiDPI support
-    os.environ.setdefault("QT_AUTO_SCREEN_SCALE_FACTOR", "1")
-
     from PySide6.QtWidgets import QApplication
     from PySide6.QtCore import Qt
-    from PySide6.QtGui import QFont
 
     app = QApplication(sys.argv)
     app.setApplicationName("Czkawka")
     app.setApplicationVersion("11.0.1")
     app.setOrganizationName("czkawka")
-    app.setDesktopFileName("com.github.qarmin.czkawka")
+    app.setOrganizationDomain("github.com/qarmin")
+    app.setDesktopFileName("com.github.qarmin.czkawka-pyside6")
 
-    # Set application icon
-    from app.icons import app_icon
-    icon = app_icon()
+    # Set application icon — use XDG theme icon with fallback to project logo
+    from PySide6.QtGui import QIcon
+    icon = QIcon.fromTheme("com.github.qarmin.czkawka")
+    if icon.isNull():
+        from app.icons import app_icon
+        icon = app_icon()
     if not icon.isNull():
         app.setWindowIcon(icon)
-
-    # Set default font
-    font = QFont()
-    font.setPointSize(10)
-    app.setFont(font)
 
     # Import and create main window
     from app.main_window import MainWindow

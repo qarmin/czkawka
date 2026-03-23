@@ -1,8 +1,9 @@
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QDialogButtonBox,
-    QCheckBox, QHBoxLayout
+    QCheckBox, QMessageBox
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 
 
 class DeleteDialog(QDialog):
@@ -16,15 +17,17 @@ class DeleteDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        # Warning
+        # Warning icon from system theme
         icon_label = QLabel()
-        icon_label.setStyleSheet("font-size: 36px;")
-        icon_label.setText("Warning")
+        icon = self.style().standardIcon(self.style().SP_MessageBoxWarning)
+        icon_label.setPixmap(icon.pixmap(48, 48))
         icon_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(icon_label)
 
         msg = QLabel(f"Are you sure you want to delete {count} selected file(s)?")
-        msg.setStyleSheet("font-size: 14px; padding: 10px;")
+        msg_font = QFont()
+        msg_font.setPointSize(11)
+        msg.setFont(msg_font)
         msg.setAlignment(Qt.AlignCenter)
         msg.setWordWrap(True)
         layout.addWidget(msg)
@@ -39,9 +42,6 @@ class DeleteDialog(QDialog):
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         )
         buttons.button(QDialogButtonBox.Ok).setText("Delete")
-        buttons.button(QDialogButtonBox.Ok).setStyleSheet(
-            "background-color: #8a2222; color: white; padding: 6px 20px;"
-        )
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
