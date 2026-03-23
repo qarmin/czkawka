@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QDialogButtonBox,
-    QCheckBox, QMessageBox
+    QCheckBox, QStyle
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
@@ -19,7 +19,7 @@ class DeleteDialog(QDialog):
 
         # Warning icon from system theme
         icon_label = QLabel()
-        icon = self.style().standardIcon(self.style().SP_MessageBoxWarning)
+        icon = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)
         icon_label.setPixmap(icon.pixmap(48, 48))
         icon_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(icon_label)
@@ -37,6 +37,10 @@ class DeleteDialog(QDialog):
         self._trash_cb.setChecked(move_to_trash)
         layout.addWidget(self._trash_cb)
 
+        # Dry run checkbox
+        self._dry_run_cb = QCheckBox("Dry run (preview only, no files will be deleted)")
+        layout.addWidget(self._dry_run_cb)
+
         # Buttons
         buttons = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -49,3 +53,7 @@ class DeleteDialog(QDialog):
     @property
     def move_to_trash(self) -> bool:
         return self._trash_cb.isChecked()
+
+    @property
+    def dry_run(self) -> bool:
+        return self._dry_run_cb.isChecked()

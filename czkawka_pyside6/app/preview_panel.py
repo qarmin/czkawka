@@ -12,7 +12,7 @@ class PreviewPanel(QWidget):
 
     SUPPORTED_EXTENSIONS = {
         ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp",
-        ".tiff", ".tif", ".ico", ".svg"
+        ".tiff", ".tif", ".ico",
     }
 
     def __init__(self, parent=None):
