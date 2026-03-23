@@ -201,7 +201,8 @@ class ToolSettingsPanel(QWidget):
         self._vid_diff_label = QLabel(str(self._ts.vid_max_difference))
         self._vid_diff_slider.valueChanged.connect(lambda v: (
             setattr(self._ts, 'vid_max_difference', v),
-            self._vid_diff_label.setText(str(v))
+            self._vid_diff_label.setText(str(v)),
+            self.settings_changed.emit(),
         ))
         diff_layout.addWidget(self._vid_diff_slider)
         diff_layout.addWidget(self._vid_diff_label)
@@ -215,7 +216,8 @@ class ToolSettingsPanel(QWidget):
         self._vid_skip_label = QLabel(str(self._ts.vid_skip_forward))
         self._vid_skip_slider.valueChanged.connect(lambda v: (
             setattr(self._ts, 'vid_skip_forward', v),
-            self._vid_skip_label.setText(str(v))
+            self._vid_skip_label.setText(str(v)),
+            self.settings_changed.emit(),
         ))
         skip_layout.addWidget(self._vid_skip_slider)
         skip_layout.addWidget(self._vid_skip_label)
@@ -229,7 +231,8 @@ class ToolSettingsPanel(QWidget):
         self._vid_dur_label = QLabel(str(self._ts.vid_duration))
         self._vid_dur_slider.valueChanged.connect(lambda v: (
             setattr(self._ts, 'vid_duration', v),
-            self._vid_dur_label.setText(str(v))
+            self._vid_dur_label.setText(str(v)),
+            self.settings_changed.emit(),
         ))
         dur_layout.addWidget(self._vid_dur_slider)
         dur_layout.addWidget(self._vid_dur_label)
@@ -289,7 +292,8 @@ class ToolSettingsPanel(QWidget):
         self._music_diff_label = QLabel(f"{self._ts.music_max_difference:.1f}")
         self._music_diff_slider.valueChanged.connect(lambda v: (
             setattr(self._ts, 'music_max_difference', v / 10.0),
-            self._music_diff_label.setText(f"{v / 10.0:.1f}")
+            self._music_diff_label.setText(f"{v / 10.0:.1f}"),
+            self.settings_changed.emit(),
         ))
         diff_layout.addWidget(self._music_diff_slider)
         diff_layout.addWidget(self._music_diff_label)

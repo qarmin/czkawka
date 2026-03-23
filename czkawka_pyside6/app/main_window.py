@@ -202,7 +202,11 @@ class MainWindow(QMainWindow):
 
         self._state.set_scanning(True)
         self._action_buttons.set_scanning(True)
-        self._progress.start(tab)
+        self._progress.start(
+            tab,
+            included_paths=self._state.settings.included_paths,
+            excluded_paths=self._state.settings.excluded_paths,
+        )
         self._results_view.clear()
         self._status_label.setText(f"Scanning: {tab.name.replace('_', ' ').title()}...")
 
@@ -274,15 +278,18 @@ class MainWindow(QMainWindow):
 
         dialog = DeleteDialog(len(checked), self._state.settings.move_to_trash, self)
         if dialog.exec() == DeleteDialog.Accepted:
+            dry_run = dialog.dry_run
             deleted, errors = FileOperations.delete_files(
-                checked, dialog.move_to_trash
+                checked, dialog.move_to_trash, dry_run=dry_run
             )
-            self._status_label.setText(f"Deleted {deleted} file(s)")
+            prefix = "[DRY RUN] " if dry_run else ""
+            self._status_label.setText(f"{prefix}Deleted {deleted} file(s)")
             if errors:
                 self._bottom_panel.set_text("\n".join(errors))
                 self._bottom_panel.show_text()
-            # Refresh results - remove deleted entries
-            self._refresh_after_action(checked)
+            # Refresh results - remove deleted entries (skip on dry run)
+            if not dry_run:
+                self._refresh_after_action(checked)
 
     def _show_move_dialog(self):
         checked = self._results_view.get_checked_entries()
@@ -295,16 +302,19 @@ class MainWindow(QMainWindow):
             if not dialog.destination:
                 QMessageBox.warning(self, "No Destination", "Please select a destination folder.")
                 return
+            dry_run = dialog.dry_run
             moved, errors = FileOperations.move_files(
                 checked, dialog.destination,
-                dialog.preserve_structure, dialog.copy_mode
+                dialog.preserve_structure, dialog.copy_mode,
+                dry_run=dry_run
             )
             action = "Copied" if dialog.copy_mode else "Moved"
-            self._status_label.setText(f"{action} {moved} file(s)")
+            prefix = "[DRY RUN] " if dry_run else ""
+            self._status_label.setText(f"{prefix}{action} {moved} file(s)")
             if errors:
                 self._bottom_panel.set_text("\n".join(errors))
                 self._bottom_panel.show_text()
-            if not dialog.copy_mode:
+            if not dialog.copy_mode and not dry_run:
                 self._refresh_after_action(checked)
 
     def _save_results(self):

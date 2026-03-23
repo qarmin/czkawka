@@ -37,6 +37,9 @@ class MoveDialog(QDialog):
         self._copy_mode = QCheckBox("Copy instead of move")
         layout.addWidget(self._copy_mode)
 
+        self._dry_run = QCheckBox("Dry run (preview only, no files will be moved)")
+        layout.addWidget(self._dry_run)
+
         # Buttons
         buttons = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
@@ -62,3 +65,7 @@ class MoveDialog(QDialog):
     @property
     def copy_mode(self) -> bool:
         return self._copy_mode.isChecked()
+
+    @property
+    def dry_run(self) -> bool:
+        return self._dry_run.isChecked()

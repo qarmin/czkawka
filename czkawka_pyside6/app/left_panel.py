@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QListWidgetItem, QLabel,
     QPushButton, QHBoxLayout, QSizePolicy
 )
-from PySide6.QtCore import Signal, Qt, QSize
+from PySide6.QtCore import Signal, Qt, QSize, QEvent
 from PySide6.QtGui import QFont, QPixmap
 
 from .models import ActiveTab, TAB_DISPLAY_NAMES, TABS_WITH_SETTINGS
@@ -45,7 +45,7 @@ class LeftPanel(QWidget):
         layout.setContentsMargins(6, 6, 6, 6)
         layout.setSpacing(4)
 
-        # Logo image (clickable)
+        # Logo image (clickable via event filter)
         logo_path = app_logo_path()
         if logo_path:
             self._logo_label = QLabel()
@@ -55,7 +55,7 @@ class LeftPanel(QWidget):
             self._logo_label.setAlignment(Qt.AlignCenter)
             self._logo_label.setCursor(Qt.PointingHandCursor)
             self._logo_label.setToolTip("About Czkawka")
-            self._logo_label.mousePressEvent = lambda _: self.about_requested.emit()
+            self._logo_label.installEventFilter(self)
             layout.addWidget(self._logo_label)
         else:
             title_label = QLabel("Czkawka")
@@ -65,7 +65,8 @@ class LeftPanel(QWidget):
             title_label.setFont(title_font)
             title_label.setAlignment(Qt.AlignCenter)
             title_label.setCursor(Qt.PointingHandCursor)
-            title_label.mousePressEvent = lambda _: self.about_requested.emit()
+            title_label.installEventFilter(self)
+            self._logo_label = title_label
             layout.addWidget(title_label)
 
         # Top buttons row with icons
@@ -112,6 +113,12 @@ class LeftPanel(QWidget):
         version_label.setAlignment(Qt.AlignCenter)
         version_label.setEnabled(False)
         layout.addWidget(version_label)
+
+    def eventFilter(self, obj, event):
+        if obj is self._logo_label and event.type() == QEvent.Type.MouseButtonPress:
+            self.about_requested.emit()
+            return True
+        return super().eventFilter(obj, event)
 
     def _on_item_changed(self, current, previous):
         if current:

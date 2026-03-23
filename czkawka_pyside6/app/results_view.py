@@ -288,53 +288,78 @@ class ResultsView(QWidget):
                 deselect_action.triggered.connect(lambda: self._set_check(item, False))
                 menu.addAction(deselect_action)
 
-                menu.exec_(self._tree.viewport().mapToGlobal(pos))
+                menu.exec(self._tree.viewport().mapToGlobal(pos))
 
     def _open_file(self, entry: ResultEntry):
         import subprocess, sys
         path = entry.values.get("__full_path", "")
-        if path:
+        if not path:
+            return
+        try:
             if sys.platform == "linux":
-                subprocess.Popen(["xdg-open", path])
+                subprocess.Popen(["xdg-open", path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             elif sys.platform == "darwin":
-                subprocess.Popen(["open", path])
+                subprocess.Popen(["open", path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
-                subprocess.Popen(["start", path], shell=True)
+                subprocess.Popen(["cmd", "/c", "start", "", path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError:
+            pass
 
     def _open_folder(self, entry: ResultEntry):
         import subprocess, sys
         from pathlib import Path
         path = entry.values.get("__full_path", "")
-        if path:
-            folder = str(Path(path).parent)
+        if not path:
+            return
+        folder = str(Path(path).parent)
+        try:
             if sys.platform == "linux":
-                subprocess.Popen(["xdg-open", folder])
+                subprocess.Popen(["xdg-open", folder], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             elif sys.platform == "darwin":
-                subprocess.Popen(["open", folder])
+                subprocess.Popen(["open", folder], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
-                subprocess.Popen(["explorer", folder], shell=True)
+                subprocess.Popen(["explorer", folder], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError:
+            pass
 
     def _set_check(self, item, checked):
         item.setCheckState(0, Qt.Checked if checked else Qt.Unchecked)
 
     # ── Summary / selection ──────────────────────────────────
 
+    @staticmethod
+    def _format_size(size_bytes: int) -> str:
+        for unit in ("B", "KB", "MB", "GB", "TB"):
+            if abs(size_bytes) < 1024:
+                return f"{size_bytes:.1f} {unit}" if unit != "B" else f"{size_bytes} B"
+            size_bytes /= 1024
+        return f"{size_bytes:.1f} PB"
+
     def _update_summary(self):
-        total = sum(1 for r in self._results if not r.header_row)
+        entries = [r for r in self._results if not r.header_row]
+        total = len(entries)
+        total_size = sum(r.values.get("__size_bytes", 0) for r in entries)
         groups = sum(1 for r in self._results if r.header_row)
+        size_str = self._format_size(total_size)
         if self._active_tab in GROUPED_TABS and groups > 0:
-            self._summary_label.setText(f"Found {total} files in {groups} groups")
+            self._summary_label.setText(f"Found {total} files ({size_str}) in {groups} groups")
         elif total > 0:
-            self._summary_label.setText(f"Found {total} entries")
+            self._summary_label.setText(f"Found {total} entries ({size_str})")
         else:
             self._summary_label.setText("No results")
         self._update_selection_count()
 
     def _update_selection_count(self):
-        selected = sum(1 for r in self._results if r.checked and not r.header_row)
-        total = sum(1 for r in self._results if not r.header_row)
+        entries = [r for r in self._results if not r.header_row]
+        total = len(entries)
+        total_size = sum(r.values.get("__size_bytes", 0) for r in entries)
+        checked = [r for r in entries if r.checked]
+        selected = len(checked)
+        selected_size = sum(r.values.get("__size_bytes", 0) for r in checked)
         if selected > 0:
-            self._selection_label.setText(f"Selected: {selected}/{total}")
+            self._selection_label.setText(
+                f"Selected: {selected}/{total} ({self._format_size(selected_size)}/{self._format_size(total_size)})"
+            )
         else:
             self._selection_label.setText("")
         self.selection_changed.emit(selected)
