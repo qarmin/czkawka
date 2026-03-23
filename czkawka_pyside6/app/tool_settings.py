@@ -30,7 +30,9 @@ class ToolSettingsPanel(QWidget):
         main_layout.setContentsMargins(4, 4, 4, 4)
 
         title = QLabel("Tool Settings")
-        title.setStyleSheet("font-weight: bold; font-size: 13px; padding: 4px;")
+        font = title.font()
+        font.setBold(True)
+        title.setFont(font)
         main_layout.addWidget(title)
 
         self._scroll = QScrollArea()

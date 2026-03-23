@@ -5,7 +5,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QProgressBar, QLabel, QHBoxLayout
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QStandardPaths
 
 from .models import ActiveTab, ScanProgress
 
@@ -19,23 +19,6 @@ class ProgressWidget(QWidget):
       - Stage name with counts
       - Elapsed time
       - Phase step indicators
-    """
-
-    # File where we persist the last file-collection count per directory set,
-    # so we can estimate the collection stage percentage on the next scan.
-    _ESTIMATE_FILE = Path.home() / ".config" / "czkawka_pyside6" / "scan_estimates.json"
-
-    _BAR_STYLE = """
-        QProgressBar {{
-            border: 1px solid #555; border-radius: 3px;
-            text-align: center; background-color: #2a2a2a;
-            font-size: 10px; color: #ccc;
-        }}
-        QProgressBar::chunk {{
-            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                stop:0 {c1}, stop:1 {c2});
-            border-radius: 2px;
-        }}
     """
 
     def __init__(self, parent=None):
@@ -62,32 +45,31 @@ class ProgressWidget(QWidget):
         # Row 1: stage label + elapsed
         row1 = QHBoxLayout()
         self._stage_label = QLabel("Initializing...")
-        self._stage_label.setStyleSheet("font-weight: bold; font-size: 12px;")
+        font = self._stage_label.font()
+        font.setBold(True)
+        self._stage_label.setFont(font)
         row1.addWidget(self._stage_label)
         row1.addStretch()
         self._elapsed_label = QLabel("")
-        self._elapsed_label.setStyleSheet("color: #888; font-size: 11px;")
+        self._elapsed_label.setEnabled(False)  # Uses disabled palette color
         row1.addWidget(self._elapsed_label)
         layout.addLayout(row1)
 
-        # Row 2: current stage bar  "Current stage"  NN%
+        # Row 2: current stage bar  "Current"  NN%
         row2 = QHBoxLayout()
         row2.setSpacing(6)
         lbl2 = QLabel("Current")
-        lbl2.setStyleSheet("color: #aaa; font-size: 10px;")
+        lbl2.setEnabled(False)
         lbl2.setFixedWidth(48)
         row2.addWidget(lbl2)
         self._stage_bar = QProgressBar()
         self._stage_bar.setFixedHeight(14)
         self._stage_bar.setTextVisible(False)
-        self._stage_bar.setStyleSheet(
-            self._BAR_STYLE.format(c1="#1b4332", c2="#2d6a4f")
-        )
         row2.addWidget(self._stage_bar)
         self._stage_pct = QLabel("")
         self._stage_pct.setFixedWidth(40)
         self._stage_pct.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        self._stage_pct.setStyleSheet("color: #aaa; font-size: 10px;")
+        self._stage_pct.setEnabled(False)
         row2.addWidget(self._stage_pct)
         layout.addLayout(row2)
 
@@ -95,38 +77,35 @@ class ProgressWidget(QWidget):
         row3 = QHBoxLayout()
         row3.setSpacing(6)
         lbl3 = QLabel("Overall")
-        lbl3.setStyleSheet("color: #aaa; font-size: 10px;")
+        lbl3.setEnabled(False)
         lbl3.setFixedWidth(48)
         row3.addWidget(lbl3)
         self._overall_bar = QProgressBar()
         self._overall_bar.setFixedHeight(14)
         self._overall_bar.setTextVisible(False)
-        self._overall_bar.setStyleSheet(
-            self._BAR_STYLE.format(c1="#2d6a4f", c2="#40916c")
-        )
         row3.addWidget(self._overall_bar)
         self._overall_pct = QLabel("")
         self._overall_pct.setFixedWidth(40)
         self._overall_pct.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        self._overall_pct.setStyleSheet("color: #aaa; font-size: 10px;")
+        self._overall_pct.setEnabled(False)
         row3.addWidget(self._overall_pct)
         layout.addLayout(row3)
 
         # Row 4: detail counts
         row4 = QHBoxLayout()
         self._detail_label = QLabel("")
-        self._detail_label.setStyleSheet("color: #888; font-size: 10px;")
+        self._detail_label.setEnabled(False)
         row4.addWidget(self._detail_label)
         row4.addStretch()
         self._size_label = QLabel("")
-        self._size_label.setStyleSheet("color: #888; font-size: 10px;")
+        self._size_label.setEnabled(False)
         self._size_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         row4.addWidget(self._size_label)
         layout.addLayout(row4)
 
         # Row 5: step indicators
         self._steps_label = QLabel("")
-        self._steps_label.setStyleSheet("color: #666; font-size: 9px;")
+        self._steps_label.setEnabled(False)
         self._steps_label.setAlignment(Qt.AlignCenter)
         self._steps_label.setWordWrap(True)
         layout.addWidget(self._steps_label)
@@ -261,18 +240,26 @@ class ProgressWidget(QWidget):
     def _get_estimate(self) -> int:
         return self._estimates.get(self._get_estimate_key(), 0)
 
+    @staticmethod
+    def _estimate_file_path() -> Path:
+        config_dir = QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation)
+        base = Path(config_dir) if config_dir else Path.home() / ".config" / "czkawka"
+        return base / "scan_estimates.json"
+
     def _save_estimate(self, count: int):
         self._estimates[self._get_estimate_key()] = count
         try:
-            self._ESTIMATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-            self._ESTIMATE_FILE.write_text(json.dumps(self._estimates))
+            path = self._estimate_file_path()
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(self._estimates))
         except OSError:
             pass
 
     def _load_estimates(self):
         try:
-            if self._ESTIMATE_FILE.exists():
-                self._estimates = json.loads(self._ESTIMATE_FILE.read_text())
+            path = self._estimate_file_path()
+            if path.exists():
+                self._estimates = json.loads(path.read_text())
         except (json.JSONDecodeError, OSError):
             self._estimates = {}
 

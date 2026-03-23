@@ -46,11 +46,6 @@ class ActionButtons(QWidget):
         self._scan_btn = QPushButton(icon_search(18), " Scan")
         self._scan_btn.setIconSize(ICON_SIZE)
         self._scan_btn.setMinimumWidth(90)
-        self._scan_btn.setStyleSheet(
-            "QPushButton { background-color: #2d5a27; color: white; font-weight: bold; padding: 6px 16px; }"
-            "QPushButton:hover { background-color: #3a7a34; }"
-            "QPushButton:disabled { background-color: #444; color: #888; }"
-        )
         self._scan_btn.clicked.connect(self.scan_clicked.emit)
         layout.addWidget(self._scan_btn)
 
@@ -58,10 +53,6 @@ class ActionButtons(QWidget):
         self._stop_btn = QPushButton(icon_stop(18), " Stop")
         self._stop_btn.setIconSize(ICON_SIZE)
         self._stop_btn.setMinimumWidth(80)
-        self._stop_btn.setStyleSheet(
-            "QPushButton { background-color: #8a2222; color: white; font-weight: bold; padding: 6px 16px; }"
-            "QPushButton:hover { background-color: #aa3333; }"
-        )
         self._stop_btn.clicked.connect(self.stop_clicked.emit)
         self._stop_btn.setVisible(False)
         layout.addWidget(self._stop_btn)
@@ -80,11 +71,6 @@ class ActionButtons(QWidget):
         # Delete button
         self._delete_btn = QPushButton(icon_delete(18), " Delete")
         self._delete_btn.setIconSize(ICON_SIZE)
-        self._delete_btn.setStyleSheet(
-            "QPushButton { background-color: #8a2222; color: white; padding: 6px 12px; }"
-            "QPushButton:hover { background-color: #aa3333; }"
-            "QPushButton:disabled { background-color: #444; color: #888; }"
-        )
         self._delete_btn.clicked.connect(self.delete_clicked.emit)
         layout.addWidget(self._delete_btn)
 

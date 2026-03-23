@@ -1,0 +1,12 @@
+[Desktop Entry]
+Categories=System;FileTools;Qt;
+Exec=czkawka-pyside6
+Icon=com.github.qarmin.czkawka
+StartupWMClass=czkawka-pyside6
+Terminal=false
+Type=Application
+
+Name=Czkawka PySide6
+GenericName=File Cleaner
+Comment=Multi-functional app to find duplicates, empty folders, similar files and more - Qt/PySide6 edition.
+Keywords=Czkawka;duplicate;same;similar;cleaner;copy;copies;compare;files;Qt;

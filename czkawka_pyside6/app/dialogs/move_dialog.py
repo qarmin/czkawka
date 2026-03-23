@@ -17,7 +17,6 @@ class MoveDialog(QDialog):
         layout = QVBoxLayout(self)
 
         msg = QLabel(f"Move or copy {count} selected file(s) to:")
-        msg.setStyleSheet("font-size: 13px; padding: 6px;")
         layout.addWidget(msg)
 
         # Destination path
