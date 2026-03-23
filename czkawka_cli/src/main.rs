@@ -36,7 +36,7 @@ use crate::commands::{
     Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, ExifRemoverArgs,
     InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs,
 };
-use crate::progress::connect_progress;
+use crate::progress::{connect_progress, connect_progress_json};
 
 mod commands;
 mod progress;
@@ -65,6 +65,7 @@ fn main() {
         debug!("Running command - {command:?}");
     }
 
+    let json_progress = command.get_json_progress();
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let stop_flag = Arc::new(AtomicBool::new(false));
     let store_flag_cloned = stop_flag.clone();
@@ -98,7 +99,11 @@ fn main() {
     })
     .expect("Error setting Ctrl-C handler");
 
-    connect_progress(&progress_receiver);
+    if json_progress {
+        connect_progress_json(&progress_receiver);
+    } else {
+        connect_progress(&progress_receiver);
+    }
 
     let cli_output = calculate_thread.join().expect("Failed to join calculation thread");
 

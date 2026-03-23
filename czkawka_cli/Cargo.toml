@@ -18,6 +18,7 @@ indicatif = "0.18"
 crossbeam-channel = { version = "0.5", features = [] }
 ctrlc = { version = "3.4", features = ["termination"] }
 humansize = "2.1"
+serde_json = "1"
 
 [features]
 default = []

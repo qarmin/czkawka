@@ -1,4 +1,5 @@
 use log::error;
+use serde::Serialize;
 
 use crate::common::model::{CheckingMethod, ToolType};
 // Empty files
@@ -66,7 +67,7 @@ use crate::common::model::{CheckingMethod, ToolType};
 // Deleting files
 // Renaming files
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub struct ProgressData {
     pub sstage: CurrentStage,
     pub checking_method: CheckingMethod,
@@ -95,7 +96,7 @@ impl ProgressData {
     }
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Serialize)]
 pub enum CurrentStage {
     DeletingFiles,
     RenamingFiles,
