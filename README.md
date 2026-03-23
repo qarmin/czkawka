@@ -55,7 +55,7 @@ Each tool uses different technologies, so you can find instructions for each of 
 
 - [Krokiet GUI (Slint frontend)](krokiet/README.md)</br>
 - [Czkawka GUI (GTK frontend)](czkawka_gui/README.md)</br>
-- [Czkawka PySide6 (Qt/PySide6 frontend)](czkawka_pyside6/README.md)</br>
+- [Czkawka PySide6 (Qt/PySide6 frontend, KDE6 compliant)](czkawka_pyside6/README.md)</br>
 - [Czkawka CLI](czkawka_cli/README.md)</br>
 - [Czkawka Core](czkawka_core/README.md)</br>
 - [Cedinia](cedinia/README.md)</br>
