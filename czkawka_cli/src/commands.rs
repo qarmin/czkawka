@@ -118,20 +118,20 @@ pub enum Commands {
 impl Commands {
     pub fn get_json_progress(&self) -> bool {
         match self {
-            Commands::Duplicates(a) => a.common_cli_items.json_progress,
-            Commands::EmptyFolders(a) => a.common_cli_items.json_progress,
-            Commands::BiggestFiles(a) => a.common_cli_items.json_progress,
-            Commands::EmptyFiles(a) => a.common_cli_items.json_progress,
-            Commands::Temporary(a) => a.common_cli_items.json_progress,
-            Commands::SimilarImages(a) => a.common_cli_items.json_progress,
-            Commands::SameMusic(a) => a.common_cli_items.json_progress,
-            Commands::InvalidSymlinks(a) => a.common_cli_items.json_progress,
-            Commands::BrokenFiles(a) => a.common_cli_items.json_progress,
-            Commands::SimilarVideos(a) => a.common_cli_items.json_progress,
-            Commands::BadExtensions(a) => a.common_cli_items.json_progress,
-            Commands::BadNames(a) => a.common_cli_items.json_progress,
-            Commands::VideoOptimizer(a) => a.common_cli_items.json_progress,
-            Commands::ExifRemover(a) => a.common_cli_items.json_progress,
+            Self::Duplicates(a) => a.common_cli_items.json_progress,
+            Self::EmptyFolders(a) => a.common_cli_items.json_progress,
+            Self::BiggestFiles(a) => a.common_cli_items.json_progress,
+            Self::EmptyFiles(a) => a.common_cli_items.json_progress,
+            Self::Temporary(a) => a.common_cli_items.json_progress,
+            Self::SimilarImages(a) => a.common_cli_items.json_progress,
+            Self::SameMusic(a) => a.common_cli_items.json_progress,
+            Self::InvalidSymlinks(a) => a.common_cli_items.json_progress,
+            Self::BrokenFiles(a) => a.common_cli_items.json_progress,
+            Self::SimilarVideos(a) => a.common_cli_items.json_progress,
+            Self::BadExtensions(a) => a.common_cli_items.json_progress,
+            Self::BadNames(a) => a.common_cli_items.json_progress,
+            Self::VideoOptimizer(a) => a.common_cli_items.json_progress,
+            Self::ExifRemover(a) => a.common_cli_items.json_progress,
         }
     }
 }
