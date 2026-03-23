@@ -139,6 +139,7 @@ class MainWindow(QMainWindow):
         self._action_buttons.delete_clicked.connect(self._show_delete_dialog)
         self._action_buttons.move_clicked.connect(self._show_move_dialog)
         self._action_buttons.save_clicked.connect(self._save_results)
+        self._action_buttons.load_clicked.connect(self._load_results)
         self._action_buttons.sort_clicked.connect(self._show_sort_dialog)
         self._action_buttons.hardlink_clicked.connect(self._create_hardlinks)
         self._action_buttons.symlink_clicked.connect(self._create_symlinks)
@@ -315,6 +316,19 @@ class MainWindow(QMainWindow):
         success = SaveDialog.save(self, all_results, self._state.settings.save_as_json)
         if success:
             self._status_label.setText("Results saved successfully")
+
+    def _load_results(self):
+        results = SaveDialog.load(self)
+        if results is None:
+            return
+        tab = self._state.active_tab
+        self._state.set_results(tab, results)
+        self._results_view.set_results(results)
+        self._action_buttons.set_has_results(
+            any(not r.header_row for r in results)
+        )
+        count = sum(1 for r in results if not r.header_row)
+        self._status_label.setText(f"Loaded {count} entries from file")
 
     def _show_sort_dialog(self):
         columns = TAB_COLUMNS.get(self._state.active_tab, [])

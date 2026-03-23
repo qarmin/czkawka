@@ -27,6 +27,8 @@ class ResultsView(QWidget):
         super().__init__(parent)
         self._active_tab = ActiveTab.DUPLICATE_FILES
         self._results: list[ResultEntry] = []
+        self._sort_column = -1
+        self._sort_order = Qt.AscendingOrder
         self._setup_ui()
 
     def _ensure_header_colors(self):
@@ -34,16 +36,16 @@ class ResultsView(QWidget):
         if self._header_colors_ready:
             return
         from PySide6.QtWidgets import QApplication
+        from PySide6.QtGui import QPalette
         palette = QApplication.instance().palette()
-        # Use a midpoint between window and highlight for header background
-        win = palette.color(palette.Window)
-        hi = palette.color(palette.Highlight)
+        win = palette.color(QPalette.ColorRole.Window)
+        hi = palette.color(QPalette.ColorRole.Highlight)
         self.HEADER_BG = QColor(
             (win.red() + hi.red()) // 2,
             (win.green() + hi.green()) // 2,
             (win.blue() + hi.blue()) // 2,
         )
-        self.HEADER_FG = palette.color(palette.HighlightedText)
+        self.HEADER_FG = palette.color(QPalette.ColorRole.HighlightedText)
         self._header_colors_ready = True
 
     def _setup_ui(self):
@@ -69,28 +71,53 @@ class ResultsView(QWidget):
         self._tree.customContextMenuRequested.connect(self._on_context_menu)
         self._tree.itemChanged.connect(self._on_item_changed)
         self._tree.itemDoubleClicked.connect(self._on_item_double_clicked)
+
+        # Sortable: click header to sort
+        self._tree.setSortingEnabled(False)  # We handle sorting manually
+        header = self._tree.header()
+        header.setSectionsClickable(True)
+        header.sectionClicked.connect(self._on_header_clicked)
+        # Resizable columns
+        header.setSectionResizeMode(QHeaderView.Interactive)
+        header.setStretchLastSection(True)
+
         layout.addWidget(self._tree)
 
     def set_active_tab(self, tab: ActiveTab):
         self._active_tab = tab
+        self._sort_column = -1
         columns = TAB_COLUMNS.get(tab, ["Selection", "File Name", "Path"])
+        self._tree.setColumnCount(len(columns))
         self._tree.setHeaderLabels(columns)
         header = self._tree.header()
-        for i in range(len(columns)):
-            if columns[i] == "Path":
-                header.setSectionResizeMode(i, QHeaderView.Stretch)
-            else:
-                header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
+        # All columns interactive (resizable), last one stretches
+        header.setSectionResizeMode(QHeaderView.Interactive)
+        header.setStretchLastSection(True)
+        # Give Path columns more initial space
+        for i, col in enumerate(columns):
+            if col == "Path":
+                header.resizeSection(i, 300)
+            elif col == "Selection":
+                header.resizeSection(i, 30)
+            elif col in ("Size", "Hash", "Modification Date"):
+                header.resizeSection(i, 140)
+            elif col == "File Name":
+                header.resizeSection(i, 200)
 
     def set_results(self, results: list[ResultEntry]):
         self._ensure_header_colors()
         self._results = results
+        self._rebuild_tree()
+        self._update_summary()
+
+    def _rebuild_tree(self):
+        """Rebuild tree items from self._results."""
         self._tree.blockSignals(True)
         self._tree.clear()
 
         columns = TAB_COLUMNS.get(self._active_tab, ["Selection", "File Name", "Path"])
 
-        for entry in results:
+        for entry in self._results:
             if entry.header_row:
                 item = QTreeWidgetItem()
                 header_text = entry.values.get("__header", "Group")
@@ -105,14 +132,15 @@ class ResultsView(QWidget):
                 item.setFlags(item.flags() & ~Qt.ItemIsUserCheckable)
                 item.setData(0, Qt.UserRole, entry)
                 self._tree.addTopLevelItem(item)
+                # Span header across all columns (must be called after adding to tree)
+                item.setFirstColumnSpanned(True)
             else:
                 item = QTreeWidgetItem()
-                # First column is checkbox (Selection)
                 item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
                 item.setCheckState(0, Qt.Checked if entry.checked else Qt.Unchecked)
 
                 for col_idx, col_name in enumerate(columns):
-                    if col_idx == 0:  # Selection column
+                    if col_idx == 0:
                         continue
                     value = entry.values.get(col_name, "")
                     item.setText(col_idx, str(value))
@@ -121,7 +149,108 @@ class ResultsView(QWidget):
                 self._tree.addTopLevelItem(item)
 
         self._tree.blockSignals(False)
-        self._update_summary()
+
+    # ── Sorting ──────────────────────────────────────────────
+
+    def _on_header_clicked(self, logical_index: int):
+        """Sort by column when header is clicked. Toggle ascending/descending."""
+        if logical_index == 0:
+            return  # Don't sort by checkbox column
+
+        if self._sort_column == logical_index:
+            # Toggle order
+            self._sort_order = (
+                Qt.DescendingOrder if self._sort_order == Qt.AscendingOrder
+                else Qt.AscendingOrder
+            )
+        else:
+            self._sort_column = logical_index
+            self._sort_order = Qt.AscendingOrder
+
+        columns = TAB_COLUMNS.get(self._active_tab, [])
+        col_name = columns[logical_index] if logical_index < len(columns) else ""
+
+        # Update header sort indicator
+        self._tree.header().setSortIndicator(logical_index, self._sort_order)
+        self._tree.header().setSortIndicatorShown(True)
+
+        ascending = self._sort_order == Qt.AscendingOrder
+
+        if self._active_tab in GROUPED_TABS:
+            self._sort_within_groups(col_name, ascending)
+        else:
+            self._sort_flat(col_name, ascending)
+
+    def _sort_key(self, entry: ResultEntry, col_name: str):
+        """Return a sort key for a result entry by column name."""
+        # Use numeric values for known numeric columns
+        if col_name in ("Size",):
+            return entry.values.get("__size_bytes", 0)
+        if col_name in ("Modification Date",):
+            return entry.values.get("__modified_date_ts", 0)
+        if col_name in ("Similarity", "Bitrate", "Year", "Length"):
+            raw = entry.values.get(col_name, "")
+            try:
+                return float(str(raw).replace(",", ""))
+            except (ValueError, TypeError):
+                return 0
+        # Default: string comparison (case-insensitive)
+        return str(entry.values.get(col_name, "")).lower()
+
+    def _sort_flat(self, col_name: str, ascending: bool):
+        """Sort flat (non-grouped) results."""
+        self._results.sort(
+            key=lambda e: self._sort_key(e, col_name),
+            reverse=not ascending,
+        )
+        self._rebuild_tree()
+
+    def _sort_within_groups(self, col_name: str, ascending: bool):
+        """Sort entries within each group, keeping group headers in place."""
+        sorted_results = []
+        current_group = []
+        current_header = None
+
+        for entry in self._results:
+            if entry.header_row:
+                if current_header is not None:
+                    current_group.sort(
+                        key=lambda e: self._sort_key(e, col_name),
+                        reverse=not ascending,
+                    )
+                    sorted_results.append(current_header)
+                    sorted_results.extend(current_group)
+                current_header = entry
+                current_group = []
+            else:
+                current_group.append(entry)
+
+        # Last group
+        if current_header is not None:
+            current_group.sort(
+                key=lambda e: self._sort_key(e, col_name),
+                reverse=not ascending,
+            )
+            sorted_results.append(current_header)
+            sorted_results.extend(current_group)
+
+        self._results = sorted_results
+        self._rebuild_tree()
+
+    def sort_by_column(self, column: int, ascending: bool = True):
+        """Public API for sorting (used by sort dialog)."""
+        self._sort_column = column
+        self._sort_order = Qt.AscendingOrder if ascending else Qt.DescendingOrder
+        columns = TAB_COLUMNS.get(self._active_tab, [])
+        col_name = columns[column] if column < len(columns) else ""
+        self._tree.header().setSortIndicator(column, self._sort_order)
+        self._tree.header().setSortIndicatorShown(True)
+        if self._active_tab in GROUPED_TABS:
+            self._sort_within_groups(col_name, ascending)
+        else:
+            self._sort_flat(col_name, ascending)
+
+    # ── Item events ──────────────────────────────────────────
 
     def _on_item_changed(self, item, column):
         if column == 0:
@@ -188,6 +317,8 @@ class ResultsView(QWidget):
     def _set_check(self, item, checked):
         item.setCheckState(0, Qt.Checked if checked else Qt.Unchecked)
 
+    # ── Summary / selection ──────────────────────────────────
+
     def _update_summary(self):
         total = sum(1 for r in self._results if not r.header_row)
         groups = sum(1 for r in self._results if r.header_row)
@@ -243,13 +374,11 @@ class ResultsView(QWidget):
                 item.setCheckState(0, Qt.Checked if entry.checked else Qt.Unchecked)
 
     def _select_by_group_criteria(self, mode: SelectMode):
-        # First unselect all
         self._select_all(False)
 
         if self._active_tab not in GROUPED_TABS:
             return
 
-        # Group entries by group_id
         groups: dict[int, list[tuple[int, ResultEntry]]] = {}
         for i in range(self._tree.topLevelItemCount()):
             item = self._tree.topLevelItem(i)
@@ -275,15 +404,12 @@ class ResultsView(QWidget):
             elif mode == SelectMode.SELECT_LONGEST_PATH:
                 best_idx = max(range(len(items)), key=lambda j: len(items[j][1].values.get("__full_path", "")))
 
-            # Select all EXCEPT the best (the one to keep)
             for j, (tree_idx, entry) in enumerate(items):
                 if j != best_idx:
                     entry.checked = True
                     self._tree.topLevelItem(tree_idx).setCheckState(0, Qt.Checked)
 
-    def sort_by_column(self, column: int, ascending: bool = True):
-        order = Qt.AscendingOrder if ascending else Qt.DescendingOrder
-        self._tree.sortItems(column, order)
+    # ── Public accessors ─────────────────────────────────────
 
     def get_checked_entries(self) -> list[ResultEntry]:
         return [r for r in self._results if r.checked and not r.header_row]
@@ -294,5 +420,7 @@ class ResultsView(QWidget):
     def clear(self):
         self._results = []
         self._tree.clear()
+        self._sort_column = -1
+        self._tree.header().setSortIndicatorShown(False)
         self._summary_label.setText("No results")
         self._selection_label.setText("")

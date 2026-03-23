@@ -1,11 +1,13 @@
-from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QLabel, QDialogButtonBox,
-    QCheckBox, QFileDialog
-)
+import json
+from pathlib import Path
+
+from PySide6.QtWidgets import QFileDialog
+
+from ..models import ResultEntry
 
 
 class SaveDialog:
-    """Save results to file (uses native file dialog)."""
+    """Save/load results to/from file."""
 
     @staticmethod
     def save(parent, results: list, save_as_json: bool = False) -> bool:
@@ -13,24 +15,30 @@ class SaveDialog:
             filter_str = "JSON Files (*.json);;All Files (*)"
             default_ext = ".json"
         else:
-            filter_str = "Text Files (*.txt);;All Files (*)"
+            filter_str = "Text Files (*.txt);;JSON Files (*.json);;All Files (*)"
             default_ext = ".txt"
 
-        path, _ = QFileDialog.getSaveFileName(
+        path, selected_filter = QFileDialog.getSaveFileName(
             parent, "Save Results", f"results{default_ext}", filter_str
         )
         if not path:
             return False
 
+        use_json = save_as_json or path.endswith(".json") or "JSON" in selected_filter
+
         try:
-            import json
-            if save_as_json:
+            if use_json:
                 data = []
                 for entry in results:
-                    if not entry.header_row:
-                        # Filter out internal keys
-                        values = {k: v for k, v in entry.values.items()
-                                  if not k.startswith("__")}
+                    if entry.header_row:
+                        data.append({
+                            "__header": entry.values.get("__header", ""),
+                            "__group_id": entry.group_id,
+                        })
+                    else:
+                        values = dict(entry.values)
+                        values["__group_id"] = entry.group_id
+                        values["__checked"] = entry.checked
                         data.append(values)
                 with open(path, "w") as f:
                     json.dump(data, f, indent=2)
@@ -46,3 +54,102 @@ class SaveDialog:
             return True
         except OSError:
             return False
+
+    @staticmethod
+    def load(parent) -> list[ResultEntry] | None:
+        """Load results from a previously saved JSON file.
+
+        Returns list of ResultEntry on success, None on cancel/error.
+        """
+        path, _ = QFileDialog.getOpenFileName(
+            parent, "Load Results",
+            "",
+            "JSON Files (*.json);;All Files (*)"
+        )
+        if not path:
+            return None
+
+        try:
+            with open(path) as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return None
+
+        if not isinstance(data, list):
+            # Could be czkawka_cli dict format {size: [[entries]]}
+            return _parse_cli_json(data)
+
+        results = []
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+
+            if "__header" in item:
+                results.append(ResultEntry(
+                    values={"__header": item["__header"]},
+                    header_row=True,
+                    group_id=item.get("__group_id", 0),
+                ))
+            else:
+                group_id = item.pop("__group_id", 0)
+                checked = item.pop("__checked", False)
+                results.append(ResultEntry(
+                    values=item,
+                    checked=checked,
+                    group_id=group_id,
+                ))
+
+        return results if results else None
+
+
+def _parse_cli_json(data: dict) -> list[ResultEntry] | None:
+    """Parse raw czkawka_cli JSON output (dict of size buckets or flat list)."""
+    results = []
+    group_id = 0
+
+    for key, groups in data.items():
+        if not isinstance(groups, list):
+            continue
+        for group in groups:
+            if not isinstance(group, list) or len(group) == 0:
+                continue
+
+            total_size = sum(e.get("size", 0) for e in group if isinstance(e, dict))
+            results.append(ResultEntry(
+                values={"__header": f"Group {group_id + 1} ({len(group)} files)"},
+                header_row=True,
+                group_id=group_id,
+            ))
+
+            for entry in group:
+                if not isinstance(entry, dict):
+                    continue
+                path = entry.get("path", "")
+                p = Path(path)
+                values = {
+                    "File Name": p.name,
+                    "Path": str(p.parent),
+                    "Size": _format_size(entry.get("size", 0)),
+                    "Modification Date": str(entry.get("modified_date", "")),
+                    "Hash": entry.get("hash", ""),
+                    "__full_path": path,
+                    "__size_bytes": entry.get("size", 0),
+                    "__modified_date_ts": entry.get("modified_date", 0),
+                }
+                results.append(ResultEntry(values=values, group_id=group_id))
+
+            group_id += 1
+
+    return results if results else None
+
+
+def _format_size(size_bytes: int) -> str:
+    if size_bytes == 0:
+        return "0 B"
+    units = ["B", "KB", "MB", "GB", "TB"]
+    i = 0
+    size = float(size_bytes)
+    while size >= 1024 and i < len(units) - 1:
+        size /= 1024
+        i += 1
+    return f"{size:.1f} {units[i]}" if i > 0 else f"{int(size)} B"
