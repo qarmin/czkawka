@@ -161,8 +161,11 @@ class ProgressWidget(QWidget):
         b_checked = progress.bytes_checked
         b_to_check = progress.bytes_to_check
 
-        # ── Stage label ──
-        self._stage_label.setText(stage_name)
+        # ── Stage label with stage index ──
+        if max_idx > 0:
+            self._stage_label.setText(f"[{idx + 1}/{max_idx + 1}] {stage_name}")
+        else:
+            self._stage_label.setText(stage_name)
 
         # ── Update step indicators using stage index ──
         if max_idx > 0:
