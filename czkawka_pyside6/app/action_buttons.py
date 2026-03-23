@@ -22,6 +22,7 @@ class ActionButtons(QWidget):
     delete_clicked = Signal()
     move_clicked = Signal()
     save_clicked = Signal()
+    load_clicked = Signal()
     sort_clicked = Signal()
     hardlink_clicked = Signal()
     symlink_clicked = Signal()
@@ -85,6 +86,14 @@ class ActionButtons(QWidget):
         self._save_btn.setIconSize(ICON_SIZE)
         self._save_btn.clicked.connect(self.save_clicked.emit)
         layout.addWidget(self._save_btn)
+
+        # Load button
+        from .icons import icon_dir
+        self._load_btn = QPushButton(icon_dir(18), " Load")
+        self._load_btn.setIconSize(ICON_SIZE)
+        self._load_btn.setToolTip("Load previously saved results")
+        self._load_btn.clicked.connect(self.load_clicked.emit)
+        layout.addWidget(self._load_btn)
 
         # Sort button
         self._sort_btn = QPushButton(icon_sort(18), " Sort")
