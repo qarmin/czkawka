@@ -306,3 +306,4 @@ class AppSettings:
     dark_theme: bool = True
     show_image_preview: bool = True
     czkawka_cli_path: str = "czkawka_cli"  # path to CLI binary
+    low_priority_scan: bool = False  # run scans with idle CPU/IO priority

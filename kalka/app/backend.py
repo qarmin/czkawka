@@ -1,6 +1,8 @@
 import json
 import os
+import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Optional
@@ -47,6 +49,15 @@ class ScanWorker(QObject):
                 cmd.extend(["--compact-file-to-save", json_output_path])
                 # Enable JSON progress on stderr, suppress text output
                 cmd.extend(["--json-progress", "-N", "-M"])
+
+                # Prepend nice/ionice for low-priority scanning on Linux
+                if self.app_settings.low_priority_scan and sys.platform.startswith("linux"):
+                    prefix = []
+                    if shutil.which("ionice"):
+                        prefix.extend(["ionice", "-c", "3"])
+                    if shutil.which("nice"):
+                        prefix.extend(["nice", "-n", "19"])
+                    cmd = prefix + cmd
 
                 self._process = subprocess.Popen(
                     cmd,
