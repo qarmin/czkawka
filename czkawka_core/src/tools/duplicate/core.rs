@@ -363,11 +363,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "prehash_save_cache_at_exit", level = "debug")]
-    fn prehash_save_cache_at_exit(
-        &mut self,
-        loaded_hash_map: BTreeMap<u64, Vec<DuplicateEntry>>,
-        pre_hash_results: Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)>,
-    ) {
+    fn prehash_save_cache_at_exit(&mut self, loaded_hash_map: BTreeMap<u64, Vec<DuplicateEntry>>, pre_hash_results: Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)>) {
         if self.get_params().use_prehash_cache {
             // All results = records already cached + computed results
             let mut save_cache_to_hashmap: HashMap<String, DuplicateEntry> = Default::default();
