@@ -5,7 +5,7 @@ pub mod core;
 mod tests;
 pub mod traits;
 
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -88,7 +88,7 @@ impl BrokenFilesParameters {
 pub struct BrokenFiles {
     common_data: CommonToolData,
     information: Info,
-    files_to_check: BTreeMap<String, BrokenEntry>,
+    files_to_check: HashMap<String, BrokenEntry>,
     broken_files: Vec<BrokenEntry>,
     params: BrokenFilesParameters,
 }

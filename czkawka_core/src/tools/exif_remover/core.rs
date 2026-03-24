@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -23,7 +23,7 @@ use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, 
 
 impl ExifRemover {
     pub fn new(params: ExifRemoverParameters) -> Self {
-        let mut additional_excluded_tags = BTreeMap::new();
+        let mut additional_excluded_tags = std::collections::BTreeMap::new();
 
         let tiff_disabled_tags = vec![
             "ImageWidth",
@@ -92,7 +92,7 @@ impl ExifRemover {
         &mut self,
         _stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
-    ) -> (BTreeMap<String, ExifEntry>, BTreeMap<String, ExifEntry>, BTreeMap<String, ExifEntry>) {
+    ) -> (HashMap<String, ExifEntry>, HashMap<String, ExifEntry>, HashMap<String, ExifEntry>) {
         let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheLoading, 0, self.get_test_type(), 0);
         let res = load_and_split_cache_generalized_by_path(&get_exif_remover_cache_file(), mem::take(&mut self.files_to_check), self);
 
@@ -104,7 +104,7 @@ impl ExifRemover {
     fn save_to_cache(
         &mut self,
         vec_file_entry: &[ExifEntry],
-        loaded_hash_map: BTreeMap<String, ExifEntry>,
+        loaded_hash_map: HashMap<String, ExifEntry>,
         _stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
     ) {

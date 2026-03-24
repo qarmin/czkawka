@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -73,7 +73,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "hash_images_load_cache", level = "debug")]
-    fn hash_images_load_cache(&mut self) -> (BTreeMap<String, ImagesEntry>, BTreeMap<String, ImagesEntry>, BTreeMap<String, ImagesEntry>) {
+    fn hash_images_load_cache(&mut self) -> (HashMap<String, ImagesEntry>, HashMap<String, ImagesEntry>, HashMap<String, ImagesEntry>) {
         load_and_split_cache_generalized_by_path(
             &get_similar_images_cache_file(self.get_params().hash_size, self.get_params().hash_alg, self.get_params().image_filter),
             mem::take(&mut self.images_to_check),
@@ -82,7 +82,7 @@ impl SimilarImages {
     }
 
     #[fun_time(message = "save_to_cache", level = "debug")]
-    fn save_to_cache(&mut self, vec_file_entry: &[ImagesEntry], loaded_hash_map: BTreeMap<String, ImagesEntry>) {
+    fn save_to_cache(&mut self, vec_file_entry: &[ImagesEntry], loaded_hash_map: HashMap<String, ImagesEntry>) {
         save_and_connect_cache_generalized_by_path(
             &get_similar_images_cache_file(self.get_params().hash_size, self.get_params().hash_alg, self.get_params().image_filter),
             vec_file_entry,
@@ -282,24 +282,24 @@ impl SimilarImages {
                             *similarity != 0 && !hashes_parents.contains_key(*compared_hash) && !hashes_with_multiple_images.contains(*compared_hash)
                         })
                         .filter(|(similarity, compared_hash)| {
-                            if let Some((_, other_similarity_with_parent)) = hashes_similarity.get(*compared_hash) {
-                                // If current hash is more similar to other hash than to current parent hash, then skip check earlier
-                                // Because there is no way to be more similar to other hash than to current parent hash
-                                if *similarity >= *other_similarity_with_parent {
-                                    return false;
-                                }
+                            if let Some((_, other_similarity_with_parent)) = hashes_similarity.get(*compared_hash)
+                                && *similarity >= *other_similarity_with_parent
+                            {
+                                return false;
                             }
                             true
                         })
                         .collect::<Vec<_>>();
 
-                    // Sort by tolerance
+                    if found_items.is_empty() && !hashes_with_multiple_images.contains(hash_to_check) {
+                        return Some(None);
+                    }
+
                     found_items.sort_unstable_by_key(|f| f.0);
-                    Some((hash_to_check, found_items))
+                    Some(Some((hash_to_check, found_items)))
                 })
                 .while_some()
-                // TODO - this filter move to into_par_iter above
-                .filter(|(original_hash, vec_similar_hashes)| !vec_similar_hashes.is_empty() || hashes_with_multiple_images.contains(*original_hash))
+                .flatten()
                 .collect::<Vec<_>>();
 
             if check_if_stop_received(stop_flag) {
