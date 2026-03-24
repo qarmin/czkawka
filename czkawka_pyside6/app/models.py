@@ -288,6 +288,7 @@ class ToolSettings:
 class AppSettings:
     """Global application settings."""
     included_paths: list = field(default_factory=lambda: [str(Path.home())])
+    reference_paths: set = field(default_factory=set)  # subset of included_paths marked as reference
     excluded_paths: list = field(default_factory=list)
     excluded_items: str = ""
     allowed_extensions: str = ""

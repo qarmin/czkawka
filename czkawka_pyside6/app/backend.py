@@ -42,40 +42,40 @@ class ScanWorker(QObject):
             with tempfile.NamedTemporaryFile(suffix=".json", delete=False, mode="w") as f:
                 json_output_path = f.name
 
-            try:
-                # Add JSON output flag (use long form to avoid conflict with -C in broken files)
-                cmd.extend(["--compact-file-to-save", json_output_path])
-                # Enable JSON progress on stderr, suppress text output
-                cmd.extend(["--json-progress", "-N", "-M"])
+            # Add JSON output flag (use long form to avoid conflict with -C in broken files)
+            cmd.extend(["--compact-file-to-save", json_output_path])
+            # Enable JSON progress on stderr, suppress text output
+            cmd.extend(["--json-progress", "-N", "-M"])
 
-                self._process = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                )
+            self._process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
 
-                # Read stderr line-by-line for JSON progress data
-                self._monitor_process_json(json_output_path)
+            # Read stderr line-by-line for JSON progress data
+            self._monitor_process_json(json_output_path)
 
-                if self._cancelled:
-                    return
-
-                # Check for CLI errors (exit code 11 = results found, not an error)
-                returncode = self._process.returncode
-                if returncode is not None and returncode != 0 and returncode != 11:
-                    error_msg = f"czkawka_cli exited with code {returncode}"
-                    self.error.emit(error_msg)
-                    return
-
-                # Parse results
-                self.progress.emit(ScanProgress(
-                    step_name="Loading results...", current=0, total=0
-                ))
-                results = self._parse_results(json_output_path)
-                self.finished.emit(self.tab, results)
-            finally:
+            if self._cancelled:
                 self._cleanup(json_output_path)
+                return
+
+            # Check for CLI errors
+            returncode = self._process.returncode
+            if returncode is not None and returncode != 0 and returncode != 11:
+                error_msg = f"czkawka_cli exited with code {returncode}"
+                self.error.emit(error_msg)
+                self._cleanup(json_output_path)
+                return
+
+            # Parse results
+            self.progress.emit(ScanProgress(
+                step_name="Loading results...", current=0, total=0
+            ))
+            results = self._parse_results(json_output_path)
+            self.finished.emit(self.tab, results)
+            self._cleanup(json_output_path)
 
         except FileNotFoundError:
             self.error.emit(
@@ -97,7 +97,7 @@ class ScanWorker(QObject):
 
     def _monitor_process_json(self, json_path: str):
         """Read JSON progress lines from stderr in real-time."""
-        import time, logging
+        import time
 
         while self._process.poll() is None:
             if self._cancelled:
@@ -108,40 +108,43 @@ class ScanWorker(QObject):
                 time.sleep(0.05)
                 continue
 
-            self._parse_progress_line(line.strip())
+            line = line.strip()
+            if not line:
+                continue
 
-        # Drain and parse remaining stderr after process exits
+            try:
+                data = json.loads(line)
+                progress = data.get("progress", {})
+                stage_name = data.get("stage_name", "Processing...")
+
+                entries_checked = progress.get("entries_checked", 0)
+                entries_to_check = progress.get("entries_to_check", 0)
+                bytes_checked = progress.get("bytes_checked", 0)
+                bytes_to_check = progress.get("bytes_to_check", 0)
+                current_stage_idx = progress.get("current_stage_idx", 0)
+                max_stage_idx = progress.get("max_stage_idx", 0)
+
+                self.progress.emit(ScanProgress(
+                    step_name=stage_name,
+                    current=0,
+                    total=0,
+                    current_size=bytes_checked,
+                    stage_name=stage_name,
+                    current_stage_idx=current_stage_idx,
+                    max_stage_idx=max_stage_idx,
+                    entries_checked=entries_checked,
+                    entries_to_check=entries_to_check,
+                    bytes_checked=bytes_checked,
+                    bytes_to_check=bytes_to_check,
+                ))
+            except (json.JSONDecodeError, KeyError, TypeError):
+                continue
+
+        # Drain remaining stderr
         remaining = self._process.stderr.read()
         if remaining:
             for line in remaining.strip().split("\n"):
-                self._parse_progress_line(line.strip())
-
-    def _parse_progress_line(self, line: str):
-        """Parse a single JSON progress line from stderr."""
-        if not line:
-            return
-        try:
-            data = json.loads(line)
-            progress = data.get("progress", {})
-            stage_name = data.get("stage_name", "Processing...")
-
-            self.progress.emit(ScanProgress(
-                step_name=stage_name,
-                current=0,
-                total=0,
-                current_size=progress.get("bytes_checked", 0),
-                stage_name=stage_name,
-                current_stage_idx=progress.get("current_stage_idx", 0),
-                max_stage_idx=progress.get("max_stage_idx", 0),
-                entries_checked=progress.get("entries_checked", 0),
-                entries_to_check=progress.get("entries_to_check", 0),
-                bytes_checked=progress.get("bytes_checked", 0),
-                bytes_to_check=progress.get("bytes_to_check", 0),
-            ))
-        except (json.JSONDecodeError, KeyError, TypeError):
-            import logging
-            if line.startswith("{"):
-                logging.warning("Failed to parse progress JSON: %s", line[:200])
+                pass  # Final lines already processed
 
     def _cleanup(self, path: str):
         try:
@@ -183,6 +186,15 @@ class ScanWorker(QObject):
             cmd.append("-H")
         if s.thread_number > 0:
             cmd.extend(["-T", str(s.thread_number)])
+
+        # Reference directories (only for grouped tools that support -r)
+        if s.reference_paths and self.tab in (
+            ActiveTab.DUPLICATE_FILES, ActiveTab.SIMILAR_IMAGES,
+            ActiveTab.SIMILAR_VIDEOS, ActiveTab.SIMILAR_MUSIC,
+        ):
+            ref_dirs = [p for p in s.reference_paths if p in s.included_paths]
+            if ref_dirs:
+                cmd.extend(["-r", ",".join(ref_dirs)])
 
         # Tool-specific args
         if self.tab == ActiveTab.DUPLICATE_FILES:
@@ -461,8 +473,7 @@ class FileOperations:
     """File operations: delete, move, hardlink, symlink, rename."""
 
     @staticmethod
-    def delete_files(entries: list[ResultEntry], move_to_trash: bool = True,
-                     dry_run: bool = False) -> tuple[int, list[str]]:
+    def delete_files(entries: list[ResultEntry], move_to_trash: bool = True) -> tuple[int, list[str]]:
         deleted = 0
         errors = []
         for entry in entries:
@@ -473,11 +484,6 @@ class FileOperations:
                 p = Path(path)
                 if not p.exists():
                     errors.append(f"File not found: {path}")
-                    continue
-                if dry_run:
-                    action = "trash" if move_to_trash else "delete"
-                    errors.append(f"[DRY RUN] Would {action}: {path}")
-                    deleted += 1
                     continue
                 if move_to_trash:
                     try:
@@ -498,14 +504,12 @@ class FileOperations:
 
     @staticmethod
     def move_files(entries: list[ResultEntry], destination: str,
-                   preserve_structure: bool = False, copy_mode: bool = False,
-                   dry_run: bool = False) -> tuple[int, list[str]]:
+                   preserve_structure: bool = False, copy_mode: bool = False) -> tuple[int, list[str]]:
         import shutil
         moved = 0
         errors = []
         dest = Path(destination)
-        if not dry_run:
-            dest.mkdir(parents=True, exist_ok=True)
+        dest.mkdir(parents=True, exist_ok=True)
 
         for entry in entries:
             src_path = entry.values.get("__full_path", "")
@@ -514,22 +518,15 @@ class FileOperations:
             try:
                 src = Path(src_path)
                 if preserve_structure:
+                    # Keep relative directory structure
                     rel = src.parent
                     target_dir = dest / rel.relative_to(rel.anchor)
+                    target_dir.mkdir(parents=True, exist_ok=True)
                     target = target_dir / src.name
                 else:
                     target = dest / src.name
 
-                if dry_run:
-                    action = "copy" if copy_mode else "move"
-                    errors.append(f"[DRY RUN] Would {action}: {src_path} -> {target}")
-                    moved += 1
-                    continue
-
-                # Create dirs and handle name conflicts for real operations
-                if preserve_structure:
-                    target.parent.mkdir(parents=True, exist_ok=True)
-
+                # Handle name conflicts
                 if target.exists():
                     stem = target.stem
                     suffix = target.suffix

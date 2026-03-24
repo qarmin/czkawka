@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QStatusBar, QMessageBox, QLabel, QApplication
 )
 from PySide6.QtCore import Qt, QTimer, QStandardPaths
-from PySide6.QtGui import QPalette, QColor
+from PySide6.QtGui import QPalette, QColor, QShortcut, QKeySequence
 
 from .state import AppState
 from .models import (
@@ -41,6 +41,17 @@ class MainWindow(QMainWindow):
         self._setup_ui()
         self._connect_signals()
         self._apply_theme()
+        self._setup_shortcuts()
+
+        from .system_tray import SystemTray
+        self._tray = SystemTray(self)
+
+        from .scan_history import ScanHistory
+        self._scan_history = ScanHistory()
+
+        from .scan_queue import ScanQueue
+        self._scan_queue = ScanQueue(self)
+        self._scan_queue.next_scan.connect(self._run_queued_scan)
 
     def _setup_window(self):
         self.setWindowTitle("Czkawka - PySide6 Edition")
@@ -51,6 +62,11 @@ class MainWindow(QMainWindow):
         icon = app_icon()
         if not icon.isNull():
             self.setWindowIcon(icon)
+
+        # Restore saved window geometry
+        if self._state.window_geometry:
+            from PySide6.QtCore import QByteArray
+            self.restoreGeometry(QByteArray.fromHex(self._state.window_geometry.encode()))
 
         # Auto-detect czkawka_cli binary
         self._auto_detect_cli()
@@ -167,6 +183,17 @@ class MainWindow(QMainWindow):
         # Bottom panel
         self._bottom_panel.directories_changed.connect(self._on_settings_changed)
 
+    def _setup_shortcuts(self):
+        QShortcut(QKeySequence("Ctrl+S"), self, self._start_scan)
+        QShortcut(QKeySequence("Escape"), self, self._stop_scan)
+        QShortcut(QKeySequence("Ctrl+A"), self, lambda: self._results_view.apply_selection(SelectMode.SELECT_ALL))
+        QShortcut(QKeySequence("Ctrl+D"), self, self._show_delete_dialog)
+        QShortcut(QKeySequence("Ctrl+M"), self, self._show_move_dialog)
+        QShortcut(QKeySequence("Ctrl+Shift+S"), self, self._save_results)
+        QShortcut(QKeySequence("Ctrl+L"), self, self._load_results)
+        QShortcut(QKeySequence("Ctrl+I"), self, lambda: self._results_view.apply_selection(SelectMode.INVERT_SELECTION))
+        QShortcut(QKeySequence("F5"), self, self._start_scan)
+
     def _on_tab_changed(self, tab: ActiveTab):
         self._state.set_active_tab(tab)
         self._results_view.set_active_tab(tab)
@@ -202,11 +229,7 @@ class MainWindow(QMainWindow):
 
         self._state.set_scanning(True)
         self._action_buttons.set_scanning(True)
-        self._progress.start(
-            tab,
-            included_paths=self._state.settings.included_paths,
-            excluded_paths=self._state.settings.excluded_paths,
-        )
+        self._progress.start(tab)
         self._results_view.clear()
         self._status_label.setText(f"Scanning: {tab.name.replace('_', ' ').title()}...")
 
@@ -231,6 +254,22 @@ class MainWindow(QMainWindow):
 
         count = sum(1 for r in results if not r.header_row)
         self._status_label.setText(f"Scan complete: found {count} entries")
+
+        if hasattr(self, '_tray') and not self.isVisible():
+            self._tray.notify("Scan Complete", f"Found {count} entries")
+
+        import time
+        duration = time.monotonic() - self._progress._start_time if self._progress._start_time else 0
+        groups = sum(1 for r in results if r.header_row)
+        self._scan_history.add(
+            tool=tab.name,
+            directories=self._state.settings.included_paths,
+            entries=count,
+            groups=groups,
+            duration=duration,
+        )
+
+        self._scan_queue.on_scan_completed()
 
     def _on_scan_progress(self, progress):
         self._progress.update_progress(progress)
@@ -278,18 +317,15 @@ class MainWindow(QMainWindow):
 
         dialog = DeleteDialog(len(checked), self._state.settings.move_to_trash, self)
         if dialog.exec() == DeleteDialog.Accepted:
-            dry_run = dialog.dry_run
             deleted, errors = FileOperations.delete_files(
-                checked, dialog.move_to_trash, dry_run=dry_run
+                checked, dialog.move_to_trash
             )
-            prefix = "[DRY RUN] " if dry_run else ""
-            self._status_label.setText(f"{prefix}Deleted {deleted} file(s)")
+            self._status_label.setText(f"Deleted {deleted} file(s)")
             if errors:
                 self._bottom_panel.set_text("\n".join(errors))
                 self._bottom_panel.show_text()
-            # Refresh results - remove deleted entries (skip on dry run)
-            if not dry_run:
-                self._refresh_after_action(checked)
+            # Refresh results - remove deleted entries
+            self._refresh_after_action(checked)
 
     def _show_move_dialog(self):
         checked = self._results_view.get_checked_entries()
@@ -302,19 +338,16 @@ class MainWindow(QMainWindow):
             if not dialog.destination:
                 QMessageBox.warning(self, "No Destination", "Please select a destination folder.")
                 return
-            dry_run = dialog.dry_run
             moved, errors = FileOperations.move_files(
                 checked, dialog.destination,
-                dialog.preserve_structure, dialog.copy_mode,
-                dry_run=dry_run
+                dialog.preserve_structure, dialog.copy_mode
             )
             action = "Copied" if dialog.copy_mode else "Moved"
-            prefix = "[DRY RUN] " if dry_run else ""
-            self._status_label.setText(f"{prefix}{action} {moved} file(s)")
+            self._status_label.setText(f"{action} {moved} file(s)")
             if errors:
                 self._bottom_panel.set_text("\n".join(errors))
                 self._bottom_panel.show_text()
-            if not dialog.copy_mode and not dry_run:
+            if not dialog.copy_mode:
                 self._refresh_after_action(checked)
 
     def _save_results(self):
@@ -323,7 +356,9 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "No Results", "No results to save.")
             return
         all_results = self._state.get_results()
-        success = SaveDialog.save(self, all_results, self._state.settings.save_as_json)
+        from .models import TAB_DISPLAY_NAMES
+        tool_name = TAB_DISPLAY_NAMES.get(self._state.active_tab, "Results")
+        success = SaveDialog.save(self, all_results, self._state.settings.save_as_json, tool_name)
         if success:
             self._status_label.setText("Results saved successfully")
 
@@ -586,8 +621,15 @@ class MainWindow(QMainWindow):
                 self._state.save_settings()
                 return
 
+    def _run_queued_scan(self, tab: ActiveTab):
+        self._state.set_active_tab(tab)
+        self._left_panel.set_active_tab(tab)
+        self._on_tab_changed(tab)
+        self._start_scan()
+
     def closeEvent(self, event):
         """Save settings on close."""
+        self._state.window_geometry = self.saveGeometry().toHex().data().decode()
         self._state.save_settings()
         if self._state.scanning:
             self._scan_runner.stop_scan()

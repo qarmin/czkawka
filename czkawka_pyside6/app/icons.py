@@ -130,6 +130,7 @@ def app_logo_path() -> str:
     # Try relative to this file first, then absolute project path
     for candidate in [
         Path(__file__).parent.parent.parent / "krokiet" / "icons" / "krokiet_logo.png",
+        Path("/mnt/developer/git/aecs4u.it/czkawka/krokiet/icons/krokiet_logo.png"),
     ]:
         if candidate.exists():
             return str(candidate)

@@ -59,7 +59,7 @@ Each tool uses different technologies, so you can find instructions for each of 
 
 - [Krokiet GUI (Slint frontend)](krokiet/README.md)</br>
 - [Czkawka GUI (GTK frontend)](czkawka_gui/README.md)</br>
-- [Czkawka PySide6 (Qt/PySide6 frontend)](czkawka_pyside6/README.md)</br>
+- [Czkawka PySide6 (Qt/PySide6 frontend, KDE6 compliant)](czkawka_pyside6/README.md)</br>
 - [Czkawka CLI](czkawka_cli/README.md)</br>
 - [Czkawka Core](czkawka_core/README.md)</br>
 - [Cedinia](cedinia/README.md)</br>
@@ -69,37 +69,37 @@ Each tool uses different technologies, so you can find instructions for each of 
 In this comparison remember, that even if app have same features they may work different(e.g. one app may have more
 options to choose than other).
 
-|                           |   Krokiet   | Czkawka PySide6  |     Czkawka      | Cedinia | FSlint |     DupeGuru      |  Bleachbit  |
-|:-------------------------:|:-----------:|:----------------:|:----------------:|:-------:|:------:|:-----------------:|:-----------:|
-|         Language          |    Rust     |      Python      |       Rust       |  Rust   | Python |   Python/Obj-C    |   Python    |
-|  Framework base language  |    Rust     |       C++        |        C         |  Rust   |   C    | C/C++/Obj-C/Swift |      C      |
-|         Framework         |    Slint    |  PySide6 (Qt 6)  |      GTK 4       |  Slint  | PyGTK2 | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
-|            OS             | Lin,Mac,Win |   Lin,Mac,Win    |   Lin,Mac,Win    | Android |  Lin   |    Lin,Mac,Win    | Lin,Mac,Win |
-|     Duplicate finder      |      ✔      |        ✔         |        ✔         |    ✔    |   ✔    |         ✔         |             |
-|        Empty files        |      ✔      |        ✔         |        ✔         |    ✔    |   ✔    |                   |             |
-|       Empty folders       |      ✔      |        ✔         |        ✔         |    ✔    |   ✔    |                   |             |
-|      Temporary files      |      ✔      |        ✔         |        ✔         |    ✔    |   ✔    |                   |      ✔      |
-|         Big files         |      ✔      |        ✔         |        ✔         |    ✔    |        |                   |             |
-|      Similar images       |      ✔      |        ✔         |        ✔         |    ✔    |        |         ✔         |             |
-|      Similar videos       |      ✔      |        ✔         |        ✔         |         |        |                   |             |
-|  Music duplicates(tags)   |      ✔      |        ✔         |        ✔         |    ✔    |        |         ✔         |             |
-| Music duplicates(content) |      ✔      |        ✔         |        ✔         |    ✔    |        |                   |             |
-|     Invalid symlinks      |      ✔      |        ✔         |        ✔         |    ✔    |   ✔    |                   |             |
-|       Broken files        |      ✔      |        ✔         |        ✔         |    ✔    |        |                   |             |
-| Invalid names/extensions  |      ✔      |        ✔         |        ✔         |    ✔    |   ✔    |                   |             |
-|       Exif cleaner        |      ✔      |        ✔         |                  |    ✔    |        |                   |             |
-|      Video optimizer      |      ✔      |        ✔         |                  |         |        |                   |             |
-|         Bad Names         |      ✔      |        ✔         |                  |    ✔    |        |                   |             |
-|      Names conflict       |             |                  |                  |         |   ✔    |                   |             |
-|    Installed packages     |             |                  |                  |         |   ✔    |                   |             |
-|          Bad ID           |             |                  |                  |         |   ✔    |                   |             |
-|   Non stripped binaries   |             |                  |                  |         |   ✔    |                   |             |
-|   Redundant whitespace    |             |                  |                  |         |   ✔    |                   |             |
-|     Overwriting files     |             |                  |                  |         |   ✔    |                   |      ✔      |
-|     Portable version      |      ✔      |        ✔         |        ✔         |         |        |                   |      ✔      |
-|    Multiple languages     |      ✔      |                  |        ✔         |    ✔    |   ✔    |         ✔         |      ✔      |
-|       Cache support       |      ✔      |        ✔         |        ✔         |    ✔    |        |         ✔         |             |
-|   In active development   |     Yes     |       Yes        | Yes<sup>**</sup> | Yes***  |   No   |  No<sup>*</sup>   |     Yes     |
+|                           |   Krokiet   | Czkawka PySide6  |     Czkawka      | FSlint |     DupeGuru      |  Bleachbit  |
+|:-------------------------:|:-----------:|:----------------:|:----------------:|:------:|:-----------------:|:-----------:|
+|         Language          |    Rust     |      Python      |       Rust       | Python |   Python/Obj-C    |   Python    |
+|  Framework base language  |    Rust     |       C++        |        C         |   C    | C/C++/Obj-C/Swift |      C      |
+|         Framework         |    Slint    |  PySide6 (Qt 6)  |      GTK 4       | PyGTK2 | Qt 5 (PyQt)/Cocoa |   PyGTK3    |
+|            OS             | Lin,Mac,Win |   Lin,Mac,Win    |   Lin,Mac,Win    |  Lin   |    Lin,Mac,Win    | Lin,Mac,Win |
+|     Duplicate finder      |      ✔      |        ✔         |        ✔         |   ✔    |         ✔         |             |
+|        Empty files        |      ✔      |        ✔         |        ✔         |   ✔    |                   |             |
+|       Empty folders       |      ✔      |        ✔         |        ✔         |   ✔    |                   |             |
+|      Temporary files      |      ✔      |        ✔         |        ✔         |   ✔    |                   |      ✔      |
+|         Big files         |      ✔      |        ✔         |        ✔         |        |                   |             |
+|      Similar images       |      ✔      |        ✔         |        ✔         |        |         ✔         |             |
+|      Similar videos       |      ✔      |        ✔         |        ✔         |        |                   |             |
+|  Music duplicates(tags)   |      ✔      |        ✔         |        ✔         |        |         ✔         |             |
+| Music duplicates(content) |      ✔      |        ✔         |        ✔         |        |                   |             |
+|     Invalid symlinks      |      ✔      |        ✔         |        ✔         |   ✔    |                   |             |
+|       Broken files        |      ✔      |        ✔         |        ✔         |        |                   |             |
+| Invalid names/extensions  |      ✔      |        ✔         |        ✔         |   ✔    |                   |             |
+|       Exif cleaner        |      ✔      |        ✔         |                  |        |                   |             |
+|      Video optimizer      |      ✔      |        ✔         |                  |        |                   |             |
+|         Bad Names         |      ✔      |        ✔         |                  |        |                   |             |
+|      Names conflict       |             |                  |                  |   ✔    |                   |             |
+|    Installed packages     |             |                  |                  |   ✔    |                   |             |
+|          Bad ID           |             |                  |                  |   ✔    |                   |             |
+|   Non stripped binaries   |             |                  |                  |   ✔    |                   |             |
+|   Redundant whitespace    |             |                  |                  |   ✔    |                   |             |
+|     Overwriting files     |             |                  |                  |   ✔    |                   |      ✔      |
+|     Portable version      |      ✔      |        ✔         |        ✔         |        |                   |      ✔      |
+|    Multiple languages     |      ✔      |                  |        ✔         |   ✔    |         ✔         |      ✔      |
+|       Cache support       |      ✔      |        ✔         |        ✔         |        |         ✔         |             |
+|   In active development   |     Yes     |       Yes        | Yes<sup>**</sup> |   No   |  No<sup>*</sup>   |     Yes     |
 
 <p><sup>*</sup> Few small commits added recently and last version released in 2023</p> 
 <p><sup>**</sup> Czkawka GTK is in maintenance mode receiving only bugfixes</p>

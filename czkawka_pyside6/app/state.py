@@ -32,6 +32,8 @@ class AppState(QObject):
         self.progress = ScanProgress()
         self.info_text = ""
         self.preview_image_path = ""
+        self.window_geometry = None  # bytes as hex string
+        self.window_state = None
         # Use QStandardPaths for XDG-compliant config location
         config_dir = QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation)
         self._config_path = Path(config_dir) if config_dir else Path.home() / ".config" / "czkawka"
@@ -77,6 +79,7 @@ class AppState(QObject):
         config_file = self._config_path / "settings.json"
         data = {
             "included_paths": self.settings.included_paths,
+            "reference_paths": list(self.settings.reference_paths),
             "excluded_paths": self.settings.excluded_paths,
             "excluded_items": self.settings.excluded_items,
             "allowed_extensions": self.settings.allowed_extensions,
@@ -92,6 +95,8 @@ class AppState(QObject):
             "dark_theme": self.settings.dark_theme,
             "show_image_preview": self.settings.show_image_preview,
             "czkawka_cli_path": self.settings.czkawka_cli_path,
+            "window_geometry": self.window_geometry,
+            "window_state": self.window_state,
         }
         try:
             config_file.write_text(json.dumps(data, indent=2))
@@ -105,6 +110,7 @@ class AppState(QObject):
                 data = json.loads(config_file.read_text())
                 s = self.settings
                 s.included_paths = data.get("included_paths", s.included_paths)
+                s.reference_paths = set(data.get("reference_paths", []))
                 s.excluded_paths = data.get("excluded_paths", s.excluded_paths)
                 s.excluded_items = data.get("excluded_items", s.excluded_items)
                 s.allowed_extensions = data.get("allowed_extensions", s.allowed_extensions)
@@ -120,5 +126,7 @@ class AppState(QObject):
                 s.dark_theme = data.get("dark_theme", s.dark_theme)
                 s.show_image_preview = data.get("show_image_preview", s.show_image_preview)
                 s.czkawka_cli_path = data.get("czkawka_cli_path", s.czkawka_cli_path)
+                self.window_geometry = data.get("window_geometry", self.window_geometry)
+                self.window_state = data.get("window_state", self.window_state)
             except (json.JSONDecodeError, OSError):
                 pass

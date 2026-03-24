@@ -1,11 +1,11 @@
-import os
+import json
 import time
-import threading
+from pathlib import Path
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QProgressBar, QLabel, QHBoxLayout
 )
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QStandardPaths
 
 from .models import ActiveTab, ScanProgress
 
@@ -27,9 +27,8 @@ class ProgressWidget(QWidget):
         self._start_time = 0.0
         self._active_tab = ActiveTab.DUPLICATE_FILES
         self._last_collection_count = 0  # Files found during collection phase
-        self._file_count_estimate = 0  # Live count from background walker
-        self._file_count_thread: threading.Thread | None = None
-        self._file_count_stop = threading.Event()
+        self._estimates: dict[str, int] = {}
+        self._load_estimates()
         self._setup_ui()
 
         self._timer = QTimer(self)
@@ -113,13 +112,11 @@ class ProgressWidget(QWidget):
 
     # ── Public API ────────────────────────────────────────────
 
-    def start(self, tab: ActiveTab = None, included_paths: list[str] | None = None,
-              excluded_paths: list[str] | None = None):
+    def start(self, tab: ActiveTab = None):
         if tab is not None:
             self._active_tab = tab
         self._start_time = time.monotonic()
         self._last_collection_count = 0
-        self._file_count_estimate = 0
         self.setVisible(True)
 
         for bar in (self._stage_bar, self._overall_bar):
@@ -134,12 +131,8 @@ class ProgressWidget(QWidget):
         self._steps_label.setText("")
         self._timer.start()
 
-        # Start background file count for collection-phase estimate
-        self._start_file_count(included_paths or [], excluded_paths or [])
-
     def stop(self):
         self._timer.stop()
-        self._stop_file_count()
         elapsed = time.monotonic() - self._start_time if self._start_time else 0
         self._elapsed_label.setText(f"Completed in {self._format_time(elapsed)}")
 
@@ -151,6 +144,10 @@ class ProgressWidget(QWidget):
 
         self._stage_label.setText("Scan complete")
         self._steps_label.setText("")
+
+        # Save collection count for next-scan estimation
+        if self._last_collection_count > 0:
+            self._save_estimate(self._last_collection_count)
 
         QTimer.singleShot(3000, self._auto_hide)
 
@@ -178,9 +175,9 @@ class ProgressWidget(QWidget):
         is_collecting = (idx == 0 and to_check == 0)
 
         if is_collecting:
-            # Collection phase: use live background file count as estimate
+            # Collection phase: use estimate from previous scan
             self._last_collection_count = max(self._last_collection_count, checked)
-            estimate = self._file_count_estimate
+            estimate = self._get_estimate()
             if estimate > 0 and checked > 0:
                 pct = min(99, int(checked * 100 / estimate))
                 self._stage_bar.setMaximum(100)
@@ -224,8 +221,8 @@ class ProgressWidget(QWidget):
         if max_idx > 0:
             if to_check > 0:
                 stage_frac = (b_checked / b_to_check) if b_to_check > 0 else (checked / to_check)
-            elif is_collecting and self._file_count_estimate > 0 and checked > 0:
-                stage_frac = min(0.99, checked / self._file_count_estimate)
+            elif is_collecting and self._get_estimate() > 0 and checked > 0:
+                stage_frac = min(0.99, checked / self._get_estimate())
             else:
                 stage_frac = 0
             overall = (idx + min(stage_frac, 0.99)) / (max_idx + 1)
@@ -237,49 +234,37 @@ class ProgressWidget(QWidget):
             self._overall_bar.setMaximum(0)
             self._overall_pct.setText("")
 
-    # ── Background file counter ─────────────────────────────
+    # ── Collection estimate persistence ───────────────────────
 
-    def _start_file_count(self, included: list[str], excluded: list[str]):
-        """Start a background thread that walks included dirs to count files."""
-        self._stop_file_count()
-        self._file_count_stop.clear()
-        self._file_count_estimate = 0
+    def _get_estimate_key(self) -> str:
+        """Key for the estimate cache based on active tab."""
+        return self._active_tab.name
 
-        if not included:
-            return
+    def _get_estimate(self) -> int:
+        return self._estimates.get(self._get_estimate_key(), 0)
 
-        excluded_set = set(os.path.realpath(p) for p in excluded)
+    @staticmethod
+    def _estimate_file_path() -> Path:
+        config_dir = QStandardPaths.writableLocation(QStandardPaths.AppConfigLocation)
+        base = Path(config_dir) if config_dir else Path.home() / ".config" / "czkawka"
+        return base / "scan_estimates.json"
 
-        def _count():
-            count = 0
-            for root_dir in included:
-                if self._file_count_stop.is_set():
-                    return
-                try:
-                    for dirpath, dirnames, filenames in os.walk(root_dir):
-                        if self._file_count_stop.is_set():
-                            return
-                        real = os.path.realpath(dirpath)
-                        # Prune excluded subtrees
-                        dirnames[:] = [
-                            d for d in dirnames
-                            if os.path.realpath(os.path.join(dirpath, d)) not in excluded_set
-                        ]
-                        if real in excluded_set:
-                            continue
-                        count += len(filenames)
-                        self._file_count_estimate = count
-                except OSError:
-                    continue
+    def _save_estimate(self, count: int):
+        self._estimates[self._get_estimate_key()] = count
+        try:
+            path = self._estimate_file_path()
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(self._estimates))
+        except OSError:
+            pass
 
-        self._file_count_thread = threading.Thread(target=_count, daemon=True)
-        self._file_count_thread.start()
-
-    def _stop_file_count(self):
-        self._file_count_stop.set()
-        if self._file_count_thread is not None:
-            self._file_count_thread.join(timeout=1)
-            self._file_count_thread = None
+    def _load_estimates(self):
+        try:
+            path = self._estimate_file_path()
+            if path.exists():
+                self._estimates = json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError):
+            self._estimates = {}
 
     # ── Step indicator ────────────────────────────────────────
 
