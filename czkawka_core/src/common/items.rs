@@ -12,7 +12,7 @@ pub const DEFAULT_EXCLUDED_DIRECTORIES: &[&str] = &["C:\\Windows"];
 pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,/Users/*/Library/Caches/*";
 
 #[cfg(all(target_family = "unix", not(target_os = "macos")))]
-pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*,/home/*/.var/app/,/home/*/.*";
+pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found/*,*/Trash/*,*/.Trash-*/*,*/snap/*,/home/*/.cache/*,/home/*/.var/app/";
 
 #[cfg(not(target_family = "unix"))]
 pub const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*,*:\\$RECYCLE.BIN\\*,*:\\$SysReset\\*,*:\\System Volume Information\\*,*:\\OneDriveTemp\\*,*:\\hiberfil.sys,*:\\pagefile.sys,*:\\swapfile.sys,*:\\Users\\*\\AppData";

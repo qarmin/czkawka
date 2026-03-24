@@ -57,7 +57,7 @@ impl InvalidSymlinks {
 
         match current_file_name.read_link() {
             Ok(t) => {
-                destination_path.push(t);
+                destination_path.push(&t);
                 let mut loop_count = 0;
                 let mut current_path = current_file_name.to_path_buf();
                 loop {
@@ -70,10 +70,23 @@ impl InvalidSymlinks {
                         break;
                     }
 
+                    let parent_dir = current_path.parent().map(|p| p.to_path_buf());
                     current_path = match current_path.read_link() {
-                        Ok(t) => t,
+                        Ok(t) => {
+                            // If the symlink target is a relative path, resolve it against
+                            // the parent directory of the current symlink (not the process CWD)
+                            if t.is_relative() {
+                                if let Some(parent) = parent_dir {
+                                    parent.join(t)
+                                } else {
+                                    t
+                                }
+                            } else {
+                                t
+                            }
+                        }
                         Err(_inspected) => {
-                            // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
+                            // Target is not a symlink (it's a regular file/dir), so the chain is valid
                             return None;
                         }
                     };
@@ -82,7 +95,7 @@ impl InvalidSymlinks {
                 }
             }
             Err(_inspected) => {
-                // Failed to load info about it
+                // Failed to read symlink - treat as non-existent
                 type_of_error = ErrorType::NonExistentFile;
             }
         }

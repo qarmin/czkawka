@@ -66,6 +66,27 @@ fn test_no_invalid_symlinks() {
 
 #[test]
 #[cfg(target_family = "unix")]
+fn test_find_invalid_symlinks_relative_path() {
+    let temp_dir = TempDir::new().unwrap();
+    let path = temp_dir.path();
+
+    // Create a broken relative symlink (like "../nonexistent/target")
+    let invalid_link = path.join("invalid_relative_link");
+    std::os::unix::fs::symlink("../nonexistent_directory/some_file", &invalid_link).unwrap();
+
+    let mut finder = InvalidSymlinks::new();
+    finder.set_included_paths(vec![path.to_path_buf()]);
+    finder.set_recursive_search(true);
+
+    let stop_flag = Arc::new(AtomicBool::new(false));
+    finder.search(&stop_flag, None);
+
+    let info = finder.get_information();
+    assert_eq!(info.number_of_invalid_symlinks, 1, "Should find 1 invalid symlink with relative path target");
+}
+
+#[test]
+#[cfg(target_family = "unix")]
 fn test_deleted_target_creates_invalid_symlink() {
     let temp_dir = TempDir::new().unwrap();
     let path = temp_dir.path();
