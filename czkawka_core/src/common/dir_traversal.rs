@@ -281,9 +281,10 @@ where
                 return DirTraversalResult::Stopped;
             }
 
+            let dir_max_len = std::thread::available_parallelism().map_or(2, |p| (p.get() / 2).max(2));
             let segments: Vec<_> = folders_to_check
                 .into_par_iter()
-                .with_max_len(2) // Avoiding checking too many folders in batch
+                .with_max_len(dir_max_len)
                 .map(|current_folder| {
                     let mut dir_result = Vec::new();
                     let mut warnings = Vec::new();

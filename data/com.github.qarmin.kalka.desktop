@@ -1,0 +1,12 @@
+[Desktop Entry]
+Categories=System;FileTools;Qt;
+Exec=kalka
+Icon=com.github.qarmin.czkawka
+StartupWMClass=kalka
+Terminal=false
+Type=Application
+
+Name=Kalka
+GenericName=File Cleaner
+Comment=Multi-functional app to find duplicates, empty folders, similar files and more - Qt/PySide6 edition.
+Keywords=Czkawka;duplicate;same;similar;cleaner;copy;copies;compare;files;Qt;

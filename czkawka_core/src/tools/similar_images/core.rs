@@ -54,7 +54,7 @@ impl SimilarImages {
                     .into_par_iter()
                     .flat_map(if self.get_hide_hard_links() { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| {
-                        let fe_str = fe.path.to_string_lossy().to_string();
+                        let fe_str = fe.path.to_string_lossy().into_owned();
                         let image_entry = fe.into_images_entry();
 
                         (fe_str, image_entry)
@@ -185,24 +185,35 @@ impl SimilarImages {
             .collect();
         let mut base_hashes = Vec::new(); // Initial hashes
         if self.common_data.use_reference_folders {
-            let mut files_from_referenced_folders: IndexMap<ImHash, Vec<ImagesEntry>> = IndexMap::new();
-            let mut normal_files: IndexMap<ImHash, Vec<ImagesEntry>> = IndexMap::new();
+            let mut hashes_referenced: IndexSet<ImHash> = IndexSet::new();
+            let mut hashes_normal: IndexSet<ImHash> = IndexSet::new();
 
-            all_hashed_images.clone().into_iter().for_each(|(hash, vec_file_entry)| {
+            for (hash, vec_file_entry) in all_hashed_images {
+                let mut has_referenced = false;
+                let mut has_normal = false;
                 for file_entry in vec_file_entry {
                     if is_in_reference_folder(&self.common_data.directories.reference_directories, &file_entry.path) {
-                        files_from_referenced_folders.entry(hash.clone()).or_default().push(file_entry);
+                        has_referenced = true;
                     } else {
-                        normal_files.entry(hash.clone()).or_default().push(file_entry);
+                        has_normal = true;
+                    }
+                    if has_referenced && has_normal {
+                        break;
                     }
                 }
-            });
+                if has_referenced {
+                    hashes_referenced.insert(hash.clone());
+                }
+                if has_normal {
+                    hashes_normal.insert(hash.clone());
+                }
+            }
 
-            for hash in normal_files.into_keys() {
+            for hash in hashes_normal {
                 self.bktree.add(hash);
             }
 
-            for hash in files_from_referenced_folders.into_keys() {
+            for hash in hashes_referenced {
                 base_hashes.push(hash);
             }
         } else {
@@ -219,35 +230,37 @@ impl SimilarImages {
         &self,
         hashes_parents: IndexMap<ImHash, u32>,
         hashes_with_multiple_images: &IndexSet<ImHash>,
-        all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
+        all_hashed_images: &mut IndexMap<ImHash, Vec<ImagesEntry>>,
         collected_similar_images: &mut IndexMap<ImHash, Vec<ImagesEntry>>,
         hashes_similarity: IndexMap<ImHash, (ImHash, u32)>,
     ) {
-        // Collecting results to vector
+        // Collecting results to vector - use swap_remove to move data instead of cloning
         for (parent_hash, child_number) in hashes_parents {
             // If hash contains other hasher OR multiple images are available for checked hash
             if child_number > 0 || hashes_with_multiple_images.contains(&parent_hash) {
-                let vec_fe = all_hashed_images[&parent_hash].clone();
-                collected_similar_images.insert(parent_hash.clone(), vec_fe);
+                if let Some(vec_fe) = all_hashed_images.swap_remove(&parent_hash) {
+                    collected_similar_images.insert(parent_hash, vec_fe);
+                }
             }
         }
 
         for (child_hash, (parent_hash, similarity)) in hashes_similarity {
-            let mut vec_fe = all_hashed_images[&child_hash].clone();
-            for fe in &mut vec_fe {
-                fe.difference = similarity;
+            if let Some(mut vec_fe) = all_hashed_images.swap_remove(&child_hash) {
+                for fe in &mut vec_fe {
+                    fe.difference = similarity;
+                }
+                collected_similar_images
+                    .get_mut(&parent_hash)
+                    .expect("Cannot find parent hash - this should be added in previous step")
+                    .append(&mut vec_fe);
             }
-            collected_similar_images
-                .get_mut(&parent_hash)
-                .expect("Cannot find parent hash - this should be added in previous step")
-                .append(&mut vec_fe);
         }
     }
 
     #[fun_time(message = "compare_hashes_with_non_zero_tolerance", level = "debug")]
     fn compare_hashes_with_non_zero_tolerance(
         &mut self,
-        all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
+        all_hashed_images: &mut IndexMap<ImHash, Vec<ImagesEntry>>,
         collected_similar_images: &mut IndexMap<ImHash, Vec<ImagesEntry>>,
         progress_sender: Option<&Sender<ProgressData>>,
         stop_flag: &Arc<AtomicBool>,
@@ -265,7 +278,11 @@ impl SimilarImages {
         // Without chunks, every single hash would be compared to every other hash and generate really big amount of results
         // With chunks we can save results to variables and later use such variables, to skip ones with too big difference
         // Not really helpful, when not finding almost any duplicates, but with bigger amount of them, this should help a lot
-        let base_hashes_chunks = base_hashes.chunks(1000);
+        let chunk_size = {
+            let num_cores = std::thread::available_parallelism().map_or(4, |p| p.get());
+            (base_hashes.len() / (num_cores * 4)).clamp(1000, 10000)
+        };
+        let base_hashes_chunks = base_hashes.chunks(chunk_size);
         for chunk in base_hashes_chunks {
             let partial_results = chunk
                 .into_par_iter()
@@ -417,7 +434,7 @@ impl SimilarImages {
         // Results
         let mut collected_similar_images: IndexMap<ImHash, Vec<ImagesEntry>> = Default::default();
 
-        let all_hashed_images = mem::take(&mut self.image_hashes);
+        let mut all_hashed_images = mem::take(&mut self.image_hashes);
 
         // Checking entries with tolerance 0 is really easy and fast, because only entries with same hashes needs to be checked
         if tolerance == 0 {
@@ -426,7 +443,7 @@ impl SimilarImages {
                     collected_similar_images.insert(hash, vec_file_entry);
                 }
             }
-        } else if self.compare_hashes_with_non_zero_tolerance(&all_hashed_images, &mut collected_similar_images, progress_sender, stop_flag, tolerance) == WorkContinueStatus::Stop
+        } else if self.compare_hashes_with_non_zero_tolerance(&mut all_hashed_images, &mut collected_similar_images, progress_sender, stop_flag, tolerance) == WorkContinueStatus::Stop
         {
             return WorkContinueStatus::Stop;
         }
@@ -519,7 +536,7 @@ impl SimilarImages {
                 continue;
             }
             for file_entry in vec_file_entry {
-                let st = file_entry.path.to_string_lossy().to_string();
+                let st = file_entry.path.to_string_lossy().into_owned();
                 if result_hashset.contains(&st) {
                     found = true;
                     error!("Duplicated Element {st}");
@@ -644,7 +661,7 @@ fn debug_check_for_duplicated_things(
             hashmap_hashes.insert((*hash).clone());
 
             for i in &all_hashed_images[hash] {
-                let name = i.path.to_string_lossy().to_string();
+                let name = i.path.to_string_lossy().into_owned();
                 if hashmap_names.contains(&name) {
                     debug!("------1--NAME--{numm}  {name:?}");
                     found_broken_thing = true;
@@ -661,7 +678,7 @@ fn debug_check_for_duplicated_things(
         hashmap_hashes.insert((*hash).clone());
 
         for i in &all_hashed_images[hash] {
-            let name = i.path.to_string_lossy().to_string();
+            let name = i.path.to_string_lossy().into_owned();
             if hashmap_names.contains(&name) {
                 debug!("------2--NAME--{numm}  {name:?}");
                 found_broken_thing = true;
@@ -951,7 +968,7 @@ mod tests {
             similar_images.find_similar_hashes(&Arc::default(), None);
             let res = similar_images.get_similar_images();
             assert_eq!(res.len(), 1);
-            let mut path = res[0].iter().map(|e| e.path.to_string_lossy().to_string()).collect::<Vec<_>>();
+            let mut path = res[0].iter().map(|e| e.path.to_string_lossy().into_owned()).collect::<Vec<_>>();
             path.sort();
             if res[0].len() == 3 {
                 assert_eq!(path, vec!["abc.txt".to_string(), "bcd.txt".to_string(), "rrd.txt".to_string()]);

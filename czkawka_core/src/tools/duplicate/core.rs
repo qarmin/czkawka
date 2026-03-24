@@ -104,7 +104,7 @@ impl DuplicateFinder {
                         })
                         .collect::<Vec<(DuplicateEntry, Vec<DuplicateEntry>)>>();
                     for (fe, vec_fe) in vec {
-                        self.files_with_identical_names_referenced.insert(fe.path.to_string_lossy().to_string(), (fe, vec_fe));
+                        self.files_with_identical_names_referenced.insert(fe.path.to_string_lossy().into_owned(), (fe, vec_fe));
                     }
                 }
                 self.calculate_name_stats();
@@ -323,7 +323,7 @@ impl DuplicateFinder {
                         .collect::<Vec<(DuplicateEntry, Vec<DuplicateEntry>)>>();
                     for (fe, vec_fe) in vec {
                         self.files_with_identical_size_names_referenced
-                            .insert((fe.size, fe.path.to_string_lossy().to_string()), (fe, vec_fe));
+                            .insert((fe.size, fe.path.to_string_lossy().into_owned()), (fe, vec_fe));
                     }
                 }
                 self.calculate_size_name_stats();
@@ -492,7 +492,11 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "prehash_save_cache_at_exit", level = "debug")]
-    fn prehash_save_cache_at_exit(&mut self, loaded_hash_map: BTreeMap<u64, Vec<DuplicateEntry>>, pre_hash_results: Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)>) {
+    fn prehash_save_cache_at_exit(
+        &mut self,
+        loaded_hash_map: BTreeMap<u64, Vec<DuplicateEntry>>,
+        pre_hash_results: Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)>,
+    ) {
         if self.get_params().use_prehash_cache {
             // All results = records already cached + computed results
             let mut save_cache_to_hashmap: HashMap<String, DuplicateEntry> = Default::default();
@@ -500,7 +504,7 @@ impl DuplicateFinder {
             for (size, vec_file_entry) in loaded_hash_map {
                 if size >= self.get_params().minimal_prehash_cache_file_size {
                     for file_entry in vec_file_entry {
-                        save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+                        save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().into_owned(), file_entry);
                     }
                 }
             }
@@ -509,7 +513,7 @@ impl DuplicateFinder {
                 if size >= self.get_params().minimal_prehash_cache_file_size {
                     for vec_file_entry in hash_map.into_values() {
                         for file_entry in vec_file_entry {
-                            save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+                            save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().into_owned(), file_entry);
                         }
                     }
                 }
@@ -560,10 +564,11 @@ impl DuplicateFinder {
         let non_cached_files_to_check: Vec<(u64, Vec<DuplicateEntry>)> = non_cached_files_to_check.into_iter().collect();
 
         debug!("Starting calculating prehash");
+        let rayon_max_len = std::thread::available_parallelism().map_or(3, |p| p.get().max(3));
         #[expect(clippy::type_complexity)]
         let pre_hash_results: Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
             .into_par_iter()
-            .with_max_len(3) // Vectors and HashMaps for really big inputs, leave some jobs to 0 thread, to avoid that I minimized max tasks for each thread to 3, which improved performance
+            .with_max_len(rayon_max_len)
             .map(|(size, vec_file_entry)| {
                 let mut hashmap_with_hash: HashMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
@@ -738,13 +743,13 @@ impl DuplicateFinder {
         let mut all_results: HashMap<String, DuplicateEntry> = Default::default();
         for (_size, vec_file_entry) in loaded_hash_map {
             for file_entry in vec_file_entry {
-                all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+                all_results.insert(file_entry.path.to_string_lossy().into_owned(), file_entry);
             }
         }
-        for (_size, hashmap, _errors) in full_hash_results {
+        for (_size, hashmap, _errors) in full_hash_results.iter() {
             for vec_file_entry in hashmap.values() {
                 for file_entry in vec_file_entry {
-                    all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
+                    all_results.insert(file_entry.path.to_string_lossy().into_owned(), file_entry.clone());
                 }
             }
         }
@@ -793,9 +798,10 @@ impl DuplicateFinder {
             "Starting full hashing of {} files",
             non_cached_files_to_check.iter().map(|(_size, v)| v.len() as u64).sum::<u64>()
         );
+        let rayon_max_len = std::thread::available_parallelism().map_or(3, |p| p.get().max(3));
         let mut full_hash_results: Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
             .into_par_iter()
-            .with_max_len(3)
+            .with_max_len(rayon_max_len)
             .map(|(size, vec_file_entry)| {
                 let mut hashmap_with_hash: HashMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
