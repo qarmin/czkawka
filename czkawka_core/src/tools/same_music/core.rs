@@ -312,6 +312,10 @@ impl SameMusic {
 
         progress_handler.join_thread();
 
+        // Sort entries within each group by path for deterministic results
+        for group in &mut old_duplicates {
+            group.sort_unstable_by(|a, b| a.path.cmp(&b.path));
+        }
         self.duplicated_music_entries = old_duplicates;
 
         if self.common_data.use_reference_folders {
@@ -477,6 +481,10 @@ impl SameMusic {
 
         progress_handler.join_thread();
 
+        // Sort entries within each group by path for deterministic results
+        for group in &mut duplicated_music_entries {
+            group.sort_unstable_by(|a, b| a.path.cmp(&b.path));
+        }
         self.duplicated_music_entries = duplicated_music_entries;
 
         if self.common_data.use_reference_folders {
