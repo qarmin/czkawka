@@ -57,7 +57,7 @@ impl InvalidSymlinks {
 
         match current_file_name.read_link() {
             Ok(t) => {
-                destination_path.push(&t);
+                destination_path.push(t);
                 let mut loop_count = 0;
                 let mut current_path = current_file_name.to_path_buf();
                 loop {
