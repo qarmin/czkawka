@@ -76,6 +76,8 @@ pub struct Info {
     pub number_of_duplicated_files_by_name: usize,
     pub number_of_groups_by_size_name: usize,
     pub number_of_duplicated_files_by_size_name: usize,
+    pub number_of_groups_by_fuzzy_name: usize,
+    pub number_of_duplicated_files_by_fuzzy_name: usize,
     pub lost_space_by_size: u64,
     pub lost_space_by_hash: u64,
     pub scanning_time: Duration,
@@ -89,6 +91,7 @@ pub struct DuplicateFinderParameters {
     pub minimal_cache_file_size: u64,
     pub minimal_prehash_cache_file_size: u64,
     pub case_sensitive_name_comparison: bool,
+    pub name_similarity_threshold: f64,
 }
 
 impl DuplicateFinderParameters {
@@ -107,7 +110,12 @@ impl DuplicateFinderParameters {
             minimal_cache_file_size,
             minimal_prehash_cache_file_size,
             case_sensitive_name_comparison,
+            name_similarity_threshold: 0.85,
         }
+    }
+    pub fn with_name_similarity_threshold(mut self, threshold: f64) -> Self {
+        self.name_similarity_threshold = threshold.clamp(0.0, 1.0);
+        self
     }
 }
 
@@ -122,6 +130,8 @@ pub struct DuplicateFinder {
     files_with_identical_size: BTreeMap<u64, Vec<DuplicateEntry>>,
     // File Size, next grouped by file size, next grouped by hash
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<DuplicateEntry>>>,
+    // Fuzzy name groups: group_id -> Vec<DuplicateEntry>
+    files_with_fuzzy_names: Vec<Vec<DuplicateEntry>>,
     // File Size, File Entry
     files_with_identical_names_referenced: BTreeMap<String, (DuplicateEntry, Vec<DuplicateEntry>)>,
     // File (Size, Name), File Entry
@@ -130,6 +140,8 @@ pub struct DuplicateFinder {
     files_with_identical_size_referenced: BTreeMap<u64, (DuplicateEntry, Vec<DuplicateEntry>)>,
     // File Size, next grouped by file size, next grouped by hash
     files_with_identical_hashes_referenced: BTreeMap<u64, Vec<(DuplicateEntry, Vec<DuplicateEntry>)>>,
+    // Fuzzy name groups with reference: (reference, Vec<DuplicateEntry>)
+    files_with_fuzzy_names_referenced: Vec<(DuplicateEntry, Vec<DuplicateEntry>)>,
     params: DuplicateFinderParameters,
 }
 
@@ -217,6 +229,14 @@ impl DuplicateFinder {
 
     pub fn get_files_with_identical_size_names_referenced(&self) -> &BTreeMap<(u64, String), (DuplicateEntry, Vec<DuplicateEntry>)> {
         &self.files_with_identical_size_names_referenced
+    }
+
+    pub fn get_files_with_fuzzy_names(&self) -> &Vec<Vec<DuplicateEntry>> {
+        &self.files_with_fuzzy_names
+    }
+
+    pub fn get_files_with_fuzzy_names_referenced(&self) -> &Vec<(DuplicateEntry, Vec<DuplicateEntry>)> {
+        &self.files_with_fuzzy_names_referenced
     }
 }
 

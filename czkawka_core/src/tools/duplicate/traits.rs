@@ -25,6 +25,7 @@ impl DeletingItems for DuplicateFinder {
 
         let files_to_delete = match self.get_params().check_method {
             CheckingMethod::Name => self.files_with_identical_names.values().cloned().collect::<Vec<_>>(),
+            CheckingMethod::FuzzyName => self.files_with_fuzzy_names.clone(),
             CheckingMethod::SizeName => self.files_with_identical_size_names.values().cloned().collect::<Vec<_>>(),
             CheckingMethod::Hash => self.files_with_identical_hashes.values().flatten().cloned().collect::<Vec<_>>(),
             CheckingMethod::Size => self.files_with_identical_size.values().cloned().collect::<Vec<_>>(),
@@ -48,6 +49,12 @@ impl Search for DuplicateFinder {
             match self.get_params().check_method {
                 CheckingMethod::Name => {
                     self.common_data.stopped_search = self.check_files_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                    if self.common_data.stopped_search {
+                        return;
+                    }
+                }
+                CheckingMethod::FuzzyName => {
+                    self.common_data.stopped_search = self.check_files_fuzzy_name(stop_flag, progress_sender) == WorkContinueStatus::Stop;
                     if self.common_data.stopped_search {
                         return;
                     }
@@ -123,6 +130,7 @@ impl DebugPrint for DuplicateFinder {
         println!("Hashed files list size - {}", self.files_with_identical_hashes.len());
         println!("Files with identical names - {}", self.files_with_identical_names.len());
         println!("Files with identical size names - {}", self.files_with_identical_size_names.len());
+        println!("Files with fuzzy names - {}", self.files_with_fuzzy_names.len());
         println!("Files with identical names referenced - {}", self.files_with_identical_names_referenced.len());
         println!("Files with identical size names referenced - {}", self.files_with_identical_size_names_referenced.len());
         println!("Files with identical size referenced - {}", self.files_with_identical_size_referenced.len());
@@ -176,6 +184,48 @@ impl PrintResults for DuplicateFinder {
                     }
                 } else {
                     write!(writer, "Not found any files with same names.")?;
+                }
+            }
+            CheckingMethod::FuzzyName => {
+                if !self.files_with_fuzzy_names.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with similar names-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} files in {} groups with similar names (threshold: {:.0}%)",
+                        self.information.number_of_duplicated_files_by_fuzzy_name,
+                        self.information.number_of_groups_by_fuzzy_name,
+                        self.params.name_similarity_threshold * 100.0,
+                    )?;
+                    for vector in &self.files_with_fuzzy_names {
+                        writeln!(writer, "\n---- {} files", vector.len())?;
+                        for j in vector {
+                            writeln!(writer, "\"{}\"", j.path.to_string_lossy())?;
+                        }
+                    }
+                } else if !self.files_with_fuzzy_names_referenced.is_empty() {
+                    writeln!(
+                        writer,
+                        "-------------------------------------------------Files with similar names in referenced folders-------------------------------------------------"
+                    )?;
+                    writeln!(
+                        writer,
+                        "Found {} files in {} groups with similar names (threshold: {:.0}%)",
+                        self.information.number_of_duplicated_files_by_fuzzy_name,
+                        self.information.number_of_groups_by_fuzzy_name,
+                        self.params.name_similarity_threshold * 100.0,
+                    )?;
+                    for (file_entry, vector) in &self.files_with_fuzzy_names_referenced {
+                        writeln!(writer, "\n---- {} files", vector.len())?;
+                        writeln!(writer, "Reference file - \"{}\"", file_entry.path.to_string_lossy())?;
+                        for j in vector {
+                            writeln!(writer, "\"{}\"", j.path.to_string_lossy())?;
+                        }
+                    }
+                } else {
+                    write!(writer, "Not found any files with similar names.")?;
                 }
             }
             CheckingMethod::SizeName => {
@@ -317,6 +367,7 @@ impl PrintResults for DuplicateFinder {
         if self.get_use_reference() {
             match self.get_params().check_method {
                 CheckingMethod::Name => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_names_referenced, pretty_print),
+                CheckingMethod::FuzzyName => self.save_results_to_file_as_json_internal(file_name, &self.files_with_fuzzy_names_referenced, pretty_print),
                 CheckingMethod::SizeName => {
                     self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size_names_referenced.values().collect::<Vec<_>>(), pretty_print)
                 }
@@ -327,6 +378,7 @@ impl PrintResults for DuplicateFinder {
         } else {
             match self.get_params().check_method {
                 CheckingMethod::Name => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_names, pretty_print),
+                CheckingMethod::FuzzyName => self.save_results_to_file_as_json_internal(file_name, &self.files_with_fuzzy_names, pretty_print),
                 CheckingMethod::SizeName => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size_names.values().collect::<Vec<_>>(), pretty_print),
                 CheckingMethod::Size => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_size, pretty_print),
                 CheckingMethod::Hash => self.save_results_to_file_as_json_internal(file_name, &self.files_with_identical_hashes, pretty_print),
@@ -358,6 +410,7 @@ impl CommonData for DuplicateFinder {
     fn found_any_items(&self) -> bool {
         self.get_information().number_of_duplicated_files_by_hash > 0
             || self.get_information().number_of_duplicated_files_by_name > 0
+            || self.get_information().number_of_duplicated_files_by_fuzzy_name > 0
             || self.get_information().number_of_duplicated_files_by_size > 0
             || self.get_information().number_of_duplicated_files_by_size_name > 0
     }

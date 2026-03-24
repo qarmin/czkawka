@@ -58,6 +58,14 @@ pub(crate) fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
                         };
                         vector = values.into_iter().map(|(original, other)| (Some(original), other)).collect::<Vec<_>>();
                     }
+                    CheckingMethod::FuzzyName => {
+                        vector = tool
+                            .get_files_with_fuzzy_names_referenced()
+                            .iter()
+                            .cloned()
+                            .map(|(original, other)| (Some(original), other))
+                            .collect::<Vec<_>>();
+                    }
                     _ => unreachable!("Invalid check method."),
                 }
             } else {
@@ -74,6 +82,9 @@ pub(crate) fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
                         };
                         vector = values.into_iter().map(|items| (None, items)).collect::<Vec<_>>();
                     }
+                    CheckingMethod::FuzzyName => {
+                        vector = tool.get_files_with_fuzzy_names().iter().cloned().map(|items| (None, items)).collect::<Vec<_>>();
+                    }
                     _ => unreachable!("Invalid check method."),
                 }
             }
@@ -87,6 +98,7 @@ pub(crate) fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
             let (duplicates_number, groups_number, lost_space) = match tool.get_check_method() {
                 CheckingMethod::Hash => (info.number_of_duplicated_files_by_hash, info.number_of_groups_by_hash, info.lost_space_by_hash),
                 CheckingMethod::Name => (info.number_of_duplicated_files_by_name, info.number_of_groups_by_name, 0),
+                CheckingMethod::FuzzyName => (info.number_of_duplicated_files_by_fuzzy_name, info.number_of_groups_by_fuzzy_name, 0),
                 CheckingMethod::Size => (info.number_of_duplicated_files_by_size, info.number_of_groups_by_size, info.lost_space_by_size),
                 CheckingMethod::SizeName => (info.number_of_duplicated_files_by_size_name, info.number_of_groups_by_size_name, info.lost_space_by_size),
                 _ => unreachable!("invalid check method {:?}", tool.get_check_method()),

@@ -99,6 +99,7 @@ impl StringComboBoxItems {
             ("hash", "Hash", CheckingMethod::Hash),
             ("size", "Size", CheckingMethod::Size),
             ("name", "Name", CheckingMethod::Name),
+            ("fuzzy_name", "Fuzzy Name", CheckingMethod::FuzzyName),
             ("size_and_name", "Size and Name", CheckingMethod::SizeName),
         ]);
 
