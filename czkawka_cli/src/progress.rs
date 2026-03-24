@@ -121,10 +121,10 @@ pub(crate) fn connect_progress_json(progress_receiver: &Receiver<ProgressData>) 
             get_progress_message(&progress_data)
         };
 
-        if let Ok(json) = serde_json::to_string(&progress_data) {
-            if let Ok(escaped_name) = serde_json::to_string(&stage_name) {
-                let _ = writeln!(stderr, "{{\"progress\":{json},\"stage_name\":{escaped_name}}}");
-            }
+        if let Ok(json) = serde_json::to_string(&progress_data)
+            && let Ok(escaped_name) = serde_json::to_string(&stage_name)
+        {
+            let _ = writeln!(stderr, "{{\"progress\":{json},\"stage_name\":{escaped_name}}}");
         }
     }
 }
