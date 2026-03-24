@@ -2,7 +2,7 @@
 
 mod cleaning;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::io::{BufReader, BufWriter};
 use std::path::Path;
 use std::{fs, mem};
@@ -45,7 +45,7 @@ fn get_cache_size(file_name: &Path) -> String {
 }
 
 #[fun_time(message = "save_cache_to_file_generalized", level = "debug")]
-pub fn save_cache_to_file_generalized<T>(cache_file_name: &str, hashmap: &BTreeMap<String, T>, save_also_as_json: bool, minimum_file_size: u64) -> Messages
+pub fn save_cache_to_file_generalized<T>(cache_file_name: &str, hashmap: &HashMap<String, T>, save_also_as_json: bool, minimum_file_size: u64) -> Messages
 where
     T: Serialize + ResultEntry + Sized + Send + Sync,
 {
@@ -90,10 +90,10 @@ where
 }
 
 pub(crate) fn extract_loaded_cache<T>(
-    loaded_hash_map: &BTreeMap<String, T>,
-    files_to_check: BTreeMap<String, T>,
-    records_already_cached: &mut BTreeMap<String, T>,
-    non_cached_files_to_check: &mut BTreeMap<String, T>,
+    loaded_hash_map: &HashMap<String, T>,
+    files_to_check: HashMap<String, T>,
+    records_already_cached: &mut HashMap<String, T>,
+    non_cached_files_to_check: &mut HashMap<String, T>,
 ) where
     T: Clone,
 {
@@ -107,7 +107,7 @@ pub(crate) fn extract_loaded_cache<T>(
 }
 
 #[fun_time(message = "load_cache_from_file_generalized_by_path", level = "debug")]
-pub fn load_cache_from_file_generalized_by_path<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &BTreeMap<String, T>) -> (Messages, Option<BTreeMap<String, T>>)
+pub fn load_cache_from_file_generalized_by_path<T>(cache_file_name: &str, delete_outdated_cache: bool, used_files: &HashMap<String, T>) -> (Messages, Option<HashMap<String, T>>)
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
 {
@@ -130,14 +130,14 @@ where
         return (text_messages, None);
     };
 
-    debug!("Converting cache Vec<T> into BTreeMap<String, T>");
+    debug!("Converting cache Vec<T> into HashMap<String, T>");
     let number_of_entries = vec_loaded_entries.len();
     let start_time = std::time::Instant::now();
-    let map_loaded_entries: BTreeMap<String, T> = vec_loaded_entries
+    let map_loaded_entries: HashMap<String, T> = vec_loaded_entries
         .into_iter()
         .map(|file_entry| (file_entry.get_path().to_string_lossy().into_owned(), file_entry))
         .collect();
-    debug!("Converted cache Vec<T>({number_of_entries} results) into BTreeMap<String, T> in {:?}", start_time.elapsed());
+    debug!("Converted cache Vec<T>({number_of_entries} results) into HashMap<String, T> in {:?}", start_time.elapsed());
 
     (text_messages, Some(map_loaded_entries))
 }
@@ -289,9 +289,9 @@ where
 
 pub(crate) fn load_and_split_cache_generalized_by_path<C: CommonData, K>(
     cache_file_name: &str,
-    mut items_to_check: BTreeMap<String, K>,
+    mut items_to_check: HashMap<String, K>,
     common_data: &mut C,
-) -> (BTreeMap<String, K>, BTreeMap<String, K>, BTreeMap<String, K>)
+) -> (HashMap<String, K>, HashMap<String, K>, HashMap<String, K>)
 where
     for<'a> K: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
 {
@@ -301,8 +301,8 @@ where
 
     let loaded_hash_map;
 
-    let mut records_already_cached: BTreeMap<String, K> = Default::default();
-    let mut non_cached_files_to_check: BTreeMap<String, K> = Default::default();
+    let mut records_already_cached: HashMap<String, K> = Default::default();
+    let mut non_cached_files_to_check: HashMap<String, K> = Default::default();
 
     let (messages, loaded_items) = load_cache_from_file_generalized_by_path::<K>(cache_file_name, common_data.get_delete_outdated_cache(), &items_to_check);
     common_data.get_text_messages_mut().extend_with_another_messages(messages);
@@ -325,14 +325,14 @@ where
     (loaded_hash_map, records_already_cached, non_cached_files_to_check)
 }
 
-pub(crate) fn save_and_connect_cache_generalized_by_path<C: CommonData, K>(cache_file_name: &str, vec_file_entry: &[K], loaded_hash_map: BTreeMap<String, K>, common_data: &mut C)
+pub(crate) fn save_and_connect_cache_generalized_by_path<C: CommonData, K>(cache_file_name: &str, vec_file_entry: &[K], loaded_hash_map: HashMap<String, K>, common_data: &mut C)
 where
     K: Serialize + ResultEntry + Sized + Send + Sync + Clone,
 {
     if !common_data.get_use_cache() {
         return;
     }
-    let mut all_results: BTreeMap<String, K> = Default::default();
+    let mut all_results: HashMap<String, K> = Default::default();
 
     for file_entry in vec_file_entry.iter().cloned() {
         all_results.insert(file_entry.get_path().to_string_lossy().to_string(), file_entry);
@@ -347,7 +347,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
+    use std::collections::HashMap;
     use std::fs;
     use std::path::PathBuf;
     use std::sync::Once;
@@ -408,17 +408,17 @@ mod tests {
 
     #[test]
     fn test_extract_loaded_cache() {
-        let mut loaded_cache = BTreeMap::new();
+        let mut loaded_cache = HashMap::new();
         loaded_cache.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
         loaded_cache.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
 
-        let mut files_to_check = BTreeMap::new();
+        let mut files_to_check = HashMap::new();
         files_to_check.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
         files_to_check.insert("file3".to_string(), TestEntry::new("/tmp/file3", 300, 3000, 30));
         files_to_check.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
 
-        let mut records_already_cached = BTreeMap::new();
-        let mut non_cached_files_to_check = BTreeMap::new();
+        let mut records_already_cached = HashMap::new();
+        let mut non_cached_files_to_check = HashMap::new();
 
         extract_loaded_cache(&loaded_cache, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
 
@@ -433,13 +433,13 @@ mod tests {
 
     #[test]
     fn test_extract_loaded_cache_empty() {
-        let loaded_cache: BTreeMap<String, TestEntry> = BTreeMap::new();
-        let mut files_to_check = BTreeMap::new();
+        let loaded_cache: HashMap<String, TestEntry> = HashMap::new();
+        let mut files_to_check = HashMap::new();
         files_to_check.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
         files_to_check.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
 
-        let mut records_already_cached = BTreeMap::new();
-        let mut non_cached_files_to_check = BTreeMap::new();
+        let mut records_already_cached = HashMap::new();
+        let mut non_cached_files_to_check = HashMap::new();
 
         extract_loaded_cache(&loaded_cache, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
 
@@ -449,16 +449,16 @@ mod tests {
 
     #[test]
     fn test_extract_loaded_cache_all_cached() {
-        let mut loaded_cache = BTreeMap::new();
+        let mut loaded_cache = HashMap::new();
         loaded_cache.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
         loaded_cache.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
 
-        let mut files_to_check = BTreeMap::new();
+        let mut files_to_check = HashMap::new();
         files_to_check.insert("file1".to_string(), TestEntry::new("/tmp/file1", 100, 1000, 10));
         files_to_check.insert("file2".to_string(), TestEntry::new("/tmp/file2", 200, 2000, 20));
 
-        let mut records_already_cached = BTreeMap::new();
-        let mut non_cached_files_to_check = BTreeMap::new();
+        let mut records_already_cached = HashMap::new();
+        let mut non_cached_files_to_check = HashMap::new();
 
         extract_loaded_cache(&loaded_cache, files_to_check, &mut records_already_cached, &mut non_cached_files_to_check);
 
@@ -474,7 +474,7 @@ mod tests {
         fs::write(&temp_file, "test content").unwrap();
         let metadata = fs::metadata(&temp_file).unwrap();
 
-        let mut cache_to_save = BTreeMap::new();
+        let mut cache_to_save = HashMap::new();
         cache_to_save.insert(
             temp_file.to_string_lossy().to_string(),
             TestEntry::new(temp_file.to_str().unwrap(), metadata.len(), metadata.modified().unwrap().elapsed().unwrap().as_secs(), 42),
@@ -524,7 +524,7 @@ mod tests {
         ));
 
         // Convert to flat map for saving
-        let mut flat_cache = BTreeMap::new();
+        let mut flat_cache = HashMap::new();
         for entries in cache_to_save.values() {
             for entry in entries {
                 flat_cache.insert(entry.path.to_string_lossy().to_string(), entry.clone());
@@ -552,7 +552,7 @@ mod tests {
         let temp_file = temp_dir.path().join("test_file.txt");
         fs::write(&temp_file, "test").unwrap();
 
-        let mut cache_to_save = BTreeMap::new();
+        let mut cache_to_save = HashMap::new();
         cache_to_save.insert("small_file".to_string(), TestEntry::new("/tmp/small", 10, 1000, 1));
         cache_to_save.insert("large_file".to_string(), TestEntry::new("/tmp/large", 1000, 2000, 2));
 
@@ -581,7 +581,7 @@ mod tests {
         fs::write(&temp_file, "test content").unwrap();
         let metadata = fs::metadata(&temp_file).unwrap();
 
-        let mut cache_to_save = BTreeMap::new();
+        let mut cache_to_save = HashMap::new();
         cache_to_save.insert(
             temp_file.to_string_lossy().to_string(),
             TestEntry::new(temp_file.to_str().unwrap(), metadata.len(), metadata.modified().unwrap().elapsed().unwrap().as_secs(), 42),
@@ -597,7 +597,7 @@ mod tests {
 
         // Create new files_to_check with updated metadata
         let new_metadata = fs::metadata(&temp_file).unwrap();
-        let mut files_to_check = BTreeMap::new();
+        let mut files_to_check = HashMap::new();
         files_to_check.insert(
             temp_file.to_string_lossy().to_string(),
             TestEntry::new(
@@ -621,7 +621,7 @@ mod tests {
     fn test_load_nonexistent_cache() {
         setup_cache_path();
         let cache_name = format!("nonexistent_cache_{}", std::process::id());
-        let files_to_check: BTreeMap<String, TestEntry> = BTreeMap::new();
+        let files_to_check: HashMap<String, TestEntry> = HashMap::new();
 
         let (messages, loaded_cache) = load_cache_from_file_generalized_by_path::<TestEntry>(&cache_name, false, &files_to_check);
 
@@ -636,7 +636,7 @@ mod tests {
         let temp_file = temp_dir.path().join("test_file.txt");
         fs::write(&temp_file, "test content").unwrap();
 
-        let mut cache_to_save = BTreeMap::new();
+        let mut cache_to_save = HashMap::new();
         cache_to_save.insert("test_key".to_string(), TestEntry::new("/tmp/test", 100, 1000, 42));
 
         // Save cache with JSON enabled

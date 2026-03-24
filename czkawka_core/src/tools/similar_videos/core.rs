@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeSet, HashMap};
 use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -258,7 +258,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "save_cache", level = "debug")]
-    fn save_cache(&mut self, vec_file_entry: &[VideosEntry], loaded_hash_map: BTreeMap<String, VideosEntry>) {
+    fn save_cache(&mut self, vec_file_entry: &[VideosEntry], loaded_hash_map: HashMap<String, VideosEntry>) {
         save_and_connect_cache_generalized_by_path(
             &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
             vec_file_entry,
@@ -268,7 +268,7 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "load_cache_at_start", level = "debug")]
-    fn load_cache_at_start(&mut self) -> (BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>) {
+    fn load_cache_at_start(&mut self) -> (HashMap<String, VideosEntry>, HashMap<String, VideosEntry>, HashMap<String, VideosEntry>) {
         load_and_split_cache_generalized_by_path(
             &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
             mem::take(&mut self.videos_to_check),

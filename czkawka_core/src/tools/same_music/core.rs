@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs::File;
 use std::path::Path;
 use std::sync::Arc;
@@ -74,12 +74,12 @@ impl SameMusic {
     }
 
     #[fun_time(message = "load_cache", level = "debug")]
-    fn load_cache(&mut self, checking_tags: bool) -> (BTreeMap<String, MusicEntry>, BTreeMap<String, MusicEntry>, BTreeMap<String, MusicEntry>) {
+    fn load_cache(&mut self, checking_tags: bool) -> (HashMap<String, MusicEntry>, HashMap<String, MusicEntry>, HashMap<String, MusicEntry>) {
         load_and_split_cache_generalized_by_path(&get_similar_music_cache_file(checking_tags), mem::take(&mut self.music_to_check), self)
     }
 
     #[fun_time(message = "save_cache", level = "debug")]
-    fn save_cache(&mut self, vec_file_entry: &[MusicEntry], loaded_hash_map: BTreeMap<String, MusicEntry>, checking_tags: bool) {
+    fn save_cache(&mut self, vec_file_entry: &[MusicEntry], loaded_hash_map: HashMap<String, MusicEntry>, checking_tags: bool) {
         save_and_connect_cache_generalized_by_path(&get_similar_music_cache_file(checking_tags), vec_file_entry, loaded_hash_map, self);
     }
 
@@ -456,6 +456,9 @@ impl SameMusic {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
+
+        // Sort for deterministic grouping regardless of HashMap/cache iteration order
+        self.music_entries.sort_unstable_by(|a, b| a.path.cmp(&b.path));
 
         let grouped_files_to_check = self.split_fingerprints_to_check();
         let base_files_number = grouped_files_to_check.iter().map(|g| g.base_files.len()).sum::<usize>();

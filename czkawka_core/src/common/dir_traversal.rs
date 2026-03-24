@@ -268,7 +268,7 @@ where
                 }
             }
         }
-        file_results.sort_by_cached_key(|fe| fe.path.to_string_lossy().to_string());
+        file_results.sort_unstable_by(|a, b| a.path.cmp(&b.path));
         for fe in file_results {
             let key = (self.group_by)(&fe);
             grouped_file_entries.entry(key).or_default().push(fe);
@@ -350,7 +350,7 @@ where
             for (segment, warnings, mut fe_result) in segments {
                 folders_to_check.extend(segment);
                 all_warnings.extend(warnings);
-                fe_result.sort_by_cached_key(|fe| fe.path.to_string_lossy().to_string());
+                fe_result.sort_unstable_by(|a, b| a.path.cmp(&b.path));
                 for fe in fe_result {
                     let key = (self.group_by)(&fe);
                     grouped_file_entries.entry(key).or_default().push(fe);

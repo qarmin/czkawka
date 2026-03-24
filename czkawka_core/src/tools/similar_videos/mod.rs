@@ -4,7 +4,7 @@ pub mod traits;
 #[cfg(test)]
 mod tests;
 
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -136,8 +136,8 @@ pub struct SimilarVideos {
     information: Info,
     similar_vectors: Vec<Vec<VideosEntry>>,
     similar_referenced_vectors: Vec<(VideosEntry, Vec<VideosEntry>)>,
-    videos_hashes: BTreeMap<Vec<u8>, Vec<VideosEntry>>,
-    videos_to_check: BTreeMap<String, VideosEntry>,
+    videos_hashes: HashMap<Vec<u8>, Vec<VideosEntry>>,
+    videos_to_check: HashMap<String, VideosEntry>,
     params: SimilarVideosParameters,
 }
 

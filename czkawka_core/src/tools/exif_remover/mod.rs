@@ -3,7 +3,7 @@ pub mod core;
 mod tests;
 pub mod traits;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -66,7 +66,7 @@ pub struct ExifRemover {
     common_data: CommonToolData,
     information: Info,
     exif_files: Vec<ExifEntry>,
-    files_to_check: BTreeMap<String, ExifEntry>,
+    files_to_check: HashMap<String, ExifEntry>,
     params: ExifRemoverParameters,
     additional_excluded_tags: BTreeMap<&'static str, Vec<&'static str>>,
 }

@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::default::Default;
 
 use czkawka_core::common::cache::{load_cache_from_file_generalized_by_path, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
@@ -131,7 +131,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
                                 let (mut messages, loaded_items) = load_cache_from_file_generalized_by_size::<DuplicateEntry>(&file_name, true, &Default::default());
 
                                 if let Some(cache_entries) = loaded_items {
-                                    let mut hashmap_to_save: BTreeMap<String, DuplicateEntry> = Default::default();
+                                    let mut hashmap_to_save: HashMap<String, DuplicateEntry> = Default::default();
                                     for (_, vec_file_entry) in cache_entries {
                                         for file_entry in vec_file_entry {
                                             hashmap_to_save.insert(file_entry.path.to_string_lossy().to_string(), file_entry);

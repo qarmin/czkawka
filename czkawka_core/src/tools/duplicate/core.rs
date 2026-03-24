@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -8,7 +8,6 @@ use std::{mem, thread};
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use humansize::{BINARY, format_size};
-use indexmap::IndexMap;
 use log::debug;
 use rayon::prelude::*;
 
@@ -367,11 +366,11 @@ impl DuplicateFinder {
     fn prehash_save_cache_at_exit(
         &mut self,
         loaded_hash_map: BTreeMap<u64, Vec<DuplicateEntry>>,
-        pre_hash_results: Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)>,
+        pre_hash_results: Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)>,
     ) {
         if self.get_params().use_prehash_cache {
             // All results = records already cached + computed results
-            let mut save_cache_to_hashmap: BTreeMap<String, DuplicateEntry> = Default::default();
+            let mut save_cache_to_hashmap: HashMap<String, DuplicateEntry> = Default::default();
 
             for (size, vec_file_entry) in loaded_hash_map {
                 if size >= self.get_params().minimal_prehash_cache_file_size {
@@ -437,11 +436,11 @@ impl DuplicateFinder {
 
         debug!("Starting calculating prehash");
         #[expect(clippy::type_complexity)]
-        let pre_hash_results: Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
+        let pre_hash_results: Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
             .into_par_iter()
-            .with_max_len(3) // Vectors and BTreeMaps for really big inputs, leave some jobs to 0 thread, to avoid that I minimized max tasks for each thread to 3, which improved performance
+            .with_max_len(3) // Vectors and HashMaps for really big inputs, leave some jobs to 0 thread, to avoid that I minimized max tasks for each thread to 3, which improved performance
             .map(|(size, vec_file_entry)| {
-                let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
+                let mut hashmap_with_hash: HashMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
 
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
@@ -513,16 +512,26 @@ impl DuplicateFinder {
 
         for (size, mut vec_file_entry) in used_map {
             if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
-                // TODO maybe hashmap is not needed when using < 4 elements
-                let mut cached_path_entries: IndexMap<&Path, DuplicateEntry> = IndexMap::new();
-                for file_entry in cached_vec_file_entry {
-                    cached_path_entries.insert(&file_entry.path, file_entry.clone());
-                }
-                for file_entry in vec_file_entry {
-                    if let Some(cached_file_entry) = cached_path_entries.swap_remove(file_entry.path.as_path()) {
-                        records_already_cached.entry(size).or_default().push(cached_file_entry);
-                    } else {
-                        non_cached_files_to_check.entry(size).or_default().push(file_entry);
+                if cached_vec_file_entry.len() < 4 {
+                    // For very small groups, linear scan is faster than building a map
+                    for file_entry in vec_file_entry {
+                        if let Some(cached) = cached_vec_file_entry.iter().find(|ce| ce.path == file_entry.path) {
+                            records_already_cached.entry(size).or_default().push(cached.clone());
+                        } else {
+                            non_cached_files_to_check.entry(size).or_default().push(file_entry);
+                        }
+                    }
+                } else {
+                    let mut cached_path_entries: HashMap<&Path, DuplicateEntry> = HashMap::with_capacity(cached_vec_file_entry.len());
+                    for file_entry in cached_vec_file_entry {
+                        cached_path_entries.insert(&file_entry.path, file_entry.clone());
+                    }
+                    for file_entry in vec_file_entry {
+                        if let Some(cached_file_entry) = cached_path_entries.remove(file_entry.path.as_path()) {
+                            records_already_cached.entry(size).or_default().push(cached_file_entry);
+                        } else {
+                            non_cached_files_to_check.entry(size).or_default().push(file_entry);
+                        }
                     }
                 }
             } else {
@@ -576,7 +585,7 @@ impl DuplicateFinder {
     fn full_hashing_save_cache_at_exit(
         &mut self,
         records_already_cached: BTreeMap<u64, Vec<DuplicateEntry>>,
-        full_hash_results: &mut Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)>,
+        full_hash_results: &mut Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)>,
         loaded_hash_map: BTreeMap<u64, Vec<DuplicateEntry>>,
     ) {
         if !self.common_data.use_cache {
@@ -593,7 +602,7 @@ impl DuplicateFinder {
                 }
             }
             // Size doesn't exists add results to files
-            let mut temp_hashmap: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
+            let mut temp_hashmap: HashMap<String, Vec<DuplicateEntry>> = Default::default();
             for file_entry in vec_file_entry {
                 temp_hashmap.entry(file_entry.hash.clone()).or_default().push(file_entry);
             }
@@ -601,7 +610,7 @@ impl DuplicateFinder {
         }
 
         // Must save all results to file, old loaded from file with all currently counted results
-        let mut all_results: BTreeMap<String, DuplicateEntry> = Default::default();
+        let mut all_results: HashMap<String, DuplicateEntry> = Default::default();
         for (_size, vec_file_entry) in loaded_hash_map {
             for file_entry in vec_file_entry {
                 all_results.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
@@ -659,11 +668,11 @@ impl DuplicateFinder {
             "Starting full hashing of {} files",
             non_cached_files_to_check.iter().map(|(_size, v)| v.len() as u64).sum::<u64>()
         );
-        let mut full_hash_results: Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
+        let mut full_hash_results: Vec<(u64, HashMap<String, Vec<DuplicateEntry>>, Vec<String>)> = non_cached_files_to_check
             .into_par_iter()
             .with_max_len(3)
             .map(|(size, vec_file_entry)| {
-                let mut hashmap_with_hash: BTreeMap<String, Vec<DuplicateEntry>> = Default::default();
+                let mut hashmap_with_hash: HashMap<String, Vec<DuplicateEntry>> = Default::default();
                 let mut errors: Vec<String> = Vec::new();
 
                 THREAD_BUFFER.with_borrow_mut(|buffer| {
