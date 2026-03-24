@@ -4,7 +4,8 @@ members = [
     "czkawka_cli",
     "czkawka_gui",
     "krokiet",
-    "cedinia"
+    "cedinia",
+    "czkawka_mcp",
 ]
 exclude = [
     "misc/test_read_perf",
