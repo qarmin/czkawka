@@ -5,7 +5,7 @@ pub mod traits;
 #[cfg(test)]
 mod tests;
 
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -123,7 +123,7 @@ impl SameMusicParameters {
 pub struct SameMusic {
     common_data: CommonToolData,
     information: Info,
-    music_to_check: BTreeMap<String, MusicEntry>,
+    music_to_check: HashMap<String, MusicEntry>,
     music_entries: Vec<MusicEntry>,
     duplicated_music_entries: Vec<Vec<MusicEntry>>,
     duplicated_music_entries_referenced: Vec<(MusicEntry, Vec<MusicEntry>)>,

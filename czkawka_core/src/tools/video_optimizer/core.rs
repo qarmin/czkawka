@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::mem;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -349,25 +349,25 @@ impl VideoOptimizer {
     fn load_video_transcode_cache(
         &mut self,
     ) -> (
-        BTreeMap<String, VideoTranscodeEntry>,
-        BTreeMap<String, VideoTranscodeEntry>,
-        BTreeMap<String, VideoTranscodeEntry>,
+        HashMap<String, VideoTranscodeEntry>,
+        HashMap<String, VideoTranscodeEntry>,
+        HashMap<String, VideoTranscodeEntry>,
     ) {
         load_and_split_cache_generalized_by_path(&get_video_transcode_cache_file(), mem::take(&mut self.video_transcode_test_entries), self)
     }
 
     #[fun_time(message = "load_video_crop_cache", level = "debug")]
-    fn load_video_crop_cache(&mut self, params: &VideoCropParams) -> (BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>, BTreeMap<String, VideoCropEntry>) {
+    fn load_video_crop_cache(&mut self, params: &VideoCropParams) -> (HashMap<String, VideoCropEntry>, HashMap<String, VideoCropEntry>, HashMap<String, VideoCropEntry>) {
         load_and_split_cache_generalized_by_path(&get_video_crop_cache_file(params), mem::take(&mut self.video_crop_test_entries), self)
     }
 
     #[fun_time(message = "save_video_transcode_cache", level = "debug")]
-    fn save_video_transcode_cache(&mut self, vec_file_entry: &[VideoTranscodeEntry], loaded_hash_map: BTreeMap<String, VideoTranscodeEntry>) {
+    fn save_video_transcode_cache(&mut self, vec_file_entry: &[VideoTranscodeEntry], loaded_hash_map: HashMap<String, VideoTranscodeEntry>) {
         save_and_connect_cache_generalized_by_path(&get_video_transcode_cache_file(), vec_file_entry, loaded_hash_map, self);
     }
 
     #[fun_time(message = "save_video_crop_cache", level = "debug")]
-    fn save_video_crop_cache(&mut self, vec_file_entry: &[VideoCropEntry], params: &VideoCropParams, loaded_hash_map: BTreeMap<String, VideoCropEntry>) {
+    fn save_video_crop_cache(&mut self, vec_file_entry: &[VideoCropEntry], params: &VideoCropParams, loaded_hash_map: HashMap<String, VideoCropEntry>) {
         save_and_connect_cache_generalized_by_path(&get_video_crop_cache_file(params), vec_file_entry, loaded_hash_map, self);
     }
 

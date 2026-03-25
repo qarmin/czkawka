@@ -6,7 +6,7 @@ pub use core::return_similarity_from_similarity_preset;
 #[cfg(test)]
 mod tests;
 
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -121,7 +121,7 @@ pub struct SimilarImages {
     similar_referenced_vectors: Vec<(ImagesEntry, Vec<ImagesEntry>)>,
     // Hashmap with image hashes and Vector with names of files
     image_hashes: IndexMap<ImHash, Vec<ImagesEntry>>,
-    images_to_check: BTreeMap<String, ImagesEntry>,
+    images_to_check: HashMap<String, ImagesEntry>,
     params: SimilarImagesParameters,
 }
 

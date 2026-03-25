@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
 use std::process::Command;
@@ -243,12 +243,12 @@ impl BrokenFiles {
     }
 
     #[fun_time(message = "load_cache", level = "debug")]
-    fn load_cache(&mut self) -> (BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>) {
+    fn load_cache(&mut self) -> (HashMap<String, BrokenEntry>, HashMap<String, BrokenEntry>, HashMap<String, BrokenEntry>) {
         load_and_split_cache_generalized_by_path(&get_broken_files_cache_file(), mem::take(&mut self.files_to_check), self)
     }
 
     #[fun_time(message = "save_to_cache", level = "debug")]
-    fn save_to_cache(&mut self, vec_file_entry: &[BrokenEntry], loaded_hash_map: BTreeMap<String, BrokenEntry>) {
+    fn save_to_cache(&mut self, vec_file_entry: &[BrokenEntry], loaded_hash_map: HashMap<String, BrokenEntry>) {
         save_and_connect_cache_generalized_by_path(&get_broken_files_cache_file(), vec_file_entry, loaded_hash_map, self);
     }
 

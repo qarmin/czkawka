@@ -3,7 +3,7 @@ pub mod core;
 mod tests;
 pub mod traits;
 
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -317,8 +317,8 @@ pub enum VideoOptimizerEntry {
 pub struct VideoOptimizer {
     common_data: CommonToolData,
     information: Info,
-    video_transcode_test_entries: BTreeMap<String, VideoTranscodeEntry>,
-    video_crop_test_entries: BTreeMap<String, VideoCropEntry>,
+    video_transcode_test_entries: HashMap<String, VideoTranscodeEntry>,
+    video_crop_test_entries: HashMap<String, VideoCropEntry>,
     video_transcode_result_entries: Vec<VideoTranscodeEntry>,
     video_crop_result_entries: Vec<VideoCropEntry>,
     params: VideoOptimizerParameters,
