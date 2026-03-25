@@ -430,7 +430,16 @@ impl SameMusic {
                         Err(e) => return Some(Err(flc!("core_error_comparing_fingerprints", reason = e.to_string()))),
                     };
                     segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
-                    if segments.is_empty() { None } else { Some(Ok((e_string, e_entry))) }
+                    if segments.is_empty() {
+                        None
+                    } else {
+                        let best_score = segments
+                            .iter()
+                            .map(|s| s.score)
+                            .min_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
+                            .unwrap_or(0.0);
+                        Some(Ok((e_string, e_entry, best_score)))
+                    }
                 })
                 .flatten()
                 .partition_map(|res| match res {
@@ -440,12 +449,14 @@ impl SameMusic {
 
             self.common_data.text_messages.errors.extend(errors);
 
-            collected_similar_items.retain(|(path, _entry)| !used_paths.contains(path));
+            collected_similar_items.retain(|(path, _entry, _score)| !used_paths.contains(path));
             if !collected_similar_items.is_empty() {
                 let mut music_entries = Vec::new();
-                for (path, entry) in collected_similar_items {
+                for (path, entry, score) in collected_similar_items {
                     used_paths.insert(path);
-                    music_entries.push(entry.clone());
+                    let mut entry = entry.clone();
+                    entry.similarity_score = score;
+                    music_entries.push(entry);
                 }
                 used_paths.insert(f_string);
                 music_entries.push(f_entry);
