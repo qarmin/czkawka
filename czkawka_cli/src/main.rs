@@ -24,6 +24,7 @@ use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::exif_remover::{ExifRemover, ExifRemoverParameters, ExifTagsFixerParams};
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
+use czkawka_core::tools::similar_documents::{SimilarDocuments, SimilarDocumentsParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
@@ -34,7 +35,7 @@ use log::{debug, error, info};
 
 use crate::commands::{
     Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, ExifRemoverArgs,
-    InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs,
+    InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarDocumentsArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs,
 };
 use crate::progress::connect_progress;
 
@@ -86,6 +87,7 @@ fn main() {
             Commands::BadNames(bad_names_args) => bad_names(bad_names_args, &stop_flag, &progress_sender),
             Commands::VideoOptimizer(video_optimizer_args) => video_optimizer(video_optimizer_args, &stop_flag, &progress_sender),
             Commands::ExifRemover(exif_remover_args) => exif_remover(exif_remover_args, &stop_flag, &progress_sender),
+            Commands::SimilarDocuments(similar_documents_args) => similar_documents(similar_documents_args, &stop_flag, &progress_sender),
         })
         .expect("Failed to spawn calculation thread");
 
@@ -632,4 +634,28 @@ where
     component.set_allowed_extensions(common_cli_items.allowed_extensions.clone());
     component.set_excluded_extensions(common_cli_items.excluded_extensions.clone());
     component.set_use_cache(!common_cli_items.disable_cache);
+}
+
+fn similar_documents(args: SimilarDocumentsArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
+    let SimilarDocumentsArgs {
+        common_cli_items,
+        delete_method,
+        minimal_file_size,
+        maximal_file_size,
+        similarity_threshold,
+        num_hashes,
+        shingle_size,
+    } = args;
+
+    let params = SimilarDocumentsParameters::new(similarity_threshold, num_hashes, shingle_size);
+    let mut tool = SimilarDocuments::new(params);
+
+    set_common_settings(&mut tool, &common_cli_items, None);
+    tool.set_minimal_file_size(minimal_file_size);
+    tool.set_maximal_file_size(maximal_file_size);
+    set_advanced_delete(&mut tool, delete_method);
+
+    tool.search(stop_flag, Some(progress_sender));
+
+    save_and_write_results_to_writer(&tool, &common_cli_items)
 }

@@ -113,6 +113,12 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka exif-remover -d /home/rafal -f results.txt"
     )]
     ExifRemover(ExifRemoverArgs),
+    #[clap(
+        name = "similar-docs",
+        about = "Finds similar text/document files by content",
+        after_help = "EXAMPLE:\n    czkawka similar-docs -d /home/rafal/documents -f results.txt"
+    )]
+    SimilarDocuments(SimilarDocumentsArgs),
 }
 
 #[derive(Debug, clap::Args)]
@@ -768,6 +774,53 @@ pub struct ExifRemoverArgs {
         long_help = "Override original files instead of creating backup files with '_cleaned' suffix"
     )]
     pub override_file: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct SimilarDocumentsArgs {
+    #[clap(flatten)]
+    pub common_cli_items: CommonCliItems,
+    #[clap(flatten)]
+    pub delete_method: DMethod,
+    #[clap(
+        short = 'i',
+        long,
+        value_parser = parse_maximal_file_size,
+        default_value = "18446744073709551615",
+        help = "Maximum size in bytes",
+        long_help = "Maximum size of checked files in bytes"
+    )]
+    pub maximal_file_size: u64,
+    #[clap(
+        short,
+        long,
+        value_parser = parse_minimal_file_size,
+        default_value = "1024",
+        help = "Minimum size in bytes",
+        long_help = "Minimum size of checked files in bytes, default 1KB to skip tiny files"
+    )]
+    pub minimal_file_size: u64,
+    #[clap(
+        long,
+        default_value = "0.7",
+        help = "Similarity threshold (0.0-1.0)",
+        long_help = "Minimum Jaccard similarity for two documents to be considered similar. 1.0 means identical, 0.0 matches everything. Recommended: 0.5-0.9"
+    )]
+    pub similarity_threshold: f64,
+    #[clap(
+        long,
+        default_value = "128",
+        help = "Number of MinHash functions",
+        long_help = "Number of hash functions in the MinHash signature. Higher values give more accurate similarity estimates but use more memory. Default: 128"
+    )]
+    pub num_hashes: usize,
+    #[clap(
+        long,
+        default_value = "3",
+        help = "Shingle size (words per shingle)",
+        long_help = "Number of consecutive words per shingle. Smaller values are more sensitive to similar content, larger values are more strict. Default: 3"
+    )]
+    pub shingle_size: usize,
 }
 
 #[derive(Debug, clap::Args)]
