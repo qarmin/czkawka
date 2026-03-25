@@ -44,6 +44,9 @@ pub struct MusicEntry {
     pub length: u32,
     pub genre: String,
     pub bitrate: u32,
+    /// Best fingerprint match score (lower = more similar). 0 for tag-based matches.
+    #[serde(default)]
+    pub similarity_score: f64,
 }
 
 impl ResultEntry for MusicEntry {
@@ -72,6 +75,7 @@ impl FileEntry {
             length: 0,
             genre: String::new(),
             bitrate: 0,
+            similarity_score: 0.0,
         }
     }
 }
