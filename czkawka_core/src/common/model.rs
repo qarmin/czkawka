@@ -22,6 +22,7 @@ pub enum ToolType {
     TemporaryFiles,
     ExifRemover,
     VideoOptimizer,
+    SimilarDocuments,
     #[default]
     None,
 }
