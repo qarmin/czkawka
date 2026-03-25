@@ -381,6 +381,28 @@ pub struct SameMusicArgs {
         long_help = "Maximum allowed difference between audio segments (0.0-10.0). Value 0.0 will find only identical segments, while 10.0 will find segments that are barely similar. Lower values mean stricter matching."
     )]
     pub maximum_difference: f64,
+    #[clap(
+        long,
+        help = "Use fuzzy (Jaro-Winkler) comparison for tag matching",
+        long_help = "When enabled, music tags are compared using Jaro-Winkler string similarity instead of exact matching. This catches variations like 'Beatles' vs 'The Beatles' or small typos in tag values. Only applies to TAGS search method."
+    )]
+    pub fuzzy_tag_comparison: bool,
+    #[clap(
+        long,
+        value_parser = parse_tag_similarity_threshold,
+        default_value = "0.85",
+        help = "Similarity threshold for fuzzy tag matching (0.0-1.0)",
+        long_help = "Minimum Jaro-Winkler similarity score for two tag values to be considered a match. 1.0 means exact match, 0.0 matches everything. Recommended range: 0.80-0.95. Only used when --fuzzy-tag-comparison is enabled."
+    )]
+    pub tag_similarity_threshold: f64,
+}
+
+fn parse_tag_similarity_threshold(src: &str) -> Result<f64, String> {
+    match src.parse::<f64>() {
+        Ok(v) if (0.0..=1.0).contains(&v) => Ok(v),
+        Ok(v) => Err(format!("Tag similarity threshold {v} is not in valid range 0.0-1.0")),
+        Err(e) => Err(format!("Cannot parse tag similarity threshold: {e}")),
+    }
 }
 
 fn parse_maximum_difference(src: &str) -> Result<f64, String> {

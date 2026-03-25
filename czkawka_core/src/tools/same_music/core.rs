@@ -506,22 +506,70 @@ impl SameMusic {
         get_item: fn(&MusicEntry) -> String,
         approximate_comparison: bool,
     ) -> Vec<Vec<MusicEntry>> {
+        let fuzzy = self.params.fuzzy_tag_comparison;
+        let threshold = self.params.tag_similarity_threshold;
+
         let mut new_duplicates: Vec<_> = Default::default();
         let old_duplicates_len = old_duplicates.len();
         for vec_file_entry in old_duplicates {
-            let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
-            for file_entry in vec_file_entry {
-                let mut thing = get_item(&file_entry).trim().to_lowercase();
-                if approximate_comparison {
-                    thing = get_simplified_name(&thing);
+            if fuzzy {
+                // Fuzzy mode: pairwise Jaro-Winkler comparison, union-find clustering
+                let normalized: Vec<String> = vec_file_entry.iter().map(|fe| normalize_tag(&get_item(fe))).collect();
+                let n = normalized.len();
+                // Simple union-find
+                let mut parent: Vec<usize> = (0..n).collect();
+                fn find(parent: &mut [usize], mut i: usize) -> usize {
+                    while parent[i] != i {
+                        parent[i] = parent[parent[i]];
+                        i = parent[i];
+                    }
+                    i
                 }
-                if !thing.is_empty() {
-                    hash_map.entry(thing).or_default().push(file_entry);
+                for i in 0..n {
+                    if normalized[i].is_empty() {
+                        continue;
+                    }
+                    for j in (i + 1)..n {
+                        if normalized[j].is_empty() {
+                            continue;
+                        }
+                        let sim = strsim::jaro_winkler(&normalized[i], &normalized[j]);
+                        if sim >= threshold {
+                            let ri = find(&mut parent, i);
+                            let rj = find(&mut parent, j);
+                            parent[ri] = rj;
+                        }
+                    }
                 }
-            }
-            for (_title, vec_file_entry) in hash_map {
-                if vec_file_entry.len() > 1 {
-                    new_duplicates.push(vec_file_entry);
+                // Collect clusters
+                let mut clusters: BTreeMap<usize, Vec<MusicEntry>> = Default::default();
+                for (i, entry) in vec_file_entry.into_iter().enumerate() {
+                    if !normalized[i].is_empty() {
+                        let root = find(&mut parent, i);
+                        clusters.entry(root).or_default().push(entry);
+                    }
+                }
+                for (_root, group) in clusters {
+                    if group.len() > 1 {
+                        new_duplicates.push(group);
+                    }
+                }
+            } else {
+                // Exact mode: hash-based grouping
+                let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
+                for file_entry in vec_file_entry {
+                    let mut thing = get_item(&file_entry).trim().to_lowercase();
+                    if approximate_comparison {
+                        thing = get_simplified_name(&thing);
+                    }
+                    if !thing.is_empty() {
+                        hash_map.entry(thing).or_default().push(file_entry);
+                    }
+                }
+                for (_title, vec_file_entry) in hash_map {
+                    if vec_file_entry.len() > 1 {
+                        new_duplicates.push(vec_file_entry);
+                    }
                 }
             }
         }
@@ -529,6 +577,21 @@ impl SameMusic {
 
         new_duplicates
     }
+}
+
+/// Normalize a music tag for fuzzy comparison: lowercase, strip common
+/// prefixes ("the ", "a ", "an "), collapse whitespace, strip non-alphanumeric.
+fn normalize_tag(s: &str) -> String {
+    let s = s.trim().to_lowercase();
+    let s = s.strip_prefix("the ").unwrap_or(&s);
+    let s = s.strip_prefix("a ").unwrap_or(s);
+    let s = s.strip_prefix("an ").unwrap_or(s);
+    s.chars()
+        .filter(|c| c.is_alphanumeric() || c.is_whitespace())
+        .collect::<String>()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 // TODO this should be taken from rusty-chromaprint repo, not reimplemented here

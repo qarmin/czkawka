@@ -1693,6 +1693,7 @@ dependencies = [
  "serde",
  "serde_json",
  "static_assertions",
+ "strsim 0.11.1",
  "symphonia",
  "tempfile",
  "tokio",

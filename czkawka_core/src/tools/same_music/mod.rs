@@ -96,6 +96,11 @@ pub struct SameMusicParameters {
     pub minimum_segment_duration: f32,
     pub maximum_difference: f64,
     pub compare_fingerprints_only_with_similar_titles: bool,
+    /// When true, use fuzzy (Jaro-Winkler) comparison for tag matching
+    /// instead of exact grouping. Only applies to AudioTags mode.
+    pub fuzzy_tag_comparison: bool,
+    /// Similarity threshold for fuzzy tag matching (0.0–1.0, default 0.85).
+    pub tag_similarity_threshold: f64,
 }
 
 impl SameMusicParameters {
@@ -116,6 +121,8 @@ impl SameMusicParameters {
             minimum_segment_duration,
             maximum_difference,
             compare_fingerprints_only_with_similar_titles,
+            fuzzy_tag_comparison: false,
+            tag_similarity_threshold: 0.85,
         }
     }
 }

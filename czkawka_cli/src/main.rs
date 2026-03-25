@@ -252,9 +252,11 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
         search_method,
         approximate_comparison,
         compare_fingerprints_only_with_similar_titles,
+        fuzzy_tag_comparison,
+        tag_similarity_threshold,
     } = same_music;
 
-    let params = SameMusicParameters::new(
+    let mut params = SameMusicParameters::new(
         music_similarity,
         approximate_comparison,
         search_method,
@@ -262,6 +264,8 @@ fn same_music(same_music: SameMusicArgs, stop_flag: &Arc<AtomicBool>, progress_s
         maximum_difference,
         compare_fingerprints_only_with_similar_titles,
     );
+    params.fuzzy_tag_comparison = fuzzy_tag_comparison;
+    params.tag_similarity_threshold = tag_similarity_threshold;
     let mut tool = SameMusic::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
