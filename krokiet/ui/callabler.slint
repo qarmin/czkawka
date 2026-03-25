@@ -19,6 +19,16 @@ export global Callabler {
     callback row_open_item_with_index(int);
     callback row_open_parent_item_with_index(int);
 
+    // Context menu actions
+    callback row_remove_from_results(int);
+    callback row_remove_all_from_folder(int);
+    callback row_select_all_from_folder(int);
+    callback row_select_all_from_folder_except_one(int);
+    callback row_exclude_parent_folder(int);
+    callback row_exclude_item(int);
+    callback row_copy_name(int);
+    callback row_copy_parent_folder_path(int);
+
     // Right click or middle click opener
     callback open_item(string);
     callback open_parent(string);
@@ -69,4 +79,15 @@ export global Callabler {
     }
 
     callback change_sort_column_mode(SortColumnMode, int);
+
+    // Image Compare mode
+    callback compare_open();
+    callback compare_set_left(int);
+    callback compare_set_right(int);
+    callback compare_toggle_checkbox(int);
+    callback compare_next_group();
+    callback compare_prev_group();
+    callback compare_swap();
+    callback compare_cancel_load();
+    callback compare_compute_diff();
 }

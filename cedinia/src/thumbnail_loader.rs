@@ -5,7 +5,8 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::time::{Duration, SystemTime};
 
-use czkawka_core::common::image::{ImgResizeOptions, LoadedImage};
+use czkawka_core::common::image::{ImgResizeOptions, LoadedImage, get_dynamic_image_from_path};
+use czkawka_core::re_exported::FirFilterType;
 use log::trace;
 
 use crate::scan_runner::FileItem;
@@ -118,9 +119,6 @@ pub fn rgba_to_slint_image(rgba: &[u8], width: u32, height: u32) -> slint::Image
 }
 
 pub fn load_and_resize_thumbnail(path: &str, cache_dir: &Path) -> Option<(Vec<u8>, u32, u32)> {
-    use czkawka_core::common::image::get_dynamic_image_from_path;
-    use fast_image_resize::FilterType;
-
     let meta = std::fs::metadata(path).ok();
     let (mtime_secs, file_size) = meta.as_ref().map_or((0, 0), |m| {
         let mtime = m.modified().ok().and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map_or(0, |d| d.as_secs());
@@ -141,7 +139,7 @@ pub fn load_and_resize_thumbnail(path: &str, cache_dir: &Path) -> Option<(Vec<u8
         Some(ImgResizeOptions {
             max_width: 256,
             max_height: 256,
-            filter: FilterType::Lanczos3,
+            filter: FirFilterType::Lanczos3,
         }),
     )
     .ok()?;

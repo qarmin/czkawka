@@ -83,8 +83,11 @@ clip:
     cargo clippy --fix --allow-dirty --allow-staged --no-default-features --features winit_software --all-targets
 
 fix:
-    ruff format --line-length 120 --no-cache
-    mypy misc --strict
+    cp misc/pyproject.toml .
+    uv sync
+
+    uv run ruff format --line-length 120 --no-cache
+    uv run mypy misc --strict
 
     bash misc/run_checks.sh
 
@@ -346,3 +349,17 @@ time_passes:
     cd czkawka_cli; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
     cargo clean
     cd krokiet; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
+
+# Build and heaptrack the standalone test/ crate (ResultsList UI).
+# Usage: just test_heaptrack
+# After the window closes: heaptrack_gui --appimage-extract-and-run "$(ls -t *.zst | head -n1)"
+test_heaptrack:
+    cd test && cargo build --profile rdebug
+    heaptrack test/target/rdebug/TEST
+    heaptrack_gui --appimage-extract-and-run "$(ls -t *.zst | head -n1)"
+
+# Run `just heaptrack cedinia; heaptrack *.last profdata `
+heaptrack bin:
+    cargo build --profile rdebug --bin {{bin}}
+    heaptrack target/rdebug/{{bin}}
+    heaptrack_gui --appimage-extract-and-run "$(ls -t *.zst | head -n1)"

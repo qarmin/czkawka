@@ -53,13 +53,7 @@ def read_ftl_with_structure(file_path: pathlib.Path) -> Tuple[str, Dict[str, str
 
 
 def translate_text(text: str, target_language: str, model: str = DEFAULT_MODEL) -> str:
-    try:
-        import ollama  # type: ignore
-    except ImportError:
-        print("Error: 'ollama' package not installed.")
-        print("   Install it with: pip install ollama")
-        print("   Or run: just prepare_translations_deps")
-        sys.exit(1)
+    import ollama
 
     language_name = LANGUAGE_NAMES.get(target_language, target_language)
 

@@ -41,3 +41,5 @@ cedinia/android/.gradle/
 cedinia/docs
 *.aab
 *.gz
+/pyproject.toml
+uv.lock

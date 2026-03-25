@@ -1,0 +1,123 @@
+import { Button } from "std-widgets.slint";
+import { ColorPalette } from "color_palette.slint";
+import { Translations } from "translations.slint";
+
+export component PopupContextMenu inherits Rectangle {
+    callback open_item();
+    callback open_parent();
+    callback remove_from_results();
+    callback remove_all_from_folder();
+    callback select_all_from_folder();
+    callback select_all_from_folder_except_one();
+    callback exclude_parent_folder();
+    callback exclude_item();
+    callback copy_name();
+    callback copy_parent_folder_path();
+
+    out property <length> popup_menu_width: 230px;
+    private property <length> menu_item_height: 28px;
+
+    callback show_popup();
+
+    popup_window := PopupWindow {
+        width: popup_menu_width;
+        height: menu_item_height * 10;
+        close-policy: PopupClosePolicy.close-on-click-outside;
+
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            border-radius: 5px;
+            background: ColorPalette.popup_background;
+            border-color: ColorPalette.popup_border_color;
+            border-width: 1px;
+
+            VerticalLayout {
+                Button {
+                    text: Translations.context_menu_open_item_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.open_item();
+                    }
+                }
+                Button {
+                    text: Translations.context_menu_open_parent_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.open_parent();
+                    }
+                }
+                Button {
+                    text: Translations.context_menu_remove_from_results_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.remove_from_results();
+                    }
+                }
+                Button {
+                    text: Translations.context_menu_remove_all_from_folder_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.remove_all_from_folder();
+                    }
+                }
+                Button {
+                    text: Translations.context_menu_select_all_from_folder_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.select_all_from_folder();
+                    }
+                }
+                Button {
+                    text: Translations.context_menu_select_all_from_folder_except_one_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.select_all_from_folder_except_one();
+                    }
+                }
+                Button {
+                    text: Translations.context_menu_exclude_parent_folder_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.exclude_parent_folder();
+                    }
+                }
+                Button {
+                    text: Translations.context_menu_exclude_item_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.exclude_item();
+                    }
+                }
+                Button {
+                    text: Translations.context_menu_copy_name_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.copy_name();
+                    }
+                }
+                Button {
+                    text: Translations.context_menu_copy_parent_folder_path_text;
+                    height: menu_item_height;
+                    clicked => {
+                        popup_window.close();
+                        root.copy_parent_folder_path();
+                    }
+                }
+            }
+        }
+    }
+
+    show_popup() => {
+        popup_window.show();
+    }
+}

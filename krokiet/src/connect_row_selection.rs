@@ -138,6 +138,7 @@ pub(crate) fn connect_row_selections(app: &MainWindow) {
     opener::open_provided_parent_item(app);
     opener::connect_on_open_item(app);
     checker::change_number_of_checked_items(app);
+    context_menu::connect_context_menu_actions(app);
 }
 
 mod opener {
@@ -420,9 +421,9 @@ pub(crate) mod checker {
 
     pub(crate) fn change_number_of_enabled_items(app: &MainWindow, active_tab: ActiveTab, additions: i64) {
         let before_number_of_items = get_number_of_enabled_items(app, active_tab);
-        let after_number_of_items = before_number_of_items
-            .checked_add_signed(additions)
-            .unwrap_or_else(|| panic!("Overflow when adding signed number to items: before_number_of_items = {before_number_of_items}, additions = {additions}"));
+        let after_number_of_items = before_number_of_items.checked_add_signed(additions).unwrap_or_else(|| {
+            panic!("Counter desync: before_number_of_items = {before_number_of_items}, additions = {additions}, tab = {active_tab:?}. Resetting to 0.");
+        });
         set_number_of_enabled_items(app, active_tab, after_number_of_items);
     }
 
@@ -766,6 +767,257 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Sin
         }
     }
     (checked_items, unchecked_items, None)
+}
+
+mod context_menu {
+    use log::warn;
+    use slint::{ComponentHandle, Model, ModelRc, VecModel};
+
+    use super::{TOOLS_SELECTION, reset_selection};
+    use crate::connect_directories_changes::add_excluded_paths;
+    use crate::model_operations::remove_single_items_in_groups;
+    use crate::{Callabler, GuiState, MainWindow, Settings, SingleMainListModel};
+
+    pub(crate) fn connect_context_menu_actions(app: &MainWindow) {
+        connect_remove_from_results(app);
+        connect_remove_all_from_folder(app);
+        connect_select_all_from_folder(app);
+        connect_select_all_from_folder_except_one(app);
+        connect_exclude_parent_folder(app);
+        connect_exclude_item(app);
+        connect_copy_name(app);
+        connect_copy_parent_folder_path(app);
+    }
+
+    fn connect_remove_from_results(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_remove_from_results(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let model = active_tab.get_tool_model(&app);
+            let idx = idx as usize;
+
+            let Some(row) = model.row_data(idx) else { return };
+            if row.header_row {
+                return;
+            }
+
+            let new_items: Vec<SingleMainListModel> = model.iter().enumerate().filter_map(|(i, r)| if i == idx { None } else { Some(r) }).collect();
+            let cleaned = remove_single_items_in_groups(new_items, active_tab.get_is_header_mode());
+            active_tab.set_tool_model(&app, ModelRc::new(VecModel::from(cleaned)));
+            reset_selection(&app, active_tab, true);
+        });
+    }
+
+    fn connect_remove_all_from_folder(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_remove_all_from_folder(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let model = active_tab.get_tool_model(&app);
+            let idx = idx as usize;
+            let path_idx = active_tab.get_str_path_idx();
+
+            let Some(clicked_row) = model.row_data(idx) else { return };
+            if clicked_row.header_row {
+                return;
+            }
+            let target_path = clicked_row.val_str.iter().nth(path_idx).map(|s| s.to_string()).unwrap_or_default();
+
+            let new_items: Vec<SingleMainListModel> = model
+                .iter()
+                .filter(|row| row.header_row || row.val_str.iter().nth(path_idx).is_none_or(|p| p.as_str() != target_path))
+                .collect();
+            let cleaned = remove_single_items_in_groups(new_items, active_tab.get_is_header_mode());
+            active_tab.set_tool_model(&app, ModelRc::new(VecModel::from(cleaned)));
+            reset_selection(&app, active_tab, true);
+        });
+    }
+
+    fn connect_select_all_from_folder(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_select_all_from_folder(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let model = active_tab.get_tool_model(&app);
+            let idx = idx as usize;
+            let path_idx = active_tab.get_str_path_idx();
+
+            let Some(clicked_row) = model.row_data(idx) else { return };
+            if clicked_row.header_row {
+                return;
+            }
+            let target_path = clicked_row.val_str.iter().nth(path_idx).map(|s| s.to_string()).unwrap_or_default();
+
+            let new_items: Vec<SingleMainListModel> = model
+                .iter()
+                .map(|mut row| {
+                    row.selected_row = !row.header_row && row.val_str.iter().nth(path_idx).is_some_and(|p| p.as_str() == target_path);
+                    row
+                })
+                .collect();
+
+            let selected_count = new_items.iter().filter(|r| r.selected_row).count();
+            {
+                let mut lock = TOOLS_SELECTION.write().expect("Failed to lock selection");
+                if let Some(selection) = lock.get_mut(&active_tab) {
+                    selection.selected_rows.clear();
+                    selection.exceeded_limit = true;
+                    selection.number_of_selected_rows = selected_count;
+                }
+            }
+            active_tab.set_tool_model(&app, ModelRc::new(VecModel::from(new_items)));
+        });
+    }
+
+    fn connect_select_all_from_folder_except_one(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_select_all_from_folder_except_one(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let model = active_tab.get_tool_model(&app);
+            let idx = idx as usize;
+            let path_idx = active_tab.get_str_path_idx();
+            let is_header = active_tab.get_is_header_mode();
+
+            let Some(clicked_row) = model.row_data(idx) else { return };
+            if clicked_row.header_row {
+                return;
+            }
+            let target_path = clicked_row.val_str.iter().nth(path_idx).map(|s| s.to_string()).unwrap_or_default();
+
+            let mut first_skipped = false;
+            let new_items: Vec<SingleMainListModel> = if is_header {
+                let mut first_in_group_skipped = false;
+                model
+                    .iter()
+                    .map(|mut row| {
+                        if row.header_row {
+                            first_in_group_skipped = false;
+                            row.selected_row = false;
+                        } else {
+                            let matches = row.val_str.iter().nth(path_idx).is_some_and(|p| p.as_str() == target_path);
+                            if matches && !first_in_group_skipped {
+                                row.selected_row = false;
+                                first_in_group_skipped = true;
+                            } else {
+                                row.selected_row = matches;
+                            }
+                        }
+                        row
+                    })
+                    .collect()
+            } else {
+                model
+                    .iter()
+                    .map(|mut row| {
+                        let matches = row.val_str.iter().nth(path_idx).is_some_and(|p| p.as_str() == target_path);
+                        if matches && !first_skipped {
+                            row.selected_row = false;
+                            first_skipped = true;
+                        } else {
+                            row.selected_row = matches;
+                        }
+                        row
+                    })
+                    .collect()
+            };
+
+            let selected_count = new_items.iter().filter(|r| r.selected_row).count();
+            {
+                let mut lock = TOOLS_SELECTION.write().expect("Failed to lock selection");
+                if let Some(selection) = lock.get_mut(&active_tab) {
+                    selection.selected_rows.clear();
+                    selection.exceeded_limit = true;
+                    selection.number_of_selected_rows = selected_count;
+                }
+            }
+            active_tab.set_tool_model(&app, ModelRc::new(VecModel::from(new_items)));
+        });
+    }
+
+    fn connect_exclude_parent_folder(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_exclude_parent_folder(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let model = active_tab.get_tool_model(&app);
+            let path_idx = active_tab.get_str_path_idx();
+
+            let row = model.row_data(idx as usize).expect("Row index out of bounds");
+            if row.header_row {
+                return;
+            }
+            let path = row.val_str.iter().nth(path_idx).expect("path_idx out of bounds").to_string();
+            add_excluded_paths(&app.global::<Settings>(), &[path]);
+        });
+    }
+
+    fn connect_exclude_item(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_exclude_item(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let model = active_tab.get_tool_model(&app);
+            let path_idx = active_tab.get_str_path_idx();
+            let name_idx = active_tab.get_str_name_idx();
+
+            let row = model.row_data(idx as usize).expect("Row index out of bounds");
+            if row.header_row {
+                return;
+            }
+            let path = row.val_str.iter().nth(path_idx).expect("path_idx out of bounds").to_string();
+            let name = row.val_str.iter().nth(name_idx).expect("name_idx out of bounds").to_string();
+            let full_path = std::path::PathBuf::from(&path).join(&name).to_string_lossy().to_string();
+            add_excluded_paths(&app.global::<Settings>(), &[full_path]);
+        });
+    }
+
+    fn set_clipboard(text: String) {
+        use copypasta::{ClipboardContext, ClipboardProvider};
+        match ClipboardContext::new() {
+            Ok(mut ctx) => {
+                if let Err(e) = ctx.set_contents(text) {
+                    warn!("Failed to set clipboard contents: {e}");
+                }
+            }
+            Err(e) => warn!("Failed to create clipboard context: {e}"),
+        }
+    }
+
+    fn connect_copy_name(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_copy_name(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let model = active_tab.get_tool_model(&app);
+            let name_idx = active_tab.get_str_name_idx();
+
+            let row = model.row_data(idx as usize).expect("Row index out of bounds");
+            if row.header_row {
+                return;
+            }
+            let name = row.val_str.iter().nth(name_idx).expect("name_idx out of bounds").to_string();
+            set_clipboard(name);
+        });
+    }
+
+    fn connect_copy_parent_folder_path(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_copy_parent_folder_path(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let model = active_tab.get_tool_model(&app);
+            let path_idx = active_tab.get_str_path_idx();
+
+            let row = model.row_data(idx as usize).expect("Row index out of bounds");
+            if row.header_row {
+                return;
+            }
+            let path = row.val_str.iter().nth(path_idx).expect("path_idx out of bounds").to_string();
+            set_clipboard(path);
+        });
+    }
 }
 
 #[cfg(test)]

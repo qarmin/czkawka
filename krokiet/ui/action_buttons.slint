@@ -3,6 +3,7 @@ import { ActiveTab, BottomPanelVisibility, PopupRequest, SingleMainListModel } f
 import { GuiState } from "gui_state.slint";
 import { Translations } from "translations.slint";
 import { Settings } from "settings.slint";
+import { Callabler } from "callabler.slint";
 
 export component VisibilityButton inherits Button {
     in-out property <BottomPanelVisibility> button_visibility;
@@ -216,6 +217,17 @@ export component ActionButtons inherits HorizontalLayout {
         colorize-icon: true;
         clicked => {
             show_action_popup(PopupRequest.CleanExif);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.SimilarImages && results_available: compare_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.compare_button_text;
+        icon: @image-url("../icons/krokiet_compare.svg");
+        colorize-icon: true;
+        clicked => {
+            Callabler.compare_open();
         }
     }
 

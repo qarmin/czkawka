@@ -27,7 +27,7 @@ impl VideoCodec {
         match self {
             Self::H264 => "libx264",
             Self::H265 => "libx265",
-            Self::Av1 => "libaom-av1",
+            Self::Av1 => "libsvtav1",
             Self::Vp9 => "libvpx-vp9",
         }
     }
@@ -49,7 +49,7 @@ impl std::str::FromStr for VideoCodec {
         match codec.to_lowercase().as_str() {
             "h264" | "libx264" => Ok(Self::H264),
             "h265" | "hevc" | "libx265" => Ok(Self::H265),
-            "av1" | "libaom-av1" => Ok(Self::Av1),
+            "av1" | "libaom-av1" | "libsvtav1" | "svtav1" => Ok(Self::Av1),
             "vp9" | "libvpx-vp9" => Ok(Self::Vp9),
             _ => Err(flc!("core_unknown_codec", codec = codec)),
         }

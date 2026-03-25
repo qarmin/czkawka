@@ -119,6 +119,16 @@ pub struct ImgResizeOptions {
     pub filter: FirFilterType,
 }
 
+pub fn resize_image_exact(img: &DynamicImage, width: u32, height: u32, filter: FirFilterType) -> DynamicImage {
+    let mut dst = DynamicImage::new(width, height, img.color());
+    let fir_opts = FirResizeOptions::new().resize_alg(ResizeAlg::Interpolation(filter));
+
+    match Resizer::new().resize(img, &mut dst, Some(&fir_opts)) {
+        Ok(()) => dst,
+        Err(_) => img.resize_exact(width, height, image::imageops::FilterType::Lanczos3),
+    }
+}
+
 fn resize_image(img: DynamicImage, opts: ImgResizeOptions) -> DynamicImage {
     let orig_w = img.width();
     let orig_h = img.height();

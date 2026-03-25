@@ -397,4 +397,32 @@ popup_custom_leave_one_in_group_text = Select all items except one, in each grou
 popup_custom_hint_str_text = Text columns: wildcards  *name*  /home/*  *.rs
 popup_custom_hint_int_text = Size [KB] / numeric columns: >= 2048  < 512  = 0  (operators: >=  <=  >  <  =)
 popup_custom_hint_date_text = Date columns: DD-MM-YYYY or YYYY-MM-DD, optional time HH:MM:SS  e.g.  >= 2020-01-01  or  < 31-12-2022 23:59:59
+compare_button_text = Compare
+compare_back_text = Back
+compare_prev_group_text = Prev Group
+compare_next_group_text = Next Group
+compare_swap_text = Swap
+compare_info_text = Info
+compare_diff_text = Diff
+compare_loading_title_text = Please wait...
+compare_cancel_text = Cancel
+compare_resolution_mismatch_text = Different resolutions - diff results may be inaccurate
+compare_computing_diff_text = Computing diff...
+compare_info_file_name_text = File name
+compare_info_path_text = Path
+compare_info_size_text = Size
+compare_info_resolution_text = Resolution
+compare_info_modification_date_text = Modification date
+compare_loading_images_text = Loading images...
+compare_cancelling_text = Cancelling, please wait...
+context_menu_open_item_text = Open Item
+context_menu_open_parent_text = Open Parent Folder
+context_menu_remove_from_results_text = Remove from Results
+context_menu_remove_all_from_folder_text = Remove All from Folder
+context_menu_select_all_from_folder_text = Select All from Folder
+context_menu_select_all_from_folder_except_one_text = Select All from Folder (keep one)
+context_menu_exclude_parent_folder_text = Exclude Parent Folder
+context_menu_exclude_item_text = Exclude Item
+context_menu_copy_name_text = Copy Name
+context_menu_copy_parent_folder_path_text = Copy Parent Folder Path
 

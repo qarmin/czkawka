@@ -26,6 +26,7 @@ import { PopupCleanExif } from "popup_clean_exif.slint";
 import { PopupCleanCache } from "popup_clean_cache.slint";
 import { ToolSettings } from "tool_settings.slint";
 import { Translations } from "translations.slint";
+import { ImageCompareOverlay } from "image_compare.slint";
 
 export {Settings, Callabler, GuiState, Translations, Palette}
 
@@ -380,6 +381,15 @@ export component MainWindow inherits Window {
         action_confirmed => {
             Callabler.softlink_items();
         }
+    }
+
+    // ── Image Compare overlay (covers the whole window, z=500) ───────────────
+    if GuiState.compare_visible: ImageCompareOverlay {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        z: 500;
     }
 
     if GuiState.file_dialog_open: Rectangle {

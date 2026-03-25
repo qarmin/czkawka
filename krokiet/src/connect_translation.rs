@@ -392,6 +392,36 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_custom_case_sensitive_text(flk!("popup_custom_case_sensitive_text").into());
     translation.set_popup_custom_leave_one_in_group_text(flk!("popup_custom_leave_one_in_group_text").into());
 
+    translation.set_compare_button_text(flk!("compare_button_text").into());
+    translation.set_compare_back_text(flk!("compare_back_text").into());
+    translation.set_compare_prev_group_text(flk!("compare_prev_group_text").into());
+    translation.set_compare_next_group_text(flk!("compare_next_group_text").into());
+    translation.set_compare_swap_text(flk!("compare_swap_text").into());
+    translation.set_compare_info_text(flk!("compare_info_text").into());
+    translation.set_compare_diff_text(flk!("compare_diff_text").into());
+    translation.set_compare_loading_title_text(flk!("compare_loading_title_text").into());
+    translation.set_compare_cancel_text(flk!("compare_cancel_text").into());
+    translation.set_compare_resolution_mismatch_text(flk!("compare_resolution_mismatch_text").into());
+    translation.set_compare_computing_diff_text(flk!("compare_computing_diff_text").into());
+    translation.set_compare_info_file_name_text(flk!("compare_info_file_name_text").into());
+    translation.set_compare_info_path_text(flk!("compare_info_path_text").into());
+    translation.set_compare_info_size_text(flk!("compare_info_size_text").into());
+    translation.set_compare_info_resolution_text(flk!("compare_info_resolution_text").into());
+    translation.set_compare_info_modification_date_text(flk!("compare_info_modification_date_text").into());
+    translation.set_compare_loading_images_text(flk!("compare_loading_images_text").into());
+    translation.set_compare_cancelling_text(flk!("compare_cancelling_text").into());
+
+    translation.set_context_menu_open_item_text(flk!("context_menu_open_item_text").into());
+    translation.set_context_menu_open_parent_text(flk!("context_menu_open_parent_text").into());
+    translation.set_context_menu_remove_from_results_text(flk!("context_menu_remove_from_results_text").into());
+    translation.set_context_menu_remove_all_from_folder_text(flk!("context_menu_remove_all_from_folder_text").into());
+    translation.set_context_menu_select_all_from_folder_text(flk!("context_menu_select_all_from_folder_text").into());
+    translation.set_context_menu_select_all_from_folder_except_one_text(flk!("context_menu_select_all_from_folder_except_one_text").into());
+    translation.set_context_menu_exclude_parent_folder_text(flk!("context_menu_exclude_parent_folder_text").into());
+    translation.set_context_menu_exclude_item_text(flk!("context_menu_exclude_item_text").into());
+    translation.set_context_menu_copy_name_text(flk!("context_menu_copy_name_text").into());
+    translation.set_context_menu_copy_parent_folder_path_text(flk!("context_menu_copy_parent_folder_path_text").into());
+
     let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),
         (flk!("tool_empty_folders").into(), ActiveTab::EmptyFolders),
