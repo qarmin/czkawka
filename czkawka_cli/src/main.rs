@@ -122,6 +122,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
         maximal_file_size,
         minimal_cached_file_size,
         search_method,
+        name_similarity_threshold,
         delete_method,
         hash_type,
         allow_hard_links,
@@ -137,7 +138,8 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
         minimal_cached_file_size,
         minimal_prehash_cache_file_size,
         case_sensitive_name_comparison.case_sensitive_name_comparison,
-    );
+    )
+    .with_name_similarity_threshold(name_similarity_threshold);
     let mut tool = DuplicateFinder::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));

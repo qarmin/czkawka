@@ -169,10 +169,17 @@ pub struct DuplicatesArgs {
         long,
         default_value = "HASH",
         value_parser = parse_checking_method_duplicate,
-        help = "Search method (NAME, SIZE, HASH)",
-        long_help = "Methods to search files.\nNAME - Fast but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file"
+        help = "Search method (NAME, FUZZY_NAME, SIZE, SIZE_NAME, HASH)",
+        long_help = "Methods to search files.\nNAME - Fast but rarely usable, finds files with identical names,\nFUZZY_NAME - Finds files with similar names using Jaro-Winkler distance,\nSIZE - Fast but not accurate, checking by the file's size,\nSIZE_NAME - Checks by both file size and name,\nHASH - The slowest method, checking by the hash of the entire file"
     )]
     pub search_method: CheckingMethod,
+    #[clap(
+        long,
+        default_value = "0.85",
+        help = "Name similarity threshold for FUZZY_NAME mode (0.0–1.0)",
+        long_help = "Minimum Jaro-Winkler similarity score (0.0–1.0) for two filenames to be considered similar. Higher values require closer matches. Only used with FUZZY_NAME search method."
+    )]
+    pub name_similarity_threshold: f64,
     #[clap(flatten)]
     pub delete_method: DMethod,
     #[clap(
@@ -1081,10 +1088,11 @@ fn parse_tolerance(src: &str) -> Result<i32, &'static str> {
 fn parse_checking_method_duplicate(src: &str) -> Result<CheckingMethod, &'static str> {
     match src.to_ascii_lowercase().as_str() {
         "name" => Ok(CheckingMethod::Name),
+        "fuzzy_name" => Ok(CheckingMethod::FuzzyName),
         "size" => Ok(CheckingMethod::Size),
         "size_name" => Ok(CheckingMethod::SizeName),
         "hash" => Ok(CheckingMethod::Hash),
-        _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH)"),
+        _ => Err("Couldn't parse the search method (allowed: NAME, FUZZY_NAME, SIZE, SIZE_NAME, HASH)"),
     }
 }
 

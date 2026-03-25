@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -11,6 +11,7 @@ use humansize::{BINARY, format_size};
 use indexmap::IndexMap;
 use log::debug;
 use rayon::prelude::*;
+use strsim;
 
 use crate::common::cache::{CACHE_DUPLICATE_VERSION, load_cache_from_file_generalized_by_size, save_cache_to_file_generalized};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
@@ -32,10 +33,12 @@ impl DuplicateFinder {
             files_with_identical_size: Default::default(),
             files_with_identical_size_names: Default::default(),
             files_with_identical_hashes: Default::default(),
+            files_with_fuzzy_names: Default::default(),
             files_with_identical_names_referenced: Default::default(),
             files_with_identical_size_names_referenced: Default::default(),
             files_with_identical_size_referenced: Default::default(),
             files_with_identical_hashes_referenced: Default::default(),
+            files_with_fuzzy_names_referenced: Default::default(),
             params,
         }
     }
@@ -110,6 +113,132 @@ impl DuplicateFinder {
                 WorkContinueStatus::Continue
             }
             DirTraversalResult::Stopped => WorkContinueStatus::Stop,
+        }
+    }
+
+    #[fun_time(message = "check_files_fuzzy_name", level = "debug")]
+    pub(crate) fn check_files_fuzzy_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        // Collect all files grouped by extension for performance (files with different extensions rarely match)
+        let group_by_func = |fe: &FileEntry| fe.path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
+
+        let result = DirTraversalBuilder::new()
+            .common_data(&self.common_data)
+            .group_by(group_by_func)
+            .stop_flag(stop_flag)
+            .progress_sender(progress_sender)
+            .checking_method(CheckingMethod::FuzzyName)
+            .build()
+            .run();
+
+        match result {
+            DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
+                self.common_data.text_messages.warnings.extend(warnings);
+
+                let threshold = self.get_params().name_similarity_threshold;
+                let case_sensitive = self.get_params().case_sensitive_name_comparison;
+                let mut all_groups: Vec<Vec<DuplicateEntry>> = Vec::new();
+
+                for (_ext, files) in grouped_file_entries {
+                    if files.len() < 2 {
+                        continue;
+                    }
+                    if check_if_stop_received(stop_flag) {
+                        return WorkContinueStatus::Stop;
+                    }
+
+                    let names: Vec<String> = files
+                        .iter()
+                        .map(|fe| {
+                            let name = fe
+                                .path
+                                .file_stem()
+                                .unwrap_or_else(|| panic!("Found invalid file_stem \"{}\"", fe.path.to_string_lossy()))
+                                .to_string_lossy();
+                            if case_sensitive { name.to_string() } else { name.to_lowercase() }
+                        })
+                        .collect();
+
+                    // Union-Find for grouping similar filenames
+                    let n = files.len();
+                    let mut parent: Vec<usize> = (0..n).collect();
+
+                    fn find(parent: &mut Vec<usize>, i: usize) -> usize {
+                        if parent[i] != i {
+                            parent[i] = find(parent, parent[i]);
+                        }
+                        parent[i]
+                    }
+
+                    fn union(parent: &mut Vec<usize>, a: usize, b: usize) {
+                        let ra = find(parent, a);
+                        let rb = find(parent, b);
+                        if ra != rb {
+                            parent[ra] = rb;
+                        }
+                    }
+
+                    for i in 0..n {
+                        for j in (i + 1)..n {
+                            let similarity = strsim::jaro_winkler(&names[i], &names[j]);
+                            if similarity >= threshold {
+                                union(&mut parent, i, j);
+                            }
+                        }
+                    }
+
+                    // Collect groups
+                    let mut groups: HashMap<usize, Vec<usize>> = HashMap::new();
+                    for i in 0..n {
+                        let root = find(&mut parent, i);
+                        groups.entry(root).or_default().push(i);
+                    }
+
+                    for (_root, indices) in groups {
+                        if indices.len() > 1 {
+                            let group: Vec<DuplicateEntry> = indices.into_iter().map(|idx| FileEntry::into_duplicate_entry(files[idx].clone())).collect();
+                            all_groups.push(group);
+                        }
+                    }
+                }
+
+                self.files_with_fuzzy_names = all_groups;
+
+                if self.common_data.use_reference_folders {
+                    let groups = mem::take(&mut self.files_with_fuzzy_names);
+                    self.files_with_fuzzy_names_referenced = groups
+                        .into_iter()
+                        .filter_map(|vec_file_entry| {
+                            let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry
+                                .into_iter()
+                                .partition(|e| self.common_data.directories.is_in_referenced_directory(e.get_path()));
+
+                            if normal_files.is_empty() {
+                                None
+                            } else {
+                                files_from_referenced_folders.pop().map(|file| (file, normal_files))
+                            }
+                        })
+                        .collect();
+                }
+
+                self.calculate_fuzzy_name_stats();
+                WorkContinueStatus::Continue
+            }
+            DirTraversalResult::Stopped => WorkContinueStatus::Stop,
+        }
+    }
+
+    fn calculate_fuzzy_name_stats(&mut self) {
+        if self.common_data.use_reference_folders {
+            for (_fe, vector) in &self.files_with_fuzzy_names_referenced {
+                self.information.number_of_duplicated_files_by_fuzzy_name += vector.len();
+                self.information.number_of_groups_by_fuzzy_name += 1;
+            }
+        } else {
+            for vector in &self.files_with_fuzzy_names {
+                self.information.number_of_duplicated_files_by_fuzzy_name += vector.len() - 1;
+                self.information.number_of_groups_by_fuzzy_name += 1;
+            }
         }
     }
 

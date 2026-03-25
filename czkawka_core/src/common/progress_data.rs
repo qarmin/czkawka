@@ -176,7 +176,7 @@ impl ProgressData {
 
         let tool_type_checking_method: Option<ToolType> = match self.checking_method {
             CheckingMethod::AudioTags | CheckingMethod::AudioContent => Some(ToolType::SameMusic),
-            CheckingMethod::Name | CheckingMethod::SizeName | CheckingMethod::Size | CheckingMethod::Hash => Some(ToolType::Duplicate),
+            CheckingMethod::Name | CheckingMethod::FuzzyName | CheckingMethod::SizeName | CheckingMethod::Size | CheckingMethod::Hash => Some(ToolType::Duplicate),
             CheckingMethod::None => None,
         };
         if let Some(tool_type) = tool_type_checking_method {
