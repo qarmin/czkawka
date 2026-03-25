@@ -73,8 +73,9 @@ impl InvalidSymlinks {
                     current_path = match current_path.read_link() {
                         Ok(t) => t,
                         Err(_inspected) => {
-                            // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
-                            return None;
+                            // A symlink in the chain is broken (e.g. A -> B -> missing)
+                            type_of_error = ErrorType::NonExistentFile;
+                            break;
                         }
                     };
 

@@ -222,6 +222,7 @@ impl Directories {
         // Get device IDs for included directories, probably ther better solution would be to get one id per directory, but this is faster, but a little less precise
         #[cfg(target_family = "unix")]
         if self.exclude_other_filesystems() {
+            self.included_dev_ids.clear();
             for d in &self.included_directories {
                 match fs::metadata(d) {
                     Ok(m) => self.included_dev_ids.push(m.dev()),

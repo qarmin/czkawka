@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use log::error;
+
 #[cfg(not(feature = "no_colors"))]
 use clap::builder::Styles;
 #[cfg(not(feature = "no_colors"))]
@@ -1034,29 +1036,44 @@ pub struct IgnoreSameSize {
 
 impl FileToSave {
     pub(crate) fn file_name(&self) -> Option<&str> {
-        if let Some(file_name) = &self.file_to_save {
-            return file_name.to_str();
+        match &self.file_to_save {
+            Some(file_name) => match file_name.to_str() {
+                Some(s) => Some(s),
+                None => {
+                    error!("Output file path contains invalid UTF-8: {:?}", file_name);
+                    None
+                }
+            },
+            None => None,
         }
-
-        None
     }
 }
 impl JsonCompactFileToSave {
     pub(crate) fn file_name(&self) -> Option<&str> {
-        if let Some(file_name) = &self.compact_file_to_save {
-            return file_name.to_str();
+        match &self.compact_file_to_save {
+            Some(file_name) => match file_name.to_str() {
+                Some(s) => Some(s),
+                None => {
+                    error!("Compact JSON output file path contains invalid UTF-8: {:?}", file_name);
+                    None
+                }
+            },
+            None => None,
         }
-
-        None
     }
 }
 impl JsonPrettyFileToSave {
     pub(crate) fn file_name(&self) -> Option<&str> {
-        if let Some(file_name) = &self.pretty_file_to_save {
-            return file_name.to_str();
+        match &self.pretty_file_to_save {
+            Some(file_name) => match file_name.to_str() {
+                Some(s) => Some(s),
+                None => {
+                    error!("Pretty JSON output file path contains invalid UTF-8: {:?}", file_name);
+                    None
+                }
+            },
+            None => None,
         }
-
-        None
     }
 }
 

@@ -45,6 +45,7 @@ mod progress;
 pub struct CliOutput {
     pub found_any_files: bool,
     pub ignored_error_code_on_found: bool,
+    pub had_save_errors: bool,
     pub output: String,
 }
 
@@ -112,7 +113,9 @@ fn main() {
         println!("{}", cli_output.output);
     }
 
-    if cli_output.found_any_files && !cli_output.ignored_error_code_on_found {
+    if cli_output.had_save_errors {
+        std::process::exit(1);
+    } else if cli_output.found_any_files && !cli_output.ignored_error_code_on_found {
         std::process::exit(11);
     } else {
         std::process::exit(0);
@@ -554,38 +557,46 @@ fn exif_remover(exif_remover: ExifRemoverArgs, stop_flag: &Arc<AtomicBool>, prog
 }
 
 fn save_and_write_results_to_writer<T: CommonData + PrintResults>(component: &T, common_cli_items: &CommonCliItems) -> CliOutput {
+    let mut had_save_errors = false;
+
     if let Some(file_name) = common_cli_items.file_to_save.file_name()
         && let Err(e) = component.print_results_to_file(file_name)
     {
         error!("Failed to save results to file {e}");
+        had_save_errors = true;
     }
     if let Some(file_name) = common_cli_items.json_compact_file_to_save.file_name()
         && let Err(e) = component.save_results_to_file_as_json(file_name, false)
     {
         error!("Failed to save compact json results to file {e}");
+        had_save_errors = true;
     }
     if let Some(file_name) = common_cli_items.json_pretty_file_to_save.file_name()
         && let Err(e) = component.save_results_to_file_as_json(file_name, true)
     {
         error!("Failed to save pretty json results to file {e}");
+        had_save_errors = true;
     }
 
     let mut buf_writer = std::io::BufWriter::new(Vec::new());
     if !common_cli_items.do_not_print.do_not_print_results {
-        let _ = component.print_results_to_writer(&mut buf_writer).map_err(|e| {
+        if let Err(e) = component.print_results_to_writer(&mut buf_writer) {
             error!("Failed to print results to output: {e}");
-        });
+            had_save_errors = true;
+        }
     }
 
     if !common_cli_items.do_not_print.do_not_print_messages {
-        let _ = component.get_text_messages().print_messages_to_writer(&mut buf_writer).map_err(|e| {
+        if let Err(e) = component.get_text_messages().print_messages_to_writer(&mut buf_writer) {
             error!("Failed to print results to output: {e}");
-        });
+            had_save_errors = true;
+        }
     }
 
     let mut cli_output = CliOutput {
         found_any_files: component.found_any_items(),
         ignored_error_code_on_found: common_cli_items.ignore_error_code_on_found,
+        had_save_errors,
         output: String::new(),
     };
 

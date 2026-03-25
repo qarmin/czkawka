@@ -192,7 +192,7 @@ impl SimilarImages {
                 let mut has_referenced = false;
                 let mut has_normal = false;
                 for file_entry in vec_file_entry {
-                    if is_in_reference_folder(&self.common_data.directories.reference_directories, &file_entry.path) {
+                    if is_in_reference_folder(&self.common_data.directories.reference_directories, &self.common_data.directories.reference_files, &file_entry.path) {
                         has_referenced = true;
                     } else {
                         has_normal = true;
@@ -549,8 +549,8 @@ impl SimilarImages {
     }
 }
 
-fn is_in_reference_folder(reference_directories: &[PathBuf], path: &Path) -> bool {
-    reference_directories.iter().any(|e| path.starts_with(e))
+fn is_in_reference_folder(reference_directories: &[PathBuf], reference_files: &[PathBuf], path: &Path) -> bool {
+    reference_directories.iter().any(|e| path.starts_with(e)) || reference_files.iter().any(|e| e.as_path() == path)
 }
 
 #[expect(clippy::indexing_slicing)] // Because hash size is validated before

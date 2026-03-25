@@ -72,6 +72,8 @@ impl ExcludedItems {
             checked_expressions.push(expression);
         }
 
+        self.expressions.clear();
+        self.connected_expressions.clear();
         for checked_expression in &checked_expressions {
             let item = new_excluded_item(checked_expression);
             self.expressions.push(item.expression.clone());
