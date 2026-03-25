@@ -122,3 +122,86 @@ class AppState(QObject):
                 s.czkawka_cli_path = data.get("czkawka_cli_path", s.czkawka_cli_path)
             except (json.JSONDecodeError, OSError):
                 pass
+
+    # ── Scan Profiles ──────────────────────────────────────
+
+    def _profiles_dir(self) -> Path:
+        d = self._config_path / "profiles"
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+
+    def list_profiles(self) -> list[str]:
+        """Return sorted list of saved profile names."""
+        return sorted(
+            p.stem for p in self._profiles_dir().glob("*.json")
+        )
+
+    def save_profile(self, name: str):
+        """Save current settings + tool_settings + active_tab as a named profile."""
+        import dataclasses
+        profile = {
+            "active_tab": self.active_tab.name,
+            "settings": {k: v for k, v in dataclasses.asdict(self.settings).items()},
+            "tool_settings": {},
+        }
+        # Serialize tool_settings, converting enums to their .value
+        for k, v in dataclasses.asdict(self.tool_settings).items():
+            if hasattr(v, "value"):
+                profile["tool_settings"][k] = v.value
+            else:
+                profile["tool_settings"][k] = v
+        path = self._profiles_dir() / f"{name}.json"
+        try:
+            path.write_text(json.dumps(profile, indent=2))
+        except OSError:
+            pass
+
+    def load_profile(self, name: str) -> bool:
+        """Load a named profile, returning True on success."""
+        path = self._profiles_dir() / f"{name}.json"
+        if not path.exists():
+            return False
+        try:
+            data = json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError):
+            return False
+
+        # Restore active tab
+        tab_name = data.get("active_tab", "")
+        for tab in ActiveTab:
+            if tab.name == tab_name:
+                self.set_active_tab(tab)
+                break
+
+        # Restore app settings
+        if "settings" in data:
+            s = self.settings
+            for k, v in data["settings"].items():
+                if hasattr(s, k):
+                    setattr(s, k, v)
+
+        # Restore tool settings
+        if "tool_settings" in data:
+            ts = self.tool_settings
+            for k, v in data["tool_settings"].items():
+                if hasattr(ts, k):
+                    # Try to convert string values back to enum types
+                    current = getattr(ts, k)
+                    if hasattr(current, "__class__") and hasattr(current.__class__, "__members__"):
+                        try:
+                            setattr(ts, k, current.__class__(v))
+                        except (ValueError, KeyError):
+                            pass
+                    else:
+                        setattr(ts, k, v)
+
+        self.settings_changed.emit()
+        return True
+
+    def delete_profile(self, name: str):
+        """Delete a saved profile."""
+        path = self._profiles_dir() / f"{name}.json"
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
