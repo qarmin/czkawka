@@ -89,6 +89,7 @@ pub struct DuplicateFinderParameters {
     pub minimal_cache_file_size: u64,
     pub minimal_prehash_cache_file_size: u64,
     pub case_sensitive_name_comparison: bool,
+    pub no_self_compare: bool,
 }
 
 impl DuplicateFinderParameters {
@@ -107,7 +108,12 @@ impl DuplicateFinderParameters {
             minimal_cache_file_size,
             minimal_prehash_cache_file_size,
             case_sensitive_name_comparison,
+            no_self_compare: false,
         }
+    }
+    pub fn with_no_self_compare(mut self, enabled: bool) -> Self {
+        self.no_self_compare = enabled;
+        self
     }
 }
 

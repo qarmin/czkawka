@@ -788,6 +788,33 @@ impl DuplicateFinder {
 
         WorkContinueStatus::Continue
     }
+
+    /// Filter out duplicate groups where all files come from the same included directory.
+    /// This implements "no self-compare": files within the same directory are not considered
+    /// duplicates of each other, only files across different directories.
+    pub(crate) fn filter_same_directory_groups(&mut self) {
+        let dirs = &self.common_data.directories;
+
+        let all_from_same_dir = |entries: &[DuplicateEntry]| -> bool {
+            if entries.len() <= 1 {
+                return true;
+            }
+            let first_idx = dirs.included_directory_index(entries[0].path.as_path());
+            entries[1..].iter().all(|e| dirs.included_directory_index(e.path.as_path()) == first_idx)
+        };
+
+        // Filter name groups
+        self.files_with_identical_names.retain(|_k, v| !all_from_same_dir(v));
+        // Filter size groups
+        self.files_with_identical_size.retain(|_k, v| !all_from_same_dir(v));
+        // Filter size+name groups
+        self.files_with_identical_size_names.retain(|_k, v| !all_from_same_dir(v));
+        // Filter hash groups (nested: size -> vec of hash groups)
+        for (_size, hash_groups) in &mut self.files_with_identical_hashes {
+            hash_groups.retain(|group| !all_from_same_dir(group));
+        }
+        self.files_with_identical_hashes.retain(|_k, v| !v.is_empty());
+    }
 }
 
 pub fn get_duplicate_cache_file(type_of_hash: HashType, is_prehash: bool) -> String {
