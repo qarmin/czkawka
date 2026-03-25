@@ -92,6 +92,7 @@ pub struct DuplicateFinderParameters {
     pub minimal_prehash_cache_file_size: u64,
     pub case_sensitive_name_comparison: bool,
     pub name_similarity_threshold: f64,
+    pub no_self_compare: bool,
 }
 
 impl DuplicateFinderParameters {
@@ -111,10 +112,15 @@ impl DuplicateFinderParameters {
             minimal_prehash_cache_file_size,
             case_sensitive_name_comparison,
             name_similarity_threshold: 0.85,
+            no_self_compare: false,
         }
     }
     pub fn with_name_similarity_threshold(mut self, threshold: f64) -> Self {
         self.name_similarity_threshold = threshold.clamp(0.0, 1.0);
+        self
+    }
+    pub fn with_no_self_compare(mut self, enabled: bool) -> Self {
+        self.no_self_compare = enabled;
         self
     }
 }

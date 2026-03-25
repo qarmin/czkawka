@@ -250,6 +250,11 @@ impl Directories {
         self.reference_directories.iter().any(|e| path.starts_with(e)) || self.reference_files.iter().any(|e| e.as_path() == path)
     }
 
+    /// Returns the index of the included directory that contains the given path, or None.
+    pub(crate) fn included_directory_index(&self, path: &Path) -> Option<usize> {
+        self.included_directories.iter().position(|d| path.starts_with(d))
+    }
+
     pub(crate) fn is_excluded_dir(&self, path: &Path) -> bool {
         #[cfg(target_family = "windows")]
         let path = crate::common::normalize_windows_path(path);

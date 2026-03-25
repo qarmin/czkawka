@@ -137,6 +137,7 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
         case_sensitive_name_comparison,
         minimal_prehash_cache_file_size,
         use_prehash_cache,
+        no_self_compare,
     } = duplicates;
 
     let params = DuplicateFinderParameters::new(
@@ -147,7 +148,8 @@ fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_
         minimal_prehash_cache_file_size,
         case_sensitive_name_comparison.case_sensitive_name_comparison,
     )
-    .with_name_similarity_threshold(name_similarity_threshold);
+    .with_name_similarity_threshold(name_similarity_threshold)
+    .with_no_self_compare(no_self_compare);
     let mut tool = DuplicateFinder::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));

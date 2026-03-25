@@ -83,6 +83,11 @@ impl Search for DuplicateFinder {
                 }
                 _ => panic!(),
             }
+            // Filter out groups where all files come from the same included directory
+            if self.get_params().no_self_compare {
+                self.filter_same_directory_groups();
+            }
+
             if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
             }

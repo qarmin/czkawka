@@ -218,6 +218,13 @@ pub struct DuplicatesArgs {
     pub case_sensitive_name_comparison: CaseSensitiveNameComparison,
     #[clap(flatten)]
     pub allow_hard_links: AllowHardLinks,
+    #[clap(
+        long,
+        default_value = "false",
+        help = "Don't compare files within the same included directory",
+        long_help = "When enabled, files within the same included directory are not compared against each other. Only files across different included directories are considered duplicates. Useful for comparing a 'known good' archive against a messy folder without finding duplicates within the archive itself."
+    )]
+    pub no_self_compare: bool,
 }
 
 #[derive(Debug, clap::Args)]
