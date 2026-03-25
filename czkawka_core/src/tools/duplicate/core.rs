@@ -796,11 +796,11 @@ impl DuplicateFinder {
         let dirs = &self.common_data.directories;
 
         let all_from_same_dir = |entries: &[DuplicateEntry]| -> bool {
-            if entries.len() <= 1 {
+            let Some(first) = entries.first() else {
                 return true;
-            }
-            let first_idx = dirs.included_directory_index(entries[0].path.as_path());
-            entries[1..].iter().all(|e| dirs.included_directory_index(e.path.as_path()) == first_idx)
+            };
+            let first_idx = dirs.included_directory_index(first.path.as_path());
+            entries.iter().skip(1).all(|e| dirs.included_directory_index(e.path.as_path()) == first_idx)
         };
 
         // Filter name groups
@@ -810,7 +810,7 @@ impl DuplicateFinder {
         // Filter size+name groups
         self.files_with_identical_size_names.retain(|_k, v| !all_from_same_dir(v));
         // Filter hash groups (nested: size -> vec of hash groups)
-        for (_size, hash_groups) in &mut self.files_with_identical_hashes {
+        for hash_groups in self.files_with_identical_hashes.values_mut() {
             hash_groups.retain(|group| !all_from_same_dir(group));
         }
         self.files_with_identical_hashes.retain(|_k, v| !v.is_empty());
