@@ -94,7 +94,9 @@ pub(crate) fn prepare_thread_handler_common(
 
                     progress_data.validate();
 
-                    progress_sender.send(progress_data).expect("Cannot send progress data");
+                    if progress_sender.send(progress_data).is_err() {
+                        break; // Receiver dropped (e.g., GUI closed)
+                    }
                     time_since_last_send = Instant::now();
                 }
                 if !progress_thread_running.load(atomic::Ordering::Relaxed) {

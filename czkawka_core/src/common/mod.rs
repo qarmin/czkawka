@@ -26,7 +26,7 @@ use std::time::Duration;
 use std::{fs, io, thread};
 
 use items::SingleExcludedItem;
-use log::debug;
+use log::{debug, error};
 
 use crate::common::consts::DEFAULT_WORKER_THREAD_SIZE;
 use crate::flc;
@@ -95,11 +95,13 @@ pub fn set_number_of_threads(thread_number: usize) {
     };
     debug!("Number of threads set to {thread_number}{additional_message}");
 
-    rayon::ThreadPoolBuilder::new()
+    if let Err(e) = rayon::ThreadPoolBuilder::new()
         .num_threads(get_number_of_threads())
         .stack_size(DEFAULT_WORKER_THREAD_SIZE)
         .build_global()
-        .expect("Cannot set number of threads");
+    {
+        error!("Failed to configure global thread pool: {e}");
+    }
 }
 
 pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> Result<(), String> {

@@ -6,6 +6,7 @@ use std::sync::atomic::AtomicBool;
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
+use log::error;
 use serde::Serialize;
 
 use crate::common::model::WorkContinueStatus;
@@ -54,9 +55,17 @@ pub trait PrintResults: CommonData {
     fn print_results_to_output(&self) {
         let stdout = std::io::stdout();
         let mut handle = stdout.lock();
-        // Panics here are allowed, because it is used only in CLI
-        self.write_results(&mut handle).expect("Error while writing to stdout");
-        handle.flush().expect("Error while flushing stdout");
+        if let Err(e) = self.write_results(&mut handle) {
+            if e.kind() != std::io::ErrorKind::BrokenPipe {
+                error!("Error writing results to stdout: {e}");
+            }
+            return;
+        }
+        if let Err(e) = handle.flush() {
+            if e.kind() != std::io::ErrorKind::BrokenPipe {
+                error!("Error flushing stdout: {e}");
+            }
+        }
     }
 
     #[fun_time(message = "print_results_to_file", level = "debug")]

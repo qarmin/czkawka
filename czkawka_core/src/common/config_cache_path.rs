@@ -17,7 +17,9 @@ pub struct ConfigCachePath {
 }
 
 pub fn get_config_cache_path() -> Option<ConfigCachePath> {
-    CONFIG_CACHE_PATH.get().expect("Cannot fail if set_config_cache_path was called before").clone()
+    CONFIG_CACHE_PATH
+        .get()
+        .and_then(|opt| opt.clone())
 }
 
 /// On Android `ProjectDirs` always returns `None` because there is no concept of a home
@@ -157,7 +159,9 @@ pub fn set_config_cache_path(cache_name: &'static str, config_name: &'static str
         None
     };
 
-    CONFIG_CACHE_PATH.set(config_cache_path).expect("Cannot set config/cache path twice");
+    if CONFIG_CACHE_PATH.set(config_cache_path).is_err() {
+        warn!("Config/cache path was already initialized; ignoring duplicate call");
+    }
 
     ConfigCachePathSetResult {
         infos,
