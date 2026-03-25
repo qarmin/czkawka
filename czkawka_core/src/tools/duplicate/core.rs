@@ -117,6 +117,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "check_files_fuzzy_name", level = "debug")]
+    #[allow(clippy::indexing_slicing)] // Union-find indices are always in-bounds (0..n over Vecs of size n)
     pub(crate) fn check_files_fuzzy_name(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         // Collect all files grouped by extension for performance (files with different extensions rarely match)
         let group_by_func = |fe: &FileEntry| fe.path.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
