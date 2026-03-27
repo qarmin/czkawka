@@ -1,16 +1,16 @@
 # In Rust translations
 rust_init_error_title = 應用程式啟動期間發生嚴重錯誤
-rust_init_error_message = 
-        當啟動應用程式時發生了嚴重錯誤：
- 
-        { $error_message }
- 
-        這可能是因為缺少或損壞的 OpenGL/Vulkan 驅動程式、在虛擬機器中或在 Krokiet 或其其中一個函式庫中執行所致，或 Krokiet 或其函式庫中的錯誤。
- 
-        您可以嘗試執行不同的建置（skia_opengl、skia_vulkan、femtovg_opengl - 預設）或使用軟體渲染器，看看是否能解決問題。.
+rust_init_error_message =
+    當啟動應用程式時發生了嚴重錯誤：
+    
+    { $error_message }
+    
+    這可能是因為缺少或損壞的 OpenGL/Vulkan 驅動程式、在虛擬機器中或在 Krokiet 或其其中一個函式庫中執行所致，或 Krokiet 或其函式庫中的錯誤。
+    
+    您可以嘗試執行不同的建置（skia_opengl、skia_vulkan、femtovg_opengl - 預設）或使用軟體渲染器，看看是否能解決問題。.
 rust_loaded_preset = 已載入預設設定 { $preset_idx }
 rust_file_already_exists = 檔案 "{ $file }" 已存在，不會被覆蓋。
-rust_error_removing_file_after_copy = 移除檔案 "{ $file }" 發生錯誤 (將其複製到不同分割區後)，原因：{ $reason}
+rust_error_removing_file_after_copy = 移除檔案 "{ $file }" 發生錯誤 (將其複製到不同分割區後)，原因：{ $reason }
 rust_error_copying_file = 複製 "{ $input }" 到 "{ $output }" 發生錯誤，原因：{ $reason }
 rust_loading_tags_cache = 正在載入標籤快取
 rust_loading_fingerprints_cache = 正在載入指紋快取
@@ -366,3 +366,49 @@ hardlink_confirmation_text = 您確定要為所選項目建立硬連結嗎？
 softlink_button_text = 軟連結
 softlink_text = 建立軟連結
 softlink_confirmation_text = 您確定要為所選項目建立軟連結 (symlinks) 嗎？
+
+column_full_path = 完整路徑
+file_dialog_open = 點擊「關閉」按鈕，即可繼續。
+selection_custom_select_unselect = 自訂選擇/取消選擇
+settings_similar_videos_preview_hint = 預覽圖僅在啟用「產生縮圖」選項，或已產生縮圖的情況下才會顯示。.
+settings_show_notification_on_scan_completion_text = 當掃描完成時，顯示通知。
+settings_notification_feature_hint_text = 僅在編譯時啟用通知功能時才可用。
+settings_notification_focused_hint_text = 請注意：當應用程式視窗處於焦點狀態時，通知可能不會以彈出視窗的形式顯示。
+popup_custom_select_title_text = 自訂選擇/取消選擇
+popup_custom_select_button_text = 選擇
+popup_custom_unselect_button_text = 取消選取
+popup_custom_column_name_header_text = 欄位
+popup_custom_filter_value_header_text = 篩選值 (萬用字元 / 正則表達式)
+popup_custom_case_sensitive_text = 區分大小寫。
+popup_custom_leave_one_in_group_text = 請在每個群組中，選取所有項目，除了其中一個。
+popup_custom_hint_str_text = 文本列：通配符 *name* /home/* *.rs
+popup_custom_hint_int_text = 大小 [KB] / 数值列：>= 2048  < 512  = 0  (运算符：>=  <=  >  <  =)
+popup_custom_hint_date_text = 日期欄位：格式為 DD-MM-YYYY 或 YYYY-MM-DD，可選時間為 HH:MM:SS。例如：>= 2020-01-01 或 < 31-12-2022 23:59:59。
+compare_button_text = 比較。
+compare_back_text = 返回
+compare_prev_group_text = 上一組
+compare_next_group_text = 下一組
+compare_swap_text = 交換。
+compare_info_text = 資訊
+compare_diff_text = 差異。
+compare_loading_title_text = 請稍候...
+compare_cancel_text = 取消
+compare_resolution_mismatch_text = 不同解析度 - 不同的結果可能不準確。
+compare_computing_diff_text = 正在計算差異...
+compare_info_file_name_text = 檔案名稱
+compare_info_path_text = 路徑。
+compare_info_size_text = 尺寸
+compare_info_resolution_text = 決議
+compare_info_modification_date_text = 修改日期
+compare_loading_images_text = 正在載入圖片...
+compare_cancelling_text = 取消中，請稍候...
+context_menu_open_item_text = 開啟項目。
+context_menu_open_parent_text = 展開上層資料夾。
+context_menu_remove_from_results_text = 從搜尋結果中移除。
+context_menu_remove_all_from_folder_text = 移除資料夾內所有項目。
+context_menu_select_all_from_folder_text = 從資料夾中選取所有項目。
+context_menu_select_all_from_folder_except_one_text = 從資料夾中選取全部項目（保留一個）。
+context_menu_exclude_parent_folder_text = 排除父資料夾
+context_menu_exclude_item_text = 排除項目
+context_menu_copy_name_text = 複製名稱
+context_menu_copy_parent_folder_path_text = 複製父目錄路徑。

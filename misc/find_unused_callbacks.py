@@ -40,18 +40,18 @@ def format_green(text: str) -> str:
 
 
 if len(sys.argv) < 2:
-    print("Usage: python find_unused_callbacks.py <folder>")
+    print("Usage: python find_unused_callbacks.py <folder> [callabler_file]")
     sys.exit(1)
 
 folder = sys.argv[1]
-callabler_path = f"{folder}/ui/callabler.slint"
+callabler_path = sys.argv[2] if len(sys.argv) >= 3 else f"{folder}/ui/callabler.slint"
 
 if not os.path.exists(callabler_path):
     print(f"Error: {callabler_path} not found")
     sys.exit(1)
 
 callbacks = extract_callbacks(callabler_path)
-print(f"Found {len(callbacks)} callbacks in callabler.slint")
+print(f"Found {len(callbacks)} callbacks in {os.path.basename(callabler_path)}")
 
 rust_files = find_files(f"{folder}/src", ".rs", None)
 rust_content = read_files(rust_files)

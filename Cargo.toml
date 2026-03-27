@@ -15,6 +15,8 @@ exclude = [
 ]
 resolver = "3"
 
+# Temporary solution for spamming mouse events in Slint
+# Even with workaround, performance is quite low in specific cases in Cedinia
 [patch.crates-io]
 slint = { git = "https://github.com/slint-ui/slint.git", rev = "c24077780bc15e7c334bae1efa0be0bb5943951c" }
 slint-build = { git = "https://github.com/slint-ui/slint.git", rev = "c24077780bc15e7c334bae1efa0be0bb5943951c" }

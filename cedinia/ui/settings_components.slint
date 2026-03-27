@@ -186,76 +186,96 @@ export component DropdownRow {
     in-out property <int>  selected;
     callback changed_selection(int);
 
-    height: description == "" ? 56px : 72px;
+    // Inline accordion – no PopupWindow, so the parent Flickable handles
+    // all scrolling through the options without "close on outside touch" issues.
+    property <bool> expanded: false;
 
-    Rectangle {
-        background: row_ta.has-hover ? CediniaColors.bg_elevated : CediniaColors.bg_surface;
-        animate background { duration: 100ms; }
-
-        row_ta := TouchArea {
-            clicked => { dropdown.show(); }
-        }
-
-        HorizontalLayout {
-            padding-left: 16px;
-            padding-right: 16px;
-            spacing: 12px;
-            alignment: LayoutAlignment.center;
-
-            Text {
-                text: root.options[root.selected];
-                color: CediniaColors.accent_light;
-                font-size: 13px;
-                font-weight: 700;
-                vertical-alignment: TextVerticalAlignment.center;
-                overflow: TextOverflow.elide;
-                max-width: 180px;
-            }
-        }
-    }
-
-    dropdown := PopupWindow {
-        x: 16px;
-        y: root.height;
-        width: root.width - 32px;
+    VerticalLayout {
+        spacing: 0px;
 
         Rectangle {
-            background: CediniaColors.bg_elevated;
-            border-radius: 8px;
-            border-width: 1px;
-            border-color: CediniaColors.divider;
-            drop-shadow-blur: 16px;
-            drop-shadow-color: #000000aa;
-            clip: true;
+            height: root.description == "" ? 56px : 72px;
+            background: row_ta.has-hover ? CediniaColors.bg_elevated : CediniaColors.bg_surface;
+            animate background { duration: 100ms; }
 
-            VerticalLayout {
-                for opt[i] in root.options : Rectangle {
-                    height: 48px;
-                    background: item_ta.has-hover ? CediniaColors.accent_muted : (i == root.selected ? CediniaColors.accent_muted.with-alpha(0.5) : transparent);
-                    animate background { duration: 80ms; }
+            row_ta := TouchArea {
+                clicked => { root.expanded = !root.expanded; }
+            }
 
-                    item_ta := TouchArea {
-                        clicked => {
+            HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                spacing: 12px;
+                alignment: LayoutAlignment.center;
+
+                Text {
+                    text: root.options[root.selected];
+                    color: CediniaColors.accent_light;
+                    font-size: 13px;
+                    font-weight: 700;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    overflow: TextOverflow.elide;
+                    horizontal-stretch: 1.0;
+                }
+
+                Text {
+                    text: root.expanded ? "▲" : "▼";
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                    vertical-alignment: TextVerticalAlignment.center;
+                }
+            }
+        }
+
+        if root.expanded : VerticalLayout {
+            spacing: 0px;
+
+            for opt[i] in root.options : Rectangle {
+                height: 48px;
+                // Per-item drag tracking: prevents toggling selection on scroll release.
+                property <bool>   _opt_moved:   false;
+                property <length> _opt_start_y: 0px;
+
+                background: item_ta.has-hover
+                    ? CediniaColors.accent_muted
+                    : (i == root.selected ? CediniaColors.accent_muted.with-alpha(0.5) : transparent);
+                animate background { duration: 80ms; }
+
+                item_ta := TouchArea {
+                    pointer-event(e) => {
+                        if (e.kind == PointerEventKind.down) {
+                            parent._opt_start_y = item_ta.mouse-y;
+                            parent._opt_moved = false;
+                        } else if (e.kind == PointerEventKind.move) {
+                            if (item_ta.mouse-y - parent._opt_start_y > 8px
+                                    || parent._opt_start_y - item_ta.mouse-y > 8px) {
+                                parent._opt_moved = true;
+                            }
+                        }
+                    }
+                    clicked => {
+                        if (!parent._opt_moved) {
                             root.selected = i;
                             root.changed_selection(i);
                             AppState.save_settings_now();
-                            dropdown.close();
+                            root.expanded = false;
                         }
+                        parent._opt_moved = false;
                     }
+                }
 
-                    HorizontalLayout {
-                        padding-left: 20px;
-                        padding-right: 16px;
-                        spacing: 8px;
+                HorizontalLayout {
+                    padding-left: 20px;
+                    padding-right: 16px;
+                    spacing: 8px;
 
-                        Text {
-                            text: opt;
-                            color: i == root.selected ? CediniaColors.accent_light : CediniaColors.text_primary;
-                            font-size: 15px;
-                            font-weight: i == root.selected ? 700 : 400;
-                            vertical-alignment: TextVerticalAlignment.center;
-                            horizontal-stretch: 1;
-                        }
+                    Text {
+                        text: opt;
+                        color: i == root.selected ? CediniaColors.accent_light : CediniaColors.text_primary;
+                        font-size: 15px;
+                        font-weight: i == root.selected ? 700 : 400;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        horizontal-stretch: 1;
                     }
                 }
             }

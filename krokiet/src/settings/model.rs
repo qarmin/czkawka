@@ -7,7 +7,7 @@ use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_videos::{DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL};
-use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
+use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use home::home_dir;
 use image::imageops::FilterType;
 use serde::{Deserialize, Serialize};
@@ -197,6 +197,14 @@ pub struct SettingsCustom {
     pub video_optimizer_max_height: u32,
     #[serde(default = "default_video_optimizer_image_threshold")]
     pub video_optimizer_image_threshold: u8,
+    #[serde(default = "default_video_optimizer_noise_reduction")]
+    pub video_optimizer_noise_reduction: String,
+    #[serde(default = "default_video_optimizer_noise_reduction_strength")]
+    pub video_optimizer_noise_reduction_strength: u32,
+    #[serde(default)]
+    pub video_optimizer_use_custom_command: bool,
+    #[serde(default)]
+    pub video_optimizer_custom_command: String,
     #[serde(default = "default_ignored_exif_tags")]
     pub ignored_exif_tags: String,
     #[serde(default)]
@@ -247,6 +255,7 @@ pub struct ComboBoxItems {
     pub video_optimizer_crop_type: StringComboBoxItem<VideoCroppingMechanism>,
     pub video_optimizer_mode: StringComboBoxItem<VideoOptimizerMode>,
     pub video_optimizer_video_codec: StringComboBoxItem<VideoCodec>,
+    pub video_optimizer_noise_reduction: StringComboBoxItem<NoiseReductionMethod>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -437,6 +446,12 @@ pub(crate) fn default_video_optimizer_max_height() -> u32 {
 }
 pub(crate) fn default_video_optimizer_image_threshold() -> u8 {
     1
+}
+pub(crate) fn default_video_optimizer_noise_reduction() -> String {
+    "none".to_string()
+}
+pub(crate) fn default_video_optimizer_noise_reduction_strength() -> u32 {
+    5
 }
 pub(crate) fn default_manual_application_scale() -> f32 {
     1.0

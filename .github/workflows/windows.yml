@@ -142,11 +142,17 @@ jobs:
           token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_12:
+    needs: krokiet-compiled-on-windows
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.12
     steps:
       - uses: actions/checkout@v6
+
+      - name: Download Krokiet (skia opengl) artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: krokiet-windows-on-windows-${{ github.sha }}
       - name: Install additional dependencies
         # gio is for the build script
         run: |
@@ -210,6 +216,23 @@ jobs:
           unzip libGL.zip
           mv libEGL.dll package/
           mv libGLESv2.dll package/
+
+          cp windows_krokiet_on_windows_skia_opengl.exe package/krokiet.exe
+
+          cat > package/README.md << 'EOF'
+# Czkawka
+
+This package contains the legacy GTK 4 GUI (czkawka_gui.exe) and the CLI (czkawka_cli.exe).
+
+## Recommended: Use Krokiet instead!
+
+**krokiet.exe** (also included in this package) is the modern, actively developed GUI for Czkawka.
+It is faster, more feature-rich, and better maintained than the legacy GTK GUI.
+
+Please use **krokiet.exe** for the best experience.
+
+More info: https://github.com/qarmin/czkawka
+EOF
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6

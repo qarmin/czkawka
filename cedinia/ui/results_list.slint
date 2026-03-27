@@ -1,5 +1,5 @@
 import { CediniaColors } from "colors.slint";
-import { FileEntry, FileEntryIdx, ScanState } from "common.slint";
+import { ConfirmPopupAction, FileEntry, FileEntryIdx, ScanState } from "common.slint";
 import { AppState } from "app_state.slint";
 import { Translations } from "translations.slint";
 import { FileRow, StatusChip, TouchButton } from "components.slint";
@@ -544,11 +544,11 @@ export component ResultsList {
                     }
 
                     TouchButton {
-                        label: (AppState.confirm_popup_action == "rename" || AppState.confirm_popup_action == "rename_bad_names") ? Translations.rename_text : Translations.delete_text;
+                        label: (AppState.confirm_popup_action == ConfirmPopupAction.Rename || AppState.confirm_popup_action == ConfirmPopupAction.RenameBadNames) ? Translations.rename_text : Translations.delete_text;
                         horizontal-stretch: 1.0;
                         min_h: 44px;
-                        bg: (AppState.confirm_popup_action == "rename" || AppState.confirm_popup_action == "rename_bad_names") ? CediniaColors.accent_muted : CediniaColors.danger;
-                        fg: (AppState.confirm_popup_action == "rename" || AppState.confirm_popup_action == "rename_bad_names") ? CediniaColors.accent_light : #ffffff;
+                        bg: (AppState.confirm_popup_action == ConfirmPopupAction.Rename || AppState.confirm_popup_action == ConfirmPopupAction.RenameBadNames) ? CediniaColors.accent_muted : CediniaColors.danger;
+                        fg: (AppState.confirm_popup_action == ConfirmPopupAction.Rename || AppState.confirm_popup_action == ConfirmPopupAction.RenameBadNames) ? CediniaColors.accent_light : #ffffff;
                         clicked => { AppState.confirm_popup_ok(); }
                     }
                 }

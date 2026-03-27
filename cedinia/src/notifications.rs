@@ -304,6 +304,20 @@ fn send_notification(title: &str, body: &str) {
             let sig_bool = RuntimeMethodSignature::from_str("(Z)Landroid/app/Notification$Builder;").unwrap();
             env.call_method(&builder, jni_str!("setAutoCancel"), &sig_bool.method_signature(), &[JValue::Bool(true)])?;
 
+            // Attach a PendingIntent so tapping the notification brings the app to the foreground.
+            let pm: JObject = env.call_method(&activity, jni_str!("getPackageManager"), jni_sig!(() -> android.content.pm.PackageManager), &[])?.l()?;
+            let pkg2: JObject = env.call_method(&activity, jni_str!("getPackageName"), jni_sig!(() -> java.lang.String), &[])?.l()?;
+            let launch_intent: JObject = env.call_method(&pm, jni_str!("getLaunchIntentForPackage"), jni_sig!((packageName: java.lang.String) -> android.content.Intent), &[JValue::Object(&pkg2)])?.l()?;
+            if !launch_intent.is_null() {
+                // FLAG_IMMUTABLE (0x04000000) is required on Android 12+ (API 31+).
+                let sig_pending = RuntimeMethodSignature::from_str("(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;").unwrap();
+                let pending_intent: JObject = env.call_static_method(jni_str!("android/app/PendingIntent"), jni_str!("getActivity"), &sig_pending.method_signature(), &[JValue::Object(&activity), JValue::Int(0), JValue::Object(&launch_intent), JValue::Int(0x0400_0000)])?.l()?;
+                if !pending_intent.is_null() {
+                    let sig_set_intent = RuntimeMethodSignature::from_str("(Landroid/app/PendingIntent;)Landroid/app/Notification$Builder;").unwrap();
+                    env.call_method(&builder, jni_str!("setContentIntent"), &sig_set_intent.method_signature(), &[JValue::Object(&pending_intent)])?;
+                }
+            }
+
             let sig_build = RuntimeMethodSignature::from_str("()Landroid/app/Notification;").unwrap();
             let notification: JObject = env.call_method(&builder, jni_str!("build"), &sig_build.method_signature(), &[])?.l()?;
 

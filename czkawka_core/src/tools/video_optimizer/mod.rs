@@ -56,6 +56,44 @@ impl std::str::FromStr for VideoCodec {
     }
 }
 
+#[derive(Clone, Debug, Default, PartialEq)]
+pub enum NoiseReductionMethod {
+    #[default]
+    None,
+    Hqdn3d,
+}
+
+impl NoiseReductionMethod {
+    pub const fn as_str(&self) -> &str {
+        match self {
+            Self::None => "none",
+            Self::Hqdn3d => "hqdn3d",
+        }
+    }
+
+    /// Returns an FFmpeg -vf filter string, or None if method is None.
+    /// strength: 1-10
+    pub fn to_ffmpeg_filter(&self, strength: u32) -> Option<String> {
+        let s = strength.clamp(1, 10) as f32;
+        match self {
+            Self::None => None,
+            Self::Hqdn3d => Some(format!("hqdn3d={:.1}:{:.1}:{:.1}:{:.1}", s * 0.8, s * 0.6, s * 1.2, s * 0.9)),
+        }
+    }
+}
+
+impl std::str::FromStr for NoiseReductionMethod {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "none" => Ok(Self::None),
+            "hqdn3d" => Ok(Self::Hqdn3d),
+            _ => Err(format!("Unknown noise reduction method: {s}")),
+        }
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VideoCroppingMechanism {
     BlackBars,
@@ -79,13 +117,13 @@ impl std::str::FromStr for VideoOptimizerMode {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum VideoOptimizerFixParams {
     VideoTranscode(VideoTranscodeFixParams),
     VideoCrop(VideoCropFixParams),
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct VideoTranscodeFixParams {
     pub codec: VideoCodec,
     pub quality: u32,
@@ -94,6 +132,9 @@ pub struct VideoTranscodeFixParams {
     pub limit_video_size: bool,
     pub max_width: u32,
     pub max_height: u32,
+    pub noise_reduction: NoiseReductionMethod,
+    pub noise_reduction_strength: u32,
+    pub custom_ffmpeg_command: Option<String>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]

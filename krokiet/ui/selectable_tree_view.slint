@@ -353,14 +353,19 @@ export component SelectableTableView inherits Rectangle {
                 Callabler.row_remove_all_from_folder(context_menu_row_idx);
             }
         }
+        remove_all_from_folder_recursive() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_remove_all_from_folder_recursive(context_menu_row_idx);
+            }
+        }
         select_all_from_folder() => {
             if (context_menu_row_idx != -1) {
                 Callabler.row_select_all_from_folder(context_menu_row_idx);
             }
         }
-        select_all_from_folder_except_one() => {
+        select_all_from_folder_recursive() => {
             if (context_menu_row_idx != -1) {
-                Callabler.row_select_all_from_folder_except_one(context_menu_row_idx);
+                Callabler.row_select_all_from_folder_recursive(context_menu_row_idx);
             }
         }
         exclude_parent_folder() => {
@@ -373,14 +378,19 @@ export component SelectableTableView inherits Rectangle {
                 Callabler.row_exclude_item(context_menu_row_idx);
             }
         }
-        copy_name() => {
+        copy_file_name() => {
             if (context_menu_row_idx != -1) {
-                Callabler.row_copy_name(context_menu_row_idx);
+                Callabler.row_copy_file_name(context_menu_row_idx);
             }
         }
         copy_parent_folder_path() => {
             if (context_menu_row_idx != -1) {
                 Callabler.row_copy_parent_folder_path(context_menu_row_idx);
+            }
+        }
+        copy_full_path() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_copy_full_path(context_menu_row_idx);
             }
         }
     }

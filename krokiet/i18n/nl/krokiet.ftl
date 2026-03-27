@@ -1,11 +1,11 @@
 # In Rust translations
-rust_init_error_title = Critische fout tijdens app opstarten
-rust_init_error_message = 
-        Een kritische fout is opgetreden bij het starten van de applicatie:
-
-        { $error_message }
-
-        Dit kan worden veroorzaakt door ontbrekende of defecte OpenGL/Vulkan drivers, het uitvoeren van de applicatie in een virtuele machine of een bug in Krokiet of een van zijn libraries.
+rust_init_error_title = Kritische fout tijdens app opstarten
+rust_init_error_message =
+    Een kritische fout is opgetreden bij het starten van de applicatie:
+    
+    { $error_message }
+    
+    Dit kan worden veroorzaakt door ontbrekende of defecte OpenGL/Vulkan drivers, het uitvoeren van de applicatie in een virtuele machine of een bug in Krokiet of een van zijn libraries.
 rust_loaded_preset = Voorinstelling geladen { $preset_idx }
 rust_file_already_exists = Bestand "{ $file }" bestaat al en zal niet worden overschreven
 rust_error_removing_file_after_copy = Fout bij het verwijderen van bestand "{ $file }" (na kopiëren naar een andere partitie), reden: { $reason }
@@ -52,7 +52,7 @@ rust_found_temporary_files = Gevonden { $items_found } tijdelijke bestanden in {
 rust_no_file_type_selected = Kan defecte bestanden niet vinden zonder geselecteerde bestandstype.
 rust_found_broken_files = Gevonden { $items_found } defecte bestanden in { $size } in { $time }
 rust_found_bad_extensions = { $items_found } bestanden met ongeldige extensies gevonden in { $time }
-rust_found_bad_names = Vond { $items_found } bestanden met slechte namen in { $time}
+rust_found_bad_names = Vond { $items_found } bestanden met slechte namen in { $time }
 rust_found_video_optimizer = Vond { $items_found } bestanden om te optimaliseren in { $time }
 rust_found_duplicate_files = Gevonden { $items_found } dubbele bestanden in { $groups } groepen die { $size } in { $time } nemen
 rust_found_duplicate_files_no_lost_space = Gevonden { $items_found } dubbele bestanden in { $groups } groepen in { $time }
@@ -112,7 +112,7 @@ rust_cache_processed_files = Verwerkt { $files } cache bestanden
 rust_cache_entries_stats = Verwijderd { $removed } entries uit alle { $all }, { $left } overgebleven
 rust_cache_size_reduced = Verkleinde cachebestandsgrootte met { $size }
 rust_cache_time_elapsed = Tijd verstreken: { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = symlink { $name } naar { $target }mislukt, reden { $reason }
 rust_hardlink_failed = Faalde bij het hardlinken van { $name } naar { $target }, reden { $reason }
 
 # Slint translations, but in arrays
@@ -149,7 +149,7 @@ do_you_want_to_continue = Wilt u doorgaan?
 main_window_title = Krokiet - Opschoner gegevens
 scan_button = Scannen
 stop_button = Stoppen
-stop_text = Stop
+stop_text = Stoppen
 select_button = Selecteren
 move_button = Verplaatsen
 delete_button = Verwijderen
@@ -364,3 +364,49 @@ hardlink_confirmation_text = Ben je er zeker van dat je hardlinks wilt aanmaken 
 softlink_button_text = Softlink
 softlink_text = Maak softlinks
 softlink_confirmation_text = Ben je zeker dat je softlinks (symlinks) wilt maken voor de geselecteerde items?
+
+column_full_path = Volledig pad
+file_dialog_open = Sluit het dialoogvenster om verder te gaan
+selection_custom_select_unselect = Aangepaste selectie/deselectie
+settings_similar_videos_preview_hint = De preview is alleen zichtbaar wanneer "Genereren van thumbnails" is ingeschakeld, of wanneer een thumbnail al is gegenereerd.
+settings_show_notification_on_scan_completion_text = Toon een melding wanneer de scan is voltooid
+settings_notification_feature_hint_text = Alleen beschikbaar wanneer gecompileerd met de notificatiefunctie
+settings_notification_focused_hint_text = De melding verschijnt mogelijk niet als een pop-up wanneer het app-venster actief is
+popup_custom_select_title_text = Aangepaste selectie / deselectie
+popup_custom_select_button_text = Selecteren
+popup_custom_unselect_button_text = Deselcteren
+popup_custom_column_name_header_text = Kolom
+popup_custom_filter_value_header_text = Filterwaarde (wildcard / reguliere expressie)
+popup_custom_case_sensitive_text = Hoofdlettergevoelig
+popup_custom_leave_one_in_group_text = Selecteer alle items, behalve één, in elke groep
+popup_custom_hint_str_text = Tekstkolommen: wildcards *name* /home/* *.rs
+popup_custom_hint_int_text = Grootte [KB] / numerieke kolommen: >= 2048  < 512  = 0  (operatoren: >=  <=  >  <  =)
+popup_custom_hint_date_text = Datumkolommen: DD-MM-YYYY of YYYY-MM-DD, optioneel tijdstip HH:MM:SS. Bijvoorbeeld: >= 2020-01-01 of < 31-12-2022 23:59:59
+compare_button_text = Vergelijk
+compare_back_text = Terug
+compare_prev_group_text = Vorige groep
+compare_next_group_text = Volgende groep
+compare_swap_text = Ruil
+compare_info_text = Info
+compare_diff_text = Verschil
+compare_loading_title_text = Wacht alstublieft...
+compare_cancel_text = Annuleren
+compare_resolution_mismatch_text = Verschillende resoluties - verschillende resultaten kunnen onnauwkeurig zijn
+compare_computing_diff_text = Het verschil wordt berekend...
+compare_info_file_name_text = Bestandsnaam
+compare_info_path_text = Pad
+compare_info_size_text = Maat
+compare_info_resolution_text = Resolutie
+compare_info_modification_date_text = Datum van wijziging
+compare_loading_images_text = Afbeeldingen worden geladen...
+compare_cancelling_text = Annuleren, even geduld...
+context_menu_open_item_text = Open item
+context_menu_open_parent_text = Open bovenliggende map
+context_menu_remove_from_results_text = Verwijder uit resultaten
+context_menu_remove_all_from_folder_text = Verwijder alles uit map
+context_menu_select_all_from_folder_text = Selecteer alles in map
+context_menu_select_all_from_folder_except_one_text = Selecteer alles in map (houd er één)
+context_menu_exclude_parent_folder_text = Exclusief bovenliggende map
+context_menu_exclude_item_text = Item uitsluiten
+context_menu_copy_name_text = Kopieer Naam
+context_menu_copy_parent_folder_path_text = Kopieer het pad van de bovenliggende map

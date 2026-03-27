@@ -1006,9 +1006,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.57"
+version = "1.2.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a0dd1ca384932ff3641c8718a02769f1698e7563dc6974ffd03346116310423"
+checksum = "e1e928d4b69e3077709075a938a05ffbedfa53a84c8f766efbf8220bb1ff60e1"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -2465,6 +2465,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "font-types"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73829a7b5c91198af28a99159b7ae4afbb252fb906159ff7f189f3a2ceaa3df2"
+dependencies = [
+ "bytemuck",
+]
+
+[[package]]
 name = "fontdb"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2491,11 +2500,26 @@ dependencies = [
  "objc2-core-foundation",
  "objc2-core-text",
  "objc2-foundation 0.3.2",
- "read-fonts",
+ "read-fonts 0.35.0",
  "roxmltree",
  "smallvec",
  "windows 0.58.0",
  "windows-core 0.58.0",
+ "yeslogic-fontconfig-sys",
+]
+
+[[package]]
+name = "fontique"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23358480a54a886d51b306718d5ca743fdfe238e5df38ef650f4e72f29c5d9e9"
+dependencies = [
+ "hashbrown 0.16.1",
+ "linebender_resource_handle",
+ "memmap2",
+ "parlance",
+ "read-fonts 0.37.0",
+ "smallvec",
  "yeslogic-fontconfig-sys",
 ]
 
@@ -3224,7 +3248,7 @@ dependencies = [
  "bitflags 2.11.0",
  "bytemuck",
  "core_maths",
- "read-fonts",
+ "read-fonts 0.35.0",
  "smallvec",
 ]
 
@@ -3434,7 +3458,7 @@ name = "i-slint-common"
 version = "1.16.0"
 source = "git+https://github.com/slint-ui/slint.git?rev=c24077780bc15e7c334bae1efa0be0bb5943951c#c24077780bc15e7c334bae1efa0be0bb5943951c"
 dependencies = [
- "fontique",
+ "fontique 0.7.0",
  "htmlparser",
  "pulldown-cmark",
  "thiserror 2.0.18",
@@ -3462,7 +3486,7 @@ dependencies = [
  "resvg 0.46.0",
  "rowan",
  "rspolib",
- "skrifa",
+ "skrifa 0.37.0",
  "smol_str 0.3.6",
  "strum",
  "swash",
@@ -3501,7 +3525,7 @@ dependencies = [
  "rgb",
  "scoped-tls-hkt",
  "scopeguard",
- "skrifa",
+ "skrifa 0.37.0",
  "slab",
  "strum",
  "swash",
@@ -3578,7 +3602,7 @@ dependencies = [
  "pin-weak",
  "raw-window-handle",
  "raw-window-metal",
- "read-fonts",
+ "read-fonts 0.35.0",
  "scoped-tls-hkt",
  "skia-safe",
  "softbuffer",
@@ -3606,7 +3630,7 @@ dependencies = [
  "integer-sqrt",
  "lyon_path",
  "num-traits",
- "skrifa",
+ "skrifa 0.37.0",
  "swash",
  "zeno",
 ]
@@ -4440,7 +4464,7 @@ dependencies = [
  "copypasta",
  "crossbeam-channel",
  "czkawka_core",
- "fontique",
+ "fontique 0.8.0",
  "fs_extra",
  "home",
  "humansize",
@@ -4994,9 +5018,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "1.1.1"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a69bcab0ad47271a0234d9422b131806bf3968021e5dc9328caf2d4cd58557fc"
+checksum = "50b7e5b27aa02a74bac8c3f23f448f8d87ff11f92d3aac1a6ed369ee08cc56c1"
 dependencies = [
  "libc",
  "wasi",
@@ -6030,16 +6054,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "parlance"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b6937eda350acc1a5d05872c3cbf99fe78619c269096e2be3d4a350058639d5"
+
+[[package]]
 name = "parley"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ada5338c3a9794af7342e6f765b6e78740db37378aced034d7bf72c96b94ed94"
 dependencies = [
- "fontique",
+ "fontique 0.7.0",
  "harfrust",
  "hashbrown 0.16.1",
  "linebender_resource_handle",
- "skrifa",
+ "skrifa 0.37.0",
  "swash",
 ]
 
@@ -6635,7 +6665,17 @@ checksum = "6717cf23b488adf64b9d711329542ba34de147df262370221940dfabc2c91358"
 dependencies = [
  "bytemuck",
  "core_maths",
- "font-types",
+ "font-types 0.10.1",
+]
+
+[[package]]
+name = "read-fonts"
+version = "0.37.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b634fabf032fab15307ffd272149b622260f55974d9fad689292a5d33df02e5"
+dependencies = [
+ "bytemuck",
+ "font-types 0.11.1",
 ]
 
 [[package]]
@@ -7190,9 +7230,9 @@ dependencies = [
 
 [[package]]
 name = "simd-adler32"
-version = "0.3.8"
+version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e320a6c5ad31d271ad523dcf3ad13e2767ad8b1cb8f047f75a8aeaf8da139da2"
+checksum = "703d5c7ef118737c72f1af64ad2f6f8c5e1921f818cdcb97b8fe6fc69bf66214"
 
 [[package]]
 name = "simd_cesu8"
@@ -7269,7 +7309,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c31071dedf532758ecf3fed987cdb4bd9509f900e026ab684b4ecb81ea49841"
 dependencies = [
  "bytemuck",
- "read-fonts",
+ "read-fonts 0.35.0",
+]
+
+[[package]]
+name = "skrifa"
+version = "0.40.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7fbdfe3d2475fbd7ddd1f3e5cf8288a30eb3e5f95832829570cd88115a7434ac"
+dependencies = [
+ "bytemuck",
+ "read-fonts 0.37.0",
 ]
 
 [[package]]
@@ -7311,7 +7361,7 @@ version = "1.16.0"
 source = "git+https://github.com/slint-ui/slint.git?rev=c24077780bc15e7c334bae1efa0be0bb5943951c#c24077780bc15e7c334bae1efa0be0bb5943951c"
 dependencies = [
  "derive_more",
- "fontique",
+ "fontique 0.7.0",
  "i-slint-compiler",
  "spin_on",
  "toml_edit 0.24.1+spec-1.1.0",
@@ -7595,11 +7645,11 @@ dependencies = [
 
 [[package]]
 name = "swash"
-version = "0.2.6"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47846491253e976bdd07d0f9cc24b7daf24720d11309302ccbbc6e6b6e53550a"
+checksum = "842f3cd369c2ba38966204f983eaa5e54a8e84a7d7159ed36ade2b6c335aae64"
 dependencies = [
- "skrifa",
+ "skrifa 0.40.0",
  "yazi",
  "zeno",
 ]
@@ -8488,9 +8538,9 @@ checksum = "383ad40bb927465ec0ce7720e033cb4ca06912855fc35db31b5755d0de75b1ee"
 
 [[package]]
 name = "unicode-segmentation"
-version = "1.13.1"
+version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da36089a805484bcccfffe0739803392c8298778a2d2f09febf76fac5ad9025b"
+checksum = "9629274872b2bfaf8d66f5f15725007f635594914870f65218920345aa11aa8c"
 
 [[package]]
 name = "unicode-vo"
@@ -8603,9 +8653,9 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "uuid"
-version = "1.22.0"
+version = "1.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a68d3c8f01c0cfa54a75291d83601161799e4a89a39e0929f4b0354d88757a37"
+checksum = "5ac8b6f42ead25368cf5b098aeb3dc8a1a2c05a3eee8a9a1a68c640edbfc79d9"
 dependencies = [
  "getrandom 0.4.2",
  "js-sys",
@@ -10000,11 +10050,11 @@ version = "0.43.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "886614b5ce857341226aa091f3c285e450683894acaaa7887f366c361efef79d"
 dependencies = [
- "font-types",
+ "font-types 0.10.1",
  "indexmap",
  "kurbo 0.12.0",
  "log",
- "read-fonts",
+ "read-fonts 0.35.0",
 ]
 
 [[package]]
@@ -10387,9 +10437,9 @@ dependencies = [
 
 [[package]]
 name = "zune-jpeg"
-version = "0.5.14"
+version = "0.5.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b7a1c0af6e5d8d1363f4994b7a091ccf963d8b694f7da5b0b9cceb82da2c0a6"
+checksum = "27bc9d5b815bc103f142aa054f561d9187d191692ec7c2d1e2b4737f8dbd7296"
 dependencies = [
  "zune-core",
 ]

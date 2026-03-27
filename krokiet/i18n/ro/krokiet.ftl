@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Eroare critică în timpul pornirii aplicației
-rust_init_error_message = 
-        A eroare critică a apărut în timpul lansării aplicației:
-
-        { $error_message }
-
-        Aceasta poate fi cauzată de drivere OpenGL/Vulkan lipsă sau defectuoase, de rularea aplicației într-o mașină virtuală sau de o eroare în Krokiet sau într-una dintre bibliotecile sale.
-
-        Puteți încerca să rulați diferite versiuni (skia_opengl, skia_vulkan, femtovg_opengl - implicit) sau cu renderer software pentru a vedea dacă acest lucru rezolvă problema.
+rust_init_error_message =
+    A eroare critică a apărut în timpul lansării aplicației:
+    
+    { $error_message }
+    
+    Aceasta poate fi cauzată de drivere OpenGL/Vulkan lipsă sau defectuoase, de rularea aplicației într-o mașină virtuală sau de o eroare în Krokiet sau într-una dintre bibliotecile sale.
+    
+    Puteți încerca să rulați diferite versiuni (skia_opengl, skia_vulkan, femtovg_opengl - implicit) sau cu renderer software pentru a vedea dacă acest lucru rezolvă problema.
 rust_loaded_preset = Presetare încărcată { $preset_idx }
 rust_file_already_exists = Fișierul "{ $file }" există deja și nu va fi suprascris
 rust_error_removing_file_after_copy = Eroare la ștergerea fișierului "{ $file }" (după copierea în altă partiție), motiv: { $reason }
@@ -54,7 +54,7 @@ rust_found_temporary_files = Fișiere temporare { $items_found } găsite în { $
 rust_no_file_type_selected = Fișierele defecte nu pot fi găsite fără niciun tip de fișier selectat.
 rust_found_broken_files = Am găsit { $items_found } fişiere defecte luând { $size } în { $time }
 rust_found_bad_extensions = Fisiere { $items_found } cu extensii gresite in { $time }
-rust_found_bad_names = Găsite { $items_found } fișiere cu nume defectuos în { $time}
+rust_found_bad_names = Găsite { $items_found } fișiere cu nume defectuos în { $time }
 rust_found_video_optimizer = Găsite { $items_found } fișiere de optimizat în { $time }
 rust_found_duplicate_files = Am găsit { $items_found } fișiere duplicate în { $groups } grupuri care iau { $size } în { $time }
 rust_found_duplicate_files_no_lost_space = Fişierele duplicate { $items_found } au fost găsite în grupurile { $groups } în { $time }
@@ -111,10 +111,10 @@ rust_symlink_confirmation_number_simple = { $items } articole selectate.
 rust_rename_confirmation = Ești sigur(ă) că dorești să redenumești elementele selectate?
 rust_rename_confirmation_number_simple = { $items } articole selectate.
 rust_cache_processed_files = Fișierele cache { $files } au fost procesate
-rust_cache_entries_stats = Eliminate { $removed } înregistrări din toate { $all }, { $left} au rămas
+rust_cache_entries_stats = Eliminate { $removed } înregistrări din toate { $all }, { $left } au rămas
 rust_cache_size_reduced = Diminuat dimensiunea fișierelor cache cu { $size }
 rust_cache_time_elapsed = Timp scurs: { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = Eșuare simlink { $name } către { $target }, motiv { $reason}
 rust_hardlink_failed = Eșec la crearea unui hardlink { $name } către { $target }, motiv { $reason }
 
 # Slint translations, but in arrays
@@ -366,3 +366,49 @@ hardlink_confirmation_text = Ești sigur că dorești să creezi hardlink-uri pe
 softlink_button_text = Softlink
 softlink_text = Creează link-uri simbolice
 softlink_confirmation_text = Ești sigur că dorești să creezi link-uri simbolice (symlinks) pentru elementele selectate?
+
+column_full_path = Calea completă
+file_dialog_open = Închideți fereastra de dialog pentru a continua
+selection_custom_select_unselect = Selectare/Deselectare personalizată
+settings_similar_videos_preview_hint = Previzualizarea este vizibilă doar atunci când opțiunea "Generează miniaturi" este activată, sau atunci când o miniatură a fost deja generată.
+settings_show_notification_on_scan_completion_text = Afișează o notificare când scanarea este finalizată
+settings_notification_feature_hint_text = Disponibil doar atunci când se compilează cu funcția de notificări
+settings_notification_focused_hint_text = Notificarea s-ar putea să nu apară ca o fereastră pop-up atunci când fereastra aplicației este activă
+popup_custom_select_title_text = Selectare / Deselectare personalizată
+popup_custom_select_button_text = Selectați
+popup_custom_unselect_button_text = Debifează
+popup_custom_column_name_header_text = Coloană
+popup_custom_filter_value_header_text = Valoare filtru (caracter sălbatic / expresie regulată)
+popup_custom_case_sensitive_text = Sensibil la majuscule și minuscule
+popup_custom_leave_one_in_group_text = Selectați toate elementele, cu excepția unuia, din fiecare grup
+popup_custom_hint_str_text = Coloane de text: caractere sălbatice *name* /home/* *.rs
+popup_custom_hint_int_text = Dimensiune [KB] / coloane numerice: >= 2048  < 512  = 0  (operatori: >=  <=  >  <  =)
+popup_custom_hint_date_text = Coloanele de date: DD-LL-AAAA sau AAAA-LL-DD, opțional, ora HH:MM:SS. De exemplu: >= 2020-01-01 sau < 31-12-2022 23:59:59
+compare_button_text = Compară
+compare_back_text = Înapoi
+compare_prev_group_text = Grupul Anterior
+compare_next_group_text = Următorul grup
+compare_swap_text = Schimb
+compare_info_text = Informații
+compare_diff_text = Diferențe
+compare_loading_title_text = Vă rugăm să așteptați...
+compare_cancel_text = Anulează
+compare_resolution_mismatch_text = Diferite rezoluții - rezultatele pot fi imprecise
+compare_computing_diff_text = Calcularea diferențelor...
+compare_info_file_name_text = Numele fișierului
+compare_info_path_text = Cale
+compare_info_size_text = Dimensiune
+compare_info_resolution_text = Rezoluție
+compare_info_modification_date_text = Data modificării
+compare_loading_images_text = Încărcare imagini...
+compare_cancelling_text = Anulare, vă rugăm să așteptați...
+context_menu_open_item_text = Element deschis
+context_menu_open_parent_text = Deschide folderul principal
+context_menu_remove_from_results_text = Elimină din rezultate
+context_menu_remove_all_from_folder_text = Șterge tot din folder
+context_menu_select_all_from_folder_text = Selectează tot din folder
+context_menu_select_all_from_folder_except_one_text = Selectează tot din folder (păstrează unul)
+context_menu_exclude_parent_folder_text = Exclude folderul părinte
+context_menu_exclude_item_text = Excludere element
+context_menu_copy_name_text = Copiază numele
+context_menu_copy_parent_folder_path_text = Copiază calea folderului părinte

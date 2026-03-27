@@ -6,6 +6,7 @@ import { TextComponent } from "settings_list.slint";
 import { Translations } from "translations.slint";
 import { ColorPalette } from "color_palette.slint";
 import { FontSizes } from "fonts.slint";
+import { Callabler } from "callabler.slint";
 
 component ComboBoxWrapper inherits HorizontalLayout {
     in-out property <string> text;
@@ -472,6 +473,7 @@ export component ToolSettings {
                         }
                     }
                 }
+
             }
 
             if Settings.video_optimizer_sub_mode_index == 0: VerticalLayout {

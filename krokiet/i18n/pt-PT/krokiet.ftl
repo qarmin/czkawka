@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Erro Crítico Durante a Inicialização do Aplicativo
-rust_init_error_message = 
-        Ocorreu um erro crítico ao iniciar a aplicação:
-
-        { $error_message }
-
-        Isto pode ser causado por drivers OpenGL/Vulkan ausentes ou com defeito, executando a aplicação em uma máquina virtual ou por um bug no Krokiet ou em uma de suas bibliotecas.
-
-        Você pode tentar executar diferentes builds (skia_opengl, skia_vulkan, femtovg_opengl - o padrão) ou com o renderizador de software para ver se isso resolve o problema.
+rust_init_error_message =
+    Ocorreu um erro crítico ao iniciar a aplicação:
+    
+    { $error_message }
+    
+    Isto pode ser causado por drivers OpenGL/Vulkan ausentes ou com defeito, executando a aplicação em uma máquina virtual ou por um bug no Krokiet ou em uma de suas bibliotecas.
+    
+    Você pode tentar executar diferentes builds (skia_opengl, skia_vulkan, femtovg_opengl - o padrão) ou com o renderizador de software para ver se isso resolve o problema.
 rust_loaded_preset = Predefinição carregada { $preset_idx }
 rust_file_already_exists = Arquivo "{ $file }" já existe e não será sobrescrito
 rust_error_removing_file_after_copy = Erro ao remover o arquivo "{ $file }" (após copiar para outra partição), motivo: { $reason }
@@ -54,7 +54,7 @@ rust_found_temporary_files = { $items_found } arquivos temporários encontrados 
 rust_no_file_type_selected = Não é possível encontrar arquivos quebrados sem o tipo de arquivo selecionado.
 rust_found_broken_files = Encontrados { $items_found } arquivos quebrados que levam { $size } em { $time }
 rust_found_bad_extensions = Encontrados { $items_found } arquivos com extensões ruins em { $time }
-rust_found_bad_names = Encontrados { $items_found } arquivos com nomes ruins em { $time}
+rust_found_bad_names = Encontrados { $items_found } arquivos com nomes ruins em { $time }
 rust_found_video_optimizer = Encontrados { $items_found } arquivos para otimizar em { $time }
 rust_found_duplicate_files = Encontrados { $items_found } arquivos duplicados em { $groups } grupos que levam { $size } em { $time }
 rust_found_duplicate_files_no_lost_space = Encontrados { $items_found } arquivos duplicados em { $groups } grupos em { $time }
@@ -114,7 +114,7 @@ rust_cache_processed_files = Arquivados { $files } arquivos em cache
 rust_cache_entries_stats = Removidas { $removed } entradas de todas as { $all }, { $left } restantes
 rust_cache_size_reduced = Reduziu o tamanho dos arquivos de cache por { $size }
 rust_cache_time_elapsed = Tempo decorrido: { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = Falha ao simbolizar { $name } para { $target }, reason { $reason}
 rust_hardlink_failed = Falhou em criar um link rígido { $name } para { $target }, motivo { $reason }
 
 # Slint translations, but in arrays
@@ -366,3 +366,49 @@ hardlink_confirmation_text = Tem certeza de que deseja criar hardlinks para os i
 softlink_button_text = Link
 softlink_text = Criar softlinks
 softlink_confirmation_text = Tem certeza de que deseja criar links simbólicos (softlinks) para os itens selecionados?
+
+column_full_path = Caminho completo
+file_dialog_open = Feche a janela de diálogo para continuar
+selection_custom_select_unselect = Seleção/Deseleção Personalizada
+settings_similar_videos_preview_hint = A visualização da miniatura é exibida apenas quando a opção "Gerar miniaturas" está ativada, ou quando uma miniatura já foi gerada.
+settings_show_notification_on_scan_completion_text = Exibir notificação quando a leitura for concluída
+settings_notification_feature_hint_text = Disponível apenas ao compilar com o recurso de notificações
+settings_notification_focused_hint_text = A notificação pode não aparecer como uma janela pop-up quando a janela do aplicativo está em foco
+popup_custom_select_title_text = Seleção Personalizada / Desseleção
+popup_custom_select_button_text = Selecione
+popup_custom_unselect_button_text = Desmarcar
+popup_custom_column_name_header_text = Coluna
+popup_custom_filter_value_header_text = Valor do filtro (caractere curinga / expressão regular)
+popup_custom_case_sensitive_text = Distinção entre maiúsculas e minúsculas
+popup_custom_leave_one_in_group_text = Selecione todos os itens, exceto um, em cada grupo
+popup_custom_hint_str_text = Colunas de texto: curingas *name* /home/* *.rs
+popup_custom_hint_int_text = Tamanho [KB] / colunas numéricas: >= 2048  < 512  = 0  (operadores: >=  <=  >  <  =)
+popup_custom_hint_date_text = Colunas de data: DD-MM-AAAA ou AAAA-MM-DD, hora opcional HH:MM:SS. Exemplo: >= 2020-01-01 ou < 31-12-2022 23:59:59
+compare_button_text = Compare
+compare_back_text = Voltar
+compare_prev_group_text = Prev Group
+compare_next_group_text = Próximo Grupo
+compare_swap_text = Trocar
+compare_info_text = Informações
+compare_diff_text = Diferenças
+compare_loading_title_text = Por favor, aguarde...
+compare_cancel_text = Cancelar
+compare_resolution_mismatch_text = Resoluções diferentes - resultados diferentes podem ser imprecisos
+compare_computing_diff_text = Calculando as diferenças...
+compare_info_file_name_text = Nome do arquivo
+compare_info_path_text = Caminho
+compare_info_size_text = Tamanho
+compare_info_resolution_text = Resolução
+compare_info_modification_date_text = Data de modificação
+compare_loading_images_text = Carregando imagens...
+compare_cancelling_text = Cancelando, por favor aguarde...
+context_menu_open_item_text = Item Aberto
+context_menu_open_parent_text = Abrir pasta pai
+context_menu_remove_from_results_text = Remover dos resultados
+context_menu_remove_all_from_folder_text = Remover Tudo da Pasta
+context_menu_select_all_from_folder_text = Selecionar tudo da pasta
+context_menu_select_all_from_folder_except_one_text = Selecionar Tudo da Pasta (manter um)
+context_menu_exclude_parent_folder_text = Excluir Pasta Pai
+context_menu_exclude_item_text = Excluir item
+context_menu_copy_name_text = Copiar Nome
+context_menu_copy_parent_folder_path_text = Copiar o caminho da pasta pai

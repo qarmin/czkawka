@@ -1,16 +1,19 @@
 import { PopupBase } from "popup_base.slint";
 import { Translations } from "translations.slint";
-import { CheckBox, ComboBox, LineEdit, Slider } from "std-widgets.slint";
+import { Button, CheckBox, ComboBox, LineEdit, Slider } from "std-widgets.slint";
 import { Settings } from "settings.slint";
 import { PopupCenteredText } from "popup_centered_text.slint";
+import { ColorPalette } from "color_palette.slint";
+import { FontSizes } from "fonts.slint";
+import { Callabler } from "callabler.slint";
 
 export component PopupReencodeVideo inherits Rectangle {
     in-out property <string> title_text;
 
     callback action_confirmed();
 
-    out property <length> popup_width: 420px;
-    out property <length> popup_height: 300px;
+    out property <length> popup_width: 440px;
+    out property <length> popup_height: 560px;
     callback show_popup();
 
     popup_window := PopupBase {
@@ -54,6 +57,54 @@ export component PopupReencodeVideo inherits Rectangle {
                         }
                     }
 
+                    Text {
+                        text: Translations.optimize_crf_hint_text;
+                        font-size: FontSizes.small;
+                        color: ColorPalette.hint_color;
+                        wrap: TextWrap.word-wrap;
+                    }
+
+                    HorizontalLayout {
+                        spacing: 5px;
+                        Text { text: Translations.subsettings_video_optimizer_noise_reduction_text; vertical_alignment: TextVerticalAlignment.center; }
+                        ComboBox {
+                            model <=> Settings.video_optimizer_sub_noise_reduction;
+                            current_index <=> Settings.video_optimizer_sub_noise_reduction_index;
+                            current_value <=> Settings.video_optimizer_sub_noise_reduction_value;
+                            enabled: !Settings.video_optimizer_sub_use_custom_command;
+                        }
+                    }
+
+                    if Settings.video_optimizer_sub_noise_reduction_index != 0: HorizontalLayout {
+                        spacing: 5px;
+                        Text { text: Translations.subsettings_video_optimizer_noise_reduction_strength_text; vertical_alignment: TextVerticalAlignment.center; }
+                        Slider {
+                            minimum: 1;
+                            maximum: 10;
+                            value <=> Settings.video_optimizer_sub_noise_reduction_strength;
+                            enabled: !Settings.video_optimizer_sub_use_custom_command;
+                        }
+                        Text {
+                            text: Math.round(Settings.video_optimizer_sub_noise_reduction_strength) + " / 10";
+                            vertical_alignment: TextVerticalAlignment.center;
+                            min-width: 40px;
+                        }
+                    }
+
+                    if Settings.video_optimizer_sub_noise_reduction_index != 0: Text {
+                        text: Translations.optimize_noise_reduction_strength_hint_text;
+                        font-size: FontSizes.small;
+                        color: ColorPalette.hint_color;
+                        wrap: TextWrap.word-wrap;
+                    }
+
+                    Text {
+                        text: Translations.optimize_noise_reduction_hint_text;
+                        font-size: FontSizes.small;
+                        color: ColorPalette.hint_color;
+                        wrap: TextWrap.word-wrap;
+                    }
+
                     CheckBox { text: Translations.optimize_fail_if_bigger_text; checked <=> Settings.popup_reencode_video_fail_if_bigger; }
                     CheckBox { text: Translations.optimize_overwrite_files_text; checked <=> Settings.popup_reencode_video_overwrite_files; }
 
@@ -65,6 +116,34 @@ export component PopupReencodeVideo inherits Rectangle {
                         LineEdit { text <=> Settings.popup_reencode_video_max_width; enabled: Settings.popup_reencode_video_limit_video_size; }
                         Text { text: Translations.optimize_max_height_text; vertical_alignment: TextVerticalAlignment.center; }
                         LineEdit { text <=> Settings.popup_reencode_video_max_height; enabled: Settings.popup_reencode_video_limit_video_size; }
+                    }
+
+                    CheckBox { text: Translations.subsettings_video_optimizer_use_custom_command_text; checked <=> Settings.video_optimizer_sub_use_custom_command; }
+
+                    if Settings.video_optimizer_sub_use_custom_command: VerticalLayout {
+                        spacing: 5px;
+
+                        Text {
+                            text: Translations.subsettings_video_optimizer_custom_command_hint_text;
+                            font-size: FontSizes.small;
+                            color: ColorPalette.hint_color;
+                            wrap: TextWrap.word-wrap;
+                        }
+
+                        HorizontalLayout {
+                            spacing: 5px;
+
+                            LineEdit {
+                                text <=> Settings.video_optimizer_sub_custom_command;
+                                font-size: FontSizes.normal;
+                                horizontal-stretch: 1.0;
+                            }
+
+                            Button {
+                                text: Translations.subsettings_video_optimizer_generate_template_text;
+                                clicked => { Callabler.generate_video_optimizer_template(); }
+                            }
+                        }
                     }
 
                     Rectangle { height: 10px; }

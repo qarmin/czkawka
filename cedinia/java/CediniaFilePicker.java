@@ -251,21 +251,26 @@ public class CediniaFilePicker {
 
     private static void openFolderInternal(Activity activity, String path) {
         try {
-            // Strip known prefixes to get the path relative to the primary volume root.
+            // Strip known primary-storage prefixes to get the path relative to the volume root.
             String rel = path;
             if (rel.startsWith("/storage/emulated/0/")) {
                 rel = rel.substring("/storage/emulated/0/".length());
+            } else if (rel.equals("/storage/emulated/0")) {
+                rel = "";
             } else if (rel.startsWith("/sdcard/")) {
                 rel = rel.substring("/sdcard/".length());
+            } else if (rel.equals("/sdcard")) {
+                rel = "";
             } else {
-                // Non-primary volume or unrecognised prefix – just show a toast-level fallback.
-                Log.w(TAG, "openFolder: non-primary path, skipping: " + path);
+                // Non-primary volume or unrecognised prefix – cannot map to a primary URI.
+                Log.w(TAG, "openFolder: non-primary path, cannot open: " + path);
                 return;
             }
-            // Use the DocumentsUI content URI understood by the built-in Files app.
-            Uri folderUri = Uri.parse(
-                "content://com.android.externalstorage.documents/document/primary:"
-                + Uri.encode(rel));
+            // Build the DocumentsUI content URI via the official API so that the document ID
+            // is correctly percent-encoded (e.g. slashes inside the ID become %2F).
+            String docId = "primary:" + rel;
+            Uri folderUri = DocumentsContract.buildDocumentUri(
+                    "com.android.externalstorage.documents", docId);
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(folderUri, DocumentsContract.Document.MIME_TYPE_DIR);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

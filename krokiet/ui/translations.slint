@@ -143,6 +143,11 @@ export global Translations {
     in-out property <string> subsettings_video_optimizer_video_codec_text: "Video codec";
     in-out property <string> subsettings_video_optimizer_excluded_codecs_text: "Excluded codecs";
     in-out property <string> subsettings_video_optimizer_video_quality_text: "Video quality (CRF)";
+    in-out property <string> subsettings_video_optimizer_noise_reduction_text: "Noise Reduction";
+    in-out property <string> subsettings_video_optimizer_noise_reduction_strength_text: "NR Strength";
+    in-out property <string> subsettings_video_optimizer_use_custom_command_text: "Use custom FFmpeg command";
+    in-out property <string> subsettings_video_optimizer_custom_command_hint_text: "Command with {PATH} for input file. Output path is appended automatically.";
+    in-out property <string> subsettings_video_optimizer_generate_template_text: "Generate template";
     in-out property <string> subsettings_reset_text: "Reset";
     in-out property <string> subsettings_exif_ignored_tags_text: "Ignored tags:";
     in-out property <string> subsettings_exif_ignored_tags_hint_text: "Comma-separated list of tags to exclude from scanning (e.g. GPS, Thumbnail). Some tags, such as ImageWidth in TIFF files, are hidden to prevent breaking the image.";
@@ -225,12 +230,14 @@ export global Translations {
     in-out property <string> context_menu_open_parent_text: "Open Parent Folder";
     in-out property <string> context_menu_remove_from_results_text: "Remove from Results";
     in-out property <string> context_menu_remove_all_from_folder_text: "Remove All from Folder";
+    in-out property <string> context_menu_remove_all_from_folder_recursive_text: "Remove All from Folder (recursive)";
     in-out property <string> context_menu_select_all_from_folder_text: "Select All from Folder";
-    in-out property <string> context_menu_select_all_from_folder_except_one_text: "Select All from Folder (keep one)";
+    in-out property <string> context_menu_select_all_from_folder_recursive_text: "Select All from Folder (recursive)";
     in-out property <string> context_menu_exclude_parent_folder_text: "Exclude Parent Folder";
     in-out property <string> context_menu_exclude_item_text: "Exclude Item";
-    in-out property <string> context_menu_copy_name_text: "Copy Name";
-    in-out property <string> context_menu_copy_parent_folder_path_text: "Copy Parent Folder Path";
+    in-out property <string> context_menu_copy_file_name_text: "Copy File Name";
+    in-out property <string> context_menu_copy_parent_folder_path_text: "Copy Parent Folder";
+    in-out property <string> context_menu_copy_full_path_text: "Copy Full Path";
 
     // Popup Save
     in-out property <string> popup_save_title_text: "Saving results";
@@ -269,6 +276,9 @@ export global Translations {
     in-out property <string> optimize_limit_video_size_text: "Limit video size";
     in-out property <string> optimize_max_width_text: "Max width:";
     in-out property <string> optimize_max_height_text: "Max height:";
+    in-out property <string> optimize_crf_hint_text: "Lower value = better quality. 0 is nearly lossless, 51 is worst. Recommended: 18–28.";
+    in-out property <string> optimize_noise_reduction_hint_text: "Noise reduction may significantly increase encoding time.";
+    in-out property <string> optimize_noise_reduction_strength_hint_text: "1 = minimal, 10 = maximum noise reduction.";
 
     // Popup hardlink
     in-out property <string> hardlink_text: "Create hardlinks";

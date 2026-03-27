@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Krytyczny błąd podczas uruchamiania aplikacji
 rust_init_error_message =
-        Wystąpił krytyczny błąd podczas uruchamiania aplikacji:
-
-        { $error_message }
-
-        Może to być spowodowane brakiem lub uszkodzeniem sterowników OpenGL/Vulkan, uruchamianiem aplikacji w maszynie wirtualnej lub błędem w Krokiecie albo jednej z używanych bibliotek.
-
-        Możesz spróbować uruchomić różne wersje renderera (skia_opengl, skia_vulkan, femtovg_opengl — domyślny) lub użyć renderera programowego, aby sprawdzić, czy to rozwiąże problem.
+    Wystąpił krytyczny błąd podczas uruchamiania aplikacji:
+    
+    { $error_message }
+    
+    Może to być spowodowane brakiem lub uszkodzeniem sterowników OpenGL/Vulkan, uruchamianiem aplikacji w maszynie wirtualnej lub błędem w Krokiecie albo jednej z używanych bibliotek.
+    
+    Możesz spróbować uruchomić różne wersje renderera (skia_opengl, skia_vulkan, femtovg_opengl — domyślny) lub użyć renderera programowego, aby sprawdzić, czy to rozwiąże problem.
 rust_loaded_preset = Wczytano preset { $preset_idx }
 rust_file_already_exists = Plik "{ $file }" już istnieje i nie zostanie nadpisany
 rust_error_removing_file_after_copy = Błąd podczas usuwania pliku "{ $file }" (po skopiowaniu na inną partycję), powód: { $reason }
@@ -22,11 +22,11 @@ rust_loading_hash_cache = Ładowanie pamięci podręcznej hashy
 rust_saving_hash_cache = Zapisywanie pamięci podręcznej hashy
 rust_loading_exif_cache = Ładowanie pamięci podręcznej EXIF
 rust_saving_exif_cache = Zapisywanie pamięci podręcznej EXIF
-rust_scanning_name = Skanowanie nazw { $entries_checked } plików
-rust_scanning_size_name = Skanowanie rozmiaru i nazw { $entries_checked } plików
-rust_scanning_size = Skanowanie rozmiaru { $entries_checked } plików
-rust_scanning_file = Skanowanie { $entries_checked } plików
-rust_scanning_folder = Skanowanie { $entries_checked } folderów
+rust_scanning_name = Skanowanie nazw ({ $entries_checked }) plików
+rust_scanning_size_name = Skanowanie rozmiaru i nazw ({ $entries_checked }) plików
+rust_scanning_size = Skanowanie rozmiaru ({ $entries_checked }) plików
+rust_scanning_file = Skanowanie ({ $entries_checked }) plików
+rust_scanning_folder = Skanowanie ({ $entries_checked }) folderów
 rust_checked_tags = Sprawdzono tagi: { $items_stats }
 rust_checked_content = Sprawdzono zawartość: { $items_stats } ({ $size_stats })
 rust_compared_tags = Porównano tagi: { $items_stats }
@@ -110,6 +110,7 @@ rust_symlink_confirmation = Czy na pewno chcesz utworzyć dowiązania symboliczn
 rust_symlink_confirmation_number_simple = Wybrano { $items } elementów.
 rust_rename_confirmation = Czy na pewno chcesz zmienić nazwę wybranych elementów?
 rust_rename_confirmation_number_simple = Wybrano { $items } elementów.
+rust_cache_processed_files = Przetworzono { $files } plików pamięci podręcznej
 rust_cache_entries_stats = Usunięto { $removed } wpisów z { $all }, { $left } pozostało
 rust_cache_size_reduced = Zmniejszono rozmiar pamięci podręcznej o { $size }
 rust_cache_time_elapsed = Upłynęło: { $time }
@@ -165,7 +166,7 @@ donation = Darowizna
 translation = Tłumaczenie
 included_paths = Wybrane ścieżki
 excluded_paths = Wykluczone ścieżki
-ref = Ref
+ref = Ref.
 path = Ścieżka
 tool_duplicate_files = Zduplikowane pliki
 tool_empty_folders = Puste foldery
@@ -277,12 +278,11 @@ settings_open_cache_folder = Otwórz folder pamięci podręcznej
 settings_language = Język
 settings_current_preset = Bieżący preset:
 settings_edit_name = Edytuj nazwę
-settings_choose_name_for_prefix = Wybierz nazwę prefiksu
+settings_choose_name_for_prefix = Wybierz nazwę dla prefiksu
 settings_save = Zapisz
 settings_load = Wczytaj
 settings_reset = Resetuj
 settings_similar_videos_tool = Narzędzie do podobnych wideo
-settings_similar_videos_preview_hint = Podgląd będzie widoczny tylko, gdy opcja „Generuj miniatury” jest włączona, lub jeśli miniatura została już wygenerowana.
 settings_video_thumbnails_clear_unused_thumbnails = Usuń nieużywane miniatury wideo starsze niż 7 dni przy uruchamianiu aplikacji
 settings_video_thumbnails_header = Miniatury wideo
 settings_video_thumbnails_generate = Generuj miniatury
@@ -302,9 +302,6 @@ settings_limit_lines_of_messages = Ogranicz wiadomości do 500 linii (dotyczy wo
 settings_play_audio_on_scan_completion_text = Odtwórz dźwięk po zakończeniu skanu
 settings_audio_feature_hint_text = Dostępne tylko, gdy aplikacja skompilowana została z funkcją audio
 settings_audio_env_variable_hint_text = Dźwięk można zmienić ustawiając zmienną środowiskową KROKIET_AUDIO_STOP_FILE na ścieżkę do pliku audio
-settings_show_notification_on_scan_completion_text = Pokaż powiadomienie po zakończeniu skanu
-settings_notification_feature_hint_text = Dostępne tylko, gdy aplikacja skompilowana została z funkcją notifications
-settings_notification_focused_hint_text = Powiadomienie może nie pojawić się jako popup, gdy okno aplikacji jest aktywne
 popup_save_title = Zapisywanie wyników
 popup_save_message = To zapisze wyniki do 3 różnych plików
 popup_rename_title = Zmienianie nazw plików
@@ -370,4 +367,48 @@ softlink_button_text = Dowiązanie symboliczne
 softlink_text = Utwórz dowiązania symboliczne
 softlink_confirmation_text = Czy na pewno chcesz utworzyć dowiązania symboliczne dla wybranych elementów?
 
-rust_cache_processed_files = Przetworzono { $files } plików pamięci podręcznej
+column_full_path = Pełna ścieżka
+file_dialog_open = Aby kontynuować, zamknij okno dialogowe
+selection_custom_select_unselect = Wybierz/Odznacz niestandardowe opcje
+settings_similar_videos_preview_hint = Podgląd jest widoczny tylko wtedy, gdy włączona jest opcja "Generuj miniaturki" lub gdy miniatura została już utworzona.
+settings_show_notification_on_scan_completion_text = Wyświetlaj powiadomienie po zakończeniu skanowania
+settings_notification_feature_hint_text = Dostępne tylko podczas kompilacji z włączoną funkcją powiadomień
+settings_notification_focused_hint_text = Powiadomienie może nie wyświetlać się jako okienko wyskakujące, gdy okno aplikacji jest aktywne
+popup_custom_select_title_text = Wybór/Odznaczenie (własne ustawienia)
+popup_custom_select_button_text = Wybierz
+popup_custom_unselect_button_text = Odznacz
+popup_custom_column_name_header_text = Kolumna
+popup_custom_filter_value_header_text = Wartość filtru (znak wieloznaczny / wyrażenie regularne)
+popup_custom_case_sensitive_text = Wielkość liter ma znaczenie
+popup_custom_leave_one_in_group_text = Wybierz wszystkie elementy, z wyjątkiem jednego, w każdej grupie
+popup_custom_hint_str_text = Kolumny tekstowe: symbole wieloznaczne *name* /home/* *.rs
+popup_custom_hint_int_text = Rozmiar [KB] / kolumny numeryczne: >= 2048  < 512  = 0  (operatory: >=  <=  >  <  =)
+popup_custom_hint_date_text = Kolumny dat: format DD-MM-YYYY lub YYYY-MM-DD, opcjonalnie godzina HH:MM:SS, np. >= 2020-01-01 lub < 31-12-2022 23:59:59
+compare_button_text = Porównaj
+compare_back_text = Wstecz
+compare_prev_group_text = Poprzednia grupa
+compare_next_group_text = Następna grupa
+compare_swap_text = Zamień
+compare_info_text = Informacje
+compare_diff_text = Różnice
+compare_loading_title_text = Proszę czekać...
+compare_cancel_text = Anuluj
+compare_resolution_mismatch_text = Różne rozdzielczości - wyniki mogą być niedokładne
+compare_computing_diff_text = Obliczanie różnic...
+compare_info_file_name_text = Nazwa pliku
+compare_info_path_text = Ścieżka
+compare_info_size_text = Rozmiar
+compare_info_resolution_text = Rozdzielczość
+compare_info_modification_date_text = Data modyfikacji
+compare_loading_images_text = Wczytywanie obrazów...
+compare_cancelling_text = Anulowanie, proszę czekać...
+context_menu_open_item_text = Otwórz element
+context_menu_open_parent_text = Otwórz folder nadrzędny
+context_menu_remove_from_results_text = Usuń z wyników
+context_menu_remove_all_from_folder_text = Usuń wszystko z folderu
+context_menu_select_all_from_folder_text = Wybierz wszystko z folderu
+context_menu_select_all_from_folder_except_one_text = Wybierz wszystko z folderu (zachowaj jeden)
+context_menu_exclude_parent_folder_text = Wyklucz folder główny
+context_menu_exclude_item_text = Wyklucz element
+context_menu_copy_name_text = Skopiuj nazwę
+context_menu_copy_parent_folder_path_text = Skopiuj ścieżkę do folderu nadrzędnego

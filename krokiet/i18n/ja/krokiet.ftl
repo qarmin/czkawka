@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = アプリの起動中に致命的なエラーが発生しました
-rust_init_error_message = 
-        アプリケーションの起動中に、次のエラーが発生しました：
- 
-        { $error_message }
- 
-        これは、OpenGL/Vulkanドライバが不足しているか、または動作していないこと、仮想マシンでアプリケーションを実行していること、またはKrokietまたはそのライブラリ内のバグによって引き起こされた可能性があります。
- 
-        問題が解決するかどうかを確認するために、異なるビルド（skia_opengl、skia_vulkan、femtovg_opengl - デフォルト）を実行するか、ソフトウェアレンダラーを使用してみてください。.
+rust_init_error_message =
+    アプリケーションの起動中に、次のエラーが発生しました：
+    
+    { $error_message }
+    
+    これは、OpenGL/Vulkanドライバが不足しているか、または動作していないこと、仮想マシンでアプリケーションを実行していること、またはKrokietまたはそのライブラリ内のバグによって引き起こされた可能性があります。
+    
+    問題が解決するかどうかを確認するために、異なるビルド（skia_opengl、skia_vulkan、femtovg_opengl - デフォルト）を実行するか、ソフトウェアレンダラーを使用してみてください。.
 rust_loaded_preset = プリセット { $preset_idx }を読み込みました
 rust_file_already_exists = ファイル "{ $file }" は既に存在し、上書きされません。
 rust_error_removing_file_after_copy = ファイル "{ $file }" の削除中にエラー (別のパーティションにコピーされた後)、理由: { $reason }
@@ -118,7 +118,7 @@ rust_cache_processed_files = 処理済み { $files } キャッシュファイル
 rust_cache_entries_stats = 削除 { $removed } エントリのうち、{ $all } のうち、{ $left } が残る
 rust_cache_size_reduced = キャッシュファイルのサイズを{ $size }に削減しました。
 rust_cache_time_elapsed = 経過時間: { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = シンボリックリンクに失敗しました { $name } to { $target }, reason { $reason}
 rust_hardlink_failed = { $name } を { $target } へのハードリンクに失敗しました、理由 { $reason }
 
 # Slint translations, but in arrays
@@ -370,3 +370,49 @@ hardlink_confirmation_text = 選択した項目に対してハードリンクを
 softlink_button_text = ソフトリンク
 softlink_text = 作成してリンク
 softlink_confirmation_text = 選択した項目に対して、シンボリックリンク（symlinks）を作成しますか？
+
+column_full_path = 完全なパス
+file_dialog_open = ダイアログウィンドウを閉じて、操作を続行してください。
+selection_custom_select_unselect = カスタム選択/非選択
+settings_similar_videos_preview_hint = プレビューは、「サムネイルを生成する」が有効になっている場合、またはサムネイルがすでに生成されている場合にのみ表示されます。.
+settings_show_notification_on_scan_completion_text = スキャンが完了したら、通知を表示する。
+settings_notification_feature_hint_text = 通知機能を使用する場合にのみ利用可能です。
+settings_notification_focused_hint_text = 通知が、アプリのウィンドウがアクティブになっている場合に、ポップアップとして表示されないことがあります。
+popup_custom_select_title_text = カスタム選択 / 選択解除
+popup_custom_select_button_text = 選択
+popup_custom_unselect_button_text = 選択を解除
+popup_custom_column_name_header_text = 列
+popup_custom_filter_value_header_text = フィルタ値 (ワイルドカード / 正規表現)
+popup_custom_case_sensitive_text = 大文字小文字を区別します。
+popup_custom_leave_one_in_group_text = 各グループの中で、1つだけ除外して、残りのすべてを選択してください。
+popup_custom_hint_str_text = テキスト列: ワイルドカード *name* /home/* *.rs
+popup_custom_hint_int_text = サイズ[KB] / 数値項目: >= 2048  < 512  = 0  (演算子: >=  <=  >  <  =)
+popup_custom_hint_date_text = 日付列: DD-MM-YYYY または YYYY-MM-DD 形式。オプションで時刻 HH:MM:SS を追加できます。例: >= 2020-01-01  または  < 31-12-2022 23:59:59
+compare_button_text = 比較する。
+compare_back_text = 戻る
+compare_prev_group_text = 前のグループ
+compare_next_group_text = 次のグループへ
+compare_swap_text = 交換する。
+compare_info_text = 情報
+compare_diff_text = 差分。
+compare_loading_title_text = お待ちください...
+compare_cancel_text = キャンセル
+compare_resolution_mismatch_text = 異なる解像度では、結果が異なり、精度が低下する可能性があります。
+compare_computing_diff_text = 差分を計算中...
+compare_info_file_name_text = ファイル名
+compare_info_path_text = パス
+compare_info_size_text = サイズ
+compare_info_resolution_text = 解像度
+compare_info_modification_date_text = 修正日
+compare_loading_images_text = 画像を読み込み中...
+compare_cancelling_text = キャンセル処理中... しばらくお待ちください。.
+context_menu_open_item_text = 未開封商品
+context_menu_open_parent_text = 親フォルダを開く
+context_menu_remove_from_results_text = 結果から削除
+context_menu_remove_all_from_folder_text = フォルダからすべて削除
+context_menu_select_all_from_folder_text = フォルダからすべて選択
+context_menu_select_all_from_folder_except_one_text = フォルダからすべて選択 (ただし、一つのみ保持)
+context_menu_exclude_parent_folder_text = 親フォルダを除外
+context_menu_exclude_item_text = 除外項目
+context_menu_copy_name_text = コピー元名
+context_menu_copy_parent_folder_path_text = 親フォルダのパスをコピー

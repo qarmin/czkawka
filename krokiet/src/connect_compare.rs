@@ -58,7 +58,7 @@ impl RawPixels {
             height: 0,
         }
     }
-    fn to_slint_image(self) -> slint::Image {
+    fn into_slint_image(self) -> slint::Image {
         if self.width == 0 {
             return slint::Image::default();
         }
@@ -69,6 +69,7 @@ impl RawPixels {
 
 struct RawCompareItem {
     path: String,
+    dir: String,
     name: String,
     size: String,
     resolution: String,
@@ -262,10 +263,10 @@ fn connect_compare_compute_diff(app: &MainWindow) {
                 if gen_counter.load(Ordering::Relaxed) == gen_val
                     && let Some(raw) = diff
                 {
-                    app.global::<GuiState>().set_compare_diff_image(raw.to_slint_image());
+                    app.global::<GuiState>().set_compare_diff_image(raw.into_slint_image());
                 }
             })
-            .ok();
+            .expect("Failed to upgrade app :(");
         });
     });
 }
@@ -320,7 +321,7 @@ fn open_group(app: &MainWindow, header_idx: usize) {
                         gs.set_compare_cancelling(false);
                         gs.set_compare_visible(false);
                     })
-                    .ok();
+                    .expect("Failed to upgrade app :(");
                 return;
             }
 
@@ -331,6 +332,7 @@ fn open_group(app: &MainWindow, header_idx: usize) {
 
             raw_items.push(RawCompareItem {
                 path: full_path,
+                dir: dir.clone(),
                 name,
                 size: strs.get(StrDataSimilarImages::Size as usize).cloned().unwrap_or_default(),
                 resolution: strs.get(StrDataSimilarImages::Resolution as usize).cloned().unwrap_or_default(),
@@ -347,7 +349,7 @@ fn open_group(app: &MainWindow, header_idx: usize) {
                 .upgrade_in_event_loop(move |app| {
                     app.global::<GuiState>().set_compare_loading_current(current);
                 })
-                .ok();
+                .expect("Failed to upgrade app :(");
         }
 
         let left_idx_slint = 0i32;
@@ -360,7 +362,7 @@ fn open_group(app: &MainWindow, header_idx: usize) {
                 gs.set_compare_cancelling(false);
                 gs.set_compare_visible(false);
             })
-            .ok();
+            .expect("Failed to upgrade app :(");
             return;
         }
 
@@ -380,13 +382,14 @@ fn open_group(app: &MainWindow, header_idx: usize) {
                     let current_checked = main_model.row_data(r.flat_idx as usize).map_or(r.checked, |row| row.checked);
                     CompareImageData {
                         path: r.path.into(),
+                        dir: r.dir.into(),
                         name: r.name.into(),
                         size: r.size.into(),
                         resolution: r.resolution.into(),
                         modification_date: r.modification_date.into(),
                         similarity: r.similarity.into(),
                         checked: current_checked,
-                        thumbnail: r.thumbnail.to_slint_image(),
+                        thumbnail: r.thumbnail.into_slint_image(),
                         flat_idx: r.flat_idx,
                     }
                 })
@@ -397,10 +400,10 @@ fn open_group(app: &MainWindow, header_idx: usize) {
             gui_state.set_compare_right_idx(right_idx_slint);
 
             if let Some(raw) = left_raw {
-                gui_state.set_compare_left_image(raw.to_slint_image());
+                gui_state.set_compare_left_image(raw.into_slint_image());
             }
             if let Some(raw) = right_raw {
-                gui_state.set_compare_right_image(raw.to_slint_image());
+                gui_state.set_compare_right_image(raw.into_slint_image());
             }
 
             gui_state.set_compare_cancelling(false);
@@ -412,39 +415,26 @@ fn open_group(app: &MainWindow, header_idx: usize) {
 
 fn update_compare_checked(gui_state: &GuiState, compare_idx: usize, new_checked: bool) {
     let images_model = gui_state.get_compare_images();
-    if let Some(vec_model) = images_model.as_any().downcast_ref::<VecModel<CompareImageData>>() {
-        if let Some(mut item) = vec_model.row_data(compare_idx) {
-            item.checked = new_checked;
-            vec_model.set_row_data(compare_idx, item);
-        }
-        return;
-    }
-    let updated: Vec<CompareImageData> = images_model
-        .iter()
-        .enumerate()
-        .map(|(i, mut img)| {
-            if i == compare_idx {
-                img.checked = new_checked;
-            }
-            img
-        })
-        .collect();
-    gui_state.set_compare_images(Rc::new(VecModel::from(updated)).into());
+    let vec_model = images_model
+        .as_any()
+        .downcast_ref::<VecModel<CompareImageData>>()
+        .expect("compare_images is always a VecModel<CompareImageData>");
+    let mut item = vec_model.row_data(compare_idx).expect("compare_idx must be a valid index into compare_images");
+    item.checked = new_checked;
+    vec_model.set_row_data(compare_idx, item);
 }
 
 fn collect_group_data_indices(model: &ModelRc<SingleMainListModel>, header_idx: usize) -> Vec<usize> {
     let count = model.row_count();
     let mut indices = Vec::new();
-    if let Some(h) = model.row_data(header_idx)
-        && h.header_row
-        && h.filled_header_row
-    {
+    let h = model.row_data(header_idx).expect("header_idx must be a valid model row index");
+    if h.header_row && h.filled_header_row {
         indices.push(header_idx);
     }
 
     let mut i = header_idx + 1;
     while i < count {
-        let row = model.row_data(i).unwrap();
+        let row = model.row_data(i).expect("i must be within row_count bounds");
         if row.header_row {
             break;
         }
@@ -458,7 +448,7 @@ fn collect_group_data_indices(model: &ModelRc<SingleMainListModel>, header_idx: 
 fn find_group_header_for_current_selection(model: &ModelRc<SingleMainListModel>) -> usize {
     if let Some(sel_idx) = model.iter().enumerate().find(|(_, r)| r.selected_row && !r.header_row).map(|(i, _)| i) {
         for i in (0..=sel_idx).rev() {
-            if model.row_data(i).is_some_and(|r| r.header_row) {
+            if model.row_data(i).expect("i is within sel_idx bounds which is within row_count").header_row {
                 return i;
             }
         }
@@ -471,13 +461,13 @@ fn find_adjacent_group_header(model: &ModelRc<SingleMainListModel>, current_head
     let count = model.row_count();
     if forward {
         for i in (current_header_idx + 1)..count {
-            if model.row_data(i).is_some_and(|r| r.header_row) {
+            if model.row_data(i).expect("i is within row_count bounds").header_row {
                 return Some(i);
             }
         }
     } else if current_header_idx > 0 {
         for i in (0..current_header_idx).rev() {
-            if model.row_data(i).is_some_and(|r| r.header_row) {
+            if model.row_data(i).expect("i is within row_count bounds").header_row {
                 return Some(i);
             }
         }
@@ -522,7 +512,90 @@ fn load_raw_image(path: &str, max_w: u32, max_h: u32) -> Option<RawPixels> {
 }
 
 fn load_full_image(path: &str) -> Option<slint::Image> {
-    load_raw_full_image(path).map(RawPixels::to_slint_image)
+    load_raw_full_image(path).map(RawPixels::into_slint_image)
+}
+
+#[cfg(test)]
+mod tests {
+    use slint::{ModelRc, VecModel};
+    use std::rc::Rc;
+
+    use crate::SingleMainListModel;
+
+    use super::{collect_group_data_indices, find_adjacent_group_header, find_group_header_for_current_selection};
+
+    fn row(header: bool, filled: bool, selected: bool) -> SingleMainListModel {
+        SingleMainListModel { header_row: header, filled_header_row: filled, selected_row: selected, ..Default::default() }
+    }
+
+    fn make_model(rows: Vec<SingleMainListModel>) -> ModelRc<SingleMainListModel> {
+        Rc::new(VecModel::from(rows)).into()
+    }
+
+    #[test]
+    fn test_collect_group_data_indices() {
+        // [H*] [D] [D] | filled header → all 3 included
+        let model = make_model(vec![row(true, true, false), row(false, false, false), row(false, false, false)]);
+        assert_eq!(collect_group_data_indices(&model, 0), vec![0, 1, 2]);
+
+        // unfilled header → only data rows
+        let model = make_model(vec![row(true, false, false), row(false, false, false), row(false, false, false)]);
+        assert_eq!(collect_group_data_indices(&model, 0), vec![1, 2]);
+
+        // two groups: first group stops at second header
+        let model = make_model(vec![
+            row(true, true, false),
+            row(false, false, false),
+            row(true, true, false),
+            row(false, false, false),
+        ]);
+        assert_eq!(collect_group_data_indices(&model, 0), vec![0, 1]);
+        assert_eq!(collect_group_data_indices(&model, 2), vec![2, 3]);
+    }
+
+    #[test]
+    fn test_find_group_header_for_current_selection() {
+        // no selection → fall back to first header (idx 0)
+        let model = make_model(vec![row(true, true, false), row(false, false, false)]);
+        assert_eq!(find_group_header_for_current_selection(&model), 0);
+
+        // selected data row belongs to first group
+        let model = make_model(vec![
+            row(true, true, false),
+            row(false, false, true),  // selected
+            row(true, true, false),
+            row(false, false, false),
+        ]);
+        assert_eq!(find_group_header_for_current_selection(&model), 0);
+
+        // selected data row belongs to second group
+        let model = make_model(vec![
+            row(true, true, false),
+            row(false, false, false),
+            row(true, true, false),
+            row(false, false, true),  // selected
+        ]);
+        assert_eq!(find_group_header_for_current_selection(&model), 2);
+    }
+
+    #[test]
+    fn test_find_adjacent_group_header() {
+        let model = make_model(vec![
+            row(true, true, false),   // 0
+            row(false, false, false), // 1
+            row(true, true, false),   // 2
+            row(false, false, false), // 3
+            row(true, true, false),   // 4
+        ]);
+
+        assert_eq!(find_adjacent_group_header(&model, 0, true), Some(2));
+        assert_eq!(find_adjacent_group_header(&model, 2, true), Some(4));
+        assert_eq!(find_adjacent_group_header(&model, 4, true), None);
+
+        assert_eq!(find_adjacent_group_header(&model, 4, false), Some(2));
+        assert_eq!(find_adjacent_group_header(&model, 2, false), Some(0));
+        assert_eq!(find_adjacent_group_header(&model, 0, false), None);
+    }
 }
 
 fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {

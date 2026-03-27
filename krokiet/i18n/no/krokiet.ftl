@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Kritisk feil under applikasjonsstart
-rust_init_error_message = 
-        En kritisk feil oppstod under oppstart av applikasjonen:
-
-        { $error_message }
-
-        Dette kan skyldes manglende eller defekte OpenGL/Vulkan-drivere, kjøring av applikasjonen i en virtuell maskin eller en feil i Krokiet eller en av dets biblioteker.
-
-        Du kan prøve å kjøre forskjellige bygg (skia_opengl, skia_vulkan, femtovg_opengl - standard) eller med programvarerenderer for å se om det løser problemet.
+rust_init_error_message =
+    En kritisk feil oppstod under oppstart av applikasjonen:
+    
+    { $error_message }
+    
+    Dette kan skyldes manglende eller defekte OpenGL/Vulkan-drivere, kjøring av applikasjonen i en virtuell maskin eller en feil i Krokiet eller en av dets biblioteker.
+    
+    Du kan prøve å kjøre forskjellige bygg (skia_opengl, skia_vulkan, femtovg_opengl - standard) eller med programvarerenderer for å se om det løser problemet.
 rust_loaded_preset = Lastet inn forhåndsinnstilling { $preset_idx }
 rust_file_already_exists = Fil "{ $file }" eksisterer allerede, og vil ikke bli overskrevet
 rust_error_removing_file_after_copy = Feil ved sletting av fil "{ $file }" (etter kopiert til annen partisjon), årsak: { $reason }
@@ -54,7 +54,7 @@ rust_found_temporary_files = Fant { $items_found } midlertidige filer i { $time 
 rust_no_file_type_selected = Finner ikke ødelagte filer uten valgt filtype.
 rust_found_broken_files = Fant { $items_found } ødelagte filer som tar { $size } i { $time }
 rust_found_bad_extensions = Fant { $items_found } filer med feilaktige utvidelser i { $time }
-rust_found_bad_names = Fant { $items_found } filer med dårlige navn i { $time}
+rust_found_bad_names = Fant { $items_found } filer med dårlige navn i { $time }
 rust_found_video_optimizer = Fant { $items_found } filer å optimalisere i { $time }
 rust_found_duplicate_files = Fant { $items_found } dupliserte filer i { $groups } grupper som tar { $size } i { $time }
 rust_found_duplicate_files_no_lost_space = Fant { $items_found } dupliserte filer i { $groups } grupper i { $time }
@@ -110,10 +110,11 @@ rust_symlink_confirmation = Er du sikker på at du vil opprette symlinker for de
 rust_symlink_confirmation_number_simple = { $items } elementer valgt.
 rust_rename_confirmation = Er du sikker på at du vil omdøpe de valgte elementene?
 rust_rename_confirmation_number_simple = { $items } elementer valgt.
+rust_cache_processed_files = Behandlet { $files } cache-filer
 rust_cache_entries_stats = Fjernet { $removed } oppføringer ut av alle { $all }, { $left } igjen
 rust_cache_size_reduced = Redusert cachefilstørrelse med { $size }
 rust_cache_time_elapsed = Tid som er gått: { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = Feil under symlink { $name } til { $target }, grunn { $reason}
 rust_hardlink_failed = Feilet med å hardlenke { $name } til { $target }, årsak { $reason }
 
 # Slint translations, but in arrays
@@ -366,4 +367,48 @@ softlink_button_text = Programlenke
 softlink_text = Opprett mylkoblinger
 softlink_confirmation_text = Er du sikker på at du vil opprette softlenker (symlinks) for de valgte elementene?
 
-rust_cache_processed_files = Behandlet { $files } cache-filer
+column_full_path = Full sti
+file_dialog_open = Lukk dialogvinduet for å fortsette
+selection_custom_select_unselect = Egendefinert valg/fravik
+settings_similar_videos_preview_hint = Forhåndsvisningen er kun synlig når "Generer miniatyrbilder" er aktivert, eller når et miniatyrbilde allerede er generert.
+settings_show_notification_on_scan_completion_text = Vis varsling når skanningen er fullført
+settings_notification_feature_hint_text = Tilgjengelig kun når du kompilerer med funksjonalitet for varslinger
+settings_notification_focused_hint_text = Varselen vises kanskje ikke som et popup-vindu når applikasjonsvinduet er i fokus
+popup_custom_select_title_text = Egendefinert valg / fjern valg
+popup_custom_select_button_text = Velg
+popup_custom_unselect_button_text = Fjern markering
+popup_custom_column_name_header_text = Kolonne
+popup_custom_filter_value_header_text = Filterverdi (wildcard / regulært uttrykk)
+popup_custom_case_sensitive_text = Skiller mellom store og små bokstaver
+popup_custom_leave_one_in_group_text = Velg alle elementene bortsett fra ett, i hver gruppe
+popup_custom_hint_str_text = Tekstkolonner: jokertegn *navn* /home/* *.rs
+popup_custom_hint_int_text = Størrelse [KB] / numeriske kolonner: >= 2048  < 512  = 0  (operatorer: >=  <=  >  <  =)
+popup_custom_hint_date_text = Datokolonner: DD-MM-YYYY eller YYYY-MM-DD, valgfri tid HH:MM:SS, f.eks. >= 2020-01-01 eller < 31-12-2022 23:59:59
+compare_button_text = Sammenlign
+compare_back_text = Tilbake
+compare_prev_group_text = Prev Group
+compare_next_group_text = Neste gruppe
+compare_swap_text = Bytt
+compare_info_text = Info
+compare_diff_text = Forskjell
+compare_loading_title_text = Vennligst vent...
+compare_cancel_text = Avbryt
+compare_resolution_mismatch_text = Ulike oppløsninger – ulike resultater kan være unøyaktige
+compare_computing_diff_text = Regner ut forskjellen...
+compare_info_file_name_text = Filnavn
+compare_info_path_text = Sti
+compare_info_size_text = Størrelse
+compare_info_resolution_text = Resolusjon
+compare_info_modification_date_text = Endringsdato
+compare_loading_images_text = Laster inn bilder...
+compare_cancelling_text = Avbestilling, vennligst vent...
+context_menu_open_item_text = Åpne element
+context_menu_open_parent_text = Åpne overordnet mappe
+context_menu_remove_from_results_text = Fjern fra resultater
+context_menu_remove_all_from_folder_text = Fjern alt fra mappe
+context_menu_select_all_from_folder_text = Velg alle fra mappe
+context_menu_select_all_from_folder_except_one_text = Velg alt fra mappe (behold én)
+context_menu_exclude_parent_folder_text = Ekskluder overordnet mappe
+context_menu_exclude_item_text = Ekskluder element
+context_menu_copy_name_text = Kopier navn
+context_menu_copy_parent_folder_path_text = Kopier stien til overordnet mappe

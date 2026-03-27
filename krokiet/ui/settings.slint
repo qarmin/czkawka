@@ -4,7 +4,7 @@ export global Settings {
     in-out property <int> settings_preset_idx: 0;
     in-out property <[string]> settings_presets: ["Preset 1", "Preset 2"];
 
-    in-out property <[string]> languages_list: ["English", "Polski (Polish)", "Français (French)", "Italiano (Italian)", "Русский (Russian)", "український (Ukrainian)", "한국어 (Korean)", "Česky (Czech)", "Deutsch (German)", "日本語 (Japanese)", "Português (Portuguese)", "Português Brasileiro (Brazilian Portuguese)", "简体中文 (Simplified Chinese)", "繁體中文 (Traditional Chinese)", "Español (Spanish)", "Norsk (Norwegian)", "Svenska (Swedish)", "العربية (Arabic)", "Български (Bulgarian)", "Ελληνικά (Greek)", "Nederlands (Dutch)", "Română (Romanian)", "Türkçe (Turkish)"];
+    in-out property <[string]> languages_list: ["English", "Polski (Polish)", "Français (French)", "Italiano (Italian)", "Русский (Russian)", "український (Ukrainian)", "한국어 (Korean)", "Česky (Czech)", "Deutsch (German)", "日本語 (Japanese)", "Português (Portuguese)", "Português Brasileiro (Brazilian Portuguese)", "简体中文 (Simplified Chinese)", "繁體中文 (Traditional Chinese)", "Español (Spanish)", "Norsk (Norwegian)", "Svenska (Swedish)", "العربية (Arabic)", "Български (Bulgarian)", "Ελληνικά (Greek)", "Nederlands (Dutch)", "Română (Romanian)", "Türkçe (Turkish)", "فارسی (Persian)", "हिंदी (Hindi)", "Bahasa Indonesia (Indonesian)", "Tiếng Việt (Vietnamese)"];
     in-out property <int> language_index: 0;
     in-out property <string> language_value: "English";
 
@@ -171,6 +171,16 @@ export global Settings {
     in-out property <bool> video_optimizer_sub_limit_video_size: false;
     in-out property <string> video_optimizer_sub_max_width: "1920";
     in-out property <string> video_optimizer_sub_max_height: "1920";
+
+    // Video noise reduction
+    in-out property <[string]> video_optimizer_sub_noise_reduction: ["None", "hqdn3d (fast)"];
+    in-out property <int>      video_optimizer_sub_noise_reduction_index: 0;
+    in-out property <string>   video_optimizer_sub_noise_reduction_value: "none";
+    in-out property <float>    video_optimizer_sub_noise_reduction_strength: 5;
+
+    // Custom FFmpeg command
+    in-out property <bool>   video_optimizer_sub_use_custom_command: false;
+    in-out property <string> video_optimizer_sub_custom_command: "";
 
     // Exif Finder
     in-out property <string> ignored_exif_tags: "";

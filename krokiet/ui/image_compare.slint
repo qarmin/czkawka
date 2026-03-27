@@ -19,6 +19,21 @@ component CompareInfoBar inherits Rectangle {
     in property <string> r_res;
     in property <string> r_mod_date;
 
+    // Hidden off-screen Text elements to measure the natural width of each label
+    // so the middle column automatically adapts to the current language
+    lbl_file_name  := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_file_name_text; }
+    lbl_path       := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_path_text; }
+    lbl_size       := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_size_text; }
+    lbl_resolution := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_resolution_text; }
+    lbl_mod_date   := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_modification_date_text; }
+
+    property <length> middle_col_width:
+        max(lbl_file_name.preferred-width,
+        max(lbl_path.preferred-width,
+        max(lbl_size.preferred-width,
+        max(lbl_resolution.preferred-width,
+            lbl_mod_date.preferred-width)))) + 12px;
+
     background: ColorPalette.compare_info_background;
     border-radius: 4px;
     border-width: 1px;
@@ -47,7 +62,7 @@ component CompareInfoBar inherits Rectangle {
         Rectangle { width: 1px; background: ColorPalette.compare_divider_color; }
 
         VerticalLayout {
-            width: 108px;
+            width: middle_col_width;
             spacing: 2px;
             padding-left: 6px;
             padding-right: 6px;
@@ -164,7 +179,10 @@ export component ImageCompareOverlay inherits Rectangle {
                     Button {
                         text: Translations.compare_cancel_text;
                         enabled: !GuiState.compare_cancelling;
-                        clicked => { Callabler.compare_cancel_load(); }
+                        clicked => {
+                            GuiState.compare_visible = false;
+                            Callabler.compare_cancel_load();
+                        }
                     }
                 }
             }
@@ -341,13 +359,13 @@ export component ImageCompareOverlay inherits Rectangle {
             vertical-stretch: 0;
 
             l_name:     left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].name              : "";
-            l_path:     left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].path              : "";
+            l_path:     left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].dir               : "";
             l_size:     left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].size              : "";
             l_res:      left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].resolution        : "";
             l_mod_date: left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].modification_date : "";
 
             r_name:     right_valid ? GuiState.compare_images[GuiState.compare_right_idx].name              : "";
-            r_path:     right_valid ? GuiState.compare_images[GuiState.compare_right_idx].path              : "";
+            r_path:     right_valid ? GuiState.compare_images[GuiState.compare_right_idx].dir               : "";
             r_size:     right_valid ? GuiState.compare_images[GuiState.compare_right_idx].size              : "";
             r_res:      right_valid ? GuiState.compare_images[GuiState.compare_right_idx].resolution        : "";
             r_mod_date: right_valid ? GuiState.compare_images[GuiState.compare_right_idx].modification_date : "";

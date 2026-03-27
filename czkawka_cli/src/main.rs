@@ -432,6 +432,9 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
                 max_width,
                 max_height,
                 thumbnail_grid_tiles_per_side,
+                noise_reduction,
+                noise_reduction_strength,
+                custom_ffmpeg_command,
             } = transcode_args;
 
             let excluded_codecs_vec = excluded_codecs.map_or_else(
@@ -460,6 +463,9 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
                     limit_video_size,
                     max_width,
                     max_height,
+                    noise_reduction,
+                    noise_reduction_strength,
+                    custom_ffmpeg_command,
                 });
                 tool.fix_items(stop_flag, Some(progress_sender), fix_params);
             }
