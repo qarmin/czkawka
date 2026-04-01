@@ -83,7 +83,7 @@ options to choose than other).
 |      Similar videos       |      ✔      |        ✔         |         |        |                   |             |
 |  Music duplicates(tags)   |      ✔      |        ✔         |    ✔    |        |         ✔         |             |
 | Music duplicates(content) |      ✔      |        ✔         |    ✔    |        |                   |             |
-|     Invalid symlinks      |      ✔      |        ✔         |    ✔    |   ✔    |                   |             |
+|     Invalid symlinks      |      ✔      |        ✔         |         |   ✔    |                   |             |
 |       Broken files        |      ✔      |        ✔         |    ✔    |        |                   |             |
 | Invalid names/extensions  |      ✔      |        ✔         |    ✔    |   ✔    |                   |             |
 |       Exif cleaner        |      ✔      |                  |    ✔    |        |                   |             |
