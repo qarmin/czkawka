@@ -71,8 +71,6 @@ impl NoiseReductionMethod {
         }
     }
 
-    /// Returns an FFmpeg -vf filter string, or None if method is None.
-    /// strength: 1-10
     pub fn to_ffmpeg_filter(&self, strength: u32) -> Option<String> {
         let s = strength.clamp(1, 10) as f32;
         match self {

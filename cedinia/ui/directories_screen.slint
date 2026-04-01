@@ -205,7 +205,7 @@ export component DirectoriesScreen {
 
     property <bool> path_enter_error: false;
 
-    // ── Main layout ───────────────────────────────────────────────────────────
+    //  Main layout
     VerticalLayout {
         height: parent.height;
         spacing: 0px;
@@ -351,7 +351,7 @@ export component DirectoriesScreen {
         }
     }
 
-    // ── Volumes popup ─────────────────────────────────────────────────────────
+    //  Volumes popup
     if AppState.storage_volumes.length > 0 && !AppState.custom_paths_popup_visible : Rectangle {
         x: 0;
         y: root.height - self.height - 74px;
@@ -505,7 +505,7 @@ export component DirectoriesScreen {
         }
     }
 
-    // ── Custom Paths popup ────────────────────────────────────────────────────
+    // Custom Paths popup
     if AppState.custom_paths_popup_visible : Rectangle {
         x: 0;
         y: root.height - self.height - 74px;
@@ -716,7 +716,7 @@ export component DirectoriesScreen {
         }
     }
 
-    // ── Path edit popup (centered overlay) ────────────────────────────────────
+    //  Path edit popup (centered overlay)
     if AppState.path_edit_popup_visible : Rectangle {
         x: 0;
         y: 0;
@@ -820,7 +820,7 @@ export component DirectoriesScreen {
         }
     }
 
-    // ── Directory statistics popup (centered overlay) ─────────────────────────
+    //  Directory statistics popup (centered overlay) ─────────────────────────
     if AppState.dirs_check_popup_visible : Rectangle {
         x: 0;
         y: 0;

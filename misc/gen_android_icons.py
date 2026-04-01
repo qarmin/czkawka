@@ -51,7 +51,6 @@ FOREGROUND_XML = """\
     android:gravity="center" />
 """
 
-# ── renderers ────────────────────────────────────────────────────────────────
 
 
 def render_cairosvg(svg: Path, out: Path, size: int) -> None:
@@ -92,7 +91,6 @@ def render_inkscape(svg: Path, out: Path, size: int) -> None:
             raise RuntimeError(f"inkscape failed (exit {result.returncode}):\n{result.stderr}\n{result2.stderr}")
 
 
-# ── main ─────────────────────────────────────────────────────────────────────
 
 
 def main() -> None:

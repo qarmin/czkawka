@@ -36,7 +36,6 @@ export component PopupContextMenu inherits Rectangle {
             border-width: 1px;
 
             VerticalLayout {
-                // ── Open ──────────────────────────────────────────────────
                 Button {
                     text: Translations.context_menu_open_item_text;
                     height: menu_item_height;
@@ -97,7 +96,6 @@ export component PopupContextMenu inherits Rectangle {
 
                 Rectangle { height: divider_height; background: ColorPalette.popup_border_color.with_alpha(0.25); }
 
-                // ── Copy ──────────────────────────────────────────────────
                 Button {
                     text: Translations.context_menu_copy_file_name_text;
                     height: menu_item_height;
