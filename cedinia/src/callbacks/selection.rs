@@ -551,7 +551,11 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
             }
             let state = win.global::<AppState>();
             state.set_confirm_popup_message(slint::SharedString::from(crate::flc!("confirm_rename_items", n = n)));
-            let action = if tool == ActiveTool::BadNames { ConfirmPopupAction::RenameBadNames } else { ConfirmPopupAction::Rename };
+            let action = if tool == ActiveTool::BadNames {
+                ConfirmPopupAction::RenameBadNames
+            } else {
+                ConfirmPopupAction::Rename
+            };
             state.set_confirm_popup_action(action);
             state.set_confirm_popup_visible(true);
             let _ = tx.clone();

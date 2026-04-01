@@ -245,7 +245,7 @@ pub(crate) fn wire_language_change(window: &MainWindow) {
     window.global::<AppState>().on_apply_language_change(move || {
         let win = weak.upgrade().expect("MainWindow dropped in on_apply_language_change");
         let idx = win.global::<GeneralSettings>().get_language_idx() as usize;
-        let lang = crate::localizer_cedinia::LANGUAGE_LIST.get(idx).map(|&(code, _)| code).unwrap_or("en");
+        let lang = crate::localizer_cedinia::LANGUAGE_LIST.get(idx).map_or("en", |&(code, _)| code);
         crate::localizer_cedinia::apply_language_preference(lang);
         crate::translations::translate_items(&win);
     });

@@ -43,3 +43,4 @@ cedinia/docs
 *.gz
 /pyproject.toml
 uv.lock
+i18n

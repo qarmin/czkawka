@@ -122,10 +122,7 @@ fn run_custom_command(cmd: &str, video_path: &str, temp_output: &Path, stop_flag
         return Err(flc!("core_custom_command_missing_path_placeholder"));
     }
 
-    let args: Vec<String> = cmd
-        .split_whitespace()
-        .map(|t| if t == "{PATH}" { video_path.to_string() } else { t.to_string() })
-        .collect();
+    let args: Vec<String> = cmd.split_whitespace().map(|t| if t == "{PATH}" { video_path.to_string() } else { t.to_string() }).collect();
 
     let mut command = Command::new(&args[0]);
     command.args(&args[1..]).arg("-y").arg(temp_output);

@@ -219,20 +219,20 @@ jobs:
 
           cp windows_krokiet_on_windows_skia_opengl.exe package/krokiet.exe
 
-          cat > package/README.md << 'EOF'
-# Czkawka
-
-This package contains the legacy GTK 4 GUI (czkawka_gui.exe) and the CLI (czkawka_cli.exe).
-
-## Recommended: Use Krokiet instead!
-
-**krokiet.exe** (also included in this package) is the modern, actively developed GUI for Czkawka.
-It is faster, more feature-rich, and better maintained than the legacy GTK GUI.
-
-Please use **krokiet.exe** for the best experience.
-
-More info: https://github.com/qarmin/czkawka
-EOF
+          {
+            echo '# Czkawka'
+            echo ''
+            echo 'This package contains the legacy GTK 4 GUI (czkawka_gui.exe).'
+            echo ''
+            echo 'Use Krokiet instead!'
+            echo ''
+            echo '**krokiet.exe** (also included in this package) is the modern, actively developed GUI for Czkawka.'
+            echo 'It is faster, more feature-rich, and better maintained than the legacy GTK GUI.'
+            echo ''
+            echo 'Please use **krokiet.exe** for the best experience.'
+            echo ''
+            echo 'More info: https://github.com/qarmin/czkawka'
+          } > package/README.md
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6

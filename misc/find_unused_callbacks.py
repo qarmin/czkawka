@@ -4,6 +4,15 @@ import re
 
 excluded = ["theme_changed"]  # Executed from Slint
 
+# Callbacks with platform-specific cfg-gated implementations (e.g. #[cfg(target_os = "android")]
+# and #[cfg(not(target_os = "android"))]) produce two matches but are intentionally correct.
+allowed_multiple: set[str] = {
+    "open_path",
+    "open_parent_folder",
+    "open_url",
+    "request_storage_permission",
+}
+
 
 def find_files(root: str, ext: str, folder: str | None) -> list[str]:
     files = []
@@ -40,7 +49,7 @@ def format_green(text: str) -> str:
 
 
 if len(sys.argv) < 2:
-    print("Usage: python find_unused_callbacks.py <folder> [callabler_file]")
+    print("Usage: python find_unused_callbacks.py <folder> [callabler_path]")
     sys.exit(1)
 
 folder = sys.argv[1]
@@ -68,7 +77,7 @@ for callback in callbacks:
     if len(matches) == 0:
         print(f"Error: Callback {format_green(callback)} has NO Rust implementation")
         errors_found = True
-    elif len(matches) > 1:
+    elif len(matches) > 1 and callback not in allowed_multiple:
         print(f"Error: Callback {format_green(callback)} has {len(matches)} Rust implementations (expected 1)")
         errors_found = True
 

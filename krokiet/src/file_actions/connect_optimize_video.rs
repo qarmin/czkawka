@@ -135,7 +135,7 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
 }
 
 impl ModelProcessor {
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments)]
     fn optimize_selected_videos(
         self,
         progress_sender: Sender<ProgressData>,

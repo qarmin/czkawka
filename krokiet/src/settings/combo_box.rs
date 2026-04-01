@@ -126,10 +126,8 @@ impl StringComboBoxItems {
             ("av1", "AV1", VideoCodec::Av1),
         ]);
 
-        let video_optimizer_noise_reduction = Self::convert_to_combobox_items(&[
-            ("none", "None", NoiseReductionMethod::None),
-            ("hqdn3d", "hqdn3d (fast)", NoiseReductionMethod::Hqdn3d),
-        ]);
+        let video_optimizer_noise_reduction =
+            Self::convert_to_combobox_items(&[("none", "None", NoiseReductionMethod::None), ("hqdn3d", "hqdn3d (fast)", NoiseReductionMethod::Hqdn3d)]);
 
         Self {
             languages,

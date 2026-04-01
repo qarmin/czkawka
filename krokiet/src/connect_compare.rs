@@ -515,89 +515,6 @@ fn load_full_image(path: &str) -> Option<slint::Image> {
     load_raw_full_image(path).map(RawPixels::into_slint_image)
 }
 
-#[cfg(test)]
-mod tests {
-    use slint::{ModelRc, VecModel};
-    use std::rc::Rc;
-
-    use crate::SingleMainListModel;
-
-    use super::{collect_group_data_indices, find_adjacent_group_header, find_group_header_for_current_selection};
-
-    fn row(header: bool, filled: bool, selected: bool) -> SingleMainListModel {
-        SingleMainListModel { header_row: header, filled_header_row: filled, selected_row: selected, ..Default::default() }
-    }
-
-    fn make_model(rows: Vec<SingleMainListModel>) -> ModelRc<SingleMainListModel> {
-        Rc::new(VecModel::from(rows)).into()
-    }
-
-    #[test]
-    fn test_collect_group_data_indices() {
-        // [H*] [D] [D] | filled header → all 3 included
-        let model = make_model(vec![row(true, true, false), row(false, false, false), row(false, false, false)]);
-        assert_eq!(collect_group_data_indices(&model, 0), vec![0, 1, 2]);
-
-        // unfilled header → only data rows
-        let model = make_model(vec![row(true, false, false), row(false, false, false), row(false, false, false)]);
-        assert_eq!(collect_group_data_indices(&model, 0), vec![1, 2]);
-
-        // two groups: first group stops at second header
-        let model = make_model(vec![
-            row(true, true, false),
-            row(false, false, false),
-            row(true, true, false),
-            row(false, false, false),
-        ]);
-        assert_eq!(collect_group_data_indices(&model, 0), vec![0, 1]);
-        assert_eq!(collect_group_data_indices(&model, 2), vec![2, 3]);
-    }
-
-    #[test]
-    fn test_find_group_header_for_current_selection() {
-        // no selection → fall back to first header (idx 0)
-        let model = make_model(vec![row(true, true, false), row(false, false, false)]);
-        assert_eq!(find_group_header_for_current_selection(&model), 0);
-
-        // selected data row belongs to first group
-        let model = make_model(vec![
-            row(true, true, false),
-            row(false, false, true),  // selected
-            row(true, true, false),
-            row(false, false, false),
-        ]);
-        assert_eq!(find_group_header_for_current_selection(&model), 0);
-
-        // selected data row belongs to second group
-        let model = make_model(vec![
-            row(true, true, false),
-            row(false, false, false),
-            row(true, true, false),
-            row(false, false, true),  // selected
-        ]);
-        assert_eq!(find_group_header_for_current_selection(&model), 2);
-    }
-
-    #[test]
-    fn test_find_adjacent_group_header() {
-        let model = make_model(vec![
-            row(true, true, false),   // 0
-            row(false, false, false), // 1
-            row(true, true, false),   // 2
-            row(false, false, false), // 3
-            row(true, true, false),   // 4
-        ]);
-
-        assert_eq!(find_adjacent_group_header(&model, 0, true), Some(2));
-        assert_eq!(find_adjacent_group_header(&model, 2, true), Some(4));
-        assert_eq!(find_adjacent_group_header(&model, 4, true), None);
-
-        assert_eq!(find_adjacent_group_header(&model, 4, false), Some(2));
-        assert_eq!(find_adjacent_group_header(&model, 2, false), Some(0));
-        assert_eq!(find_adjacent_group_header(&model, 0, false), None);
-    }
-}
-
 fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {
     let resize_opts = Some(ImgResizeOptions {
         max_width: 1200,
@@ -640,4 +557,87 @@ fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {
     }
 
     Some(RawPixels { data, width: w, height: h })
+}
+
+#[cfg(test)]
+mod tests {
+    use std::rc::Rc;
+
+    use slint::{ModelRc, VecModel};
+
+    use super::{collect_group_data_indices, find_adjacent_group_header, find_group_header_for_current_selection};
+    use crate::SingleMainListModel;
+
+    fn row(header: bool, filled: bool, selected: bool) -> SingleMainListModel {
+        SingleMainListModel {
+            header_row: header,
+            filled_header_row: filled,
+            selected_row: selected,
+            ..Default::default()
+        }
+    }
+
+    fn make_model(rows: Vec<SingleMainListModel>) -> ModelRc<SingleMainListModel> {
+        Rc::new(VecModel::from(rows)).into()
+    }
+
+    #[test]
+    fn test_collect_group_data_indices() {
+        // [H*] [D] [D] | filled header → all 3 included
+        let model = make_model(vec![row(true, true, false), row(false, false, false), row(false, false, false)]);
+        assert_eq!(collect_group_data_indices(&model, 0), vec![0, 1, 2]);
+
+        // unfilled header → only data rows
+        let model = make_model(vec![row(true, false, false), row(false, false, false), row(false, false, false)]);
+        assert_eq!(collect_group_data_indices(&model, 0), vec![1, 2]);
+
+        // two groups: first group stops at second header
+        let model = make_model(vec![row(true, true, false), row(false, false, false), row(true, true, false), row(false, false, false)]);
+        assert_eq!(collect_group_data_indices(&model, 0), vec![0, 1]);
+        assert_eq!(collect_group_data_indices(&model, 2), vec![2, 3]);
+    }
+
+    #[test]
+    fn test_find_group_header_for_current_selection() {
+        // no selection → fall back to first header (idx 0)
+        let model = make_model(vec![row(true, true, false), row(false, false, false)]);
+        assert_eq!(find_group_header_for_current_selection(&model), 0);
+
+        // selected data row belongs to first group
+        let model = make_model(vec![
+            row(true, true, false),
+            row(false, false, true), // selected
+            row(true, true, false),
+            row(false, false, false),
+        ]);
+        assert_eq!(find_group_header_for_current_selection(&model), 0);
+
+        // selected data row belongs to second group
+        let model = make_model(vec![
+            row(true, true, false),
+            row(false, false, false),
+            row(true, true, false),
+            row(false, false, true), // selected
+        ]);
+        assert_eq!(find_group_header_for_current_selection(&model), 2);
+    }
+
+    #[test]
+    fn test_find_adjacent_group_header() {
+        let model = make_model(vec![
+            row(true, true, false),   // 0
+            row(false, false, false), // 1
+            row(true, true, false),   // 2
+            row(false, false, false), // 3
+            row(true, true, false),   // 4
+        ]);
+
+        assert_eq!(find_adjacent_group_header(&model, 0, true), Some(2));
+        assert_eq!(find_adjacent_group_header(&model, 2, true), Some(4));
+        assert_eq!(find_adjacent_group_header(&model, 4, true), None);
+
+        assert_eq!(find_adjacent_group_header(&model, 4, false), Some(2));
+        assert_eq!(find_adjacent_group_header(&model, 2, false), Some(0));
+        assert_eq!(find_adjacent_group_header(&model, 0, false), None);
+    }
 }

@@ -773,7 +773,7 @@ mod context_menu {
     use log::warn;
     use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-    use super::{reset_selection};
+    use super::reset_selection;
     use crate::connect_directories_changes::add_excluded_paths;
     use crate::connect_row_selection::checker::set_number_of_enabled_items;
     use crate::model_operations::remove_single_items_in_groups;
@@ -897,7 +897,11 @@ mod context_menu {
                 return false;
             }
             let p = items[i].val_str.iter().nth(path_idx).map(|s| s.as_str().to_owned()).unwrap_or_default();
-            if recursive { p == target_path || p.starts_with(&target_prefix) } else { p == target_path }
+            if recursive {
+                p == target_path || p.starts_with(&target_prefix)
+            } else {
+                p == target_path
+            }
         };
 
         // should_check[i] = true  → set checked=true for that item (never uncheck)
@@ -932,9 +936,7 @@ mod context_menu {
                 }
 
                 let currently_checked = (group_start..group_end).filter(|&j| items[j].checked).count();
-                let matching_unchecked: Vec<usize> = (group_start..group_end)
-                    .filter(|&j| path_matches(j) && !items[j].checked)
-                    .collect();
+                let matching_unchecked: Vec<usize> = (group_start..group_end).filter(|&j| path_matches(j) && !items[j].checked).collect();
                 let would_be_checked = currently_checked + matching_unchecked.len();
 
                 if is_reference {
@@ -966,13 +968,17 @@ mod context_menu {
             }
         }
 
-        let new_items: Vec<SingleMainListModel> = items.into_iter().enumerate().map(|(i, mut row)| {
-            if should_check[i] {
-                row.checked = true;
-            }
-            row.selected_row = false; // keep in sync with TOOLS_SELECTION reset below
-            row
-        }).collect();
+        let new_items: Vec<SingleMainListModel> = items
+            .into_iter()
+            .enumerate()
+            .map(|(i, mut row)| {
+                if should_check[i] {
+                    row.checked = true;
+                }
+                row.selected_row = false; // keep in sync with TOOLS_SELECTION reset below
+                row
+            })
+            .collect();
 
         let checked_count = new_items.iter().filter(|r| r.checked).count() as u64;
         active_tab.set_tool_model(app, ModelRc::new(VecModel::from(new_items)));
@@ -1104,11 +1110,7 @@ mod context_menu {
             }
             let name = row.val_str.iter().nth(name_idx).expect("name_idx out of bounds").to_string();
             let path = row.val_str.iter().nth(path_idx).expect("path_idx out of bounds").to_string();
-            let full_path = if path.is_empty() {
-                name
-            } else {
-                format!("{path}/{name}")
-            };
+            let full_path = if path.is_empty() { name } else { format!("{path}/{name}") };
             set_clipboard(full_path);
         });
     }

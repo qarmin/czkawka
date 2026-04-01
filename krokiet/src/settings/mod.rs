@@ -356,7 +356,8 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     settings.set_video_optimizer_sub_video_codec_value(display_names[idx].clone());
 
     // Video Optimizer noise reduction
-    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_noise_reduction, &collected_items.video_optimizer_noise_reduction);
+    let (idx, display_names) =
+        StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_noise_reduction, &collected_items.video_optimizer_noise_reduction);
     settings.set_video_optimizer_sub_noise_reduction_index(idx as i32);
     settings.set_video_optimizer_sub_noise_reduction_value(display_names[idx].clone());
 }
@@ -636,7 +637,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let video_optimizer_mode = combo_box_items.video_optimizer_mode.config_name.clone();
     let video_optimizer_crop_type = combo_box_items.video_optimizer_crop_type.config_name.clone();
     let video_optimizer_video_codec = combo_box_items.video_optimizer_video_codec.config_name.clone();
-    let video_optimizer_noise_reduction = combo_box_items.video_optimizer_noise_reduction.config_name.clone();
+    let video_optimizer_noise_reduction = combo_box_items.video_optimizer_noise_reduction.config_name;
     let video_optimizer_excluded_codecs = settings.get_video_optimizer_sub_excluded_codecs().to_string();
     let video_optimizer_black_pixel_threshold = settings
         .get_video_optimizer_sub_black_pixel_threshold()
