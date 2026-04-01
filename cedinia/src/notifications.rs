@@ -318,6 +318,14 @@ fn send_notification(title: &str, body: &str) {
                 )?
                 .l()?;
             if !launch_intent.is_null() {
+                // FLAG_ACTIVITY_SINGLE_TOP (0x20000000) | FLAG_ACTIVITY_CLEAR_TOP (0x04000000):
+                // bring the existing Activity to front instead of creating a new instance.
+                env.call_method(
+                    &launch_intent,
+                    jni_str!("addFlags"),
+                    jni_sig!((flags: int) -> android.content.Intent),
+                    &[JValue::Int(0x2000_0000 | 0x0400_0000)],
+                )?;
                 // FLAG_IMMUTABLE (0x04000000) is required on Android 12+ (API 31+).
                 let sig_pending = RuntimeMethodSignature::from_str("(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;").unwrap();
                 let pending_intent: JObject = env

@@ -97,6 +97,12 @@ name = "android.app.NativeActivity"
 # screenSize change which Android defers until foreground → causes the
 # "every-other-time restart" pattern.
 config_changes = "orientation|keyboardHidden|screenSize|smallestScreenSize|navigation|uiMode|screenLayout|locale|density|fontScale"
+# singleTop: prevent Android from creating a new Activity instance when the
+# launcher icon or a notification brings the existing task to the foreground.
+# With the default standard mode, each tap stacks a new NativeActivity on top
+# (which re-runs android_main and resets all state).  singleTop keeps the
+# existing instance and calls onNewIntent instead.
+launch_mode = "singleTop"
 
 # Full external storage access (needed to scan /sdcard root on Android 11+)
 [[package.metadata.android.uses_permission]]

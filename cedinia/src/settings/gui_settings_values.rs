@@ -134,7 +134,8 @@ impl StringComboBoxItems {
         ]);
 
         let big_files_count = Self::convert(&[
-            ("10", "10", 10usize), ("100", "100", 100),
+            ("10", "10", 10usize),
+            ("100", "100", 100),
             // ("1000", "1000", 1000), ("10000", "10000", 10000) // Too slowefor now
         ]);
 
