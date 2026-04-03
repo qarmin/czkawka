@@ -386,7 +386,7 @@ impl VideoOptimizer {
                             return None;
                         }
 
-                        match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, video_transcode_params) {
+                        match process_video(stop_flag, &entry.path.to_string_lossy(), entry.size, &video_transcode_params) {
                             Ok(_new_size) => Some(None),
                             Err(e) => Some(Some(flc!("core_failed_to_optimize_video", file = entry.path.to_string_lossy(), reason = e))),
                         }

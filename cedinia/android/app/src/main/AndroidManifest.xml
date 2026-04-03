@@ -17,6 +17,7 @@
         <activity
             android:name="android.app.NativeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize|navigation|uiMode|screenLayout|locale|density|fontScale"
+            android:launchMode="singleTop"
             android:exported="true">
 
             <!-- Tells NativeActivity which .so to load -->

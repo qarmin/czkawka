@@ -1,0 +1,13 @@
+[project]
+name = "test"
+version = "1.0.0"
+requires-python = "==3.13.*"
+dependencies = [
+    "ruff==0.15.8",
+    "mypy==1.19.1",
+    "ty==0.0.26",
+    "pandas-stubs",
+    "fluent.syntax",
+    "ollama"
+]
+

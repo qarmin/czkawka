@@ -354,6 +354,12 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_video_codec, &collected_items.video_optimizer_video_codec);
     settings.set_video_optimizer_sub_video_codec_index(idx as i32);
     settings.set_video_optimizer_sub_video_codec_value(display_names[idx].clone());
+
+    // Video Optimizer noise reduction
+    let (idx, display_names) =
+        StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_noise_reduction, &collected_items.video_optimizer_noise_reduction);
+    settings.set_video_optimizer_sub_noise_reduction_index(idx as i32);
+    settings.set_video_optimizer_sub_noise_reduction_value(display_names[idx].clone());
 }
 
 pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, base_settings: &BasicSettings, cli_args: Option<CliResult>) {
@@ -476,6 +482,9 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_video_optimizer_sub_max_width(custom_settings.video_optimizer_max_width.to_string().into());
     settings.set_video_optimizer_sub_max_height(custom_settings.video_optimizer_max_height.to_string().into());
     settings.set_video_optimizer_sub_image_threshold(custom_settings.video_optimizer_image_threshold as f32);
+    settings.set_video_optimizer_sub_noise_reduction_strength(custom_settings.video_optimizer_noise_reduction_strength.clamp(1, 10) as f32);
+    settings.set_video_optimizer_sub_use_custom_command(custom_settings.video_optimizer_use_custom_command);
+    settings.set_video_optimizer_sub_custom_command(custom_settings.video_optimizer_custom_command.clone().into());
 
     settings.set_ignored_exif_tags(custom_settings.ignored_exif_tags.clone().into());
 
@@ -627,7 +636,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let video_optimizer_mode = combo_box_items.video_optimizer_mode.config_name.clone();
     let video_optimizer_crop_type = combo_box_items.video_optimizer_crop_type.config_name.clone();
-    let video_optimizer_video_codec = combo_box_items.video_optimizer_video_codec.config_name;
+    let video_optimizer_video_codec = combo_box_items.video_optimizer_video_codec.config_name.clone();
+    let video_optimizer_noise_reduction = combo_box_items.video_optimizer_noise_reduction.config_name;
     let video_optimizer_excluded_codecs = settings.get_video_optimizer_sub_excluded_codecs().to_string();
     let video_optimizer_black_pixel_threshold = settings
         .get_video_optimizer_sub_black_pixel_threshold()
@@ -656,6 +666,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let video_optimizer_max_width = settings.get_video_optimizer_sub_max_width().parse::<u32>().unwrap_or(1920);
     let video_optimizer_max_height = settings.get_video_optimizer_sub_max_height().parse::<u32>().unwrap_or(1920);
     let video_optimizer_image_threshold = settings.get_video_optimizer_sub_image_threshold().round() as u8;
+    let video_optimizer_noise_reduction_strength = settings.get_video_optimizer_sub_noise_reduction_strength().round() as u32;
+    let video_optimizer_use_custom_command = settings.get_video_optimizer_sub_use_custom_command();
+    let video_optimizer_custom_command = settings.get_video_optimizer_sub_custom_command().to_string();
 
     let ignored_exif_tags = settings.get_ignored_exif_tags().to_string();
 
@@ -758,6 +771,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         video_optimizer_max_width,
         video_optimizer_max_height,
         video_optimizer_image_threshold,
+        video_optimizer_noise_reduction,
+        video_optimizer_noise_reduction_strength,
+        video_optimizer_use_custom_command,
+        video_optimizer_custom_command,
         ignored_exif_tags,
         column_sizes,
         popup_move_preserve_folder_structure: settings.get_popup_move_preserve_folder_structure(),
@@ -791,6 +808,7 @@ pub(crate) fn collect_combo_box_settings(app: &MainWindow) -> ComboBoxItems {
     let video_optimizer_crop_type_idx = settings.get_video_optimizer_sub_crop_type_index() as usize;
     let video_optimizer_mode_idx = settings.get_video_optimizer_sub_mode_index() as usize;
     let video_optimizer_video_codec_idx = settings.get_video_optimizer_sub_video_codec_index() as usize;
+    let video_optimizer_noise_reduction_idx = settings.get_video_optimizer_sub_noise_reduction_index() as usize;
 
     ComboBoxItems {
         language: collected_combo_boxes.languages[language_idx].clone(),
@@ -805,6 +823,7 @@ pub(crate) fn collect_combo_box_settings(app: &MainWindow) -> ComboBoxItems {
         video_optimizer_crop_type: collected_combo_boxes.video_optimizer_crop_type[video_optimizer_crop_type_idx].clone(),
         video_optimizer_mode: collected_combo_boxes.video_optimizer_mode[video_optimizer_mode_idx].clone(),
         video_optimizer_video_codec: collected_combo_boxes.video_optimizer_video_codec[video_optimizer_video_codec_idx].clone(),
+        video_optimizer_noise_reduction: collected_combo_boxes.video_optimizer_noise_reduction[video_optimizer_noise_reduction_idx].clone(),
     }
 }
 

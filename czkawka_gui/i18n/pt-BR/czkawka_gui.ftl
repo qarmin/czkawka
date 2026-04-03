@@ -43,7 +43,7 @@ music_comparison_checkbox_tooltip =
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021) (Santuário --- O santuário foi remixado no verão de 2021)
 duplicate_case_sensitive_name = Diferenciar as letras maiúsculas das minúsculas
-duplicate_case_sensitive_name_tooltip = 
+duplicate_case_sensitive_name_tooltip =
     Quando esta opção está ativada, agrupa apenas os registros se eles tiverem exatamente o mesmo nome. Por exemplo, pagar <-> pagar.
     
     Quando esta opção está desativada, agrupa os registros por nomes e sem verificar a diferença entre as letras maiúsculas das minúsculas. Por exemplo, pagar <-> Pagar
@@ -156,7 +156,7 @@ upper_remove_included_button = Remover
 upper_manual_add_excluded_button = Adicionar manualmente
 upper_add_excluded_button = Adicionar
 upper_remove_excluded_button = Remover
-upper_manual_add_included_button_tooltip = 
+upper_manual_add_included_button_tooltip =
     Adicionar manualmente os nomes dos diretórios ou das pastas para serem pesquisadas.
     
     Para adicionar vários caminhos de uma vez, separe-os com o ponto e vírgula ‘ ; ’.
@@ -164,7 +164,7 @@ upper_manual_add_included_button_tooltip =
     Por exemplo, ao utilizar ‘/home/roman;/home/rozkaz’ irá adicionar os dois diretórios ‘/home/roman’ e ‘/home/rozkaz’
 upper_add_included_button_tooltip = Adicionar um novo diretório para ser pesquisado.
 upper_remove_included_button_tooltip = Remover o diretório da pesquisa.
-upper_manual_add_excluded_button_tooltip = 
+upper_manual_add_excluded_button_tooltip =
     Adicionar manualmente um diretório à lista das exceções.
     
     Para adicionar vários caminhos de uma vez, separe-os com o ponto e vírgula ‘ ; ’.
@@ -185,9 +185,9 @@ upper_excluded_extensions_tooltip =
     Lista dos arquivos que serão ignorados na verificação.
     
     Quando você utiliza as extensões permitidas, estas tem maior prioridade em relação as outras, então o arquivo não será verificado.
-upper_excluded_items_tooltip = 
-        Itens excluídos devem conter * wildcard e devem ser separados por vírgulas.
-        Isto é mais lento que Excluídas Caminhos, portanto use-o com cuidado.
+upper_excluded_items_tooltip =
+    Itens excluídos devem conter * wildcard e devem ser separados por vírgulas.
+    Isto é mais lento que Excluídas Caminhos, portanto use-o com cuidado.
 upper_excluded_items = Itens ignorados:
 upper_allowed_extensions = Extensões permitidas:
 upper_excluded_extensions = Extensões ignoradas:
@@ -514,8 +514,3 @@ preview_image_opening_failure = Ocorreu uma falha ao abrir a imagem ‘{ $name }
 compare_groups_number = Os ‘{ $current_group }’ de ‘{ $all_groups }’ grupos possuem ‘{ $images_in_group }’ imagens
 compare_move_left_button = E
 compare_move_right_button = D
-
-progress_scanning_empty_folders = 
-        {$pasta_numero ->
-        [um] Pasta {$folder_number} escaneada
-        *[outro] Pastas {$folder_number} escaneadas}

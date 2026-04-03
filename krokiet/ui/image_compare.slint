@@ -1,0 +1,437 @@
+import { Button, ScrollView } from "std-widgets.slint";
+import { ColorPalette } from "color_palette.slint";
+import { FontSizes } from "fonts.slint";
+import { GuiState } from "gui_state.slint";
+import { Callabler } from "callabler.slint";
+import { Preview } from "preview.slint";
+import { Settings } from "settings.slint";
+import { Translations } from "translations.slint";
+
+component CompareInfoBar inherits Rectangle {
+    in property <string> l_name;
+    in property <string> l_path;
+    in property <string> l_size;
+    in property <string> l_res;
+    in property <string> l_mod_date;
+    in property <string> r_name;
+    in property <string> r_path;
+    in property <string> r_size;
+    in property <string> r_res;
+    in property <string> r_mod_date;
+
+    // Hidden off-screen Text elements to measure the natural width of each label
+    // so the middle column automatically adapts to the current language
+    lbl_file_name  := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_file_name_text; }
+    lbl_path       := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_path_text; }
+    lbl_size       := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_size_text; }
+    lbl_resolution := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_resolution_text; }
+    lbl_mod_date   := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.small; text: Translations.compare_info_modification_date_text; }
+
+    property <length> middle_col_width:
+        max(lbl_file_name.preferred-width,
+        max(lbl_path.preferred-width,
+        max(lbl_size.preferred-width,
+        max(lbl_resolution.preferred-width,
+            lbl_mod_date.preferred-width)))) + 12px;
+
+    background: ColorPalette.compare_info_background;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: ColorPalette.compare_info_border;
+
+    HorizontalLayout {
+        padding: 6px;
+        spacing: 0px;
+
+        Rectangle {
+            horizontal-stretch: 1.0;
+            clip: true;
+            VerticalLayout {
+                x: 0; y: 0;
+                width: parent.width;
+                spacing: 2px;
+                padding-right: 8px;
+                Text { height: 18px; text: l_name;     font-size: FontSizes.small; color: ColorPalette.compare_left_value_color; horizontal-alignment: right; vertical-alignment: center; overflow: elide; }
+                Text { height: 18px; text: l_path;     font-size: FontSizes.small; color: ColorPalette.compare_left_value_color; horizontal-alignment: right; vertical-alignment: center; overflow: elide; }
+                Text { height: 18px; text: l_size;     font-size: FontSizes.small; color: ColorPalette.compare_left_value_color; horizontal-alignment: right; vertical-alignment: center; overflow: elide; }
+                Text { height: 18px; text: l_res;      font-size: FontSizes.small; color: ColorPalette.compare_left_value_color; horizontal-alignment: right; vertical-alignment: center; overflow: elide; }
+                Text { height: 18px; text: l_mod_date; font-size: FontSizes.small; color: ColorPalette.compare_left_value_color; horizontal-alignment: right; vertical-alignment: center; overflow: elide; }
+            }
+        }
+
+        Rectangle { width: 1px; background: ColorPalette.compare_divider_color; }
+
+        VerticalLayout {
+            width: middle_col_width;
+            spacing: 2px;
+            padding-left: 6px;
+            padding-right: 6px;
+            Text { height: 18px; text: Translations.compare_info_file_name_text;        font-size: FontSizes.small; color: ColorPalette.hint_color; horizontal-alignment: center; vertical-alignment: center; }
+            Text { height: 18px; text: Translations.compare_info_path_text;             font-size: FontSizes.small; color: ColorPalette.hint_color; horizontal-alignment: center; vertical-alignment: center; }
+            Text { height: 18px; text: Translations.compare_info_size_text;             font-size: FontSizes.small; color: ColorPalette.hint_color; horizontal-alignment: center; vertical-alignment: center; }
+            Text { height: 18px; text: Translations.compare_info_resolution_text;       font-size: FontSizes.small; color: ColorPalette.hint_color; horizontal-alignment: center; vertical-alignment: center; }
+            Text { height: 18px; text: Translations.compare_info_modification_date_text; font-size: FontSizes.small; color: ColorPalette.hint_color; horizontal-alignment: center; vertical-alignment: center; }
+        }
+
+        Rectangle { width: 1px; background: ColorPalette.compare_divider_color; }
+
+        Rectangle {
+            horizontal-stretch: 1.0;
+            clip: true;
+            VerticalLayout {
+                x: 0; y: 0;
+                width: parent.width;
+                spacing: 2px;
+                padding-left: 8px;
+                Text { height: 18px; text: r_name;     font-size: FontSizes.small; color: ColorPalette.compare_right_value_color; horizontal-alignment: left; vertical-alignment: center; overflow: elide; }
+                Text { height: 18px; text: r_path;     font-size: FontSizes.small; color: ColorPalette.compare_right_value_color; horizontal-alignment: left; vertical-alignment: center; overflow: elide; }
+                Text { height: 18px; text: r_size;     font-size: FontSizes.small; color: ColorPalette.compare_right_value_color; horizontal-alignment: left; vertical-alignment: center; overflow: elide; }
+                Text { height: 18px; text: r_res;      font-size: FontSizes.small; color: ColorPalette.compare_right_value_color; horizontal-alignment: left; vertical-alignment: center; overflow: elide; }
+                Text { height: 18px; text: r_mod_date; font-size: FontSizes.small; color: ColorPalette.compare_right_value_color; horizontal-alignment: left; vertical-alignment: center; overflow: elide; }
+            }
+        }
+    }
+}
+
+export component ImageCompareOverlay inherits Rectangle {
+    private property <bool> info_visible: false;
+    private property <bool> diff_mode: false;
+
+    private property <bool> left_valid:
+        GuiState.compare_left_idx >= 0 &&
+        GuiState.compare_left_idx < GuiState.compare_images.length;
+    private property <bool> right_valid:
+        GuiState.compare_right_idx >= 0 &&
+        GuiState.compare_right_idx < GuiState.compare_images.length;
+
+    private property <bool> resolution_mismatch: left_valid && right_valid && GuiState.compare_images[GuiState.compare_left_idx].resolution != GuiState.compare_images[GuiState.compare_right_idx].resolution;
+
+    background: Settings.dark_theme ? #181818 : #ebebeb;
+
+    TouchArea { width: parent.width; height: parent.height; }
+
+    property <bool> _loading_watch: GuiState.compare_loading;
+    changed _loading_watch => {
+        if !_loading_watch && diff_mode { Callabler.compare_compute_diff(); }
+    }
+    property <int> _left_idx_watch: GuiState.compare_left_idx;
+    changed _left_idx_watch => {
+        if diff_mode { Callabler.compare_compute_diff(); }
+    }
+    property <int> _right_idx_watch: GuiState.compare_right_idx;
+    changed _right_idx_watch => {
+        if diff_mode { Callabler.compare_compute_diff(); }
+    }
+
+    if GuiState.compare_loading: Rectangle {
+        z: 100;
+        width: parent.width; height: parent.height;
+        background: Settings.dark_theme ? #181818 : #ebebeb;
+
+        // Block all pointer events so buttons behind the overlay cannot be clicked
+        TouchArea { width: parent.width; height: parent.height; }
+
+        // Steal keyboard focus so Space / arrow-keys do NOT reach the main
+        // table's FocusScope while loading is in progress.  Without this a
+        // Space press during thumbnail loading would toggle checked state in
+        // the main model BEFORE compare_images is rebuilt, producing a stale
+        // snapshot and eventually a counter underflow crash.
+        FocusScope {
+            width: parent.width; height: parent.height;
+            key-released(event) => { accept }
+            key-pressed(event) => { accept }
+        }
+
+        Rectangle {
+            x: (parent.width  - self.width)  / 2;
+            y: (parent.height - self.height) / 2;
+            width: 300px; height: 180px;
+            background: ColorPalette.compare_loading_card_background;
+            border-radius: 8px;
+            border-width: 1px;
+            border-color: ColorPalette.compare_divider_color;
+
+            VerticalLayout {
+                alignment: center; spacing: 10px; padding: 24px;
+                Text {
+                    text: GuiState.compare_cancelling
+                        ? Translations.compare_cancelling_text
+                        : Translations.compare_loading_title_text;
+                    font-size: FontSizes.header;
+                    color: Settings.dark_theme ? #f0f0f0 : #111111;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: Translations.compare_loading_images_text;
+                    font-size: FontSizes.normal;
+                    color: ColorPalette.hint_color;
+                    horizontal-alignment: center;
+                    visible: !GuiState.compare_cancelling;
+                }
+                Text {
+                    text: GuiState.compare_loading_current + " / " + GuiState.compare_loading_total;
+                    font-size: FontSizes.normal;
+                    color: ColorPalette.hint_color;
+                    horizontal-alignment: center;
+                }
+                HorizontalLayout {
+                    alignment: center;
+                    Button {
+                        text: Translations.compare_cancel_text;
+                        enabled: !GuiState.compare_cancelling;
+                        clicked => {
+                            GuiState.compare_visible = false;
+                            Callabler.compare_cancel_load();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    VerticalLayout {
+        padding: 5px; spacing: 5px;
+
+        HorizontalLayout {
+            height: 32px; spacing: 5px;
+
+            Button {
+                icon: @image-url("../icons/krokiet_compare_prev.svg");
+                colorize-icon: true;
+                text: Translations.compare_prev_group_text;
+                height: parent.height;
+                clicked => { Callabler.compare_prev_group(); }
+            }
+
+            Rectangle { horizontal-stretch: 1.0; }
+
+            Button {
+                icon: @image-url("../icons/krokiet_compare_swap.svg");
+                colorize-icon: true;
+                text: Translations.compare_swap_text;
+                height: parent.height;
+                clicked => { Callabler.compare_swap(); }
+            }
+            Button {
+                icon: @image-url("../icons/krokiet_info.svg");
+                colorize-icon: true;
+                text: Translations.compare_info_text;
+                height: parent.height;
+                checked: info_visible;
+                clicked => { info_visible = !info_visible; }
+            }
+            Button {
+                icon: @image-url("../icons/krokiet_compare_diff.svg");
+                colorize-icon: true;
+                text: Translations.compare_diff_text;
+                height: parent.height;
+                checked: diff_mode;
+                clicked => {
+                    if !diff_mode { Callabler.compare_compute_diff(); }
+                    diff_mode = !diff_mode;
+                }
+            }
+            Button {
+                icon: @image-url("../icons/krokiet_compare_back.svg");
+                colorize-icon: true;
+                text: Translations.compare_back_text;
+                height: parent.height;
+                clicked => {
+                    GuiState.compare_visible = false;
+                    info_visible = false;
+                    diff_mode = false;
+                }
+            }
+
+            Rectangle { horizontal-stretch: 1.0; }
+
+            Button {
+                icon: @image-url("../icons/krokiet_compare_next.svg");
+                colorize-icon: true;
+                text: Translations.compare_next_group_text;
+                height: parent.height;
+                clicked => { Callabler.compare_next_group(); }
+            }
+        }
+
+        if resolution_mismatch && diff_mode: Rectangle {
+            height: 22px;
+            background: #ff880033;
+            border-radius: 4px;
+            Text {
+                text: Translations.compare_resolution_mismatch_text;
+                color: ColorPalette.compare_right_value_color;
+                font-size: FontSizes.small;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                overflow: elide;
+            }
+        }
+
+        Rectangle {
+            vertical-stretch: 1.0;
+            clip: true;
+
+            if diff_mode: Rectangle {
+                width: parent.width; height: parent.height;
+                background: #000000; border-radius: 4px; clip: true;
+                Image {
+                    width: parent.width; height: parent.height;
+                    source: GuiState.compare_diff_image;
+                    image-fit: ImageFit.contain;
+                    image-rendering: ImageRendering.pixelated;
+                }
+                if GuiState.compare_diff_image.width == 0: Text {
+                    text: Translations.compare_computing_diff_text;
+                    color: ColorPalette.hint_color;
+                    font-size: FontSizes.normal;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+
+            if !diff_mode: Rectangle {
+                width: parent.width; height: parent.height;
+
+                VerticalLayout {
+                    x: 0px; y: 0px;
+                    width: (parent.width - 1px) / 2; height: parent.height;
+                    padding: 2px;
+                    Rectangle {
+                        vertical-stretch: 1.0;
+                        Rectangle {
+                            width: parent.width; height: parent.height;
+                            background: Settings.dark_theme ? #0e0e0e : #e0e0e0;
+                            border-radius: 4px; clip: true;
+                            Preview {
+                                width: parent.width; height: parent.height;
+                                source: GuiState.compare_left_image;
+                                image-fit: ImageFit.contain;
+                            }
+                        }
+                        Button {
+                            x: parent.width - self.width - 6px;
+                            y: parent.height - self.height - 6px;
+                            width: 32px; height: 28px;
+                            text: (left_valid && GuiState.compare_images[GuiState.compare_left_idx].checked) ? "✓" : "□";
+                            checked: left_valid && GuiState.compare_images[GuiState.compare_left_idx].checked;
+                            clicked => { Callabler.compare_toggle_checkbox(GuiState.compare_left_idx); }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    x: (parent.width - 1px) / 2; y: 0px;
+                    width: 1px; height: parent.height;
+                    background: ColorPalette.compare_divider_color;
+                }
+
+                VerticalLayout {
+                    x: (parent.width + 1px) / 2; y: 0px;
+                    width: (parent.width - 1px) / 2; height: parent.height;
+                    padding: 2px;
+                    Rectangle {
+                        vertical-stretch: 1.0;
+                        Rectangle {
+                            width: parent.width; height: parent.height;
+                            background: Settings.dark_theme ? #0e0e0e : #e0e0e0;
+                            border-radius: 4px; clip: true;
+                            Preview {
+                                width: parent.width; height: parent.height;
+                                source: GuiState.compare_right_image;
+                                image-fit: ImageFit.contain;
+                            }
+                        }
+                        Button {
+                            x: 6px;
+                            y: parent.height - self.height - 6px;
+                            width: 32px; height: 28px;
+                            text: (right_valid && GuiState.compare_images[GuiState.compare_right_idx].checked) ? "✓" : "□";
+                            checked: right_valid && GuiState.compare_images[GuiState.compare_right_idx].checked;
+                            clicked => { Callabler.compare_toggle_checkbox(GuiState.compare_right_idx); }
+                        }
+                    }
+                }
+            }
+        }
+
+        if info_visible && !diff_mode: CompareInfoBar {
+            vertical-stretch: 0;
+
+            l_name:     left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].name              : "";
+            l_path:     left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].dir               : "";
+            l_size:     left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].size              : "";
+            l_res:      left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].resolution        : "";
+            l_mod_date: left_valid  ? GuiState.compare_images[GuiState.compare_left_idx].modification_date : "";
+
+            r_name:     right_valid ? GuiState.compare_images[GuiState.compare_right_idx].name              : "";
+            r_path:     right_valid ? GuiState.compare_images[GuiState.compare_right_idx].dir               : "";
+            r_size:     right_valid ? GuiState.compare_images[GuiState.compare_right_idx].size              : "";
+            r_res:      right_valid ? GuiState.compare_images[GuiState.compare_right_idx].resolution        : "";
+            r_mod_date: right_valid ? GuiState.compare_images[GuiState.compare_right_idx].modification_date : "";
+        }
+
+        ScrollView {
+            height: 155px; vertical-stretch: 0;
+            viewport-width: GuiState.compare_images.length * 135px;
+
+            HorizontalLayout {
+                width: GuiState.compare_images.length * 135px;
+                spacing: 5px; padding: 2px; alignment: start;
+
+                for img[idx] in GuiState.compare_images: VerticalLayout {
+                    width: 125px; spacing: 2px; alignment: start;
+
+                    Rectangle {
+                        height: 90px; border-radius: 4px; border-width: 2px;
+                        border-color:
+                            idx == GuiState.compare_left_idx  ? ColorPalette.compare_left_value_color :
+                            idx == GuiState.compare_right_idx ? ColorPalette.compare_right_value_color : transparent;
+                        background: Settings.dark_theme ? #222222 : #d4d4d4;
+                        clip: true;
+                        Image {
+                            x: 2px; y: 2px;
+                            width: parent.width - 4px; height: parent.height - 4px;
+                            source: img.thumbnail;
+                            image-fit: ImageFit.contain;
+                            image-rendering: ImageRendering.smooth;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        height: 26px; spacing: 2px;
+                        Button {
+                            text: "←"; height: parent.height; horizontal-stretch: 1;
+                            checked: idx == GuiState.compare_left_idx;
+                            enabled: idx != GuiState.compare_right_idx;
+                            clicked => { Callabler.compare_set_left(idx); }
+                        }
+                        Button {
+                            text: "→"; height: parent.height; horizontal-stretch: 1;
+                            checked: idx == GuiState.compare_right_idx;
+                            enabled: idx != GuiState.compare_left_idx;
+                            clicked => { Callabler.compare_set_right(idx); }
+                        }
+                    }
+
+                    HorizontalLayout {
+                        height: 22px; spacing: 3px; alignment: center;
+                        Button {
+                            width: 38px; height: parent.height;
+                            text: img.checked ? "✓" : "□";
+                            checked: img.checked;
+                            clicked => { Callabler.compare_toggle_checkbox(idx); }
+                        }
+                        Text {
+                            text: img.name;
+                            font-size: FontSizes.small;
+                            overflow: elide;
+                            vertical-alignment: center;
+                            horizontal-stretch: 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

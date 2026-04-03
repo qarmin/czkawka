@@ -10,6 +10,7 @@ cmds=(
     "python3 misc/find_unused_slint_translations.py krokiet"
     "python3 misc/find_unused_slint_translations.py cedinia"
     "python3 misc/find_unused_callbacks.py krokiet"
+    "python3 misc/find_unused_callbacks.py cedinia cedinia/ui/app_state.slint"
     "python3 misc/find_unused_settings_properties.py krokiet"
     "python3 misc/find_unused_settings_properties.py cedinia"
 )

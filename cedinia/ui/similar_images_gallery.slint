@@ -110,11 +110,7 @@ component GalleryImageCell {
             height: 140px;
             border-radius: 8px;
             clip: true;
-
-            border-width: (root.checked || root.is_reference) ? 3px : 0px;
-            border-color: root.is_reference ? #4488ff : CediniaColors.accent;
             background: CediniaColors.bg_elevated;
-            animate border-width { duration: 100ms; }
 
             Image {
                 width: parent.width;
@@ -123,12 +119,19 @@ component GalleryImageCell {
                 image-fit: SimilarImagesSettings.gallery_image_fit_cover ? ImageFit.cover : ImageFit.contain;
             }
 
-
             Rectangle {
                 border-radius: 8px;
                 background: ta.pressed ? #ffffff22 : transparent;
             }
 
+            // Border drawn after the image so it is not covered by it.
+            Rectangle {
+                border-radius: 8px;
+                border-width: (root.checked || root.is_reference) ? 3px : 0px;
+                border-color: root.is_reference ? #4488ff : CediniaColors.accent;
+                background: transparent;
+                animate border-width { duration: 100ms; }
+            }
 
             if root.checked : Rectangle {
                 x: parent.width - 30px;

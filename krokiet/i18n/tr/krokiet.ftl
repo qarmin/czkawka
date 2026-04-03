@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Uygulama Başlangıç Sırasında Kritik Hata
-rust_init_error_message = 
-        Uygulamayı başlatırken kritik bir hata oluştu:
-
-        { $error_message }
-
-        Bu, eksik veya arızalı OpenGL/Vulkan sürücüleri, bir sanal makinede uygulama çalıştırma veya Krokiet veya kütüphanelerinden birinde bir hata nedeniyle oluşmuş olabilir.
-
-        Sorunu çözmek için farklı sürümler (skia_opengl, skia_vulkan, femtovg_opengl - varsayılan) veya yazılım render'ı kullanarak denemeyi deneyebilirsiniz.
+rust_init_error_message =
+    Uygulamayı başlatırken kritik bir hata oluştu:
+    
+    { $error_message }
+    
+    Bu, eksik veya arızalı OpenGL/Vulkan sürücüleri, bir sanal makinede uygulama çalıştırma veya Krokiet veya kütüphanelerinden birinde bir hata nedeniyle oluşmuş olabilir.
+    
+    Sorunu çözmek için farklı sürümler (skia_opengl, skia_vulkan, femtovg_opengl - varsayılan) veya yazılım render'ı kullanarak denemeyi deneyebilirsiniz.
 rust_loaded_preset = Yüklenen ön ayar { $preset_idx }
 rust_file_already_exists = Dosya "{ $file }" zaten mevcut ve geçersiz kılınmayacak
 rust_error_removing_file_after_copy = Dosya "{ $file }" silinirken hata oluştu (farklı bir bölüme kopyalandıktan sonra), sebep: { $reason }
@@ -139,7 +139,7 @@ column_symlink_folder = Sembolik Bağlantı Klasörü
 column_destination_path = Hedef Yol
 column_current_extension = Geçerli Uzantı
 column_proper_extension = Doğru Uzantı
-column_fps = FPS
+column_fps = FPS (Saniyedeki Kare Sayısı)
 column_codec = Kodçalışma
 column_duration = Süre
 column_exif_tags = EXIF Etiketleri
@@ -366,3 +366,49 @@ hardlink_confirmation_text = Seçilen öğeler için sert bağlantılar oluştur
 softlink_button_text = Yumuşak bağlantı
 softlink_text = Yumuşak bağlantılar oluştur
 softlink_confirmation_text = Seçilen öğeler için yumuşak bağlantılar (sembolik bağlantılar) oluşturmaya emin misiniz?
+
+column_full_path = Tam Yol
+file_dialog_open = Devam etmek için iletişim kutusunu kapatın
+selection_custom_select_unselect = Özel Seç/İptal Etme
+settings_similar_videos_preview_hint = Ön izleme, "Küçük resimleri oluştur" seçeneği etkinleştirildiğinde veya zaten bir küçük resim oluşturulduğunda görünür.
+settings_show_notification_on_scan_completion_text = Taramayı tamamladığında bir bildirim göster
+settings_notification_feature_hint_text = Sadece bildirim özelliğiyle derleme yapıldığında kullanılabilir
+settings_notification_focused_hint_text = Bildirim, uygulama penceresi aktifken açılır pencere şeklinde görünmeyebilir
+popup_custom_select_title_text = Özel Seçme / Seçme İptali
+popup_custom_select_button_text = Seç
+popup_custom_unselect_button_text = Seçimi Kaldır
+popup_custom_column_name_header_text = Sütun
+popup_custom_filter_value_header_text = Filtre değeri (wildcard / regex)
+popup_custom_case_sensitive_text = Büyük/küçük harf duyarlılığı
+popup_custom_leave_one_in_group_text = Her grupta, sadece bir öğeyi hariç tutarak, diğer tüm öğeleri seçin
+popup_custom_hint_str_text = Metin sütunları: joker karakterler *name* /home/* *.rs
+popup_custom_hint_int_text = Boyut [KB] / sayısal sütunlar: >= 2048  < 512  = 0  (işleçler: >=  <=  >  <  =)
+popup_custom_hint_date_text = Tarih sütunları: GG-AA-YYYY veya YYYY-AA-GG, isteğe bağlı olarak saat bilgisi HH:MM:SS. Örneğin: >= 2020-01-01 veya < 31-12-2022 23:59:59
+compare_button_text = Karşılaştır
+compare_back_text = Geri
+compare_prev_group_text = Önceki Grup
+compare_next_group_text = Sonraki Grup
+compare_swap_text = Değiştir
+compare_info_text = Bilgi
+compare_diff_text = Farklılıklar
+compare_loading_title_text = Lütfen bekleyin...
+compare_cancel_text = İptal
+compare_resolution_mismatch_text = Farklı çözünürlükler kullanıldığında, elde edilen sonuçlar hatalı olabilir
+compare_computing_diff_text = Farkları hesaplanıyor...
+compare_info_file_name_text = Dosya adı
+compare_info_path_text = Yol
+compare_info_size_text = Size
+compare_info_resolution_text = Çözünürlük
+compare_info_modification_date_text = Değişiklik tarihi
+compare_loading_images_text = Resimleri yükleniyor...
+compare_cancelling_text = İptal işlemi gerçekleştiriliyor, lütfen bekleyin...
+context_menu_open_item_text = Açık Olarak Belirtilen Öğe
+context_menu_open_parent_text = Üst Klasörü Aç
+context_menu_remove_from_results_text = Sonuçlardan Kaldır
+context_menu_remove_all_from_folder_text = Klasördeki Tüm Öğeleri Sil
+context_menu_select_all_from_folder_text = Klasördeki Tüm Öğeleri Seç
+context_menu_select_all_from_folder_except_one_text = Klasördeki Tüm Öğeleri Seç (sadece bir tanesini bırak)
+context_menu_exclude_parent_folder_text = Ebeveyn Klasörünü Hariç Bırak
+context_menu_exclude_item_text = Seçili Öğeyi Hariç Tut
+context_menu_copy_name_text = Kopyala Adı
+context_menu_copy_parent_folder_path_text = Ebeveyn Klasörünün Yolunu Kopyala

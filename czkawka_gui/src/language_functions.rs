@@ -97,6 +97,22 @@ pub const LANGUAGES_ALL: &[Language] = &[
         combo_box_text: "Türkçe (Turkish)",
         short_text: "tr",
     },
+    Language {
+        combo_box_text: "فارسی (Persian)",
+        short_text: "fa",
+    },
+    Language {
+        combo_box_text: "हिंदी (Hindi)",
+        short_text: "hi",
+    },
+    Language {
+        combo_box_text: "Bahasa Indonesia (Indonesian)",
+        short_text: "id",
+    },
+    Language {
+        combo_box_text: "Tiếng Việt (Vietnamese)",
+        short_text: "vi",
+    },
 ];
 
 pub(crate) fn get_language_from_combo_box_text(combo_box_text: &str) -> Language {

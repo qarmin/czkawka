@@ -82,7 +82,7 @@ core_failed_to_get_video_duration = ناموفق بود دریافت مدت زم
 core_failed_to_get_video_dimensions = ناموفق بود دریافت ابعاد ویدیو برای فایل "{ $file }"
 core_frame_dimensions_mismatch = ابعاد فریم برای زمان‌بندی { $timestamp } با ابعاد فریم اول ({ $first_w }x{ $first_h }) مطابقت ندارند
 core_failed_to_load_data_from_cache = ناموفق بود تا داده‌ها را از فایل کش { $file } بارگیری شود، دلیل { $reason }
-core_failed_to_load_data_from_json_cache = ناموفق بود تا داده‌ها را از فایل کش JSON { $file} بارگیری شود، دلیل { $reason }
+core_failed_to_load_data_from_json_cache = ناموفق بود تا داده‌ها را از فایل کش JSON { $file } بارگیری شود، دلیل { $reason }
 core_failed_to_replace_with_optimized = ناموفق بود فایل "{ $file }" با نسخه بهینه جایگزین شود: { $reason }
 core_failed_to_write_data_to_cache = امکان نوشتن داده‌ها به فایل کش "{ $file }" وجود ندارد، دلیل { $reason }
 core_properly_saved_cache_entries = ذخیره شده به درستی در فایل { $count } ورودی کش.
@@ -97,3 +97,6 @@ core_cannot_create_or_open_cache_file = امکان ایجاد یا باز کرد
 core_cannot_set_config_cache_path = امکان تنظیم مسیر config/cache وجود ندارد - config و cache استفاده نخواهند شد.
 core_invalid_extension_contains_space = { $extension } یک پسوند معتبر نیست زیرا حاوی فاصله خالی در داخل است
 core_invalid_extension_contains_dot = { $extension } یک پسوند معتبر نیست زیرا شامل نقطه داخل آن است
+
+core_ffmpeg_unknown_encoder = امکان رمزگذاری فایل { $file } با استفاده از رمزگذار { $encoder } وجود ندارد. نسخه فعلی FFmpeg از این رمزگذار پشتیبانی نمی‌کند. از یک نسخه دیگر از FFmpeg که از کدک مورد نیاز پشتیبانی می‌کند، استفاده کنید یا یک رمزگذار دیگر را انتخاب کنید.
+core_ffmpeg_error = خطای FFmpeg در حین پردازش فایل { $file }، کد خطا: { $code }، دلیل: { $reason }

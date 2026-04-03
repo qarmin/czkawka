@@ -138,7 +138,7 @@ fn add_included_paths(settings: &Settings, folders: &[String]) {
     settings.set_included_paths_model(new_folders_model);
 }
 
-fn add_excluded_paths(settings: &Settings, folders: &[String]) {
+pub(crate) fn add_excluded_paths(settings: &Settings, folders: &[String]) {
     let old_folders = settings.get_excluded_paths_model();
     let old_folders_path = old_folders.iter().map(|x| x.path.to_string()).collect::<Vec<_>>();
     let mut new_folders = old_folders.iter().collect::<Vec<_>>();

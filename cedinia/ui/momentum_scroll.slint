@@ -1,6 +1,5 @@
 import { CediniaColors } from "colors.slint";
 
-// ─────────────────────────────────────────────────────────────────────────────
 // MomentumScrollView
 //
 // A vertically-scrolling container with natural fling / inertia driven by Rust.
@@ -30,11 +29,8 @@ import { CediniaColors } from "colors.slint";
 //   lock_vertical  – when true the vertical SGR will not claim new gestures
 //                    (used by the gallery when a horizontal per-row SGR owns
 //                     the pointer).
-// ─────────────────────────────────────────────────────────────────────────────
 
 export component MomentumScrollView {
-
-    // ── Public interface ──────────────────────────────────────────────────
 
     // Scroll offset (negative = scrolled down).  Driven by Rust during fling.
     in-out property <length> scroll_y: 0px;
@@ -56,11 +52,11 @@ export component MomentumScrollView {
     // Stop any ongoing fling animation (call when user touches again).
     callback stop_momentum();
 
-    // ── Internal scroll geometry ──────────────────────────────────────────
+    // ── Internal scroll geometry
 
     property <length> max_scroll: max(0px, content_vl.preferred-height - root.height);
 
-    // ── Scrollbar indicator ───────────────────────────────────────────────
+    // ── Scrollbar indicator
 
     property <float> content_f:   max(1.0, content_vl.preferred-height / 1px);
     property <float> viewport_f:  root.height / 1px;
@@ -108,7 +104,6 @@ export component MomentumScrollView {
         }
     }
 
-    // ── Layout ────────────────────────────────────────────────────────────
 
     sgr := SwipeGestureHandler {
         handle-swipe-up:   !root.lock_vertical;

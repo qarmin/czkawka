@@ -9,7 +9,7 @@ core_similarity_minimal = Минимальное
 core_cannot_open_dir = Невозможно открыть каталог { $dir }, причина: { $reason }
 core_cannot_read_entry_dir = Невозможно прочитать запись в директории { $dir }, причина: { $reason }
 core_cannot_read_metadata_dir = Невозможно прочитать метаданные в директории { $dir }, причина: { $reason }
-core_cannot_read_metadata_file = Cannot read metadata of file { $file }, reason { $reason }
+core_cannot_read_metadata_file = Невозможно прочитать метаданные файла { $file }, причина { $reason}
 core_file_modified_before_epoch = Файл { $name } был изменен до эпохи Unix
 core_folder_modified_before_epoch = Папка { $name } была изменена до начала Unix Epoch
 core_file_no_modification_date = Не удаётся получить дату изменения из файла { $name }, причина: { $reason }
@@ -48,7 +48,7 @@ core_failed_get_frame_at_timestamp = Не удалось получить кад
 core_failed_get_frame_from_file = Не удалось получить кадр из "{ $file }" в метке времени { $timestamp }: { $reason }
 core_invalid_crop_rectangle = Неверный прямоугольник обрезки: лево={ $left }, сверху={ $top }, право={ $right }, снизу={ $bottom }
 core_failed_to_crop_video_file = Не удалось обрезать видеофайл "{ $file }": { $reason }
-core_cropped_video_not_created = Обрезённый видеофайл не был создан: { $temp }
+core_cropped_video_not_created = Обрезанный видеофайл не был создан: { $temp }
 core_unable_check_hash_of_file = Невозможно проверить хэш файла "{ $file }", причина { $reason }
 core_error_checking_hash_of_file = Ошибка при проверке хэша файла "{ $file }", причина { $reason }
 core_image_zero_dimensions = Изображение имеет нулевую ширину или высоту "{ $path }"
@@ -95,3 +95,6 @@ core_cannot_create_or_open_cache_file = Невозможно создать ил
 core_cannot_set_config_cache_path = Невозможно установить путь к config/cache - config и cache не будут использоваться.
 core_invalid_extension_contains_space = { $extension } не является допустимым расширением, поскольку оно содержит пробел внутри
 core_invalid_extension_contains_dot = { $extension } не является допустимым расширением, так как оно содержит точку внутри
+
+core_ffmpeg_unknown_encoder = Не удалось закодировать файл { $file } с использованием кодека { $encoder }.  Текущая версия FFmpeg не поддерживает этот кодек. Используйте другую версию FFmpeg с поддержкой необходимого кодека или выберите другой кодек.
+core_ffmpeg_error = Ошибка FFmpeg при обработке файла { $file }, код ошибки { $code }, причина { $reason }

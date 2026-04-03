@@ -11,7 +11,7 @@ use czkawka_core::re_exported::{Cropdetect, FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::same_music::MusicSimilarity;
 use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_SKIP_FORWARD_AMOUNT, crop_detect_from_str_opt};
-use czkawka_core::tools::video_optimizer::VideoCodec;
+use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec};
 
 #[cfg(not(feature = "no_colors"))]
 pub const CLAP_STYLING: Styles = Styles::styled()
@@ -657,6 +657,28 @@ pub struct TranscodeArgs {
         long_help = "Maximum video height in pixels when limit_video_size is enabled"
     )]
     pub max_height: u32,
+    #[clap(
+        long,
+        default_value = "none",
+        value_parser = parse_noise_reduction,
+        help = "Noise reduction method (none, hqdn3d)",
+        long_help = "Noise reduction filter to apply during transcoding.\nnone - disabled\nhqdn3d - general-purpose temporal/spatial denoiser; higher strength = more aggressive noise removal"
+    )]
+    pub noise_reduction: NoiseReductionMethod,
+    #[clap(
+        long,
+        default_value = "5",
+        value_parser = clap::value_parser!(u32).range(1..=10),
+        help = "Noise reduction strength (1-10)",
+        long_help = "Strength of the noise reduction filter (1-10). Higher values remove more noise but may soften fine details. Only used when --noise-reduction is not 'none'."
+    )]
+    pub noise_reduction_strength: u32,
+    #[clap(
+        long,
+        help = "Custom ffmpeg command",
+        long_help = "Custom ffmpeg command-line arguments to pass to ffmpeg during transcoding. When set, most other encoding options are ignored."
+    )]
+    pub custom_ffmpeg_command: Option<String>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -1245,6 +1267,10 @@ fn parse_crop_mechanism(src: &str) -> Result<String, String> {
         "blackbars" | "staticcontent" => Ok(src.to_lowercase()),
         _ => Err("Invalid crop mechanism. Allowed values: blackbars, staticcontent".to_string()),
     }
+}
+
+fn parse_noise_reduction(src: &str) -> Result<NoiseReductionMethod, String> {
+    src.parse::<NoiseReductionMethod>()
 }
 
 const HELP_TEMPLATE: &str = r#"

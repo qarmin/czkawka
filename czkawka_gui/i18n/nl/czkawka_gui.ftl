@@ -8,18 +8,18 @@ general_ok_button = OK
 general_close_button = Afsluiten
 # Krokiet info dialog
 krokiet_info_title = Introductie van Krokiet - Nieuwe versie van Czkawka
-krokiet_info_message = 
-        Krokiet is de nieuwe, verbeterde, snellere en betrouwbaardere versie van de Czkawka GTK GUI!
-
-        Het is eenvoudiger te draaien en robuuster tegen systeemwijzigingen, omdat het alleen afhankelijk is van kernbibliotheken die standaard op de meeste systemen beschikbaar zijn.
-
-        Krokiet brengt ook functies die Czkawka mist, waaronder thumbnails in video vergelijking modus, een EXIF cleaner, bestand verplaatsen/kopieer/verwijderen voortgang of uitgebreide sorteeropties.
-
-        Probeer het uit en zie het verschil!
-
-        Czkawka zal blijven ontvangen bugfixes en kleine updates van mij, maar alle nieuwe functies zullen exclusief voor Krokiet worden ontwikkeld, en iedereen is vrij om nieuwe functies toe te voegen, ontbrekende modi uit te breiden of Czkawka verder te ontwikkelen.
-
-        PS: Dit bericht zou alleen één keer moeten verschijnen. Als het weer verschijnt, stel dan de CZKAWKA_DONT_ANNOY_ME omgeving variabele in op een niet-lege waarde.
+krokiet_info_message =
+    Krokiet is de nieuwe, verbeterde, snellere en betrouwbaardere versie van de Czkawka GTK GUI!
+    
+    Het is eenvoudiger te draaien en robuuster tegen systeemwijzigingen, omdat het alleen afhankelijk is van kernbibliotheken die standaard op de meeste systemen beschikbaar zijn.
+    
+    Krokiet brengt ook functies die Czkawka mist, waaronder thumbnails in video vergelijking modus, een EXIF cleaner, bestand verplaatsen/kopieer/verwijderen voortgang of uitgebreide sorteeropties.
+    
+    Probeer het uit en zie het verschil!
+    
+    Czkawka zal blijven ontvangen bugfixes en kleine updates van mij, maar alle nieuwe functies zullen exclusief voor Krokiet worden ontwikkeld, en iedereen is vrij om nieuwe functies toe te voegen, ontbrekende modi uit te breiden of Czkawka verder te ontwikkelen.
+    
+    PS: Dit bericht zou alleen één keer moeten verschijnen. Als het weer verschijnt, stel dan de CZKAWKA_DONT_ANNOY_ME omgeving variabele in op een niet-lege waarde.
 # Main window
 music_title_checkbox = Aanspreektitel
 music_artist_checkbox = Kunstenaar
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lijst van uitgeschakelde bestanden die genegeerd zullen worden in scan.
     
     Wanneer gebruik wordt gemaakt van toegestane en uitgeschakelde extensies, heeft deze hogere prioriteit, dus het bestand zal niet worden gecontroleerd.
-upper_excluded_items_tooltip = 
-        Uitsluitende items moeten * wildcard bevatten en moeten gescheiden worden door komma's.
-        Dit is langzamer dan Uitsluitingspaden, dus gebruik het voorzichtig.
+upper_excluded_items_tooltip =
+    Uitsluitende items moeten * wildcard bevatten en moeten gescheiden worden door komma's.
+    Dit is langzamer dan Uitsluitingspaden, dus gebruik het voorzichtig.
 upper_excluded_items = Uitgesloten artikelen:
 upper_allowed_extensions = Toegestane extensies:
 upper_excluded_extensions = Uitgeschakelde extensies:

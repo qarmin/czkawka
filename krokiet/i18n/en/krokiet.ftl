@@ -364,6 +364,11 @@ subsettings_video_optimizer_min_crop_size_hint = Minimum pixels to crop on any s
 subsettings_video_optimizer_video_codec = Video codec
 subsettings_video_optimizer_excluded_codecs = Excluded codecs
 subsettings_video_optimizer_video_quality = Video quality (CRF)
+subsettings_video_optimizer_noise_reduction = Noise Reduction
+subsettings_video_optimizer_noise_reduction_strength = NR Strength
+subsettings_video_optimizer_use_custom_command = Use custom FFmpeg command
+subsettings_video_optimizer_custom_command_hint = Command with {"{PATH}"} for input file. Output path is appended automatically.
+subsettings_video_optimizer_generate_template = Generate template
 subsettings_reset = Reset
 subsettings_exif_ignored_tags_text = Ignored tags:
 subsettings_exif_ignored_tags_hint_text = Comma-separated list of tags to exclude from scanning (e.g. GPS, Thumbnail). Some tags, such as ImageWidth in TIFF files, are hidden to prevent breaking the image.
@@ -381,6 +386,9 @@ optimize_overwrite_files_text = Overwrite files
 optimize_limit_video_size_text = Limit video size
 optimize_max_width_text = Max width:
 optimize_max_height_text = Max height:
+optimize_crf_hint = Lower value = better quality. 0 is nearly lossless, 51 is worst. Recommended: 18–28.
+optimize_noise_reduction_hint = Noise reduction may significantly increase encoding time.
+optimize_noise_reduction_strength_hint = 1 = minimal, 10 = maximum noise reduction.
 hardlink_button_text = Hardlink
 hardlink_text = Create hardlinks
 hardlink_confirmation_text = Are you sure you want to create hardlinks for the selected items?
@@ -397,4 +405,34 @@ popup_custom_leave_one_in_group_text = Select all items except one, in each grou
 popup_custom_hint_str_text = Text columns: wildcards  *name*  /home/*  *.rs
 popup_custom_hint_int_text = Size [KB] / numeric columns: >= 2048  < 512  = 0  (operators: >=  <=  >  <  =)
 popup_custom_hint_date_text = Date columns: DD-MM-YYYY or YYYY-MM-DD, optional time HH:MM:SS  e.g.  >= 2020-01-01  or  < 31-12-2022 23:59:59
+compare_button_text = Compare
+compare_back_text = Back
+compare_prev_group_text = Prev Group
+compare_next_group_text = Next Group
+compare_swap_text = Swap
+compare_info_text = Info
+compare_diff_text = Diff
+compare_loading_title_text = Please wait...
+compare_cancel_text = Cancel
+compare_resolution_mismatch_text = Different resolutions - diff results may be inaccurate
+compare_computing_diff_text = Computing diff...
+compare_info_file_name_text = File name
+compare_info_path_text = Path
+compare_info_size_text = Size
+compare_info_resolution_text = Resolution
+compare_info_modification_date_text = Modification date
+compare_loading_images_text = Loading images...
+compare_cancelling_text = Cancelling, please wait...
+context_menu_open_item_text = Open Item
+context_menu_open_parent_text = Open Parent Folder
+context_menu_remove_from_results_text = Remove from Results
+context_menu_remove_all_from_folder_text = Remove All from Folder
+context_menu_remove_all_from_folder_recursive_text = Remove All from Folder (recursive)
+context_menu_select_all_from_folder_text = Select All from Folder
+context_menu_select_all_from_folder_recursive_text = Select All from Folder (recursive)
+context_menu_exclude_parent_folder_text = Exclude Parent Folder
+context_menu_exclude_item_text = Exclude Item
+context_menu_copy_file_name_text = Copy File Name
+context_menu_copy_parent_folder_path_text = Copy Parent Folder
+context_menu_copy_full_path_text = Copy Full Path
 

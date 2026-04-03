@@ -68,24 +68,6 @@ You should see output like:
 Slint: Build config: debug; Backend: software
 ```
 
-## Scaling the Application
-
-By default, the Slint application will automatically scale to match your system settings, but you can also manually set the scaling factor with the `SLINT_SCALE_FACTOR` environment variable:
-
-```
-SLINT_SCALE_FACTOR=2 cargo run 
-```
-
-## Different Theme
-
-By default, Czkawka was created with the `fluent` theme in mind, but Slint also supports other themes, which are not officially supported by this app and may look broken.
-
-```
-SLINT_STYLE=cupertino-light cargo run -- --path .
-SLINT_STYLE=cupertino-dark cargo run -- --path .
-SLINT_STYLE=material-light cargo run -- --path .
-SLINT_STYLE=material-dark cargo run -- --path .
-```
 
 ## Why create a new frontend instead of improving the existing Czkawka GTK 4 app?
 

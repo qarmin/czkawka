@@ -9,7 +9,7 @@ core_similarity_minimal = 最小
 core_cannot_open_dir = ディレクトリを開くことができません { $dir }、理由 { $reason }
 core_cannot_read_entry_dir = Dir { $dir } でエントリを読み込めません、理由 { $reason }
 core_cannot_read_metadata_dir = Dir { $dir } でメタデータを読み込めません、理由 { $reason }
-core_cannot_read_metadata_file = Cannot read metadata of file { $file }, reason { $reason }
+core_cannot_read_metadata_file = ファイルのメタデータが読み込めません { $file }, reason { $reason}
 core_file_modified_before_epoch = ファイル { $name } は Unix Epoch より前に変更されているようです
 core_folder_modified_before_epoch = フォルダ { $name } は、Unix Epoch の前に変更されているようです
 core_file_no_modification_date = ファイル { $name } から変更日を取得できません、理由 { $reason }
@@ -95,3 +95,6 @@ core_cannot_create_or_open_cache_file = キャッシュファイル "{ $file }" 
 core_cannot_set_config_cache_path = 設定/キャッシュのパスを設定できません - 設定とキャッシュは使用されません。.
 core_invalid_extension_contains_space = { $extension } は有効な拡張子ではありません。なぜなら、中に空白が含まれているからです。
 core_invalid_extension_contains_dot = { $extension } は有効な拡張子ではありません。なぜなら、中にドットが含まれているからです。
+
+core_ffmpeg_unknown_encoder = { $file } を { $encoder } エンコーダでエンコードできません。現在の FFmpeg のバージョンでは、このエンコーダがサポートされていません。必要なコーデックをサポートしている別の FFmpeg のバージョンを使用するか、別のエンコーダを選択してください。.
+core_ffmpeg_error = FFmpeg処理中にエラーが発生しました。ファイル: { $file }, エラーコード: { $code }, エラー内容: { $reason }

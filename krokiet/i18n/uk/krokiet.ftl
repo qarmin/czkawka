@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Критична помилка під час запуску додатку
-rust_init_error_message = 
-        Виникла критична помилка під час запуску програми:
-
-        { $error_message }
-
-        Це може бути спричинено відсутніми або несправними драйверами OpenGL/Vulkan, запуском програми у віртуальній машині або помилкою в Krokiet або одній із його бібліотек.
-
-        Ви можете спробувати запустити різні версії (skia_opengl, skia_vulkan, femtovg_opengl - за замовчуванням) або з програмним рендерером, щоб побачити, чи це вирішить проблему.
+rust_init_error_message =
+    Виникла критична помилка під час запуску програми:
+    
+    { $error_message }
+    
+    Це може бути спричинено відсутніми або несправними драйверами OpenGL/Vulkan, запуском програми у віртуальній машині або помилкою в Krokiet або одній із його бібліотек.
+    
+    Ви можете спробувати запустити різні версії (skia_opengl, skia_vulkan, femtovg_opengl - за замовчуванням) або з програмним рендерером, щоб побачити, чи це вирішить проблему.
 rust_loaded_preset = Завантажено пресет { $preset_idx }
 rust_file_already_exists = Файл "{ $file }" вже існує і не буде перезаписано
 rust_error_removing_file_after_copy = Помилка при видаленні файлу "{ $file }" (після копіювання на інший розділ), причина: { $reason }
@@ -114,7 +114,7 @@ rust_cache_processed_files = Оброблені { $files } кешовані фа
 rust_cache_entries_stats = Видалено { $removed } записів з усіх { $all }, { $left } залишилось
 rust_cache_size_reduced = Зменшено розмір файлів кешу на { $size }
 rust_cache_time_elapsed = Час, що минув: { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = Не вдалося прив'язати посилання { $name } до { $target }, причиною { $reason}
 rust_hardlink_failed = Не вдалося створити символічне посилання { $name } на { $target }, причина { $reason }
 
 # Slint translations, but in arrays
@@ -366,3 +366,49 @@ hardlink_confirmation_text = Ви впевнені, що хочете створ
 softlink_button_text = М'яке посилання
 softlink_text = Створити символічні посилання
 softlink_confirmation_text = Ви впевнені, що хочете створити символічні посилання (symlinks) для вибраних елементів?
+
+column_full_path = Повний шлях
+file_dialog_open = Закрийте вікно діалогу, щоб продовжити
+selection_custom_select_unselect = Власне налаштування: вибір/зняття вибору
+settings_similar_videos_preview_hint = Попередній перегляд доступний лише тоді, коли увімкнено опцію "Генерувати мініатюри", або коли мініатюра вже була згенерована.
+settings_show_notification_on_scan_completion_text = Показувати сповіщення після завершення сканування
+settings_notification_feature_hint_text = Доступно лише при компіляції з увімкненою функцією сповіщень
+settings_notification_focused_hint_text = Повідомлення може не відображатися у вигляді спливаючого вікна, коли вікно програми активовано
+popup_custom_select_title_text = Вибір / Зняття вибору (для користувача)
+popup_custom_select_button_text = Виберіть
+popup_custom_unselect_button_text = Зняти виділення
+popup_custom_column_name_header_text = Колонка
+popup_custom_filter_value_header_text = Значення фільтра (символ-замінник / регулярний вираз)
+popup_custom_case_sensitive_text = Розрізняє великі та малі літери
+popup_custom_leave_one_in_group_text = Виберіть усі елементи, за винятком одного, у кожній групі
+popup_custom_hint_str_text = Текстові колонки: підстановки *name* /home/* *.rs
+popup_custom_hint_int_text = Розмір [KB] / числові стовпці: >= 2048  < 512  = 0  (оператори: >=  <=  >  <  =)
+popup_custom_hint_date_text = Колонки з датами: формат DD-MM-YYYY або YYYY-MM-DD, необов'язково з часом HH:MM:SS, наприклад: >= 2020-01-01 або < 31-12-2022 23:59:59
+compare_button_text = Порівняйте
+compare_back_text = Назад
+compare_prev_group_text = Попередня група
+compare_next_group_text = Наступна група
+compare_swap_text = Обмін
+compare_info_text = Інформація
+compare_diff_text = Зміни
+compare_loading_title_text = Будь ласка, зачекайте...
+compare_cancel_text = Скасувати
+compare_resolution_mismatch_text = Різні роздільні здатності – результати можуть бути неточними
+compare_computing_diff_text = Обчислення різниці...
+compare_info_file_name_text = Назва файлу
+compare_info_path_text = Шлях
+compare_info_size_text = Розмір
+compare_info_resolution_text = Роздільна здатність
+compare_info_modification_date_text = Дата внесення змін
+compare_loading_images_text = Завантаження зображень...
+compare_cancelling_text = Скасування, будь ласка, зачекайте...
+context_menu_open_item_text = Відкритий пункт
+context_menu_open_parent_text = Відкрити батьківську папку
+context_menu_remove_from_results_text = Видалити з результатів
+context_menu_remove_all_from_folder_text = Видалити все з папки
+context_menu_select_all_from_folder_text = Вибрати все з папки
+context_menu_select_all_from_folder_except_one_text = Вибрати все з папки (залишити один)
+context_menu_exclude_parent_folder_text = Виключити батьківську папку
+context_menu_exclude_item_text = Видалити елемент
+context_menu_copy_name_text = Скопіювати назву
+context_menu_copy_parent_folder_path_text = Скопіювати шлях до батьківської папки

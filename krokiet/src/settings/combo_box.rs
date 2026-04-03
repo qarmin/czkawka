@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
+use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use image::imageops::FilterType;
 use log::warn;
 use slint::SharedString;
@@ -34,6 +34,7 @@ pub struct StringComboBoxItems {
     pub video_optimizer_crop_type: Vec<StringComboBoxItem<VideoCroppingMechanism>>,
     pub video_optimizer_mode: Vec<StringComboBoxItem<VideoOptimizerMode>>,
     pub video_optimizer_video_codec: Vec<StringComboBoxItem<VideoCodec>>,
+    pub video_optimizer_noise_reduction: Vec<StringComboBoxItem<NoiseReductionMethod>>,
 }
 
 pub static STRING_COMBO_BOX_ITEMS: std::sync::LazyLock<Arc<Mutex<StringComboBoxItems>>> = std::sync::LazyLock::new(|| {
@@ -125,6 +126,9 @@ impl StringComboBoxItems {
             ("av1", "AV1", VideoCodec::Av1),
         ]);
 
+        let video_optimizer_noise_reduction =
+            Self::convert_to_combobox_items(&[("none", "None", NoiseReductionMethod::None), ("hqdn3d", "hqdn3d (fast)", NoiseReductionMethod::Hqdn3d)]);
+
         Self {
             languages,
             hash_size,
@@ -138,6 +142,7 @@ impl StringComboBoxItems {
             video_optimizer_crop_type,
             video_optimizer_mode,
             video_optimizer_video_codec,
+            video_optimizer_noise_reduction,
         }
     }
 

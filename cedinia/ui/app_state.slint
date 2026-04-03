@@ -1,4 +1,4 @@
-import { ActiveTool, CollectTestResult, ProgressData, ScanState, VolumeEntry } from "common.slint";
+import { ActiveTool, CollectTestResult, ConfirmPopupAction, ProgressData, ScanState, VolumeEntry } from "common.slint";
 
 export global GeneralSettings {
     in-out property <bool>   use_cache:                   true;
@@ -13,7 +13,7 @@ export global GeneralSettings {
     in-out property <[string]> max_file_size_options: ["16 KB", "1 MB", "10 MB", "100 MB", "Bez limitu"];
 
     in-out property <int>    language_idx:         0;
-    in-out property <[string]> language_options:   ["English", "Polski (Polish)"];
+    in-out property <[string]> language_options:   ["English", "Polski (Polish)", "Français (French)", "Italiano (Italian)", "Русский (Russian)", "український (Ukrainian)", "한국어 (Korean)", "Česky (Czech)", "Deutsch (German)", "日本語 (Japanese)", "Português (Portuguese)", "Português Brasileiro (Brazilian Portuguese)", "简体中文 (Simplified Chinese)", "繁體中文 (Traditional Chinese)", "Español (Spanish)", "Norsk (Norwegian)", "Svenska (Swedish)", "العربية (Arabic)", "Български (Bulgarian)", "Ελληνικά (Greek)", "Nederlands (Dutch)", "Română (Romanian)", "Türkçe (Turkish)", "فارسی (Persian)", "हिंदी (Hindi)", "Bahasa Indonesia (Indonesian)", "Tiếng Việt (Vietnamese)"];
 
     in-out property <string> excluded_items:       "";
 
@@ -93,8 +93,8 @@ export global BigFilesSettings {
     in-out property <[string]> search_mode_options: ["Biggest", "Smallest"];
 
     in-out property <int>    count_idx:         1;
-    in-out property <string> count_value:       "50";
-    in-out property <[string]> count_options:   ["5", "50", "500", "5000"];
+    in-out property <string> count_value:       "100";
+    in-out property <[string]> count_options:   ["10", "100"];
 }
 
 
@@ -238,9 +238,9 @@ export global AppState {
     in-out property <string> delete_errors_text:    "";
 
 
-    in-out property <bool>   confirm_popup_visible: false;
-    in-out property <string> confirm_popup_message: "";
-    in-out property <string> confirm_popup_action:  "";
+    in-out property <bool>                confirm_popup_visible: false;
+    in-out property <string>             confirm_popup_message: "";
+    in-out property <ConfirmPopupAction> confirm_popup_action:  ConfirmPopupAction.None;
     callback confirm_popup_ok();
     callback confirm_popup_cancel();
 

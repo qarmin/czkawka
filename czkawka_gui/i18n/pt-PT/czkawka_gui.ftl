@@ -8,18 +8,18 @@ general_ok_button = Ok
 general_close_button = Fechar
 # Krokiet info dialog
 krokiet_info_title = Apresentando Krokiet - Nova versão do Czkawka
-krokiet_info_message = 
-        Krokiet é a nova, melhorada, mais rápida e mais confiável versão da interface gráfica Czkawka GTK!
-
-        É mais fácil de executar e mais resistente a alterações do sistema, pois depende apenas de bibliotecas principais disponíveis na maioria dos sistemas por padrão.
-
-        Krokiet também traz recursos que a Czkawka não possui, incluindo miniaturas no modo de comparação de vídeo, um limpador EXIF, opções de progresso de mover/copiar/excluir arquivos ou opções de classificação estendidas.
-
-        Experimente e veja a diferença!
-
-        A Czkawka continuará a receber correções de bugs e atualizações menores de mim, mas todos os novos recursos serão desenvolvidos exclusivamente para o Krokiet e qualquer pessoa é livre para contribuir com novos recursos, adicionar modos ausentes ou estender ainda mais a Czkawka.
-
-        PS: Esta mensagem deve aparecer apenas uma vez. Se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME para qualquer valor não vazio.
+krokiet_info_message =
+    Krokiet é a nova, melhorada, mais rápida e mais confiável versão da interface gráfica Czkawka GTK!
+    
+    É mais fácil de executar e mais resistente a alterações do sistema, pois depende apenas de bibliotecas principais disponíveis na maioria dos sistemas por padrão.
+    
+    Krokiet também traz recursos que a Czkawka não possui, incluindo miniaturas no modo de comparação de vídeo, um limpador EXIF, opções de progresso de mover/copiar/excluir arquivos ou opções de classificação estendidas.
+    
+    Experimente e veja a diferença!
+    
+    A Czkawka continuará a receber correções de bugs e atualizações menores de mim, mas todos os novos recursos serão desenvolvidos exclusivamente para o Krokiet e qualquer pessoa é livre para contribuir com novos recursos, adicionar modos ausentes ou estender ainda mais a Czkawka.
+    
+    PS: Esta mensagem deve aparecer apenas uma vez. Se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME para qualquer valor não vazio.
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista
@@ -192,9 +192,9 @@ upper_excluded_extensions_tooltip =
     Lista de arquivos desabilitados que serão ignorados na verificação.
     
     Ao usar extensões permitidas e desativadas, este tem maior prioridade, então o arquivo não será marcado.
-upper_excluded_items_tooltip = 
-        Itens excluídos devem conter * wildcard e devem ser separados por vírgulas.
-        Este é mais lento que Excluídas Caminhos, portanto use-o com cuidado.
+upper_excluded_items_tooltip =
+    Itens excluídos devem conter * wildcard e devem ser separados por vírgulas.
+    Este é mais lento que Excluídas Caminhos, portanto use-o com cuidado.
 upper_excluded_items = Itens excluídos:
 upper_allowed_extensions = Extensões permitidas:
 upper_excluded_extensions = Extensões desabilitadas:

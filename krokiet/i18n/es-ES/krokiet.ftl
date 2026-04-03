@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Error Crítico Durante el Inicio de la Aplicación
-rust_init_error_message = 
-        Ocurrió un error crítico al iniciar la aplicación:
-
-        { $error_message }
-
-        Esto puede ser causado por controladores OpenGL/Vulkan faltantes o defectuosos, ejecutando la aplicación en una máquina virtual o un error en Krokiet o en una de sus bibliotecas.
-
-        Puede intentar ejecutar diferentes versiones (skia_opengl, skia_vulkan, femtovg_opengl - la predeterminada) o con renderizador de software para ver si eso resuelve el problema.
+rust_init_error_message =
+    Ocurrió un error crítico al iniciar la aplicación:
+    
+    { $error_message }
+    
+    Esto puede ser causado por controladores OpenGL/Vulkan faltantes o defectuosos, ejecutando la aplicación en una máquina virtual o un error en Krokiet o en una de sus bibliotecas.
+    
+    Puede intentar ejecutar diferentes versiones (skia_opengl, skia_vulkan, femtovg_opengl - la predeterminada) o con renderizador de software para ver si eso resuelve el problema.
 rust_loaded_preset = Preset cargado { $preset_idx }
 rust_file_already_exists = Archivo "{ $file }" ya existe, y no será sobreescrito
 rust_error_removing_file_after_copy = Error al eliminar el archivo "{ $file }" (después de copiar en una partición diferente), razón: { $reason }
@@ -54,7 +54,7 @@ rust_found_temporary_files = Encontrados archivos temporales { $items_found } en
 rust_no_file_type_selected = No se pueden encontrar archivos rotos sin ningún tipo de archivo seleccionado.
 rust_found_broken_files = Se encontraron { $items_found } archivos dañados ocupando { $size } en { $time }
 rust_found_bad_extensions = Se encontraron archivos { $items_found } con extensiones incorrectas en { $time }
-rust_found_bad_names = Encontrados { $items_found } archivos con nombres incorrectos en { $time}
+rust_found_bad_names = Encontrados { $items_found } archivos con nombres incorrectos en { $time }
 rust_found_video_optimizer = Encontrados { $items_found } archivos para optimizar en { $time }
 rust_found_duplicate_files = Se encontraron { $items_found } archivos duplicados en { $groups } grupos ocupando { $size } en { $time }
 rust_found_duplicate_files_no_lost_space = Se encontraron { $items_found } archivos duplicados en { $groups } grupos en { $time }
@@ -114,7 +114,7 @@ rust_cache_processed_files = Procesados { $files } archivos en caché
 rust_cache_entries_stats = Eliminados { $removed } entradas de todas { $all }, { $left } restantes
 rust_cache_size_reduced = Reducido tamaño de archivos en caché por { $size }
 rust_cache_time_elapsed = Tiempo transcurrido: { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = No se pudo symlink { $name } a { $target }, razón { $reason}
 rust_hardlink_failed = Falló crear el enlace duro { $name } a { $target }, motivo { $reason }
 
 # Slint translations, but in arrays
@@ -366,3 +366,49 @@ hardlink_confirmation_text = ¿Está usted seguro de que desea crear enlaces dur
 softlink_button_text = Softlink
 softlink_text = Crear enlaces simbólicos
 softlink_confirmation_text = ¿Está usted seguro de que desea crear enlaces simbólicos (softlinks) para los elementos seleccionados?
+
+column_full_path = Ruta completa
+file_dialog_open = Cierre la ventana de diálogo para continuar
+selection_custom_select_unselect = Selección/Deselección personalizada
+settings_similar_videos_preview_hint = La vista previa solo es visible cuando la opción "Generar miniaturas" está habilitada, o cuando ya se ha generado una miniatura.
+settings_show_notification_on_scan_completion_text = Mostrar notificación cuando el escaneo se complete
+settings_notification_feature_hint_text = Disponible únicamente al compilar con la función de notificaciones
+settings_notification_focused_hint_text = Es posible que la notificación no aparezca como una ventana emergente cuando la ventana de la aplicación está en foco
+popup_custom_select_title_text = Selección/Desselección personalizada
+popup_custom_select_button_text = Seleccionar
+popup_custom_unselect_button_text = Desmarcar
+popup_custom_column_name_header_text = Columna
+popup_custom_filter_value_header_text = Valor del filtro (carácter comodín / expresión regular)
+popup_custom_case_sensitive_text = Sensible a mayúsculas y minúsculas
+popup_custom_leave_one_in_group_text = Seleccione todos los elementos, excepto uno, en cada grupo
+popup_custom_hint_str_text = Columnas de texto: comodines *name* /home/* *.rs
+popup_custom_hint_int_text = Tamaño [KB] / columnas numéricas: >= 2048  < 512  = 0  (operadores: >=  <=  >  <  =)
+popup_custom_hint_date_text = Columnas de fecha: DD-MM-AAAA o AAAA-MM-DD, opcionalmente con la hora HH:MM:SS.  Ejemplo: >= 2020-01-01 o < 31-12-2022 23:59:59
+compare_button_text = Comparar
+compare_back_text = Atrás
+compare_prev_group_text = Grupo Prev
+compare_next_group_text = Siguiente grupo
+compare_swap_text = Intercambio
+compare_info_text = Información
+compare_diff_text = Diferencias
+compare_loading_title_text = Por favor, espere...
+compare_cancel_text = Cancelar
+compare_resolution_mismatch_text = Diferentes resoluciones: los resultados pueden ser inexactos
+compare_computing_diff_text = Calculando las diferencias...
+compare_info_file_name_text = Nombre del archivo
+compare_info_path_text = Ruta
+compare_info_size_text = Tamaño
+compare_info_resolution_text = Resolución
+compare_info_modification_date_text = Fecha de modificación
+compare_loading_images_text = Cargando imágenes...
+compare_cancelling_text = Cancelando, por favor espere...
+context_menu_open_item_text = Element abierto
+context_menu_open_parent_text = Abrir carpeta padre
+context_menu_remove_from_results_text = Eliminar de los resultados
+context_menu_remove_all_from_folder_text = Eliminar todo de la carpeta
+context_menu_select_all_from_folder_text = Seleccionar todo de la carpeta
+context_menu_select_all_from_folder_except_one_text = Seleccionar todo del directorio (mantener uno)
+context_menu_exclude_parent_folder_text = Excluir carpeta principal
+context_menu_exclude_item_text = Excluir elemento
+context_menu_copy_name_text = Copiar nombre
+context_menu_copy_parent_folder_path_text = Copiar la ruta de la carpeta principal

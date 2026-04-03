@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Erreur Critique Pendant Le Démarrage De L'Application
-rust_init_error_message = 
-        Une erreur critique s'est produite lors du démarrage de l'application :
-
-        { $error_message }
-
-        Cela peut être dû à des pilotes OpenGL/Vulkan manquants ou défectueux, à l'exécution de l'application dans une machine virtuelle ou à un bug dans Krokiet ou l'une de ses bibliothèques.
-
-        Vous pouvez essayer d'exécuter différentes versions (skia_opengl, skia_vulkan, femtovg_opengl - par défaut) ou avec un rendu logiciel pour voir si cela résout le problème.
+rust_init_error_message =
+    Une erreur critique s'est produite lors du démarrage de l'application :
+    
+    { $error_message }
+    
+    Cela peut être dû à des pilotes OpenGL/Vulkan manquants ou défectueux, à l'exécution de l'application dans une machine virtuelle ou à un bug dans Krokiet ou l'une de ses bibliothèques.
+    
+    Vous pouvez essayer d'exécuter différentes versions (skia_opengl, skia_vulkan, femtovg_opengl - par défaut) ou avec un rendu logiciel pour voir si cela résout le problème.
 rust_loaded_preset = Préréglage { $preset_idx } chargé
 rust_file_already_exists = Fichier "{ $file }" existe déjà et ne sera pas écrasé
 rust_error_removing_file_after_copy = Erreur lors de la suppression du fichier "{ $file }" (après copie sur une autre partition), la raison : { $reason }
@@ -114,7 +114,7 @@ rust_cache_processed_files = Les fichiers de cache { $files } ont été traités
 rust_cache_entries_stats = Supprimés { $removed } entrées sur { $all }, { $left } restantes
 rust_cache_size_reduced = Réduit la taille des fichiers de cache de { $size }
 rust_cache_time_elapsed = Temps écoulé : { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = Échec du lien symbolique { $name } vers { $target }, raison { $reason }
 rust_hardlink_failed = Échec du lien dur { $name } vers { $target }, la raison { $reason }
 
 # Slint translations, but in arrays
@@ -336,7 +336,7 @@ subsettings_video_optimizer_black_pixel_threshold = Seuil Pixel Noir
 subsettings_video_optimizer_black_pixel_threshold_hint = Valeur RGB maximale pour chaque canal de pixel à être considérée comme noire (0-128). Valeur par défaut : 20
 subsettings_video_optimizer_black_bar_min_percentage = Barre noire pourcentage minimum
 subsettings_video_optimizer_black_bar_min_percentage_hint = Minimum pourcentage de pixels noirs dans une ligne/colonne à être considéré comme une barre noire (50-100). Valeur par défaut : 90
-subsettings_video_optimizer_max_samples = Max Samples
+subsettings_video_optimizer_max_samples = Nombre max. d'échantillons
 subsettings_video_optimizer_max_samples_hint = Nombre maximal de séquences à analyser par vidéo (5-1000). Valeur par défaut : 60
 subsettings_video_optimizer_min_crop_size = Taille minimale de l'image
 subsettings_video_optimizer_min_crop_size_hint = Minimum pixels à rogner sur n'importe quel côté (1-1000). Les rognages plus petits sont ignorés. Valeur par défaut : 5
@@ -366,3 +366,49 @@ hardlink_confirmation_text = Êtes-vous sûr de vouloir créer des liens matéri
 softlink_button_text = Lien Softlink
 softlink_text = Créer des liens logiciels
 softlink_confirmation_text = Êtes-vous sûr de vouloir créer des liens logiciels (liens symboliques) pour les éléments sélectionnés ?
+
+column_full_path = Chemin complet
+file_dialog_open = Fermez la fenêtre de dialogue pour continuer
+selection_custom_select_unselect = Sélection/Désélection personnalisée
+settings_similar_videos_preview_hint = L'aperçu est visible uniquement lorsque l'option "Générer les miniatures" est activée, ou lorsqu'une miniature a déjà été générée.
+settings_show_notification_on_scan_completion_text = Afficher une notification lorsque la numérisation est terminée
+settings_notification_feature_hint_text = Disponible uniquement lors de la compilation avec la fonctionnalité de notifications
+settings_notification_focused_hint_text = La notification peut ne pas apparaître sous forme de fenêtre contextuelle lorsque la fenêtre de l'application est active
+popup_custom_select_title_text = Sélection personnalisée / Désélection personnalisée
+popup_custom_select_button_text = Sélectionner
+popup_custom_unselect_button_text = Désélectionner
+popup_custom_column_name_header_text = Colonne
+popup_custom_filter_value_header_text = Valeur du filtre (caractère générique / expression régulière)
+popup_custom_case_sensitive_text = Sensible à la casse
+popup_custom_leave_one_in_group_text = Sélectionnez tous les éléments, à l'exception d'un seul, dans chaque groupe
+popup_custom_hint_str_text = Colonnes de texte : caractères génériques *name* /home/* *.rs
+popup_custom_hint_int_text = Taille [Ko] / colonnes numériques : >= 2048  < 512  = 0  (opérateurs : >=  <=  >  <  =)
+popup_custom_hint_date_text = Colonnes de dates : Format JJ-MM-AAAA ou AAAA-MM-JJ, heure optionnelle HH:MM:SS. Exemple : >= 2020-01-01 ou < 31-12-2022 23:59:59
+compare_button_text = Comparez
+compare_back_text = Retour
+compare_prev_group_text = Groupe précédent
+compare_next_group_text = Groupe suivant
+compare_swap_text = Échange
+compare_info_text = Info
+compare_diff_text = Diff
+compare_loading_title_text = Veuillez patienter...
+compare_cancel_text = Annuler
+compare_resolution_mismatch_text = Différentes résolutions - les résultats des comparaisons peuvent être imprécis
+compare_computing_diff_text = Calcul du diff...
+compare_info_file_name_text = Nom du fichier
+compare_info_path_text = Chemin
+compare_info_size_text = Taille
+compare_info_resolution_text = Résolution
+compare_info_modification_date_text = Date de modification
+compare_loading_images_text = Chargement des images...
+compare_cancelling_text = Annulation en cours, veuillez patienter...
+context_menu_open_item_text = Élément ouvert
+context_menu_open_parent_text = Ouvrir le dossier parent
+context_menu_remove_from_results_text = Supprimer des résultats
+context_menu_remove_all_from_folder_text = Supprimer tout du dossier
+context_menu_select_all_from_folder_text = Sélectionner tout depuis le dossier
+context_menu_select_all_from_folder_except_one_text = Sélectionner tout depuis le dossier (en ne conservant qu'un seul élément)
+context_menu_exclude_parent_folder_text = Exclure le dossier parent
+context_menu_exclude_item_text = Exclure l'élément
+context_menu_copy_name_text = Copier le nom
+context_menu_copy_parent_folder_path_text = Copier le chemin du dossier parent

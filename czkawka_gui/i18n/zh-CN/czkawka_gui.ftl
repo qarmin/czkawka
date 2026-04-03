@@ -8,18 +8,18 @@ general_ok_button = 确定
 general_close_button = 关闭
 # Krokiet info dialog
 krokiet_info_title = Introducing Krokiet - 新版本 Czkawka
-krokiet_info_message = 
-        克罗基特是 Czkawka GTK GUI 的新、改进、更快、更可靠的版本！
- 
-        它更易于运行，并且对系统更改更具弹性，因为它只依赖于大多数系统默认可用的核心库。
- 
-        克罗基特还带来 Czkawka 缺乏的功能，包括视频比较模式下的缩略图、EXIF 清理器、文件移动/复制/删除进度或扩展排序选项。
- 
-        尝试一下并看看区别！
- 
-        Czkawka 将继续收到我提供的错误修复和小更新，但所有新功能都将专门为克罗基特开发，任何人都可以在添加新功能、添加缺失模式或进一步扩展 Czkawka 时自由贡献。
- 
-        PS：此消息只应出现一次。如果它再次出现，请将 CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。.
+krokiet_info_message =
+    克罗基特是 Czkawka GTK GUI 的新、改进、更快、更可靠的版本！
+    
+    它更易于运行，并且对系统更改更具弹性，因为它只依赖于大多数系统默认可用的核心库。
+    
+    克罗基特还带来 Czkawka 缺乏的功能，包括视频比较模式下的缩略图、EXIF 清理器、文件移动/复制/删除进度或扩展排序选项。
+    
+    尝试一下并看看区别！
+    
+    Czkawka 将继续收到我提供的错误修复和小更新，但所有新功能都将专门为克罗基特开发，任何人都可以在添加新功能、添加缺失模式或进一步扩展 Czkawka 时自由贡献。
+    
+    PS：此消息只应出现一次。如果它再次出现，请将 CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。.
 # Main window
 music_title_checkbox = 标题
 music_artist_checkbox = 艺人
@@ -33,11 +33,11 @@ music_checking_by_content = 内容
 same_music_seconds_label = 最小分片秒持续时间
 same_music_similarity_label = 最大差异
 music_compare_only_in_title_group = 在相似标题的组中比较
-music_compare_only_in_title_group_tooltip = 
+music_compare_only_in_title_group_tooltip =
     如果启用，文件按标题分类，然后相互比较。
     
     如果有一亿文件，而不是几乎1亿文件的比较，通常就会有大约2000万份比较。.
-same_music_tooltip = 
+same_music_tooltip =
     通过设置以下内容，可以配置按其内容搜索类似的音乐文件：
     
     - 可以识别音乐文件为类似文件的最小碎片时间
@@ -62,7 +62,7 @@ duplicate_mode_size_name_combo_box = 大小和名称
 duplicate_mode_name_combo_box = 名称
 duplicate_mode_size_combo_box = 大小
 duplicate_mode_hash_combo_box = 哈希
-duplicate_hash_type_tooltip = 
+duplicate_hash_type_tooltip =
     Czkawka提供3种哈希类型：
     
     Blake3 - 加密散列函数。这是默认选项，因为它非常快。
@@ -70,7 +70,7 @@ duplicate_hash_type_tooltip =
     CRC32 - 简单的散列函数。这应该比Blake3更快，但极少情况下可能会有一些冲突。
     
     XXH3 - 与Blake3非常相似，性能和哈希质量也很高 （但不是加密的）。因此，这些模式可以很容易地互换使用。.
-duplicate_check_method_tooltip = 
+duplicate_check_method_tooltip =
     目前，Czkawka提供三种方法来查找重复：
     
     名称 - 查找名称相同的文件。
@@ -78,7 +78,7 @@ duplicate_check_method_tooltip =
     大小 - 查找大小相同的文件。
     
     哈希 - 查找内容相同的文件。 这种模式会对文件进行哈希计算，然后将哈希值进行比较以查找重复项。这种模式是查找重复项的最安全方法。应用程序大量使用缓存，因此对相同数据进行的第二次及更多次扫描应比第一次更快。.
-image_hash_size_tooltip = 
+image_hash_size_tooltip =
     每张选中的图像都产生了一个可相互比较的特殊哈希。 两者之间的小差别意味着这些图像是相似的。
     
     8 散列尺寸非常适合于找到仅略类似于原始图像的图像。 有了更大的一组图像 (>1000)，这将产生大量虚假的正数， 所以我建议在这种情况下使用更大的散列尺寸。
@@ -86,7 +86,7 @@ image_hash_size_tooltip =
     16是默认的散列尺寸，它是一个很好的折衷，既使找到了一些小相似的图像，又仅有少量的散列碰撞。
     
     32和64 散列只找到非常相似的图像，但是几乎不应该有假正数  (可能只有一些带着Alpha 通道的图像)。.
-image_resize_filter_tooltip = 
+image_resize_filter_tooltip =
     要计算图像散列，库必须首先调整大小。
     
     在选定的算法上花费, 用来计算散列的结果图像看起来有点不同。
@@ -94,7 +94,7 @@ image_resize_filter_tooltip =
     最快使用的算法，也是结果最差的算法，是Nearest。 默认情况下启用它，因为16x16散列大小较低的质量并不真正可见。
     
     使用 8x8 散列大小，建议使用不同于Nearest的算法来拥有更好的图像组。.
-image_hash_alg_tooltip = 
+image_hash_alg_tooltip =
     用户可以从许多计算哈希值的算法中选择一种。
     
     每种算法都有强项和弱项，对于不同的图像，有时结果更好，有时结果更差。
@@ -184,7 +184,7 @@ upper_remove_excluded_button_tooltip = 从排除中删除目录。.
 upper_notebook_items_configuration = 项目配置
 upper_notebook_excluded_directories = 排除路径
 upper_notebook_included_directories = 包含路径
-upper_allowed_extensions_tooltip = 
+upper_allowed_extensions_tooltip =
     允许的扩展名必须用逗号分隔（默认情况下所有扩展名都可用）。
     
     还可以使用以下可一次添加多个扩展名的宏：IMAGE、VIDEO、MUSIC、TEXT。
@@ -192,13 +192,13 @@ upper_allowed_extensions_tooltip =
     填写 /home/roman;/home/krokiet 将添加 /home/roman 和  /home/kookiet 两个目录
     
     用法示例“.exe、IMAGE、VIDEO、.rar、7z” - 这意味着将扫描图像（例如 jpg、png）、视频（例如 avi、mp4）、exe、rar 和 7z 文件。.
-upper_excluded_extensions_tooltip = 
+upper_excluded_extensions_tooltip =
     在扫描中忽略的已禁用文件列表。
     
     在使用允许和禁用的扩展时，这个扩展具有更高的优先级，所以文件将不会被检查。.
-upper_excluded_items_tooltip = 
-        排除项目必须包含 * 并且应以逗号分隔。
-        这比排除路径慢，因此请谨慎使用。.
+upper_excluded_items_tooltip =
+    排除项目必须包含 * 并且应以逗号分隔。
+    这比排除路径慢，因此请谨慎使用。.
 upper_excluded_items = 排除的项目：
 upper_allowed_extensions = 允许的扩展：
 upper_excluded_extensions = 已禁用扩展：
@@ -226,7 +226,7 @@ popover_custom_name_check_button_entry_tooltip =
     
     示例用法：
     /usr/ping/pong.txt 可以通过 *ong* 找到。
-popover_custom_regex_check_button_entry_tooltip = 
+popover_custom_regex_check_button_entry_tooltip =
     按指定的正则表达式选择记录。
     
     使用此模式，搜索的文本是带有名称的路径。
@@ -235,11 +235,11 @@ popover_custom_regex_check_button_entry_tooltip =
     可以使用 /ziem[a-z]+ 查找 /usr/bin/ziemniak.txt
     
     这使用默认的Rust正则表达式实现。 您可以在此处阅读有关它的更多信息: https://docs.rs/regex。.
-popover_custom_case_sensitive_check_button_tooltip = 
+popover_custom_case_sensitive_check_button_tooltip =
     启用大小写检测。
     
     该选项禁用时，/home/* 将同时找到 /HoMe/roman 和 /home/roman。.
-popover_custom_not_all_check_button_tooltip = 
+popover_custom_not_all_check_button_tooltip =
     禁止在分组中选择所有记录。
     
     这是默认启用的，因为在大多数情况下， 您不想删除原始文件和重复文件，而是想留下至少一个文件。
@@ -273,20 +273,20 @@ bottom_search_button_tooltip = 开始搜索
 bottom_select_button_tooltip = 选择记录。只能稍后处理选定的文件/文件夹。.
 bottom_delete_button_tooltip = 删除选中的文件/文件夹。.
 bottom_save_button_tooltip = 保存搜索数据到文件
-bottom_symlink_button_tooltip = 
+bottom_symlink_button_tooltip =
     创建软链接。
     只有在至少选择了一组中的两个结果时才起作用。
     第一个结果保持不变，第二个及后续结果都会被软链接到第一个结果上。.
-bottom_hardlink_button_tooltip = 
+bottom_hardlink_button_tooltip =
     创建硬链接。
     只有在至少选择了一组中的两个结果时才起作用。
     第一个结果保持不变，第二个及后续结果都会被硬链接到第一个结果上。.
-bottom_hardlink_button_not_available_tooltip = 
+bottom_hardlink_button_not_available_tooltip =
     创建硬链接。
     按钮已禁用，因为无法创建硬链接。
     在 Windows 上，只有使用管理员权限才能使用硬链接，所以请确保以管理员身份运行该应用程序。
     如果应用程序已经具有管理员权限，请在 Github 上查找类似的问题。.
-bottom_move_button_tooltip = 
+bottom_move_button_tooltip =
     移动文件到选定的目录。
     它复制所有文件到目录，而不保留目录树。
     试图将两个具有相同名称的文件移动到文件夹时，第二个将失败并显示错误。.
@@ -309,7 +309,7 @@ about_translation_button = 翻译
 # Header
 header_setting_button_tooltip = 打开设置对话框。.
 header_about_button_tooltip = 打开包含应用程序信息的对话框。.
- 
+
 # Settings
 
 
@@ -318,7 +318,7 @@ header_about_button_tooltip = 打开包含应用程序信息的对话框。.
 settings_number_of_threads = 使用的线程数
 settings_number_of_threads_tooltip = 使用的线程数，0表示所有可用线程都将被使用。.
 settings_use_rust_preview = 使用外部库来加载预览
-settings_use_rust_preview_tooltip = 
+settings_use_rust_preview_tooltip =
     使用 gtk 预览有时会更快，支持更多格式，但有时恰恰相反。
     
     如果您在加载预览时遇到问题，您可以尝试更改此设置。
@@ -331,7 +331,7 @@ settings_ignore_other_filesystems_tooltip =
     
     在 Linux 上查找命令时类似-xdev选项
 settings_save_at_exit_button_tooltip = 关闭应用时将配置保存到文件。.
-settings_load_at_start_button_tooltip = 
+settings_load_at_start_button_tooltip =
     打开应用程序时从文件加载配置。
     
     如果未启用，将使用默认设置。.
@@ -354,7 +354,7 @@ settings_save_also_as_json_button = 同时将缓存保存为 JSON 文件
 settings_use_trash_button = 移动已删除的文件到回收站
 settings_language_label = 语言
 settings_multiple_delete_outdated_cache_checkbutton = 自动删除过时的缓存条目
-settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
+settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     删除指向不存在文件的过期缓存结果。
     
     当启用时，应用程序确保在加载记录时所有记录都指向有效文件 (无法访问的文件将被忽略)。
@@ -371,22 +371,22 @@ settings_notebook_videos = 相似视频
 
 settings_multiple_image_preview_checkbutton_tooltip = 在右侧显示预览 (当选择图像文件时)。.
 settings_multiple_image_preview_checkbutton = 显示图像预览
-settings_multiple_clear_cache_button_tooltip = 
+settings_multiple_clear_cache_button_tooltip =
     手动清除过时条目的缓存。
     仅在禁用自动清除时才使用。.
 settings_multiple_clear_cache_button = 从缓存中删除过时的结果。.
- 
+
 ## Duplicates
 
-settings_duplicates_hide_hard_link_button_tooltip = 
+settings_duplicates_hide_hard_link_button_tooltip =
     隐藏除一个以外的所有文件，如果所有文件都指向同一数据（即为硬链接）。
     
     示例：如果（磁盘上）有七个文件硬链接到特定数据，而一个不同文件具有相同数据但不同 inode，则在重复查找器中，将仅显示一个唯一文件和一个来自硬链接文件的文件。.
-settings_duplicates_minimal_size_entry_tooltip = 
+settings_duplicates_minimal_size_entry_tooltip =
     设置将被缓存的最小文件大小。
     
     选择较小的值将会生成更多的记录。这将加快搜索速度，但会减慢缓存的加载/保存速度。.
-settings_duplicates_prehash_checkbutton_tooltip = 
+settings_duplicates_prehash_checkbutton_tooltip =
     启用预散列缓存 (从文件的一小部分计算出的哈希)，以便更早地排除非重复结果。
     
     默认情况下禁用它，因为在某些情况下可能会导致减慢速度。
@@ -409,7 +409,7 @@ settings_reset_button = 重置配置
 
 ## Opening cache/config folders
 
-settings_folder_cache_open_tooltip = 
+settings_folder_cache_open_tooltip =
     打开存储缓存的txt文件的文件夹。
     
     修改缓存文件可能会导致显示无效的结果。然而，当将大量文件移动到另一个位置时，修改路径可能会节省时间。
@@ -417,7 +417,7 @@ settings_folder_cache_open_tooltip =
     您可以在计算机之间复制这些文件，以节省再次扫描文件的时间 (当然，如果它们具有相似的目录结构)。
     
     如果出现缓存问题，可以删除这些文件。该应用程序将自动重新生成它们。.
-settings_folder_settings_open_tooltip = 
+settings_folder_settings_open_tooltip =
     打开保存Czkawka配置的文件夹。
     
     警告：手动修改配置可能会破坏您的工作流程。.

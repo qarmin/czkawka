@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Kritisk Fel Vid Applikationsstart
-rust_init_error_message = 
-        Ett allvarligt fel inträffade vid start av applikationen:
-
-        { $error_message }
-
-        Detta kan bero på saknade eller felaktiga OpenGL/Vulkan-drivrutiner, att applikationen körs i en virtuell maskin eller ett fel i Krokiet eller någon av dess bibliotek.
-
-        Du kan försöka köra olika byggen (skia_opengl, skia_vulkan, femtovg_opengl - standard) eller med en renderingsmotor för att se om det löser problemet.
+rust_init_error_message =
+    Ett allvarligt fel inträffade vid start av applikationen:
+    
+    { $error_message }
+    
+    Detta kan bero på saknade eller felaktiga OpenGL/Vulkan-drivrutiner, att applikationen körs i en virtuell maskin eller ett fel i Krokiet eller någon av dess bibliotek.
+    
+    Du kan försöka köra olika byggen (skia_opengl, skia_vulkan, femtovg_opengl - standard) eller med en renderingsmotor för att se om det löser problemet.
 rust_loaded_preset = Laddad förinställning { $preset_idx }
 rust_file_already_exists = Fil "{ $file }" finns redan och kommer inte att skrivas över
 rust_error_removing_file_after_copy = Fel vid borttagning av fil "{ $file }" (efter kopiering till en annan partition), anledning: { $reason }
@@ -54,7 +54,7 @@ rust_found_temporary_files = Hittade { $items_found } temporära filer i { $time
 rust_no_file_type_selected = Kan inte hitta trasiga filer utan någon vald filtyp.
 rust_found_broken_files = Hittade { $items_found } trasiga filer som tog { $size } i { $time }
 rust_found_bad_extensions = Hittade { $items_found } filer med dåliga tillägg i { $time }
-rust_found_bad_names = Hittade { $items_found } filer med dåliga namn i { $time}
+rust_found_bad_names = Hittade { $items_found } filer med dåliga namn i { $time }
 rust_found_video_optimizer = Hittade { $items_found } filer att optimera i { $time }
 rust_found_duplicate_files = Hittade { $items_found } duplicerade filer i { $groups } grupper som tog { $size } i { $time }
 rust_found_duplicate_files_no_lost_space = Hittade { $items_found } dubblettfiler i { $groups } grupper i { $time }
@@ -110,10 +110,11 @@ rust_symlink_confirmation = Är du säker på att du vill skapa symboliska länk
 rust_symlink_confirmation_number_simple = { $items } föremål valda.
 rust_rename_confirmation = Är du säker på att du vill omdöpa de valda objekten?
 rust_rename_confirmation_number_simple = { $items } föremål valda.
+rust_cache_processed_files = Bearbetade { $files } cache-filer
 rust_cache_entries_stats = Borttagna { $removed } posteringar ut av alla { $all }, { $left } kvar
 rust_cache_size_reduced = Minskade cachefilers storlek med { $size }
 rust_cache_time_elapsed = Tid som gått: { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = Misslyckades med att länka den symboliska länken { $name } till { $target }, orsak { $reason }
 rust_hardlink_failed = Misslyckades med att skapa hårdlänk { $name } till { $target }, anledning { $reason }
 
 # Slint translations, but in arrays
@@ -366,4 +367,48 @@ softlink_button_text = Softlink
 softlink_text = Skapa symboliska länkar
 softlink_confirmation_text = Är du säker på att du vill skapa symboliska länkar (symlinks) för de valda objekten?
 
-rust_cache_processed_files = Bearbetade { $files } cache-filer
+column_full_path = Fullständig sökväg
+file_dialog_open = Stäng dialogfönstret för att fortsätta
+selection_custom_select_unselect = Anpassad val/avmarkering
+settings_similar_videos_preview_hint = Förhandsvisningen visas endast när "Generera miniatyrbilder" är aktiverat, eller när en miniatyrbild redan har genererats.
+settings_show_notification_on_scan_completion_text = Visa en notis när skanningen är klar
+settings_notification_feature_hint_text = Tillgängligt endast när man kompilerar med funktionen för notifikationer
+settings_notification_focused_hint_text = Meddelandet kanske inte visas som en popup när appfönstret är aktivt
+popup_custom_select_title_text = Anpassad val/avmarkering
+popup_custom_select_button_text = Välj
+popup_custom_unselect_button_text = Avmarkera
+popup_custom_column_name_header_text = Kolumn
+popup_custom_filter_value_header_text = Filtervärde (wildcard / regex)
+popup_custom_case_sensitive_text = Skiftlägeskänslig
+popup_custom_leave_one_in_group_text = Välj alla objekt förutom ett, i varje grupp
+popup_custom_hint_str_text = Textkolumner: jokertecken *namn* /home/* *.rs
+popup_custom_hint_int_text = Storlek [KB] / numeriska kolumner: >= 2048  < 512  = 0  (operatorer: >=  <=  >  <  =)
+popup_custom_hint_date_text = Datumkolumner: DD-MM-YYYY eller YYYY-MM-DD, valfri tid HH:MM:SS. Exempel: >= 2020-01-01 eller < 31-12-2022 23:59:59
+compare_button_text = Jämför
+compare_back_text = Tillbaka
+compare_prev_group_text = Föregående grupp
+compare_next_group_text = Nästa grupp
+compare_swap_text = Byt
+compare_info_text = Info
+compare_diff_text = Skillnad
+compare_loading_title_text = Vänligen vänta...
+compare_cancel_text = Avbryt
+compare_resolution_mismatch_text = Olika upplösningar – resultaten kan bli felaktiga
+compare_computing_diff_text = Beräknar skillnaden...
+compare_info_file_name_text = Filnamn
+compare_info_path_text = Väg
+compare_info_size_text = Storlek
+compare_info_resolution_text = Beslut
+compare_info_modification_date_text = Ändringsdatum
+compare_loading_images_text = Laddar bilder...
+compare_cancelling_text = Avbokning, vänligen vänta...
+context_menu_open_item_text = Öppna objekt
+context_menu_open_parent_text = Öppna överordnad mapp
+context_menu_remove_from_results_text = Ta bort från resultat
+context_menu_remove_all_from_folder_text = Ta bort allt från mappen
+context_menu_select_all_from_folder_text = Välj alla från mapp
+context_menu_select_all_from_folder_except_one_text = Välj alla från mapp (behåll en)
+context_menu_exclude_parent_folder_text = Exkludera överordnad mapp
+context_menu_exclude_item_text = Exkludera objekt
+context_menu_copy_name_text = Kopiera namn
+context_menu_copy_parent_folder_path_text = Kopiera sökvägen till överordnad mapp

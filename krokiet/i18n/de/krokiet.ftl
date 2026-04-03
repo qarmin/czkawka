@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = Kritischer Fehler während des App-Startlaufs
-rust_init_error_message = 
-        Beim Starten der Anwendung ist ein kritischer Fehler aufgetreten:
-
-        { $error_message }
-
-        Dies kann durch fehlende oder fehlerhafte OpenGL/Vulkan-Treiber, das Ausführen der Anwendung in einer virtuellen Maschine oder einem Fehler in Krokiet oder einer seiner Bibliotheken verursacht werden.
-
-        Sie können versuchen, verschiedene Builds (skia_opengl, skia_vulkan, femtovg_opengl - Standard) oder mit dem Software-Renderer auszuführen, um zu sehen, ob das Problem dadurch behoben wird.
+rust_init_error_message =
+    Beim Starten der Anwendung ist ein kritischer Fehler aufgetreten:
+    
+    { $error_message }
+    
+    Dies kann durch fehlende oder fehlerhafte OpenGL/Vulkan-Treiber, das Ausführen der Anwendung in einer virtuellen Maschine oder einem Fehler in Krokiet oder einer seiner Bibliotheken verursacht werden.
+    
+    Sie können versuchen, verschiedene Builds (skia_opengl, skia_vulkan, femtovg_opengl - Standard) oder mit dem Software-Renderer auszuführen, um zu sehen, ob das Problem dadurch behoben wird.
 rust_loaded_preset = Geladene Voreinstellung { $preset_idx }
 rust_file_already_exists = Datei "{ $file }" existiert bereits und wird nicht überschrieben
 rust_error_removing_file_after_copy = Fehler beim Entfernen der Datei "{ $file }" (nach Kopieren auf eine andere Partition), Grund: { $reason }
@@ -16,12 +16,12 @@ rust_loading_tags_cache = Tag-Cache wird geladen
 rust_loading_fingerprints_cache = Cache für Fingerabdrücke wird geladen
 rust_saving_tags_cache = Speichere Tag-Cache
 rust_saving_fingerprints_cache = Speichere Fingerabdruck-Cache
-rust_loading_prehash_cache = Lade Vorhash-Cache
-rust_saving_prehash_cache = Speichere Vorhash-Cache
+rust_loading_prehash_cache = Lade Prehash-Cache
+rust_saving_prehash_cache = Speichere Prehash-Cache
 rust_loading_hash_cache = Hash-Cache wird geladen
 rust_saving_hash_cache = Speichere Hash-Cache
 rust_loading_exif_cache = Lade EXIF-Cache
-rust_saving_exif_cache = Speichern EXIF-Cache
+rust_saving_exif_cache = Speichere EXIF-Cache
 rust_scanning_name = Scanne Name der { $entries_checked } Datei
 rust_scanning_size_name = Scanne Größe und Name der { $entries_checked } Datei
 rust_scanning_size = Scanne Größe der { $entries_checked } Datei
@@ -54,7 +54,7 @@ rust_found_temporary_files = { $items_found } temporäre Dateien in { $time } ge
 rust_no_file_type_selected = defekte Dateien ohne ausgewählten Dateityp nicht gefunden.
 rust_found_broken_files = { $items_found } fehlerhafte Dateien gefunden, die { $size } in { $time } einnehmen
 rust_found_bad_extensions = { $items_found } Dateien mit schlechten Erweiterungen in { $time } gefunden
-rust_found_bad_names = Gefunden { $items_found } Dateien mit schlechten Namen in { $time}
+rust_found_bad_names = Gefunden { $items_found } Dateien mit schlechten Namen in { $time }
 rust_found_video_optimizer = Gefunden { $items_found } Dateien zur Optimierung in { $time }
 rust_found_duplicate_files = { $items_found } Duplikate in { $groups } Gruppen gefunden, die { $size } in { $time } einnehmen
 rust_found_duplicate_files_no_lost_space = { $items_found } Duplikate in { $groups } Gruppen in { $time } gefunden
@@ -114,7 +114,7 @@ rust_cache_processed_files = Verarbeitete { $files } Cache-Dateien
 rust_cache_entries_stats = Entfernt { $removed } Einträge aus { $all }, { $left } Einträge übrig
 rust_cache_size_reduced = Reduzierte Cache-Dateigröße um { $size }
 rust_cache_time_elapsed = Zeit vergangen: { $time }
-rust_symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+rust_symlink_failed = Symbolische Verknüpfung von { $name } nach { $target } fehlgeschlagen, Grund: { $reason }
 rust_hardlink_failed = Fehlgeschlagenes Hardlink von { $name } zu { $target }, Grund { $reason }
 
 # Slint translations, but in arrays
@@ -168,7 +168,7 @@ included_paths = Einbezogene Pfade
 excluded_paths = Ausgeschlossene Pfade
 ref = Referenz
 path = Pfad
-tool_duplicate_files = Dateien duplizieren
+tool_duplicate_files = Gleiche Dateien
 tool_empty_folders = Leere Ordner
 tool_big_files = Große Dateien
 tool_empty_files = Leere Dateien
@@ -336,7 +336,7 @@ subsettings_video_optimizer_black_pixel_threshold = Schwarzer Pixel-Schwellenwer
 subsettings_video_optimizer_black_pixel_threshold_hint = Maximaler RGB-Wert für jeden Farbkanal, der als Schwarz (0-128) betrachtet wird. Standard: 20
 subsettings_video_optimizer_black_bar_min_percentage = Schwarze Balken Mindestprozentsatz
 subsettings_video_optimizer_black_bar_min_percentage_hint = Mindestprozentsatz der schwarzen Pixel in einer Zeile/Spalte, um als schwarze Linie zu gelten (50-100). Standard: 90
-subsettings_video_optimizer_max_samples = Max Samples
+subsettings_video_optimizer_max_samples = Max. Samples
 subsettings_video_optimizer_max_samples_hint = Maximal Anzahl an Frames zur Analyse pro Video (5-1000). Standard: 60
 subsettings_video_optimizer_min_crop_size = Minimale Bildgröße
 subsettings_video_optimizer_min_crop_size_hint = Mindestanzahl der zu abschneidenden Pixel auf jeder Seite (1-1000). Kleinere Abschneidungen werden ignoriert. Standard: 5
@@ -366,3 +366,49 @@ hardlink_confirmation_text = Sind Sie sicher, dass Sie harte Links für die ausg
 softlink_button_text = Softlink
 softlink_text = Erstelle Softlinks
 softlink_confirmation_text = Sind Sie sicher, dass Sie Softlinks (Symlinks) für die ausgewählten Elemente erstellen möchten?
+
+column_full_path = Vollständiger Pfad
+file_dialog_open = Schließen Sie das Dialogfenster, um fortzufahren
+selection_custom_select_unselect = Benutzerdefinierte Auswahl/Abwahl
+settings_similar_videos_preview_hint = Die Vorschau ist nur sichtbar, wenn die Option "Miniaturansichten generieren" aktiviert ist, oder wenn bereits eine Miniaturansicht erstellt wurde.
+settings_show_notification_on_scan_completion_text = Zeige eine Benachrichtigung an, wenn der Scan abgeschlossen ist
+settings_notification_feature_hint_text = Nur verfügbar, wenn die Benachrichtigungsfunktion beim Kompilieren aktiviert ist
+settings_notification_focused_hint_text = Die Benachrichtigung wird möglicherweise nicht als Popup-Fenster angezeigt, wenn das Anwendungsfenster im Fokus steht
+popup_custom_select_title_text = Benutzerdefinierte Auswahl / Deauswahl
+popup_custom_select_button_text = Auswählen
+popup_custom_unselect_button_text = Abwählen
+popup_custom_column_name_header_text = Spalte
+popup_custom_filter_value_header_text = Filterwert (Wildcard / regulärer Ausdruck)
+popup_custom_case_sensitive_text = Groß- und Kleinschreibung beachten
+popup_custom_leave_one_in_group_text = Wählen Sie alle Elemente aus, mit Ausnahme eines, in jeder Gruppe
+popup_custom_hint_str_text = Textspalten: Platzhalter *name* /home/* *.rs
+popup_custom_hint_int_text = Größe [KB] / numerische Spalten: >= 2048  < 512  = 0  (Operatoren: >=  <=  >  <  =)
+popup_custom_hint_date_text = Datumsspalten: DD-MM-YYYY oder YYYY-MM-DD, optional Uhrzeit HH:MM:SS  z.B.  >= 2020-01-01  oder  < 31-12-2022 23:59:59
+compare_button_text = Vergleichen
+compare_back_text = Zurück
+compare_prev_group_text = Prev Group
+compare_next_group_text = Nächste Gruppe
+compare_swap_text = Tauschen
+compare_info_text = Information
+compare_diff_text = Änderungen
+compare_loading_title_text = Bitte warten...
+compare_cancel_text = Abbrechen
+compare_resolution_mismatch_text = Verschiedene Auflösungen – unterschiedliche Ergebnisse können ungenau sein
+compare_computing_diff_text = Berechne Differenz...
+compare_info_file_name_text = Dateiname
+compare_info_path_text = Pfad
+compare_info_size_text = Größe
+compare_info_resolution_text = Auflösung
+compare_info_modification_date_text = Datum der Änderung
+compare_loading_images_text = Bilder werden geladen...
+compare_cancelling_text = Stornierung wird bearbeitet... Bitte warten.
+context_menu_open_item_text = Offener Posten
+context_menu_open_parent_text = Ordner öffnen (übergeordnet)
+context_menu_remove_from_results_text = Entfernen aus den Ergebnissen
+context_menu_remove_all_from_folder_text = Entferne alle Elemente aus dem Ordner
+context_menu_select_all_from_folder_text = Alle auswählen aus Ordner
+context_menu_select_all_from_folder_except_one_text = Alle auswählen aus Ordner (einen beibehalten)
+context_menu_exclude_parent_folder_text = Ordner "Eltern" ausschließen
+context_menu_exclude_item_text = Artikel ausblenden
+context_menu_copy_name_text = Kopiere Namen
+context_menu_copy_parent_folder_path_text = Pfad des übergeordneten Ordners kopieren

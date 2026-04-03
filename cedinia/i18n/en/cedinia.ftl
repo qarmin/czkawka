@@ -302,14 +302,6 @@ option_check_method_size = Size
 option_music_method_tags = Tags
 option_music_method_audio = Audio
 option_min_size_none = None
-option_min_size_1kb = 1 KB
-option_min_size_8kb = 8 KB
-option_min_size_64kb = 64 KB
-option_min_size_1mb = 1 MB
-option_max_size_16kb = 16 KB
-option_max_size_1mb = 1 MB
-option_max_size_10mb = 10 MB
-option_max_size_100mb = 100 MB
 option_max_size_unlimited = Unlimited
 
 # Volume labels (shown in the directories screen)
@@ -342,4 +334,5 @@ path_edit_no_newlines = Paths cannot contain newlines — Enter key is not allow
 ctx_menu_title = Open
 ctx_open_file = Open item
 ctx_open_folder = Open parent folder
+dir_open_folder = Open folder
 

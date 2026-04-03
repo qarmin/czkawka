@@ -25,6 +25,13 @@ export global ColorPalette {
 
     in-out property <color> hint_color: Settings.dark_theme ? #888888 : #888888;
 
+    in-out property <color> compare_left_value_color: Settings.dark_theme ? #6699cc : #224488;
+    in-out property <color> compare_right_value_color: Settings.dark_theme ? #cc9966 : #885522;
+    in-out property <color> compare_divider_color: Settings.dark_theme ? #444444 : #aaaaaa;
+    in-out property <color> compare_info_background: Settings.dark_theme ? #222222 : #d8d8d8;
+    in-out property <color> compare_info_border: Settings.dark_theme ? #444444 : #bbbbbb;
+    in-out property <color> compare_loading_card_background: Settings.dark_theme ? #2a2a2a : #f4f4f4;
+
     public pure function get_listview_color(selected: bool, hovered: bool) -> color {
         if (selected) {
             return hovered ? self.list_view_item_selected_hovered_color : self.list_view_item_selected_color;

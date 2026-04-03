@@ -83,8 +83,11 @@ clip:
     cargo clippy --fix --allow-dirty --allow-staged --no-default-features --features winit_software --all-targets
 
 fix:
-    ruff format --line-length 120 --no-cache
-    mypy misc --strict
+    cp misc/pyproject.toml .
+    uv sync
+
+    uv run ruff format --line-length 120 --no-cache
+    uv run mypy misc --strict
 
     bash misc/run_checks.sh
 
@@ -214,7 +217,7 @@ install:
 prepare_translations_deps:
     @command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
     @command -v ollama >/dev/null 2>&1 || curl -fsSL https://ollama.com/install.sh | sh
-    cd misc/ai_translate; uv sync
+    uv sync
     # qwen2.5:7b - fast, but quite bad quality
     # qwen2.5:32b - very slow, still not good quality
     # zongwei/gemma3-translator:4b - not so fast, but looks quite good
@@ -222,15 +225,17 @@ prepare_translations_deps:
     export OLLAMA_VULKAN=1; export HSA_OVERRIDE_GFX_VERSION=10.3.0; ollama pull translategemma:12b
 
 translate:
-    cd misc/ai_translate; uv run translate.py ../../czkawka_gui/i18n
-    cd misc/ai_translate; uv run translate.py ../../czkawka_core/i18n
-    cd misc/ai_translate; uv run translate.py ../../krokiet/i18n
+    uv run misc/ai_translate/translate.py czkawka_gui/i18n
+    uv run misc/ai_translate/translate.py czkawka_core/i18n
+    uv run misc/ai_translate/translate.py krokiet/i18n
+    uv run misc/ai_translate/translate.py cedinia/i18n
     just pack_translations
 
 validate_translations *args: # Available --fix argument, which removes invalid translations
-    cd misc/ai_translate; uv run validate_translations.py ../../czkawka_gui/i18n {{args}}
-    cd misc/ai_translate; uv run validate_translations.py ../../czkawka_core/i18n {{args}}
-    cd misc/ai_translate; uv run validate_translations.py ../../krokiet/i18n {{args}}
+    uv run misc/ai_translate/validate_translations.py czkawka_gui/i18n {{args}}
+    uv run misc/ai_translate/validate_translations.py czkawka_core/i18n {{args}}
+    uv run misc/ai_translate/validate_translations.py krokiet/i18n {{args}}
+    uv run misc/ai_translate/validate_translations.py cedinia/i18n {{args}}
 
 # Crowdin allows to import zip file with structured translations
 pack_translations:
@@ -243,6 +248,7 @@ pack_translations:
         [ -f "czkawka_gui/i18n/$lang_code/czkawka_gui.ftl" ] && cp "czkawka_gui/i18n/$lang_code/czkawka_gui.ftl" "/tmp/czkawka_i18n/i18n/$lang_code/" || true; \
         [ -f "czkawka_core/i18n/$lang_code/czkawka_core.ftl" ] && cp "czkawka_core/i18n/$lang_code/czkawka_core.ftl" "/tmp/czkawka_i18n/i18n/$lang_code/" || true; \
         [ -f "krokiet/i18n/$lang_code/krokiet.ftl" ] && cp "krokiet/i18n/$lang_code/krokiet.ftl" "/tmp/czkawka_i18n/i18n/$lang_code/" || true; \
+        [ -f "cedinia/i18n/$lang_code/cedinia.ftl" ] && cp "cedinia/i18n/$lang_code/cedinia.ftl" "/tmp/czkawka_i18n/i18n/$lang_code/" || true; \
     done
     cd /tmp/czkawka_i18n && zip -r - i18n > "{{justfile_directory()}}/i18n_translations.zip"
     rm -rf /tmp/czkawka_i18n
@@ -257,6 +263,7 @@ unpack_translations path_to_file:
         [ -f "$lang_dir/czkawka_gui.ftl" ] && mkdir -p "czkawka_gui/i18n/$lang_code" && cp "$lang_dir/czkawka_gui.ftl" "czkawka_gui/i18n/$lang_code/" && echo "Copied czkawka_gui.ftl to czkawka_gui/i18n/$lang_code/" || true; \
         [ -f "$lang_dir/czkawka_core.ftl" ] && mkdir -p "czkawka_core/i18n/$lang_code" && cp "$lang_dir/czkawka_core.ftl" "czkawka_core/i18n/$lang_code/" && echo "Copied czkawka_core.ftl to czkawka_core/i18n/$lang_code/" || true; \
         [ -f "$lang_dir/krokiet.ftl" ] && mkdir -p "krokiet/i18n/$lang_code" && cp "$lang_dir/krokiet.ftl" "krokiet/i18n/$lang_code/" && echo "Copied krokiet.ftl to krokiet/i18n/$lang_code/" || true; \
+        [ -f "$lang_dir/cedinia.ftl" ] && mkdir -p "cedinia/i18n/$lang_code" && cp "$lang_dir/cedinia.ftl" "cedinia/i18n/$lang_code/" && echo "Copied cedinia.ftl to cedinia/i18n/$lang_code/" || true; \
     done
     rm -rf /tmp/czkawka_unpack
     @echo "Translations unpacked successfully"
@@ -346,3 +353,13 @@ time_passes:
     cd czkawka_cli; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
     cargo clean
     cd krokiet; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
+
+test_heaptrack:
+    cd test && cargo build --profile rdebug
+    heaptrack test/target/rdebug/TEST
+    heaptrack_gui --appimage-extract-and-run "$(ls -t *.zst | head -n1)"
+
+heaptrack bin:
+    cargo build --profile rdebug --bin {{bin}}
+    heaptrack target/rdebug/{{bin}}
+    heaptrack_gui --appimage-extract-and-run "$(ls -t *.zst | head -n1)"

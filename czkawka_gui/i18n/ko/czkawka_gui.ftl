@@ -8,18 +8,18 @@ general_ok_button = 확인
 general_close_button = 닫기
 # Krokiet info dialog
 krokiet_info_title = Introducing Krokiet - 새로운 버전의 Czkawka
-krokiet_info_message = 
-        크로키트는 Czkawka GTK GUI의 새로운, 개선된, 더 빠르고 더 안정적인 버전입니다!
-
-        실행하기가 더 쉽고 시스템 변경에 더 강하며, 대부분의 시스템에서 기본적으로 사용 가능한 핵심 라이브러리에만 의존합니다.
-
-        크로키트는 Czkawka에 없는 기능도 제공하며, 비디오 비교 모드에서 미리보기, EXIF 클리너, 파일 이동/복사/삭제 진행률 또는 확장된 정렬 옵션 등이 포함됩니다.
-
-        사용해 보고 차이점을 확인해 보세요!
-
-        Czkawka는 저로부터 버그 수정 및 소규모 업데이트를 계속 받겠지만, 모든 새로운 기능은 크로키트에만 개발되며, 누구나 새로운 기능 추가, 누락된 모드 확장 또는 Czkawka 추가 확장을 자유롭게 기여할 수 있습니다.
-
-        PS: 이 메시지는 한 번만 표시되어야 합니다. 다시 나타나면 CZKAWKA_DONT_ANNOY_ME 환경 변수를 비어 있는 값이 아닌 값으로 설정하십시오.
+krokiet_info_message =
+    크로키트는 Czkawka GTK GUI의 새로운, 개선된, 더 빠르고 더 안정적인 버전입니다!
+    
+    실행하기가 더 쉽고 시스템 변경에 더 강하며, 대부분의 시스템에서 기본적으로 사용 가능한 핵심 라이브러리에만 의존합니다.
+    
+    크로키트는 Czkawka에 없는 기능도 제공하며, 비디오 비교 모드에서 미리보기, EXIF 클리너, 파일 이동/복사/삭제 진행률 또는 확장된 정렬 옵션 등이 포함됩니다.
+    
+    사용해 보고 차이점을 확인해 보세요!
+    
+    Czkawka는 저로부터 버그 수정 및 소규모 업데이트를 계속 받겠지만, 모든 새로운 기능은 크로키트에만 개발되며, 누구나 새로운 기능 추가, 누락된 모드 확장 또는 Czkawka 추가 확장을 자유롭게 기여할 수 있습니다.
+    
+    PS: 이 메시지는 한 번만 표시되어야 합니다. 다시 나타나면 CZKAWKA_DONT_ANNOY_ME 환경 변수를 비어 있는 값이 아닌 값으로 설정하십시오.
 # Main window
 music_title_checkbox = 제목
 music_artist_checkbox = 아티스트
@@ -160,7 +160,7 @@ main_check_box_broken_files_image = 이미지
 main_check_box_broken_files_video = 비디오
 main_check_box_broken_files_video_tooltip = ffmpeg/ffprobe를 사용하여 비디오 파일 유효성 검사합니다. 상당히 느리고 파일이 잘 재생되더라도 형식에 민감한 오류를 감지할 수 있습니다.
 check_button_general_same_size = 같은 파일크기 무시
-check_button_general_same_size_tooltip = 동일한 크기의 파일은 결과에서 제외합니다 - 대부분 1:1 중복일 가능성이 높습니다
+check_button_general_same_size_tooltip = 동일한 크기의 파일은 결과에서 제외합니다 – 대부분 1:1 중복일 가능성이 높습니다
 main_label_size_bytes_tooltip = 스캔할 파일의 크기입니다
 # Upper window
 upper_tree_view_included_folder_column_title = 검색할 폴더
@@ -173,7 +173,7 @@ upper_remove_included_button = 제거
 upper_manual_add_excluded_button = 수동 추가
 upper_add_excluded_button = 추가
 upper_remove_excluded_button = 제거
-upper_manual_add_included_button_tooltip = 
+upper_manual_add_included_button_tooltip =
     직접 검색할 경로를 입력합니다.
     
     여러 경로를 입력하고자 한다면, ';'로 구분하세요.
@@ -181,7 +181,7 @@ upper_manual_add_included_button_tooltip =
     '/home/roman;/home/rozkaz' 를 입력하면, '/home/roman'와 '/home/rozkaz'가 추가됩니다
 upper_add_included_button_tooltip = 검색할 디렉터리를 추가합니다.
 upper_remove_included_button_tooltip = 검색할 디렉터리에서 제거합니다.
-upper_manual_add_excluded_button_tooltip = 
+upper_manual_add_excluded_button_tooltip =
     직접 제외할 경로를 입력합니다.
     
     여러 경로를 입력하고자 한다면, ';'로 구분하세요.
@@ -202,9 +202,9 @@ upper_excluded_extensions_tooltip =
     검사에서 무시될 비활성화된 파일 목록입니다.
     
     허용된 확장자와 비활성화된 확장자를 둘 다 사용할 경우, 비활성화된 확장자가 더 높은 우선순위를 가지므로 해당 파일은 검사되지 않습니다.
-upper_excluded_items_tooltip = 
-        제외 항목은 * 와일드카드와 쉼표로 구분되어야 합니다.
-        이는 Excluded Paths 보다 느리므로 주의해서 사용하십시오.
+upper_excluded_items_tooltip =
+    제외 항목은 * 와일드카드와 쉼표로 구분되어야 합니다.
+    이는 Excluded Paths 보다 느리므로 주의해서 사용하십시오.
 upper_excluded_items = 제외할 항목:
 upper_allowed_extensions = 허용할 확장자:
 upper_excluded_extensions = 비활성 확장자:
@@ -222,12 +222,12 @@ popover_select_custom = 사용자 지정 선택
 popover_unselect_custom = 사용자 지정 선택 해제
 popover_select_all_images_except_biggest = 가장 큰 파일 제외하고 모두 선택
 popover_select_all_images_except_smallest = 가장 작은 파일 제외하고 모두 선택
-popover_custom_path_check_button_entry_tooltip = 
+popover_custom_path_check_button_entry_tooltip =
     경로를 기준으로 선택합니다.
     
     사용 예시:
     '/home/pimpek/rzecz.txt' 파일을 선택하려면 '/home/pim*'와 같이 입력하세요
-popover_custom_name_check_button_entry_tooltip = 
+popover_custom_name_check_button_entry_tooltip =
     파일 이름을 기준으로 선택합니다.
     
     사용 예시:
@@ -245,7 +245,7 @@ popover_custom_case_sensitive_check_button_tooltip =
     대소문자를 구분할 지 여부를 선택합니다.
     
     만일 꺼져 있으면, '/home/*'은 '/HoMe/roman'과 '/home/roman'를 모두 선택합니다.
-popover_custom_not_all_check_button_tooltip = 
+popover_custom_not_all_check_button_tooltip =
     한 그룹에 있는 모든 항목이 선택되는 것을 방지합니다.
     
     이 옵션은 기본적으로 켜져 있습니다. 대부분의 경우, 원본과 중복 파일을 전부 선택하여 삭제하는 것은 원하지 않는 동작일 것입니다. 즉 각 그룹에서 최소한 하나의 항목은 삭제하지 않고 남겨놓게 됩니다.
@@ -334,7 +334,7 @@ settings_use_rust_preview_tooltip =
     이 옵션을 끄면 일부 이미지 미리보기가 로드되지 않을 수 있습니다.
 settings_label_restart = 이 설정을 적용하려면 프로그램을 재시작해야 합니다!
 settings_ignore_other_filesystems = 다른 파일시스템 무시(Linux에서만)
-settings_ignore_other_filesystems_tooltip = 
+settings_ignore_other_filesystems_tooltip =
     검색할 디렉터리와 파일시스템이 다른 디렉터리를 무시합니다.
     
     Linux의 find 명령에서 -xdev 옵션을 준 것과 동일하게 동작합니다
@@ -383,7 +383,7 @@ settings_multiple_clear_cache_button_tooltip =
     더 이상 존재하지 않는 파일을 캐시에서 제거합니다.
     캐시를 자동으로 정리하는 옵션이 꺼져 있을 때만 사용하세요.
 settings_multiple_clear_cache_button = 캐시에서 오래된 결과 제거.
- 
+
 ## Duplicates
 
 settings_duplicates_hide_hard_link_button_tooltip =

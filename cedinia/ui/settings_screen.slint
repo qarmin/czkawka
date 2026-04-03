@@ -209,13 +209,15 @@ export component SettingsScreen {
                     vertical-alignment: TextVerticalAlignment.center;
                     horizontal-stretch: 1.0;
                 }
-
-                TouchButton {
-                    label: Translations.notifications_enable_button_text;
-                    bg: CediniaColors.warning;
-                    fg: #000000;
-                    min_h: 36px;
-                    clicked => { AppState.open_notification_settings(); }
+                VerticalLayout {
+                    alignment: LayoutAlignment.center;
+                    TouchButton {
+                        label: Translations.notifications_enable_button_text;
+                        bg: CediniaColors.warning;
+                        fg: #000000;
+                        min_h: 36px;
+                        clicked => { AppState.open_notification_settings(); }
+                    }
                 }
             }
         }

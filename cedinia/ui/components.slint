@@ -125,13 +125,21 @@ export component FileRow {
     // `clicked` event (fired on finger-up) doesn't also toggle selection.
     property <bool> lp_fired: false;
 
+    // Set to true once the finger drifts beyond the dead zone or the scroll
+    // SGR claims the gesture.  Prevents `clicked` from toggling selection
+    // after a drag/scroll release.
+    property <bool> _moved: false;
+
     // Set by the parent MomentumScrollView via `scroll_swiping: scroll_view.is_swiping`.
     // When the scroll SGR claims the pointer gesture it stops forwarding pointer
     // events to child TouchAreas, so the only reliable way to cancel the
     // long-press timer during a scroll is to watch this flag directly.
     in property <bool> scroll_swiping: false;
     changed scroll_swiping => {
-        if root.scroll_swiping { lp_timer.running = false; }
+        if root.scroll_swiping {
+            lp_timer.running = false;
+            root._moved = true;
+        }
     }
 
     // Stored press coordinates for the dead-zone check.
@@ -167,15 +175,17 @@ export component FileRow {
             clicked => {
                 if (root.lp_fired) {
                     root.lp_fired = false;
-                } else if (!root.is_header && !root.is_reference) {
+                } else if (!root._moved && !root.is_header && !root.is_reference) {
                     root.toggle_checked();
                 }
+                root._moved = false;
             }
             pointer-event(e) => {
                 if (!root.is_header) {
                     if (e.kind == PointerEventKind.down) {
                         root._lp_start_x = ta.mouse-x;
                         root._lp_start_y = ta.mouse-y;
+                        root._moved = false;
                         lp_timer.running = true;
                         lp_timer.restart();
                     } else if (e.kind == PointerEventKind.up) {
@@ -189,6 +199,7 @@ export component FileRow {
                                 || ta.mouse-y - root._lp_start_y > 8px
                                 || root._lp_start_y - ta.mouse-y > 8px) {
                             lp_timer.running = false;
+                            root._moved = true;
                         }
                     }
                     if (e.button == PointerEventButton.middle && e.kind == PointerEventKind.up) {

@@ -8,18 +8,18 @@ general_ok_button = Tamam
 general_close_button = Kapat
 # Krokiet info dialog
 krokiet_info_title = Krokiet - Yeni versiyon Czkawka
-krokiet_info_message = 
-        Krokiet, Czkawka GTK GUI’nin yeni, geliştirilmiş, daha hızlı ve daha güvenilir versiyonudur!
-
-        Çalıştırması daha kolay ve sistem değişikliklerine karşı daha dirençlidir, çünkü çoğu sistemde varsayılan olarak bulunan temel kütüphanelere dayanır.
-
-        Krokiet ayrıca, Czkawka’da bulunmayan özellikler getirir, örneğin video karşılaştırma modunda alıştırmalar, bir EXIF temizleyici, dosya taşıma/kopyalama/silme ilerleme veya gelişmiş sıralama seçenekleri.
-
-        Deneyin ve farkı görün!
-
-        Czkawka’nın benim tarafımdan düzeltmeler ve küçük güncellemeler almaya devam etmesi muhtemeldir, ancak tüm yeni özellikler yalnızca Krokiet için geliştirilecek ve herkes yeni özellikler eklemek, eksik modları tamamlamak veya Czkawka’yı daha da genişletmekten serbestçe yararlanabilir.
-
-        PS: Bu mesaj yalnızca bir kez görünmelidir. Tekrar gösteriliyorsa, CZKAWKA_DONT_ANNOY_ME ortam değişkenini herhangi bir boş olmayan değere ayarlayın.
+krokiet_info_message =
+    Krokiet, Czkawka GTK GUI’nin yeni, geliştirilmiş, daha hızlı ve daha güvenilir versiyonudur!
+    
+    Çalıştırması daha kolay ve sistem değişikliklerine karşı daha dirençlidir, çünkü çoğu sistemde varsayılan olarak bulunan temel kütüphanelere dayanır.
+    
+    Krokiet ayrıca, Czkawka’da bulunmayan özellikler getirir, örneğin video karşılaştırma modunda alıştırmalar, bir EXIF temizleyici, dosya taşıma/kopyalama/silme ilerleme veya gelişmiş sıralama seçenekleri.
+    
+    Deneyin ve farkı görün!
+    
+    Czkawka’nın benim tarafımdan düzeltmeler ve küçük güncellemeler almaya devam etmesi muhtemeldir, ancak tüm yeni özellikler yalnızca Krokiet için geliştirilecek ve herkes yeni özellikler eklemek, eksik modları tamamlamak veya Czkawka’yı daha da genişletmekten serbestçe yararlanabilir.
+    
+    PS: Bu mesaj yalnızca bir kez görünmelidir. Tekrar gösteriliyorsa, CZKAWKA_DONT_ANNOY_ME ortam değişkenini herhangi bir boş olmayan değere ayarlayın.
 # Main window
 music_title_checkbox = Başlık
 music_artist_checkbox = Sanatçı
@@ -153,7 +153,7 @@ main_label_check_method = Denetim yöntemi:
 main_label_hash_type = SUÇ türü:
 main_label_hash_size = SURÇ boyutu:
 main_label_size_bytes = Boyut (bayt):
-main_label_min_size = Min
+main_label_min_size = En az
 main_label_max_size = Maks
 main_label_shown_files = Gösterilecek Dosya Sayısı:
 main_label_resize_algorithm = Yeniden boyutlandırma algoritması:
@@ -178,7 +178,7 @@ upper_remove_included_button = Kaldır
 upper_manual_add_excluded_button = Dizin Gir
 upper_add_excluded_button = Ekle
 upper_remove_excluded_button = Kaldır
-upper_manual_add_included_button_tooltip = 
+upper_manual_add_included_button_tooltip =
     Arama yapılacak dizin yolunu doğrudan yazın.
     
     Aynı anda birden fazla girdi eklemek için bunları ";" ile ayırın.
@@ -187,7 +187,7 @@ upper_manual_add_included_button_tooltip =
     olmak üzere iki dizin ekleyecektir
 upper_add_included_button_tooltip = "Aranacak Klasörler" listesine yeni bir dizin ekler.
 upper_remove_included_button_tooltip = Seçili dizini "Aranacak Klasörler" listesinden kaldırır.
-upper_manual_add_excluded_button_tooltip = 
+upper_manual_add_excluded_button_tooltip =
     Hariç tutulacak dizin yolunu doğrudan yazın.
     
     Aynı anda birden fazla girdi eklemek için bunları ";" ile ayırın.
@@ -210,9 +210,9 @@ upper_excluded_extensions_tooltip =
     Taramada göz ardı edilecek devre dışı bırakılmış dosyaların listesi.
     
     İzin verilen ve devre dışı bırakılan uzantılar kullanıldığında, bu daha yüksek önceliğe sahiptir, bu nedenle dosya kontrol edilmeyecektir.
-upper_excluded_items_tooltip = 
-        Hariçlanan öğeler * joker karakterini içermeli ve virgülle ayrılmalıdır.
-        Bu, Hariç Yollar'dan daha yavaştır, bu nedenle dikkatli kullanılmalıdır.
+upper_excluded_items_tooltip =
+    Hariçlanan öğeler * joker karakterini içermeli ve virgülle ayrılmalıdır.
+    Bu, Hariç Yollar'dan daha yavaştır, bu nedenle dikkatli kullanılmalıdır.
 upper_excluded_items = Hariç Tutulan Öğeler:
 upper_allowed_extensions = İzin Verilen Uzantılar:
 upper_excluded_extensions = Devre Dışı Uzantılar:
@@ -343,7 +343,7 @@ settings_use_rust_preview_tooltip =
     Linux dışı sistemlerde bu seçeneğin kullanılması önerilir çünkü gtk-pixbuf her zaman mevcut değildir, dolayısıyla bu seçeneğin devre dışı bırakılması bazı görüntülerin ön izlemelerini yüklemeyecektir.
 settings_label_restart = Ayarları uygulamak için uygulamayı yeniden başlatmanız gerekir!
 settings_ignore_other_filesystems = Öteki dosya sistemlerini yoksay (sadece Linux)
-settings_ignore_other_filesystems_tooltip = 
+settings_ignore_other_filesystems_tooltip =
     Aranan dizinlerle aynı dosya sisteminde olmayan dosyaları yoksayar.
     
     Linux'ta find komutundaki -xdev seçeneği ile aynı şekilde çalışır

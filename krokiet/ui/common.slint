@@ -138,3 +138,16 @@ export struct CacheCleaningResult {
     errors_count: int,
     errors: string,
 }
+
+export struct CompareImageData {
+    path: string,
+    dir: string,
+    name: string,
+    size: string,
+    resolution: string,
+    modification_date: string,
+    similarity: string,
+    checked: bool,
+    thumbnail: image,
+    flat_idx: int,
+}

@@ -11,16 +11,15 @@ exclude = [
     "misc/test_image_perf",
     "misc/test_compilation_speed_size",
     "ci_tester",
+    "test"
 ]
 resolver = "3"
 
-# android-activity 0.6.0 panics when ANativeActivity_onCreate is called a second
-# time (Activity recreation) because ndk_context::initialize_android_context
-# asserts previous.is_none().  The fix (OnceLock, init once with Application ref)
-# is merged to main but not yet released.  Remove this patch once 0.6.1+ ships.
-# Affects only android-activity ^0.6 (cedinia); Slint's ^0.5 dependency is unaffected.
-#[patch.crates-io]
-#android-activity = { git = "https://github.com/rust-mobile/android-activity", rev = "43de2770b91b1b8ff870f00551f89f04062216cc" }
+# Temporary solution for spamming mouse events in Slint
+# Even with workaround, performance is quite low in specific cases in Cedinia
+[patch.crates-io]
+slint = { git = "https://github.com/slint-ui/slint.git", rev = "c24077780bc15e7c334bae1efa0be0bb5943951c" }
+slint-build = { git = "https://github.com/slint-ui/slint.git", rev = "c24077780bc15e7c334bae1efa0be0bb5943951c" }
 
 [profile.release]
 # panic = "unwind" in opposite to "abort", allows to catch panic!()

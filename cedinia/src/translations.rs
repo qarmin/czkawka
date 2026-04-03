@@ -248,6 +248,7 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_ctx_menu_title_text(flc!("ctx_menu_title").into());
     t.set_ctx_open_file_text(flc!("ctx_open_file").into());
     t.set_ctx_open_folder_text(flc!("ctx_open_folder").into());
+    t.set_dir_open_folder_text(flc!("dir_open_folder").into());
 
     use std::fmt::Debug;
 

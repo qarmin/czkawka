@@ -83,7 +83,7 @@ options to choose than other).
 |      Similar videos       |      ✔      |        ✔         |         |        |                   |             |
 |  Music duplicates(tags)   |      ✔      |        ✔         |    ✔    |        |         ✔         |             |
 | Music duplicates(content) |      ✔      |        ✔         |    ✔    |        |                   |             |
-|     Invalid symlinks      |      ✔      |        ✔         |    ✔    |   ✔    |                   |             |
+|     Invalid symlinks      |      ✔      |        ✔         |         |   ✔    |                   |             |
 |       Broken files        |      ✔      |        ✔         |    ✔    |        |                   |             |
 | Invalid names/extensions  |      ✔      |        ✔         |    ✔    |   ✔    |                   |             |
 |       Exif cleaner        |      ✔      |                  |    ✔    |        |                   |             |
@@ -110,7 +110,7 @@ There are many similar applications to Czkawka on the Internet, which do some th
 
 ### GUI
 
-- [DupeGuru](https://github.com/arsenetar/dupeguru) - Many options to customize; great photo compare tool
+- [DupeGuru](https://github.com/arsenetar/dupeguru) - Many options to customize
 - [FSlint](https://github.com/pixelb/fslint) - A little outdated, but still have some tools not available in Czkawka
 - [AntiDupl.NET](https://github.com/ermig1979/AntiDupl) - Shows a lot of metadata of compared images
 - [Video Duplicate Finder](https://github.com/0x90d/videoduplicatefinder) - Finds similar videos(surprising, isn't it)
@@ -182,7 +182,7 @@ Also, I really appreciate work of people that create crates on which Czkawka is 
 
 
 ## AI Policy
-The vast majority of the code in this project was written by me(qarmin), without using AI. However, as AI tools have improved and can significantly simplify development and reduce boilerplate, I see no reason to forbid their use.
+The vast majority of the code in this project was written by me (qarmin) without using AI. However, as AI tools have improved and can significantly simplify development and reduce boilerplate, I see no reason to forbid their use. I have also added a CLAUDE.md file to the repo to make it easier to provide AI tools with context about the project’s style and code structure.
 
 That said, every pull request, whether created with AI or not, must meet proper quality standards. The author must be able to clearly explain what the code does, without relying on AI for that explanation. I manually review every PR and test each change, so the risk of incorrect code slipping through is low. Still, to avoid wasting time, please refrain from submitting AI Slop PRs.
 

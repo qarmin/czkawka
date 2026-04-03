@@ -8,18 +8,18 @@ general_ok_button = Ok
 general_close_button = Inchide
 # Krokiet info dialog
 krokiet_info_title = Introducerea lui Krokiet - Noua versiune a Czkawka
-krokiet_info_message = 
-        Krokiet este noua, îmbunătățită, mai rapidă și mai fiabilă versiune a Czkawka GTK GUI!
-
-        Este mai ușor de rulat și mai rezistent la modificările sistemului, deoarece depinde doar de bibliotecile de bază disponibile pe majoritatea sistemelor implicit.
-
-        Krokiet aduce, de asemenea, funcții pe care Czkawka nu le are, inclusiv miniaturile în modul de comparare video, un curățător EXIF, progresul mutării/copierii/ștergerii fișierelor sau opțiuni extinse de sortare.
-
-        Îl testează și vezi diferența!
-
-        Czkawka va continua să primească corecții de erori și actualizări minore de la mine, dar toate noile funcții vor fi dezvoltate exclusiv pentru Krokiet, iar oricine este liber să contribuie cu noi funcții, să adauge moduri lipsă sau să extindă Czkawka în continuare.
-
-        PS: Acest mesaj ar trebui să apară doar o dată. Dacă apare din nou, setați variabila de mediu CZKAWKA_DONT_ANNOY_ME la orice valoare non-goalomptă.
+krokiet_info_message =
+    Krokiet este noua, îmbunătățită, mai rapidă și mai fiabilă versiune a Czkawka GTK GUI!
+    
+    Este mai ușor de rulat și mai rezistent la modificările sistemului, deoarece depinde doar de bibliotecile de bază disponibile pe majoritatea sistemelor implicit.
+    
+    Krokiet aduce, de asemenea, funcții pe care Czkawka nu le are, inclusiv miniaturile în modul de comparare video, un curățător EXIF, progresul mutării/copierii/ștergerii fișierelor sau opțiuni extinse de sortare.
+    
+    Îl testează și vezi diferența!
+    
+    Czkawka va continua să primească corecții de erori și actualizări minore de la mine, dar toate noile funcții vor fi dezvoltate exclusiv pentru Krokiet, iar oricine este liber să contribuie cu noi funcții, să adauge moduri lipsă sau să extindă Czkawka în continuare.
+    
+    PS: Acest mesaj ar trebui să apară doar o dată. Dacă apare din nou, setați variabila de mediu CZKAWKA_DONT_ANNOY_ME la orice valoare non-goalomptă.
 # Main window
 music_title_checkbox = Titlu
 music_artist_checkbox = Artist
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lista fişierelor dezactivate care vor fi ignorate în scanare.
     
     La utilizarea extensiilor permise și dezactivate, aceasta are prioritate mai mare, deci fișierul nu va fi verificat.
-upper_excluded_items_tooltip = 
-        Elemente excluse trebuie să conțină * wildcard și să fie separate prin virgulă.
-        Aceasta este mai lentă decât Excluded Paths, deci folosiți-o cu grijă.
+upper_excluded_items_tooltip =
+    Elemente excluse trebuie să conțină * wildcard și să fie separate prin virgulă.
+    Aceasta este mai lentă decât Excluded Paths, deci folosiți-o cu grijă.
 upper_excluded_items = Elemente excluse:
 upper_allowed_extensions = Extensii permise:
 upper_excluded_extensions = Extensii dezactivate:
@@ -279,7 +279,7 @@ bottom_hardlink_button_tooltip =
     Creează link-uri hardware.
     Funcţionează numai atunci când cel puţin două rezultate sunt selectate într-un grup.
     Prima este neschimbată, iar a doua și mai târziu sunt greu legate mai întâi.
-bottom_hardlink_button_not_available_tooltip = 
+bottom_hardlink_button_not_available_tooltip =
     Creează link-uri hardware.
     Butonul este dezactivat, deoarece hardlink-urile nu pot fi create.
     Legăturile fizice funcționează doar cu privilegii de administrator pe Windows, așa că asigură-te că rulezi aplicația ca administrator.

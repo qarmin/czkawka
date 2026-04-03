@@ -8,18 +8,18 @@ general_ok_button = Ok
 general_close_button = Zamknij
 # Krokiet info dialog
 krokiet_info_title = Wprowadzamy Krokiet - Nowa wersja Czkawki
-krokiet_info_message = 
-        Krokiet to nowa, ulepszona, szybsza i bardziej niezawodna wersja Czkawki GTK!
-
-        Jest łatwiejszy w uruchomieniu i bardziej odporny na zmiany w systemie, ponieważ polega tylko na podstawowych bibliotekach dostępnych domyślnie na większości systemów.
-
-        Krokiet oferuje również funkcje, których brakuje Czkawce, w tym miniaturki w trybie porównania wideo, czyszczenie EXIF, wyświetlanie postępu kopiowania/przenoszenia/usuwania plików czy rozszerzone opcje sortowania.
-
-        Wypróbuj go i zobacz różnicę!
-
-        Czkawka będzie nadal otrzymywać poprawki błędów i drobne aktualizacje z mojej strony, ale wszystkie nowe funkcje będą rozwijane wyłącznie dla Krokieta, lecz zachęcam każdego chętnego by jeśli chce, to by implementował na własną rękę nowe funkcje czy brakujące tryby w Czkawce.
-
-        PS: Ta wiadomość powinna pojawić się tylko raz. Jeśli pojawia się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną niepustą wartość.
+krokiet_info_message =
+    Krokiet to nowa, ulepszona, szybsza i bardziej niezawodna wersja Czkawki GTK!
+    
+    Jest łatwiejszy w uruchomieniu i bardziej odporny na zmiany w systemie, ponieważ polega tylko na podstawowych bibliotekach dostępnych domyślnie na większości systemów.
+    
+    Krokiet oferuje również funkcje, których brakuje Czkawce, w tym miniaturki w trybie porównania wideo, czyszczenie EXIF, wyświetlanie postępu kopiowania/przenoszenia/usuwania plików czy rozszerzone opcje sortowania.
+    
+    Wypróbuj go i zobacz różnicę!
+    
+    Czkawka będzie nadal otrzymywać poprawki błędów i drobne aktualizacje z mojej strony, ale wszystkie nowe funkcje będą rozwijane wyłącznie dla Krokieta, lecz zachęcam każdego chętnego by jeśli chce, to by implementował na własną rękę nowe funkcje czy brakujące tryby w Czkawce.
+    
+    PS: Ta wiadomość powinna pojawić się tylko raz. Jeśli pojawia się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną niepustą wartość.
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lista wyłączonych plików, które zostaną zignorowane w skanowaniu.
     
     Gdy używasz zarówno dozwolonych, jak i wyłączonych rozszerzeń, ten ma wyższy priorytet, więc plik nie zostanie sprawdzony.
-upper_excluded_items_tooltip = 
-        Wykluczone elementy muszą zawierać znak * i powinny być oddzielone przecinkami.
-        To działa wolniej niż ustawianie wykluczonych katalogow i plików, więc używaj tego z rozwagą.
+upper_excluded_items_tooltip =
+    Wykluczone elementy muszą zawierać znak * i powinny być oddzielone przecinkami.
+    To działa wolniej niż ustawianie wykluczonych katalogow i plików, więc używaj tego z rozwagą.
 upper_excluded_items = Ignorowane Obiekty:
 upper_allowed_extensions = Dozwolone Rozszerzenia:
 upper_excluded_extensions = Wyłączone rozszerzenia:
@@ -293,7 +293,7 @@ bottom_compare_button_tooltip = Porównaj obrazy w grupie.
 bottom_show_errors_tooltip = Pokaż/Ukryj dolny panel tekstowy.
 bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 # Progress Window
-progress_stop_button = Zatrzymaj
+progress_stop_button = Stop
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
 about_repository_button_tooltip = Link do repozytorium z kodem źródłowym.

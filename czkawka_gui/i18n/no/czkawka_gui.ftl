@@ -8,18 +8,18 @@ general_ok_button = Ok
 general_close_button = Lukk
 # Krokiet info dialog
 krokiet_info_title = Introduserer Krokiet - Ny versjon av Czkawka
-krokiet_info_message = 
-        Krokiet er den nye, forbedrede, raskere og mer pålitelige versjonen av Czkawka GTK GUI!
-
-        Det er lettere å kjøre og mer motstandsdyktig mot systemendringer, siden det bare er avhengig av kjernelibbrer som er tilgjengelige på de fleste systemer som standard.
-
-        Krokiet bringer også funksjoner som Czkawka mangler, inkludert forhåndsvisninger i videoj sammenligningsmodus, en EXIF-renser, fil flytt/kopier/slett fremdrift eller utvidede sorteringsalternativer.
-
-        Prøv det og se forskjellen!
-
-        Czkawka vil fortsette å motta feilrettinger og mindre oppdateringer fra meg, men alle nye funksjoner vil bli utviklet eksklusivt for Krokiet, og alle er fri til å bidra med nye funksjoner, legge til manglende moduser eller utvide Czkawka videre.
-
-        PS: Denne meldingen skal bare vises én gang. Hvis den dukker opp igjen, sett CZKAWKA_DONT_ANNOY_ME miljøvariabelen til en hvilken som helst ikke-tom verdi.
+krokiet_info_message =
+    Krokiet er den nye, forbedrede, raskere og mer pålitelige versjonen av Czkawka GTK GUI!
+    
+    Det er lettere å kjøre og mer motstandsdyktig mot systemendringer, siden det bare er avhengig av kjernelibbrer som er tilgjengelige på de fleste systemer som standard.
+    
+    Krokiet bringer også funksjoner som Czkawka mangler, inkludert forhåndsvisninger i videoj sammenligningsmodus, en EXIF-renser, fil flytt/kopier/slett fremdrift eller utvidede sorteringsalternativer.
+    
+    Prøv det og se forskjellen!
+    
+    Czkawka vil fortsette å motta feilrettinger og mindre oppdateringer fra meg, men alle nye funksjoner vil bli utviklet eksklusivt for Krokiet, og alle er fri til å bidra med nye funksjoner, legge til manglende moduser eller utvide Czkawka videre.
+    
+    PS: Denne meldingen skal bare vises én gang. Hvis den dukker opp igjen, sett CZKAWKA_DONT_ANNOY_ME miljøvariabelen til en hvilken som helst ikke-tom verdi.
 # Main window
 music_title_checkbox = Tittel
 music_artist_checkbox = Kunstner
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Liste over deaktiverte filer som vil bli ignorert i skanning.
     
     Ved bruk av både tillatte og deaktiverte utvidelser, har denne prioriteten høyere enn prioritet, så filen vil ikke bli sjekket.
-upper_excluded_items_tooltip = 
-        Uekskluderte elementer må inneholde * wildcard og skal være separert med komma.
-        Dette er tregere enn Excluded Paths, så bruk det forsiktig.
+upper_excluded_items_tooltip =
+    Uekskluderte elementer må inneholde * wildcard og skal være separert med komma.
+    Dette er tregere enn Excluded Paths, så bruk det forsiktig.
 upper_excluded_items = Ekskluderte elementer:
 upper_allowed_extensions = Tillatte utvidelser:
 upper_excluded_extensions = Deaktiverte utvidelser:

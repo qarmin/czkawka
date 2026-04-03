@@ -95,3 +95,6 @@ core_cannot_create_or_open_cache_file = 無法建立或開啟快取檔案 "{ $fi
 core_cannot_set_config_cache_path = 無法設定 config/cache 路径 - config 和 cache 将不会被使用。.
 core_invalid_extension_contains_space = { $extension } 不是一個有效的擴充類型，因為它包含內部的空白
 core_invalid_extension_contains_dot = { $extension } 不是一個有效的擴充類型，因為它包含內部的點。
+
+core_ffmpeg_unknown_encoder = 無法使用 { $encoder } 編碼器來編碼 { $file }。 目前的 FFmpeg 版本不支援此編碼器。 請使用支援所需編碼器的其他 FFmpeg 版本，或選擇其他編碼器。.
+core_ffmpeg_error = FFmpeg 處理 { $file } 時發生錯誤，狀態碼為 { $code }，原因：{ $reason }

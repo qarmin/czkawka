@@ -5,7 +5,7 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
-use czkawka_core::tools::video_optimizer::{VideoCodec, VideoCropSingleFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
+use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCropSingleFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
 use slint::{ComponentHandle, Weak};
 
 use crate::common::IntDataVideoOptimizer;
@@ -55,7 +55,8 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
         let active_tab = app.global::<GuiState>().get_active_tab();
 
         let settings = app.global::<Settings>();
-        let codec = collect_combo_box_settings(&app).video_optimizer_video_codec.value;
+        let combo = collect_combo_box_settings(&app);
+        let codec = combo.video_optimizer_video_codec.value;
         let fail_if_bigger = settings.get_popup_reencode_video_fail_if_bigger();
         let overwrite_files = settings.get_popup_reencode_video_overwrite_files();
         let video_quality = settings.get_popup_reencode_video_quality();
@@ -70,6 +71,11 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
         let max_width = if max_width > 0 { max_width } else { 1920 };
         let max_height = if max_height > 0 { max_height } else { 1920 };
 
+        let noise_reduction = combo.video_optimizer_noise_reduction.value;
+        let noise_reduction_strength = settings.get_video_optimizer_sub_noise_reduction_strength().round() as u32;
+        let use_custom_command = settings.get_video_optimizer_sub_use_custom_command();
+        let custom_ffmpeg_command = use_custom_command.then(|| settings.get_video_optimizer_sub_custom_command().to_string());
+
         let processor = ModelProcessor::new(active_tab);
 
         processor.optimize_selected_videos(
@@ -83,11 +89,53 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
             limit_video_size,
             max_width,
             max_height,
+            noise_reduction,
+            noise_reduction_strength,
+            custom_ffmpeg_command,
         );
+    });
+
+    let a3 = app.as_weak();
+    app.global::<Callabler>().on_generate_video_optimizer_template(move || {
+        let app = a3.upgrade().expect("Failed to upgrade app :(");
+        let settings = app.global::<Settings>();
+        let combo = collect_combo_box_settings(&app);
+        let codec = combo.video_optimizer_video_codec.value;
+        let quality = settings.get_popup_reencode_video_quality().round() as u32;
+        let nr = combo.video_optimizer_noise_reduction.value;
+        let nr_strength = settings.get_video_optimizer_sub_noise_reduction_strength().round() as u32;
+        let limit = settings.get_popup_reencode_video_limit_video_size();
+        let max_w = settings.get_popup_reencode_video_max_width().parse::<u32>().unwrap_or(1920);
+        let max_h = settings.get_popup_reencode_video_max_height().parse::<u32>().unwrap_or(1920);
+
+        let mut parts: Vec<String> = vec![
+            "ffmpeg".into(),
+            "-i".into(),
+            "{PATH}".into(),
+            "-nostdin".into(),
+            "-c:v".into(),
+            codec.as_str().into(),
+            "-crf".into(),
+            quality.to_string(),
+        ];
+        let mut filters: Vec<String> = Vec::new();
+        if limit {
+            filters.push(format!("scale='min({max_w},iw):min({max_h},ih):force_original_aspect_ratio=decrease'"));
+        }
+        if let Some(f) = nr.to_ffmpeg_filter(nr_strength) {
+            filters.push(f);
+        }
+        if !filters.is_empty() {
+            parts.extend(["-vf".into(), filters.join(",")]);
+        }
+        parts.extend(["-c:a".into(), "copy".into()]);
+
+        settings.set_video_optimizer_sub_custom_command(parts.join(" ").into());
     });
 }
 
 impl ModelProcessor {
+    #[expect(clippy::too_many_arguments)]
     fn optimize_selected_videos(
         self,
         progress_sender: Sender<ProgressData>,
@@ -100,6 +148,9 @@ impl ModelProcessor {
         limit_video_size: bool,
         max_width: u32,
         max_height: u32,
+        noise_reduction: NoiseReductionMethod,
+        noise_reduction_strength: u32,
+        custom_ffmpeg_command: Option<String>,
     ) {
         let codec_str = requested_video_codec.as_ffprobe_codec_name().to_string();
 
@@ -114,8 +165,8 @@ impl ModelProcessor {
             let stop_flag_clone = stop_flag.clone();
             let optimize_fnc = move |data: &SimplerSingleMainListModel| {
                 let file_codec = &data.val_str[codec_idx];
-                if codec_str == *file_codec {
-                    return Ok(()); // No need to transcode if codec is the same
+                if custom_ffmpeg_command.is_none() && codec_str == *file_codec {
+                    return Ok(()); // No need to transcode if codec is the same and no custom command
                 }
 
                 let full_path = format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]);
@@ -126,7 +177,7 @@ impl ModelProcessor {
                     &stop_flag_clone,
                     &full_path,
                     original_size,
-                    VideoTranscodeFixParams {
+                    &VideoTranscodeFixParams {
                         codec: requested_video_codec,
                         quality: target_quality,
                         fail_if_not_smaller: fail_if_bigger,
@@ -134,6 +185,9 @@ impl ModelProcessor {
                         limit_video_size,
                         max_width,
                         max_height,
+                        noise_reduction: noise_reduction.clone(),
+                        noise_reduction_strength,
+                        custom_ffmpeg_command: custom_ffmpeg_command.clone(),
                     },
                 )
             };
@@ -216,12 +270,12 @@ impl ModelProcessor {
 }
 
 #[cfg(not(test))]
-fn optimize_single_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, transcode_params: VideoTranscodeFixParams) -> Result<(), String> {
+fn optimize_single_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, transcode_params: &VideoTranscodeFixParams) -> Result<(), String> {
     czkawka_core::tools::video_optimizer::core::process_video(stop_flag, video_path, original_size, transcode_params)
 }
 
 #[cfg(test)]
-fn optimize_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _transcode_params: VideoTranscodeFixParams) -> Result<(), String> {
+fn optimize_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _transcode_params: &VideoTranscodeFixParams) -> Result<(), String> {
     if video_path.contains("test_error") {
         return Err(format!("Test error for item: {video_path}"));
     }

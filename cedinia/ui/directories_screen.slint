@@ -35,6 +35,7 @@ component DirRow {
     in property <bool>    exists: true;
     callback remove();
     callback toggle_referenced();
+    callback open_folder();
 
     min-height: 52px;
 
@@ -125,6 +126,28 @@ component DirRow {
                 horizontal-stretch: 0.0;
                 width: 40px;
                 border-radius: 20px;
+                background: open_ta.has-hover ? CediniaColors.accent.with-alpha(0.15) : transparent;
+                vertical-stretch: 0.0;
+
+                open_ta := TouchArea {
+                    clicked => { root.open_folder(); }
+                }
+                VerticalLayout {
+                    alignment: LayoutAlignment.center;
+                    Text {
+                        text: "↗";
+                        color: CediniaColors.text_secondary;
+                        font-size: 18px;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+
+            Rectangle {
+                horizontal-stretch: 0.0;
+                width: 40px;
+                border-radius: 20px;
                 background: rm_ta.has-hover ? CediniaColors.danger.with-alpha(0.2) : transparent;
                 vertical-stretch: 0.0;
 
@@ -182,7 +205,7 @@ export component DirectoriesScreen {
 
     property <bool> path_enter_error: false;
 
-    // ── Main layout ───────────────────────────────────────────────────────────
+    //  Main layout
     VerticalLayout {
         height: parent.height;
         spacing: 0px;
@@ -223,6 +246,7 @@ export component DirectoriesScreen {
                     is_referenced: entry.is_referenced;
                     exists: entry.exists;
                     toggle_referenced => { AppState.toggle_referenced_dir(entry.path); }
+                    open_folder => { AppState.open_parent_folder(entry.path); }
                     remove => {
                         AppState.remove_include_dir(entry.path);
                         AppState.save_settings_now();
@@ -249,6 +273,7 @@ export component DirectoriesScreen {
                     is_included: false;
                     is_referenced: false;
                     exists: entry.exists;
+                    open_folder => { AppState.open_parent_folder(entry.path); }
                     remove => {
                         AppState.remove_exclude_dir(entry.path);
                         AppState.save_settings_now();
@@ -326,7 +351,7 @@ export component DirectoriesScreen {
         }
     }
 
-    // ── Volumes popup ─────────────────────────────────────────────────────────
+    //  Volumes popup
     if AppState.storage_volumes.length > 0 && !AppState.custom_paths_popup_visible : Rectangle {
         x: 0;
         y: root.height - self.height - 74px;
@@ -480,7 +505,7 @@ export component DirectoriesScreen {
         }
     }
 
-    // ── Custom Paths popup ────────────────────────────────────────────────────
+    // Custom Paths popup
     if AppState.custom_paths_popup_visible : Rectangle {
         x: 0;
         y: root.height - self.height - 74px;
@@ -691,7 +716,7 @@ export component DirectoriesScreen {
         }
     }
 
-    // ── Path edit popup (centered overlay) ────────────────────────────────────
+    //  Path edit popup (centered overlay)
     if AppState.path_edit_popup_visible : Rectangle {
         x: 0;
         y: 0;
@@ -795,7 +820,7 @@ export component DirectoriesScreen {
         }
     }
 
-    // ── Directory statistics popup (centered overlay) ─────────────────────────
+    //  Directory statistics popup (centered overlay) ─────────────────────────
     if AppState.dirs_check_popup_visible : Rectangle {
         x: 0;
         y: 0;

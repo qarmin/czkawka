@@ -3,6 +3,7 @@ import { ColorPalette } from "color_palette.slint";
 import { SingleMainListModel, SortColumnMode } from "common.slint";
 import { Callabler } from "callabler.slint";
 import { FontSizes } from "fonts.slint";
+import { PopupContextMenu } from "popup_context_menu.slint";
 
 export component SelectableTableView inherits Rectangle {
     in property <[string]> columns;
@@ -24,6 +25,7 @@ export component SelectableTableView inherits Rectangle {
     in-out property <int> originalHeightIdx: -1;
     in-out property <int> start_shift_idx: -1;
     in-out property <int> last_selected_idx: -1;
+    private property <int> context_menu_row_idx: -1;
     out property <length> item_height: 23px;
     in-out property <SortColumnMode> sort_column_mode: SortColumnMode.None;
     in-out property <int> sort_column_idx: -1;
@@ -123,7 +125,10 @@ export component SelectableTableView inherits Rectangle {
                         if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
                             if (contains_data(idx)) {
                                 Callabler.row_reverse_single_unique_item(idx);
-                                Callabler.row_open_parent_item_with_index(idx);
+                                context_menu_row_idx = idx;
+                                context_menu.x = touch_area.mouse-x;
+                                context_menu.y = list_view.y + idx * item_height + list_view.viewport-y;
+                                context_menu.show_popup();
                             }
                         } else if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up) {
                             if (event.modifiers.control) {
@@ -325,6 +330,69 @@ export component SelectableTableView inherits Rectangle {
 
     function hidePreview() {
         Callabler.load_image_preview("NOT_AVAILABLE.NOT_AVAILABLE", -1, -1, -1, -1, -1, -1);
+    }
+
+    context_menu := PopupContextMenu {
+        open_item() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_open_item_with_index(context_menu_row_idx);
+            }
+        }
+        open_parent() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_open_parent_item_with_index(context_menu_row_idx);
+            }
+        }
+        remove_from_results() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_remove_from_results(context_menu_row_idx);
+            }
+        }
+        remove_all_from_folder() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_remove_all_from_folder(context_menu_row_idx);
+            }
+        }
+        remove_all_from_folder_recursive() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_remove_all_from_folder_recursive(context_menu_row_idx);
+            }
+        }
+        select_all_from_folder() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_select_all_from_folder(context_menu_row_idx);
+            }
+        }
+        select_all_from_folder_recursive() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_select_all_from_folder_recursive(context_menu_row_idx);
+            }
+        }
+        exclude_parent_folder() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_exclude_parent_folder(context_menu_row_idx);
+            }
+        }
+        exclude_item() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_exclude_item(context_menu_row_idx);
+            }
+        }
+        copy_file_name() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_copy_file_name(context_menu_row_idx);
+            }
+        }
+        copy_parent_folder_path() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_copy_parent_folder_path(context_menu_row_idx);
+            }
+        }
+        copy_full_path() => {
+            if (context_menu_row_idx != -1) {
+                Callabler.row_copy_full_path(context_menu_row_idx);
+            }
+        }
     }
 
     focus_item := FocusScope {

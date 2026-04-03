@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = 应用启动时发生严重错误
-rust_init_error_message = 
-        在启动应用程序时发生了一个严重错误：
- 
-        { $error_message }
- 
-        这可能是由于缺少或损坏的 OpenGL/Vulkan 驱动程序、在虚拟机中运行应用程序或 Krokiet 或其库中的错误所致。
- 
-        您可以尝试运行不同的构建（skia_opengl、skia_vulkan、femtovg_opengl - 默认）或使用软件渲染器，看看是否可以解决问题。.
+rust_init_error_message =
+    在启动应用程序时发生了一个严重错误：
+    
+    { $error_message }
+    
+    这可能是由于缺少或损坏的 OpenGL/Vulkan 驱动程序、在虚拟机中运行应用程序或 Krokiet 或其库中的错误所致。
+    
+    您可以尝试运行不同的构建（skia_opengl、skia_vulkan、femtovg_opengl - 默认）或使用软件渲染器，看看是否可以解决问题。.
 rust_loaded_preset = 加载预设 { $preset_idx }
 rust_file_already_exists = 文件 "{ $file }" 已存在，不会被覆盖
 rust_error_removing_file_after_copy = 删除文件 "{ $file }" 时出错 (复制到不同分区后), 原因: { $reason }
@@ -16,8 +16,8 @@ rust_loading_tags_cache = 加载标签缓存
 rust_loading_fingerprints_cache = 正在加载指纹缓存
 rust_saving_tags_cache = 正在保存标签缓存
 rust_saving_fingerprints_cache = 保存指纹缓存
-rust_loading_prehash_cache = 正在加载逮捕缓存
-rust_saving_prehash_cache = 正在保存抓取缓存
+rust_loading_prehash_cache = 正在加载预哈希缓存
+rust_saving_prehash_cache = 正在保存预哈希缓存
 rust_loading_hash_cache = 加载散列缓存
 rust_saving_hash_cache = 保存哈希缓存
 rust_loading_exif_cache = 加载 EXIF 缓存
@@ -35,7 +35,7 @@ rust_hashed_images = 哈希的 { $items_stats } 图像 ({ $size_stats })
 rust_compared_image_hashes = 对比的 { $items_stats } 图像哈希值
 rust_hashed_videos = 哈希的 { $items_stats } 视频
 rust_created_thumbnails = 为 { $items_stats } 视频创建缩略图
-rust_checked_files = 签入 { $items_stats } 文件 ({ $size_stats })
+rust_checked_files = 已检查 { $items_stats } 文件 ({ $size_stats })
 rust_checked_files_bad_extensions = 已检查 { $items_stats } 文件
 rust_checked_files_bad_names = 检查 { $items_stats } 文件
 rust_checked_videos = 已检查 { $items_stats } 视频 ({ $size_stats })
@@ -132,7 +132,7 @@ column_artist = 艺人
 column_year = 年份
 column_bitrate = 位速率
 column_length = 长度
-column_genre = 流派数
+column_genre = 流派
 column_type_of_error = 错误类型
 column_symlink_name = 符号链接名称
 column_symlink_folder = 符号链接文件夹
@@ -141,7 +141,7 @@ column_current_extension = 当前扩展
 column_proper_extension = 合适的扩展
 column_fps = 帧率
 column_codec = 编解码器
-column_duration = 期限
+column_duration = 时长
 column_exif_tags = EXIF 标签
 column_new_name = 新名称
 # Slint translations
@@ -168,7 +168,7 @@ included_paths = 包含路径
 excluded_paths = 排除路径
 ref = 参考值
 path = 路径
-tool_duplicate_files = 复制文件
+tool_duplicate_files = 重复文件
 tool_empty_folders = 空文件夹
 tool_big_files = 大文件
 tool_empty_files = 空文件
@@ -216,7 +216,7 @@ subsettings_music_compared_tags = 比较标签
 subsettings_music_title = 标题
 subsettings_music_artist = 艺人
 subsettings_music_bitrate = 位速率
-subsettings_music_genre = 流派数
+subsettings_music_genre = 流派
 subsettings_music_year = 年份
 subsettings_music_length = 长度
 subsettings_music_max_difference = 最大差异
@@ -224,7 +224,7 @@ subsettings_music_minimal_fragment_duration = 最小碎片持续时间
 subsettings_music_compare_fingerprints_only_with_similar_titles = 在相似标题的组中比较
 subsettings_broken_files_type = 要检查的文件类型
 subsettings_broken_files_audio = 音频
-subsettings_broken_files_pdf = 帕德夫
+subsettings_broken_files_pdf = PDF
 subsettings_broken_files_archive = 存档
 subsettings_broken_files_image = 图片
 subsettings_broken_files_video = 视频
@@ -265,7 +265,7 @@ settings_thread_number = 线程编号
 settings_restart_required = ---你需要重新启动应用才能应用线程编号中的更改--
 settings_duplicate_image_preview = 图像预览
 settings_duplicate_minimal_hash_cache_size = 缓存文件的最小大小 - 哈希值 (KB)
-settings_duplicate_use_prehash = 使用预设的
+settings_duplicate_use_prehash = 使用预哈希
 settings_duplicate_minimal_prehash_cache_size = 缓存文件最小大小 - Prehash (KB)
 settings_similar_images_show_image_preview = 图像预览
 settings_application_scale_text = 应用规模
@@ -280,7 +280,7 @@ settings_current_preset = 当前预设：
 settings_edit_name = 编辑名称
 settings_choose_name_for_prefix = 选择前缀的名称
 settings_save = 保存
-settings_load = 负载
+settings_load = 加载
 settings_reset = 恢复
 settings_similar_videos_tool = 相似视频工具
 settings_video_thumbnails_clear_unused_thumbnails = 删除启动时超过7天未使用的视频缩略图
@@ -366,3 +366,49 @@ hardlink_confirmation_text = 您确定要为所选项目创建硬链接吗？
 softlink_button_text = 软链接
 softlink_text = 创建软链接
 softlink_confirmation_text = 您确定要为所选项目创建软链接（符号链接）吗？
+
+column_full_path = 完整路径
+file_dialog_open = 点击关闭对话框以继续。
+selection_custom_select_unselect = 自定义选择/取消选择
+settings_similar_videos_preview_hint = 预览功能仅在“生成缩略图”选项启用时，或已生成缩略图时可见。.
+settings_show_notification_on_scan_completion_text = 完成扫描时，显示通知。
+settings_notification_feature_hint_text = 仅在编译时启用通知功能时可用。
+settings_notification_focused_hint_text = 通知可能不会以弹出窗口的形式显示，尤其是在应用程序窗口处于活动状态时。
+popup_custom_select_title_text = 自定义选择/取消选择
+popup_custom_select_button_text = 选择
+popup_custom_unselect_button_text = 取消选择
+popup_custom_column_name_header_text = 列。
+popup_custom_filter_value_header_text = 筛选值 (通配符 / 正则表达式)
+popup_custom_case_sensitive_text = 区分大小写
+popup_custom_leave_one_in_group_text = 请在每个组中，选择所有项目，但只保留一个。
+popup_custom_hint_str_text = 文本列：通配符 *name* /home/* *.rs
+popup_custom_hint_int_text = 大小 [KB] / 数值列：>= 2048  < 512  = 0  (运算符：>=  <=  >  <  =)
+popup_custom_hint_date_text = 日期列：格式为 DD-MM-YYYY 或 YYYY-MM-DD，可选时间部分为 HH:MM:SS。例如：>= 2020-01-01 或 < 31-12-2022 23:59:59。
+compare_button_text = 比较
+compare_back_text = 返回
+compare_prev_group_text = 上一组
+compare_next_group_text = 下一组。
+compare_swap_text = 交换；互换。
+compare_info_text = 信息。
+compare_diff_text = 差异。
+compare_loading_title_text = 请稍候...
+compare_cancel_text = 取消
+compare_resolution_mismatch_text = 不同的分辨率 - 不同的结果可能不准确。
+compare_computing_diff_text = 正在计算差异...
+compare_info_file_name_text = 文件名
+compare_info_path_text = 路径
+compare_info_size_text = 尺寸
+compare_info_resolution_text = 决议
+compare_info_modification_date_text = 修改日期
+compare_loading_images_text = 正在加载图片...
+compare_cancelling_text = 正在取消，请稍候...
+context_menu_open_item_text = 打开项目。
+context_menu_open_parent_text = 打开父文件夹
+context_menu_remove_from_results_text = 从结果中移除。
+context_menu_remove_all_from_folder_text = 从文件夹中删除所有文件。
+context_menu_select_all_from_folder_text = 从文件夹中选择所有文件。
+context_menu_select_all_from_folder_except_one_text = 从文件夹中选择全部（保留一个）。
+context_menu_exclude_parent_folder_text = 排除父文件夹。
+context_menu_exclude_item_text = 排除项目
+context_menu_copy_name_text = 复制名称
+context_menu_copy_parent_folder_path_text = 复制父文件夹路径

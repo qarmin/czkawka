@@ -9,7 +9,7 @@ core_similarity_minimal = Minimă
 core_cannot_open_dir = Nu se poate deschide dir { $dir }, motiv { $reason }
 core_cannot_read_entry_dir = Nu se poate citi intrarea în dir { $dir }, motivul { $reason }
 core_cannot_read_metadata_dir = Metadatele nu pot fi citite în dir { $dir }, motivul { $reason }
-core_cannot_read_metadata_file = Cannot read metadata of file { $file }, reason { $reason }
+core_cannot_read_metadata_file = Nu se pot citi metadatele din fişierul { $file }, motiv { $reason}
 core_file_modified_before_epoch = Fișierul { $name } pare să fi fost modificat înainte de Epocul Unix
 core_folder_modified_before_epoch = Dosarul { $name } pare să fi fost modificat înainte de Epocul Unix
 core_file_no_modification_date = Imposibil de obținut data modificării din fișierul { $name }, motivul { $reason }
@@ -95,3 +95,6 @@ core_cannot_create_or_open_cache_file = Nu se poate crea sau deschide fișierul 
 core_cannot_set_config_cache_path = Nu se poate seta calea de configurare/cache - configurarea și cache-ul nu vor fi utilizate.
 core_invalid_extension_contains_space = { $extension } nu este o extensie validă deoarece conține spații goale în interior
 core_invalid_extension_contains_dot = { $extension } nu este o extensie validă deoarece conține punct în interior
+
+core_ffmpeg_unknown_encoder = Nu se poate codifica fișierul { $file } folosind codificatorul { $encoder }. Versiunea curentă de FFmpeg nu suportă acest codificator. Folosiți o altă versiune de FFmpeg care să suporte codec-ul necesar sau selectați un alt codificator.
+core_ffmpeg_error = Eroare FFmpeg în timpul procesării fișierului { $file }, cod de stare { $code }, motiv { $reason }

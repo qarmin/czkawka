@@ -7,19 +7,19 @@ window_compare_images = Bilder vergleichen
 general_ok_button = Ok
 general_close_button = Schließen
 # Krokiet info dialog
-krokiet_info_title = Krokiet - Neue Version von Czkawka
-krokiet_info_message = 
-        Krokiet ist die neue, verbesserte, schnellere und zuverlässigere Version der Czkawka GTK GUI!
-
-        Es ist einfacher zu betreiben und widerstandsfähiger gegenüber Systemänderungen, da es nur auf Core-Bibliotheken angewiesen ist, die standardmäßig auf den meisten Systemen verfügbar sind.
-
-        Krokiet bietet außerdem Funktionen, die Czkawka nicht hat, darunter Miniaturansichten im Video-Vergleichsmodus, ein EXIF-Bereiniger, Fortschritt bei Datei-Verschieben/Kopieren/Löschen oder erweiterte Sortieroptionen.
-
-        Probiere es aus und sieh den Unterschied!
-
-        Czkawka wird weiterhin Fehlerbehebungen und kleinere Updates von mir erhalten, aber alle neuen Funktionen werden ausschließlich für Krokiet entwickelt und jeder ist frei, neue Funktionen hinzuzufügen, fehlende Modi zu erweitern oder Czkawka weiter auszubauen.
-
-        PS: Diese Nachricht sollte nur einmal erscheinen. Wenn sie erneut angezeigt wird, setze die Umgebungsvariable CZKAWKA_DONT_ANNOY_ME auf einen nicht leeren Wert.
+krokiet_info_title = Krokiet – Neue Version von Czkawka
+krokiet_info_message =
+    Krokiet ist die neue, verbesserte, schnellere und zuverlässigere Version der Czkawka GTK GUI!
+    
+    Es ist einfacher zu betreiben und widerstandsfähiger gegenüber Systemänderungen, da es nur auf Core-Bibliotheken angewiesen ist, die standardmäßig auf den meisten Systemen verfügbar sind.
+    
+    Krokiet bietet außerdem Funktionen, die Czkawka nicht hat, darunter Miniaturansichten im Video-Vergleichsmodus, ein EXIF-Bereiniger, Fortschritt bei Datei-Verschieben/Kopieren/Löschen oder erweiterte Sortieroptionen.
+    
+    Probiere es aus und sieh den Unterschied!
+    
+    Czkawka wird weiterhin Fehlerbehebungen und kleinere Updates von mir erhalten, aber alle neuen Funktionen werden ausschließlich für Krokiet entwickelt und jeder ist frei, neue Funktionen hinzuzufügen, fehlende Modi zu erweitern oder Czkawka weiter auszubauen.
+    
+    PS: Diese Nachricht sollte nur einmal erscheinen. Wenn sie erneut angezeigt wird, setze die Umgebungsvariable CZKAWKA_DONT_ANNOY_ME auf einen nicht leeren Wert.
 # Main window
 music_title_checkbox = Titel
 music_artist_checkbox = Künstler
@@ -193,9 +193,9 @@ upper_excluded_extensions_tooltip =
     Liste der deaktivierten Dateien, die beim Scannen ignoriert werden.
     
     Wenn sowohl erlaubte als auch deaktivierte Erweiterungen verwendet werden, hat diese eine höhere Priorität, so dass die Datei nicht ausgewählt wird.
-upper_excluded_items_tooltip = 
-        Ausgeschlossene Elemente müssen * Wildcard und durch Kommas getrennt enthalten.
-        Dies ist langsamer als Exkludierte Pfade, also verwenden Sie es vorsichtig.
+upper_excluded_items_tooltip =
+    Ausgeschlossene Elemente müssen * Wildcard und durch Kommas getrennt enthalten.
+    Dies ist langsamer als Exkludierte Pfade, also verwenden Sie es vorsichtig.
 upper_excluded_items = Ausgeschlossene Elemente:
 upper_allowed_extensions = Erlaubte Erweiterungen:
 upper_excluded_extensions = Deaktivierte Erweiterungen:

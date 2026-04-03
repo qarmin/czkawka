@@ -26,6 +26,7 @@ use slint::VecModel;
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
 use crate::connect_clean_cache::connect_clean_cache;
+use crate::connect_compare::connect_compare;
 use crate::connect_directories_changes::connect_add_remove_directories;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
@@ -52,6 +53,7 @@ mod audio_player;
 mod clear_outdated_video_thumbnails;
 mod common;
 mod connect_clean_cache;
+mod connect_compare;
 mod connect_directories_changes;
 mod connect_open;
 mod connect_progress_receiver;
@@ -141,6 +143,7 @@ fn main() {
     connect_progress_gathering(&app, progress_receiver);
     connect_add_remove_directories(&app);
     connect_show_preview(&app, Arc::clone(&shared_models));
+    connect_compare(&app, Arc::clone(&shared_models));
     connect_translations(&app);
     connect_changing_settings_preset(&app);
     connect_select(&app, &shared_models);

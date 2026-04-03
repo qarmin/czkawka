@@ -7,19 +7,19 @@ window_compare_images = Jämför bilder
 general_ok_button = Ok
 general_close_button = Stäng
 # Krokiet info dialog
-krokiet_info_title = Införande av Krokiet - Ny version av Czkawka
-krokiet_info_message = 
-        Stödet är den nya, förbättrade, snabbare och mer pålitliga versionen av Czkawka GTK GUI!
-
-        Det är lättare att köra och mer motståndskraftigt mot systemändringar, eftersom det bara förlitar sig på kärnbibliotek som finns tillgängliga på de flesta system som standard.
-
-        Stödet medför också funktioner som Czkawka saknar, inklusive miniatyrbilder i videojämförelsetillstånd, en EXIF-renare, filflytt/kopiera/ta bort-framsteg eller utökade sorteringsalternativ.
-
-        Prova det och se skillnaden!
-
-        Czkawka kommer fortsätta att få buggfixar och mindre uppdateringar från mig, men alla nya funktioner kommer att utvecklas exklusivt för Stödet, och vem som helst är fri att bidra med nya funktioner, lägga till saknade lägen eller utöka Czkawka vidare.
-
-        PS: Detta meddelande bör bara visas en gång. Om det visas igen, sätt miljökvariabeln CZKAWKA_DONT_ANNOY_ME till ett värde som inte är tomt.
+krokiet_info_title = Införande av Krokiet – Ny version av Czkawka
+krokiet_info_message =
+    Stödet är den nya, förbättrade, snabbare och mer pålitliga versionen av Czkawka GTK GUI!
+    
+    Det är lättare att köra och mer motståndskraftigt mot systemändringar, eftersom det bara förlitar sig på kärnbibliotek som finns tillgängliga på de flesta system som standard.
+    
+    Stödet medför också funktioner som Czkawka saknar, inklusive miniatyrbilder i videojämförelsetillstånd, en EXIF-renare, filflytt/kopiera/ta bort-framsteg eller utökade sorteringsalternativ.
+    
+    Prova det och se skillnaden!
+    
+    Czkawka kommer fortsätta att få buggfixar och mindre uppdateringar från mig, men alla nya funktioner kommer att utvecklas exklusivt för Stödet, och vem som helst är fri att bidra med nya funktioner, lägga till saknade lägen eller utöka Czkawka vidare.
+    
+    PS: Detta meddelande bör bara visas en gång. Om det visas igen, sätt miljökvariabeln CZKAWKA_DONT_ANNOY_ME till ett värde som inte är tomt.
 # Main window
 music_title_checkbox = Titel
 music_artist_checkbox = Kunstnär
@@ -194,9 +194,9 @@ upper_excluded_extensions_tooltip =
     Lista över inaktiverade filer som kommer att ignoreras i skanning.
     
     Vid användning av både tillåtna och inaktiverade tillägg har denna högre prioritet, så filen kommer inte att kontrolleras.
-upper_excluded_items_tooltip = 
-        Uteslutna objekt måste innehålla * wildcard och ska separeras med komma.
-        Detta är långsammare än Exkluderade Sökvägar, så använd det försiktigt.
+upper_excluded_items_tooltip =
+    Uteslutna objekt måste innehålla * wildcard och ska separeras med komma.
+    Detta är långsammare än Exkluderade Sökvägar, så använd det försiktigt.
 upper_excluded_items = Exkluderade objekt:
 upper_allowed_extensions = Tillåtna tillägg:
 upper_excluded_extensions = Inaktiverade tillägg:

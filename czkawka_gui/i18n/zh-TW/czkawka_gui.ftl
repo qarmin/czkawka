@@ -8,18 +8,18 @@ general_ok_button = 確定
 general_close_button = 關閉
 # Krokiet info dialog
 krokiet_info_title = 介紹 Krokiet - Czkawka 的新版本
-krokiet_info_message = 
-        考基特是新的、改良的、更快速且更可靠的Czkawka GTK GUI版本！
- 
-        它更容易運行，並且更能抵抗系統變動，因為它僅依賴於大多數系統預設可用的核心函式庫。
- 
-        考基特還帶來了Czkawka所沒有的功能，包括影片比較模式下的縮圖、EXIF清理器、檔案移動/複製/刪除進度或擴展的排序選項。
- 
-        試試看，看看區別吧！
- 
-        Czkawka將繼續由我提供錯誤修復和輕微更新，但所有新功能都將專門為考基特開發，任何人都可以在自由地貢獻新的功能、添加缺失的模式或進一步擴展Czkawka。
- 
-        PS：這則訊息只應該出現一次。如果它再次出現，請將CZKAWKA_DONT_ANNOY_ME環境變數設定為任何非空值。.
+krokiet_info_message =
+    考基特是新的、改良的、更快速且更可靠的Czkawka GTK GUI版本！
+    
+    它更容易運行，並且更能抵抗系統變動，因為它僅依賴於大多數系統預設可用的核心函式庫。
+    
+    考基特還帶來了Czkawka所沒有的功能，包括影片比較模式下的縮圖、EXIF清理器、檔案移動/複製/刪除進度或擴展的排序選項。
+    
+    試試看，看看區別吧！
+    
+    Czkawka將繼續由我提供錯誤修復和輕微更新，但所有新功能都將專門為考基特開發，任何人都可以在自由地貢獻新的功能、添加缺失的模式或進一步擴展Czkawka。
+    
+    PS：這則訊息只應該出現一次。如果它再次出現，請將CZKAWKA_DONT_ANNOY_ME環境變數設定為任何非空值。.
 # Main window
 music_title_checkbox = 標題
 music_artist_checkbox = 藝人
@@ -33,11 +33,11 @@ music_checking_by_content = 內容
 same_music_seconds_label = 最小片段秒數
 same_music_similarity_label = 最大差異
 music_compare_only_in_title_group = 比較相同標題類群之間
-music_compare_only_in_title_group_tooltip = 
+music_compare_only_in_title_group_tooltip =
     當啟用時，檔案會按照標題分組然後相互比較。
     
     有萬個檔案，通常會有的近乎十億次比較，反之只會約有二萬次比較。.
-same_music_tooltip = 
+same_music_tooltip =
     透過以下設定，可以根據內容搜尋相似的音樂檔案：
     
     - 音樂檔案在超過最小片段時間後可以被識別為相似
@@ -62,7 +62,7 @@ duplicate_mode_size_name_combo_box = 大小和名稱
 duplicate_mode_name_combo_box = 名稱
 duplicate_mode_size_combo_box = 大小
 duplicate_mode_hash_combo_box = 雜湊
-duplicate_hash_type_tooltip = 
+duplicate_hash_type_tooltip =
     Czkawka 提供三種類型的雜湊：
     
     Blake3 - 這是一種加密雜湊函式，也是預設選項，主要因為它的計算速度非常快。
@@ -70,7 +70,7 @@ duplicate_hash_type_tooltip =
     CRC32 - 這是一種簡單的雜湊函式。理論上它比 Blake3 更快，雖然機率很低但有時可能會產生碰撞。
     
     XXH3 - 在效能和雜湊品質上與 Blake3 非常相似，但它不是加密型的。因此，這兩種模式可以輕易地互換使用。.
-duplicate_check_method_tooltip = 
+duplicate_check_method_tooltip =
     目前，Czkawka 提供三種方法來找出重複檔案：
     
     名稱 - 找出名稱相同的檔案。
@@ -78,7 +78,7 @@ duplicate_check_method_tooltip =
     大小 - 找出大小相同的檔案。
     
     雜湊 - 找出內容相同的檔案。這個模式會先對檔案進行雜湊運算，然後比較這些雜湊值來識別重複檔案。這是找出重複檔案最安全的方式。由於應用程式大量使用快取，對同一組資料進行的第二次及後續掃描會比第一次快得多。.
-image_hash_size_tooltip = 
+image_hash_size_tooltip =
     每個檢查的圖片會產生一個可用來來互相比較的的特定的雜湊值，它們之間些微的差異則代表這些圖片是相似的。
     
     8 雜湊大小是相當不錯用以尋找與原版僅些微相似的圖片。對於更大規模的圖片組（>1000），則會產生大量的誤報，所以在此情形中推薦使用更大的雜湊大小。
@@ -86,7 +86,7 @@ image_hash_size_tooltip =
     16 是預設的雜湊大小是相當不錯的折衷方案，對於尋找即使僅些微相似的圖片，並且只會有少量的雜湊衝突。
     
     32 與 64 雜湊值用於尋找非常相似的圖片，但應該幾乎沒有誤報（也許除了一些具有 Alpha 通道的圖片）。.
-image_resize_filter_tooltip = 
+image_resize_filter_tooltip =
     要計算圖片的雜湊值，函式庫必須先對它進行調整大小。
     
     取決於選取的演算法，用於計算雜湊值的圖片將會看起來有些不同。
@@ -94,7 +94,7 @@ image_resize_filter_tooltip =
     最快的演算法是 Nearest，但也許會給出最差結果。預設為啟用，因為 16x16 雜湊大小並不是明顯可見的較低品質。
     
     對於 8x8 雜湊大小，建議使用不同於 Nearest 的演算法，以獲得更好的圖片分組。.
-image_hash_alg_tooltip = 
+image_hash_alg_tooltip =
     使用者可以從許多計算雜湊值的演算法中選擇一種。
     
     每種演算法都有強項和弱項，對於不同的圖片，有時會有更好的結果，有時會有更差的結果。
@@ -184,19 +184,19 @@ upper_remove_excluded_button_tooltip = 從排除中移除目錄。.
 upper_notebook_items_configuration = 項目設定
 upper_notebook_excluded_directories = 排除路徑
 upper_notebook_included_directories = 包含的路徑
-upper_allowed_extensions_tooltip = 
+upper_allowed_extensions_tooltip =
     允許的副檔名必須用逗號分隔（預設所有可用）。
     
     以下的巨集也可用，可以一次新增多個副檔名：IMAGE, VIDEO, MUSIC, TEXT。
     
     使用範例 ".exe, IMAGE, VIDEO, .rar, 7z" - 這表示將影像檔案（例如 .jpg, .png)、影片檔案（例如 .avi, .mp4)、.exe、.rar 和 .7z 檔案。.
-upper_excluded_extensions_tooltip = 
+upper_excluded_extensions_tooltip =
     在掃描中將會被忽略的禁用檔案清單。
     
     當使同時使用允許與禁用兩者時，此項擁有更高的優先等級，所以檔案將不會被檢查。.
-upper_excluded_items_tooltip = 
-        排除的項目必須包含 * 萬位符號，並且用逗號分隔。
-        這比排除路徑慢，所以請謹慎使用。.
+upper_excluded_items_tooltip =
+    排除的項目必須包含 * 萬位符號，並且用逗號分隔。
+    這比排除路徑慢，所以請謹慎使用。.
 upper_excluded_items = 排除的項目：
 upper_allowed_extensions = 允許的副檔名：
 upper_excluded_extensions = 禁用的副檔名：
@@ -224,7 +224,7 @@ popover_custom_name_check_button_entry_tooltip =
     
     範例用法：
     /usr/ping/pong.txt 可以在 *ong* 中找到。
-popover_custom_regex_check_button_entry_tooltip = 
+popover_custom_regex_check_button_entry_tooltip =
     透過指定的正規表達式（Regex）來選擇記錄。
     
     在這個模式下，被搜尋的文字是「路徑」加上「名稱」。
@@ -233,11 +233,11 @@ popover_custom_regex_check_button_entry_tooltip =
     使用 /ziem[a-z]+ 可以找到 /usr/bin/ziemniak.txt。
     
     這個功能使用的是 Rust 語言預設的正規表達式實作。更多相關資訊，您可以參考這個網址： https://docs.rs/regex。.
-popover_custom_case_sensitive_check_button_tooltip = 
+popover_custom_case_sensitive_check_button_tooltip =
     啟用區分大小寫的偵測。
     
     當此選項停用時，「/home/*」會同時找到「/HoMe/roman」和「/home/roman」。.
-popover_custom_not_all_check_button_tooltip = 
+popover_custom_not_all_check_button_tooltip =
     防止在同一群組中全選所有記錄。
     
     這個選項預設是啟用的，主要是因為在多數情況下，您不會想要同時刪除原始檔案和其重複檔，而是會希望至少保留一個檔案。
@@ -271,20 +271,20 @@ bottom_search_button_tooltip = 開始搜尋
 bottom_select_button_tooltip = 選擇記錄。只能稍後處理選定的檔案/資料夾。.
 bottom_delete_button_tooltip = 刪除選取的檔案/資料夾。.
 bottom_save_button_tooltip = 儲存搜尋資料到檔案
-bottom_symlink_button_tooltip = 
+bottom_symlink_button_tooltip =
     建立符號連結。
     只有在一個群組中至少選擇了兩個結果時才會生效。
     第一個檔案保持不變，第二個以及之後的檔案會建立為指向第一個檔案的符號連結。.
-bottom_hardlink_button_tooltip = 
+bottom_hardlink_button_tooltip =
     建立永久連結。
     只有在一個群組中至少選擇了兩個結果時才會生效。
     第一個檔案保持不變，第二個以及之後的檔案會建立為與第一個檔案的永久連結。.
-bottom_hardlink_button_not_available_tooltip = 
+bottom_hardlink_button_not_available_tooltip =
     建立永久連結。
     此按鈕已被停用，因為無法建立永久連結。
     在 Windows 上，只有擁有管理員權限才能建立永久連結，請確保以管理員身份執行應用程式。
     如果應用程式已經具有對應的權限，請在 GitHub 上查詢相關問題。.
-bottom_move_button_tooltip = 
+bottom_move_button_tooltip =
     將檔案移動到指定目錄。
     會將所有檔案複製到目錄中，但不會保留原始的目錄結構。
     如果試圖將兩個同名檔案移動到同一資料夾，第二個檔案將無法移動並會顯示錯誤。.
@@ -307,7 +307,7 @@ about_translation_button = 翻譯
 # Header
 header_setting_button_tooltip = 開啟設定對話方塊。.
 header_about_button_tooltip = 開啟包含應用程式資訊的對話方塊。.
- 
+
 # Settings
 
 
@@ -316,7 +316,7 @@ header_about_button_tooltip = 開啟包含應用程式資訊的對話方塊。.
 settings_number_of_threads = 使用的執行緒數
 settings_number_of_threads_tooltip = 使用的執行緒數，0 表示所有可用執行緒都將被使用。.
 settings_use_rust_preview = 使用外部庫 Instead gtk 來加載預覽
-settings_use_rust_preview_tooltip = 
+settings_use_rust_preview_tooltip =
     使用 gtk 預覽通常會較快且支援更多格式，但有時這可能會正好相反。
     
     如果您在載入預覽時遇到問題，您可以嘗試更變這個設定。
@@ -329,7 +329,7 @@ settings_ignore_other_filesystems_tooltip =
     
     在 Linux 上查詢命令時類似 -xdev 選項
 settings_save_at_exit_button_tooltip = 關閉應用程式時將設定儲存到檔案。.
-settings_load_at_start_button_tooltip = 
+settings_load_at_start_button_tooltip =
     開啟應用程式時從檔案載入設定。
     
     如果未啟用，將使用預設設定。.
@@ -352,7 +352,7 @@ settings_save_also_as_json_button = 同時將快取儲存為 JSON 檔案
 settings_use_trash_button = 移動已刪除的檔案到回收桶
 settings_language_label = 語言
 settings_multiple_delete_outdated_cache_checkbutton = 自動刪除過時的快取項目
-settings_multiple_delete_outdated_cache_checkbutton_tooltip = 
+settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     刪除指向不存在檔案的過時快取結果。
     
     啟用後，應用程式在載入記錄時會確保所有記錄都指向有效的檔案（無效的檔案會被忽略）。
@@ -369,22 +369,22 @@ settings_notebook_videos = 相似影片
 
 settings_multiple_image_preview_checkbutton_tooltip = 在右側顯示預覽（當選擇影像檔案時）。.
 settings_multiple_image_preview_checkbutton = 顯示影像預覽
-settings_multiple_clear_cache_button_tooltip = 
+settings_multiple_clear_cache_button_tooltip =
     手動清除過時項目的快取。
     僅在停用自動清除時才應使用。.
 settings_multiple_clear_cache_button = 從快取中移除過時結果.
- 
+
 ## Duplicates
 
-settings_duplicates_hide_hard_link_button_tooltip = 
+settings_duplicates_hide_hard_link_button_tooltip =
     如果所有檔案都指向相同的資料（即為永久連結），則隱藏除一個以外的所有檔案。
     
     例如：在有七個檔案與特定資料有永久連結，以及一個具有相同資料但不同 inode 的不同檔案的情況下，重複檔案檢查工具只會顯示一個獨特的檔案和一個來自永久連結的檔案。.
-settings_duplicates_minimal_size_entry_tooltip = 
+settings_duplicates_minimal_size_entry_tooltip =
     設定將被快取的最小檔案大小。
     
     選擇較小的值會產生更多記錄。這會加速搜尋，但會減慢快取的載入和儲存。.
-settings_duplicates_prehash_checkbutton_tooltip = 
+settings_duplicates_prehash_checkbutton_tooltip =
     啟用預先計算的雜湊（從檔案的一小部分計算出來）的快取，這允許更早地排除非重複的結果。
     
     這個選項預設是停用的，因為在某些情況下它可能會造成減速。
@@ -407,7 +407,7 @@ settings_reset_button = 重設設定
 
 ## Opening cache/config folders
 
-settings_folder_cache_open_tooltip = 
+settings_folder_cache_open_tooltip =
     開啟儲存快取 txt 檔案的資料夾。
     
     修改快取檔案可能會導致顯示無效的結果。然而，如果需要將大量檔案移動到不同位置，修改路徑可能會節省時間。
@@ -415,7 +415,7 @@ settings_folder_cache_open_tooltip =
     如果兩台電腦有類似的目錄結構，您可以在它們之間複製這些檔案，以節省重新掃描檔案的時間。
     
     如果快取有問題，這些檔案可以被移除。應用程式會自動重新產生它們。.
-settings_folder_settings_open_tooltip = 
+settings_folder_settings_open_tooltip =
     開啟儲存 Czkawka 設定的資料夾。
     
     警告：手動修改設定可能會影響您的工作流程。.

@@ -27,7 +27,7 @@ impl VideoCodec {
         match self {
             Self::H264 => "libx264",
             Self::H265 => "libx265",
-            Self::Av1 => "libaom-av1",
+            Self::Av1 => "libsvtav1",
             Self::Vp9 => "libvpx-vp9",
         }
     }
@@ -49,9 +49,45 @@ impl std::str::FromStr for VideoCodec {
         match codec.to_lowercase().as_str() {
             "h264" | "libx264" => Ok(Self::H264),
             "h265" | "hevc" | "libx265" => Ok(Self::H265),
-            "av1" | "libaom-av1" => Ok(Self::Av1),
+            "av1" | "libaom-av1" | "libsvtav1" | "svtav1" => Ok(Self::Av1),
             "vp9" | "libvpx-vp9" => Ok(Self::Vp9),
             _ => Err(flc!("core_unknown_codec", codec = codec)),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub enum NoiseReductionMethod {
+    #[default]
+    None,
+    Hqdn3d,
+}
+
+impl NoiseReductionMethod {
+    pub const fn as_str(&self) -> &str {
+        match self {
+            Self::None => "none",
+            Self::Hqdn3d => "hqdn3d",
+        }
+    }
+
+    pub fn to_ffmpeg_filter(&self, strength: u32) -> Option<String> {
+        let s = strength.clamp(1, 10) as f32;
+        match self {
+            Self::None => None,
+            Self::Hqdn3d => Some(format!("hqdn3d={:.1}:{:.1}:{:.1}:{:.1}", s * 0.8, s * 0.6, s * 1.2, s * 0.9)),
+        }
+    }
+}
+
+impl std::str::FromStr for NoiseReductionMethod {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "none" => Ok(Self::None),
+            "hqdn3d" => Ok(Self::Hqdn3d),
+            _ => Err(format!("Unknown noise reduction method: {s}")),
         }
     }
 }
@@ -79,13 +115,13 @@ impl std::str::FromStr for VideoOptimizerMode {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum VideoOptimizerFixParams {
     VideoTranscode(VideoTranscodeFixParams),
     VideoCrop(VideoCropFixParams),
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct VideoTranscodeFixParams {
     pub codec: VideoCodec,
     pub quality: u32,
@@ -94,6 +130,9 @@ pub struct VideoTranscodeFixParams {
     pub limit_video_size: bool,
     pub max_width: u32,
     pub max_height: u32,
+    pub noise_reduction: NoiseReductionMethod,
+    pub noise_reduction_strength: u32,
+    pub custom_ffmpeg_command: Option<String>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
