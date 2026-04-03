@@ -999,7 +999,7 @@ mod context_menu {
                 return;
             }
             let path = row.val_str.iter().nth(path_idx).expect("path_idx out of bounds").to_string();
-            add_excluded_paths(&app.global::<Settings>(), &[path.clone()]);
+            add_excluded_paths(&app.global::<Settings>(), std::slice::from_ref(&path));
 
             // Also remove matching rows from results, keeping reference-group items.
             let mut in_reference_group = false;

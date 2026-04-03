@@ -46,13 +46,13 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     entry
 }
 
-pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, params: VideoTranscodeFixParams) -> Result<(), String> {
+pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, params: &VideoTranscodeFixParams) -> Result<(), String> {
     let temp_output = Path::new(video_path).with_extension("czkawka_optimized.mp4");
 
     if let Some(ref cmd) = params.custom_ffmpeg_command {
         run_custom_command(cmd, video_path, &temp_output, stop_flag)?;
     } else {
-        run_standard_command(&params, video_path, &temp_output, stop_flag)?;
+        run_standard_command(params, video_path, &temp_output, stop_flag)?;
     }
 
     let metadata = fs::metadata(&temp_output).map_err(|e| {
@@ -124,8 +124,15 @@ fn run_custom_command(cmd: &str, video_path: &str, temp_output: &Path, stop_flag
 
     let args: Vec<String> = cmd.split_whitespace().map(|t| if t == "{PATH}" { video_path.to_string() } else { t.to_string() }).collect();
 
-    let mut command = Command::new(&args[0]);
-    command.args(&args[1..]).arg("-y").arg(temp_output);
+    let Some(first_arg) = args.first() else {
+        return Err(flc!("core_custom_command_empty"));
+    };
+    let Some(next_args) = args.get(1..) else {
+        return Err(flc!("core_custom_command_empty"));
+    };
+
+    let mut command = Command::new(first_arg);
+    command.args(next_args).arg("-y").arg(temp_output);
 
     run_ffmpeg_command(command, video_path, "custom", stop_flag, temp_output)
 }

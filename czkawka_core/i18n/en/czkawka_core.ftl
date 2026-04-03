@@ -107,3 +107,4 @@ core_invalid_extension_contains_dot = { $extension } is not a valid extension be
 core_ffmpeg_unknown_encoder = Cannot encode { $file } using the { $encoder } encoder. The current FFmpeg build does not support this encoder. Use a different FFmpeg version with the required codec support or select another encoder.
 core_ffmpeg_error = FFmpeg error while processing { $file }, status code { $code }, reason { $reason }
 core_custom_command_missing_path_placeholder = Custom FFmpeg command must contain {"{PATH}"} as input file placeholder
+core_custom_command_empty = Custom FFmpeg command cannot be empty

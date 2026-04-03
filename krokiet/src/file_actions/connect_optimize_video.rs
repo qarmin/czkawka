@@ -177,7 +177,7 @@ impl ModelProcessor {
                     &stop_flag_clone,
                     &full_path,
                     original_size,
-                    VideoTranscodeFixParams {
+                    &VideoTranscodeFixParams {
                         codec: requested_video_codec,
                         quality: target_quality,
                         fail_if_not_smaller: fail_if_bigger,
@@ -270,12 +270,12 @@ impl ModelProcessor {
 }
 
 #[cfg(not(test))]
-fn optimize_single_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, transcode_params: VideoTranscodeFixParams) -> Result<(), String> {
+fn optimize_single_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_size: u64, transcode_params: &VideoTranscodeFixParams) -> Result<(), String> {
     czkawka_core::tools::video_optimizer::core::process_video(stop_flag, video_path, original_size, transcode_params)
 }
 
 #[cfg(test)]
-fn optimize_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _transcode_params: VideoTranscodeFixParams) -> Result<(), String> {
+fn optimize_single_video(_stop_flag: &Arc<AtomicBool>, video_path: &str, _original_size: u64, _transcode_params: &VideoTranscodeFixParams) -> Result<(), String> {
     if video_path.contains("test_error") {
         return Err(format!("Test error for item: {video_path}"));
     }
