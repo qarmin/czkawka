@@ -222,16 +222,14 @@ jobs:
           {
             echo '# Czkawka'
             echo ''
-            echo 'This package contains the legacy GTK 4 GUI (czkawka_gui.exe).'
+            echo 'This package includes the legacy GTK 4 GUI (czkawka_gui.exe), which is now deprecated.'
             echo ''
-            echo 'Use Krokiet instead!'
+            echo 'The recommended successor is Krokiet.'
             echo ''
-            echo '**krokiet.exe** (also included in this package) is the modern, actively developed GUI for Czkawka.'
-            echo 'It is faster, more feature-rich, and better maintained than the legacy GTK GUI.'
+            echo '**krokiet.exe** (also included in this package) is a new application created by the author of Czkawka.'
+            echo 'It offers better performance, more features, improved Windows/macOS support compared to the legacy GTK GUI.'
             echo ''
-            echo 'Please use **krokiet.exe** for the best experience.'
-            echo ''
-            echo 'More info: https://github.com/qarmin/czkawka'
+            echo 'More information: https://github.com/qarmin/czkawka'
           } > package/README.md
 
       - name: Upload artifacts
