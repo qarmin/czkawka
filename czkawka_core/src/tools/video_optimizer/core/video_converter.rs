@@ -129,8 +129,12 @@ fn run_standard_command(params: &VideoTranscodeFixParams, video_path: &str, temp
     if let Some(nr_filter) = params.noise_reduction.to_ffmpeg_filter(params.noise_reduction_strength) {
         filters.push(nr_filter);
     }
-    // VAAPI requires software-side format conversion before uploading frames to hardware.
     if using_vaapi {
+        // Align dimensions to multiples of 16 before hwupload. VAAPI encoders pad
+        // the coded picture to 16-aligned boundaries; players that ignore the
+        // conformance-window crop signal show the padding as green pixels.
+        // Scaling by at most 15 px per axis is imperceptible at typical resolutions.
+        filters.push("scale=trunc(iw/16)*16:trunc(ih/16)*16".to_string());
         filters.push("format=nv12,hwupload".to_string());
     }
     if !filters.is_empty() {
