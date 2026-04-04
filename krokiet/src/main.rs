@@ -11,9 +11,11 @@ use std::sync::atomic::AtomicBool;
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::basic_gui_cli::process_cli_args;
 use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
+use czkawka_core::common::ffmpeg_utils::{check_if_ffprobe_ffmpeg_exists, get_working_hardware_encoders};
 use czkawka_core::common::image::register_image_decoding_hooks;
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
+use czkawka_core::tools::video_optimizer::HardwareEncoder;
 use file_actions::connect_clean_exif::connect_clean;
 use file_actions::connect_delete::connect_delete_button;
 use file_actions::connect_hardlink::connect_hardlink;
@@ -101,6 +103,7 @@ fn main() {
     print_version_mode("Krokiet");
     print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
     print_krokiet_features();
+    print_available_hw_accelerations();
 
     create_default_settings_files();
 
@@ -135,6 +138,7 @@ fn main() {
 
     let original_preset_idx = base_settings.default_preset;
     set_initial_settings_to_gui(&app, &base_settings, &custom_settings, cli_args, preset_to_load);
+    update_available_hardware_encoders(&app);
 
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models), Arc::clone(&audio_player));
@@ -207,6 +211,36 @@ pub(crate) fn zeroing_all_models(app: &MainWindow) {
 #[allow(unfulfilled_lint_expectations)] // Happens only on release build
 #[expect(clippy::vec_init_then_push)]
 #[expect(unused_mut)]
+pub(crate) fn print_available_hw_accelerations() {
+    let hw_accels = czkawka_core::common::ffmpeg_utils::get_available_hw_accelerations();
+    info!("Available HW accelerations({}): [{}]", hw_accels.len(), hw_accels.join(", "));
+}
+
+/// Probe which hardware encoders actually work on this machine and restrict the combo-box
+/// model to those. Runs before the event loop so the test encodes are synchronous but fast
+/// (single 64x64 frame each). If ffmpeg is absent the default hardcoded list is kept.
+fn update_available_hardware_encoders(app: &MainWindow) {
+    if !check_if_ffprobe_ffmpeg_exists() {
+        return;
+    }
+
+    let settings = app.global::<Settings>();
+    let current_value = settings.get_video_optimizer_sub_hardware_encoder_value();
+    let current_encoder = current_value.to_lowercase().parse::<HardwareEncoder>().unwrap_or_default();
+
+    let working = get_working_hardware_encoders();
+    info!("Working HW encoders({}): [{}]", working.len(), working.iter().map(|e| e.as_display_name()).collect::<Vec<_>>().join(", "));
+
+    let all_encoders: Vec<HardwareEncoder> = std::iter::once(HardwareEncoder::None).chain(working).collect();
+
+    let new_index = all_encoders.iter().position(|&e| e == current_encoder).unwrap_or(0) as i32;
+
+    let config: Vec<slint::SharedString> = all_encoders.iter().map(|e| slint::SharedString::from(e.as_display_name())).collect();
+
+    settings.set_video_optimizer_sub_hardware_encoder_config(Rc::new(VecModel::from(config)).into());
+    settings.set_video_optimizer_sub_hardware_encoder_index(new_index);
+}
+
 pub(crate) fn print_krokiet_features() {
     let mut features: Vec<&str> = Vec::new();
 

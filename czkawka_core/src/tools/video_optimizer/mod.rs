@@ -56,6 +56,83 @@ impl std::str::FromStr for VideoCodec {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Default)]
+pub enum HardwareEncoder {
+    #[default]
+    None,
+    Nvenc,
+    Vaapi,
+    Qsv,
+    VideoToolbox,
+    Amf,
+}
+
+impl HardwareEncoder {
+    pub const fn as_config_name(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::Nvenc => "nvenc",
+            Self::Vaapi => "vaapi",
+            Self::Qsv => "qsv",
+            Self::VideoToolbox => "videotoolbox",
+            Self::Amf => "amf",
+        }
+    }
+
+    pub const fn as_display_name(self) -> &'static str {
+        match self {
+            Self::None => "None",
+            Self::Nvenc => "NVENC",
+            Self::Vaapi => "VAAPI",
+            Self::Qsv => "QSV",
+            Self::VideoToolbox => "VideoToolbox",
+            Self::Amf => "AMF",
+        }
+    }
+
+    pub const fn all_non_none() -> &'static [HardwareEncoder] {
+        &[Self::Nvenc, Self::Vaapi, Self::Qsv, Self::VideoToolbox, Self::Amf]
+    }
+
+    /// Returns the ffmpeg hardware encoder name for the given codec, or None if unsupported.
+    pub const fn encoder_name_for_codec(self, codec: VideoCodec) -> Option<&'static str> {
+        match (self, codec) {
+            (Self::None, _) => None,
+            (Self::Nvenc, VideoCodec::H264) => Some("h264_nvenc"),
+            (Self::Nvenc, VideoCodec::H265) => Some("hevc_nvenc"),
+            (Self::Nvenc, VideoCodec::Av1) => Some("av1_nvenc"),
+            (Self::Vaapi, VideoCodec::H264) => Some("h264_vaapi"),
+            (Self::Vaapi, VideoCodec::H265) => Some("hevc_vaapi"),
+            (Self::Qsv, VideoCodec::H264) => Some("h264_qsv"),
+            (Self::Qsv, VideoCodec::H265) => Some("hevc_qsv"),
+            (Self::Qsv, VideoCodec::Av1) => Some("av1_qsv"),
+            (Self::VideoToolbox, VideoCodec::H264) => Some("h264_videotoolbox"),
+            (Self::VideoToolbox, VideoCodec::H265) => Some("hevc_videotoolbox"),
+            (Self::Amf, VideoCodec::H264) => Some("h264_amf"),
+            (Self::Amf, VideoCodec::H265) => Some("hevc_amf"),
+            (Self::Amf, VideoCodec::Av1) => Some("av1_amf"),
+            // VP9 has no widely available hardware encoders; AV1+VideoToolbox not supported
+            _ => None,
+        }
+    }
+}
+
+impl std::str::FromStr for HardwareEncoder {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "none" => Ok(Self::None),
+            "nvenc" => Ok(Self::Nvenc),
+            "vaapi" => Ok(Self::Vaapi),
+            "qsv" => Ok(Self::Qsv),
+            "videotoolbox" => Ok(Self::VideoToolbox),
+            "amf" => Ok(Self::Amf),
+            _ => Err(format!("Unknown hardware encoder: {s}")),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, PartialEq)]
 pub enum NoiseReductionMethod {
     #[default]
@@ -124,6 +201,7 @@ pub enum VideoOptimizerFixParams {
 #[derive(Clone, PartialEq, Debug)]
 pub struct VideoTranscodeFixParams {
     pub codec: VideoCodec,
+    pub hardware_encoder: HardwareEncoder,
     pub quality: u32,
     pub fail_if_not_smaller: bool,
     pub overwrite_original: bool,

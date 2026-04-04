@@ -5,7 +5,7 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
-use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCropSingleFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
+use czkawka_core::tools::video_optimizer::{HardwareEncoder, NoiseReductionMethod, VideoCodec, VideoCropSingleFixParams, VideoCroppingMechanism, VideoTranscodeFixParams};
 use slint::{ComponentHandle, Weak};
 
 use crate::common::IntDataVideoOptimizer;
@@ -75,6 +75,11 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
         let noise_reduction_strength = settings.get_video_optimizer_sub_noise_reduction_strength().round() as u32;
         let use_custom_command = settings.get_video_optimizer_sub_use_custom_command();
         let custom_ffmpeg_command = use_custom_command.then(|| settings.get_video_optimizer_sub_custom_command().to_string());
+        let hardware_encoder = settings
+            .get_video_optimizer_sub_hardware_encoder_value()
+            .to_lowercase()
+            .parse::<HardwareEncoder>()
+            .unwrap_or_default();
 
         let processor = ModelProcessor::new(active_tab);
 
@@ -83,6 +88,7 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
             weak_app,
             stop_flag,
             codec,
+            hardware_encoder,
             fail_if_bigger,
             overwrite_files,
             video_quality,
@@ -142,6 +148,7 @@ impl ModelProcessor {
         weak_app: Weak<MainWindow>,
         stop_flag: Arc<AtomicBool>,
         requested_video_codec: VideoCodec,
+        hardware_encoder: HardwareEncoder,
         fail_if_bigger: bool,
         overwrite_files: bool,
         video_quality: f32,
@@ -179,6 +186,7 @@ impl ModelProcessor {
                     original_size,
                     &VideoTranscodeFixParams {
                         codec: requested_video_codec,
+                        hardware_encoder,
                         quality: target_quality,
                         fail_if_not_smaller: fail_if_bigger,
                         overwrite_original: overwrite_files,

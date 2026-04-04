@@ -437,6 +437,7 @@ impl SimilarImages {
         self.similar_vectors = collected_similar_images.into_values().collect();
 
         self.exclude_items_with_same_size();
+        self.exclude_items_with_same_resolution();
 
         self.remove_multiple_records_from_reference_folders();
 
@@ -468,6 +469,24 @@ impl SimilarImages {
                 let mut vec_values = Vec::new();
                 for file_entry in vec_file_entry {
                     if bt_sizes.insert(file_entry.size) {
+                        vec_values.push(file_entry);
+                    }
+                }
+                if vec_values.len() > 1 {
+                    self.similar_vectors.push(vec_values);
+                }
+            }
+        }
+    }
+
+    #[fun_time(message = "exclude_items_with_same_resolution", level = "debug")]
+    fn exclude_items_with_same_resolution(&mut self) {
+        if self.get_params().exclude_images_with_same_resolution {
+            for vec_file_entry in mem::take(&mut self.similar_vectors) {
+                let mut bt_resolutions: BTreeSet<(u32, u32)> = Default::default();
+                let mut vec_values = Vec::new();
+                for file_entry in vec_file_entry {
+                    if bt_resolutions.insert((file_entry.width, file_entry.height)) {
                         vec_values.push(file_entry);
                     }
                 }

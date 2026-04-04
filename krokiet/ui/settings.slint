@@ -69,6 +69,7 @@ export global Settings {
     in-out property <float> similar_images_sub_max_similarity: 40;
     in-out property <float> similar_images_sub_current_similarity: 20;
     in-out property <bool> similar_images_sub_ignore_same_size: false;
+    in-out property <bool> similar_images_sub_ignore_same_resolution: false;
 
     // Duplicates
     in-out property <[string]> duplicates_sub_check_method: ["Hash", "Size", "Name", "Size and Name"];
@@ -87,6 +88,7 @@ export global Settings {
 
     // Similar Videos
     in-out property <bool> similar_videos_sub_ignore_same_size;
+    in-out property <bool> similar_videos_sub_ignore_same_resolution;
     in-out property <float> similar_videos_sub_max_similarity: 20;
     in-out property <float> similar_videos_sub_current_similarity: 15;
 
@@ -177,6 +179,11 @@ export global Settings {
     in-out property <int>      video_optimizer_sub_noise_reduction_index: 0;
     in-out property <string>   video_optimizer_sub_noise_reduction_value: "none";
     in-out property <float>    video_optimizer_sub_noise_reduction_strength: 5;
+
+    // Video hardware encoder
+    in-out property <[string]> video_optimizer_sub_hardware_encoder_config: ["None", "NVENC", "VAAPI", "QSV", "VideoToolbox", "AMF"];
+    in-out property <int>      video_optimizer_sub_hardware_encoder_index: 0;
+    in-out property <string>   video_optimizer_sub_hardware_encoder_value: "none";
 
     // Custom FFmpeg command
     in-out property <bool>   video_optimizer_sub_use_custom_command: false;

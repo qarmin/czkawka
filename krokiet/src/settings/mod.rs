@@ -360,6 +360,16 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
         StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_noise_reduction, &collected_items.video_optimizer_noise_reduction);
     settings.set_video_optimizer_sub_noise_reduction_index(idx as i32);
     settings.set_video_optimizer_sub_noise_reduction_value(display_names[idx].clone());
+
+    // Video Optimizer hardware encoder (static list; config names are lowercase variants of display names)
+    let hw_encoder_config_names = ["none", "nvenc", "vaapi", "qsv", "videotoolbox", "amf"];
+    let hw_encoder_display_names = ["None", "NVENC", "VAAPI", "QSV", "VideoToolbox", "AMF"];
+    let hw_idx = hw_encoder_config_names
+        .iter()
+        .position(|&s| s == custom_settings.video_optimizer_hardware_encoder.to_lowercase().as_str())
+        .unwrap_or(0);
+    settings.set_video_optimizer_sub_hardware_encoder_index(hw_idx as i32);
+    settings.set_video_optimizer_sub_hardware_encoder_value(hw_encoder_display_names[hw_idx].into());
 }
 
 pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, base_settings: &BasicSettings, cli_args: Option<CliResult>) {
@@ -410,12 +420,14 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     set_combobox_custom_settings_items(&settings, custom_settings);
 
     settings.set_similar_images_sub_ignore_same_size(custom_settings.similar_images_sub_ignore_same_size);
+    settings.set_similar_images_sub_ignore_same_resolution(custom_settings.similar_images_sub_ignore_same_resolution);
     settings.set_similar_images_sub_max_similarity(MAX_HASH_SIZE);
     settings.set_similar_images_sub_current_similarity(custom_settings.similar_images_sub_similarity as f32);
 
     settings.set_biggest_files_sub_number_of_files(custom_settings.biggest_files_sub_number_of_files.to_string().into());
 
     settings.set_similar_videos_sub_ignore_same_size(custom_settings.similar_videos_sub_ignore_same_size);
+    settings.set_similar_videos_sub_ignore_same_resolution(custom_settings.similar_videos_sub_ignore_same_resolution);
     settings.set_similar_videos_sub_current_similarity(custom_settings.similar_videos_sub_similarity as f32);
     settings.set_similar_videos_sub_max_similarity(20.0);
     settings.set_similar_videos_skip_forward_amount(
@@ -591,6 +603,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_images_sub_hash_alg = combo_box_items.image_hash_alg.config_name.clone();
     let similar_images_sub_resize_algorithm = combo_box_items.resize_algorithm.config_name.clone();
     let similar_images_sub_ignore_same_size = settings.get_similar_images_sub_ignore_same_size();
+    let similar_images_sub_ignore_same_resolution = settings.get_similar_images_sub_ignore_same_resolution();
     let similar_images_sub_similarity = settings.get_similar_images_sub_current_similarity().round() as i32;
 
     let duplicates_sub_check_method = combo_box_items.duplicates_check_method.config_name.clone();
@@ -599,6 +612,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let biggest_files_sub_number_of_files = settings.get_biggest_files_sub_number_of_files().parse().unwrap_or(DEFAULT_BIGGEST_FILES);
 
     let similar_videos_sub_ignore_same_size = settings.get_similar_videos_sub_ignore_same_size();
+    let similar_videos_sub_ignore_same_resolution = settings.get_similar_videos_sub_ignore_same_resolution();
     let similar_videos_sub_similarity = settings.get_similar_videos_sub_current_similarity().round() as i32;
     let similar_videos_crop_detect = combo_box_items.videos_crop_detect.config_name.clone();
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
@@ -669,6 +683,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let video_optimizer_noise_reduction_strength = settings.get_video_optimizer_sub_noise_reduction_strength().round() as u32;
     let video_optimizer_use_custom_command = settings.get_video_optimizer_sub_use_custom_command();
     let video_optimizer_custom_command = settings.get_video_optimizer_sub_custom_command().to_string();
+    let hw_encoder_config_names = ["none", "nvenc", "vaapi", "qsv", "videotoolbox", "amf"];
+    let video_optimizer_hardware_encoder =
+        hw_encoder_config_names.get(settings.get_video_optimizer_sub_hardware_encoder_index() as usize).unwrap_or(&"none").to_string();
 
     let ignored_exif_tags = settings.get_ignored_exif_tags().to_string();
 
@@ -718,6 +735,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_images_sub_hash_alg,
         similar_images_sub_resize_algorithm,
         similar_images_sub_ignore_same_size,
+        similar_images_sub_ignore_same_resolution,
         similar_images_sub_similarity,
         duplicates_sub_check_method,
         duplicates_sub_available_hash_type,
@@ -725,6 +743,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         biggest_files_sub_method,
         biggest_files_sub_number_of_files,
         similar_videos_sub_ignore_same_size,
+        similar_videos_sub_ignore_same_resolution,
         similar_videos_sub_similarity,
         similar_music_sub_audio_check_type,
         similar_music_sub_approximate_comparison,
@@ -775,6 +794,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         video_optimizer_noise_reduction_strength,
         video_optimizer_use_custom_command,
         video_optimizer_custom_command,
+        video_optimizer_hardware_encoder,
         ignored_exif_tags,
         column_sizes,
         popup_move_preserve_folder_structure: settings.get_popup_move_preserve_folder_structure(),

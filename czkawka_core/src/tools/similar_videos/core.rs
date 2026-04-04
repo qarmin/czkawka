@@ -284,19 +284,26 @@ impl SimilarVideos {
         // We need to allow to set value in range 0 - 0.5
         let match_group = vid_dup_finder_lib::search(vector_of_hashes, self.get_params().tolerance as f64 / 40.0f64);
 
+        let exclude_same_size = self.get_params().exclude_videos_with_same_size;
+        let exclude_same_resolution = self.get_params().exclude_videos_with_same_resolution;
         let mut collected_similar_videos: Vec<Vec<VideosEntry>> = Default::default();
         for i in match_group {
             let mut temp_vector: Vec<VideosEntry> = Vec::new();
             let mut bt_size: BTreeSet<u64> = Default::default();
+            let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
             for j in i.duplicates() {
                 let file_entry = &hashmap_with_file_entries[&j.to_string_lossy().to_string()];
-                if self.get_params().exclude_videos_with_same_size {
-                    if bt_size.insert(file_entry.size) {
-                        temp_vector.push(file_entry.clone());
-                    }
-                } else {
-                    temp_vector.push(file_entry.clone());
+                if exclude_same_size && !bt_size.insert(file_entry.size) {
+                    continue;
                 }
+                if exclude_same_resolution {
+                    if let (Some(w), Some(h)) = (file_entry.width, file_entry.height) {
+                        if !bt_resolution.insert((w, h)) {
+                            continue;
+                        }
+                    }
+                }
+                temp_vector.push(file_entry.clone());
             }
             if temp_vector.len() > 1 {
                 collected_similar_videos.push(temp_vector);
