@@ -59,6 +59,13 @@ fn test_encoder_simple(encoder_name: &str) -> bool {
         .unwrap_or(false)
 }
 
+/// Returns the path of the first available DRI render node, or None if none exist.
+pub fn find_vaapi_device() -> Option<String> {
+    (128..=132u32)
+        .map(|index| format!("/dev/dri/renderD{index}"))
+        .find(|device| std::path::Path::new(device).exists())
+}
+
 /// VAAPI encoding requires an explicit DRI render node and a hwupload filter step.
 /// Scan /dev/dri/renderD* in order and return true on the first successful test encode.
 fn test_vaapi_encoder(encoder_name: &str) -> bool {

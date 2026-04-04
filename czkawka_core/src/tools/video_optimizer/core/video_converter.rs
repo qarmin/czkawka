@@ -6,6 +6,7 @@ use std::sync::atomic::AtomicBool;
 
 use log::{error, warn};
 
+use crate::common::ffmpeg_utils::find_vaapi_device;
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_utils::VideoMetadata;
 use crate::flc;
@@ -89,7 +90,6 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
 
 fn run_standard_command(params: &VideoTranscodeFixParams, video_path: &str, temp_output: &Path, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
     let mut command = Command::new("ffmpeg");
-    command.arg("-i").arg(video_path).arg("-nostdin");
 
     // Determine whether to use a hardware encoder or the software codec.
     let hw = params.hardware_encoder;
@@ -102,6 +102,15 @@ fn run_standard_command(params: &VideoTranscodeFixParams, video_path: &str, temp
             params.codec.as_ffprobe_codec_name()
         );
     }
+
+    // VAAPI requires the render device to be declared before the input file.
+    let using_vaapi = hw == HardwareEncoder::Vaapi && hw_encoder_name.is_some();
+    if using_vaapi {
+        let device = find_vaapi_device().ok_or_else(|| "No VAAPI render device found in /dev/dri/".to_string())?;
+        command.arg("-vaapi_device").arg(device);
+    }
+
+    command.arg("-i").arg(video_path).arg("-nostdin");
 
     if let Some(hw_name) = hw_encoder_name {
         // Hardware encoders do not support CRF; use -q:v instead.
@@ -119,6 +128,10 @@ fn run_standard_command(params: &VideoTranscodeFixParams, video_path: &str, temp
     }
     if let Some(nr_filter) = params.noise_reduction.to_ffmpeg_filter(params.noise_reduction_strength) {
         filters.push(nr_filter);
+    }
+    // VAAPI requires software-side format conversion before uploading frames to hardware.
+    if using_vaapi {
+        filters.push("format=nv12,hwupload".to_string());
     }
     if !filters.is_empty() {
         command.arg("-vf").arg(filters.join(","));
