@@ -13,6 +13,7 @@ export global Translations {
     in-out property <string> select_button_text: "Select";
     in-out property <string> move_button_text: "Move";
     in-out property <string> delete_button_text: "Delete";
+    in-out property <string> trash_button_text: "Trash";
     in-out property <string> save_button_text: "Save";
     in-out property <string> sort_button_text: "Sort";
     in-out property <string> rename_button_text: "Rename";
@@ -167,7 +168,6 @@ export global Translations {
     in-out property <string> settings_recursive_search_text: "Recursive search";
     in-out property <string> settings_use_cache_text: "Use cache";
     in-out property <string> settings_save_as_json_text: "Also save cache as JSON file";
-    in-out property <string> settings_move_to_trash_text: "Move deleted files to trash";
     in-out property <string> settings_ignore_other_filesystems_text: "Ignore other filesystems (only Linux)";
     in-out property <string> settings_delete_outdated_cache_entries_text: "Delete automatically outdated cache entries";
     in-out property <string> settings_delete_outdated_cache_entries_hint_text: "When enabled, the app will verify during cache loading (at most once per week) whether the cached records still point to existing and unmodified files/data";
@@ -263,6 +263,10 @@ export global Translations {
     // Popup delete
     in-out property <string> delete_text: "Delete items";
     in-out property <string> delete_confirmation_text: "Are you sure you want to delete the selected items?";
+
+    // Popup trash
+    in-out property <string> trash_text: "Move items to trash";
+    in-out property <string> trash_confirmation_text: "Are you sure you want to move the selected items to trash?";
 
     // Popup clean
     in-out property <string> clean_text: "Clean EXIF data";

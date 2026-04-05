@@ -255,7 +255,6 @@ settings_maximum_file_size = Nejvýše:
 settings_recursive_search = Rekurzivní vyhledávání
 settings_use_cache = Používat mezipaměť
 settings_save_as_json = Ukládat mezipaměť také jako soubor JSON
-settings_move_to_trash = Přesouvat smazané soubory do koše
 settings_ignore_other_filesystems = Nepřekračovat na ostatní souborové systémy (pouze v Linuxu)
 settings_delete_outdated_cache_entries = Automaticky z mezipaměti odstraňovat už neplatné položky
 settings_delete_outdated_cache_entries_hint = Pokud zapnuto, aplikace bude během načítání mezipaměti prověřovat (maximálně jednou za týden), zda uložené záznamy stále ještě odkazují na existující a nezměněné soubory/data

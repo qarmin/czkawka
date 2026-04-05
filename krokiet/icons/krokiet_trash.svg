@@ -1,0 +1,5 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect x="208" y="90" width="96" height="65" rx="10"/>
+  <rect x="86" y="155" width="340" height="50" rx="8"/>
+  <path fill-rule="evenodd" d="M132 222 L155 455 Q157 472 174 472 L338 472 Q355 472 357 455 L380 222 Z M210 242 L210 452 L224 452 L224 242 Z M249 242 L249 452 L263 452 L263 242 Z M288 242 L288 452 L302 452 L302 242 Z"/>
+</svg>

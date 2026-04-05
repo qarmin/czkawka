@@ -152,6 +152,18 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
+    trash_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.trash_button_text;
+        icon: @image-url("../icons/krokiet_trash.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Trash);
+        }
+    }
+
     save_button := Button {
         visible: lists_enabled;
         height: parent.height;

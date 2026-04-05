@@ -203,6 +203,11 @@ All user-visible strings use [Fluent](https://projectfluent.org/) (`.ftl` files)
 
 English is the source/fallback language. All other locales are AI-translated and then validated.
 
+**Important:** Only edit the English `.ftl` files (`i18n/en/`) directly in this repository.
+All other language files are managed through [Crowdin](https://crowdin.com/) and will be
+**overwritten** when translations are pulled from Crowdin. Any manual edits to non-English
+`.ftl` files in the repo will be lost on the next `just unpack_translations` run.
+
 ---
 
 ## Slint UI conventions

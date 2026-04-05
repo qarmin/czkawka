@@ -255,7 +255,6 @@ settings_maximum_file_size = Max:
 settings_recursive_search = Rekursiv sökning
 settings_use_cache = Använd cache
 settings_save_as_json = Spara även cache som JSON-fil
-settings_move_to_trash = Flytta raderade filer till papperskorgen
 settings_ignore_other_filesystems = Ignorera andra filsystem (endast Linux)
 settings_delete_outdated_cache_entries = Radera automatiskt utdaterade cacheposter
 settings_delete_outdated_cache_entries_hint = När det är aktiverat kommer appen att verifiera under cache-laddning (högst en gång per vecka) om de cachelagrade posterna fortfarande pekar på befintliga och oförändrade filer/data

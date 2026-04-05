@@ -17,7 +17,7 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::tools::video_optimizer::HardwareEncoder;
 use file_actions::connect_clean_exif::connect_clean;
-use file_actions::connect_delete::connect_delete_button;
+use file_actions::connect_delete::{connect_delete_button, connect_trash_button};
 use file_actions::connect_hardlink::connect_hardlink;
 use file_actions::connect_move::connect_move;
 use file_actions::connect_optimize_video::connect_optimize_video;
@@ -141,6 +141,7 @@ fn main() {
     update_available_hardware_encoders(&app);
 
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
+    connect_trash_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models), Arc::clone(&audio_player));
     connect_stop_button(&app, stop_flag.clone());
     connect_open_items(&app);

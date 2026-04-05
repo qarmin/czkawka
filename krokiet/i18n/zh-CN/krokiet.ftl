@@ -255,7 +255,6 @@ settings_maximum_file_size = 最大值：
 settings_recursive_search = 递归搜索
 settings_use_cache = 使用缓存
 settings_save_as_json = 同时将缓存保存为 JSON 文件
-settings_move_to_trash = 移动已删除的文件到回收站
 settings_ignore_other_filesystems = 忽略其他文件系统 (仅限Linux)
 settings_delete_outdated_cache_entries = 删除自动过时缓存条目
 settings_delete_outdated_cache_entries_hint = 当启用时，应用程序将在缓存加载期间（每周最多一次）验证缓存记录是否仍然指向现有且未修改的文件/数据

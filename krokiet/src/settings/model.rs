@@ -59,8 +59,6 @@ pub struct SettingsCustom {
     pub use_cache: bool,
     #[serde(default)]
     pub save_also_as_json: bool,
-    #[serde(default = "ttrue")]
-    pub move_deleted_files_to_trash: bool,
     #[serde(default)]
     pub ignore_other_file_systems: bool,
     #[serde(default)]

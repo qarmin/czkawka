@@ -255,7 +255,6 @@ settings_maximum_file_size = Maks.:
 settings_recursive_search = Wyszukiwanie rekurencyjne
 settings_use_cache = Użyj pamięci podręcznej
 settings_save_as_json = Zapisz pamięć podręczną także jako plik JSON
-settings_move_to_trash = Przenieś usunięte pliki do kosza
 settings_ignore_other_filesystems = Ignoruj inne systemy plików (tylko Linux)
 settings_delete_outdated_cache_entries = Automatycznie usuń nieaktualne wpisy pamięci podręcznej
 settings_delete_outdated_cache_entries_hint = Po włączeniu aplikacja podczas ładowania pamięci podręcznej (maksymalnie raz na tydzień) sprawdzi, czy wpisy nadal wskazują na istniejące i niezmienione pliki

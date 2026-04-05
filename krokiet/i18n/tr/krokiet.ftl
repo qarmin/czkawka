@@ -255,7 +255,6 @@ settings_maximum_file_size = Maks:
 settings_recursive_search = Yordayıcı arama
 settings_use_cache = Önbellek Kullan
 settings_save_as_json = Önbelleği JSON dosyası olarak da kaydet
-settings_move_to_trash = Silinen dosyaları çöp kutusuna taşı
 settings_ignore_other_filesystems = Başka bir dosya sistemi gözardı edin (sadece Linux)
 settings_delete_outdated_cache_entries = Sil otomatik olarak eskiyen önbellek girdilerini
 settings_delete_outdated_cache_entries_hint = Eğer etkinleştirilmişse, uygulama önbellek yükleme sırasında (haftada en fazla bir kez) önbelleğe alınmış kayıtların mevcut ve değiştirilmemiş dosyalara/verilere işaret edip etmediğini doğrulayacaktır

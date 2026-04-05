@@ -255,7 +255,6 @@ settings_maximum_file_size = الحد الأقصى:
 settings_recursive_search = البحث المتكرر
 settings_use_cache = استخدام ذاكرة التخزين المؤقت
 settings_save_as_json = حفظ ذاكرة التخزين المؤقت أيضا كملف JSON
-settings_move_to_trash = نقل الملفات المحذوفة إلى سلة المهملات
 settings_ignore_other_filesystems = تجاهل نظم الملفات الأخرى (Linux)
 settings_delete_outdated_cache_entries = حذف إدخالات ذاكرة التخزين المؤقت القديمة تلقائيًا
 settings_delete_outdated_cache_entries_hint = عند التفعيل، ستقوم التطبيق بالتحقق أثناء تحميل ذاكرة التخزين المؤقت (بحد أقصى مرة واحدة في الأسبوع) لمعرفة ما إذا كانت السجلات المخزنة لا تزال تشير إلى ملفات/بيانات موجودة وغير معدلة

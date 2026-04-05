@@ -258,7 +258,6 @@ settings_maximum_file_size = Макс:
 settings_recursive_search = Рекурсивно търсене
 settings_use_cache = Използвай кеш
 settings_save_as_json = Запиши кеш също и като JSON
-settings_move_to_trash = Премести изтритите файлове в кошчето
 settings_ignore_other_filesystems = Игнориране на други файлови системи (само за Linux)
 settings_delete_outdated_cache_entries = Изтрийте автоматично остарели записи в кеша
 settings_delete_outdated_cache_entries_hint = Когато е активиран, приложението ще проверява по време на зареждане на кеша (максимум веднъж седмично), дали записите в кеша все още сочат към съществуващи и непокътнати файлове/данни

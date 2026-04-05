@@ -255,7 +255,6 @@ settings_maximum_file_size = Max:
 settings_recursive_search = Tìm kiếm đệ quy
 settings_use_cache = Sử dụng bộ nhớ đệm
 settings_save_as_json = Ngoài ra, hãy lưu bộ nhớ đệm dưới dạng tệp JSON
-settings_move_to_trash = Di chuyển các tệp đã xóa đến thùng rác
 settings_ignore_other_filesystems = Bỏ qua các hệ thống tệp khác (chỉ dành cho Linux)
 settings_delete_outdated_cache_entries = Xóa tự động các mục bộ nhớ đệm đã hết hạn
 settings_delete_outdated_cache_entries_hint = Khi được kích hoạt, ứng dụng sẽ kiểm tra (tối đa một lần mỗi tuần) xem các bản ghi đã lưu trong bộ nhớ đệm có còn trỏ đến các tệp/dữ liệu hiện có và chưa bị thay đổi hay không, trong quá trình tải bộ nhớ đệm

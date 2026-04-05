@@ -255,7 +255,6 @@ settings_maximum_file_size = مکس:
 settings_recursive_search = جستجو خودکار
 settings_use_cache = استفاده از کشی
 settings_save_as_json = همچنین кеш را به فایل JSON ذخیره کنید
-settings_move_to_trash = فایل‌های حذف شده را به سبد اسکیز منتقل کنید
 settings_ignore_other_filesystems = سایر سیستم‌هايisis FileSystem را ددغناييد (فقط لينукس)
 settings_delete_outdated_cache_entries = حذف خودکار ورودی‌های کش منسوخ‌شده به‌طور خودکار
 settings_delete_outdated_cache_entries_hint = هنگام فعال‌سازی، برنامه در هنگام بارگذاری کش (حداکثر یک بار در هفته) بررسی می‌کند که آیا رکودهای کش‌شده هنوز به فایل‌ها/داده‌های موجود و بدون تغییر اشاره می‌کنند یا خیر

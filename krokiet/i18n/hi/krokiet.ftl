@@ -257,7 +257,6 @@ settings_maximum_file_size = मैक्स:
 settings_recursive_search = पुनरावर्ती खोज
 settings_use_cache = कैश का उपयोग करें
 settings_save_as_json = इसके अतिरिक्त, कैश को JSON फ़ाइल के रूप में भी सहेजें
-settings_move_to_trash = डिलीट की गई फ़ाइलों को ट्रैश में ले जाएं
 settings_ignore_other_filesystems = अन्य फ़ाइल सिस्टम को अनदेखा करें (केवल लिनक्स के लिए)।
 settings_delete_outdated_cache_entries = स्वचालित रूप से पुरानी कैश प्रविष्टियों को हटा दें
 settings_delete_outdated_cache_entries_hint = जब यह सुविधा सक्षम होती है, तो ऐप कैश लोड करते समय (अधिकतम एक बार प्रति सप्ताह) यह सत्यापित करेगा कि क्या कैश में मौजूद रिकॉर्ड अभी भी मौजूदा और अपरिवर्तित फ़ाइलों/डेटा की ओर इशारा कर रहे हैं

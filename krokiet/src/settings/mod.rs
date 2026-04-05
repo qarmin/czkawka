@@ -400,7 +400,6 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_maximum_file_size(custom_settings.maximum_file_size.to_string().into());
     settings.set_use_cache(custom_settings.use_cache);
     settings.set_save_as_json(custom_settings.save_also_as_json);
-    settings.set_move_to_trash(custom_settings.move_deleted_files_to_trash);
     settings.set_ignore_other_filesystems(custom_settings.ignore_other_file_systems);
     settings.set_thread_number(custom_settings.thread_number as f32);
 
@@ -577,7 +576,6 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let recursive_search = settings.get_recursive_search();
     let use_cache = settings.get_use_cache();
     let save_also_as_json = settings.get_save_as_json();
-    let move_deleted_files_to_trash = settings.get_move_to_trash();
     let ignore_other_file_systems = settings.get_ignore_other_filesystems();
     let thread_number = settings.get_thread_number().round() as i32;
 
@@ -719,7 +717,6 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         recursive_search,
         use_cache,
         save_also_as_json,
-        move_deleted_files_to_trash,
         ignore_other_file_systems,
         thread_number,
         duplicate_image_preview,

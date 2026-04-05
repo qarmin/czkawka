@@ -197,7 +197,7 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
     let max_diff = return_similarity_from_similarity_preset(similarity_preset, hash_size);
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
-    let params = SimilarImagesParameters::new(max_diff, hash_size, hash_alg, image_filter, ignore_same_size);
+    let params = SimilarImagesParameters::new(max_diff, hash_size, hash_alg, image_filter, ignore_same_size, false); // TODO apply
     let mut tool = SimilarImages::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);

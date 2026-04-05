@@ -186,6 +186,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_select_button_text(flk!("select_button").into());
     translation.set_move_button_text(flk!("move_button").into());
     translation.set_delete_button_text(flk!("delete_button").into());
+    translation.set_trash_button_text(flk!("trash_button").into());
     translation.set_save_button_text(flk!("save_button").into());
     translation.set_sort_button_text(flk!("sort_button").into());
     translation.set_rename_button_text(flk!("rename_button").into());
@@ -323,7 +324,6 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_recursive_search_text(flk!("settings_recursive_search").into());
     translation.set_settings_use_cache_text(flk!("settings_use_cache").into());
     translation.set_settings_save_as_json_text(flk!("settings_save_as_json").into());
-    translation.set_settings_move_to_trash_text(flk!("settings_move_to_trash").into());
     translation.set_settings_ignore_other_filesystems_text(flk!("settings_ignore_other_filesystems").into());
     translation.set_settings_thread_number_text(flk!("settings_thread_number").into());
     translation.set_settings_restart_required_text(flk!("settings_restart_required").into());
@@ -372,6 +372,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_move_preserve_folder_checkbox_text(flk!("popup_move_preserve_folder_checkbox").into());
     translation.set_delete_text(flk!("delete").into());
     translation.set_delete_confirmation_text(flk!("rust_delete_confirmation").into());
+    translation.set_trash_text(flk!("trash").into());
+    translation.set_trash_confirmation_text(flk!("rust_trash_confirmation").into());
     translation.set_stopping_scan_text(flk!("stopping_scan").into());
     translation.set_searching_text(flk!("searching").into());
     translation.set_subsettings_videos_crop_detect_text(flk!("subsettings_videos_crop_detect").into());

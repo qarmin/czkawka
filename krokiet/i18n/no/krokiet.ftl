@@ -255,7 +255,6 @@ settings_maximum_file_size = Maks:
 settings_recursive_search = Rekursivt søk
 settings_use_cache = Bruk buffer
 settings_save_as_json = Lagre også mellomlager som JSON-fil
-settings_move_to_trash = Flytt slettede filer til papirkurv
 settings_ignore_other_filesystems = Ignorer andre filsystemer (bare Linux)
 settings_delete_outdated_cache_entries = Slett automatisk utdaterte cache-oppføringer
 settings_delete_outdated_cache_entries_hint = Når det er aktivert, vil appen verifisere under cachelasting (maks én gang per uke) om de cachelagrede oppføringene fortsatt peker til eksisterende og uendrede filer/data

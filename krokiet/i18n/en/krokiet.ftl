@@ -101,6 +101,12 @@ rust_delete_confirmation_number_simple = { $items } items selected.
 rust_delete_confirmation_number_groups = { $items } items selected in { $groups } groups.
 rust_delete_confirmation_selected_all_in_group = All items selected in { $groups } groups.
 
+rust_trash_confirmation = Are you sure you want to move the selected items to trash?
+rust_trash_confirmation_unsupported_volumes = Note: not all volumes support moving to trash. For unsupported volumes, this operation will always fail.
+rust_trash_confirmation_number_simple = { $items } items selected.
+rust_trash_confirmation_number_groups = { $items } items selected in { $groups } groups.
+rust_trash_confirmation_selected_all_in_group = All items selected in { $groups } groups.
+
 rust_move_confirmation = Are you sure you want to move the selected items?
 rust_move_confirmation_number_simple = { $items } items selected.
 
@@ -170,6 +176,7 @@ stop_text = Stop
 select_button = Select
 move_button = Move
 delete_button = Delete
+trash_button = Trash
 save_button = Save
 sort_button = Sort
 rename_button = Rename
@@ -271,7 +278,6 @@ settings_maximum_file_size = Max:
 settings_recursive_search = Recursive search
 settings_use_cache = Use cache
 settings_save_as_json = Also save cache as JSON file
-settings_move_to_trash = Move deleted files to trash
 settings_ignore_other_filesystems = Ignore other filesystems (only Linux)
 settings_delete_outdated_cache_entries = Delete automatically outdated cache entries
 settings_delete_outdated_cache_entries_hint = When enabled, the app will verify during cache loading (at most once per week) whether the cached records still point to existing and unmodified files/data
@@ -333,6 +339,7 @@ popup_move_preserve_folder_checkbox = Preserve folder structure
 move_confirmation_text = Are you sure you want to move the selected items?
 rename_confirmation_text = Are you sure you want to rename the selected items?
 delete = Delete items
+trash = Move items to trash
 stopping_scan = Stopping scan, please wait...
 searching = Searching...
 subsettings_videos_crop_detect = Crop detect method
