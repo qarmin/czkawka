@@ -1,3 +1,31 @@
+## Version ? - ??.??.????r 
+### Core
+- Changed encoding AV1 coded into libsvtav1 from very slow libaom-av1 coded - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- Added noise reduction option to Video optimizer mode, which can greatly decrease size of videos with a lot of noise - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- Added ability to use custom optimization command in Video optimizer mode - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- Hardware encoding videos - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+
+### CLI
+
+### GTK GUI
+- Fixed crash when using sort button - [#1837](https://github.com/qarmin/czkawka/pull/1837)
+
+### Krokiet
+- Added separate buttons for removing to trash and permanently deleting files(trash is not supported ) - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Added new custom select popup - [#1809](https://github.com/qarmin/czkawka/pull/1809)
+- Added image compare tool, to find visual differences between two similar images - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- Added context menu, opened via righ click - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- Opening file/folder selection dialogs, no longer blocks main thread - [#1809](https://github.com/qarmin/czkawka/pull/1809)
+- Fix not respected generating thumbnails option in similar videos mode - [#1809](https://github.com/qarmin/czkawka/pull/1809)
+- Added notification support - [#1837](https://github.com/qarmin/czkawka/pull/1837)
+
+### Cedinia
+- Initial and experimental release of Cedinia - new Android app, with a touch screen support - [#1821](https://github.com/qarmin/czkawka/pull/1821)
+
+### Prebuilt binaries
+- Linux prebuild binaries, are now built with avif support(requires libavif and libdav1d installed on the system)
+- Windows czkawka zip file, now contains Krokiet binaries + Readme, to simplify user conversion to new frontend, which still use Czkawka
+
 ## Version 11.0.1 - 20.02.2026r
 ### Core
 - Fixed issue with excluded folders not working on Windows - [#1808](https://github.com/qarmin/czkawka/pull/1808)
