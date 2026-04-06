@@ -1051,7 +1051,7 @@ mod tests {
             assert_eq!(res[0].1.len(), 1);
             assert_eq!(res[1].1.len(), 1);
             #[allow(clippy::allow_attributes)]
-            #[allow(clippy::cmp_owned)] // TODO Bug in nightly
+            #[allow(clippy::cmp_owned)] // Bug in nightly versions of clippy
             if res[0].1[0].path == PathBuf::from("/home/kk/bcd.txt") {
                 assert_eq!(res[0].0.path, PathBuf::from("/home/rr/abc.txt"));
                 assert_eq!(res[1].0.path, PathBuf::from("/home/rr/krkr.txt"));

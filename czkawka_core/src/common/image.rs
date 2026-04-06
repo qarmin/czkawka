@@ -191,8 +191,7 @@ pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result
 
     let params = RawDecodeParams::default();
 
-    if let Some(extracted_dynamic_image) = decoder.full_image(&raw_source, &params).ok().flatten()
-    {
+    if let Some(extracted_dynamic_image) = decoder.full_image(&raw_source, &params).ok().flatten() {
         timer.checkpoint("Decoded full image");
 
         trace!("{}", timer.report("Everything", false));

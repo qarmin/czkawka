@@ -253,6 +253,9 @@ fn update_available_hardware_encoders(app: &MainWindow) {
     });
 }
 
+#[allow(clippy::allow_attributes)]
+#[expect(clippy::vec_init_then_push)]
+#[expect(unused_mut)]
 pub(crate) fn print_krokiet_features() {
     let mut features: Vec<&str> = Vec::new();
 
