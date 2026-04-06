@@ -136,7 +136,8 @@ impl StringComboBoxItems {
         let big_files_count = Self::convert(&[
             ("10", "10", 10usize),
             ("100", "100", 100),
-            // ("1000", "1000", 1000), ("10000", "10000", 10000) // Too slowefor now
+            ("1000", "1000", 1000),
+            ("10000", "10000", 10000) // Too slowefor now
         ]);
 
         let similarity_preset = Self::convert_i18n(&[
