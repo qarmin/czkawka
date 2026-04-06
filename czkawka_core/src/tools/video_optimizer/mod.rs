@@ -90,8 +90,26 @@ impl HardwareEncoder {
         }
     }
 
-    pub const fn all_non_none() -> &'static [HardwareEncoder] {
+    pub const fn all_non_none() -> &'static [Self] {
         &[Self::Nvenc, Self::Vaapi, Self::Qsv, Self::VideoToolbox, Self::Amf]
+    }
+
+    /// Returns encoder-specific quality arguments for the given quality value.
+    ///
+    /// Each hardware encoder family uses a different rate-control mechanism:
+    /// - NVENC: VBR with a constant quality target (`-rc:v vbr -cq:v`)
+    /// - VAAPI / QSV: Intelligent Constant Quality (`-global_quality`)
+    /// - VideoToolbox: quality scale 1-100 (`-q:v`)
+    /// - AMF: constant QP for I- and P-frames (`-rc cqp -qp_i -qp_p`)
+    pub fn quality_args(self, quality: u32) -> Vec<String> {
+        let q = quality.to_string();
+        match self {
+            Self::None => vec!["-crf".into(), q],
+            Self::Nvenc => vec!["-rc:v".into(), "vbr".into(), "-cq:v".into(), q],
+            Self::Vaapi | Self::Qsv => vec!["-global_quality".into(), q],
+            Self::VideoToolbox => vec!["-q:v".into(), q],
+            Self::Amf => vec!["-rc".into(), "cqp".into(), "-qp_i".into(), quality.to_string(), "-qp_p".into(), quality.to_string()],
+        }
     }
 
     /// Returns the ffmpeg hardware encoder name for the given codec, or None if unsupported.

@@ -296,12 +296,11 @@ impl SimilarVideos {
                 if exclude_same_size && !bt_size.insert(file_entry.size) {
                     continue;
                 }
-                if exclude_same_resolution {
-                    if let (Some(w), Some(h)) = (file_entry.width, file_entry.height) {
-                        if !bt_resolution.insert((w, h)) {
-                            continue;
-                        }
-                    }
+                if exclude_same_resolution
+                    && let (Some(w), Some(h)) = (file_entry.width, file_entry.height)
+                    && !bt_resolution.insert((w, h))
+                {
+                    continue;
                 }
                 temp_vector.push(file_entry.clone());
             }

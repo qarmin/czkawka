@@ -113,8 +113,8 @@ fn run_standard_command(params: &VideoTranscodeFixParams, video_path: &str, temp
     command.arg("-i").arg(video_path).arg("-nostdin");
 
     if let Some(hw_name) = hw_encoder_name {
-        // Hardware encoders do not support CRF; use -q:v instead.
-        command.arg("-c:v").arg(hw_name).arg("-q:v").arg(params.quality.to_string());
+        command.arg("-c:v").arg(hw_name);
+        command.args(hw.quality_args(params.quality));
     } else {
         command.arg("-c:v").arg(params.codec.as_str()).arg("-crf").arg(params.quality.to_string());
     }

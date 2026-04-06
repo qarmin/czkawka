@@ -1,4 +1,5 @@
 use std::process::{Command, Stdio};
+use std::time::{Duration, Instant};
 
 use crate::common::process_utils::disable_windows_console_window;
 use crate::tools::video_optimizer::{HardwareEncoder, VideoCodec};
@@ -31,11 +32,7 @@ pub fn check_if_ffprobe_ffmpeg_exists() -> bool {
 /// Each candidate is tested by attempting a 1-frame encode; encoders that fail
 /// (missing driver, missing library like libcuda.so, unsupported GPU, …) are excluded.
 pub fn get_working_hardware_encoders() -> Vec<HardwareEncoder> {
-    HardwareEncoder::all_non_none()
-        .iter()
-        .copied()
-        .filter(|&enc| test_hardware_encoder(enc))
-        .collect()
+    HardwareEncoder::all_non_none().iter().copied().filter(|&enc| test_hardware_encoder(enc)).collect()
 }
 
 fn test_hardware_encoder(encoder: HardwareEncoder) -> bool {
@@ -51,12 +48,49 @@ fn test_hardware_encoder(encoder: HardwareEncoder) -> bool {
 fn test_encoder_simple(encoder_name: &str) -> bool {
     let mut cmd = Command::new("ffmpeg");
     disable_windows_console_window(&mut cmd);
-    cmd.args(["-f", "lavfi", "-i", "color=size=64x64:rate=1", "-frames:v", "1", "-c:v", encoder_name, "-f", "null", "-"])
+    let mut child = match cmd
+        .args([
+            "-nostdin",
+            "-f",
+            "lavfi",
+            "-i",
+            "color=size=64x64:rate=1",
+            "-frames:v",
+            "1",
+            "-c:v",
+            encoder_name,
+            "-f",
+            "null",
+            "-",
+        ])
         .stdout(Stdio::null())
         .stderr(Stdio::null())
-        .status()
-        .map(|s| s.success())
-        .unwrap_or(false)
+        .spawn()
+    {
+        Ok(c) => c,
+        Err(_) => return false,
+    };
+    wait_with_timeout(&mut child)
+}
+
+const ENCODER_PROBE_TIMEOUT: Duration = Duration::from_secs(5);
+
+fn wait_with_timeout(child: &mut std::process::Child) -> bool {
+    let deadline = Instant::now() + ENCODER_PROBE_TIMEOUT;
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => return status.success(),
+            Ok(None) => {
+                if Instant::now() >= deadline {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    return false;
+                }
+                std::thread::sleep(Duration::from_millis(50));
+            }
+            Err(_) => return false,
+        }
+    }
 }
 
 /// Returns the path of the first available DRI render node, or None if none exist.
@@ -77,8 +111,9 @@ fn test_vaapi_encoder(encoder_name: &str) -> bool {
         }
         let mut cmd = Command::new("ffmpeg");
         disable_windows_console_window(&mut cmd);
-        let ok = cmd
+        let mut child = match cmd
             .args([
+                "-nostdin",
                 "-vaapi_device",
                 &device,
                 "-f",
@@ -97,10 +132,12 @@ fn test_vaapi_encoder(encoder_name: &str) -> bool {
             ])
             .stdout(Stdio::null())
             .stderr(Stdio::null())
-            .status()
-            .map(|s| s.success())
-            .unwrap_or(false);
-        if ok {
+            .spawn()
+        {
+            Ok(c) => c,
+            Err(_) => continue,
+        };
+        if wait_with_timeout(&mut child) {
             return true;
         }
     }

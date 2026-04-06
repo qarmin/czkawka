@@ -682,8 +682,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let video_optimizer_use_custom_command = settings.get_video_optimizer_sub_use_custom_command();
     let video_optimizer_custom_command = settings.get_video_optimizer_sub_custom_command().to_string();
     let hw_encoder_config_names = ["none", "nvenc", "vaapi", "qsv", "videotoolbox", "amf"];
-    let video_optimizer_hardware_encoder =
-        hw_encoder_config_names.get(settings.get_video_optimizer_sub_hardware_encoder_index() as usize).unwrap_or(&"none").to_string();
+    let video_optimizer_hardware_encoder = hw_encoder_config_names
+        .get(settings.get_video_optimizer_sub_hardware_encoder_index() as usize)
+        .unwrap_or(&"none")
+        .to_string();
 
     let ignored_exif_tags = settings.get_ignored_exif_tags().to_string();
 

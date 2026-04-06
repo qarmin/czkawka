@@ -228,6 +228,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_images_hash_size_text(flk!("subsettings_images_hash_size").into());
     translation.set_subsettings_images_resize_algorithm_text(flk!("subsettings_images_resize_algorithm").into());
     translation.set_subsettings_images_ignore_same_size_text(flk!("subsettings_images_ignore_same_size").into());
+    translation.set_subsettings_images_ignore_same_resolution_text(flk!("subsettings_images_ignore_same_resolution").into());
     translation.set_subsettings_images_max_difference_text(flk!("subsettings_images_max_difference").into());
     translation.set_subsettings_images_duplicates_hash_type_text(flk!("subsettings_images_duplicates_hash_type").into());
     translation.set_subsettings_duplicates_check_method_text(flk!("subsettings_duplicates_check_method").into());
@@ -236,6 +237,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_biggest_files_sub_number_of_files_text(flk!("subsettings_biggest_files_sub_number_of_files").into());
     translation.set_subsettings_videos_max_difference_text(flk!("subsettings_videos_max_difference").into());
     translation.set_subsettings_videos_ignore_same_size_text(flk!("subsettings_videos_ignore_same_size").into());
+    translation.set_subsettings_videos_ignore_same_resolution_text(flk!("subsettings_videos_ignore_same_resolution").into());
     translation.set_subsettings_music_audio_check_type_text(flk!("subsettings_music_audio_check_type").into());
     translation.set_subsettings_music_approximate_comparison_text(flk!("subsettings_music_approximate_comparison").into());
     translation.set_subsettings_music_compared_tags_text(flk!("subsettings_music_compared_tags").into());
@@ -282,6 +284,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_video_optimizer_video_codec_text(flk!("subsettings_video_optimizer_video_codec").into());
     translation.set_subsettings_video_optimizer_excluded_codecs_text(flk!("subsettings_video_optimizer_excluded_codecs").into());
     translation.set_subsettings_video_optimizer_video_quality_text(flk!("subsettings_video_optimizer_video_quality").into());
+    translation.set_subsettings_video_optimizer_hardware_encoder_text(flk!("subsettings_video_optimizer_hardware_encoder").into());
     translation.set_subsettings_video_optimizer_noise_reduction_text(flk!("subsettings_video_optimizer_noise_reduction").into());
     translation.set_subsettings_video_optimizer_noise_reduction_strength_text(flk!("subsettings_video_optimizer_noise_reduction_strength").into());
     translation.set_subsettings_video_optimizer_use_custom_command_text(flk!("subsettings_video_optimizer_use_custom_command").into());
@@ -425,6 +428,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_compare_swap_text(flk!("compare_swap_text").into());
     translation.set_compare_info_text(flk!("compare_info_text").into());
     translation.set_compare_diff_text(flk!("compare_diff_text").into());
+    translation.set_compare_split_text(flk!("compare_split_text").into());
+    translation.set_compare_overlay_text(flk!("compare_overlay_text").into());
     translation.set_compare_loading_title_text(flk!("compare_loading_title_text").into());
     translation.set_compare_cancel_text(flk!("compare_cancel_text").into());
     translation.set_compare_resolution_mismatch_text(flk!("compare_resolution_mismatch_text").into());

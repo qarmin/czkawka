@@ -218,28 +218,39 @@ pub(crate) fn print_available_hw_accelerations() {
 }
 
 /// Probe which hardware encoders actually work on this machine and restrict the combo-box
-/// model to those. Runs before the event loop so the test encodes are synchronous but fast
-/// (single 64x64 frame each). If ffmpeg is absent the default hardcoded list is kept.
+/// model to those. Runs in a background thread with per-encoder timeouts so driver issues
+/// or device initialization problems cannot stall the event loop. If ffmpeg is absent the
+/// default hardcoded list is kept.
 fn update_available_hardware_encoders(app: &MainWindow) {
     if !check_if_ffprobe_ffmpeg_exists() {
         return;
     }
 
     let settings = app.global::<Settings>();
-    let current_value = settings.get_video_optimizer_sub_hardware_encoder_value();
-    let current_encoder = current_value.to_lowercase().parse::<HardwareEncoder>().unwrap_or_default();
+    let current_value = settings.get_video_optimizer_sub_hardware_encoder_value().to_string();
 
-    let working = get_working_hardware_encoders();
-    info!("Working HW encoders({}): [{}]", working.len(), working.iter().map(|e| e.as_display_name()).collect::<Vec<_>>().join(", "));
+    let app_weak = app.as_weak();
+    std::thread::spawn(move || {
+        let working = get_working_hardware_encoders();
+        info!(
+            "Working HW encoders({}): [{}]",
+            working.len(),
+            working.iter().map(|e| e.as_display_name()).collect::<Vec<_>>().join(", ")
+        );
 
-    let all_encoders: Vec<HardwareEncoder> = std::iter::once(HardwareEncoder::None).chain(working).collect();
+        let _ = slint::invoke_from_event_loop(move || {
+            let Some(app) = app_weak.upgrade() else { return };
+            let settings = app.global::<Settings>();
+            let current_encoder = current_value.to_lowercase().parse::<HardwareEncoder>().unwrap_or_default();
 
-    let new_index = all_encoders.iter().position(|&e| e == current_encoder).unwrap_or(0) as i32;
+            let all_encoders: Vec<HardwareEncoder> = std::iter::once(HardwareEncoder::None).chain(working).collect();
+            let new_index = all_encoders.iter().position(|&e| e == current_encoder).unwrap_or(0) as i32;
+            let config: Vec<slint::SharedString> = all_encoders.iter().map(|e| slint::SharedString::from(e.as_display_name())).collect();
 
-    let config: Vec<slint::SharedString> = all_encoders.iter().map(|e| slint::SharedString::from(e.as_display_name())).collect();
-
-    settings.set_video_optimizer_sub_hardware_encoder_config(Rc::new(VecModel::from(config)).into());
-    settings.set_video_optimizer_sub_hardware_encoder_index(new_index);
+            settings.set_video_optimizer_sub_hardware_encoder_config(Rc::new(VecModel::from(config)).into());
+            settings.set_video_optimizer_sub_hardware_encoder_index(new_index);
+        });
+    });
 }
 
 pub(crate) fn print_krokiet_features() {

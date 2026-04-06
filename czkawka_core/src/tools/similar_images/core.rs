@@ -720,6 +720,7 @@ mod tests {
             max_difference: 0,
             image_filter: FilterType::Lanczos3,
             exclude_images_with_same_size: false,
+            exclude_images_with_same_resolution: false,
         }
     }
 
@@ -1165,7 +1166,7 @@ mod connect_results_tests {
 
     #[test]
     fn test_connect_results_real_case() {
-        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false);
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false);
         let _finder = SimilarImages::new(params);
 
         let hash1: ImHash = vec![59, 41, 53, 27, 19, 143, 228, 228];

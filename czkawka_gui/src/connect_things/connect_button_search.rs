@@ -596,7 +596,13 @@ fn similar_image_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let params = SimilarImagesParameters::new(similarity, hash_size, hash_alg, image_filter, ignore_same_size, false, // Not implemented in gtk gui
+            let params = SimilarImagesParameters::new(
+                similarity,
+                hash_size,
+                hash_alg,
+                image_filter,
+                ignore_same_size,
+                false, // Not implemented in gtk gui
             );
             let mut tool = SimilarImages::new(params);
 

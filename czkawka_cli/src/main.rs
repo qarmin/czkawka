@@ -27,7 +27,10 @@ use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
-use czkawka_core::tools::video_optimizer::{HardwareEncoder, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeFixParams, VideoTranscodeParams};
+use czkawka_core::tools::video_optimizer::{
+    HardwareEncoder, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeFixParams,
+    VideoTranscodeParams,
+};
 use log::{debug, error, info};
 
 use crate::commands::{
@@ -223,7 +226,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         ignore_same_size,
     } = similar_images;
 
-    let params = SimilarImagesParameters::new(max_difference, hash_size, hash_alg, image_filter, ignore_same_size.ignore_same_size, false);// TODO - implement ignore same resolution
+    let params = SimilarImagesParameters::new(max_difference, hash_size, hash_alg, image_filter, ignore_same_size.ignore_same_size, false); // TODO - implement ignore same resolution
     let mut tool = SimilarImages::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
