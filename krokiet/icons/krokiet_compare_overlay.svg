@@ -1,0 +1,4 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 32,32 L 32,400 L 400,400 L 400,32 Z M 80,80 L 352,80 L 352,352 L 80,352 Z" fill-rule="evenodd"/>
+  <path d="M 112,112 L 112,480 L 480,480 L 480,112 Z M 160,160 L 432,160 L 432,432 L 160,432 Z" fill-rule="evenodd"/>
+</svg>
