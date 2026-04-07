@@ -3,7 +3,7 @@ import { ScanState, SimilarGroupCard } from "common.slint";
 import { AppState, SimilarImagesSettings } from "app_state.slint";
 import { StatusChip, TouchButton } from "components.slint";
 import { Translations } from "translations.slint";
-import { MomentumScrollView } from "momentum_scroll.slint";
+import { ListView } from "std-widgets.slint";
 
 component GalleryImageCell {
     in property <image>  thumbnail;
@@ -271,10 +271,8 @@ export component SimilarImagesGallery {
     property <string> ctx_open_folder:  "";
     property <string> ctx_item_name:    "";
 
-    // Set to true while any per-row horizontal SGR is active so the vertical
-    // MomentumScrollView does not steal the gesture during reversals.
-    // Cleared only in the horizontal sgr.swiped handler (on finger-up).
     property <bool> _h_locked: false;
+
 
     VerticalLayout {
         spacing: 0px;
@@ -303,15 +301,8 @@ export component SimilarImagesGallery {
         // Inline the scroller directly (like ResultsList does) so that
         // vertical-stretch: 1.0 is applied to a real element in the layout,
         // not wrapped inside an intermediate component.
-        if groups.length > 0 : gallery_scroll := MomentumScrollView {
+        if groups.length > 0 : gallery_scroll := ListView {
             vertical-stretch: 1.0;
-            scroll_y <=> AppState.gallery_scroll_y;
-            lock_vertical: root._h_locked;
-            swiped(d, v, m) => {
-                AppState.gallery_max_scroll_f = m;
-                AppState.gallery_swiped(d, v);
-            }
-            stop_momentum => { AppState.gallery_stop_momentum(); }
 
             for group in root.groups : VerticalLayout {
                 padding-left: 8px;
@@ -345,7 +336,7 @@ export component SimilarImagesGallery {
                     height: 244px;
                     swiped => {
                         // Horizontal gesture finished — release the lock so the
-                        // outer MomentumScrollView can handle verticals again.
+                        // outer ListView can handle verticals again.
                         root._h_locked = false;
                         self.committed_x = self.committed_x + self.current-position.x - self.pressed-position.x;
                         if self.committed_x > 0px { self.committed_x = 0px; }
@@ -377,8 +368,7 @@ export component SimilarImagesGallery {
                                 checked:         img.checked;
                                 is_reference:    img.is_reference;
                                 // Cancel long-press when either the horizontal or the
-                                // vertical (MomentumScrollView) SGR claims the gesture.
-                                any_sgr_swiping: sgr.swiping || gallery_scroll.is_swiping;
+                                any_sgr_swiping: sgr.swiping;
                                 cell_long_pressed(f, d, n) => {
                                     root.ctx_open_file   = f;
                                     root.ctx_open_folder = d;
@@ -390,7 +380,7 @@ export component SimilarImagesGallery {
                     }
                 }
 
-                // When the horizontal swipe is confirmed, lock the vertical SGR.
+                // Track horizontal swipe state.
                 // Safe: depends only on sgr.swiping — no layout properties.
                 property <bool> _row_swiping: sgr.swiping;
                 changed _row_swiping => {

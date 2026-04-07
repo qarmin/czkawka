@@ -238,8 +238,6 @@ impl ScanResultHandler for GuiHandler {
                     win.set_similar_images_model(make_file_model(items));
                     win.set_similar_images_groups(ModelRc::new(VecModel::from(groups)));
 
-                    win.global::<AppState>().set_gallery_scroll_y(0.0);
-
                     let mut cancel_guard = thumb_cancel.lock().unwrap();
                     cancel_guard.store(true, Ordering::Relaxed);
                     let new_cancel = Arc::new(AtomicBool::new(false));
@@ -426,64 +424,6 @@ fn run_app_inner(
     wire_cache_info(&window);
     wire_licenses_popup(&window);
     wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone());
-
-    let gallery_momentum: Rc<std::cell::RefCell<f32>> = Rc::new(std::cell::RefCell::new(0.0));
-
-    {
-        let weak_g = window.as_weak();
-        let mom = Rc::clone(&gallery_momentum);
-        window.global::<AppState>().on_gallery_swiped(move |total_delta, vel_px| {
-            if let Some(win) = weak_g.upgrade() {
-                let current = win.global::<AppState>().get_gallery_scroll_y();
-                let max_scroll = win.global::<AppState>().get_gallery_max_scroll_f();
-
-                let new_y = (current + total_delta).clamp(-max_scroll, 0.0);
-                win.global::<AppState>().set_gallery_scroll_y(new_y);
-
-                const VEL_THRESHOLD: f32 = 4.0;
-                *mom.borrow_mut() = if vel_px.abs() < VEL_THRESHOLD { 0.0 } else { vel_px * 1.5 };
-            }
-        });
-    }
-
-    {
-        let mom = Rc::clone(&gallery_momentum);
-        window.global::<AppState>().on_gallery_stop_momentum(move || {
-            *mom.borrow_mut() = 0.0;
-        });
-    }
-
-    let scroll_timer = Timer::default();
-    {
-        let weak_sc = window.as_weak();
-        let mom_sc = Rc::clone(&gallery_momentum);
-        scroll_timer.start(TimerMode::Repeated, std::time::Duration::from_millis(16), move || {
-            // ── Gallery fling ─────────────────────────────────────────────
-            let mut mom = mom_sc.borrow_mut();
-            if mom.abs() > 0.3 {
-                if let Some(win) = weak_sc.upgrade() {
-                    let current = win.global::<AppState>().get_gallery_scroll_y();
-                    let max_scroll = win.global::<AppState>().get_gallery_max_scroll_f();
-                    let new_y = (current + *mom).clamp(-max_scroll, 0.0);
-                    win.global::<AppState>().set_gallery_scroll_y(new_y);
-
-                    *mom *= 0.95;
-
-                    if new_y >= 0.0 || new_y <= -max_scroll {
-                        *mom = 0.0;
-                    }
-                }
-            } else if let Some(win) = weak_sc.upgrade() {
-                let max_s = win.global::<AppState>().get_gallery_max_scroll_f();
-                let cur = win.global::<AppState>().get_gallery_scroll_y();
-                if max_s > 0.0 && cur < -max_s {
-                    win.global::<AppState>().set_gallery_scroll_y(-max_s);
-                } else if cur > 0.0 {
-                    win.global::<AppState>().set_gallery_scroll_y(0.0);
-                }
-            }
-        });
-    }
 
     let weak = window.as_weak();
     let thumb_rx = Rc::new(std::cell::RefCell::new(thumb_rx));

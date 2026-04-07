@@ -86,6 +86,40 @@ krokiet/
 
 ---
 
+## Slint Performance: ListView vs. for-in / ScrollView
+
+When displaying more than a few dozen items, **always use `ListView`** (from
+`std-widgets.slint`)
+rather than a bare `ScrollView` / `for` loop inside a `VerticalLayout`.
+
+```slint
+// SLOW – instantiates every item upfront, O(n) per frame
+ScrollView {
+    VerticalLayout {
+        for item in model : Row { ... }
+    }
+}
+
+// SLOW - same as above
+VerticalLayout {
+    for item in model : Row { ... }
+}
+
+// FAST – virtual scroll via Flickable's Repeater optimization
+ListView {
+    for item in model : Row { ... }
+}
+```
+
+`ListView` uses Slint's Repeater-inside-Flickable
+optimization: only visible rows (plus a small buffer) are instantiated at any
+given time.  With a plain `ScrollView` + `VerticalLayout`, all N items are
+created and visited on every frame.
+
+Reference: Slint issue [#11021](https://github.com/slint-ui/slint/issues/11021).
+
+---
+
 ## SharedModels (`src/shared_models.rs`)
 
 ```rust

@@ -69,13 +69,45 @@ cedinia/src/
     ├── colors.slint               # CediniaColors theme
     ├── settings_screen.slint      # Settings screen layout
     ├── settings_components.slint  # ToggleRow, SegmentRow, DropdownRow, TextInputRow
-    ├── results_list.slint         # Scrollable results list (MomentumScrollView)
     ├── similar_images_gallery.slint
     ├── directories_screen.slint   # Add/remove directory paths
-    ├── momentum_scroll.slint      # Touch momentum scroll (custom component)
     ├── components.slint           # Shared components
     └── …
 ```
+
+---
+
+## Slint Performance: ListView vs. for-in / ScrollView
+
+When displaying more than a few dozen items, **always use `ListView`** (from
+`std-widgets.slint`)
+rather than a bare `ScrollView` / `for` loop inside a `VerticalLayout`.
+
+```slint
+// SLOW – instantiates every item upfront, O(n) per frame
+ScrollView {
+    VerticalLayout {
+        for item in model : Row { ... }
+    }
+}
+
+// SLOW - same as above
+VerticalLayout {
+    for item in model : Row { ... }
+}
+
+// FAST – virtual scroll via Flickable's Repeater optimization
+ListView {
+    for item in model : Row { ... }
+}
+```
+
+`ListView` uses Slint's Repeater-inside-Flickable
+optimization: only visible rows (plus a small buffer) are instantiated at any
+given time.  With a plain `ScrollView` + `VerticalLayout`, all N items are
+created and visited on every frame.
+
+Reference: Slint issue [#11021](https://github.com/slint-ui/slint/issues/11021).
 
 ---
 
@@ -111,13 +143,6 @@ Custom settings row with a scrollable popup:
 - Height capped at `min(options.length * 48px, 384px)`.
 - Content wrapped in `ScrollView` with `viewport-height = options.length * 48px`,
   allowing the 27-language list to scroll.
-
-### MomentumScrollView (`ui/momentum_scroll.slint`)
-
-Custom touch-scroll component used for the results list and image gallery.
-Provides momentum / deceleration on swipe. Not available in krokiet.
-
----
 
 ## Translation System
 
@@ -188,7 +213,6 @@ and used by `czkawka_core`'s config path logic.
 | Video tools | No | Yes |
 | Video optimizer | No | Yes |
 | Bad names tool | Yes | No |
-| Touch scroll | MomentumScrollView | Standard |
 | File picker | JNI (Android) / rfd (desktop) | rfd |
 | Settings | JSON, no presets | JSON, 11 presets |
 | Column indices | `common.rs` (own set) | `common.rs` (own set) |

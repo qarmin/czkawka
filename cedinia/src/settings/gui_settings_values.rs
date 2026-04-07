@@ -133,12 +133,7 @@ impl StringComboBoxItems {
             ("smallest", SearchMode::SmallestFiles, DisplaySpec::Translatable("option_search_mode_smallest")),
         ]);
 
-        let big_files_count = Self::convert(&[
-            ("10", "10", 10usize),
-            ("100", "100", 100),
-            ("1000", "1000", 1000),
-            ("10000", "10000", 10000) // Too slowefor now
-        ]);
+        let big_files_count = Self::convert(&[("10", "10", 10usize), ("100", "100", 100), ("1000", "1000", 1000), ("10000", "10000", 10000)]);
 
         let similarity_preset = Self::convert_i18n(&[
             ("very_high", SimilarityPreset::VeryHigh, DisplaySpec::Translatable("option_similarity_very_high")),

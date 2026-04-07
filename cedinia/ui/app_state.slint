@@ -193,12 +193,6 @@ export global AppState {
 
     in-out property <bool> similar_images_gallery_mode: true;
 
-    in-out property <length> gallery_scroll_y:     0px;
-    in-out property <float>  gallery_max_scroll_f: 0.0;
-    // total_delta: full swipe displacement (px)  vel: EMA velocity at release (px per touch-event)
-    callback gallery_swiped(float, float);
-    callback gallery_stop_momentum();
-
 
     in-out property <string> diag_thumbnails_size: "-";
     in-out property <string> diag_app_cache_size:  "-";
