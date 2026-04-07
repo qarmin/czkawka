@@ -3,7 +3,7 @@ import { ConfirmPopupAction, FileEntry, FileEntryIdx, ScanState } from "common.s
 import { AppState } from "app_state.slint";
 import { Translations } from "translations.slint";
 import { FileRow, StatusChip, TouchButton } from "components.slint";
-import { MomentumScrollView } from "momentum_scroll.slint";
+import { ListView } from "std-widgets.slint";
 
 export component ResultsList {
     in property <[FileEntry]> entries: [];
@@ -106,14 +106,8 @@ export component ResultsList {
         }
 
 
-        if entries.length > 0 : scroll_view := MomentumScrollView {
+        if entries.length > 0 : ListView {
             vertical-stretch: 1.0;
-            scroll_y <=> AppState.list_scroll_y;
-            swiped(d, v, m) => {
-                AppState.list_max_scroll_f = m;
-                AppState.list_swiped(d, v);
-            }
-            stop_momentum => { AppState.list_stop_momentum(); }
 
             for entry[idx] in entries : FileRow {
                 name:           entry.val_str[FileEntryIdx.name_idx];
@@ -125,8 +119,6 @@ export component ResultsList {
                 is_reference:   entry.is_reference;
                 is_even:        mod(idx, 2) == 0;
                 extra_as_line2: root.extra_as_line2 && !entry.is_header;
-                // Cancel long-press when the scroll SGR claims the gesture.
-                scroll_swiping: scroll_view.is_swiping;
                 toggle_checked => { AppState.toggle_file_checked(idx); }
                 open_item   => { AppState.open_path(entry.val_str[FileEntryIdx.path_idx] == "" ? entry.val_str[FileEntryIdx.name_idx] : entry.val_str[FileEntryIdx.path_idx] + "/" + entry.val_str[FileEntryIdx.name_idx]); }
                 open_parent => { AppState.open_parent_folder(entry.val_str[FileEntryIdx.path_idx]); }

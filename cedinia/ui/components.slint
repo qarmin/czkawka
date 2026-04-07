@@ -130,18 +130,6 @@ export component FileRow {
     // after a drag/scroll release.
     property <bool> _moved: false;
 
-    // Set by the parent MomentumScrollView via `scroll_swiping: scroll_view.is_swiping`.
-    // When the scroll SGR claims the pointer gesture it stops forwarding pointer
-    // events to child TouchAreas, so the only reliable way to cancel the
-    // long-press timer during a scroll is to watch this flag directly.
-    in property <bool> scroll_swiping: false;
-    changed scroll_swiping => {
-        if root.scroll_swiping {
-            lp_timer.running = false;
-            root._moved = true;
-        }
-    }
-
     // Stored press coordinates for the dead-zone check.
     // On Android even a stationary finger generates tiny move events;
     // we only cancel the timer when the finger actually drifts > 8 px.

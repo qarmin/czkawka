@@ -199,12 +199,6 @@ export global AppState {
     callback gallery_swiped(float, float);
     callback gallery_stop_momentum();
 
-    // Scroll state for the regular (list) result views.
-    in-out property <length> list_scroll_y:     0px;
-    in-out property <float>  list_max_scroll_f: 0.0;
-    callback list_swiped(float, float);
-    callback list_stop_momentum();
-
 
     in-out property <string> diag_thumbnails_size: "-";
     in-out property <string> diag_app_cache_size:  "-";
