@@ -214,9 +214,9 @@ android_build_aab:
     rm -rf "$ROOT/cedinia/android/app/build"
     rm -rf "$ROOT/cedinia/android/build"
 
-    cargo apk build -p cedinia --lib --profile rdebug
+    cargo apk build -p cedinia --lib --release
     mkdir -p "$ROOT/cedinia/android/app/src/main/jniLibs/arm64-v8a"
-    cp "$ROOT/target/aarch64-linux-android/rdebug/libcedinia.so" "$ROOT/cedinia/android/app/src/main/jniLibs/arm64-v8a/"
+    cp "$ROOT/target/aarch64-linux-android/release/libcedinia.so" "$ROOT/cedinia/android/app/src/main/jniLibs/arm64-v8a/"
     cd "$ROOT/cedinia/android" && gradle bundleRelease
     cp "$ROOT/cedinia/android/app/build/outputs/bundle/release/app-release.aab" "$ROOT/cedinia.aab"
     echo "AAB built: $ROOT/cedinia.aab"
