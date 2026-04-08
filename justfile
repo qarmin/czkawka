@@ -201,8 +201,11 @@ android_build_aab:
     #!/usr/bin/env bash
     set -euo pipefail
     PASS=$(cat keystore_pass)
-    sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" cedinia/Cargo.toml
-    trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" cedinia/Cargo.toml' EXIT
+    CARGO_TOML="$(pwd)/cedinia/Cargo.toml"
+    sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" "$CARGO_TOML"
+    trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" "$CARGO_TOML"' EXIT
+    export KEYSTORE_PASSWORD="$PASS"
+    export KEY_PASSWORD="$PASS"
 
     rm -rf cedinia/android/app/src/main/jniLibs
     rm -f cedinia.aab
