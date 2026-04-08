@@ -200,25 +200,26 @@ androidr: android_build_release android_install_release android_run
 android_build_aab:
     #!/usr/bin/env bash
     set -euo pipefail
+    ROOT="$(pwd)"
     PASS=$(cat keystore_pass)
-    CARGO_TOML="$(pwd)/cedinia/Cargo.toml"
+    CARGO_TOML="$ROOT/cedinia/Cargo.toml"
     sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" "$CARGO_TOML"
     trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" "$CARGO_TOML"' EXIT
     export KEYSTORE_PASSWORD="$PASS"
     export KEY_PASSWORD="$PASS"
 
-    rm -rf cedinia/android/app/src/main/jniLibs
-    rm -f cedinia.aab
-    rm -rf cedinia/android/.gradle
-    rm -rf cedinia/android/app/build
-    rm -rf cedinia/android/build
+    rm -rf "$ROOT/cedinia/android/app/src/main/jniLibs"
+    rm -f "$ROOT/cedinia.aab"
+    rm -rf "$ROOT/cedinia/android/.gradle"
+    rm -rf "$ROOT/cedinia/android/app/build"
+    rm -rf "$ROOT/cedinia/android/build"
 
     cargo apk build -p cedinia --lib --profile rdebug
-    mkdir -p cedinia/android/app/src/main/jniLibs/arm64-v8a
-    cp target/aarch64-linux-android/rdebug/libcedinia.so cedinia/android/app/src/main/jniLibs/arm64-v8a/
-    cd cedinia/android && gradle bundleRelease
-    cp cedinia/android/app/build/outputs/bundle/release/app-release.aab cedinia.aab
-    echo "AAB built: cedinia.aab"
+    mkdir -p "$ROOT/cedinia/android/app/src/main/jniLibs/arm64-v8a"
+    cp "$ROOT/target/aarch64-linux-android/rdebug/libcedinia.so" "$ROOT/cedinia/android/app/src/main/jniLibs/arm64-v8a/"
+    cd "$ROOT/cedinia/android" && gradle bundleRelease
+    cp "$ROOT/cedinia/android/app/build/outputs/bundle/release/app-release.aab" "$ROOT/cedinia.aab"
+    echo "AAB built: $ROOT/cedinia.aab"
 
 ##################### BENCHMARKS #####################
 
