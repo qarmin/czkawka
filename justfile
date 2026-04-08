@@ -153,17 +153,22 @@ gen_keystores:
         -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
         -noprompt
 
-android_replace_keystore_password:
+android_build:
     #!/usr/bin/env bash
     set -euo pipefail
     PASS=$(cat keystore_pass)
     sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" cedinia/Cargo.toml
     trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" cedinia/Cargo.toml' EXIT
 
-android_build: android_replace_keystore_password
     cargo apk build -p cedinia --lib
 
-android_build_release: android_replace_keystore_password
+android_build_release:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PASS=$(cat keystore_pass)
+    sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" cedinia/Cargo.toml
+    trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" cedinia/Cargo.toml' EXIT
+
     cargo apk build -p cedinia --lib --release
 
 android_install:
@@ -192,7 +197,13 @@ androidr: android_build_release android_install_release android_run
 # Requires gradle 8.9+ in PATH (e.g. sdk install gradle 8.9 via sdkman).
 # The libcedinia.so is compiled by cargo-apk and the DEX is already embedded
 # in the .so via include_bytes! – no separate Java compilation is needed.
-android_build_aab: android_replace_keystore_password
+android_build_aab:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PASS=$(cat keystore_pass)
+    sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" cedinia/Cargo.toml
+    trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" cedinia/Cargo.toml' EXIT
+
     rm -rf cedinia/android/app/src/main/jniLibs
     rm -f cedinia.aab
     rm -rf cedinia/android/.gradle
