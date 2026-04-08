@@ -236,6 +236,7 @@ install:
     cargo install --path krokiet --locked
     cargo install --path czkawka_gui --locked
 
+#
 
 prepare_translations_deps:
     @command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -246,6 +247,8 @@ prepare_translations_deps:
     # zongwei/gemma3-translator:4b - not so fast, but looks quite good
     # translategemma:12b - probably very slow - using only for small tasks
     export OLLAMA_VULKAN=1; export HSA_OVERRIDE_GFX_VERSION=10.3.0; ollama pull translategemma:12b
+
+##################### TRANSLATIONS #####################
 
 translate:
     uv run misc/ai_translate/translate.py czkawka_gui/i18n
