@@ -130,30 +130,40 @@ gen_cedinia_licenses:
 keystore_dir := "cedinia/android/keystore"
 
 gen_keystores:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PASS=$(cat keystore_pass)
     mkdir -p {{keystore_dir}}
     [ -f {{keystore_dir}}/debug.keystore ] || keytool -genkey -v \
         -keystore {{keystore_dir}}/debug.keystore \
         -alias debug -keyalg RSA -keysize 2048 -validity 10000 \
-        -storepass 123456 -keypass 123456 \
+        -storepass "$PASS" -keypass "$PASS" \
         -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, S=Debug, C=US" \
         -noprompt
     [ -f {{keystore_dir}}/rdebug.keystore ] || keytool -genkey -v \
         -keystore {{keystore_dir}}/rdebug.keystore \
         -alias rdebug -keyalg RSA -keysize 2048 -validity 10000 \
-        -storepass 123456 -keypass 123456 \
+        -storepass "$PASS" -keypass "$PASS" \
         -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
         -noprompt
     [ -f {{keystore_dir}}/release.keystore ] || keytool -genkey -v \
         -keystore {{keystore_dir}}/release.keystore \
         -alias release -keyalg RSA -keysize 2048 -validity 10000 \
-        -storepass 123456 -keypass 123456 \
+        -storepass "$PASS" -keypass "$PASS" \
         -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
         -noprompt
 
-android_build:
+android_replace_keystore_password:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PASS=$(cat keystore_pass)
+    sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" cedinia/Cargo.toml
+    trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" cedinia/Cargo.toml' EXIT
+
+android_build: android_replace_keystore_password
     cargo apk build -p cedinia --lib
 
-android_build_release:
+android_build_release: android_replace_keystore_password
     cargo apk build -p cedinia --lib --release
 
 android_install:
@@ -182,7 +192,7 @@ androidr: android_build_release android_install_release android_run
 # Requires gradle 8.9+ in PATH (e.g. sdk install gradle 8.9 via sdkman).
 # The libcedinia.so is compiled by cargo-apk and the DEX is already embedded
 # in the .so via include_bytes! – no separate Java compilation is needed.
-android_build_aab:
+android_build_aab: android_replace_keystore_password
     rm -rf cedinia/android/app/src/main/jniLibs
     rm -f cedinia.aab
     rm -rf cedinia/android/.gradle
@@ -194,7 +204,7 @@ android_build_aab:
     cp target/aarch64-linux-android/rdebug/libcedinia.so cedinia/android/app/src/main/jniLibs/arm64-v8a/
     cd cedinia/android && gradle bundleRelease
     cp cedinia/android/app/build/outputs/bundle/release/app-release.aab cedinia.aab
-    @echo "AAB built: cedinia.aab"
+    echo "AAB built: cedinia.aab"
 
 ##################### BENCHMARKS #####################
 
