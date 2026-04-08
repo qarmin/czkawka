@@ -122,6 +122,10 @@ name = "android.permission.POST_NOTIFICATIONS"
 path = "android/keystore/debug.keystore"
 keystore_password = "123456"
 
+[package.metadata.android.signing.rdebug]
+path = "android/keystore/debug.keystore"
+keystore_password = "123456"
+
 [package.metadata.android.signing.release]
 path = "android/keystore/release.keystore"
 keystore_password = "123456"
