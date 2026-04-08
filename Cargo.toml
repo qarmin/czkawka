@@ -64,6 +64,7 @@ lto = "off"
 
 [profile.rdebug]
 inherits = "release"
+debug-assertions = false
 debug = "full"
 strip = "none"
 

@@ -144,10 +144,10 @@ gen_keystores:
         -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
         -noprompt
 
-android_build: gen_keystores
+android_build:
     cargo apk build -p cedinia --lib
 
-android_build_release: gen_keystores
+android_build_release:
     cargo apk build -p cedinia --lib --release
 
 android_install:
@@ -176,9 +176,16 @@ androidr: android_build_release android_install_release android_run
 # Requires gradle 8.9+ in PATH (e.g. sdk install gradle 8.9 via sdkman).
 # The libcedinia.so is compiled by cargo-apk and the DEX is already embedded
 # in the .so via include_bytes! – no separate Java compilation is needed.
-android_build_aab: android_build_release
+android_build_aab:
+    rm -rf cedinia/android/app/src/main/jniLibs
+    rm -f cedinia.aab
+    rm -rf cedinia/android/.gradle
+    rm -rf cedinia/android/app/build
+    rm -rf cedinia/android/build
+
+    cargo apk build -p cedinia --lib --profile rdebug
     mkdir -p cedinia/android/app/src/main/jniLibs/arm64-v8a
-    cp target/aarch64-linux-android/release/libcedinia.so cedinia/android/app/src/main/jniLibs/arm64-v8a/
+    cp target/aarch64-linux-android/rdebug/libcedinia.so cedinia/android/app/src/main/jniLibs/arm64-v8a/
     cd cedinia/android && gradle bundleRelease
     cp cedinia/android/app/build/outputs/bundle/release/app-release.aab cedinia.aab
     @echo "AAB built: cedinia.aab"
