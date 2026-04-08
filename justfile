@@ -137,6 +137,12 @@ gen_keystores:
         -storepass 123456 -keypass 123456 \
         -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, S=Debug, C=US" \
         -noprompt
+    [ -f {{keystore_dir}}/rdebug.keystore ] || keytool -genkey -v \
+        -keystore {{keystore_dir}}/rdebug.keystore \
+        -alias rdebug -keyalg RSA -keysize 2048 -validity 10000 \
+        -storepass 123456 -keypass 123456 \
+        -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
+        -noprompt
     [ -f {{keystore_dir}}/release.keystore ] || keytool -genkey -v \
         -keystore {{keystore_dir}}/release.keystore \
         -alias release -keyalg RSA -keysize 2048 -validity 10000 \
