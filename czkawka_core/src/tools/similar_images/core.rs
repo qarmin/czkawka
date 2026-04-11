@@ -50,9 +50,27 @@ impl SimilarImages {
 
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
+                self.common_data.text_messages.warnings.extend(warnings);
+
+                let progress_handler = prepare_thread_handler_common(
+                    progress_sender,
+                    CurrentStage::SimilarImagesHidingHardLinks,
+                    grouped_file_entries.len(),
+                    self.get_test_type(),
+                    0,
+                );
+                let hide_hard_links = self.get_hide_hard_links();
                 self.images_to_check = grouped_file_entries
                     .into_par_iter()
-                    .flat_map(if self.get_hide_hard_links() { |(_, fes)| fes } else { take_1_per_inode })
+                    .map(|(inode, fes)| {
+                        if check_if_stop_received(stop_flag) {
+                            return None;
+                        }
+                        progress_handler.increase_items(1);
+                        Some((inode, fes))
+                    })
+                    .while_some()
+                    .flat_map(if hide_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| {
                         let fe_str = fe.path.to_string_lossy().to_string();
                         let image_entry = fe.into_images_entry();
@@ -61,9 +79,14 @@ impl SimilarImages {
                     })
                     .collect();
 
+                progress_handler.join_thread();
+
+                if check_if_stop_received(stop_flag) {
+                    return WorkContinueStatus::Stop;
+                }
+
                 self.information.initial_found_files = self.images_to_check.len();
 
-                self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} image files.", self.images_to_check.len());
                 WorkContinueStatus::Continue
             }

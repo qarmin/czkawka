@@ -56,8 +56,9 @@ slint = { version = "1.15.0", default-features = false, features = [
     "std",
     "compat-1-2",
     "backend-winit",
-    "renderer-winit-femtovg",
-    "renderer-winit-software",
+    "renderer-femtovg-wgpu"
+#    "renderer-winit-femtovg",
+#    "renderer-winit-software",
 ] }
 
 [build-dependencies]

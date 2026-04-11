@@ -23,13 +23,15 @@ use crate::common::model::{CheckingMethod, ToolType};
 
 // Similar images
 // 0 - Collecting files
-// 1 - Scanning images
-// 2 - Comparing hashes
+// 1 - Hiding hard links
+// 2 - Scanning images
+// 3 - Comparing hashes
 
 // Similar videos
 // 0 - Collecting files
-// 1 - Scanning videos
-// 2 - Creating thumbnails
+// 1 - Hiding hard links
+// 2 - Scanning videos
+// 3 - Creating thumbnails
 
 // Temporary files
 // 0 - Collecting files
@@ -53,12 +55,13 @@ use crate::common::model::{CheckingMethod, ToolType};
 
 // Duplicates - Hash
 // 0 - Collecting files
-// 1 - Loading cache
-// 2 - Hash - first 1KB file
-// 3 - Saving cache
-// 4 - Loading cache
-// 5 - Hash - normal hash
-// 6 - Saving cache
+// 1 - Hiding hard links
+// 2 - Loading prehash cache
+// 3 - Hash - first 1KB file
+// 4 - Saving prehash cache
+// 5 - Loading cache
+// 6 - Hash - normal hash
+// 7 - Saving cache
 
 // Duplicates - Name or SizeName or Size
 // 0 - Collecting files
@@ -113,6 +116,7 @@ pub enum CurrentStage {
     DuplicateScanningName,
     DuplicateScanningSizeName,
     DuplicateScanningSize,
+    DuplicateHidingHardLinks,
     DuplicatePreHashing,
     DuplicateFullHashing,
 
@@ -125,8 +129,10 @@ pub enum CurrentStage {
     SameMusicComparingTags,
     SameMusicComparingFingerprints,
 
+    SimilarImagesHidingHardLinks,
     SimilarImagesCalculatingHashes,
     SimilarImagesComparingHashes,
+    SimilarVideosHidingHardLinks,
     SimilarVideosCalculatingHashes,
     SimilarVideosCreatingThumbnails,
     BrokenFilesChecking,
@@ -197,6 +203,7 @@ impl ProgressData {
             CurrentStage::DuplicateScanningName
             | CurrentStage::DuplicateScanningSizeName
             | CurrentStage::DuplicateScanningSize
+            | CurrentStage::DuplicateHidingHardLinks
             | CurrentStage::DuplicatePreHashing
             | CurrentStage::DuplicateFullHashing => Some(ToolType::Duplicate),
             CurrentStage::SameMusicCacheLoadingTags
@@ -207,8 +214,8 @@ impl ProgressData {
             | CurrentStage::SameMusicReadingTags
             | CurrentStage::SameMusicComparingFingerprints
             | CurrentStage::SameMusicCalculatingFingerprints => Some(ToolType::SameMusic),
-            CurrentStage::SimilarImagesCalculatingHashes | CurrentStage::SimilarImagesComparingHashes => Some(ToolType::SimilarImages),
-            CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => Some(ToolType::SimilarVideos),
+            CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarImagesCalculatingHashes | CurrentStage::SimilarImagesComparingHashes => Some(ToolType::SimilarImages),
+            CurrentStage::SimilarVideosHidingHardLinks | CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => Some(ToolType::SimilarVideos),
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
             CurrentStage::BadNamesChecking => Some(ToolType::BadNames),
@@ -224,10 +231,11 @@ impl ProgressData {
 impl ToolType {
     pub(crate) fn get_max_stage(self, checking_method: CheckingMethod) -> u8 {
         match self {
-            Self::Duplicate => 6,
+            Self::Duplicate => 7,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
             Self::BrokenFiles | Self::BadExtensions | Self::BadNames => 1,
-            Self::SimilarImages | Self::SimilarVideos | Self::VideoOptimizer => 2,
+            Self::SimilarImages | Self::SimilarVideos => 3,
+            Self::VideoOptimizer => 2,
             Self::ExifRemover => 3,
             Self::None => unreachable!("ToolType::None is not allowed"),
             Self::SameMusic => match checking_method {
@@ -261,16 +269,19 @@ impl CurrentStage {
             Self::DuplicateScanningName => 0,
             Self::DuplicateScanningSizeName => 0,
             Self::DuplicateScanningSize => 0,
-            Self::DuplicatePreHashCacheLoading => 1,
-            Self::DuplicatePreHashing => 2,
-            Self::DuplicatePreHashCacheSaving => 3,
-            Self::DuplicateCacheLoading => 4,
-            Self::DuplicateFullHashing => 5,
-            Self::DuplicateCacheSaving => 6,
-            Self::SimilarImagesCalculatingHashes => 1,
-            Self::SimilarImagesComparingHashes => 2,
-            Self::SimilarVideosCalculatingHashes => 1,
-            Self::SimilarVideosCreatingThumbnails => 2,
+            Self::DuplicateHidingHardLinks => 1,
+            Self::DuplicatePreHashCacheLoading => 2,
+            Self::DuplicatePreHashing => 3,
+            Self::DuplicatePreHashCacheSaving => 4,
+            Self::DuplicateCacheLoading => 5,
+            Self::DuplicateFullHashing => 6,
+            Self::DuplicateCacheSaving => 7,
+            Self::SimilarImagesHidingHardLinks => 1,
+            Self::SimilarImagesCalculatingHashes => 2,
+            Self::SimilarImagesComparingHashes => 3,
+            Self::SimilarVideosHidingHardLinks => 1,
+            Self::SimilarVideosCalculatingHashes => 2,
+            Self::SimilarVideosCreatingThumbnails => 3,
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
             Self::BadNamesChecking => 1,
@@ -316,13 +327,13 @@ mod tests {
 
     #[test]
     fn test_tool_type_and_current_stage_integration() {
-        assert_eq!(ToolType::Duplicate.get_max_stage(CheckingMethod::Hash), 6);
+        assert_eq!(ToolType::Duplicate.get_max_stage(CheckingMethod::Hash), 7);
         assert_eq!(ToolType::SameMusic.get_max_stage(CheckingMethod::AudioTags), 4);
         assert_eq!(ToolType::SameMusic.get_max_stage(CheckingMethod::AudioContent), 7);
-        assert_eq!(ToolType::SimilarImages.get_max_stage(CheckingMethod::None), 2);
+        assert_eq!(ToolType::SimilarImages.get_max_stage(CheckingMethod::None), 3);
         assert_eq!(ToolType::BrokenFiles.get_max_stage(CheckingMethod::None), 1);
 
-        assert_eq!(CurrentStage::DuplicateFullHashing.get_current_stage(), 5);
+        assert_eq!(CurrentStage::DuplicateFullHashing.get_current_stage(), 6);
         assert_eq!(CurrentStage::SameMusicComparingFingerprints.get_current_stage(), 7);
         assert!(CurrentStage::DeletingFiles.is_special_non_tool_stage());
         assert!(!CurrentStage::CollectingFiles.is_special_non_tool_stage());
@@ -345,8 +356,8 @@ mod tests {
         let valid = ProgressData {
             sstage: CurrentStage::DuplicateFullHashing,
             checking_method: CheckingMethod::Hash,
-            current_stage_idx: 5,
-            max_stage_idx: 6,
+            current_stage_idx: 6,
+            max_stage_idx: 7,
             entries_checked: 50,
             entries_to_check: 100,
             bytes_checked: 1000,
@@ -362,8 +373,8 @@ mod tests {
         ProgressData {
             sstage: CurrentStage::DuplicateFullHashing,
             checking_method: CheckingMethod::Hash,
-            current_stage_idx: 7,
-            max_stage_idx: 6,
+            current_stage_idx: 8,
+            max_stage_idx: 7,
             entries_checked: 0,
             entries_to_check: 100,
             bytes_checked: 0,
@@ -379,8 +390,8 @@ mod tests {
         ProgressData {
             sstage: CurrentStage::DuplicateFullHashing,
             checking_method: CheckingMethod::Hash,
-            current_stage_idx: 5,
-            max_stage_idx: 6,
+            current_stage_idx: 6,
+            max_stage_idx: 7,
             entries_checked: 150,
             entries_to_check: 100,
             bytes_checked: 0,

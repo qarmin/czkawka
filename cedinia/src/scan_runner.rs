@@ -329,6 +329,7 @@ fn stage_label(stage: CurrentStage) -> String {
         CurrentStage::SymlinkingFiles => flc!("stage_symlinking"),
         CurrentStage::OptimizingVideos => flc!("stage_optimizing_videos"),
         CurrentStage::CleaningExif => flc!("stage_cleaning_exif"),
+        CurrentStage::DuplicateHidingHardLinks |  CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarVideosHidingHardLinks => flc!("stage_all_hiding_links"),
     }
 }
 

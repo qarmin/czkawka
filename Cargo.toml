@@ -3,8 +3,8 @@ members = [
     "czkawka_core",
     "czkawka_cli",
     "czkawka_gui",
+    "cedinia",
     "krokiet",
-    "cedinia"
 ]
 exclude = [
     "misc/test_read_perf",

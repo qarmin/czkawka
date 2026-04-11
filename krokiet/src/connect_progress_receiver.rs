@@ -140,6 +140,7 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::CleaningExif => flk!("rust_cleaning_no_size_exif", items_stats = items_stats),
 
         CurrentStage::ExifRemoverExtractingTags => flk!("rust_extracted_exif_tags", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::DuplicateHidingHardLinks |  CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarVideosHidingHardLinks => flk!("rust_hiding_links", items_stats = items_stats),
 
         CurrentStage::CollectingFiles
         | CurrentStage::DuplicateCacheSaving

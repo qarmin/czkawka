@@ -78,6 +78,7 @@ pub(crate) fn get_progress_message(progress_data: &ProgressData) -> String {
         CurrentStage::ExifRemoverExtractingTags => "Extracting EXIF tags",
         CurrentStage::VideoOptimizerProcessingVideos => "Processing videos",
         CurrentStage::BadNamesChecking => "Checking names of files",
+        CurrentStage::DuplicateHidingHardLinks | CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarVideosHidingHardLinks => "Hiding duplicates with hardlinks",
 
         CurrentStage::CollectingFiles
         | CurrentStage::DuplicateCacheSaving

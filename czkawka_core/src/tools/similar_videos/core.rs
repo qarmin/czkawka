@@ -46,12 +46,36 @@ impl SimilarVideos {
 
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
+                self.common_data.text_messages.warnings.extend(warnings);
+
+                let progress_handler = prepare_thread_handler_common(
+                    progress_sender,
+                    CurrentStage::SimilarVideosHidingHardLinks,
+                    grouped_file_entries.len(),
+                    self.get_test_type(),
+                    0,
+                );
+                let hide_hard_links = self.get_hide_hard_links();
                 self.videos_to_check = grouped_file_entries
                     .into_par_iter()
-                    .flat_map(if self.get_hide_hard_links() { |(_, fes)| fes } else { take_1_per_inode })
+                    .map(|(inode, fes)| {
+                        if check_if_stop_received(stop_flag) {
+                            return None;
+                        }
+                        progress_handler.increase_items(1);
+                        Some((inode, fes))
+                    })
+                    .while_some()
+                    .flat_map(if hide_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| (fe.path.to_string_lossy().to_string(), fe.into_videos_entry()))
                     .collect();
-                self.common_data.text_messages.warnings.extend(warnings);
+
+                progress_handler.join_thread();
+
+                if check_if_stop_received(stop_flag) {
+                    return WorkContinueStatus::Stop;
+                }
+
                 debug!("check_files - Found {} video files.", self.videos_to_check.len());
                 WorkContinueStatus::Continue
             }

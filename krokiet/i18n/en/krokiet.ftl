@@ -95,6 +95,7 @@ rust_no_files_symlinked = No files or folders selected for symlinking
 rust_no_videos_optimized = No videos selected for optimization
 rust_no_exif_cleaned = No files selected for EXIF cleaning
 rust_extracted_exif_tags = Extracted EXIF tags from { $items_stats } files ({ $size_stats })
+rust_hiding_links = Hiding hard links { $items_stats }
 
 rust_delete_confirmation = Are you sure you want to delete the selected items?
 rust_delete_confirmation_number_simple = { $items } items selected.
