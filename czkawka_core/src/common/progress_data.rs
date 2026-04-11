@@ -215,7 +215,9 @@ impl ProgressData {
             | CurrentStage::SameMusicComparingFingerprints
             | CurrentStage::SameMusicCalculatingFingerprints => Some(ToolType::SameMusic),
             CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarImagesCalculatingHashes | CurrentStage::SimilarImagesComparingHashes => Some(ToolType::SimilarImages),
-            CurrentStage::SimilarVideosHidingHardLinks | CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => Some(ToolType::SimilarVideos),
+            CurrentStage::SimilarVideosHidingHardLinks | CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => {
+                Some(ToolType::SimilarVideos)
+            }
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
             CurrentStage::BadNamesChecking => Some(ToolType::BadNames),

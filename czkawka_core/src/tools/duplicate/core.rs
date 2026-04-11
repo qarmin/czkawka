@@ -248,13 +248,7 @@ impl DuplicateFinder {
                     .map(|(_size, vec)| if vec.len() > 1 { vec.len() as u64 } else { 0 })
                     .sum::<u64>();
 
-                let progress_handler = prepare_thread_handler_common(
-                    progress_sender,
-                    CurrentStage::DuplicateHidingHardLinks,
-                    grouped_file_entries.len(),
-                    self.get_test_type(),
-                    0,
-                );
+                let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateHidingHardLinks, grouped_file_entries.len(), self.get_test_type(), 0);
                 self.files_with_identical_size = grouped_file_entries
                     .into_par_iter()
                     .with_max_len(rayon_max_len)
