@@ -474,19 +474,32 @@ impl DuplicateFinder {
         // Saving into cache
         let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheSaving, 0, self.get_test_type(), 0);
 
-        // Add data from cache
-        for (size, mut vec_file_entry) in records_already_cached {
-            pre_checked_map.entry(size).or_default().append(&mut vec_file_entry);
-        }
-
-        // Check results
-        for (size, hash_map, errors) in &pre_hash_results {
+        // Collect errors from freshly-computed results
+        for (_size, _hash_map, errors) in &pre_hash_results {
             if !errors.is_empty() {
                 self.common_data.text_messages.warnings.append(&mut errors.clone());
             }
-            for vec_file_entry in hash_map.values() {
-                if vec_file_entry.len() > 1 {
-                    pre_checked_map.entry(*size).or_default().append(&mut vec_file_entry.clone());
+        }
+
+        // Merge cached and freshly-computed entries into (size -> hash -> files) groups,
+        // then only pass groups with >1 file to full hashing.  Merging is required so that
+        // a cached file and a freshly-computed file sharing the same prehash are recognised
+        // as a collision even when neither set alone has more than one entry for that hash.
+        let mut combined: BTreeMap<u64, BTreeMap<String, Vec<DuplicateEntry>>> = BTreeMap::new();
+        for (size, vec_file_entry) in records_already_cached {
+            for file_entry in vec_file_entry {
+                combined.entry(size).or_default().entry(file_entry.hash.clone()).or_default().push(file_entry);
+            }
+        }
+        for (size, hash_map, _errors) in &pre_hash_results {
+            for (hash, vec_file_entry) in hash_map {
+                combined.entry(*size).or_default().entry(hash.clone()).or_default().extend(vec_file_entry.iter().cloned());
+            }
+        }
+        for (size, hash_groups) in combined {
+            for group in hash_groups.into_values() {
+                if group.len() > 1 {
+                    pre_checked_map.entry(size).or_default().extend(group);
                 }
             }
         }
