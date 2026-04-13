@@ -238,6 +238,9 @@ jobs:
             echo ''
             echo 'More information: https://github.com/qarmin/czkawka'
           } > package/README.md
+          echo "Really use Krokiet" > package/USE_KROKIET_INSTEAD_CZKAWKA_GTK.txt
+          echo "I'm not joking, just use Krokiet" > package/USE_KROKIET_JUST_USE_IT.txt
+          echo "Seriously, Czkawka GUI is deprecated, use Krokiet" > package/USE_KROKIET_SERIOUSLY.txt
 
           # czkawka_gui renderer launcher scripts (GSK_RENDERER)
           printf '@echo off\r\nset GSK_RENDERER=cairo\r\n"%%~dp0czkawka_gui.exe" %%*\r\n' > package/czkawka_gui_cairo_renderer.bat
