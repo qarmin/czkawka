@@ -64,7 +64,8 @@ bitflags! {
         const AUDIO = 0b10;
         const IMAGE = 0b100;
         const ARCHIVE = 0b1000;
-        const VIDEO = 0b10000;
+        const VIDEO_FFPROBE = 0b10000;
+        const VIDEO_FFMPEG = 0b100000;
     }
 }
 

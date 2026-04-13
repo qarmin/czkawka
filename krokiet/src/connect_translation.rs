@@ -252,11 +252,13 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_music_compare_fingerprints_only_with_similar_titles_text(flk!("subsettings_music_compare_fingerprints_only_with_similar_titles").into());
     translation.set_subsettings_broken_files_type_text(flk!("subsettings_broken_files_type").into());
     translation.set_subsettings_broken_files_audio_text(flk!("subsettings_broken_files_audio").into());
-    translation.set_subsettings_broken_files_video_text(flk!("subsettings_broken_files_video").into());
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
     translation.set_subsettings_broken_files_image_text(flk!("subsettings_broken_files_image").into());
-    translation.set_subsettings_broken_files_video_info_text(flk!("subsettings_broken_files_video_info").into());
+    translation.set_subsettings_broken_files_video_ffprobe_text(flk!("subsettings_broken_files_video_ffprobe").into());
+    translation.set_subsettings_broken_files_video_ffprobe_info_text(flk!("subsettings_broken_files_video_ffprobe_info").into());
+    translation.set_subsettings_broken_files_video_ffmpeg_text(flk!("subsettings_broken_files_video_ffmpeg").into());
+    translation.set_subsettings_broken_files_video_ffmpeg_info_text(flk!("subsettings_broken_files_video_ffmpeg_info").into());
     translation.set_subsettings_bad_names_issues_text(flk!("subsettings_bad_names_issues").into());
     translation.set_subsettings_bad_names_uppercase_extension_text(flk!("subsettings_bad_names_uppercase_extension").into());
     translation.set_subsettings_bad_names_uppercase_extension_hint_text(flk!("subsettings_bad_names_uppercase_extension_hint").into());
@@ -396,7 +398,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_log_number_size_text("".into());
     translation.set_settings_video_thumbnails_clear_unused_thumbnails_text(flk!("settings_video_thumbnails_clear_unused_thumbnails").into());
     translation.set_clean_exif_overwrite_files_text(flk!("clean_exif_overwrite_files_text").into());
-    translation.set_subsettings_broken_files_video_info_text(flk!("subsettings_broken_files_video_info").into());
+    translation.set_subsettings_broken_files_video_ffprobe_info_text(flk!("subsettings_broken_files_video_ffprobe_info").into());
+    translation.set_subsettings_broken_files_video_ffmpeg_info_text(flk!("subsettings_broken_files_video_ffmpeg_info").into());
     translation.set_stop_text(flk!("stop_text").into());
     translation.set_settings_cache_header_text(flk!("settings_cache_header_text").into());
     translation.set_settings_clean_cache_button_text(flk!("settings_clean_cache_button_text").into());

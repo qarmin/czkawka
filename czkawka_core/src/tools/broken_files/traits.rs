@@ -23,7 +23,8 @@ impl Search for BrokenFiles {
         let start_time = Instant::now();
 
         let () = (|| {
-            if self.params.checked_types.contains(CheckedTypes::VIDEO) && !check_if_ffprobe_ffmpeg_exists() {
+            let video_types = CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
+            if self.params.checked_types.intersects(video_types) && !check_if_ffprobe_ffmpeg_exists() {
                 self.common_data.text_messages.critical = Some(flc!("core_ffmpeg_not_found"));
                 #[cfg(target_os = "windows")]
                 self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
@@ -35,13 +36,16 @@ impl Search for BrokenFiles {
                 (CheckedTypes::AUDIO, AUDIO_FILES_EXTENSIONS),
                 (CheckedTypes::ARCHIVE, ZIP_FILES_EXTENSIONS),
                 (CheckedTypes::IMAGE, IMAGE_RS_BROKEN_FILES_EXTENSIONS),
-                (CheckedTypes::VIDEO, VIDEO_FILES_EXTENSIONS),
             ];
-            let extensions = extension_types
+            let mut extensions = extension_types
                 .into_iter()
                 .filter(|(checked_type, _)| self.get_params().checked_types.contains(*checked_type))
                 .flat_map(|(_, exts)| exts.to_vec())
                 .collect::<Vec<&str>>();
+
+            if self.get_params().checked_types.intersects(video_types) {
+                extensions.extend_from_slice(VIDEO_FILES_EXTENSIONS);
+            }
 
             if extensions.is_empty() {
                 self.common_data.text_messages.critical = Some(flc!("core_needs_to_set_at_least_one_broken_option"));

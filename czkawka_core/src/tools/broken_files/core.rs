@@ -22,7 +22,7 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::helpers::audio_checker;
-use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, Info, TypeOfFile};
+use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, Info, TypeOfFile};
 
 impl BrokenFiles {
     pub fn new(params: BrokenFilesParameters) -> Self {
@@ -146,7 +146,7 @@ impl BrokenFiles {
     }
 
     // None if stopped, otherwise Some
-    fn check_broken_video(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<BrokenEntry> {
+    fn check_broken_video_ffprobe(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<BrokenEntry> {
         let ffprobe_errors = [
             ("moov atom not found", Some("broken file structure")),
             ("error reading header", Some("broken file structure")),
@@ -164,22 +164,24 @@ impl BrokenFiles {
             Some(Err(e)) => {
                 debug!("Failed to run ffprobe on {:?}: {}", file_entry.path, e);
                 file_entry.error_string = format!("Failed to run ffprobe: {e}").trim().to_string();
-                return Some(file_entry);
             }
             Some(Ok(output)) => {
                 let combined = format!("{}{}", output.stdout.trim(), output.stderr.trim());
 
                 if let Some((error_message, additional_message)) = ffprobe_errors.iter().find(|(err, _)| combined.contains(err)) {
                     file_entry.error_string = format!("{error_message}{}", additional_message.map(|e| format!(" ({e})")).unwrap_or_default());
-                    return Some(file_entry);
                 } else if !output.status.success() {
                     // debug_save_file("ffprobe_failed_output.txt", &format!("{} --- \n{}", file_entry.path.to_string_lossy(), combined));
                     file_entry.error_string = format!("ffprobe exited with non-zero status: {}", output.status);
-                    return Some(file_entry);
                 }
             }
         }
 
+        Some(file_entry)
+    }
+
+    // None if stopped, otherwise Some
+    fn check_broken_video_ffmpeg(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<BrokenEntry> {
         let ffmpeg_message = [
             ("Output file does not contain any stream", Some("cannot find video stream - possible not even video file")),
             ("missing mandatory atoms, broken header", Some("broken file structure")),
@@ -242,6 +244,26 @@ impl BrokenFiles {
         Some(file_entry)
     }
 
+    // None if stopped, otherwise Some
+    fn check_broken_video(file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>, checked_types: CheckedTypes) -> Option<BrokenEntry> {
+        if checked_types.contains(CheckedTypes::VIDEO_FFPROBE) {
+            let result = Self::check_broken_video_ffprobe(file_entry, stop_flag)?;
+            if !result.error_string.is_empty() {
+                return Some(result);
+            }
+            if checked_types.contains(CheckedTypes::VIDEO_FFMPEG) {
+                return Self::check_broken_video_ffmpeg(result, stop_flag);
+            }
+            return Some(result);
+        }
+
+        if checked_types.contains(CheckedTypes::VIDEO_FFMPEG) {
+            return Self::check_broken_video_ffmpeg(file_entry, stop_flag);
+        }
+
+        Some(file_entry)
+    }
+
     #[fun_time(message = "load_cache", level = "debug")]
     fn load_cache(&mut self) -> (BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>, BTreeMap<String, BrokenEntry>) {
         load_and_split_cache_generalized_by_path(&get_broken_files_cache_file(), mem::take(&mut self.files_to_check), self)
@@ -252,13 +274,13 @@ impl BrokenFiles {
         save_and_connect_cache_generalized_by_path(&get_broken_files_cache_file(), vec_file_entry, loaded_hash_map, self);
     }
 
-    fn check_file(file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<Option<BrokenEntry>> {
+    fn check_file(file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>, checked_types: CheckedTypes) -> Option<Option<BrokenEntry>> {
         match check_extension_availability(&file_entry.path) {
             TypeOfFile::Image => Some(Some(Self::check_broken_image(file_entry))),
             TypeOfFile::ArchiveZip => Some(Self::check_broken_zip(file_entry)),
             TypeOfFile::Audio => Some(Self::check_broken_audio(file_entry)),
             TypeOfFile::Pdf => Some(Some(Self::check_broken_pdf(file_entry))),
-            TypeOfFile::Video => Self::check_broken_video(file_entry, stop_flag).map(Some),
+            TypeOfFile::Video => Self::check_broken_video(file_entry, stop_flag, checked_types).map(Some),
             TypeOfFile::Unknown => {
                 error!("Unknown file type of: {file_entry:?}");
                 Some(None)
@@ -283,6 +305,7 @@ impl BrokenFiles {
         );
 
         let non_cached_files_to_check = non_cached_files_to_check.into_iter().collect::<Vec<_>>();
+        let checked_types = self.params.checked_types;
 
         debug!("look_for_broken_files - started finding for broken files");
         let mut vec_file_entry: Vec<BrokenEntry> = non_cached_files_to_check
@@ -294,7 +317,7 @@ impl BrokenFiles {
                 }
 
                 let size = file_entry.size;
-                let res = Self::check_file(file_entry, stop_flag);
+                let res = Self::check_file(file_entry, stop_flag, checked_types);
 
                 progress_handler.increase_items(1);
                 progress_handler.increase_size(size);

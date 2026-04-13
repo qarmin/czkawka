@@ -514,7 +514,7 @@ fn broken_files_search(
         checked_types |= CheckedTypes::ARCHIVE;
     }
     if check_button_broken_files_video.is_active() {
-        checked_types |= CheckedTypes::VIDEO;
+        checked_types |= CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
     }
 
     if checked_types != CheckedTypes::NONE {

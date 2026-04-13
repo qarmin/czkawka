@@ -358,12 +358,21 @@ export component ToolSettings {
             }
 
             CheckBoxWrapper {
-                text: Translations.subsettings_broken_files_video_text;
-                checked <=> Settings.broken_files_sub_video;
+                text: Translations.subsettings_broken_files_video_ffprobe_text;
+                checked <=> Settings.broken_files_sub_video_ffprobe;
             }
 
             HintText {
-                hint_text: Translations.subsettings_broken_files_video_info_text;
+                hint_text: Translations.subsettings_broken_files_video_ffprobe_info_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_broken_files_video_ffmpeg_text;
+                checked <=> Settings.broken_files_sub_video_ffmpeg;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_broken_files_video_ffmpeg_info_text;
             }
 
             Rectangle { }

@@ -140,7 +140,9 @@ pub struct SettingsCustom {
     #[serde(default = "ttrue")]
     pub broken_files_sub_image: bool,
     #[serde(default)]
-    pub broken_files_sub_video: bool,
+    pub broken_files_sub_video_ffprobe: bool,
+    #[serde(default)]
+    pub broken_files_sub_video_ffmpeg: bool,
     #[serde(default = "ttrue")]
     pub bad_names_sub_uppercase_extension: bool,
     #[serde(default = "ttrue")]

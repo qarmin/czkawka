@@ -32,8 +32,11 @@ pub(crate) fn scan_broken_files(a: Weak<MainWindow>, sd: ScanData) {
             if sd.custom_settings.broken_files_sub_archive {
                 checked_types |= CheckedTypes::ARCHIVE;
             }
-            if sd.custom_settings.broken_files_sub_video {
-                checked_types |= CheckedTypes::VIDEO;
+            if sd.custom_settings.broken_files_sub_video_ffprobe {
+                checked_types |= CheckedTypes::VIDEO_FFPROBE;
+            }
+            if sd.custom_settings.broken_files_sub_video_ffmpeg {
+                checked_types |= CheckedTypes::VIDEO_FFMPEG;
             }
 
             if checked_types == CheckedTypes::NONE {
