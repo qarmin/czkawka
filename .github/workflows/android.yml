@@ -68,6 +68,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           echo "VERS=release" >> $GITHUB_ENV
+          echo "123456" > keystore_pass
           cargo apk build -p cedinia --lib --release --target aarch64-linux-android
           mv target/release/apk/cedinia.apk cedinia.apk
 
