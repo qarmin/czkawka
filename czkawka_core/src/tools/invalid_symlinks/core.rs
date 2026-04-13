@@ -70,8 +70,15 @@ impl InvalidSymlinks {
                         break;
                     }
 
+                    let parent_dir = current_path.parent().map(|p| p.to_path_buf());
                     current_path = match current_path.read_link() {
-                        Ok(t) => t,
+                        Ok(t) => {
+                            if t.is_relative() {
+                                if let Some(parent) = parent_dir { parent.join(t) } else { t }
+                            } else {
+                                t
+                            }
+                        }
                         Err(_inspected) => {
                             // Looks that some next symlinks are broken, but we do nothing with it - TODO why they are broken
                             return None;
