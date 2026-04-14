@@ -53,6 +53,8 @@ jobs:
 
           echo "123456" > keystore_pass
           just gen_keystores
+          PASS=$(cat keystore_pass)
+          sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" cedinia/Cargo.toml
 
       - name: Patch Cargo.toml - set min/target SDK versions
         run: |
