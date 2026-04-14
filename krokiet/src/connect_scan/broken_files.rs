@@ -108,7 +108,7 @@ fn prepare_data_model_broken_files(fe: BrokenEntry) -> (ModelRc<SharedString>, M
     let data_model_str_arr: [SharedString; MAX_STR_DATA_BROKEN_FILES] = [
         file.into(),
         directory.into(),
-        fe.error_string.into(),
+        fe.get_error_string().into(),
         format_size(fe.size, BINARY).into(),
         get_dt_timestamp_string(fe.modified_date).into(),
     ];

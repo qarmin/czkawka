@@ -57,6 +57,7 @@ pub enum ScanRequest {
         hash_alg: HashAlg,
         image_filter: FilterType,
         ignore_same_size: bool,
+        ignore_same_resolution: bool,
         filters: CommonFilters,
     },
     EmptyFiles {
@@ -184,6 +185,7 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 hash_alg,
                 image_filter,
                 ignore_same_size,
+                ignore_same_resolution,
                 filters,
             } => {
                 scan_id += 1;
@@ -194,6 +196,7 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                     hash_alg,
                     image_filter,
                     ignore_same_size,
+                    ignore_same_resolution,
                     &filters,
                     stop_flag,
                     &handler,

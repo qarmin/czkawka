@@ -276,6 +276,8 @@ pub struct SimilarImagesArgs {
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
     pub ignore_same_size: IgnoreSameSize,
+    #[clap(flatten)]
+    pub ignore_same_resolution: IgnoreSameResolution,
     #[clap(
         short = 'g',
         long,
@@ -1016,6 +1018,17 @@ pub struct IgnoreSameSize {
         long_help = "Groups files by size and keeps only one file from each size group, ignoring files with identical sizes (useful for quick deduplication based solely on file size)."
     )]
     pub ignore_same_size: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct IgnoreSameResolution {
+    #[clap(
+        short = 'R',
+        long,
+        help = "Ignore images with same resolution",
+        long_help = "Skips images that have identical resolution (width x height), keeping only one image per resolution group."
+    )]
+    pub ignore_same_resolution: bool,
 }
 
 impl FileToSave {
