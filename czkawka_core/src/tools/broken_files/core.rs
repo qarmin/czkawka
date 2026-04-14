@@ -152,7 +152,6 @@ impl BrokenFiles {
         })
     }
 
-    // None if stopped, otherwise Some
     fn check_broken_video_ffprobe(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<BrokenEntry> {
         let ffprobe_errors = [
             ("moov atom not found", Some("broken file structure")),
@@ -189,7 +188,6 @@ impl BrokenFiles {
         Some(file_entry)
     }
 
-    // None if stopped, otherwise Some
     fn check_broken_video_ffmpeg(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<BrokenEntry> {
         let ffmpeg_message = [
             ("Output file does not contain any stream", Some("cannot find video stream - possible not even video file")),
@@ -255,7 +253,6 @@ impl BrokenFiles {
         Some(file_entry)
     }
 
-    // None if stopped, otherwise Some
     fn check_broken_video(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>, checked_types: CheckedTypes) -> Option<BrokenEntry> {
         if checked_types.contains(CheckedTypes::VIDEO_FFPROBE) {
             file_entry = Self::check_broken_video_ffprobe(file_entry, stop_flag)?;

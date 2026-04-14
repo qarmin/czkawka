@@ -3,7 +3,11 @@
 - Switched AV1 encoding from the very slow `libaom-av1` to `libsvtav1` - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
 - Added a noise reduction option to Video Optimizer mode, which can significantly reduce file size for noisy videos - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
 - Added support for custom optimization commands in Video Optimizer mode - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
-- Added hardware-accelerated video encoding - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Added experimental hardware-accelerated video encoding - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Broken files now allows to check file with multiple different checkers - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Checking for broken videos was split into fast(ffprobe - only headers) and slow(ffmpeg - full decoding) checks - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Added ability to stop ignoring hardlinks search and added progress tracking for this operation - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Added ability to exclude images/videos with the same resolution - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
 
 ### CLI
 
