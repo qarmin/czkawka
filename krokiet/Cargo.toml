@@ -47,7 +47,7 @@ notify-rust = { version = "4" }
 
 # Easier cross-compilation of app to e.g. 32 bit os, by using dlopen instead of linking libraries at compile time
 # Must match version used in slint
-fontique = { version = "=0.7.0", default-features = false, features = ["fontconfig-dlopen", "std"] }
+fontique = { version = "=0.8.0", default-features = false, features = ["fontconfig-dlopen", "std"] }
 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}

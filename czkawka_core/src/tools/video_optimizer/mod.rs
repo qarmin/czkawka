@@ -115,7 +115,6 @@ impl HardwareEncoder {
     /// Returns the ffmpeg hardware encoder name for the given codec, or None if unsupported.
     pub const fn encoder_name_for_codec(self, codec: VideoCodec) -> Option<&'static str> {
         match (self, codec) {
-            (Self::None, _) => None,
             (Self::Nvenc, VideoCodec::H264) => Some("h264_nvenc"),
             (Self::Nvenc, VideoCodec::H265) => Some("hevc_nvenc"),
             (Self::Nvenc, VideoCodec::Av1) => Some("av1_nvenc"),

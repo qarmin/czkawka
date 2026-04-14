@@ -317,7 +317,6 @@ pub trait CommonData {
         }
     }
 
-    #[expect(clippy::indexing_slicing)] // Safe, because input is always checked to have at least 1 element
     fn delete_advanced_elements_and_add_to_messages<T: ResultEntry + Sized + Send + Sync + Clone>(
         &mut self,
         stop_flag: &Arc<AtomicBool>,

@@ -110,9 +110,13 @@ impl BrokenFiles {
                     let error = match audio_checker::parse_audio_file(file) {
                         Err(e) => {
                             let err_str = e.to_string();
-                            if err_str.contains("not supported codec") { String::new() } else { err_str.trim().to_string() }
+                            if err_str.contains("not supported codec") {
+                                String::new()
+                            } else {
+                                err_str.trim().to_string()
+                            }
                         }
-                        Ok(_) => String::new(),
+                        Ok(()) => String::new(),
                     };
                     file_entry.errors.insert(CheckedTypesSingle::Audio, error);
                     Some(file_entry)

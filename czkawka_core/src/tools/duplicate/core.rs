@@ -88,8 +88,8 @@ impl DuplicateFinder {
                 // Reference - only use in size, because later hash will be counted differently
                 if self.common_data.use_reference_folders {
                     let vec = mem::take(&mut self.files_with_identical_names)
-                        .into_iter()
-                        .filter_map(|(_name, vec_file_entry)| {
+                        .into_values()
+                        .filter_map(|vec_file_entry| {
                             let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry
                                 .into_iter()
                                 .partition(|e| self.common_data.directories.is_in_referenced_directory(e.get_path()));
@@ -180,8 +180,8 @@ impl DuplicateFinder {
                 // Reference - only use in size, because later hash will be counted differently
                 if self.common_data.use_reference_folders {
                     let vec = mem::take(&mut self.files_with_identical_size_names)
-                        .into_iter()
-                        .filter_map(|(_size, vec_file_entry)| {
+                        .into_values()
+                        .filter_map(|vec_file_entry| {
                             let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry
                                 .into_iter()
                                 .partition(|e| self.common_data.directories.is_in_referenced_directory(e.get_path()));
@@ -328,8 +328,8 @@ impl DuplicateFinder {
     fn filter_reference_folders_by_size(&mut self) {
         if self.common_data.use_reference_folders && self.get_params().check_method == CheckingMethod::Size {
             let vec = mem::take(&mut self.files_with_identical_size)
-                .into_iter()
-                .filter_map(|(_size, vec_file_entry)| {
+                .into_values()
+                .filter_map(|vec_file_entry| {
                     let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry
                         .into_iter()
                         .partition(|e| self.common_data.directories.is_in_referenced_directory(e.get_path()));
@@ -737,8 +737,8 @@ impl DuplicateFinder {
         // Reference - only use in size, because later hash will be counted differently
         if self.common_data.use_reference_folders {
             let vec = mem::take(&mut self.files_with_identical_hashes)
-                .into_iter()
-                .filter_map(|(_size, vec_vec_file_entry)| {
+                .into_values()
+                .filter_map(|vec_vec_file_entry| {
                     let mut all_results_with_same_size = Vec::new();
                     for vec_file_entry in vec_vec_file_entry {
                         let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry

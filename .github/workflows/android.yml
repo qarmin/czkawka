@@ -51,6 +51,7 @@ jobs:
           sudo apt update || true
           sudo apt install -y just
 
+          echo "123456" > keystore_pass
           just gen_keystores
 
       - name: Patch Cargo.toml - set min/target SDK versions
@@ -68,7 +69,6 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           echo "VERS=release" >> $GITHUB_ENV
-          echo "123456" > keystore_pass
           cargo apk build -p cedinia --lib --release --target aarch64-linux-android
           mv target/release/apk/cedinia.apk cedinia.apk
 

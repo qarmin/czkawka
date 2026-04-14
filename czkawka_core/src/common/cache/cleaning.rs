@@ -301,7 +301,7 @@ fn clean_cache_file_typed<T>(
 where
     for<'a> T: Deserialize<'a> + ResultEntry + Serialize + Clone + Send,
 {
-    let size_before = fs::metadata(cache_path).map(|m| m.len()).unwrap_or(0);
+    let size_before = fs::metadata(cache_path).map_or(0, |m| m.len());
 
     let file = fs::File::open(cache_path).map_err(|e| format!("Cannot open file: {e}"))?;
     let reader = BufReader::new(file);
@@ -363,7 +363,7 @@ where
             .serialize_into(writer, &filtered_entries)
             .map_err(|e| format!("Cannot serialize cleaned data to temporary file: {e}"))?;
 
-        let new_size = fs::metadata(&tmp_file_path).map(|m| m.len()).unwrap_or(size_before);
+        let new_size = fs::metadata(&tmp_file_path).map_or(size_before, |m| m.len());
 
         fs::rename(&tmp_file_path, cache_path).map_err(|e| format!("Cannot replace original cache file: {e}"))?;
 

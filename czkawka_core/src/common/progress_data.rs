@@ -236,9 +236,8 @@ impl ToolType {
             Self::Duplicate => 7,
             Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
             Self::BrokenFiles | Self::BadExtensions | Self::BadNames => 1,
-            Self::SimilarImages | Self::SimilarVideos => 3,
+            Self::SimilarImages | Self::SimilarVideos | Self::ExifRemover => 3,
             Self::VideoOptimizer => 2,
-            Self::ExifRemover => 3,
             Self::None => unreachable!("ToolType::None is not allowed"),
             Self::SameMusic => match checking_method {
                 CheckingMethod::AudioTags => 4,

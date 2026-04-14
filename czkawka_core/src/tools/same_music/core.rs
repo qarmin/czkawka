@@ -95,8 +95,8 @@ impl SameMusic {
         if self.params.compare_fingerprints_only_with_similar_titles {
             let grouped_by_title: BTreeMap<String, Vec<MusicEntry>> = Self::get_entries_grouped_by_title(mem::take(&mut self.music_entries));
             self.music_to_check = grouped_by_title
-                .into_iter()
-                .filter_map(|(_title, entries)| if entries.len() >= 2 { Some(entries) } else { None })
+                .into_values()
+                .filter_map(|entries| if entries.len() >= 2 { Some(entries) } else { None })
                 .flatten()
                 .map(|e| (e.path.to_string_lossy().to_string(), e))
                 .collect();
@@ -362,8 +362,8 @@ impl SameMusic {
             let entries_grouped_by_title: BTreeMap<String, Vec<MusicEntry>> = Self::get_entries_grouped_by_title(mem::take(&mut self.music_entries));
 
             entries_grouped_by_title
-                .into_iter()
-                .filter_map(|(_title, entries)| {
+                .into_values()
+                .filter_map(|entries| {
                     let (base_files, files_to_compare) = self.split_fingerprints_to_base_and_files_to_compare(entries);
 
                     // When there is 0 files in base files or files to compare there will be no comparison, so removing it from the list
@@ -575,11 +575,7 @@ fn calc_fingerprint_helper<P: AsRef<Path>>(path: P, config: &Configuration) -> R
 
         let mut sample_buf = None;
 
-        loop {
-            let Ok(packet) = format.next_packet() else {
-                break;
-            };
-
+        while let Ok(packet) = format.next_packet() {
             if packet.track_id() != track_id {
                 continue;
             }
@@ -731,7 +727,7 @@ fn get_simplified_name_internal(what: &str, ignore_numbers: bool) -> String {
                                 space_before = true;
                             }
                         } else {
-                            new_what.extend(new_items.into_iter());
+                            new_what.extend(new_items);
                             space_before = false;
                         }
                     }

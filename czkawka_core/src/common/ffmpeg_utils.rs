@@ -12,8 +12,7 @@ pub fn check_if_ffprobe_ffmpeg_exists() -> bool {
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status()
-        .map(|s| s.success())
-        .unwrap_or(false);
+        .is_ok_and(|s| s.success());
 
     let mut ffprobe_command = Command::new("ffprobe");
     disable_windows_console_window(&mut ffprobe_command);
@@ -22,8 +21,7 @@ pub fn check_if_ffprobe_ffmpeg_exists() -> bool {
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status()
-        .map(|s| s.success())
-        .unwrap_or(false);
+        .is_ok_and(|s| s.success());
 
     ffprobe_ok && ffmpeg_ok
 }
@@ -48,7 +46,7 @@ fn test_hardware_encoder(encoder: HardwareEncoder) -> bool {
 fn test_encoder_simple(encoder_name: &str) -> bool {
     let mut cmd = Command::new("ffmpeg");
     disable_windows_console_window(&mut cmd);
-    let mut child = match cmd
+    let Ok(mut child) = cmd
         .args([
             "-nostdin",
             "-f",
@@ -66,9 +64,8 @@ fn test_encoder_simple(encoder_name: &str) -> bool {
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
-    {
-        Ok(c) => c,
-        Err(_) => return false,
+    else {
+        return false;
     };
     wait_with_timeout(&mut child)
 }
@@ -111,7 +108,7 @@ fn test_vaapi_encoder(encoder_name: &str) -> bool {
         }
         let mut cmd = Command::new("ffmpeg");
         disable_windows_console_window(&mut cmd);
-        let mut child = match cmd
+        let Ok(mut child) = cmd
             .args([
                 "-nostdin",
                 "-vaapi_device",
@@ -133,9 +130,8 @@ fn test_vaapi_encoder(encoder_name: &str) -> bool {
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .spawn()
-        {
-            Ok(c) => c,
-            Err(_) => continue,
+        else {
+            continue;
         };
         if wait_with_timeout(&mut child) {
             return true;
@@ -150,9 +146,8 @@ fn test_vaapi_encoder(encoder_name: &str) -> bool {
 pub fn get_available_hw_accelerations() -> Vec<String> {
     let mut command = Command::new("ffmpeg");
     disable_windows_console_window(&mut command);
-    let output = match command.arg("-hwaccels").stderr(Stdio::null()).output() {
-        Ok(o) => o,
-        Err(_) => return Vec::new(),
+    let Ok(output) = command.arg("-hwaccels").stderr(Stdio::null()).output() else {
+        return Vec::new();
     };
     let stdout = String::from_utf8_lossy(&output.stdout);
     stdout

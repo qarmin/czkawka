@@ -227,7 +227,14 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         ignore_same_resolution,
     } = similar_images;
 
-    let params = SimilarImagesParameters::new(max_difference, hash_size, hash_alg, image_filter, ignore_same_size.ignore_same_size, ignore_same_resolution.ignore_same_resolution);
+    let params = SimilarImagesParameters::new(
+        max_difference,
+        hash_size,
+        hash_alg,
+        image_filter,
+        ignore_same_size.ignore_same_size,
+        ignore_same_resolution.ignore_same_resolution,
+    );
     let mut tool = SimilarImages::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));

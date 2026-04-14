@@ -1023,7 +1023,7 @@ pub struct IgnoreSameSize {
 #[derive(Debug, clap::Args)]
 pub struct IgnoreSameResolution {
     #[clap(
-        short = 'R',
+        short = 'Z',
         long,
         help = "Ignore images with same resolution",
         long_help = "Skips images that have identical resolution (width x height), keeping only one image per resolution group."
