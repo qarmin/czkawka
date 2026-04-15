@@ -10,5 +10,7 @@ Type=Application
 Name=Krokiet
 
 Comment=Krokiet - multi-functional app to find duplicates, empty folders, similar files and many more.
+Comment[ru]=Krokiet — многофункциональное приложение для поиска дубликатов, пустых папок, похожих файлов и прочего.
 
 Keywords=Krokiet;duplicate;same;similar;cleaner;copy;copies;compare;files;krokiet
+Keywords[ru]=Krokiet;duplicate;same;similar;cleaner;copy;copies;compare;files;krokiet;дубликаты;похожие;копии;очистка;файлы
