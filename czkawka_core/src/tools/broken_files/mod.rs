@@ -15,13 +15,34 @@ use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
 
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Debug)]
+pub enum CheckedTypesSingle {
+    Pdf,
+    Audio,
+    Image,
+    Archive,
+    VideoFfprobe,
+    VideoFfmpeg,
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct BrokenEntry {
     pub path: PathBuf,
     pub modified_date: u64,
     pub size: u64,
-    pub error_string: String,
+    pub errors: BTreeMap<CheckedTypesSingle, String>,
 }
+
+impl BrokenEntry {
+    pub fn has_errors(&self) -> bool {
+        self.errors.values().any(|e| !e.is_empty())
+    }
+
+    pub fn get_error_string(&self) -> String {
+        self.errors.values().filter(|e| !e.is_empty()).cloned().collect::<Vec<_>>().join(", ")
+    }
+}
+
 impl ResultEntry for BrokenEntry {
     fn get_path(&self) -> &Path {
         &self.path
@@ -40,7 +61,7 @@ impl FileEntry {
             size: self.size,
             path: self.path,
             modified_date: self.modified_date,
-            error_string: String::new(),
+            errors: BTreeMap::new(),
         }
     }
 }
@@ -64,7 +85,8 @@ bitflags! {
         const AUDIO = 0b10;
         const IMAGE = 0b100;
         const ARCHIVE = 0b1000;
-        const VIDEO = 0b10000;
+        const VIDEO_FFPROBE = 0b10000;
+        const VIDEO_FFMPEG = 0b100000;
     }
 }
 

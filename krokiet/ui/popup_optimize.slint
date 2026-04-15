@@ -43,6 +43,18 @@ export component PopupReencodeVideo inherits Rectangle {
                             model <=> Settings.video_optimizer_sub_video_codec_config;
                             current_index <=> Settings.video_optimizer_sub_video_codec_index;
                             current_value <=> Settings.video_optimizer_sub_video_codec_value;
+                            enabled: !Settings.video_optimizer_sub_use_custom_command;
+                        }
+                    }
+
+                    HorizontalLayout {
+                        spacing: 5px;
+                        Text { text: Translations.subsettings_video_optimizer_hardware_encoder_text; vertical_alignment: TextVerticalAlignment.center; }
+                        ComboBox {
+                            model <=> Settings.video_optimizer_sub_hardware_encoder_config;
+                            current_index <=> Settings.video_optimizer_sub_hardware_encoder_index;
+                            current_value <=> Settings.video_optimizer_sub_hardware_encoder_value;
+                            enabled: !Settings.video_optimizer_sub_use_custom_command;
                         }
                     }
 

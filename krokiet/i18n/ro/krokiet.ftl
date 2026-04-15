@@ -255,7 +255,6 @@ settings_maximum_file_size = Max:
 settings_recursive_search = Căutare Recursivă
 settings_use_cache = Utilizare geocutie
 settings_save_as_json = De asemenea, salvează cache-ul ca fișier JSON
-settings_move_to_trash = Mută fișierele șterse în gunoi
 settings_ignore_other_filesystems = Ignorați alte sisteme de fișiere (doar Linux)
 settings_delete_outdated_cache_entries = Șterge automat înregistrările de cache depășite
 settings_delete_outdated_cache_entries_hint = Când este activat, aplicația va verifica în timpul încărcării din cache (cel mult o dată pe săptămână) dacă înregistrările din cache indică încă fișiere/date existente și nemodificate

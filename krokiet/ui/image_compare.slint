@@ -1,4 +1,4 @@
-import { Button, ScrollView } from "std-widgets.slint";
+import { Button, ScrollView, Slider } from "std-widgets.slint";
 import { ColorPalette } from "color_palette.slint";
 import { FontSizes } from "fonts.slint";
 import { GuiState } from "gui_state.slint";
@@ -96,6 +96,10 @@ component CompareInfoBar inherits Rectangle {
 export component ImageCompareOverlay inherits Rectangle {
     private property <bool> info_visible: false;
     private property <bool> diff_mode: false;
+    private property <bool> split_mode: false;
+    private property <bool> transparent_mode: false;
+    private property <float> overlay_split_pos: 0.5;
+    private property <float> overlay_alpha: 0.5;
 
     private property <bool> left_valid:
         GuiState.compare_left_idx >= 0 &&
@@ -229,6 +233,32 @@ export component ImageCompareOverlay inherits Rectangle {
                 clicked => {
                     if !diff_mode { Callabler.compare_compute_diff(); }
                     diff_mode = !diff_mode;
+                    split_mode = false;
+                    transparent_mode = false;
+                }
+            }
+            Button {
+                icon: @image-url("../icons/krokiet_compare_split.svg");
+                colorize-icon: true;
+                text: Translations.compare_split_text;
+                height: parent.height;
+                checked: split_mode;
+                clicked => {
+                    split_mode = !split_mode;
+                    diff_mode = false;
+                    transparent_mode = false;
+                }
+            }
+            Button {
+                icon: @image-url("../icons/krokiet_compare_overlay.svg");
+                colorize-icon: true;
+                text: Translations.compare_overlay_text;
+                height: parent.height;
+                checked: transparent_mode;
+                clicked => {
+                    transparent_mode = !transparent_mode;
+                    diff_mode = false;
+                    split_mode = false;
                 }
             }
             Button {
@@ -240,6 +270,8 @@ export component ImageCompareOverlay inherits Rectangle {
                     GuiState.compare_visible = false;
                     info_visible = false;
                     diff_mode = false;
+                    split_mode = false;
+                    transparent_mode = false;
                 }
             }
 
@@ -268,7 +300,7 @@ export component ImageCompareOverlay inherits Rectangle {
             }
         }
 
-        Rectangle {
+        main-image-area := Rectangle {
             vertical-stretch: 1.0;
             clip: true;
 
@@ -290,7 +322,67 @@ export component ImageCompareOverlay inherits Rectangle {
                 }
             }
 
-            if !diff_mode: Rectangle {
+            if split_mode && !diff_mode: Rectangle {
+                width: parent.width; height: parent.height;
+                background: Settings.dark_theme ? #0e0e0e : #e0e0e0;
+                border-radius: 4px; clip: true;
+
+                // Left clip: shows left portion of the left image
+                Rectangle {
+                    clip: true;
+                    x: 0px; y: 0px;
+                    width: main-image-area.width * overlay_split_pos;
+                    height: main-image-area.height;
+                    Image {
+                        x: 0px; y: 0px;
+                        width: main-image-area.width;
+                        height: main-image-area.height;
+                        source: GuiState.compare_left_image;
+                        image-fit: ImageFit.contain;
+                    }
+                }
+
+                // Right clip: shows right portion of the right image
+                Rectangle {
+                    clip: true;
+                    x: main-image-area.width * overlay_split_pos; y: 0px;
+                    width: main-image-area.width * (1 - overlay_split_pos);
+                    height: main-image-area.height;
+                    Image {
+                        x: -(main-image-area.width * overlay_split_pos); y: 0px;
+                        width: main-image-area.width;
+                        height: main-image-area.height;
+                        source: GuiState.compare_right_image;
+                        image-fit: ImageFit.contain;
+                    }
+                }
+
+                // Divider line at the split position
+                Rectangle {
+                    x: main-image-area.width * overlay_split_pos - 1px; y: 0px;
+                    width: 2px; height: main-image-area.height;
+                    background: #ffffff80;
+                }
+            }
+
+            if transparent_mode && !diff_mode && !split_mode: Rectangle {
+                width: parent.width; height: parent.height;
+                background: Settings.dark_theme ? #0e0e0e : #e0e0e0;
+                border-radius: 4px; clip: true;
+                Image {
+                    width: parent.width; height: parent.height;
+                    source: GuiState.compare_left_image;
+                    image-fit: ImageFit.contain;
+                }
+                Image {
+                    width: parent.width; height: parent.height;
+                    source: GuiState.compare_right_image;
+                    image-fit: ImageFit.contain;
+                    opacity: overlay_alpha;
+                }
+            }
+
+            if !diff_mode && !split_mode && !transparent_mode: Rectangle {
                 width: parent.width; height: parent.height;
 
                 VerticalLayout {
@@ -352,6 +444,26 @@ export component ImageCompareOverlay inherits Rectangle {
                         }
                     }
                 }
+            }
+        }
+
+        if split_mode && !diff_mode: HorizontalLayout {
+            height: 28px; spacing: 6px; vertical-stretch: 0; padding-left: 4px; padding-right: 4px;
+            Slider {
+                value: overlay_split_pos;
+                minimum: 0.0;
+                maximum: 1.0;
+                changed(v) => { overlay_split_pos = v; }
+            }
+        }
+
+        if transparent_mode && !diff_mode && !split_mode: HorizontalLayout {
+            height: 28px; spacing: 6px; vertical-stretch: 0; padding-left: 4px; padding-right: 4px;
+            Slider {
+                value: overlay_alpha;
+                minimum: 0.0;
+                maximum: 1.0;
+                changed(v) => { overlay_alpha = v; }
             }
         }
 

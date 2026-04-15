@@ -29,7 +29,6 @@ export global Settings {
     in-out property <bool> recursive_search: true;
     in-out property <bool> use_cache: false;
     in-out property <bool> save_as_json: false;
-    in-out property <bool> move_to_trash: false;
     in-out property <bool> ignore_other_filesystems: false;
     in-out property <bool> delete_outdated_cache_entries: false;
     in-out property <bool> hide_hard_links: false;
@@ -69,6 +68,7 @@ export global Settings {
     in-out property <float> similar_images_sub_max_similarity: 40;
     in-out property <float> similar_images_sub_current_similarity: 20;
     in-out property <bool> similar_images_sub_ignore_same_size: false;
+    in-out property <bool> similar_images_sub_ignore_same_resolution: false;
 
     // Duplicates
     in-out property <[string]> duplicates_sub_check_method: ["Hash", "Size", "Name", "Size and Name"];
@@ -87,6 +87,7 @@ export global Settings {
 
     // Similar Videos
     in-out property <bool> similar_videos_sub_ignore_same_size;
+    in-out property <bool> similar_videos_sub_ignore_same_resolution;
     in-out property <float> similar_videos_sub_max_similarity: 20;
     in-out property <float> similar_videos_sub_current_similarity: 15;
 
@@ -125,7 +126,8 @@ export global Settings {
     in-out property <bool> broken_files_sub_pdf: false;
     in-out property <bool> broken_files_sub_archive: false;
     in-out property <bool> broken_files_sub_image: false;
-    in-out property <bool> broken_files_sub_video: false;
+    in-out property <bool> broken_files_sub_video_ffprobe: false;
+    in-out property <bool> broken_files_sub_video_ffmpeg: false;
 
     // Bad Names
     in-out property <bool> bad_names_sub_uppercase_extension: true;
@@ -177,6 +179,11 @@ export global Settings {
     in-out property <int>      video_optimizer_sub_noise_reduction_index: 0;
     in-out property <string>   video_optimizer_sub_noise_reduction_value: "none";
     in-out property <float>    video_optimizer_sub_noise_reduction_strength: 5;
+
+    // Video hardware encoder
+    in-out property <[string]> video_optimizer_sub_hardware_encoder_config: ["None", "NVENC", "VAAPI", "QSV", "VideoToolbox", "AMF"];
+    in-out property <int>      video_optimizer_sub_hardware_encoder_index: 0;
+    in-out property <string>   video_optimizer_sub_hardware_encoder_value: "none";
 
     // Custom FFmpeg command
     in-out property <bool>   video_optimizer_sub_use_custom_command: false;

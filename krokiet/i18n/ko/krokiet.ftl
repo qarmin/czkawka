@@ -258,7 +258,6 @@ settings_maximum_file_size = 최대:
 settings_recursive_search = 재귀 검색
 settings_use_cache = 캐시 사용
 settings_save_as_json = 캐시를 JSON으로 저장
-settings_move_to_trash = 삭제된 파일을 휴지통으로 이동
 settings_ignore_other_filesystems = 다른 파일시스템 무시하기(리눅스 한정)
 settings_delete_outdated_cache_entries = 자동으로 오래된 캐시 항목 삭제
 settings_delete_outdated_cache_entries_hint = 활성화되면, 앱은 캐시 로딩 중에 (주당 최대 한 번) 캐시 기록이 기존 및 수정되지 않은 파일/데이터를 가리키고 있는지 확인합니다

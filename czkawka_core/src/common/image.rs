@@ -191,10 +191,7 @@ pub(crate) fn get_raw_image<P: AsRef<Path> + std::fmt::Debug>(path: P) -> Result
 
     let params = RawDecodeParams::default();
 
-    // TODO - Nef currently disabled, due really bad quality of some extracted images https://github.com/dnglab/dnglab/issues/638, waiting for new release
-    if !path.as_ref().to_string_lossy().to_ascii_lowercase().ends_with(".nef")
-        && let Some(extracted_dynamic_image) = decoder.full_image(&raw_source, &params).ok().flatten()
-    {
+    if let Some(extracted_dynamic_image) = decoder.full_image(&raw_source, &params).ok().flatten() {
         timer.checkpoint("Decoded full image");
 
         trace!("{}", timer.report("Everything", false));

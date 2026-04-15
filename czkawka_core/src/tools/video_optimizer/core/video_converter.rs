@@ -4,12 +4,13 @@ use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use log::error;
+use log::{error, warn};
 
+use crate::common::ffmpeg_utils::find_vaapi_device;
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::video_utils::VideoMetadata;
 use crate::flc;
-use crate::tools::video_optimizer::{VideoTranscodeEntry, VideoTranscodeFixParams};
+use crate::tools::video_optimizer::{HardwareEncoder, VideoTranscodeEntry, VideoTranscodeFixParams};
 
 pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
     let metadata = match VideoMetadata::from_path(&entry.path) {
@@ -89,14 +90,34 @@ pub fn process_video(stop_flag: &Arc<AtomicBool>, video_path: &str, original_siz
 
 fn run_standard_command(params: &VideoTranscodeFixParams, video_path: &str, temp_output: &Path, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {
     let mut command = Command::new("ffmpeg");
-    command
-        .arg("-i")
-        .arg(video_path)
-        .arg("-nostdin")
-        .arg("-c:v")
-        .arg(params.codec.as_str())
-        .arg("-crf")
-        .arg(params.quality.to_string());
+
+    // Determine whether to use a hardware encoder or the software codec.
+    let hw = params.hardware_encoder;
+    let hw_encoder_name = if hw == HardwareEncoder::None { None } else { hw.encoder_name_for_codec(params.codec) };
+
+    if hw != HardwareEncoder::None && hw_encoder_name.is_none() {
+        warn!(
+            "Hardware encoder '{}' does not support codec '{}', falling back to software encoder",
+            hw.as_config_name(),
+            params.codec.as_ffprobe_codec_name()
+        );
+    }
+
+    // VAAPI requires the render device to be declared before the input file.
+    let using_vaapi = hw == HardwareEncoder::Vaapi && hw_encoder_name.is_some();
+    if using_vaapi {
+        let device = find_vaapi_device().ok_or_else(|| "No VAAPI render device found in /dev/dri/".to_string())?;
+        command.arg("-vaapi_device").arg(device);
+    }
+
+    command.arg("-i").arg(video_path).arg("-nostdin");
+
+    if let Some(hw_name) = hw_encoder_name {
+        command.arg("-c:v").arg(hw_name);
+        command.args(hw.quality_args(params.quality));
+    } else {
+        command.arg("-c:v").arg(params.codec.as_str()).arg("-crf").arg(params.quality.to_string());
+    }
 
     let mut filters: Vec<String> = Vec::new();
     if params.limit_video_size {
@@ -108,13 +129,22 @@ fn run_standard_command(params: &VideoTranscodeFixParams, video_path: &str, temp
     if let Some(nr_filter) = params.noise_reduction.to_ffmpeg_filter(params.noise_reduction_strength) {
         filters.push(nr_filter);
     }
+    if using_vaapi {
+        // Align dimensions to multiples of 16 before hwupload. VAAPI encoders pad
+        // the coded picture to 16-aligned boundaries; players that ignore the
+        // conformance-window crop signal show the padding as green pixels.
+        // Scaling by at most 15 px per axis is imperceptible at typical resolutions.
+        filters.push("scale=trunc(iw/16)*16:trunc(ih/16)*16".to_string());
+        filters.push("format=nv12,hwupload".to_string());
+    }
     if !filters.is_empty() {
         command.arg("-vf").arg(filters.join(","));
     }
 
     command.arg("-c:a").arg("copy").arg("-y").arg(temp_output);
 
-    run_ffmpeg_command(command, video_path, params.codec.as_ffprobe_codec_name(), stop_flag, temp_output)
+    let codec_label = hw_encoder_name.unwrap_or_else(|| params.codec.as_ffprobe_codec_name());
+    run_ffmpeg_command(command, video_path, codec_label, stop_flag, temp_output)
 }
 
 fn run_custom_command(cmd: &str, video_path: &str, temp_output: &Path, stop_flag: &Arc<AtomicBool>) -> Result<(), String> {

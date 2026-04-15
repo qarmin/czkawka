@@ -73,7 +73,10 @@ fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
         | CurrentStage::BadNamesChecking
         | CurrentStage::ExifRemoverExtractingTags
         | CurrentStage::VideoOptimizerCreatingThumbnails
-        | CurrentStage::VideoOptimizerProcessingVideos => unreachable!(),
+        | CurrentStage::VideoOptimizerProcessingVideos
+        | CurrentStage::SimilarImagesHidingHardLinks
+        | CurrentStage::SimilarVideosHidingHardLinks
+        | CurrentStage::DuplicateHidingHardLinks => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
     ProgressToSend {
@@ -140,6 +143,9 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::CleaningExif => flk!("rust_cleaning_no_size_exif", items_stats = items_stats),
 
         CurrentStage::ExifRemoverExtractingTags => flk!("rust_extracted_exif_tags", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::DuplicateHidingHardLinks | CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarVideosHidingHardLinks => {
+            flk!("rust_hiding_links", items_stats = items_stats)
+        }
 
         CurrentStage::CollectingFiles
         | CurrentStage::DuplicateCacheSaving

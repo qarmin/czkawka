@@ -193,7 +193,7 @@ pub fn cleanup_old_thumbnails() {
     if let Ok(entries) = std::fs::read_dir(&cache_dir) {
         for entry in entries.flatten() {
             if let Ok(meta) = entry.metadata()
-                && meta.modified().map(|t| t < cutoff).unwrap_or(false)
+                && meta.modified().is_ok_and(|t| t < cutoff)
             {
                 let _ = std::fs::remove_file(entry.path());
             }
@@ -211,7 +211,7 @@ pub fn spawn_thumbnail_loader(tasks: Vec<(usize, usize, String)>, tx: std::sync:
             return;
         }
 
-        let num_workers = std::thread::available_parallelism().map(|n| n.get().min(4)).unwrap_or(2);
+        let num_workers = std::thread::available_parallelism().map_or(2, |n| n.get().min(4));
 
         let limit = cache_limit_bytes();
         let used_bytes = Arc::new(AtomicU64::new(0));

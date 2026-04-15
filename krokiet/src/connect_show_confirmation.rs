@@ -46,6 +46,35 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow, shared_models: Arc<Mut
                 }
                 translation.set_delete_confirmation_text(base.into());
             }
+            PopupRequest::Trash => {
+                let mut base = flk!("rust_trash_confirmation");
+                base.push_str(format!("\n{}", flk!("rust_trash_confirmation_unsupported_volumes")).as_str());
+                if let Some(group_res) = res.groups_with_checked_items {
+                    base.push_str(
+                        format!(
+                            "\n{}",
+                            flk!(
+                                "rust_trash_confirmation_number_groups",
+                                items = res.checked_items_number,
+                                groups = group_res.groups_with_checked_items
+                            )
+                        )
+                        .as_str(),
+                    );
+                    if group_res.number_of_groups_with_all_items_checked > 0 {
+                        base.push_str(
+                            format!(
+                                "\n{}",
+                                flk!("rust_trash_confirmation_selected_all_in_group", groups = group_res.number_of_groups_with_all_items_checked)
+                            )
+                            .as_str(),
+                        );
+                    }
+                } else {
+                    base.push_str(format!("\n{}", flk!("rust_trash_confirmation_number_simple", items = res.checked_items_number)).as_str());
+                }
+                translation.set_trash_confirmation_text(base.into());
+            }
             PopupRequest::Move => {
                 let res = get_checked_info_from_app(&app);
                 let checked_items_number = res.checked_items_number;

@@ -317,7 +317,6 @@ pub trait CommonData {
         }
     }
 
-    #[expect(clippy::indexing_slicing)] // Safe, because input is always checked to have at least 1 element
     fn delete_advanced_elements_and_add_to_messages<T: ResultEntry + Sized + Send + Sync + Clone>(
         &mut self,
         stop_flag: &Arc<AtomicBool>,
@@ -348,18 +347,28 @@ pub trait CommonData {
             let res = files_to_process
                 .into_iter()
                 .flat_map(|values| {
-                    // TODO - probably a little too much cloning, so later could be this optimized
                     let len = values.len();
-                    let all_values = sort_items(values);
+                    let mut all_values = sort_items(values);
                     match delete_method {
-                        DeleteMethod::Delete => &all_values,
-                        DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptBiggest => &all_values[..(len - 1)],
-                        DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptSmallest => &all_values[1..],
-                        DeleteMethod::OneOldest | DeleteMethod::OneSmallest => &all_values[..1],
-                        DeleteMethod::OneNewest | DeleteMethod::OneBiggest => &all_values[(len - 1)..],
+                        DeleteMethod::Delete => all_values,
+                        DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptBiggest => {
+                            all_values.truncate(len - 1);
+                            all_values
+                        }
+                        DeleteMethod::AllExceptOldest | DeleteMethod::AllExceptSmallest => {
+                            all_values.remove(0);
+                            all_values
+                        }
+                        DeleteMethod::OneOldest | DeleteMethod::OneSmallest => {
+                            all_values.truncate(1);
+                            all_values
+                        }
+                        DeleteMethod::OneNewest | DeleteMethod::OneBiggest => {
+                            all_values.drain(..len - 1);
+                            all_values
+                        }
                         DeleteMethod::HardLink | DeleteMethod::None => unreachable!("HardLink and None should be handled before"),
                     }
-                    .to_vec()
                 })
                 .collect::<Vec<_>>();
             self.delete_elements(stop_flag, progress_sender, DeleteItemType::DeletingFiles(res))

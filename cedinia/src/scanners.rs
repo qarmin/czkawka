@@ -189,6 +189,7 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     hash_alg: czkawka_core::re_exported::HashAlg,
     image_filter: czkawka_core::re_exported::FilterType,
     ignore_same_size: bool,
+    ignore_same_resolution: bool,
     filters: &CommonFilters,
     stop: &Arc<AtomicBool>,
     handler: &Arc<H>,
@@ -197,7 +198,7 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
     let max_diff = return_similarity_from_similarity_preset(similarity_preset, hash_size);
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
-    let params = SimilarImagesParameters::new(max_diff, hash_size, hash_alg, image_filter, ignore_same_size);
+    let params = SimilarImagesParameters::new(max_diff, hash_size, hash_alg, image_filter, ignore_same_size, ignore_same_resolution);
     let mut tool = SimilarImages::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
@@ -368,7 +369,7 @@ pub(crate) fn scan_broken_files<H: ScanResultHandler>(
                 parent_str(&be.path),
                 fmt_size(be.size),
                 fmt_date(be.modified_date),
-                be.error_string.clone(),
+                be.get_error_string(),
             ];
             let val_int: [i32; INT_BASE_COUNT] = [mod_hi, mod_lo, 0, 0];
             FileItem {

@@ -277,6 +277,7 @@ stage_hardlinking = Creating hard links
 stage_symlinking = Creating symlinks
 stage_optimizing_videos = Optimizing videos
 stage_cleaning_exif = Cleaning EXIF
+stage_all_hiding_links = Hiding hard links
 
 # Group headers in scan results
 duplicates_group_header = { $count } files  x  { $per_file } / file  =  { $total } total

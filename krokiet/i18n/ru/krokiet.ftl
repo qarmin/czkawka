@@ -255,7 +255,6 @@ settings_maximum_file_size = Макс:
 settings_recursive_search = Рекурсивный поиск
 settings_use_cache = Использовать кэш
 settings_save_as_json = Также сохранить кэш как файл JSON
-settings_move_to_trash = Переместить удаленные файлы в корзину
 settings_ignore_other_filesystems = Игнорировать другие файловые системы (только Linux)
 settings_delete_outdated_cache_entries = Удалить автоматически устаревшие записи кэша
 settings_delete_outdated_cache_entries_hint = Когда включено, приложение будет проверять во время загрузки кэша (не более одного раза в неделю), действительно ли записи в кэше указывают на существующие и неизмененные файлы/данные

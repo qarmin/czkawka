@@ -24,7 +24,7 @@ android {
         minSdk = 26
         targetSdk = 35
         // Increment versionCode for every Play Store upload.
-        versionCode = 1
+        versionCode = 2
         versionName = "11.0.1"
     }
 

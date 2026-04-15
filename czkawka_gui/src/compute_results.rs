@@ -214,11 +214,12 @@ fn compute_broken_files(br: BrokenFiles, entry_info: &Entry, text_view_errors: &
 
     for file_entry in vector {
         let (directory, file) = split_path(&file_entry.path);
+        let error_string = file_entry.get_error_string();
         let values: [(u32, &dyn ToValue); 6] = [
             (ColumnsBrokenFiles::SelectionButton as u32, &false),
             (ColumnsBrokenFiles::Name as u32, &file),
             (ColumnsBrokenFiles::Path as u32, &directory),
-            (ColumnsBrokenFiles::ErrorType as u32, &file_entry.error_string),
+            (ColumnsBrokenFiles::ErrorType as u32, &error_string),
             (ColumnsBrokenFiles::Modification as u32, &(get_dt_timestamp_string(file_entry.modified_date))),
             (ColumnsBrokenFiles::ModificationAsSecs as u32, &(file_entry.modified_date as i64)),
         ];

@@ -527,6 +527,7 @@ progress_hash_cache_loading = Loading hash cache
 progress_hash_cache_saving = Saving hash cache
 progress_cache_loading = Loading cache
 progress_cache_saving = Saving cache
+progress_hiding_hard_link = Hiding hard links of {$file_checked}/{$all_files} file
 
 progress_current_stage = Current Stage:{"  "}
 progress_all_stages = All Stages:{"  "}

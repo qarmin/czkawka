@@ -32,8 +32,11 @@ pub(crate) fn scan_broken_files(a: Weak<MainWindow>, sd: ScanData) {
             if sd.custom_settings.broken_files_sub_archive {
                 checked_types |= CheckedTypes::ARCHIVE;
             }
-            if sd.custom_settings.broken_files_sub_video {
-                checked_types |= CheckedTypes::VIDEO;
+            if sd.custom_settings.broken_files_sub_video_ffprobe {
+                checked_types |= CheckedTypes::VIDEO_FFPROBE;
+            }
+            if sd.custom_settings.broken_files_sub_video_ffmpeg {
+                checked_types |= CheckedTypes::VIDEO_FFMPEG;
             }
 
             if checked_types == CheckedTypes::NONE {
@@ -105,7 +108,7 @@ fn prepare_data_model_broken_files(fe: BrokenEntry) -> (ModelRc<SharedString>, M
     let data_model_str_arr: [SharedString; MAX_STR_DATA_BROKEN_FILES] = [
         file.into(),
         directory.into(),
-        fe.error_string.into(),
+        fe.get_error_string().into(),
         format_size(fe.size, BINARY).into(),
         get_dt_timestamp_string(fe.modified_date).into(),
     ];

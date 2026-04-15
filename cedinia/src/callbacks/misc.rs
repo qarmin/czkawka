@@ -141,11 +141,7 @@ fn dir_size_recursive(path: &Path) -> u64 {
             .flatten()
             .map(|e| {
                 let p = e.path();
-                if p.is_dir() {
-                    dir_size_recursive(&p)
-                } else {
-                    e.metadata().map(|m| m.len()).unwrap_or(0)
-                }
+                if p.is_dir() { dir_size_recursive(&p) } else { e.metadata().map_or(0, |m| m.len()) }
             })
             .sum()
     })

@@ -1,14 +1,14 @@
 [package]
 name = "test_image_perf"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 czkawka_core = { path = "../../czkawka_core" }
 walkdir = "2.5.0"
 humansize = "2.1.3"
 rayon = "1.10.0"
-strum = { version = "0.27.1", features = ["strum_macros", "derive"] }
+strum = { version = "0.28.0", features = ["strum_macros", "derive"] }
 image_hasher = "3.0.0"
 log = "0.4.25"
 os_info = "3.10.0"

@@ -35,13 +35,3 @@ jobs:
         run: |
           cargo clippy --all-targets --all-features -- -D warnings
           cargo clippy --all-targets -- -D warnings
-
-      - name: Check tools
-        run: |
-          cd misc/test_image_perf
-          cargo check
-          cd ../../
-          
-          cd misc/test_read_perf
-          cargo check
-          cd ../../

@@ -72,6 +72,16 @@ android-build = "0.1.2"
 [features]
 default = []
 
+skia_opengl = ["slint/renderer-skia-opengl"]
+skia_vulkan = ["slint/renderer-skia-vulkan"]
+software = ["slint/renderer-software"]
+femtovg = ["slint/renderer-femtovg"]
+femtovg_wgpu = ["slint/renderer-femtovg-wgpu"]
+winit_femtovg = ["slint/renderer-winit-femtovg"]
+winit_skia_opengl = ["slint/renderer-winit-skia-opengl"]
+winit_skia_vulkan = ["slint/renderer-winit-skia-vulkan"]
+winit_software = ["slint/renderer-winit-software"]
+
 # ── Android packaging metadata (used by cargo-apk) ───────────────────────────
 [package.metadata.android]
 package = "io.github.qarmin.cedinia"
@@ -120,11 +130,15 @@ name = "android.permission.POST_NOTIFICATIONS"
 
 [package.metadata.android.signing.dev]
 path = "android/keystore/debug.keystore"
-keystore_password = "123456"
+keystore_password = "TO_REPLACE_KEYSTORE_PASSWORD"
+
+[package.metadata.android.signing.rdebug]
+path = "android/keystore/rdebug.keystore"
+keystore_password = "TO_REPLACE_KEYSTORE_PASSWORD"
 
 [package.metadata.android.signing.release]
 path = "android/keystore/release.keystore"
-keystore_password = "123456"
+keystore_password = "TO_REPLACE_KEYSTORE_PASSWORD"
 
 [lints]
 workspace = true

@@ -130,24 +130,45 @@ gen_cedinia_licenses:
 keystore_dir := "cedinia/android/keystore"
 
 gen_keystores:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PASS=$(cat keystore_pass)
     mkdir -p {{keystore_dir}}
     [ -f {{keystore_dir}}/debug.keystore ] || keytool -genkey -v \
         -keystore {{keystore_dir}}/debug.keystore \
         -alias debug -keyalg RSA -keysize 2048 -validity 10000 \
-        -storepass 123456 -keypass 123456 \
+        -storepass "$PASS" -keypass "$PASS" \
         -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, S=Debug, C=US" \
+        -noprompt
+    [ -f {{keystore_dir}}/rdebug.keystore ] || keytool -genkey -v \
+        -keystore {{keystore_dir}}/rdebug.keystore \
+        -alias rdebug -keyalg RSA -keysize 2048 -validity 10000 \
+        -storepass "$PASS" -keypass "$PASS" \
+        -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
         -noprompt
     [ -f {{keystore_dir}}/release.keystore ] || keytool -genkey -v \
         -keystore {{keystore_dir}}/release.keystore \
         -alias release -keyalg RSA -keysize 2048 -validity 10000 \
-        -storepass 123456 -keypass 123456 \
+        -storepass "$PASS" -keypass "$PASS" \
         -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
         -noprompt
 
-android_build: gen_keystores
+android_build:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PASS=$(cat keystore_pass)
+    sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" cedinia/Cargo.toml
+    trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" cedinia/Cargo.toml' EXIT
+
     cargo apk build -p cedinia --lib
 
-android_build_release: gen_keystores
+android_build_release:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PASS=$(cat keystore_pass)
+    sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" cedinia/Cargo.toml
+    trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" cedinia/Cargo.toml' EXIT
+
     cargo apk build -p cedinia --lib --release
 
 android_install:
@@ -176,12 +197,29 @@ androidr: android_build_release android_install_release android_run
 # Requires gradle 8.9+ in PATH (e.g. sdk install gradle 8.9 via sdkman).
 # The libcedinia.so is compiled by cargo-apk and the DEX is already embedded
 # in the .so via include_bytes! – no separate Java compilation is needed.
-android_build_aab: android_build_release
-    mkdir -p cedinia/android/app/src/main/jniLibs/arm64-v8a
-    cp target/aarch64-linux-android/release/libcedinia.so cedinia/android/app/src/main/jniLibs/arm64-v8a/
-    cd cedinia/android && gradle bundleRelease
-    cp cedinia/android/app/build/outputs/bundle/release/app-release.aab cedinia.aab
-    @echo "AAB built: cedinia.aab"
+android_build_aab:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ROOT="$(pwd)"
+    PASS=$(cat keystore_pass)
+    CARGO_TOML="$ROOT/cedinia/Cargo.toml"
+    sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" "$CARGO_TOML"
+    trap 'sed -i "s|$PASS|TO_REPLACE_KEYSTORE_PASSWORD|g" "$CARGO_TOML"' EXIT
+    export KEYSTORE_PASSWORD="$PASS"
+    export KEY_PASSWORD="$PASS"
+
+    rm -rf "$ROOT/cedinia/android/app/src/main/jniLibs"
+    rm -f "$ROOT/cedinia.aab"
+    rm -rf "$ROOT/cedinia/android/.gradle"
+    rm -rf "$ROOT/cedinia/android/app/build"
+    rm -rf "$ROOT/cedinia/android/build"
+
+    cargo apk build -p cedinia --lib --release
+    mkdir -p "$ROOT/cedinia/android/app/src/main/jniLibs/arm64-v8a"
+    cp "$ROOT/target/aarch64-linux-android/release/libcedinia.so" "$ROOT/cedinia/android/app/src/main/jniLibs/arm64-v8a/"
+    cd "$ROOT/cedinia/android" && gradle bundleRelease
+    cp "$ROOT/cedinia/android/app/build/outputs/bundle/release/app-release.aab" "$ROOT/cedinia.aab"
+    echo "AAB built: $ROOT/cedinia.aab"
 
 ##################### BENCHMARKS #####################
 
@@ -213,6 +251,7 @@ install:
     cargo install --path krokiet --locked
     cargo install --path czkawka_gui --locked
 
+##################### TRANSLATIONS #####################
 
 prepare_translations_deps:
     @command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh

@@ -19,7 +19,7 @@ impl SimplerSingleMainListModel {
     }
     #[allow(clippy::allow_attributes)]
     #[expect(clippy::print_stdout)]
-    #[allow(dead_code)] // TODO - rust with some version shows this
+    #[allow(dead_code)] // rust with some version shows this
     pub(crate) fn debug_print(&self) {
         println!(
             "SimplerSingleMainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",

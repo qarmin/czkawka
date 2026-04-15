@@ -118,6 +118,11 @@ export component ToolSettings {
                 checked <=> Settings.similar_images_sub_ignore_same_size;
             }
 
+            CheckBoxWrapper {
+                text: Translations.subsettings_images_ignore_same_resolution_text;
+                checked <=> Settings.similar_images_sub_ignore_same_resolution;
+            }
+
             Rectangle {
                 height: 4px;
             }
@@ -188,14 +193,6 @@ export component ToolSettings {
             spacing: 5px;
             padding: 10px;
             SubsettingsHeader { }
-            CheckBoxWrapper {
-                text: Translations.subsettings_videos_ignore_same_size_text;
-                checked <=> Settings.similar_videos_sub_ignore_same_size;
-            }
-
-            Rectangle {
-                height: 0px;
-            }
 
             ComboBoxWrapper {
                 text: Translations.subsettings_videos_crop_detect_text;
@@ -232,6 +229,20 @@ export component ToolSettings {
                 maximum <=> Settings.similar_videos_vid_hash_duration_max;
                 minimum <=> Settings.similar_videos_vid_hash_duration_min;
                 value <=> Settings.similar_videos_vid_hash_duration;
+            }
+
+            Rectangle {
+                height: 4px;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_videos_ignore_same_size_text;
+                checked <=> Settings.similar_videos_sub_ignore_same_size;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_videos_ignore_same_resolution_text;
+                checked <=> Settings.similar_videos_sub_ignore_same_resolution;
             }
 
             Rectangle { }
@@ -347,12 +358,21 @@ export component ToolSettings {
             }
 
             CheckBoxWrapper {
-                text: Translations.subsettings_broken_files_video_text;
-                checked <=> Settings.broken_files_sub_video;
+                text: Translations.subsettings_broken_files_video_ffprobe_text;
+                checked <=> Settings.broken_files_sub_video_ffprobe;
             }
 
             HintText {
-                hint_text: Translations.subsettings_broken_files_video_info_text;
+                hint_text: Translations.subsettings_broken_files_video_ffprobe_info_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_broken_files_video_ffmpeg_text;
+                checked <=> Settings.broken_files_sub_video_ffmpeg;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_broken_files_video_ffmpeg_info_text;
             }
 
             Rectangle { }

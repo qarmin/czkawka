@@ -186,6 +186,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_select_button_text(flk!("select_button").into());
     translation.set_move_button_text(flk!("move_button").into());
     translation.set_delete_button_text(flk!("delete_button").into());
+    translation.set_trash_button_text(flk!("trash_button").into());
     translation.set_save_button_text(flk!("save_button").into());
     translation.set_sort_button_text(flk!("sort_button").into());
     translation.set_rename_button_text(flk!("rename_button").into());
@@ -227,6 +228,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_images_hash_size_text(flk!("subsettings_images_hash_size").into());
     translation.set_subsettings_images_resize_algorithm_text(flk!("subsettings_images_resize_algorithm").into());
     translation.set_subsettings_images_ignore_same_size_text(flk!("subsettings_images_ignore_same_size").into());
+    translation.set_subsettings_images_ignore_same_resolution_text(flk!("subsettings_images_ignore_same_resolution").into());
     translation.set_subsettings_images_max_difference_text(flk!("subsettings_images_max_difference").into());
     translation.set_subsettings_images_duplicates_hash_type_text(flk!("subsettings_images_duplicates_hash_type").into());
     translation.set_subsettings_duplicates_check_method_text(flk!("subsettings_duplicates_check_method").into());
@@ -235,6 +237,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_biggest_files_sub_number_of_files_text(flk!("subsettings_biggest_files_sub_number_of_files").into());
     translation.set_subsettings_videos_max_difference_text(flk!("subsettings_videos_max_difference").into());
     translation.set_subsettings_videos_ignore_same_size_text(flk!("subsettings_videos_ignore_same_size").into());
+    translation.set_subsettings_videos_ignore_same_resolution_text(flk!("subsettings_videos_ignore_same_resolution").into());
     translation.set_subsettings_music_audio_check_type_text(flk!("subsettings_music_audio_check_type").into());
     translation.set_subsettings_music_approximate_comparison_text(flk!("subsettings_music_approximate_comparison").into());
     translation.set_subsettings_music_compared_tags_text(flk!("subsettings_music_compared_tags").into());
@@ -249,11 +252,13 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_music_compare_fingerprints_only_with_similar_titles_text(flk!("subsettings_music_compare_fingerprints_only_with_similar_titles").into());
     translation.set_subsettings_broken_files_type_text(flk!("subsettings_broken_files_type").into());
     translation.set_subsettings_broken_files_audio_text(flk!("subsettings_broken_files_audio").into());
-    translation.set_subsettings_broken_files_video_text(flk!("subsettings_broken_files_video").into());
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
     translation.set_subsettings_broken_files_image_text(flk!("subsettings_broken_files_image").into());
-    translation.set_subsettings_broken_files_video_info_text(flk!("subsettings_broken_files_video_info").into());
+    translation.set_subsettings_broken_files_video_ffprobe_text(flk!("subsettings_broken_files_video_ffprobe").into());
+    translation.set_subsettings_broken_files_video_ffprobe_info_text(flk!("subsettings_broken_files_video_ffprobe_info").into());
+    translation.set_subsettings_broken_files_video_ffmpeg_text(flk!("subsettings_broken_files_video_ffmpeg").into());
+    translation.set_subsettings_broken_files_video_ffmpeg_info_text(flk!("subsettings_broken_files_video_ffmpeg_info").into());
     translation.set_subsettings_bad_names_issues_text(flk!("subsettings_bad_names_issues").into());
     translation.set_subsettings_bad_names_uppercase_extension_text(flk!("subsettings_bad_names_uppercase_extension").into());
     translation.set_subsettings_bad_names_uppercase_extension_hint_text(flk!("subsettings_bad_names_uppercase_extension_hint").into());
@@ -281,6 +286,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_video_optimizer_video_codec_text(flk!("subsettings_video_optimizer_video_codec").into());
     translation.set_subsettings_video_optimizer_excluded_codecs_text(flk!("subsettings_video_optimizer_excluded_codecs").into());
     translation.set_subsettings_video_optimizer_video_quality_text(flk!("subsettings_video_optimizer_video_quality").into());
+    translation.set_subsettings_video_optimizer_hardware_encoder_text(flk!("subsettings_video_optimizer_hardware_encoder").into());
     translation.set_subsettings_video_optimizer_noise_reduction_text(flk!("subsettings_video_optimizer_noise_reduction").into());
     translation.set_subsettings_video_optimizer_noise_reduction_strength_text(flk!("subsettings_video_optimizer_noise_reduction_strength").into());
     translation.set_subsettings_video_optimizer_use_custom_command_text(flk!("subsettings_video_optimizer_use_custom_command").into());
@@ -323,7 +329,6 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_recursive_search_text(flk!("settings_recursive_search").into());
     translation.set_settings_use_cache_text(flk!("settings_use_cache").into());
     translation.set_settings_save_as_json_text(flk!("settings_save_as_json").into());
-    translation.set_settings_move_to_trash_text(flk!("settings_move_to_trash").into());
     translation.set_settings_ignore_other_filesystems_text(flk!("settings_ignore_other_filesystems").into());
     translation.set_settings_thread_number_text(flk!("settings_thread_number").into());
     translation.set_settings_restart_required_text(flk!("settings_restart_required").into());
@@ -372,6 +377,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_move_preserve_folder_checkbox_text(flk!("popup_move_preserve_folder_checkbox").into());
     translation.set_delete_text(flk!("delete").into());
     translation.set_delete_confirmation_text(flk!("rust_delete_confirmation").into());
+    translation.set_trash_text(flk!("trash").into());
+    translation.set_trash_confirmation_text(flk!("rust_trash_confirmation").into());
     translation.set_stopping_scan_text(flk!("stopping_scan").into());
     translation.set_searching_text(flk!("searching").into());
     translation.set_subsettings_videos_crop_detect_text(flk!("subsettings_videos_crop_detect").into());
@@ -391,7 +398,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_log_number_size_text("".into());
     translation.set_settings_video_thumbnails_clear_unused_thumbnails_text(flk!("settings_video_thumbnails_clear_unused_thumbnails").into());
     translation.set_clean_exif_overwrite_files_text(flk!("clean_exif_overwrite_files_text").into());
-    translation.set_subsettings_broken_files_video_info_text(flk!("subsettings_broken_files_video_info").into());
+    translation.set_subsettings_broken_files_video_ffprobe_info_text(flk!("subsettings_broken_files_video_ffprobe_info").into());
+    translation.set_subsettings_broken_files_video_ffmpeg_info_text(flk!("subsettings_broken_files_video_ffmpeg_info").into());
     translation.set_stop_text(flk!("stop_text").into());
     translation.set_settings_cache_header_text(flk!("settings_cache_header_text").into());
     translation.set_settings_clean_cache_button_text(flk!("settings_clean_cache_button_text").into());
@@ -423,6 +431,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_compare_swap_text(flk!("compare_swap_text").into());
     translation.set_compare_info_text(flk!("compare_info_text").into());
     translation.set_compare_diff_text(flk!("compare_diff_text").into());
+    translation.set_compare_split_text(flk!("compare_split_text").into());
+    translation.set_compare_overlay_text(flk!("compare_overlay_text").into());
     translation.set_compare_loading_title_text(flk!("compare_loading_title_text").into());
     translation.set_compare_cancel_text(flk!("compare_cancel_text").into());
     translation.set_compare_resolution_mismatch_text(flk!("compare_resolution_mismatch_text").into());

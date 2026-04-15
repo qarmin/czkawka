@@ -44,3 +44,4 @@ cedinia/docs
 /pyproject.toml
 uv.lock
 i18n
+keystore_pass

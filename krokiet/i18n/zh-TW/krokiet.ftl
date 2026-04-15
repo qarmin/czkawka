@@ -255,7 +255,6 @@ settings_maximum_file_size = 最大:
 settings_recursive_search = 遞迴搜尋
 settings_use_cache = 使用快取
 settings_save_as_json = 同時將快取儲存為 JSON 檔案
-settings_move_to_trash = 移動已刪除的檔案到回收桶
 settings_ignore_other_filesystems = 忽略其它檔案系統（僅限 Linux）
 settings_delete_outdated_cache_entries = 刪除自動過時快取項目
 settings_delete_outdated_cache_entries_hint = 當啟用時，應用程式會在緩存載入期間（每周最多一次）驗證緩存記錄是否仍然指向有效的且未修改的檔案/資料

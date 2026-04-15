@@ -46,12 +46,36 @@ impl SimilarVideos {
 
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
+                self.common_data.text_messages.warnings.extend(warnings);
+
+                let progress_handler = prepare_thread_handler_common(
+                    progress_sender,
+                    CurrentStage::SimilarVideosHidingHardLinks,
+                    grouped_file_entries.len(),
+                    self.get_test_type(),
+                    0,
+                );
+                let hide_hard_links = self.get_hide_hard_links();
                 self.videos_to_check = grouped_file_entries
                     .into_par_iter()
-                    .flat_map(if self.get_hide_hard_links() { |(_, fes)| fes } else { take_1_per_inode })
+                    .map(|(inode, fes)| {
+                        if check_if_stop_received(stop_flag) {
+                            return None;
+                        }
+                        progress_handler.increase_items(1);
+                        Some((inode, fes))
+                    })
+                    .while_some()
+                    .flat_map(if hide_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| (fe.path.to_string_lossy().to_string(), fe.into_videos_entry()))
                     .collect();
-                self.common_data.text_messages.warnings.extend(warnings);
+
+                progress_handler.join_thread();
+
+                if check_if_stop_received(stop_flag) {
+                    return WorkContinueStatus::Stop;
+                }
+
                 debug!("check_files - Found {} video files.", self.videos_to_check.len());
                 WorkContinueStatus::Continue
             }
@@ -284,19 +308,25 @@ impl SimilarVideos {
         // We need to allow to set value in range 0 - 0.5
         let match_group = vid_dup_finder_lib::search(vector_of_hashes, self.get_params().tolerance as f64 / 40.0f64);
 
+        let exclude_same_size = self.get_params().exclude_videos_with_same_size;
+        let exclude_same_resolution = self.get_params().exclude_videos_with_same_resolution;
         let mut collected_similar_videos: Vec<Vec<VideosEntry>> = Default::default();
         for i in match_group {
             let mut temp_vector: Vec<VideosEntry> = Vec::new();
             let mut bt_size: BTreeSet<u64> = Default::default();
+            let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
             for j in i.duplicates() {
                 let file_entry = &hashmap_with_file_entries[&j.to_string_lossy().to_string()];
-                if self.get_params().exclude_videos_with_same_size {
-                    if bt_size.insert(file_entry.size) {
-                        temp_vector.push(file_entry.clone());
-                    }
-                } else {
-                    temp_vector.push(file_entry.clone());
+                if exclude_same_size && !bt_size.insert(file_entry.size) {
+                    continue;
                 }
+                if exclude_same_resolution
+                    && let (Some(w), Some(h)) = (file_entry.width, file_entry.height)
+                    && !bt_resolution.insert((w, h))
+                {
+                    continue;
+                }
+                temp_vector.push(file_entry.clone());
             }
             if temp_vector.len() > 1 {
                 collected_similar_videos.push(temp_vector);

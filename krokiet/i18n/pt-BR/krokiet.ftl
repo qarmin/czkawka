@@ -253,7 +253,6 @@ settings_maximum_file_size = Máximo:
 settings_recursive_search = Pesquisa recursiva
 settings_use_cache = Utilizar o ‘cache’
 settings_save_as_json = Salvar o ‘cache’ como um arquivo JSON
-settings_move_to_trash = Excluir permanentemente os arquivos que foram movidos para a lixeira
 settings_ignore_other_filesystems = Ignorar os outros sistemas de arquivos (somente para o GNU/Linux)
 settings_delete_outdated_cache_entries = Excluir automaticamente as entradas que estão desatualizadas no ‘cache’
 settings_delete_outdated_cache_entries_hint = Quando esta opção está ativada, o programa verificará durante o carregamento do ‘cache’ (no máximo uma vez por semana) se os registros que estão no ‘cache’ ainda apontam para arquivos/dados que ainda existem e não foram modificados

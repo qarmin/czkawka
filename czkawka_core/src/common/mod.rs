@@ -76,7 +76,7 @@ pub fn get_all_available_threads() -> usize {
     if let Some(available_threads) = *available_threads {
         available_threads
     } else {
-        let threads = thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1);
+        let threads = thread::available_parallelism().map_or(1, std::num::NonZeroUsize::get);
         *available_threads = Some(threads);
         threads
     }
@@ -88,7 +88,7 @@ pub fn set_number_of_threads(thread_number: usize) {
     let additional_message = if thread_number == 0 {
         format!(
             " (0 - means that all available threads will be used({}))",
-            thread::available_parallelism().map(std::num::NonZeroUsize::get).unwrap_or(1)
+            thread::available_parallelism().map_or(1, std::num::NonZeroUsize::get)
         )
     } else {
         "".to_string()

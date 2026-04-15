@@ -56,6 +56,100 @@ impl std::str::FromStr for VideoCodec {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Default)]
+pub enum HardwareEncoder {
+    #[default]
+    None,
+    Nvenc,
+    Vaapi,
+    Qsv,
+    VideoToolbox,
+    Amf,
+}
+
+impl HardwareEncoder {
+    pub const fn as_config_name(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::Nvenc => "nvenc",
+            Self::Vaapi => "vaapi",
+            Self::Qsv => "qsv",
+            Self::VideoToolbox => "videotoolbox",
+            Self::Amf => "amf",
+        }
+    }
+
+    pub const fn as_display_name(self) -> &'static str {
+        match self {
+            Self::None => "None",
+            Self::Nvenc => "NVENC",
+            Self::Vaapi => "VAAPI",
+            Self::Qsv => "QSV",
+            Self::VideoToolbox => "VideoToolbox",
+            Self::Amf => "AMF",
+        }
+    }
+
+    pub const fn all_non_none() -> &'static [Self] {
+        &[Self::Nvenc, Self::Vaapi, Self::Qsv, Self::VideoToolbox, Self::Amf]
+    }
+
+    /// Returns encoder-specific quality arguments for the given quality value.
+    ///
+    /// Each hardware encoder family uses a different rate-control mechanism:
+    /// - NVENC: VBR with a constant quality target (`-rc:v vbr -cq:v`)
+    /// - VAAPI / QSV: Intelligent Constant Quality (`-global_quality`)
+    /// - VideoToolbox: quality scale 1-100 (`-q:v`)
+    /// - AMF: constant QP for I- and P-frames (`-rc cqp -qp_i -qp_p`)
+    pub fn quality_args(self, quality: u32) -> Vec<String> {
+        let q = quality.to_string();
+        match self {
+            Self::None => vec!["-crf".into(), q],
+            Self::Nvenc => vec!["-rc:v".into(), "vbr".into(), "-cq:v".into(), q],
+            Self::Vaapi | Self::Qsv => vec!["-global_quality".into(), q],
+            Self::VideoToolbox => vec!["-q:v".into(), q],
+            Self::Amf => vec!["-rc".into(), "cqp".into(), "-qp_i".into(), quality.to_string(), "-qp_p".into(), quality.to_string()],
+        }
+    }
+
+    /// Returns the ffmpeg hardware encoder name for the given codec, or None if unsupported.
+    pub const fn encoder_name_for_codec(self, codec: VideoCodec) -> Option<&'static str> {
+        match (self, codec) {
+            (Self::Nvenc, VideoCodec::H264) => Some("h264_nvenc"),
+            (Self::Nvenc, VideoCodec::H265) => Some("hevc_nvenc"),
+            (Self::Nvenc, VideoCodec::Av1) => Some("av1_nvenc"),
+            (Self::Vaapi, VideoCodec::H264) => Some("h264_vaapi"),
+            (Self::Vaapi, VideoCodec::H265) => Some("hevc_vaapi"),
+            (Self::Qsv, VideoCodec::H264) => Some("h264_qsv"),
+            (Self::Qsv, VideoCodec::H265) => Some("hevc_qsv"),
+            (Self::Qsv, VideoCodec::Av1) => Some("av1_qsv"),
+            (Self::VideoToolbox, VideoCodec::H264) => Some("h264_videotoolbox"),
+            (Self::VideoToolbox, VideoCodec::H265) => Some("hevc_videotoolbox"),
+            (Self::Amf, VideoCodec::H264) => Some("h264_amf"),
+            (Self::Amf, VideoCodec::H265) => Some("hevc_amf"),
+            (Self::Amf, VideoCodec::Av1) => Some("av1_amf"),
+            // VP9 has no widely available hardware encoders; AV1+VideoToolbox not supported
+            _ => None,
+        }
+    }
+}
+
+impl std::str::FromStr for HardwareEncoder {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "none" => Ok(Self::None),
+            "nvenc" => Ok(Self::Nvenc),
+            "vaapi" => Ok(Self::Vaapi),
+            "qsv" => Ok(Self::Qsv),
+            "videotoolbox" => Ok(Self::VideoToolbox),
+            "amf" => Ok(Self::Amf),
+            _ => Err(format!("Unknown hardware encoder: {s}")),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, PartialEq)]
 pub enum NoiseReductionMethod {
     #[default]
@@ -124,6 +218,7 @@ pub enum VideoOptimizerFixParams {
 #[derive(Clone, PartialEq, Debug)]
 pub struct VideoTranscodeFixParams {
     pub codec: VideoCodec,
+    pub hardware_encoder: HardwareEncoder,
     pub quality: u32,
     pub fail_if_not_smaller: bool,
     pub overwrite_original: bool,

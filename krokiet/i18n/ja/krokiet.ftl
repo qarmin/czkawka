@@ -259,7 +259,6 @@ settings_maximum_file_size = 最大：
 settings_recursive_search = 再帰的な検索
 settings_use_cache = キャッシュを使用
 settings_save_as_json = また、キャッシュをJSONファイルとして保存
-settings_move_to_trash = 削除したファイルをゴミ箱に移動する
 settings_ignore_other_filesystems = 他のファイルシステムを無視（Linuxのみ）
 settings_delete_outdated_cache_entries = 自動的に古いキャッシュエントリを削除する
 settings_delete_outdated_cache_entries_hint = 有効になっている場合、アプリはキャッシュの読み込み中に（1週間に最大1回まで）キャッシュされたレコードが既存で変更されていないファイル/データにまだ参照しているかどうかを確認します。

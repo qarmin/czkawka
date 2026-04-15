@@ -28,7 +28,8 @@ use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
 use czkawka_core::tools::video_optimizer::{
-    VideoCropFixParams, VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeFixParams, VideoTranscodeParams,
+    HardwareEncoder, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeFixParams,
+    VideoTranscodeParams,
 };
 use log::{debug, error, info};
 
@@ -223,9 +224,17 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         delete_method,
         allow_hard_links,
         ignore_same_size,
+        ignore_same_resolution,
     } = similar_images;
 
-    let params = SimilarImagesParameters::new(max_difference, hash_size, hash_alg, image_filter, ignore_same_size.ignore_same_size);
+    let params = SimilarImagesParameters::new(
+        max_difference,
+        hash_size,
+        hash_alg,
+        image_filter,
+        ignore_same_size.ignore_same_size,
+        ignore_same_resolution.ignore_same_resolution,
+    );
     let mut tool = SimilarImages::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, Some(reference_directories.reference_directories.as_ref()));
@@ -327,6 +336,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
     let params = SimilarVideosParameters::new(
         tolerance,
         ignore_same_size.ignore_same_size,
+        false, // TODO - add exclude same resolution
         skip_forward_amount,
         scan_duration,
         crop_detect,
@@ -466,6 +476,7 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
                     noise_reduction,
                     noise_reduction_strength,
                     custom_ffmpeg_command,
+                    hardware_encoder: HardwareEncoder::None, // TODO  - missing hardware encoder
                 });
                 tool.fix_items(stop_flag, Some(progress_sender), fix_params);
             }

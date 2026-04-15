@@ -157,6 +157,9 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
         CurrentStage::DuplicateFullHashing => {
             label_stage.set_text(&flg!("progress_analyzed_full_hash", progress_ratio_tm(item)));
         }
+        CurrentStage::DuplicateHidingHardLinks | CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarVideosHidingHardLinks => {
+            label_stage.set_text(&flg!("progress_hiding_hard_link", progress_ratio_tm(item)));
+        }
         _ => unreachable!("Invalid stage {:?}", item.sstage),
     }
 }

@@ -84,6 +84,7 @@ impl FileEntry {
 pub struct SimilarVideosParameters {
     pub tolerance: i32,
     pub exclude_videos_with_same_size: bool,
+    pub exclude_videos_with_same_resolution: bool,
     pub skip_forward_amount: u32,
     pub duration: u32,
     pub crop_detect: Cropdetect,
@@ -106,6 +107,7 @@ impl SimilarVideosParameters {
     pub fn new(
         tolerance: i32,
         exclude_videos_with_same_size: bool,
+        exclude_videos_with_same_resolution: bool,
         skip_forward_amount: u32,
         duration: u32,
         crop_detect: Cropdetect,
@@ -120,6 +122,7 @@ impl SimilarVideosParameters {
         Self {
             tolerance,
             exclude_videos_with_same_size,
+            exclude_videos_with_same_resolution,
             skip_forward_amount,
             duration,
             crop_detect,

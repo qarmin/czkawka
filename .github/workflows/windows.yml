@@ -217,7 +217,14 @@ jobs:
           mv libEGL.dll package/
           mv libGLESv2.dll package/
 
-          cp windows_krokiet_on_windows_skia_opengl.exe package/krokiet.exe
+          cp windows_krokiet_on_windows_all_backends.exe package/krokiet.exe
+
+          # krokiet SLINT_BACKEND launcher scripts
+          printf '@echo off\r\nset SLINT_BACKEND=winit-femtovg\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_winit_femtovg.bat
+          printf '@echo off\r\nset SLINT_BACKEND=winit-skia-opengl\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_winit_skia_opengl.bat
+          printf '@echo off\r\nset SLINT_BACKEND=winit-skia-vulkan\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_winit_skia_vulkan.bat
+          printf '@echo off\r\nset SLINT_BACKEND=winit-software\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_winit_software.bat
+          printf '@echo off\r\nset SLINT_BACKEND=femtovg-wgpu\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_femtovg_wgpu.bat
 
           {
             echo '# Czkawka'
@@ -231,6 +238,14 @@ jobs:
             echo ''
             echo 'More information: https://github.com/qarmin/czkawka'
           } > package/README.md
+          echo "Really use Krokiet" > package/USE_KROKIET_INSTEAD_CZKAWKA_GTK.txt
+          echo "I'm not joking, just use Krokiet" > package/USE_KROKIET_JUST_USE_IT.txt
+          echo "Seriously, Czkawka GUI is deprecated, use Krokiet" > package/USE_KROKIET_SERIOUSLY.txt
+
+          # czkawka_gui renderer launcher scripts (GSK_RENDERER)
+          printf '@echo off\r\nset GSK_RENDERER=cairo\r\n"%%~dp0czkawka_gui.exe" %%*\r\n' > package/czkawka_gui_cairo_renderer.bat
+          printf '@echo off\r\nset GSK_RENDERER=opengl\r\n"%%~dp0czkawka_gui.exe" %%*\r\n' > package/czkawka_gui_opengl_renderer.bat
+          printf '@echo off\r\nset GSK_RENDERER=vulkan\r\n"%%~dp0czkawka_gui.exe" %%*\r\n' > package/czkawka_gui_vulkan_renderer.bat
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6

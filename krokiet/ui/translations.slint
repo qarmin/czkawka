@@ -13,6 +13,7 @@ export global Translations {
     in-out property <string> select_button_text: "Select";
     in-out property <string> move_button_text: "Move";
     in-out property <string> delete_button_text: "Delete";
+    in-out property <string> trash_button_text: "Trash";
     in-out property <string> save_button_text: "Save";
     in-out property <string> sort_button_text: "Sort";
     in-out property <string> rename_button_text: "Rename";
@@ -79,6 +80,7 @@ export global Translations {
     in-out property <string> subsettings_images_hash_size_text: "Hash Size";
     in-out property <string> subsettings_images_resize_algorithm_text: "Resize Algorithm";
     in-out property <string> subsettings_images_ignore_same_size_text: "Ignore images with same size";
+    in-out property <string> subsettings_images_ignore_same_resolution_text: "Ignore images with same resolution";
     in-out property <string> subsettings_images_max_difference_text: "Max difference";
 
     in-out property <string> subsettings_images_duplicates_hash_type_text: "Hash Type";
@@ -91,6 +93,7 @@ export global Translations {
 
     in-out property <string> subsettings_videos_max_difference_text: "Max difference";
     in-out property <string> subsettings_videos_ignore_same_size_text: "Ignore videos with same size";
+    in-out property <string> subsettings_videos_ignore_same_resolution_text: "Ignore videos with same resolution";
     in-out property <string> subsettings_videos_skip_forward_amount_text: "Skip duration [s]";
     in-out property <string> subsettings_videos_vid_hash_duration_text: "Video hash duration";
     in-out property <string> subsettings_videos_crop_detect_text: "Crop detect method";
@@ -112,8 +115,10 @@ export global Translations {
     in-out property <string> subsettings_broken_files_pdf_text: "Pdf";
     in-out property <string> subsettings_broken_files_archive_text: "Archive";
     in-out property <string> subsettings_broken_files_image_text: "Image";
-    in-out property <string> subsettings_broken_files_video_text: "Video";
-    in-out property <string> subsettings_broken_files_video_info_text: "Uses ffmpeg/ffprobe. Quite slow and may detect pedantic errors even if file plays fine.";
+    in-out property <string> subsettings_broken_files_video_ffprobe_text: "Video (ffprobe)";
+    in-out property <string> subsettings_broken_files_video_ffprobe_info_text: "Quick video check using ffprobe (header validation).";
+    in-out property <string> subsettings_broken_files_video_ffmpeg_text: "Video (ffmpeg)";
+    in-out property <string> subsettings_broken_files_video_ffmpeg_info_text: "Deep video check using ffmpeg (full decode). Very slow and may detect pedantic errors even if file plays fine.";
 
     in-out property <string> subsettings_bad_names_issues_text: "Filename checks";
     in-out property <string> subsettings_bad_names_uppercase_extension_text: "Uppercase extension";
@@ -131,6 +136,7 @@ export global Translations {
     in-out property <string> subsettings_bad_names_remove_duplicated_hint_text: "Finds consecutive duplicated non-alphanumeric characters";
 
     in-out property <string> subsettings_video_optimizer_mode_text: "Mode";
+    in-out property <string> subsettings_video_optimizer_hardware_encoder_text: "Hardware Encoder";
     in-out property <string> subsettings_video_optimizer_crop_type_text: "Crop Type";
     in-out property <string> subsettings_video_optimizer_black_pixel_threshold_text: "Black Pixel Threshold";
     in-out property <string> subsettings_video_optimizer_black_pixel_threshold_hint_text: "Maximum RGB value for each pixel channel to be considered black (0-128). Default: 20";
@@ -164,7 +170,6 @@ export global Translations {
     in-out property <string> settings_recursive_search_text: "Recursive search";
     in-out property <string> settings_use_cache_text: "Use cache";
     in-out property <string> settings_save_as_json_text: "Also save cache as JSON file";
-    in-out property <string> settings_move_to_trash_text: "Move deleted files to trash";
     in-out property <string> settings_ignore_other_filesystems_text: "Ignore other filesystems (only Linux)";
     in-out property <string> settings_delete_outdated_cache_entries_text: "Delete automatically outdated cache entries";
     in-out property <string> settings_delete_outdated_cache_entries_hint_text: "When enabled, the app will verify during cache loading (at most once per week) whether the cached records still point to existing and unmodified files/data";
@@ -261,6 +266,10 @@ export global Translations {
     in-out property <string> delete_text: "Delete items";
     in-out property <string> delete_confirmation_text: "Are you sure you want to delete the selected items?";
 
+    // Popup trash
+    in-out property <string> trash_text: "Move items to trash";
+    in-out property <string> trash_confirmation_text: "Are you sure you want to move the selected items to trash?";
+
     // Popup clean
     in-out property <string> clean_text: "Clean EXIF data";
     in-out property <string> clean_confirmation_text: "Are you sure you want to remove EXIF data from the selected items?";
@@ -312,6 +321,8 @@ export global Translations {
     in-out property <string> compare_swap_text: "Swap";
     in-out property <string> compare_info_text: "Info";
     in-out property <string> compare_diff_text: "Diff";
+    in-out property <string> compare_split_text: "Split";
+    in-out property <string> compare_overlay_text: "Overlay";
     in-out property <string> compare_loading_title_text: "Please wait...";
     in-out property <string> compare_cancel_text: "Cancel";
     in-out property <string> compare_resolution_mismatch_text: "Different resolutions - diff results may be inaccurate";

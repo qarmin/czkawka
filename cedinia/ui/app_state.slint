@@ -52,6 +52,7 @@ export global SimilarImagesSettings {
     in-out property <[string]> image_filter_options:  ["Nearest", "Triangle", "CatmullRom", "Gaussian", "Lanczos3"];
 
     in-out property <bool>   ignore_same_size:        false;
+    in-out property <bool>   ignore_same_resolution:  false;
     in-out property <bool>   gallery_image_fit_cover: true;
 }
 
@@ -94,7 +95,7 @@ export global BigFilesSettings {
 
     in-out property <int>    count_idx:         1;
     in-out property <string> count_value:       "100";
-    in-out property <[string]> count_options:   ["10", "100"];
+    in-out property <[string]> count_options:   ["10", "100", "1000", "10000"];
 }
 
 
@@ -192,18 +193,6 @@ export global AppState {
     in-out property <bool> collect_test_cancelled: false;
 
     in-out property <bool> similar_images_gallery_mode: true;
-
-    in-out property <length> gallery_scroll_y:     0px;
-    in-out property <float>  gallery_max_scroll_f: 0.0;
-    // total_delta: full swipe displacement (px)  vel: EMA velocity at release (px per touch-event)
-    callback gallery_swiped(float, float);
-    callback gallery_stop_momentum();
-
-    // Scroll state for the regular (list) result views.
-    in-out property <length> list_scroll_y:     0px;
-    in-out property <float>  list_max_scroll_f: 0.0;
-    callback list_swiped(float, float);
-    callback list_stop_momentum();
 
 
     in-out property <string> diag_thumbnails_size: "-";

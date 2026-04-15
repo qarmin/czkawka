@@ -43,7 +43,7 @@ fn test_find_broken_image() {
 
     let broken_files = finder.get_broken_files();
     assert_eq!(broken_files.len(), 1, "Should find 1 broken image file");
-    assert!(!broken_files[0].error_string.is_empty(), "Error string should not be empty");
+    assert!(broken_files[0].has_errors(), "Errors should not be empty");
 }
 
 #[test]
@@ -92,7 +92,7 @@ fn test_broken_audio() {
 
     let broken_files = finder.get_broken_files();
     assert_eq!(broken_files.len(), 1, "Should find 1 broken audio file");
-    assert!(!broken_files[0].error_string.is_empty(), "Error string should not be empty");
+    assert!(broken_files[0].has_errors(), "Errors should not be empty");
 }
 
 #[test]

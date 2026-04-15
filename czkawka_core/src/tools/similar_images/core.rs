@@ -50,9 +50,27 @@ impl SimilarImages {
 
         match result {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
+                self.common_data.text_messages.warnings.extend(warnings);
+
+                let progress_handler = prepare_thread_handler_common(
+                    progress_sender,
+                    CurrentStage::SimilarImagesHidingHardLinks,
+                    grouped_file_entries.len(),
+                    self.get_test_type(),
+                    0,
+                );
+                let hide_hard_links = self.get_hide_hard_links();
                 self.images_to_check = grouped_file_entries
                     .into_par_iter()
-                    .flat_map(if self.get_hide_hard_links() { |(_, fes)| fes } else { take_1_per_inode })
+                    .map(|(inode, fes)| {
+                        if check_if_stop_received(stop_flag) {
+                            return None;
+                        }
+                        progress_handler.increase_items(1);
+                        Some((inode, fes))
+                    })
+                    .while_some()
+                    .flat_map(if hide_hard_links { |(_, fes)| fes } else { take_1_per_inode })
                     .map(|fe| {
                         let fe_str = fe.path.to_string_lossy().to_string();
                         let image_entry = fe.into_images_entry();
@@ -61,9 +79,14 @@ impl SimilarImages {
                     })
                     .collect();
 
+                progress_handler.join_thread();
+
+                if check_if_stop_received(stop_flag) {
+                    return WorkContinueStatus::Stop;
+                }
+
                 self.information.initial_found_files = self.images_to_check.len();
 
-                self.common_data.text_messages.warnings.extend(warnings);
                 debug!("check_files - Found {} image files.", self.images_to_check.len());
                 WorkContinueStatus::Continue
             }
@@ -437,6 +460,7 @@ impl SimilarImages {
         self.similar_vectors = collected_similar_images.into_values().collect();
 
         self.exclude_items_with_same_size();
+        self.exclude_items_with_same_resolution();
 
         self.remove_multiple_records_from_reference_folders();
 
@@ -468,6 +492,24 @@ impl SimilarImages {
                 let mut vec_values = Vec::new();
                 for file_entry in vec_file_entry {
                     if bt_sizes.insert(file_entry.size) {
+                        vec_values.push(file_entry);
+                    }
+                }
+                if vec_values.len() > 1 {
+                    self.similar_vectors.push(vec_values);
+                }
+            }
+        }
+    }
+
+    #[fun_time(message = "exclude_items_with_same_resolution", level = "debug")]
+    fn exclude_items_with_same_resolution(&mut self) {
+        if self.get_params().exclude_images_with_same_resolution {
+            for vec_file_entry in mem::take(&mut self.similar_vectors) {
+                let mut bt_resolutions: BTreeSet<(u32, u32)> = Default::default();
+                let mut vec_values = Vec::new();
+                for file_entry in vec_file_entry {
+                    if bt_resolutions.insert((file_entry.width, file_entry.height)) {
                         vec_values.push(file_entry);
                     }
                 }
@@ -701,6 +743,7 @@ mod tests {
             max_difference: 0,
             image_filter: FilterType::Lanczos3,
             exclude_images_with_same_size: false,
+            exclude_images_with_same_resolution: false,
         }
     }
 
@@ -1031,7 +1074,7 @@ mod tests {
             assert_eq!(res[0].1.len(), 1);
             assert_eq!(res[1].1.len(), 1);
             #[allow(clippy::allow_attributes)]
-            #[allow(clippy::cmp_owned)] // TODO Bug in nightly
+            #[allow(clippy::cmp_owned)] // Bug in nightly versions of clippy
             if res[0].1[0].path == PathBuf::from("/home/kk/bcd.txt") {
                 assert_eq!(res[0].0.path, PathBuf::from("/home/rr/abc.txt"));
                 assert_eq!(res[1].0.path, PathBuf::from("/home/rr/krkr.txt"));
@@ -1146,7 +1189,7 @@ mod connect_results_tests {
 
     #[test]
     fn test_connect_results_real_case() {
-        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false);
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false);
         let _finder = SimilarImages::new(params);
 
         let hash1: ImHash = vec![59, 41, 53, 27, 19, 143, 228, 228];

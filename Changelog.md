@@ -1,3 +1,36 @@
+## Version ? - ??.??.????r 
+### Core
+- Switched AV1 encoding from the very slow `libaom-av1` to `libsvtav1` - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
+- Added a noise reduction option to Video Optimizer mode, which can significantly reduce file size for noisy videos - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
+- Added support for custom optimization commands in Video Optimizer mode - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
+- Added experimental hardware-accelerated video encoding - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Broken files now allows to check file with multiple different checkers - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Checking for broken videos was split into fast(ffprobe - only headers) and slow(ffmpeg - full decoding) checks - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Added ability to stop ignoring hardlinks search and added progress tracking for this operation - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Added ability to exclude images/videos with the same resolution - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+
+### CLI
+
+### GTK GUI
+- Fixed a crash when using the sort button - [#1837](https://github.com/qarmin/czkawka/pull/1837)  
+
+### Krokiet
+- Added separate buttons for moving files to trash and permanently deleting them - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Added a new custom selection popup - [#1809](https://github.com/qarmin/czkawka/pull/1809)  
+- Added an image comparison tool to detect visual differences between similar images - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
+- Added a context menu (right-click) - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
+- File/folder selection dialogs no longer block the main thread - [#1809](https://github.com/qarmin/czkawka/pull/1809)  
+- Fixed an issue where thumbnail generation settings were not respected in Similar Videos mode - [#1809](https://github.com/qarmin/czkawka/pull/1809)  
+- Added notification support - [#1837](https://github.com/qarmin/czkawka/pull/1837)  
+- Femtovg backend no longer have blurry fonts - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+
+### Cedinia
+- Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)  
+
+### Prebuilt binaries
+- Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d` installed on the system)  
+- Windows ZIP package now includes Krokiet binaries and a README to simplify migration to the new frontend
+
 ## Version 11.0.1 - 20.02.2026r
 ### Core
 - Fixed issue with excluded folders not working on Windows - [#1808](https://github.com/qarmin/czkawka/pull/1808)

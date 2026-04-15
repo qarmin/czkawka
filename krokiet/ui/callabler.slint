@@ -36,6 +36,7 @@ export global Callabler {
     callback open_parent(string);
 
     callback delete_selected_items();
+    callback trash_selected_items();
     callback select_items(SelectMode);
     callback populate_custom_select_columns(); // Rust fills GuiState.custom_select_columns for active tab
     callback update_custom_select_column(int, bool, string); // col_idx, enabled, filter_value

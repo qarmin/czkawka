@@ -276,6 +276,8 @@ pub struct SimilarImagesArgs {
     pub allow_hard_links: AllowHardLinks,
     #[clap(flatten)]
     pub ignore_same_size: IgnoreSameSize,
+    #[clap(flatten)]
+    pub ignore_same_resolution: IgnoreSameResolution,
     #[clap(
         short = 'g',
         long,
@@ -431,8 +433,8 @@ pub struct BrokenFilesArgs {
         long,
         default_value = "PDF",
         value_parser = parse_broken_files,
-        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE, VIDEO)",
-        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files,\nVIDEO - finds broken video files"
+        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE, VIDEO_FFPROBE, VIDEO_FFMPEG)",
+        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files,\nVIDEO_FFPROBE - quick video check using ffprobe (header validation),\nVIDEO_FFMPEG - deep video check using ffmpeg (full decode)"
     )]
     pub checked_types: Vec<CheckedTypes>,
 }
@@ -1018,6 +1020,17 @@ pub struct IgnoreSameSize {
     pub ignore_same_size: bool,
 }
 
+#[derive(Debug, clap::Args)]
+pub struct IgnoreSameResolution {
+    #[clap(
+        short = 'Z',
+        long,
+        help = "Ignore images with same resolution",
+        long_help = "Skips images that have identical resolution (width x height), keeping only one image per resolution group."
+    )]
+    pub ignore_same_resolution: bool,
+}
+
 impl FileToSave {
     pub(crate) fn file_name(&self) -> Option<&str> {
         if let Some(file_name) = &self.file_to_save {
@@ -1116,8 +1129,9 @@ fn parse_broken_files(src: &str) -> Result<CheckedTypes, &'static str> {
         "audio" => Ok(CheckedTypes::AUDIO),
         "image" => Ok(CheckedTypes::IMAGE),
         "archive" => Ok(CheckedTypes::ARCHIVE),
-        "video" => Ok(CheckedTypes::VIDEO),
-        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE, VIDEO)"),
+        "video_ffprobe" => Ok(CheckedTypes::VIDEO_FFPROBE),
+        "video_ffmpeg" => Ok(CheckedTypes::VIDEO_FFMPEG),
+        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE, VIDEO_FFPROBE, VIDEO_FFMPEG)"),
     }
 }
 

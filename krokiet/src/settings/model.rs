@@ -59,8 +59,6 @@ pub struct SettingsCustom {
     pub use_cache: bool,
     #[serde(default)]
     pub save_also_as_json: bool,
-    #[serde(default = "ttrue")]
-    pub move_deleted_files_to_trash: bool,
     #[serde(default)]
     pub ignore_other_file_systems: bool,
     #[serde(default)]
@@ -91,6 +89,8 @@ pub struct SettingsCustom {
     pub similar_images_sub_resize_algorithm: String,
     #[serde(default)]
     pub similar_images_sub_ignore_same_size: bool,
+    #[serde(default)]
+    pub similar_images_sub_ignore_same_resolution: bool,
     #[serde(default = "default_image_similarity")]
     pub similar_images_sub_similarity: i32,
     #[serde(default = "default_duplicates_check_method")]
@@ -105,6 +105,8 @@ pub struct SettingsCustom {
     pub biggest_files_sub_number_of_files: i32,
     #[serde(default)]
     pub similar_videos_sub_ignore_same_size: bool,
+    #[serde(default)]
+    pub similar_videos_sub_ignore_same_resolution: bool,
     #[serde(default = "default_video_similarity")]
     pub similar_videos_sub_similarity: i32,
     #[serde(default = "default_audio_check_type")]
@@ -138,7 +140,9 @@ pub struct SettingsCustom {
     #[serde(default = "ttrue")]
     pub broken_files_sub_image: bool,
     #[serde(default)]
-    pub broken_files_sub_video: bool,
+    pub broken_files_sub_video_ffprobe: bool,
+    #[serde(default)]
+    pub broken_files_sub_video_ffmpeg: bool,
     #[serde(default = "ttrue")]
     pub bad_names_sub_uppercase_extension: bool,
     #[serde(default = "ttrue")]
@@ -205,6 +209,8 @@ pub struct SettingsCustom {
     pub video_optimizer_use_custom_command: bool,
     #[serde(default)]
     pub video_optimizer_custom_command: String,
+    #[serde(default = "default_video_optimizer_hardware_encoder")]
+    pub video_optimizer_hardware_encoder: String,
     #[serde(default = "default_ignored_exif_tags")]
     pub ignored_exif_tags: String,
     #[serde(default)]
@@ -461,4 +467,7 @@ pub(crate) fn default_use_manual_application_scale() -> bool {
 }
 pub(crate) fn default_ignored_exif_tags() -> String {
     "Orientation".to_string()
+}
+pub(crate) fn default_video_optimizer_hardware_encoder() -> String {
+    "none".to_string()
 }

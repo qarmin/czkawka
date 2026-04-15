@@ -257,7 +257,6 @@ settings_maximum_file_size = Maks:
 settings_recursive_search = Pencarian rekursif
 settings_use_cache = Gunakan *cache*
 settings_save_as_json = Simpan juga cache sebagai file JSON
-settings_move_to_trash = Pindahkan file yang dihapus ke tempat sampah
 settings_ignore_other_filesystems = Abaikan sistem berkas lainnya (hanya untuk Linux)
 settings_delete_outdated_cache_entries = Hapus secara otomatis entri cache yang sudah kedaluwarsa
 settings_delete_outdated_cache_entries_hint = Saat diaktifkan, aplikasi akan memverifikasi (paling banyak sekali seminggu) apakah data yang disimpan dalam cache masih mengarah ke file/data yang ada dan belum dimodifikasi, saat proses pemuatan cache berlangsung

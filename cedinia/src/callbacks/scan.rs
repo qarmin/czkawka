@@ -155,6 +155,7 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, re
                 hash_alg: StringComboBoxItems::value_from_idx(&items.hash_alg, s.get_hash_alg_idx(), HashAlg::Mean),
                 image_filter: StringComboBoxItems::value_from_idx(&items.image_filter, s.get_image_filter_idx(), FilterType::Triangle),
                 ignore_same_size: s.get_ignore_same_size(),
+                ignore_same_resolution: s.get_ignore_same_resolution(),
                 filters,
             }
         }

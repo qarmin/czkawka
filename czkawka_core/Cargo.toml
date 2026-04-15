@@ -30,7 +30,7 @@ fast_image_resize = { version = "6.0.0", features = ["image"] }
 
 # Needed by same music
 bitflags = "2.6"
-lofty = "0.23"
+lofty = "0.24"
 
 # Needed by broken files
 zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
