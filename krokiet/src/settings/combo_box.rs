@@ -35,6 +35,9 @@ pub struct StringComboBoxItems {
     pub video_optimizer_mode: Vec<StringComboBoxItem<VideoOptimizerMode>>,
     pub video_optimizer_video_codec: Vec<StringComboBoxItem<VideoCodec>>,
     pub video_optimizer_noise_reduction: Vec<StringComboBoxItem<NoiseReductionMethod>>,
+    pub similar_videos_engine: Vec<StringComboBoxItem<String>>,
+    pub similar_videos_perceptual_preset: Vec<StringComboBoxItem<String>>,
+    pub similar_videos_audio_preset: Vec<StringComboBoxItem<String>>,
 }
 
 pub static STRING_COMBO_BOX_ITEMS: std::sync::LazyLock<Arc<Mutex<StringComboBoxItems>>> = std::sync::LazyLock::new(|| {
@@ -129,6 +132,26 @@ impl StringComboBoxItems {
         let video_optimizer_noise_reduction =
             Self::convert_to_combobox_items(&[("none", "None", NoiseReductionMethod::None), ("hqdn3d", "hqdn3d (fast)", NoiseReductionMethod::Hqdn3d)]);
 
+        let similar_videos_engine = Self::convert_string_to_combobox_items(&[
+            ("vid_dup_finder", "VidDupFinder"),
+            ("perceptual", "Perceptual"),
+            ("audio", "Audio"),
+        ]);
+
+        let similar_videos_perceptual_preset = Self::convert_string_to_combobox_items(&[
+            ("fastest", "Fastest"),
+            ("fast", "Fast"),
+            ("balanced", "Balanced"),
+            ("thorough", "Thorough"),
+            ("maximum", "Maximum"),
+        ]);
+
+        let similar_videos_audio_preset = Self::convert_string_to_combobox_items(&[
+            ("full", "Full"),
+            ("fast2min", "Fast 2 Min"),
+            ("skipintros", "Skip Intros"),
+        ]);
+
         Self {
             languages,
             hash_size,
@@ -143,6 +166,9 @@ impl StringComboBoxItems {
             video_optimizer_mode,
             video_optimizer_video_codec,
             video_optimizer_noise_reduction,
+            similar_videos_engine,
+            similar_videos_perceptual_preset,
+            similar_videos_audio_preset,
         }
     }
 
@@ -156,6 +182,17 @@ impl StringComboBoxItems {
                 config_name: config_name.to_string(),
                 display_name: display_name.to_string(),
                 value: value.clone(),
+            })
+            .collect()
+    }
+
+    fn convert_string_to_combobox_items(input: &[(&str, &str)]) -> Vec<StringComboBoxItem<String>> {
+        input
+            .iter()
+            .map(|(config_name, display_name)| StringComboBoxItem {
+                config_name: config_name.to_string(),
+                display_name: display_name.to_string(),
+                value: config_name.to_string(),
             })
             .collect()
     }

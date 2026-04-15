@@ -24,6 +24,9 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
         video_optimizer_mode,
         video_optimizer_video_codec,
         video_optimizer_noise_reduction,
+        similar_videos_engine,
+        similar_videos_perceptual_preset,
+        similar_videos_audio_preset,
     } = &*collected_items;
 
     let languages_display_names = StringComboBoxItems::get_display_names(languages);
@@ -39,6 +42,9 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
     let video_optimizer_mode_display_names = StringComboBoxItems::get_display_names(video_optimizer_mode);
     let video_optimizer_video_codec_display_names = StringComboBoxItems::get_display_names(video_optimizer_video_codec);
     let video_optimizer_noise_reduction_display_names = StringComboBoxItems::get_display_names(video_optimizer_noise_reduction);
+    let similar_videos_engine_display_names = StringComboBoxItems::get_display_names(similar_videos_engine);
+    let similar_videos_perceptual_preset_display_names = StringComboBoxItems::get_display_names(similar_videos_perceptual_preset);
+    let similar_videos_audio_preset_display_names = StringComboBoxItems::get_display_names(similar_videos_audio_preset);
 
     // Currently this is not possible due to slint bug - after 11.0 version I will try to fight with this - https://github.com/slint-ui/slint/issues/7632
     // For now I just assert that names will be in sync with slint files
@@ -104,5 +110,17 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
     assert_eq!(
         settings.get_video_optimizer_sub_noise_reduction().iter().collect::<Vec<SharedString>>(),
         video_optimizer_noise_reduction_display_names
+    );
+    assert_eq!(
+        settings.get_similar_videos_engine().iter().collect::<Vec<SharedString>>(),
+        similar_videos_engine_display_names
+    );
+    assert_eq!(
+        settings.get_similar_videos_perceptual_preset().iter().collect::<Vec<SharedString>>(),
+        similar_videos_perceptual_preset_display_names
+    );
+    assert_eq!(
+        settings.get_similar_videos_audio_preset().iter().collect::<Vec<SharedString>>(),
+        similar_videos_audio_preset_display_names
     );
 }

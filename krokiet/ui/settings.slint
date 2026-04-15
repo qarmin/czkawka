@@ -103,6 +103,18 @@ export global Settings {
     in-out property <string> similar_videos_crop_detect_value: "letterbox";
     in-out property <int> similar_videos_crop_detect_index: 0;
 
+    in-out property <[string]> similar_videos_engine: ["VidDupFinder", "Perceptual", "Audio"];
+    in-out property <string> similar_videos_engine_value: "VidDupFinder";
+    in-out property <int> similar_videos_engine_index: 0;
+
+    in-out property <[string]> similar_videos_perceptual_preset: ["Fastest", "Fast", "Balanced", "Thorough", "Maximum"];
+    in-out property <string> similar_videos_perceptual_preset_value: "Balanced";
+    in-out property <int> similar_videos_perceptual_preset_index: 2;
+
+    in-out property <[string]> similar_videos_audio_preset: ["Full", "Fast 2 Min", "Skip Intros"];
+    in-out property <string> similar_videos_audio_preset_value: "Full";
+    in-out property <int> similar_videos_audio_preset_index: 0;
+
 
     // Same Music
     in-out property <[string]> similar_music_sub_audio_check_type: ["Tags", "Fingerprint"];

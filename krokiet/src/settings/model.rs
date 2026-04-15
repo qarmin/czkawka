@@ -163,6 +163,12 @@ pub struct SettingsCustom {
     pub similar_videos_vid_hash_duration: u32,
     #[serde(default = "default_similar_videos_crop_detect")]
     pub similar_videos_crop_detect: String,
+    #[serde(default = "default_similar_videos_engine")]
+    pub similar_videos_engine: String,
+    #[serde(default = "default_similar_videos_perceptual_preset")]
+    pub similar_videos_perceptual_preset: String,
+    #[serde(default = "default_similar_videos_audio_preset")]
+    pub similar_videos_audio_preset: String,
     #[serde(default)]
     pub video_thumbnails_generate: bool,
     #[serde(default = "default_similar_videos_thumbnail_percentage")]
@@ -262,6 +268,9 @@ pub struct ComboBoxItems {
     pub video_optimizer_mode: StringComboBoxItem<VideoOptimizerMode>,
     pub video_optimizer_video_codec: StringComboBoxItem<VideoCodec>,
     pub video_optimizer_noise_reduction: StringComboBoxItem<NoiseReductionMethod>,
+    pub similar_videos_engine: StringComboBoxItem<String>,
+    pub similar_videos_perceptual_preset: StringComboBoxItem<String>,
+    pub similar_videos_audio_preset: StringComboBoxItem<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -336,6 +345,15 @@ fn default_similar_videos_vid_hash_duration() -> u32 {
 }
 fn default_similar_videos_crop_detect() -> String {
     "letterbox".to_string()
+}
+fn default_similar_videos_engine() -> String {
+    "vid_dup_finder".to_string()
+}
+fn default_similar_videos_perceptual_preset() -> String {
+    "balanced".to_string()
+}
+fn default_similar_videos_audio_preset() -> String {
+    "full".to_string()
 }
 fn default_similar_videos_thumbnail_percentage() -> u8 {
     DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL

@@ -25,7 +25,7 @@ use czkawka_core::tools::exif_remover::{ExifRemover, ExifRemoverParameters, Exif
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
-use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
+use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosEngine, SimilarVideosParameters};
 use czkawka_core::tools::temporary::Temporary;
 use czkawka_core::tools::video_optimizer::{
     HardwareEncoder, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeFixParams,
@@ -331,7 +331,12 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         skip_forward_amount,
         crop_detect,
         scan_duration,
+        engine,
+        perceptual_preset,
+        audio_preset,
     } = similar_videos;
+
+    let similarity_engine = SimilarVideosEngine::from_str_opt(&engine, &perceptual_preset, &audio_preset).unwrap_or_default();
 
     let params = SimilarVideosParameters::new(
         tolerance,
@@ -344,6 +349,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         10,    // creating thumbnails in CLI, makes almost no sense
         false, // creating thumbnails in CLI, makes almost no sense
         2,     // creating thumbnails in CLI, makes almost no sense
+        similarity_engine,
     );
     let mut tool = SimilarVideos::new(params);
 

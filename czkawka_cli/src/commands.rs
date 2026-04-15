@@ -505,6 +505,27 @@ pub struct SimilarVideosArgs {
         long_help = "Duration of video scanning in seconds. Longer duration provides more accurate results but takes more time. Allowed values are predefined in the application."
     )]
     pub scan_duration: u32,
+    #[clap(
+        long,
+        default_value = "vid-dup-finder",
+        help = "Similarity engine: vid-dup-finder (default), perceptual, audio",
+        long_help = "Algorithm used to detect similar videos. 'vid-dup-finder' is the original engine. 'perceptual' uses sliding-window pHash (similarrio_videoo). 'audio' uses Chromaprint audio fingerprinting."
+    )]
+    pub engine: String,
+    #[clap(
+        long,
+        default_value = "balanced",
+        help = "Perceptual engine preset: fastest, fast, balanced, thorough, maximum",
+        long_help = "Quality/speed preset for the 'perceptual' engine. fastest=30 frames, fast=100, balanced=300, thorough=600, maximum=1200."
+    )]
+    pub perceptual_preset: String,
+    #[clap(
+        long,
+        default_value = "full",
+        help = "Audio engine preset: full, fast-2min, skip-intros",
+        long_help = "Preset for the 'audio' engine. 'full' uses the whole audio track. 'fast-2min' limits to 120 s. 'skip-intros' skips first 120 s for videos longer than 600 s."
+    )]
+    pub audio_preset: String,
 }
 
 #[derive(Debug, clap::Args)]

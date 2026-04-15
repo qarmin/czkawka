@@ -19,7 +19,10 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
 use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, VideoMetadata, generate_thumbnail};
-use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
+use crate::tools::similar_videos::{
+    AudioCacheEntry, AudioSearchPreset, PerceptualCacheEntry, PerceptualSearchPreset, SimilarVideos, SimilarVideosEngine, SimilarVideosParameters, VideosEntry,
+    get_audio_cache_file, get_perceptual_cache_file,
+};
 
 impl SimilarVideos {
     pub fn new(params: SimilarVideosParameters) -> Self {
@@ -123,12 +126,29 @@ impl SimilarVideos {
         file_entry
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Dispatcher
+    // ─────────────────────────────────────────────────────────────────────────
+
     #[fun_time(message = "sort_videos", level = "debug")]
     pub(crate) fn sort_videos(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.videos_to_check.is_empty() {
             return WorkContinueStatus::Continue;
         }
 
+        match self.params.engine.clone() {
+            SimilarVideosEngine::VidDupFinder => self.sort_videos_vid_dup_finder(stop_flag, progress_sender),
+            SimilarVideosEngine::Perceptual(preset) => self.sort_videos_perceptual(preset, stop_flag, progress_sender),
+            SimilarVideosEngine::Audio(preset) => self.sort_videos_audio(preset, stop_flag, progress_sender),
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Original vid_dup_finder engine (renamed from sort_videos)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[fun_time(message = "sort_videos_vid_dup_finder", level = "debug")]
+    fn sort_videos_vid_dup_finder(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
         let progress_handler = prepare_thread_handler_common(
@@ -136,7 +156,7 @@ impl SimilarVideos {
             CurrentStage::SimilarVideosCalculatingHashes,
             non_cached_files_to_check.len(),
             self.get_test_type(),
-            0, // non_cached_files_to_check.values().map(|e| e.size).sum(), // Looks, that at least for now, there is no big difference between checking big and small files, so at least for now, only tracking number of files is enough
+            0,
         );
 
         let non_cached_files_to_check: Vec<_> = non_cached_files_to_check.into_iter().map(|f| f.1).collect();
@@ -148,13 +168,10 @@ impl SimilarVideos {
                     return None;
                 }
 
-                // Currently size is not too much relevant
-                // let size = file_entry.size;
                 let res = self.check_video_file_entry(file_entry);
                 let res = Self::read_video_properties(res);
 
                 progress_handler.increase_items(1);
-                // progress_handler.increase_size(size);
 
                 Some(res)
             })
@@ -210,6 +227,304 @@ impl SimilarVideos {
 
         WorkContinueStatus::Continue
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Perceptual engine (similarrio_videoo pHash + sliding window)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[fun_time(message = "sort_videos_perceptual", level = "debug")]
+    fn sort_videos_perceptual(&mut self, preset: PerceptualSearchPreset, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        // Convert videos_to_check to PerceptualCacheEntry placeholders for cache lookup.
+        // The fingerprint field is empty (Default) and used only as a placeholder;
+        // real fingerprints come from the cache file or are computed below.
+        let perceptual_to_check: BTreeMap<String, PerceptualCacheEntry> = mem::take(&mut self.videos_to_check)
+            .into_iter()
+            .map(|(key, ve)| {
+                (
+                    key,
+                    PerceptualCacheEntry {
+                        path: ve.path,
+                        size: ve.size,
+                        modified_date: ve.modified_date,
+                        fingerprint: Default::default(),
+                    },
+                )
+            })
+            .collect();
+
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) =
+            load_and_split_cache_generalized_by_path(&get_perceptual_cache_file(preset), perceptual_to_check, self);
+
+        let (hash_config, min_matched_frames, max_duration_ratio) = preset.to_hash_config_and_compare_params();
+
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::SimilarVideosCalculatingHashes,
+            non_cached_files_to_check.len(),
+            self.get_test_type(),
+            0,
+        );
+
+        // Hash new (non-cached) files in parallel.
+        let new_entries: Vec<PerceptualCacheEntry> = non_cached_files_to_check
+            .into_values()
+            .collect::<Vec<_>>()
+            .into_par_iter()
+            .with_max_len(2)
+            .filter_map(|placeholder| {
+                if check_if_stop_received(stop_flag) {
+                    return None;
+                }
+                let fp = match similarrio_videoo::hash_video_cancellable(&placeholder.path, &hash_config, stop_flag) {
+                    Ok(fp) => fp,
+                    Err(similarrio_videoo::VideoHashError::Cancelled) => return None,
+                    Err(e) => {
+                        debug!("Perceptual hash failed for {}: {e}", placeholder.path.display());
+                        return None;
+                    }
+                };
+                progress_handler.increase_items(1);
+                Some(PerceptualCacheEntry {
+                    path: placeholder.path,
+                    size: placeholder.size,
+                    modified_date: placeholder.modified_date,
+                    fingerprint: fp,
+                })
+            })
+            .collect();
+
+        progress_handler.join_thread();
+
+        // Save cache (merge new results with the previously loaded map).
+        save_and_connect_cache_generalized_by_path(&get_perceptual_cache_file(preset), &new_entries, loaded_hash_map, self);
+
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
+
+        // Combine freshly computed + already-cached entries.
+        let all_entries: Vec<PerceptualCacheEntry> = new_entries.into_iter().chain(records_already_cached.into_values()).collect();
+
+        if all_entries.len() < 2 {
+            return WorkContinueStatus::Continue;
+        }
+
+        // Convert tolerance (0–20) to similarity threshold (0.90–1.00).
+        // tolerance=0  → threshold=1.00 (exact match only)
+        // tolerance=15 → threshold=0.925 (≈ similarrio default 0.93)
+        // tolerance=20 → threshold=0.90
+        let threshold = 1.0 - (self.params.tolerance as f64) * 0.005;
+
+        let fingerprints: Vec<similarrio_videoo::VideoFingerprint> = all_entries.iter().map(|e| e.fingerprint.clone()).collect();
+        let groups = similarrio_videoo::find_similar_group_indices(&fingerprints, threshold, min_matched_frames, max_duration_ratio);
+
+        let exclude_same_size = self.params.exclude_videos_with_same_size;
+        let exclude_same_resolution = self.params.exclude_videos_with_same_resolution;
+
+        let mut similar_vectors: Vec<Vec<VideosEntry>> = Vec::new();
+        for group in groups {
+            let mut temp_vector: Vec<VideosEntry> = Vec::new();
+            let mut bt_size: BTreeSet<u64> = Default::default();
+            let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
+
+            for idx in group {
+                let entry = &all_entries[idx];
+                let w = entry.fingerprint.width;
+                let h = entry.fingerprint.height;
+
+                if exclude_same_size && !bt_size.insert(entry.size) {
+                    continue;
+                }
+                if exclude_same_resolution && !bt_resolution.insert((w, h)) {
+                    continue;
+                }
+                temp_vector.push(perceptual_cache_entry_to_videos_entry(entry));
+            }
+
+            if temp_vector.len() > 1 {
+                similar_vectors.push(temp_vector);
+            }
+        }
+
+        self.similar_vectors = similar_vectors;
+        self.videos_to_check = Default::default();
+
+        if self.create_thumbnails(progress_sender, stop_flag) == WorkContinueStatus::Stop {
+            return WorkContinueStatus::Stop;
+        }
+
+        self.remove_from_reference_folders();
+
+        if self.common_data.use_reference_folders {
+            for (_fe, vector) in &self.similar_referenced_vectors {
+                self.information.number_of_duplicates += vector.len();
+                self.information.number_of_groups += 1;
+            }
+        } else {
+            for vector in &self.similar_vectors {
+                self.information.number_of_duplicates += vector.len() - 1;
+                self.information.number_of_groups += 1;
+            }
+        }
+
+        WorkContinueStatus::Continue
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Audio engine (Chromaprint via similarrio_videoo)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[fun_time(message = "sort_videos_audio", level = "debug")]
+    fn sort_videos_audio(&mut self, preset: AudioSearchPreset, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        // Convert videos_to_check to AudioCacheEntry placeholders.
+        let audio_to_check: BTreeMap<String, AudioCacheEntry> = mem::take(&mut self.videos_to_check)
+            .into_iter()
+            .map(|(key, ve)| {
+                (
+                    key,
+                    AudioCacheEntry {
+                        path: ve.path,
+                        size: ve.size,
+                        modified_date: ve.modified_date,
+                        fingerprint: Default::default(),
+                    },
+                )
+            })
+            .collect();
+
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) =
+            load_and_split_cache_generalized_by_path(&get_audio_cache_file(preset), audio_to_check, self);
+
+        let audio_config = preset.to_audio_config();
+
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            CurrentStage::SimilarVideosCalculatingHashes,
+            non_cached_files_to_check.len(),
+            self.get_test_type(),
+            0,
+        );
+
+        // Extract audio fingerprints for non-cached files in parallel.
+        let new_entries: Vec<AudioCacheEntry> = non_cached_files_to_check
+            .into_values()
+            .collect::<Vec<_>>()
+            .into_par_iter()
+            .with_max_len(2)
+            .filter_map(|placeholder| {
+                if check_if_stop_received(stop_flag) {
+                    return None;
+                }
+                let fp = match similarrio_videoo::extract_audio_fingerprint(&placeholder.path, &audio_config) {
+                    Ok(fp) => fp,
+                    Err(e) => {
+                        debug!("Audio fingerprint failed for {}: {e}", placeholder.path.display());
+                        return None;
+                    }
+                };
+                progress_handler.increase_items(1);
+                Some(AudioCacheEntry {
+                    path: placeholder.path,
+                    size: placeholder.size,
+                    modified_date: placeholder.modified_date,
+                    fingerprint: fp,
+                })
+            })
+            .collect();
+
+        progress_handler.join_thread();
+
+        // Save cache.
+        save_and_connect_cache_generalized_by_path(&get_audio_cache_file(preset), &new_entries, loaded_hash_map, self);
+
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
+
+        // Combine freshly computed + already-cached entries.
+        let all_entries: Vec<AudioCacheEntry> = new_entries.into_iter().chain(records_already_cached.into_values()).collect();
+
+        if all_entries.len() < 2 {
+            return WorkContinueStatus::Continue;
+        }
+
+        // All-pairs audio comparison (parallel).
+        const AUDIO_MIN_SEGMENT_SECS: f64 = 5.0;
+        const AUDIO_MAX_DIFFERENCE: f64 = 0.6;
+
+        let n = all_entries.len();
+        let pairs: Vec<(usize, usize)> = (0..n).flat_map(|i| ((i + 1)..n).map(move |j| (i, j))).collect();
+
+        let similar_pairs: Vec<(usize, usize)> = pairs
+            .into_par_iter()
+            .filter(|&(i, j)| {
+                if check_if_stop_received(stop_flag) {
+                    return false;
+                }
+                let matches = similarrio_videoo::find_audio_matches(&all_entries[i].fingerprint, &all_entries[j].fingerprint, AUDIO_MIN_SEGMENT_SECS, AUDIO_MAX_DIFFERENCE);
+                !matches.is_empty()
+            })
+            .collect();
+
+        if check_if_stop_received(stop_flag) {
+            return WorkContinueStatus::Stop;
+        }
+
+        // Union-Find to build transitive groups from similar pairs.
+        let groups = audio_union_find_groups(n, &similar_pairs);
+
+        let exclude_same_size = self.params.exclude_videos_with_same_size;
+        let exclude_same_resolution = self.params.exclude_videos_with_same_resolution;
+
+        let mut similar_vectors: Vec<Vec<VideosEntry>> = Vec::new();
+        for group in groups {
+            let mut temp_vector: Vec<VideosEntry> = Vec::new();
+            let mut bt_size: BTreeSet<u64> = Default::default();
+            let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
+
+            for idx in group {
+                let entry = &all_entries[idx];
+                if exclude_same_size && !bt_size.insert(entry.size) {
+                    continue;
+                }
+                // Audio fingerprints don't carry resolution, so skip resolution filter.
+                let _ = (exclude_same_resolution, &mut bt_resolution);
+
+                temp_vector.push(audio_cache_entry_to_videos_entry(entry));
+            }
+
+            if temp_vector.len() > 1 {
+                similar_vectors.push(temp_vector);
+            }
+        }
+
+        self.similar_vectors = similar_vectors;
+        self.videos_to_check = Default::default();
+
+        if self.create_thumbnails(progress_sender, stop_flag) == WorkContinueStatus::Stop {
+            return WorkContinueStatus::Stop;
+        }
+
+        self.remove_from_reference_folders();
+
+        if self.common_data.use_reference_folders {
+            for (_fe, vector) in &self.similar_referenced_vectors {
+                self.information.number_of_duplicates += vector.len();
+                self.information.number_of_groups += 1;
+            }
+        } else {
+            for vector in &self.similar_vectors {
+                self.information.number_of_duplicates += vector.len() - 1;
+                self.information.number_of_groups += 1;
+            }
+        }
+
+        WorkContinueStatus::Continue
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Shared helpers
+    // ─────────────────────────────────────────────────────────────────────────
 
     #[fun_time(message = "create_thumbnails", level = "debug")]
     fn create_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
@@ -356,6 +671,11 @@ impl SimilarVideos {
         }
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Free functions
+// ─────────────────────────────────────────────────────────────────────────────
+
 pub fn get_similar_videos_cache_file(skip_forward_amount: u32, duration: u32, crop_detect: Cropdetect) -> String {
     let crop_detect_str = match crop_detect {
         Cropdetect::None => "none",
@@ -364,6 +684,7 @@ pub fn get_similar_videos_cache_file(skip_forward_amount: u32, duration: u32, cr
     };
     format!("cache_similar_videos_{CACHE_VIDEO_VERSION}__skip_{skip_forward_amount}__dur_{duration}__cd_{crop_detect_str}.bin")
 }
+
 pub fn format_bitrate_opt(bitrate: Option<u64>) -> String {
     match bitrate {
         Some(b) => {
@@ -392,4 +713,90 @@ pub fn format_duration_opt(duration: Option<f64>) -> String {
             }
         })
         .unwrap_or_default()
+}
+
+/// Convert a `PerceptualCacheEntry` to a `VideosEntry` for display.
+///
+/// Uses data from the `VideoFingerprint` (fps, width, height, duration).
+/// `codec` and `bitrate` are not available from the perceptual fingerprint
+/// and are left as `None`.
+fn perceptual_cache_entry_to_videos_entry(entry: &PerceptualCacheEntry) -> VideosEntry {
+    VideosEntry {
+        path: entry.path.clone(),
+        size: entry.size,
+        modified_date: entry.modified_date,
+        vhash: Default::default(),
+        error: String::new(),
+        fps: if entry.fingerprint.fps > 0.0 { Some(entry.fingerprint.fps) } else { None },
+        codec: None,
+        bitrate: None,
+        width: if entry.fingerprint.width > 0 { Some(entry.fingerprint.width) } else { None },
+        height: if entry.fingerprint.height > 0 { Some(entry.fingerprint.height) } else { None },
+        duration: if entry.fingerprint.duration_secs > 0.0 { Some(entry.fingerprint.duration_secs) } else { None },
+        thumbnail_path: None,
+    }
+}
+
+/// Convert an `AudioCacheEntry` to a `VideosEntry` for display.
+///
+/// The audio fingerprint only carries `duration_secs`; other video-specific
+/// fields (fps, resolution, codec, bitrate) are left as `None`.
+fn audio_cache_entry_to_videos_entry(entry: &AudioCacheEntry) -> VideosEntry {
+    VideosEntry {
+        path: entry.path.clone(),
+        size: entry.size,
+        modified_date: entry.modified_date,
+        vhash: Default::default(),
+        error: String::new(),
+        fps: None,
+        codec: None,
+        bitrate: None,
+        width: None,
+        height: None,
+        duration: if entry.fingerprint.duration_secs > 0.0 { Some(entry.fingerprint.duration_secs) } else { None },
+        thumbnail_path: None,
+    }
+}
+
+/// Simple Union-Find (path-halving, rank-based) for building transitive groups
+/// from a list of similar pairs.
+///
+/// Returns groups (each with ≥ 2 elements), sorted largest first.
+fn audio_union_find_groups(n: usize, similar_pairs: &[(usize, usize)]) -> Vec<Vec<usize>> {
+    let mut parent: Vec<usize> = (0..n).collect();
+    let mut rank: Vec<u8> = vec![0; n];
+
+    fn find(parent: &mut Vec<usize>, mut x: usize) -> usize {
+        while parent[x] != x {
+            parent[x] = parent[parent[x]]; // path halving
+            x = parent[x];
+        }
+        x
+    }
+
+    for &(a, b) in similar_pairs {
+        let ra = find(&mut parent, a);
+        let rb = find(&mut parent, b);
+        if ra == rb {
+            continue;
+        }
+        match rank[ra].cmp(&rank[rb]) {
+            std::cmp::Ordering::Less => parent[ra] = rb,
+            std::cmp::Ordering::Greater => parent[rb] = ra,
+            std::cmp::Ordering::Equal => {
+                parent[rb] = ra;
+                rank[ra] += 1;
+            }
+        }
+    }
+
+    let mut buckets: BTreeMap<usize, Vec<usize>> = Default::default();
+    for i in 0..n {
+        let root = find(&mut parent, i);
+        buckets.entry(root).or_default().push(i);
+    }
+
+    let mut groups: Vec<Vec<usize>> = buckets.into_values().filter(|g| g.len() >= 2).collect();
+    groups.sort_by(|a, b| b.len().cmp(&a.len()));
+    groups
 }
