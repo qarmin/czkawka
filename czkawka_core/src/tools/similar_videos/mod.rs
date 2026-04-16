@@ -58,64 +58,24 @@ impl PerceptualSearchPreset {
         use similarrio_videoo::{HashConfig, VideoHashAlg};
         match self {
             Self::Fastest => (
-                HashConfig {
-                    samples_per_second: Some(1.0),
-                    max_frames: 30,
-                    skip_start_secs: 0.0,
-                    skip_threshold_secs: 600.0,
-                    hash_alg: VideoHashAlg::Mean,
-                    dct: true,
-                },
-                10,
-                1.05,
+                HashConfig { samples_per_second: Some(1.0), max_frames: 30,   skip_start_secs: 0.0,   skip_threshold_secs: 600.0, hash_alg: VideoHashAlg::Mean, dct: true, ..HashConfig::default() },
+                10, 1.05,
             ),
             Self::Fast => (
-                HashConfig {
-                    samples_per_second: Some(1.0),
-                    max_frames: 100,
-                    skip_start_secs: 0.0,
-                    skip_threshold_secs: 600.0,
-                    hash_alg: VideoHashAlg::Mean,
-                    dct: true,
-                },
-                20,
-                1.10,
+                HashConfig { samples_per_second: Some(1.0), max_frames: 100,  skip_start_secs: 0.0,   skip_threshold_secs: 600.0, hash_alg: VideoHashAlg::Mean, dct: true, ..HashConfig::default() },
+                20, 1.10,
             ),
             Self::Balanced => (
-                HashConfig {
-                    samples_per_second: Some(1.0),
-                    max_frames: 300,
-                    skip_start_secs: 0.0,
-                    skip_threshold_secs: 600.0,
-                    hash_alg: VideoHashAlg::Mean,
-                    dct: true,
-                },
-                30,
-                0.0,
+                HashConfig { samples_per_second: Some(1.0), max_frames: 300,  skip_start_secs: 0.0,   skip_threshold_secs: 600.0, hash_alg: VideoHashAlg::Mean, dct: true, ..HashConfig::default() },
+                30, 0.0,
             ),
             Self::Thorough => (
-                HashConfig {
-                    samples_per_second: Some(1.0),
-                    max_frames: 600,
-                    skip_start_secs: 120.0,
-                    skip_threshold_secs: 600.0,
-                    hash_alg: VideoHashAlg::Mean,
-                    dct: true,
-                },
-                30,
-                0.0,
+                HashConfig { samples_per_second: Some(1.0), max_frames: 600,  skip_start_secs: 120.0, skip_threshold_secs: 600.0, hash_alg: VideoHashAlg::Mean, dct: true, ..HashConfig::default() },
+                30, 0.0,
             ),
             Self::Maximum => (
-                HashConfig {
-                    samples_per_second: Some(1.0),
-                    max_frames: 1200,
-                    skip_start_secs: 120.0,
-                    skip_threshold_secs: 300.0,
-                    hash_alg: VideoHashAlg::Mean,
-                    dct: true,
-                },
-                30,
-                0.0,
+                HashConfig { samples_per_second: Some(1.0), max_frames: 1200, skip_start_secs: 120.0, skip_threshold_secs: 300.0, hash_alg: VideoHashAlg::Mean, dct: true, ..HashConfig::default() },
+                30, 0.0,
             ),
         }
     }

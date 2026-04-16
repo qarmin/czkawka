@@ -5,6 +5,31 @@ import { StatusChip, TouchButton } from "components.slint";
 import { Translations } from "translations.slint";
 import { ListView } from "std-widgets.slint";
 
+// Index of the group within similar_images_groups – passed in by the repeater.
+// Used so the Compare button can open the right group.
+component GroupCompareBtn inherits Rectangle {
+    in property <int> group_idx;
+
+    height: 28px;
+    width: lbl.preferred-width + 20px;
+    border-radius: 6px;
+    background: ta.has-hover ? CediniaColors.accent.brighter(0.12) : CediniaColors.accent.with-alpha(0.75);
+    animate background { duration: 80ms; }
+
+    ta := TouchArea {
+        clicked => { AppState.compare_open(root.group_idx); }
+    }
+
+    lbl := Text {
+        text: Translations.compare_label_text;
+        color: #000000;
+        font-size: 11px;
+        font-weight: 700;
+        horizontal-alignment: TextHorizontalAlignment.center;
+        vertical-alignment:   TextVerticalAlignment.center;
+    }
+}
+
 component GalleryImageCell {
     in property <image>  thumbnail;
     in property <string> img_name;
@@ -304,7 +329,7 @@ export component SimilarImagesGallery {
         if groups.length > 0 : gallery_scroll := ListView {
             vertical-stretch: 1.0;
 
-            for group in root.groups : VerticalLayout {
+            for group[group_idx] in root.groups : VerticalLayout {
                 padding-left: 8px;
                 padding-right: 8px;
                 padding-top: 8px;
@@ -315,17 +340,26 @@ export component SimilarImagesGallery {
                     height: 34px;
                     border-radius: 8px;
                     background: CediniaColors.accent.with-alpha(0.85);
+
+                    // Group label (leaves room for the Compare button on the right)
                     Text {
                         x: 12px;
                         y: 0px;
                         height: parent.height;
-                        width: parent.width - 24px;
+                        width: parent.width - 24px - compare_btn.width - 8px;
                         text: group.label;
                         color: #000000;
                         font-size: 13px;
                         font-weight: 700;
                         vertical-alignment: TextVerticalAlignment.center;
                         overflow: TextOverflow.elide;
+                    }
+
+                    // Compare button (right-aligned inside the header)
+                    compare_btn := GroupCompareBtn {
+                        group_idx: group_idx;
+                        x: parent.width - self.width - 6px;
+                        y: (parent.height - self.height) / 2;
                     }
                 }
 

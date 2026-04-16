@@ -12,6 +12,7 @@ use crate::callbacks::{
     DeleteEvent, build_excluded_model, build_included_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_licenses_popup,
     wire_notification_settings, wire_open_path, wire_open_url, wire_permission, wire_save_settings_now, wire_scan, wire_selection,
 };
+use crate::compare::wire_compare;
 use crate::model::make_file_model;
 use crate::scan_runner::{FileItem, ScanResult, ScanResultHandler, start_worker};
 use crate::set_initial_gui_infos::set_initial_gui_infos;
@@ -424,6 +425,7 @@ fn run_app_inner(
     wire_cache_info(&window);
     wire_licenses_popup(&window);
     wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone());
+    wire_compare(&window);
 
     let weak = window.as_weak();
     let thumb_rx = Rc::new(std::cell::RefCell::new(thumb_rx));

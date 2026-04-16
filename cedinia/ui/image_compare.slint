@@ -1,0 +1,735 @@
+import { CediniaColors } from "colors.slint";
+import { AppState } from "app_state.slint";
+import { Translations } from "translations.slint";
+import { Slider, ScrollView } from "std-widgets.slint";
+
+enum CompareMode { Normal, Split, Overlay, Diff }
+
+// A single icon-button used in the top action bar.
+component CompareIconBtn inherits Rectangle {
+    in property <image>  icon;
+    in property <bool>   active:  false;
+    in property <bool>   enabled: true;
+    in property <bool>   danger:  false;
+    callback clicked;
+
+    width:  52px;
+    height: 44px;
+    border-radius: 10px;
+    background: ta.has-hover && root.enabled
+        ? (root.danger ? CediniaColors.danger.brighter(0.1)
+          : root.active ? CediniaColors.accent.brighter(0.15) : CediniaColors.bg_surface)
+        : (root.danger ? CediniaColors.danger.with-alpha(0.35)
+          : root.active ? CediniaColors.accent_muted : transparent);
+    animate background { duration: 100ms; }
+
+    ta := TouchArea {
+        enabled: root.enabled;
+        clicked => { root.clicked(); }
+    }
+
+    Image {
+        source: root.icon;
+        colorize: root.enabled
+            ? (root.danger ? CediniaColors.danger
+              : root.active ? CediniaColors.accent_light : CediniaColors.text_secondary)
+            : CediniaColors.text_disabled;
+        width:  24px;
+        height: 24px;
+        horizontal-alignment: ImageHorizontalAlignment.center;
+        vertical-alignment:   ImageVerticalAlignment.center;
+    }
+}
+
+// ─── Main overlay component ────────────────────────────────────────────────
+export component ImageCompareOverlay inherits Rectangle {
+
+    // 0 = side-by-side, 1 = split, 2 = overlay, 3 = diff
+    private property <int>   compare_mode:  0;
+    private property <bool>  info_visible:  false;
+    private property <float> split_pos:     0.5;
+    private property <float> overlay_alpha: 0.5;
+
+    // Cached split position when the drag starts so we can compute the delta.
+    private property <float> split_pos_at_drag_start: 0.5;
+
+    private property <bool> left_valid:
+        AppState.compare_left_idx >= 0 &&
+        AppState.compare_left_idx < AppState.compare_images.length;
+    private property <bool> right_valid:
+        AppState.compare_right_idx >= 0 &&
+        AppState.compare_right_idx < AppState.compare_images.length;
+
+    private property <bool> res_mismatch:
+        left_valid && right_valid &&
+        AppState.compare_images[AppState.compare_left_idx].dims !=
+        AppState.compare_images[AppState.compare_right_idx].dims;
+
+    background: CediniaColors.bg_primary;
+
+    // Auto-compute diff when loading finishes or images change while in diff mode.
+    property <bool> _loading_watch: AppState.compare_loading;
+    changed _loading_watch => {
+        if (!_loading_watch && compare_mode == 3) {
+            AppState.compare_compute_diff();
+        }
+    }
+    property <int> _left_watch: AppState.compare_left_idx;
+    changed _left_watch => {
+        if (compare_mode == 3) { AppState.compare_compute_diff(); }
+    }
+    property <int> _right_watch: AppState.compare_right_idx;
+    changed _right_watch => {
+        if (compare_mode == 3) { AppState.compare_compute_diff(); }
+    }
+
+    VerticalLayout {
+        spacing: 0px;
+
+        // ── Top action bar ───────────────────────────────────────────────────
+        Rectangle {
+            height: 56px;
+            background: CediniaColors.bg_elevated;
+
+            HorizontalLayout {
+                padding-left:  6px;
+                padding-right: 6px;
+                padding-top:   6px;
+                padding-bottom: 6px;
+                spacing: 2px;
+
+                // Back
+                CompareIconBtn {
+                    icon: @image-url("../../krokiet/icons/krokiet_compare_back.svg");
+                    clicked => {
+                        AppState.compare_visible = false;
+                        root.compare_mode = 0;
+                        root.info_visible = false;
+                    }
+                }
+
+                // Prev group
+                CompareIconBtn {
+                    icon: @image-url("../../krokiet/icons/krokiet_compare_prev.svg");
+                    clicked => { AppState.compare_prev_group(); }
+                }
+
+                Rectangle { horizontal-stretch: 1.0; }
+
+                // Swap
+                CompareIconBtn {
+                    icon: @image-url("../../krokiet/icons/krokiet_compare_swap.svg");
+                    clicked => { AppState.compare_swap(); }
+                }
+
+                // Info toggle
+                CompareIconBtn {
+                    icon:   @image-url("../../krokiet/icons/krokiet_info.svg");
+                    active: root.info_visible;
+                    clicked => { root.info_visible = !root.info_visible; }
+                }
+
+                Rectangle { horizontal-stretch: 1.0; }
+
+                // Next group
+                CompareIconBtn {
+                    icon: @image-url("../../krokiet/icons/krokiet_compare_next.svg");
+                    clicked => { AppState.compare_next_group(); }
+                }
+            }
+
+            // Bottom border
+            Rectangle {
+                x: 0; y: parent.height - 1px;
+                width: parent.width; height: 1px;
+                background: CediniaColors.divider;
+            }
+        }
+
+        // ── Resolution mismatch warning (diff mode only) ──────────────────
+        if res_mismatch && compare_mode == 3: Rectangle {
+            height: 26px;
+            background: #ff880033;
+            Text {
+                text: Translations.compare_res_mismatch_text;
+                color: CediniaColors.warning;
+                font-size: 10px;
+                horizontal-alignment: TextHorizontalAlignment.center;
+                vertical-alignment:   TextVerticalAlignment.center;
+                overflow: TextOverflow.elide;
+            }
+        }
+
+        // ── Main image area ──────────────────────────────────────────────
+        main_area := Rectangle {
+            vertical-stretch: 1.0;
+            clip: true;
+            background: #0d0d0d;
+
+            // ── Normal: side-by-side ─────────────────────────────────────
+            if compare_mode == 0: Rectangle {
+                width: parent.width; height: parent.height;
+
+                // Left image
+                Rectangle {
+                    x: 0; y: 0;
+                    width: parent.width / 2;
+                    height: parent.height;
+                    clip: true;
+                    background: CediniaColors.bg_surface;
+
+                    Image {
+                        width: parent.width; height: parent.height;
+                        source: AppState.compare_left_image;
+                        image-fit: ImageFit.contain;
+                    }
+
+                    // Checked indicator (bottom-right corner)
+                    if left_valid: Rectangle {
+                        x: parent.width - 44px;
+                        y: parent.height - 44px;
+                        width: 36px; height: 36px;
+                        border-radius: 18px;
+                        background: AppState.compare_images[AppState.compare_left_idx].checked
+                            ? CediniaColors.accent : CediniaColors.bg_elevated;
+                        border-width: 2px;
+                        border-color: AppState.compare_images[AppState.compare_left_idx].checked
+                            ? CediniaColors.accent : CediniaColors.border;
+                        drop-shadow-blur: 4px;
+                        drop-shadow-color: #00000066;
+                        animate background { duration: 100ms; }
+                        TouchArea {
+                            clicked => { AppState.compare_toggle_checkbox(AppState.compare_left_idx); }
+                        }
+                        Text {
+                            text: AppState.compare_images[AppState.compare_left_idx].checked ? "✓" : "";
+                            color: #000000;
+                            font-size: 15px; font-weight: 700;
+                            horizontal-alignment: TextHorizontalAlignment.center;
+                            vertical-alignment:   TextVerticalAlignment.center;
+                        }
+                    }
+                }
+
+                // Divider
+                Rectangle {
+                    x: parent.width / 2; y: 0;
+                    width: 1px; height: parent.height;
+                    background: CediniaColors.divider;
+                }
+
+                // Right image
+                Rectangle {
+                    x: parent.width / 2 + 1px; y: 0;
+                    width: parent.width / 2 - 1px;
+                    height: parent.height;
+                    clip: true;
+                    background: CediniaColors.bg_surface;
+
+                    Image {
+                        width: parent.width; height: parent.height;
+                        source: AppState.compare_right_image;
+                        image-fit: ImageFit.contain;
+                    }
+
+                    // Checked indicator (bottom-left corner)
+                    if right_valid: Rectangle {
+                        x: 8px;
+                        y: parent.height - 44px;
+                        width: 36px; height: 36px;
+                        border-radius: 18px;
+                        background: AppState.compare_images[AppState.compare_right_idx].checked
+                            ? CediniaColors.accent : CediniaColors.bg_elevated;
+                        border-width: 2px;
+                        border-color: AppState.compare_images[AppState.compare_right_idx].checked
+                            ? CediniaColors.accent : CediniaColors.border;
+                        drop-shadow-blur: 4px;
+                        drop-shadow-color: #00000066;
+                        animate background { duration: 100ms; }
+                        TouchArea {
+                            clicked => { AppState.compare_toggle_checkbox(AppState.compare_right_idx); }
+                        }
+                        Text {
+                            text: AppState.compare_images[AppState.compare_right_idx].checked ? "✓" : "";
+                            color: #000000;
+                            font-size: 15px; font-weight: 700;
+                            horizontal-alignment: TextHorizontalAlignment.center;
+                            vertical-alignment:   TextVerticalAlignment.center;
+                        }
+                    }
+                }
+            }
+
+            // ── Split mode ───────────────────────────────────────────────
+            if compare_mode == 1: Rectangle {
+                width: parent.width; height: parent.height;
+                background: CediniaColors.bg_surface;
+
+                // Left image – clipped to split position
+                Rectangle {
+                    clip: true;
+                    x: 0; y: 0;
+                    width: main_area.width * root.split_pos;
+                    height: main_area.height;
+                    Image {
+                        x: 0; y: 0;
+                        width: main_area.width; height: main_area.height;
+                        source: AppState.compare_left_image;
+                        image-fit: ImageFit.contain;
+                    }
+                }
+
+                // Right image – clipped from split position
+                Rectangle {
+                    clip: true;
+                    x: main_area.width * root.split_pos; y: 0;
+                    width: main_area.width * (1.0 - root.split_pos);
+                    height: main_area.height;
+                    Image {
+                        x: -(main_area.width * root.split_pos); y: 0;
+                        width: main_area.width; height: main_area.height;
+                        source: AppState.compare_right_image;
+                        image-fit: ImageFit.contain;
+                    }
+                }
+
+                // Draggable split divider handle
+                Rectangle {
+                    x: main_area.width * root.split_pos - 16px; y: 0;
+                    width: 32px; height: main_area.height;
+
+                    // Vertical line
+                    Rectangle {
+                        x: 15px; y: 0;
+                        width: 2px; height: parent.height;
+                        background: #ffffffaa;
+                    }
+
+                    // Circular handle in the middle
+                    Rectangle {
+                        x: 4px;
+                        y: (parent.height - 44px) / 2;
+                        width: 24px; height: 44px;
+                        border-radius: 12px;
+                        background: #ffffffdd;
+                        drop-shadow-blur: 4px;
+                        drop-shadow-color: #00000088;
+                    }
+
+                    split_drag_ta := TouchArea {
+                        pointer-event(e) => {
+                            if (e.kind == PointerEventKind.down) {
+                                root.split_pos_at_drag_start = root.split_pos;
+                            }
+                        }
+                        moved => {
+                            // (mouse-x - pressed-x) is a length delta; divide by area width to get fraction
+                            root.split_pos = max(0.02, min(0.98,
+                                root.split_pos_at_drag_start +
+                                (self.mouse-x - self.pressed-x) / main_area.width
+                            ));
+                        }
+                    }
+                }
+            }
+
+            // ── Overlay mode ─────────────────────────────────────────────
+            if compare_mode == 2: Rectangle {
+                width: parent.width; height: parent.height;
+                background: CediniaColors.bg_surface;
+                Image {
+                    width: parent.width; height: parent.height;
+                    source: AppState.compare_left_image;
+                    image-fit: ImageFit.contain;
+                }
+                Image {
+                    width: parent.width; height: parent.height;
+                    source: AppState.compare_right_image;
+                    image-fit: ImageFit.contain;
+                    opacity: root.overlay_alpha;
+                }
+            }
+
+            // ── Diff mode ─────────────────────────────────────────────────
+            if compare_mode == 3: Rectangle {
+                width: parent.width; height: parent.height;
+                background: #000000;
+                Image {
+                    width: parent.width; height: parent.height;
+                    source: AppState.compare_diff_image;
+                    image-fit: ImageFit.contain;
+                    image-rendering: ImageRendering.pixelated;
+                }
+                if AppState.compare_diff_image.width == 0: Text {
+                    text: Translations.compare_computing_text;
+                    color: CediniaColors.text_disabled;
+                    font-size: 14px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    vertical-alignment:   TextVerticalAlignment.center;
+                }
+            }
+        }
+
+        // ── Slider row (split or overlay mode) ──────────────────────────
+        if compare_mode == 1 || compare_mode == 2: Rectangle {
+            height: 52px;
+            background: CediniaColors.bg_elevated;
+
+            // Top border
+            Rectangle {
+                x: 0; y: 0; width: parent.width; height: 1px;
+                background: CediniaColors.divider;
+            }
+
+            HorizontalLayout {
+                padding: 12px; spacing: 10px;
+                Text {
+                    text: compare_mode == 1 ? "⟷" : "◧";
+                    color: CediniaColors.text_secondary;
+                    font-size: 18px;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    width: 24px;
+                }
+                Slider {
+                    horizontal-stretch: 1.0;
+                    value: compare_mode == 1 ? root.split_pos : root.overlay_alpha;
+                    minimum: 0.0; maximum: 1.0;
+                    changed(v) => {
+                        if (compare_mode == 1) { root.split_pos = v; }
+                        else { root.overlay_alpha = v; }
+                    }
+                }
+            }
+        }
+
+        // ── Info panel ───────────────────────────────────────────────────
+        if info_visible: Rectangle {
+            height: info_content.preferred-height + 16px;
+            background: CediniaColors.bg_elevated;
+
+            // Top border
+            Rectangle {
+                x: 0; y: 0; width: parent.width; height: 1px;
+                background: CediniaColors.divider;
+            }
+
+            info_content := HorizontalLayout {
+                y: 8px; x: 0;
+                width: parent.width;
+                padding-left: 12px; padding-right: 12px;
+                spacing: 8px;
+
+                // Left image info
+                VerticalLayout {
+                    horizontal-stretch: 1.0;
+                    spacing: 2px; alignment: LayoutAlignment.start;
+
+                    Text {
+                        text: left_valid ? AppState.compare_images[AppState.compare_left_idx].name : "";
+                        color: CediniaColors.accent_light;
+                        font-size: 11px; font-weight: 700;
+                        overflow: TextOverflow.elide; wrap: no-wrap;
+                    }
+                    Text {
+                        text: left_valid ? AppState.compare_images[AppState.compare_left_idx].size : "";
+                        color: CediniaColors.text_secondary;
+                        font-size: 10px;
+                    }
+                    Text {
+                        text: left_valid ? AppState.compare_images[AppState.compare_left_idx].dims : "";
+                        color: CediniaColors.text_disabled;
+                        font-size: 10px;
+                    }
+                    Text {
+                        text: left_valid ? AppState.compare_images[AppState.compare_left_idx].dir : "";
+                        color: CediniaColors.text_disabled;
+                        font-size: 9px;
+                        overflow: TextOverflow.elide; wrap: no-wrap;
+                    }
+                }
+
+                Rectangle { width: 1px; background: CediniaColors.divider; }
+
+                // Right image info
+                VerticalLayout {
+                    horizontal-stretch: 1.0;
+                    spacing: 2px; alignment: LayoutAlignment.start;
+
+                    Text {
+                        text: right_valid ? AppState.compare_images[AppState.compare_right_idx].name : "";
+                        color: CediniaColors.accent_light;
+                        font-size: 11px; font-weight: 700;
+                        overflow: TextOverflow.elide; wrap: no-wrap;
+                    }
+                    Text {
+                        text: right_valid ? AppState.compare_images[AppState.compare_right_idx].size : "";
+                        color: CediniaColors.text_secondary;
+                        font-size: 10px;
+                    }
+                    Text {
+                        text: right_valid ? AppState.compare_images[AppState.compare_right_idx].dims : "";
+                        color: CediniaColors.text_disabled;
+                        font-size: 10px;
+                    }
+                    Text {
+                        text: right_valid ? AppState.compare_images[AppState.compare_right_idx].dir : "";
+                        color: CediniaColors.text_disabled;
+                        font-size: 9px;
+                        overflow: TextOverflow.elide; wrap: no-wrap;
+                    }
+                }
+            }
+        }
+
+        // ── Mode selector ────────────────────────────────────────────────
+        Rectangle {
+            height: 48px;
+            background: CediniaColors.bg_elevated;
+
+            // Top border
+            Rectangle {
+                x: 0; y: 0; width: parent.width; height: 1px;
+                background: CediniaColors.divider;
+            }
+
+            HorizontalLayout {
+                alignment: LayoutAlignment.center;
+                spacing: 6px;
+                padding: 6px;
+
+                // Side-by-side
+                Rectangle {
+                    width: mode_normal_txt.preferred-width + 24px; height: 36px;
+                    border-radius: 8px;
+                    background: compare_mode == 0 ? CediniaColors.accent_muted : (mode_normal_ta.has-hover ? CediniaColors.bg_surface : transparent);
+                    animate background { duration: 100ms; }
+                    mode_normal_ta := TouchArea { clicked => { root.compare_mode = 0; } }
+                    mode_normal_txt := Text {
+                        text: Translations.compare_mode_normal_text;
+                        color: compare_mode == 0 ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        font-size: 12px; font-weight: 600;
+                        horizontal-alignment: TextHorizontalAlignment.center;
+                        vertical-alignment:   TextVerticalAlignment.center;
+                    }
+                }
+
+                // Split
+                Rectangle {
+                    width: mode_split_txt.preferred-width + 24px; height: 36px;
+                    border-radius: 8px;
+                    background: compare_mode == 1 ? CediniaColors.accent_muted : (mode_split_ta.has-hover ? CediniaColors.bg_surface : transparent);
+                    animate background { duration: 100ms; }
+                    mode_split_ta := TouchArea { clicked => { root.compare_mode = 1; } }
+                    mode_split_txt := Text {
+                        text: Translations.compare_mode_split_text;
+                        color: compare_mode == 1 ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        font-size: 12px; font-weight: 600;
+                        horizontal-alignment: TextHorizontalAlignment.center;
+                        vertical-alignment:   TextVerticalAlignment.center;
+                    }
+                }
+
+                // Overlay
+                Rectangle {
+                    width: mode_overlay_txt.preferred-width + 24px; height: 36px;
+                    border-radius: 8px;
+                    background: compare_mode == 2 ? CediniaColors.accent_muted : (mode_overlay_ta.has-hover ? CediniaColors.bg_surface : transparent);
+                    animate background { duration: 100ms; }
+                    mode_overlay_ta := TouchArea { clicked => { root.compare_mode = 2; } }
+                    mode_overlay_txt := Text {
+                        text: Translations.compare_mode_overlay_text;
+                        color: compare_mode == 2 ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        font-size: 12px; font-weight: 600;
+                        horizontal-alignment: TextHorizontalAlignment.center;
+                        vertical-alignment:   TextVerticalAlignment.center;
+                    }
+                }
+
+                // Diff
+                Rectangle {
+                    width: mode_diff_txt.preferred-width + 24px; height: 36px;
+                    border-radius: 8px;
+                    background: compare_mode == 3 ? CediniaColors.accent_muted : (mode_diff_ta.has-hover ? CediniaColors.bg_surface : transparent);
+                    animate background { duration: 100ms; }
+                    mode_diff_ta := TouchArea {
+                        clicked => {
+                            root.compare_mode = 3;
+                            if (!AppState.compare_loading) { AppState.compare_compute_diff(); }
+                        }
+                    }
+                    mode_diff_txt := Text {
+                        text: Translations.compare_mode_diff_text;
+                        color: compare_mode == 3 ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        font-size: 12px; font-weight: 600;
+                        horizontal-alignment: TextHorizontalAlignment.center;
+                        vertical-alignment:   TextVerticalAlignment.center;
+                    }
+                }
+            }
+        }
+
+        // ── Thumbnail strip ──────────────────────────────────────────────
+        Rectangle {
+            height: 118px;
+            background: CediniaColors.bg_primary;
+
+            // Top border
+            Rectangle {
+                x: 0; y: 0; width: parent.width; height: 1px;
+                background: CediniaColors.divider;
+            }
+
+            ScrollView {
+                y: 1px;
+                height: parent.height - 1px;
+                viewport-width: AppState.compare_images.length * 96px + 8px;
+
+                HorizontalLayout {
+                    width: AppState.compare_images.length * 96px + 8px;
+                    alignment: LayoutAlignment.start;
+                    spacing: 4px;
+                    padding: 6px;
+
+                    for img[idx] in AppState.compare_images: VerticalLayout {
+                        width: 88px;
+                        spacing: 3px;
+
+                        // Thumbnail tile
+                        Rectangle {
+                            height: 66px;
+                            border-radius: 7px;
+                            border-width: 2px;
+                            border-color:
+                                idx == AppState.compare_left_idx  ? CediniaColors.accent_light :
+                                idx == AppState.compare_right_idx ? #ff7755 : transparent;
+                            background: CediniaColors.bg_surface;
+                            clip: true;
+
+                            Image {
+                                x: 2px; y: 2px;
+                                width: parent.width - 4px;
+                                height: parent.height - 4px;
+                                source: img.thumbnail;
+                                image-fit: ImageFit.contain;
+                            }
+
+                            // Checked badge
+                            if img.checked: Rectangle {
+                                x: parent.width - 22px; y: 4px;
+                                width: 18px; height: 18px;
+                                border-radius: 9px;
+                                background: CediniaColors.accent;
+                                Text {
+                                    text: "✓";
+                                    color: #000000;
+                                    font-size: 10px; font-weight: 700;
+                                    horizontal-alignment: TextHorizontalAlignment.center;
+                                    vertical-alignment:   TextVerticalAlignment.center;
+                                }
+                            }
+                        }
+
+                        // L / R buttons
+                        HorizontalLayout {
+                            height: 26px; spacing: 3px;
+
+                            Rectangle {
+                                horizontal-stretch: 1.0;
+                                border-radius: 5px;
+                                background: idx == AppState.compare_left_idx
+                                    ? CediniaColors.accent
+                                    : (l_ta.has-hover ? CediniaColors.bg_surface : CediniaColors.bg_surface);
+                                l_ta := TouchArea {
+                                    enabled: idx != AppState.compare_right_idx;
+                                    clicked => { AppState.compare_set_left(idx); }
+                                }
+                                Text {
+                                    text: "L";
+                                    color: idx == AppState.compare_left_idx ? #000000 : CediniaColors.text_secondary;
+                                    font-size: 12px; font-weight: 700;
+                                    horizontal-alignment: TextHorizontalAlignment.center;
+                                    vertical-alignment:   TextVerticalAlignment.center;
+                                }
+                            }
+
+                            Rectangle {
+                                horizontal-stretch: 1.0;
+                                border-radius: 5px;
+                                background: idx == AppState.compare_right_idx
+                                    ? #ff7755
+                                    : CediniaColors.bg_surface;
+                                r_ta := TouchArea {
+                                    enabled: idx != AppState.compare_left_idx;
+                                    clicked => { AppState.compare_set_right(idx); }
+                                }
+                                Text {
+                                    text: "R";
+                                    color: idx == AppState.compare_right_idx ? #000000 : CediniaColors.text_secondary;
+                                    font-size: 12px; font-weight: 700;
+                                    horizontal-alignment: TextHorizontalAlignment.center;
+                                    vertical-alignment:   TextVerticalAlignment.center;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Loading overlay ──────────────────────────────────────────────────────
+    if AppState.compare_loading: Rectangle {
+        z: 100;
+        width: parent.width; height: parent.height;
+        background: #000000bb;
+
+        // Consume all pointer events
+        TouchArea {}
+
+        Rectangle {
+            x: (parent.width  - 280px) / 2;
+            y: (parent.height - 170px) / 2;
+            width: 280px; height: 170px;
+            border-radius: 16px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 20px;
+            drop-shadow-color: #000000aa;
+
+            VerticalLayout {
+                padding: 24px; spacing: 12px;
+                alignment: LayoutAlignment.center;
+
+                Text {
+                    text: AppState.compare_cancelling
+                        ? Translations.compare_cancelling_text
+                        : Translations.compare_loading_text;
+                    color: CediniaColors.text_primary;
+                    font-size: 15px; font-weight: 600;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+                Text {
+                    text: AppState.compare_loading_current + " / " + AppState.compare_loading_total;
+                    color: CediniaColors.text_secondary;
+                    font-size: 13px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+                Rectangle {
+                    height: 40px;
+                    border-radius: 8px;
+                    background: cancel_ta.has-hover ? CediniaColors.bg_surface.brighter(0.1) : CediniaColors.bg_surface;
+                    cancel_ta := TouchArea {
+                        enabled: !AppState.compare_cancelling;
+                        clicked => { AppState.compare_cancel_load(); }
+                    }
+                    Text {
+                        text: Translations.cancel_text;
+                        color: AppState.compare_cancelling ? CediniaColors.text_disabled : CediniaColors.text_secondary;
+                        font-size: 14px;
+                        horizontal-alignment: TextHorizontalAlignment.center;
+                        vertical-alignment:   TextVerticalAlignment.center;
+                    }
+                }
+            }
+        }
+    }
+}

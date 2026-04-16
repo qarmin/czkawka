@@ -56,6 +56,20 @@ export struct SimilarGroupCard {
     label: string,
     items: [SimilarImageItem],
 }
+
+export struct CompareImageData {
+    path:      string,
+    dir:       string,
+    name:      string,
+    size:      string,
+    dims:      string,
+    modified:  string,
+    checked:   bool,
+    thumbnail: image,
+    flat_idx:  int,
+    group_idx: int,
+    item_idx:  int,
+}
 export struct ProgressData {
     step_name: string,
     current_progress: int,
