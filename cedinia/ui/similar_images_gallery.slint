@@ -53,18 +53,31 @@ component GalleryImageCell {
     // Suppresses the clicked event that fires right after the long-press timer.
     property <bool> lp_fired: false;
 
-    // Stored press coordinates for the 30 px dead-zone check (Android).
+    // Explicit armed flag – set to true only while a genuine long-press is in
+    // progress.  Cleared imperatively by every cancellation path so that even
+    // if the timer callback runs just after a cancel/up/move event it will not
+    // open the popup.  This is more reliable than checking `ta.pressed` because
+    // Slint may not clear pressed before the timer callback runs.
+    property <bool> _lp_active: false;
+
+    // Stored press coordinates for the 30 px dead-zone check.
     property <length> _lp_start_x: 0px;
     property <length> _lp_start_y: 0px;
-    // Tracks the most-recent pointer position so the timer can re-check
-    // displacement even after the TouchArea stops receiving move events
-    // (i.e. when a SwipeGestureHandler has claimed the gesture).
-    property <length> _lp_cur_x:   0px;
-    property <length> _lp_cur_y:   0px;
 
-    // Cancel immediately when either SGR takes over the swipe gesture.
+    // Watch ta.pressed: the moment it goes false (up, cancel, gesture-steal)
+    // disarm the long-press even if the event callback hasn't run yet.
+    property <bool> _ta_pressed_watch: ta.pressed;
+    changed _ta_pressed_watch => {
+        if (!_ta_pressed_watch) {
+            root._lp_active = false;
+            cell_lp_timer.running = false;
+        }
+    }
+
+    // Cancel immediately when the horizontal SwipeGestureHandler takes over.
     changed any_sgr_swiping => {
         if (root.any_sgr_swiping) {
+            root._lp_active = false;
             cell_lp_timer.running = false;
         }
     }
@@ -81,25 +94,25 @@ component GalleryImageCell {
         }
         pointer-event(e) => {
             if (e.kind == PointerEventKind.down) {
-                root._lp_start_x = ta.mouse-x;
-                root._lp_start_y = ta.mouse-y;
-                root._lp_cur_x   = ta.mouse-x;
-                root._lp_cur_y   = ta.mouse-y;
+                root._lp_start_x = self.mouse-x;
+                root._lp_start_y = self.mouse-y;
+                root._lp_active  = true;
                 cell_lp_timer.running = true;
                 cell_lp_timer.restart();
-            } else if (e.kind == PointerEventKind.up) {
+            } else if (e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel) {
+                root._lp_active = false;
                 cell_lp_timer.running = false;
-            } else if (e.kind == PointerEventKind.move) {
-                root._lp_cur_x = ta.mouse-x;
-                root._lp_cur_y = ta.mouse-y;
-                // 30 px dead zone – cancels on real scroll gestures while
-                // tolerating Android micro-moves on a stationary finger.
-                if (ta.mouse-x - root._lp_start_x > 30px
-                        || root._lp_start_x - ta.mouse-x > 30px
-                        || ta.mouse-y - root._lp_start_y > 30px
-                        || root._lp_start_y - ta.mouse-y > 30px) {
-                    cell_lp_timer.running = false;
-                }
+            }
+        }
+        // Fires while finger is held and moving – cancel on dead-zone breach.
+        moved => {
+            // Well - this rarely works, because faster cancel event is gathered
+            if (self.mouse-x - root._lp_start_x > 30px
+                    || root._lp_start_x - self.mouse-x > 30px
+                    || self.mouse-y - root._lp_start_y > 30px
+                    || root._lp_start_y - self.mouse-y > 30px) {
+                root._lp_active = false;
+                cell_lp_timer.running = false;
             }
         }
     }
@@ -109,14 +122,8 @@ component GalleryImageCell {
         running: false;
         triggered => {
             self.running = false;
-            // Final guard: even if any_sgr_swiping didn't cancel in time,
-            // refuse to fire if the finger has drifted beyond the dead zone.
-            if (root._lp_cur_x - root._lp_start_x > 30px
-                    || root._lp_start_x - root._lp_cur_x > 30px
-                    || root._lp_cur_y - root._lp_start_y > 30px
-                    || root._lp_start_y - root._lp_cur_y > 30px) {
-                return;
-            }
+            if (!root._lp_active) { return; }
+            root._lp_active = false;
             root.lp_fired = true;
             root.cell_long_pressed(
                 root.img_full_path,

@@ -121,20 +121,29 @@ export component FileRow {
     callback open_item();
     callback open_parent();
 
-    // Set to true when the long-press timer fires so the subsequent
-    // `clicked` event (fired on finger-up) doesn't also toggle selection.
+    // Suppresses the clicked event that fires right after the long-press timer.
     property <bool> lp_fired: false;
 
-    // Set to true once the finger drifts beyond the dead zone or the scroll
-    // SGR claims the gesture.  Prevents `clicked` from toggling selection
-    // after a drag/scroll release.
+    // Prevents clicked from toggling selection after a drag/scroll release.
     property <bool> _moved: false;
 
-    // Stored press coordinates for the dead-zone check.
-    // On Android even a stationary finger generates tiny move events;
-    // we only cancel the timer when the finger actually drifts > 8 px.
+    // Explicit armed flag – only true while a valid long-press is in progress.
+    // Cleared by every cancellation path before the timer callback can read it.
+    property <bool> _lp_active: false;
+
+    // Stored press coordinates for the 8 px dead-zone check.
     property <length> _lp_start_x: 0px;
     property <length> _lp_start_y: 0px;
+
+    // Watch ta.pressed directly: fires synchronously when the TouchArea loses
+    // its pressed state (up, cancel, gesture-steal by ListView/SGR).
+    property <bool> _ta_pressed_watch: ta.pressed;
+    changed _ta_pressed_watch => {
+        if (!_ta_pressed_watch) {
+            root._lp_active = false;
+            lp_timer.running = false;
+        }
+    }
 
     height: root.is_header ? 36px : 80px;
 
@@ -171,30 +180,36 @@ export component FileRow {
             pointer-event(e) => {
                 if (!root.is_header) {
                     if (e.kind == PointerEventKind.down) {
-                        root._lp_start_x = ta.mouse-x;
-                        root._lp_start_y = ta.mouse-y;
-                        root._moved = false;
+                        root._lp_start_x = self.mouse-x;
+                        root._lp_start_y = self.mouse-y;
+                        root._moved    = false;
+                        root._lp_active = true;
                         lp_timer.running = true;
                         lp_timer.restart();
-                    } else if (e.kind == PointerEventKind.up) {
+                    } else if (e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel) {
+                        root._lp_active = false;
                         lp_timer.running = false;
-                    } else if (e.kind == PointerEventKind.move) {
-                        // 8 px dead zone – on Android even a stationary finger
-                        // produces micro-move events that would otherwise cancel
-                        // the long-press timer immediately.
-                        if (ta.mouse-x - root._lp_start_x > 8px
-                                || root._lp_start_x - ta.mouse-x > 8px
-                                || ta.mouse-y - root._lp_start_y > 8px
-                                || root._lp_start_y - ta.mouse-y > 8px) {
-                            lp_timer.running = false;
-                            root._moved = true;
-                        }
+                        if (e.kind == PointerEventKind.cancel) { root._moved = true; }
                     }
                     if (e.button == PointerEventButton.middle && e.kind == PointerEventKind.up) {
                         root.open_item();
                     }
                     if (e.button == PointerEventButton.right && e.kind == PointerEventKind.up) {
                         root.open_parent();
+                    }
+                }
+            }
+            // Fires while finger is held and moving.
+            moved => {
+                if (!root.is_header) {
+                    // Well - this rarely works, because faster cancel event is gathered
+                    if (self.mouse-x - root._lp_start_x > 8px
+                            || root._lp_start_x - self.mouse-x > 8px
+                            || self.mouse-y - root._lp_start_y > 8px
+                            || root._lp_start_y - self.mouse-y > 8px) {
+                        root._lp_active = false;
+                        lp_timer.running = false;
+                        root._moved = true;
                     }
                 }
             }
@@ -205,6 +220,8 @@ export component FileRow {
             running: false;
             triggered => {
                 self.running = false;
+                if (!root._lp_active) { return; }
+                root._lp_active = false;
                 root.lp_fired = true;
                 root.long_pressed();
             }
