@@ -10,16 +10,16 @@ component CompareIconBtn inherits Rectangle {
     in property <image>  icon;
     in property <bool>   active:  false;
     in property <bool>   enabled: true;
-    in property <bool>   danger:  false;
+    in property <bool>   close_btn: false;
     callback clicked;
 
     width:  52px;
     height: 44px;
     border-radius: 10px;
     background: ta.has-hover && root.enabled
-        ? (root.danger ? CediniaColors.danger.brighter(0.1)
+        ? (root.close_btn ? #3a6a9a
           : root.active ? CediniaColors.accent.brighter(0.15) : CediniaColors.bg_surface)
-        : (root.danger ? CediniaColors.danger.with-alpha(0.35)
+        : (root.close_btn ? #2a4a6a
           : root.active ? CediniaColors.accent_muted : transparent);
     animate background { duration: 100ms; }
 
@@ -31,7 +31,7 @@ component CompareIconBtn inherits Rectangle {
     Image {
         source: root.icon;
         colorize: root.enabled
-            ? (root.danger ? CediniaColors.danger
+            ? (root.close_btn ? #8ac4e8
               : root.active ? CediniaColors.accent_light : CediniaColors.text_secondary)
             : CediniaColors.text_disabled;
         width:  24px;
@@ -48,9 +48,6 @@ export component ImageCompareOverlay inherits Rectangle {
     private property <bool>  info_visible:  false;
     private property <float> split_pos:     0.5;
     private property <float> overlay_alpha: 0.5;
-
-    // Cached split position when the drag starts so we can compute the delta.
-    private property <float> split_pos_at_drag_start: 0.5;
 
     private property <bool> left_valid:
         AppState.compare_left_idx >= 0 &&
@@ -111,10 +108,10 @@ export component ImageCompareOverlay inherits Rectangle {
                     clicked => { AppState.compare_swap(); }
                 }
 
-                // Close / Back (center, danger color)
+                // Close / Back (center, blue)
                 CompareIconBtn {
-                    icon:   @image-url("../../krokiet/icons/krokiet_compare_back.svg");
-                    danger: true;
+                    icon:      @image-url("../../krokiet/icons/krokiet_compare_back.svg");
+                    close_btn: true;
                     clicked => {
                         AppState.compare_visible = false;
                         root.compare_mode = CompareMode.Normal;
@@ -293,43 +290,11 @@ export component ImageCompareOverlay inherits Rectangle {
                     }
                 }
 
-                // Draggable split divider handle
+                // Static split divider line
                 Rectangle {
-                    x: main_area.width * root.split_pos - 16px; y: 0;
-                    width: 32px; height: main_area.height;
-
-                    // Vertical line
-                    Rectangle {
-                        x: 15px; y: 0;
-                        width: 2px; height: parent.height;
-                        background: #ffffffaa;
-                    }
-
-                    // Circular handle in the middle
-                    Rectangle {
-                        x: 4px;
-                        y: (parent.height - 44px) / 2;
-                        width: 24px; height: 44px;
-                        border-radius: 12px;
-                        background: #ffffffdd;
-                        drop-shadow-blur: 4px;
-                        drop-shadow-color: #00000088;
-                    }
-
-                    split_drag_ta := TouchArea {
-                        pointer-event(e) => {
-                            if (e.kind == PointerEventKind.down) {
-                                root.split_pos_at_drag_start = root.split_pos;
-                            }
-                        }
-                        moved => {
-                            // (mouse-x - pressed-x) is a length delta; divide by area width to get fraction
-                            root.split_pos = max(0.02, min(0.98,
-                                root.split_pos_at_drag_start +
-                                (self.mouse-x - self.pressed-x) / main_area.width
-                            ));
-                        }
-                    }
+                    x: main_area.width * root.split_pos; y: 0;
+                    width: 2px; height: main_area.height;
+                    background: #ffffffaa;
                 }
             }
 
@@ -383,13 +348,6 @@ export component ImageCompareOverlay inherits Rectangle {
 
             HorizontalLayout {
                 padding: 12px; spacing: 10px;
-                Text {
-                    text: compare_mode == CompareMode.Split ? "⟷" : "◧";
-                    color: CediniaColors.text_secondary;
-                    font-size: 18px;
-                    vertical-alignment: TextVerticalAlignment.center;
-                    width: 24px;
-                }
                 Slider {
                     horizontal-stretch: 1.0;
                     value: compare_mode == CompareMode.Split ? root.split_pos : root.overlay_alpha;
