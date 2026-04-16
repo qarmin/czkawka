@@ -44,8 +44,7 @@ component CompareIconBtn inherits Rectangle {
 // ─── Main overlay component ────────────────────────────────────────────────
 export component ImageCompareOverlay inherits Rectangle {
 
-    // 0 = side-by-side, 1 = split, 2 = overlay, 3 = diff
-    private property <int>   compare_mode:  0;
+    private property <CompareMode> compare_mode: CompareMode.Normal;
     private property <bool>  info_visible:  false;
     private property <float> split_pos:     0.5;
     private property <float> overlay_alpha: 0.5;
@@ -70,17 +69,17 @@ export component ImageCompareOverlay inherits Rectangle {
     // Auto-compute diff when loading finishes or images change while in diff mode.
     property <bool> _loading_watch: AppState.compare_loading;
     changed _loading_watch => {
-        if (!_loading_watch && compare_mode == 3) {
+        if (!_loading_watch && compare_mode == CompareMode.Diff) {
             AppState.compare_compute_diff();
         }
     }
     property <int> _left_watch: AppState.compare_left_idx;
     changed _left_watch => {
-        if (compare_mode == 3) { AppState.compare_compute_diff(); }
+        if (compare_mode == CompareMode.Diff) { AppState.compare_compute_diff(); }
     }
     property <int> _right_watch: AppState.compare_right_idx;
     changed _right_watch => {
-        if (compare_mode == 3) { AppState.compare_compute_diff(); }
+        if (compare_mode == CompareMode.Diff) { AppState.compare_compute_diff(); }
     }
 
     VerticalLayout {
@@ -98,17 +97,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 padding-bottom: 6px;
                 spacing: 2px;
 
-                // Back
-                CompareIconBtn {
-                    icon: @image-url("../../krokiet/icons/krokiet_compare_back.svg");
-                    clicked => {
-                        AppState.compare_visible = false;
-                        root.compare_mode = 0;
-                        root.info_visible = false;
-                    }
-                }
-
-                // Prev group
+                // Prev group (far left)
                 CompareIconBtn {
                     icon: @image-url("../../krokiet/icons/krokiet_compare_prev.svg");
                     clicked => { AppState.compare_prev_group(); }
@@ -122,6 +111,17 @@ export component ImageCompareOverlay inherits Rectangle {
                     clicked => { AppState.compare_swap(); }
                 }
 
+                // Close / Back (center, danger color)
+                CompareIconBtn {
+                    icon:   @image-url("../../krokiet/icons/krokiet_compare_back.svg");
+                    danger: true;
+                    clicked => {
+                        AppState.compare_visible = false;
+                        root.compare_mode = CompareMode.Normal;
+                        root.info_visible = false;
+                    }
+                }
+
                 // Info toggle
                 CompareIconBtn {
                     icon:   @image-url("../../krokiet/icons/krokiet_info.svg");
@@ -131,7 +131,7 @@ export component ImageCompareOverlay inherits Rectangle {
 
                 Rectangle { horizontal-stretch: 1.0; }
 
-                // Next group
+                // Next group (far right)
                 CompareIconBtn {
                     icon: @image-url("../../krokiet/icons/krokiet_compare_next.svg");
                     clicked => { AppState.compare_next_group(); }
@@ -147,7 +147,7 @@ export component ImageCompareOverlay inherits Rectangle {
         }
 
         // ── Resolution mismatch warning (diff mode only) ──────────────────
-        if res_mismatch && compare_mode == 3: Rectangle {
+        if res_mismatch && compare_mode == CompareMode.Diff: Rectangle {
             height: 26px;
             background: #ff880033;
             Text {
@@ -167,7 +167,7 @@ export component ImageCompareOverlay inherits Rectangle {
             background: #0d0d0d;
 
             // ── Normal: side-by-side ─────────────────────────────────────
-            if compare_mode == 0: Rectangle {
+            if compare_mode == CompareMode.Normal: Rectangle {
                 width: parent.width; height: parent.height;
 
                 // Left image
@@ -261,7 +261,7 @@ export component ImageCompareOverlay inherits Rectangle {
             }
 
             // ── Split mode ───────────────────────────────────────────────
-            if compare_mode == 1: Rectangle {
+            if compare_mode == CompareMode.Split: Rectangle {
                 width: parent.width; height: parent.height;
                 background: CediniaColors.bg_surface;
 
@@ -334,7 +334,7 @@ export component ImageCompareOverlay inherits Rectangle {
             }
 
             // ── Overlay mode ─────────────────────────────────────────────
-            if compare_mode == 2: Rectangle {
+            if compare_mode == CompareMode.Overlay: Rectangle {
                 width: parent.width; height: parent.height;
                 background: CediniaColors.bg_surface;
                 Image {
@@ -351,7 +351,7 @@ export component ImageCompareOverlay inherits Rectangle {
             }
 
             // ── Diff mode ─────────────────────────────────────────────────
-            if compare_mode == 3: Rectangle {
+            if compare_mode == CompareMode.Diff: Rectangle {
                 width: parent.width; height: parent.height;
                 background: #000000;
                 Image {
@@ -371,7 +371,7 @@ export component ImageCompareOverlay inherits Rectangle {
         }
 
         // ── Slider row (split or overlay mode) ──────────────────────────
-        if compare_mode == 1 || compare_mode == 2: Rectangle {
+        if compare_mode == CompareMode.Split || compare_mode == CompareMode.Overlay: Rectangle {
             height: 52px;
             background: CediniaColors.bg_elevated;
 
@@ -384,7 +384,7 @@ export component ImageCompareOverlay inherits Rectangle {
             HorizontalLayout {
                 padding: 12px; spacing: 10px;
                 Text {
-                    text: compare_mode == 1 ? "⟷" : "◧";
+                    text: compare_mode == CompareMode.Split ? "⟷" : "◧";
                     color: CediniaColors.text_secondary;
                     font-size: 18px;
                     vertical-alignment: TextVerticalAlignment.center;
@@ -392,10 +392,10 @@ export component ImageCompareOverlay inherits Rectangle {
                 }
                 Slider {
                     horizontal-stretch: 1.0;
-                    value: compare_mode == 1 ? root.split_pos : root.overlay_alpha;
+                    value: compare_mode == CompareMode.Split ? root.split_pos : root.overlay_alpha;
                     minimum: 0.0; maximum: 1.0;
                     changed(v) => {
-                        if (compare_mode == 1) { root.split_pos = v; }
+                        if (compare_mode == CompareMode.Split) { root.split_pos = v; }
                         else { root.overlay_alpha = v; }
                     }
                 }
@@ -501,12 +501,12 @@ export component ImageCompareOverlay inherits Rectangle {
                 Rectangle {
                     width: mode_normal_txt.preferred-width + 24px; height: 36px;
                     border-radius: 8px;
-                    background: compare_mode == 0 ? CediniaColors.accent_muted : (mode_normal_ta.has-hover ? CediniaColors.bg_surface : transparent);
+                    background: compare_mode == CompareMode.Normal ? CediniaColors.accent_muted : (mode_normal_ta.has-hover ? CediniaColors.bg_surface : transparent);
                     animate background { duration: 100ms; }
-                    mode_normal_ta := TouchArea { clicked => { root.compare_mode = 0; } }
+                    mode_normal_ta := TouchArea { clicked => { root.compare_mode = CompareMode.Normal; } }
                     mode_normal_txt := Text {
                         text: Translations.compare_mode_normal_text;
-                        color: compare_mode == 0 ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        color: compare_mode == CompareMode.Normal ? CediniaColors.accent_light : CediniaColors.text_secondary;
                         font-size: 12px; font-weight: 600;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment:   TextVerticalAlignment.center;
@@ -517,12 +517,12 @@ export component ImageCompareOverlay inherits Rectangle {
                 Rectangle {
                     width: mode_split_txt.preferred-width + 24px; height: 36px;
                     border-radius: 8px;
-                    background: compare_mode == 1 ? CediniaColors.accent_muted : (mode_split_ta.has-hover ? CediniaColors.bg_surface : transparent);
+                    background: compare_mode == CompareMode.Split ? CediniaColors.accent_muted : (mode_split_ta.has-hover ? CediniaColors.bg_surface : transparent);
                     animate background { duration: 100ms; }
-                    mode_split_ta := TouchArea { clicked => { root.compare_mode = 1; } }
+                    mode_split_ta := TouchArea { clicked => { root.compare_mode = CompareMode.Split; } }
                     mode_split_txt := Text {
                         text: Translations.compare_mode_split_text;
-                        color: compare_mode == 1 ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        color: compare_mode == CompareMode.Split ? CediniaColors.accent_light : CediniaColors.text_secondary;
                         font-size: 12px; font-weight: 600;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment:   TextVerticalAlignment.center;
@@ -533,12 +533,12 @@ export component ImageCompareOverlay inherits Rectangle {
                 Rectangle {
                     width: mode_overlay_txt.preferred-width + 24px; height: 36px;
                     border-radius: 8px;
-                    background: compare_mode == 2 ? CediniaColors.accent_muted : (mode_overlay_ta.has-hover ? CediniaColors.bg_surface : transparent);
+                    background: compare_mode == CompareMode.Overlay ? CediniaColors.accent_muted : (mode_overlay_ta.has-hover ? CediniaColors.bg_surface : transparent);
                     animate background { duration: 100ms; }
-                    mode_overlay_ta := TouchArea { clicked => { root.compare_mode = 2; } }
+                    mode_overlay_ta := TouchArea { clicked => { root.compare_mode = CompareMode.Overlay; } }
                     mode_overlay_txt := Text {
                         text: Translations.compare_mode_overlay_text;
-                        color: compare_mode == 2 ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        color: compare_mode == CompareMode.Overlay ? CediniaColors.accent_light : CediniaColors.text_secondary;
                         font-size: 12px; font-weight: 600;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment:   TextVerticalAlignment.center;
@@ -549,17 +549,17 @@ export component ImageCompareOverlay inherits Rectangle {
                 Rectangle {
                     width: mode_diff_txt.preferred-width + 24px; height: 36px;
                     border-radius: 8px;
-                    background: compare_mode == 3 ? CediniaColors.accent_muted : (mode_diff_ta.has-hover ? CediniaColors.bg_surface : transparent);
+                    background: compare_mode == CompareMode.Diff ? CediniaColors.accent_muted : (mode_diff_ta.has-hover ? CediniaColors.bg_surface : transparent);
                     animate background { duration: 100ms; }
                     mode_diff_ta := TouchArea {
                         clicked => {
-                            root.compare_mode = 3;
+                            root.compare_mode = CompareMode.Diff;
                             if (!AppState.compare_loading) { AppState.compare_compute_diff(); }
                         }
                     }
                     mode_diff_txt := Text {
                         text: Translations.compare_mode_diff_text;
-                        color: compare_mode == 3 ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        color: compare_mode == CompareMode.Diff ? CediniaColors.accent_light : CediniaColors.text_secondary;
                         font-size: 12px; font-weight: 600;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment:   TextVerticalAlignment.center;
