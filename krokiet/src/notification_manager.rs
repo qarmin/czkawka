@@ -18,6 +18,7 @@ pub fn send_scan_completed_notification(tool: &str, body: &str) {
 }
 
 #[cfg(target_os = "linux")]
+// TODO - linux on error - https://github.com/hoodie/notify-rust/issues/218
 fn try_notify_send(summary: &str, body: &str) -> bool {
     match std::process::Command::new("notify-send").arg("--app-name=krokiet").arg(summary).arg(body).status() {
         Ok(s) if s.success() => {
