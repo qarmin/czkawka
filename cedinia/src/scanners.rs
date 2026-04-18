@@ -61,7 +61,6 @@ pub(crate) fn scan_duplicate_files<H: ScanResultHandler>(
     dirs: Vec<PathBuf>,
     check_method: czkawka_core::common::model::CheckingMethod,
     hash_type: czkawka_core::common::model::HashType,
-    use_cache: bool,
     filters: &CommonFilters,
     stop: &Arc<AtomicBool>,
     handler: &Arc<H>,
@@ -70,11 +69,10 @@ pub(crate) fn scan_duplicate_files<H: ScanResultHandler>(
     use czkawka_core::common::model::CheckingMethod;
     use czkawka_core::tools::duplicate::{DuplicateEntry, DuplicateFinder, DuplicateFinderParameters};
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
-    let params = DuplicateFinderParameters::new(check_method, hash_type, use_cache, 8 * 1024, 0, false);
+    let params = DuplicateFinderParameters::new(check_method, hash_type, filters.use_cache, 8 * 1024, 0, false);
     let mut tool = DuplicateFinder::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
@@ -202,7 +200,6 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     let mut tool = SimilarImages::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
@@ -257,7 +254,6 @@ pub(crate) fn scan_empty_files<H: ScanResultHandler>(dirs: Vec<PathBuf>, filters
     let mut tool = EmptyFiles::new();
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
@@ -285,7 +281,6 @@ pub(crate) fn scan_temporary_files<H: ScanResultHandler>(dirs: Vec<PathBuf>, fil
     let mut tool = Temporary::new();
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
@@ -322,7 +317,6 @@ pub(crate) fn scan_big_files<H: ScanResultHandler>(
     let mut tool = BigFile::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
@@ -355,7 +349,6 @@ pub(crate) fn scan_broken_files<H: ScanResultHandler>(
     let mut tool = BrokenFiles::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
@@ -391,7 +384,6 @@ pub(crate) fn scan_bad_extensions<H: ScanResultHandler>(dirs: Vec<PathBuf>, filt
     let mut tool = BadExtensions::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
@@ -452,7 +444,6 @@ pub(crate) fn scan_bad_names<H: ScanResultHandler>(
     let mut tool = BadNames::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
@@ -488,7 +479,6 @@ pub(crate) fn scan_exif_remover<H: ScanResultHandler>(dirs: Vec<PathBuf>, filter
     let mut tool = ExifRemover::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");
@@ -531,7 +521,6 @@ pub(crate) fn scan_same_music<H: ScanResultHandler>(
     let mut tool = SameMusic::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
-    tool.set_recursive_search(true);
     tool.search(stop, Some(&ptx));
     drop(ptx);
     fwd.join().expect("Failed to join progress forwarder thread");

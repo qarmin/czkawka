@@ -413,7 +413,15 @@ fn run_app_inner(
     let delete_rx = Rc::new(std::cell::RefCell::new(delete_rx));
     let delete_stop: Rc<std::cell::RefCell<Arc<AtomicBool>>> = Rc::new(std::cell::RefCell::new(Arc::new(AtomicBool::new(false))));
 
-    wire_scan(&window, stop_flag, scan_tx, included_dirs.clone(), referenced_dirs.clone(), scan_gen.clone());
+    wire_scan(
+        &window,
+        stop_flag,
+        scan_tx,
+        included_dirs.clone(),
+        excluded_dirs.clone(),
+        referenced_dirs.clone(),
+        scan_gen.clone(),
+    );
     wire_permission(&window);
     wire_notification_settings(&window);
     wire_selection(&window, delete_tx, Rc::clone(&delete_stop));
