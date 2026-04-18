@@ -1,0 +1,34 @@
+// Utility component that measures the natural (preferred) width of a list of strings
+// rendered with given font settings, and exposes the maximum as `max_width`.
+//
+// Usage:
+//   m := MaxTextMeasure {
+//       texts: ["Short", "A much longer string", "Medium"];
+//       font-size: FontSizes.normal;
+//       font-weight: 700;
+//   }
+//   some-element.width: m.max_width + 8px;
+//
+// The component renders all strings as Text elements in an off-screen VerticalLayout.
+// Slint computes VerticalLayout.preferred-width = max of children's preferred-widths,
+// which is exactly what we need.
+export component MaxTextMeasure {
+    in property <[string]> texts: [];
+    in property <length>   font-size: 13px;
+    in property <int>      font-weight: 400;
+
+    out property <length>  measure_width: layout.preferred-width;
+
+    // Positioned far off-screen so it never appears in the UI.
+    x: -10000px;
+    y: -10000px;
+    height: 0;
+
+    layout := VerticalLayout {
+        for t in texts: Text {
+            font-size: root.font-size;
+            font-weight: root.font-weight;
+            text: t;
+        }
+    }
+}

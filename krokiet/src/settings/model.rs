@@ -303,6 +303,40 @@ pub struct BasicSettings {
     pub play_audio_on_scan_completion: bool,
     #[serde(default)]
     pub show_notification_on_scan_completion: bool,
+
+    // Select popup visibility – global (not per-preset)
+    #[serde(default)]
+    pub select_show_oldest: bool,
+    #[serde(default)]
+    pub select_show_newest: bool,
+    #[serde(default)]
+    pub select_show_smallest_size: bool,
+    #[serde(default)]
+    pub select_show_biggest_size: bool,
+    #[serde(default)]
+    pub select_show_smallest_resolution: bool,
+    #[serde(default)]
+    pub select_show_biggest_resolution: bool,
+    #[serde(default)]
+    pub select_show_shortest_path: bool,
+    #[serde(default)]
+    pub select_show_longest_path: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_oldest: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_newest: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_smallest_size: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_biggest_size: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_smallest_resolution: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_biggest_resolution: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_shortest_path: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_longest_path: bool,
 }
 
 impl Default for BasicSettings {

@@ -230,6 +230,24 @@ export global Settings {
     // Notifications
     in-out property <bool> show_notification_on_scan_completion: false;
 
+    // Select popup visibility – global (not per-preset)
+    in-out property <bool> select_show_oldest: true;
+    in-out property <bool> select_show_newest: true;
+    in-out property <bool> select_show_smallest_size: true;
+    in-out property <bool> select_show_biggest_size: true;
+    in-out property <bool> select_show_smallest_resolution: true;
+    in-out property <bool> select_show_biggest_resolution: true;
+    in-out property <bool> select_show_shortest_path: true;
+    in-out property <bool> select_show_longest_path: true;
+    in-out property <bool> select_show_except_oldest: true;
+    in-out property <bool> select_show_except_newest: true;
+    in-out property <bool> select_show_except_smallest_size: true;
+    in-out property <bool> select_show_except_biggest_size: true;
+    in-out property <bool> select_show_except_smallest_resolution: true;
+    in-out property <bool> select_show_except_biggest_resolution: true;
+    in-out property <bool> select_show_except_shortest_path: true;
+    in-out property <bool> select_show_except_longest_path: true;
+
     out property <length> path_px: 350px;
     out property <length> name_px: 100px;
     out property <length> mod_px: 125px;

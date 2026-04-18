@@ -5,6 +5,7 @@ import { GuiState } from "gui_state.slint";
 import { Translations } from "translations.slint";
 import { ColorPalette } from "color_palette.slint";
 import { FontSizes } from "fonts.slint";
+import { MaxTextMeasure } from "text_size.slint";
 
 // TODO use Spinbox instead LineEdit {} to be able to set only numbers
 
@@ -48,6 +49,160 @@ component CheckBoxComponent inherits HorizontalLayout {
         }
     }
     Rectangle { }
+}
+
+component SelectGroupRow inherits HorizontalLayout {
+    in property <string> group_label;
+    in-out property <bool> val_a;
+    in-out property <bool> val_b;
+    in-out property <bool> val_c;
+    in-out property <bool> val_d;
+    in property <string> label_a;
+    in property <string> label_b;
+    in property <string> label_c;
+    in property <string> label_d;
+    in property <length> col_label;
+    in property <length> col_single;
+    in property <length> col_except;
+    callback changed();
+    height: SettingsSize.item_height;
+    spacing: 30px;
+
+    Text {
+        text: group_label;
+        width: col_label;
+        horizontal-stretch: 0.0;
+        vertical-alignment: TextVerticalAlignment.center;
+        font-size: FontSizes.normal;
+        overflow: TextOverflow.elide;
+    }
+    CheckBox {
+        width: col_single;
+        horizontal-stretch: 0.0;
+        height: SettingsSize.item_height;
+        checked <=> val_a;
+        text: label_a;
+        toggled => { root.changed(); }
+    }
+    CheckBox {
+        width: col_single;
+        horizontal-stretch: 0.0;
+        height: SettingsSize.item_height;
+        checked <=> val_b;
+        text: label_b;
+        toggled => { root.changed(); }
+    }
+    CheckBox {
+        width: col_except;
+        horizontal-stretch: 0.0;
+        height: SettingsSize.item_height;
+        checked <=> val_c;
+        text: label_c;
+        toggled => { root.changed(); }
+    }
+    CheckBox {
+        width: col_except;
+        horizontal-stretch: 0.0;
+        height: SettingsSize.item_height;
+        checked <=> val_d;
+        text: label_d;
+        toggled => { root.changed(); }
+    }
+}
+
+component SelectGridSection inherits VerticalLayout {
+    spacing: 5px;
+
+    property <length> checkbox_overhead: 20px;
+
+    m_labels := MaxTextMeasure {
+        font-size: FontSizes.normal;
+        texts: [
+            Translations.settings_select_group_size_text,
+            Translations.settings_select_group_date_text,
+            Translations.settings_select_group_resolution_text,
+            Translations.settings_select_group_path_text,
+        ];
+    }
+    m_single := MaxTextMeasure {
+        font-size: FontSizes.normal;
+        texts: [
+            Translations.settings_select_label_one_smallest_text,
+            Translations.settings_select_label_one_biggest_text,
+            Translations.settings_select_label_one_oldest_text,
+            Translations.settings_select_label_one_newest_text,
+            Translations.settings_select_label_shortest_text,
+            Translations.settings_select_label_longest_text,
+        ];
+    }
+    m_except := MaxTextMeasure {
+        font-size: FontSizes.normal;
+        texts: [
+            Translations.settings_select_label_except_smallest_text,
+            Translations.settings_select_label_except_biggest_text,
+            Translations.settings_select_label_except_oldest_text,
+            Translations.settings_select_label_except_newest_text,
+            Translations.settings_select_label_except_shortest_text,
+            Translations.settings_select_label_except_longest_text,
+        ];
+    }
+
+    property <length> w_label:  m_labels.measure_width + 12px;
+    property <length> w_single: m_single.measure_width + checkbox_overhead;
+    property <length> w_except: m_except.measure_width + checkbox_overhead;
+
+    SelectGroupRow {
+        col_label: w_label; col_single: w_single; col_except: w_except;
+        group_label: Translations.settings_select_group_size_text;
+        val_a <=> Settings.select_show_smallest_size;
+        label_a: Translations.settings_select_label_one_smallest_text;
+        val_b <=> Settings.select_show_biggest_size;
+        label_b: Translations.settings_select_label_one_biggest_text;
+        val_c <=> Settings.select_show_except_smallest_size;
+        label_c: Translations.settings_select_label_except_smallest_text;
+        val_d <=> Settings.select_show_except_biggest_size;
+        label_d: Translations.settings_select_label_except_biggest_text;
+        changed => { Callabler.update_select_buttons(); }
+    }
+    SelectGroupRow {
+        col_label: w_label; col_single: w_single; col_except: w_except;
+        group_label: Translations.settings_select_group_date_text;
+        val_a <=> Settings.select_show_oldest;
+        label_a: Translations.settings_select_label_one_oldest_text;
+        val_b <=> Settings.select_show_newest;
+        label_b: Translations.settings_select_label_one_newest_text;
+        val_c <=> Settings.select_show_except_oldest;
+        label_c: Translations.settings_select_label_except_oldest_text;
+        val_d <=> Settings.select_show_except_newest;
+        label_d: Translations.settings_select_label_except_newest_text;
+        changed => { Callabler.update_select_buttons(); }
+    }
+    SelectGroupRow {
+        col_label: w_label; col_single: w_single; col_except: w_except;
+        group_label: Translations.settings_select_group_resolution_text;
+        val_a <=> Settings.select_show_smallest_resolution;
+        label_a: Translations.settings_select_label_one_smallest_text;
+        val_b <=> Settings.select_show_biggest_resolution;
+        label_b: Translations.settings_select_label_one_biggest_text;
+        val_c <=> Settings.select_show_except_smallest_resolution;
+        label_c: Translations.settings_select_label_except_smallest_text;
+        val_d <=> Settings.select_show_except_biggest_resolution;
+        label_d: Translations.settings_select_label_except_biggest_text;
+        changed => { Callabler.update_select_buttons(); }
+    }
+    SelectGroupRow {
+        col_label: w_label; col_single: w_single; col_except: w_except;
+        group_label: Translations.settings_select_group_path_text;
+        val_a <=> Settings.select_show_shortest_path;
+        label_a: Translations.settings_select_label_shortest_text;
+        val_b <=> Settings.select_show_longest_path;
+        label_b: Translations.settings_select_label_longest_text;
+        val_c <=> Settings.select_show_except_shortest_path;
+        label_c: Translations.settings_select_label_except_shortest_text;
+        val_d <=> Settings.select_show_except_longest_path;
+        label_d: Translations.settings_select_label_except_longest_text;
+        changed => { Callabler.update_select_buttons(); }
+    }
 }
 
 component ThreadSliderComponent inherits HorizontalLayout {
@@ -357,7 +512,13 @@ export component SettingsList inherits VerticalLayout {
             }
 
             HeaderText {
-                text <=> Translations.settings_general_settings_text;
+                text <=> Translations.settings_select_header_text;
+            }
+
+            SelectGridSection { }
+
+            HeaderText {
+                text <=> Translations.settings_cache_header_text;
             }
 
             TextComponent {

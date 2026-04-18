@@ -9,7 +9,7 @@ use crate::common::{connect_i32_into_u64, create_model_from_model_vec};
 use crate::connect_row_selection::checker::change_number_of_enabled_items;
 use crate::connect_translation::translate_select_mode;
 use crate::shared_models::SharedModels;
-use crate::{ActiveTab, Callabler, CustomSelectColumnModel, GuiState, MainWindow, SelectMode, SelectModel, SingleMainListModel};
+use crate::{ActiveTab, Callabler, CustomSelectColumnModel, GuiState, MainWindow, SelectMode, SelectModel, Settings, SingleMainListModel};
 
 type SelectionResult = (u64, u64, ModelRc<SingleMainListModel>);
 
@@ -17,6 +17,12 @@ type SelectionResult = (u64, u64, ModelRc<SingleMainListModel>);
 // https://github.com/slint-ui/slint/discussions/4595
 pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedModels>>) {
     set_select_buttons(app);
+
+    let a = app.as_weak();
+    app.global::<Callabler>().on_update_select_buttons(move || {
+        let app = a.upgrade().expect("Failed to upgrade app :(");
+        set_select_buttons(&app);
+    });
 
     let shared_models = shared_models.clone();
     let a = app.as_weak();
@@ -37,6 +43,14 @@ pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedM
             SelectMode::SelectOldest => select_by_property(&current_model, active_tab, Property::Date, false),
             SelectMode::SelectShortestPath => select_by_property(&current_model, active_tab, Property::PathLength, false),
             SelectMode::SelectLongestPath => select_by_property(&current_model, active_tab, Property::PathLength, true),
+            SelectMode::SelectAllExceptBiggestSize => select_all_except_by_property(&current_model, active_tab, Property::Size, true),
+            SelectMode::SelectAllExceptSmallestSize => select_all_except_by_property(&current_model, active_tab, Property::Size, false),
+            SelectMode::SelectAllExceptBiggestResolution => select_all_except_by_property(&current_model, active_tab, Property::Resolution, true),
+            SelectMode::SelectAllExceptSmallestResolution => select_all_except_by_property(&current_model, active_tab, Property::Resolution, false),
+            SelectMode::SelectAllExceptNewest => select_all_except_by_property(&current_model, active_tab, Property::Date, true),
+            SelectMode::SelectAllExceptOldest => select_all_except_by_property(&current_model, active_tab, Property::Date, false),
+            SelectMode::SelectAllExceptLongestPath => select_all_except_by_property(&current_model, active_tab, Property::PathLength, true),
+            SelectMode::SelectAllExceptShortestPath => select_all_except_by_property(&current_model, active_tab, Property::PathLength, false),
 
             SelectMode::SelectCustom => return,
         };
@@ -98,26 +112,41 @@ enum Property {
 
 pub(crate) fn set_select_buttons(app: &MainWindow) {
     let active_tab = app.global::<GuiState>().get_active_tab();
+    let settings = app.global::<Settings>();
     let mut base_buttons = vec![SelectMode::SelectCustom, SelectMode::SelectAll, SelectMode::UnselectAll, SelectMode::InvertSelection];
 
     let additional_buttons = match active_tab {
         ActiveTab::DuplicateFiles | ActiveTab::SimilarVideos | ActiveTab::SimilarMusic => vec![
-            SelectMode::SelectOldest,
-            SelectMode::SelectNewest,
-            SelectMode::SelectTheSmallestSize,
-            SelectMode::SelectTheBiggestSize,
-            SelectMode::SelectShortestPath,
-            SelectMode::SelectLongestPath,
+            (SelectMode::SelectOldest, settings.get_select_show_oldest()),
+            (SelectMode::SelectNewest, settings.get_select_show_newest()),
+            (SelectMode::SelectTheSmallestSize, settings.get_select_show_smallest_size()),
+            (SelectMode::SelectTheBiggestSize, settings.get_select_show_biggest_size()),
+            (SelectMode::SelectShortestPath, settings.get_select_show_shortest_path()),
+            (SelectMode::SelectLongestPath, settings.get_select_show_longest_path()),
+            (SelectMode::SelectAllExceptOldest, settings.get_select_show_except_oldest()),
+            (SelectMode::SelectAllExceptNewest, settings.get_select_show_except_newest()),
+            (SelectMode::SelectAllExceptSmallestSize, settings.get_select_show_except_smallest_size()),
+            (SelectMode::SelectAllExceptBiggestSize, settings.get_select_show_except_biggest_size()),
+            (SelectMode::SelectAllExceptShortestPath, settings.get_select_show_except_shortest_path()),
+            (SelectMode::SelectAllExceptLongestPath, settings.get_select_show_except_longest_path()),
         ],
         ActiveTab::SimilarImages => vec![
-            SelectMode::SelectOldest,
-            SelectMode::SelectNewest,
-            SelectMode::SelectTheSmallestSize,
-            SelectMode::SelectTheBiggestSize,
-            SelectMode::SelectTheSmallestResolution,
-            SelectMode::SelectTheBiggestResolution,
-            SelectMode::SelectShortestPath,
-            SelectMode::SelectLongestPath,
+            (SelectMode::SelectOldest, settings.get_select_show_oldest()),
+            (SelectMode::SelectNewest, settings.get_select_show_newest()),
+            (SelectMode::SelectTheSmallestSize, settings.get_select_show_smallest_size()),
+            (SelectMode::SelectTheBiggestSize, settings.get_select_show_biggest_size()),
+            (SelectMode::SelectTheSmallestResolution, settings.get_select_show_smallest_resolution()),
+            (SelectMode::SelectTheBiggestResolution, settings.get_select_show_biggest_resolution()),
+            (SelectMode::SelectShortestPath, settings.get_select_show_shortest_path()),
+            (SelectMode::SelectLongestPath, settings.get_select_show_longest_path()),
+            (SelectMode::SelectAllExceptOldest, settings.get_select_show_except_oldest()),
+            (SelectMode::SelectAllExceptNewest, settings.get_select_show_except_newest()),
+            (SelectMode::SelectAllExceptSmallestSize, settings.get_select_show_except_smallest_size()),
+            (SelectMode::SelectAllExceptBiggestSize, settings.get_select_show_except_biggest_size()),
+            (SelectMode::SelectAllExceptSmallestResolution, settings.get_select_show_except_smallest_resolution()),
+            (SelectMode::SelectAllExceptBiggestResolution, settings.get_select_show_except_biggest_resolution()),
+            (SelectMode::SelectAllExceptShortestPath, settings.get_select_show_except_shortest_path()),
+            (SelectMode::SelectAllExceptLongestPath, settings.get_select_show_except_longest_path()),
         ],
         ActiveTab::EmptyFolders
         | ActiveTab::BigFiles
@@ -130,10 +159,10 @@ pub(crate) fn set_select_buttons(app: &MainWindow) {
         | ActiveTab::ExifRemover
         | ActiveTab::VideoOptimizer
         | ActiveTab::Settings
-        | ActiveTab::About => Vec::new(), // Not available in settings and about, so may be set any value here
+        | ActiveTab::About => Vec::new(),
     };
 
-    base_buttons.extend(additional_buttons);
+    base_buttons.extend(additional_buttons.into_iter().filter_map(|(mode, enabled)| enabled.then_some(mode)));
     base_buttons.reverse();
 
     let new_select_model = base_buttons
@@ -211,6 +240,53 @@ fn select_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTa
     }
 
     (checked_items, 0, ModelRc::new(VecModel::from(old_data)))
+}
+
+// Selects all items in each group EXCEPT the one with the extreme property value.
+// `increasing_order: true`  → spares the biggest/newest/longest item (selects all others).
+// `increasing_order: false` → spares the smallest/oldest/shortest item (selects all others).
+fn select_all_except_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab, property: Property, increasing_order: bool) -> SelectionResult {
+    let mut checked_items = 0;
+    let mut unchecked_items = 0;
+
+    let is_header_mode = active_tab.get_is_header_mode();
+    assert!(is_header_mode);
+
+    let mut old_data = model.iter().collect::<Vec<_>>();
+    let headers_idx = find_header_idx_and_deselect_all(&mut old_data);
+
+    for i in 0..(headers_idx.len() - 1) {
+        let group_start = headers_idx[i] + 1;
+        let group_end = headers_idx[i + 1];
+
+        // Find the extreme item to spare.
+        let mut extreme_val = if increasing_order { 0u64 } else { u64::MAX };
+        let mut extreme_idx = group_start;
+        for j in group_start..group_end {
+            let val = extract_comparable_field(&old_data[j], property, active_tab);
+            if increasing_order && val > extreme_val || !increasing_order && val < extreme_val {
+                extreme_val = val;
+                extreme_idx = j;
+            }
+        }
+
+        // Select every item except the extreme one.
+        for j in group_start..group_end {
+            if j == extreme_idx {
+                if old_data[j].checked {
+                    unchecked_items += 1;
+                }
+                old_data[j].checked = false;
+            } else {
+                if !old_data[j].checked {
+                    checked_items += 1;
+                }
+                old_data[j].checked = true;
+            }
+        }
+    }
+
+    (checked_items, unchecked_items, ModelRc::new(VecModel::from(old_data)))
 }
 
 fn select_all(model: &ModelRc<SingleMainListModel>) -> SelectionResult {

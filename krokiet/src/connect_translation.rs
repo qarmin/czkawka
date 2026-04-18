@@ -408,6 +408,23 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_broken_files_video_ffmpeg_info_text(flk!("subsettings_broken_files_video_ffmpeg_info").into());
     translation.set_stop_text(flk!("stop_text").into());
     translation.set_settings_cache_header_text(flk!("settings_cache_header_text").into());
+    translation.set_settings_select_header_text(flk!("settings_select_header_text").into());
+    translation.set_settings_select_group_size_text(flk!("settings_select_group_size_text").into());
+    translation.set_settings_select_group_date_text(flk!("settings_select_group_date_text").into());
+    translation.set_settings_select_group_resolution_text(flk!("settings_select_group_resolution_text").into());
+    translation.set_settings_select_group_path_text(flk!("settings_select_group_path_text").into());
+    translation.set_settings_select_label_one_smallest_text(flk!("settings_select_label_one_smallest_text").into());
+    translation.set_settings_select_label_one_biggest_text(flk!("settings_select_label_one_biggest_text").into());
+    translation.set_settings_select_label_except_smallest_text(flk!("settings_select_label_except_smallest_text").into());
+    translation.set_settings_select_label_except_biggest_text(flk!("settings_select_label_except_biggest_text").into());
+    translation.set_settings_select_label_one_oldest_text(flk!("settings_select_label_one_oldest_text").into());
+    translation.set_settings_select_label_one_newest_text(flk!("settings_select_label_one_newest_text").into());
+    translation.set_settings_select_label_except_oldest_text(flk!("settings_select_label_except_oldest_text").into());
+    translation.set_settings_select_label_except_newest_text(flk!("settings_select_label_except_newest_text").into());
+    translation.set_settings_select_label_shortest_text(flk!("settings_select_label_shortest_text").into());
+    translation.set_settings_select_label_longest_text(flk!("settings_select_label_longest_text").into());
+    translation.set_settings_select_label_except_shortest_text(flk!("settings_select_label_except_shortest_text").into());
+    translation.set_settings_select_label_except_longest_text(flk!("settings_select_label_except_longest_text").into());
     translation.set_settings_clean_cache_button_text(flk!("settings_clean_cache_button_text").into());
     translation.set_popup_clean_cache_title_text(flk!("popup_clean_cache_title_text").into());
     translation.set_popup_clean_cache_confirmation_text(flk!("popup_clean_cache_confirmation_text").into());
@@ -560,6 +577,14 @@ pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
         SelectMode::SelectOldest => flk!("selection_oldest").into(),
         SelectMode::SelectShortestPath => flk!("selection_shortest_path").into(),
         SelectMode::SelectLongestPath => flk!("selection_longest_path").into(),
+        SelectMode::SelectAllExceptBiggestSize => flk!("selection_all_except_biggest_size").into(),
+        SelectMode::SelectAllExceptSmallestSize => flk!("selection_all_except_smallest_size").into(),
+        SelectMode::SelectAllExceptBiggestResolution => flk!("selection_all_except_biggest_resolution").into(),
+        SelectMode::SelectAllExceptSmallestResolution => flk!("selection_all_except_smallest_resolution").into(),
+        SelectMode::SelectAllExceptNewest => flk!("selection_all_except_newest").into(),
+        SelectMode::SelectAllExceptOldest => flk!("selection_all_except_oldest").into(),
+        SelectMode::SelectAllExceptLongestPath => flk!("selection_all_except_longest_path").into(),
+        SelectMode::SelectAllExceptShortestPath => flk!("selection_all_except_shortest_path").into(),
         SelectMode::SelectCustom => flk!("selection_custom_select_unselect").into(),
     }
 }

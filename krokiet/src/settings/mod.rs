@@ -276,6 +276,23 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_play_audio_on_scan_completion(basic_settings.play_audio_on_scan_completion);
     settings.set_show_notification_on_scan_completion(basic_settings.show_notification_on_scan_completion);
 
+     settings.set_select_show_oldest(basic_settings.select_show_oldest);
+    settings.set_select_show_newest(basic_settings.select_show_newest);
+    settings.set_select_show_smallest_size(basic_settings.select_show_smallest_size);
+    settings.set_select_show_biggest_size(basic_settings.select_show_biggest_size);
+    settings.set_select_show_smallest_resolution(basic_settings.select_show_smallest_resolution);
+    settings.set_select_show_biggest_resolution(basic_settings.select_show_biggest_resolution);
+    settings.set_select_show_shortest_path(basic_settings.select_show_shortest_path);
+    settings.set_select_show_longest_path(basic_settings.select_show_longest_path);
+    settings.set_select_show_except_oldest(basic_settings.select_show_except_oldest);
+    settings.set_select_show_except_newest(basic_settings.select_show_except_newest);
+    settings.set_select_show_except_smallest_size(basic_settings.select_show_except_smallest_size);
+    settings.set_select_show_except_biggest_size(basic_settings.select_show_except_biggest_size);
+    settings.set_select_show_except_smallest_resolution(basic_settings.select_show_except_smallest_resolution);
+    settings.set_select_show_except_biggest_resolution(basic_settings.select_show_except_biggest_resolution);
+    settings.set_select_show_except_shortest_path(basic_settings.select_show_except_shortest_path);
+    settings.set_select_show_except_longest_path(basic_settings.select_show_except_longest_path);
+
     set_combobox_basic_settings_items(&settings, basic_settings);
 }
 
@@ -915,5 +932,21 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         use_manual_application_scale,
         play_audio_on_scan_completion,
         show_notification_on_scan_completion,
+        select_show_oldest: settings.get_select_show_oldest(),
+        select_show_newest: settings.get_select_show_newest(),
+        select_show_smallest_size: settings.get_select_show_smallest_size(),
+        select_show_biggest_size: settings.get_select_show_biggest_size(),
+        select_show_smallest_resolution: settings.get_select_show_smallest_resolution(),
+        select_show_biggest_resolution: settings.get_select_show_biggest_resolution(),
+        select_show_shortest_path: settings.get_select_show_shortest_path(),
+        select_show_longest_path: settings.get_select_show_longest_path(),
+        select_show_except_oldest: settings.get_select_show_except_oldest(),
+        select_show_except_newest: settings.get_select_show_except_newest(),
+        select_show_except_smallest_size: settings.get_select_show_except_smallest_size(),
+        select_show_except_biggest_size: settings.get_select_show_except_biggest_size(),
+        select_show_except_smallest_resolution: settings.get_select_show_except_smallest_resolution(),
+        select_show_except_biggest_resolution: settings.get_select_show_except_biggest_resolution(),
+        select_show_except_shortest_path: settings.get_select_show_except_shortest_path(),
+        select_show_except_longest_path: settings.get_select_show_except_longest_path(),
     }
 }
