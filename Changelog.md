@@ -32,6 +32,8 @@
 ### Prebuilt binaries
 - Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d` installed on the system)  
 - Windows ZIP package now includes Krokiet binaries and a README to simplify migration to the new frontend
+- All backedns Krokiet binaries on all systems, are now packed into zip files, with additional scripts to open them with selected backend
+- Mac Intel binaries are no longer provided, due very long build times on Github CI
 
 ## Version 11.0.1 - 20.02.2026r
 ### Core
