@@ -46,8 +46,8 @@ fn next_diff_gen() -> (Arc<AtomicU64>, u64) {
 // ── Raw pixel buffer ──────────────────────────────────────────────────────────
 
 struct RawPixels {
-    data:   Vec<u8>,
-    width:  u32,
+    data: Vec<u8>,
+    width: u32,
     height: u32,
 }
 
@@ -56,9 +56,7 @@ impl RawPixels {
         if self.width == 0 {
             return slint::Image::default();
         }
-        let buf = slint::SharedPixelBuffer::<slint::Rgba8Pixel>::clone_from_slice(
-            &self.data, self.width, self.height,
-        );
+        let buf = slint::SharedPixelBuffer::<slint::Rgba8Pixel>::clone_from_slice(&self.data, self.width, self.height);
         slint::Image::from_rgba8(buf)
     }
 }
@@ -72,13 +70,21 @@ fn load_raw_image(path: &str, max_w: u32, max_h: u32) -> Option<RawPixels> {
     }
     match get_dynamic_image_from_path(
         path,
-        Some(ImgResizeOptions { max_width: max_w, max_height: max_h, filter: FirFilterType::Bilinear }),
+        Some(ImgResizeOptions {
+            max_width: max_w,
+            max_height: max_h,
+            filter: FirFilterType::Bilinear,
+        }),
     ) {
         Ok(result) => {
             let buf = result.image.into_rgba8();
-            let w   = buf.width();
-            let h   = buf.height();
-            Some(RawPixels { data: buf.into_raw(), width: w, height: h })
+            let w = buf.width();
+            let h = buf.height();
+            Some(RawPixels {
+                data: buf.into_raw(),
+                width: w,
+                height: h,
+            })
         }
         Err(e) => {
             error!("compare: failed to load \"{path}\": {e}");
@@ -90,16 +96,14 @@ fn load_raw_image(path: &str, max_w: u32, max_h: u32) -> Option<RawPixels> {
 // ── Diff computation ──────────────────────────────────────────────────────────
 
 fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {
-    let left  = load_raw_image(left_path,  1200, 900)?;
+    let left = load_raw_image(left_path, 1200, 900)?;
     let right = load_raw_image(right_path, 1200, 900)?;
 
     let (w, h) = (left.width, left.height);
 
     // If dimensions differ, resize right to match left.
     let right_data: Vec<u8> = if (right.width, right.height) != (w, h) {
-        let right_buf = image::ImageBuffer::<image::Rgba<u8>, _>::from_raw(
-            right.width, right.height, right.data,
-        )?;
+        let right_buf = image::ImageBuffer::<image::Rgba<u8>, _>::from_raw(right.width, right.height, right.data)?;
         let resized = imageops::resize(&right_buf, w, h, imageops::FilterType::Lanczos3);
         resized.into_raw()
     } else {
@@ -147,13 +151,17 @@ fn wire_compare_open(app: &MainWindow) {
 fn wire_compare_set_left(app: &MainWindow) {
     let weak = app.as_weak();
     app.global::<AppState>().on_compare_set_left(move |compare_idx| {
-        let app    = weak.upgrade().expect("wire_compare_set_left: upgrade failed");
-        let state  = app.global::<AppState>();
-        let idx    = compare_idx as usize;
-        if compare_idx == state.get_compare_right_idx() { return; }
+        let app = weak.upgrade().expect("wire_compare_set_left: upgrade failed");
+        let state = app.global::<AppState>();
+        let idx = compare_idx as usize;
+        if compare_idx == state.get_compare_right_idx() {
+            return;
+        }
         let images = state.get_compare_images();
-        if idx >= images.row_count() { return; }
-        let path   = images.row_data(idx).unwrap().path.to_string();
+        if idx >= images.row_count() {
+            return;
+        }
+        let path = images.row_data(idx).unwrap().path.to_string();
         state.set_compare_left_idx(compare_idx);
         state.set_compare_diff_image(slint::Image::default());
         if let Some(raw) = load_raw_image(&path, 1200, 900) {
@@ -165,13 +173,17 @@ fn wire_compare_set_left(app: &MainWindow) {
 fn wire_compare_set_right(app: &MainWindow) {
     let weak = app.as_weak();
     app.global::<AppState>().on_compare_set_right(move |compare_idx| {
-        let app    = weak.upgrade().expect("wire_compare_set_right: upgrade failed");
-        let state  = app.global::<AppState>();
-        let idx    = compare_idx as usize;
-        if compare_idx == state.get_compare_left_idx() { return; }
+        let app = weak.upgrade().expect("wire_compare_set_right: upgrade failed");
+        let state = app.global::<AppState>();
+        let idx = compare_idx as usize;
+        if compare_idx == state.get_compare_left_idx() {
+            return;
+        }
         let images = state.get_compare_images();
-        if idx >= images.row_count() { return; }
-        let path   = images.row_data(idx).unwrap().path.to_string();
+        if idx >= images.row_count() {
+            return;
+        }
+        let path = images.row_data(idx).unwrap().path.to_string();
         state.set_compare_right_idx(compare_idx);
         state.set_compare_diff_image(slint::Image::default());
         if let Some(raw) = load_raw_image(&path, 1200, 900) {
@@ -183,18 +195,20 @@ fn wire_compare_set_right(app: &MainWindow) {
 fn wire_compare_toggle_checkbox(app: &MainWindow) {
     let weak = app.as_weak();
     app.global::<AppState>().on_compare_toggle_checkbox(move |compare_idx| {
-        let app         = weak.upgrade().expect("wire_compare_toggle_checkbox: upgrade failed");
-        let state       = app.global::<AppState>();
-        let cidx        = compare_idx as usize;
+        let app = weak.upgrade().expect("wire_compare_toggle_checkbox: upgrade failed");
+        let state = app.global::<AppState>();
+        let cidx = compare_idx as usize;
         let images_model = state.get_compare_images();
 
-        if cidx >= images_model.row_count() { return; }
+        if cidx >= images_model.row_count() {
+            return;
+        }
 
-        let item        = images_model.row_data(cidx).unwrap();
+        let item = images_model.row_data(cidx).unwrap();
         let new_checked = !item.checked;
-        let flat_idx    = item.flat_idx as usize;
-        let group_idx   = item.group_idx as usize;
-        let item_idx    = item.item_idx  as usize;
+        let flat_idx = item.flat_idx as usize;
+        let group_idx = item.group_idx as usize;
+        let item_idx = item.item_idx as usize;
 
         // Sync checked state back into the flat similar_images_model.
         let flat_model = app.get_similar_images_model();
@@ -225,11 +239,11 @@ fn wire_compare_toggle_checkbox(app: &MainWindow) {
 fn wire_compare_next_group(app: &MainWindow) {
     let weak = app.as_weak();
     app.global::<AppState>().on_compare_next_group(move || {
-        let app     = weak.upgrade().expect("wire_compare_next_group: upgrade failed");
-        let state   = app.global::<AppState>();
-        let groups  = app.get_similar_images_groups();
+        let app = weak.upgrade().expect("wire_compare_next_group: upgrade failed");
+        let state = app.global::<AppState>();
+        let groups = app.get_similar_images_groups();
         let current = state.get_compare_current_group_idx() as usize;
-        let next    = current + 1;
+        let next = current + 1;
         if next < groups.row_count() {
             open_group(&app, next);
         }
@@ -239,8 +253,8 @@ fn wire_compare_next_group(app: &MainWindow) {
 fn wire_compare_prev_group(app: &MainWindow) {
     let weak = app.as_weak();
     app.global::<AppState>().on_compare_prev_group(move || {
-        let app     = weak.upgrade().expect("wire_compare_prev_group: upgrade failed");
-        let state   = app.global::<AppState>();
+        let app = weak.upgrade().expect("wire_compare_prev_group: upgrade failed");
+        let state = app.global::<AppState>();
         let current = state.get_compare_current_group_idx() as usize;
         if current > 0 {
             open_group(&app, current - 1);
@@ -251,10 +265,10 @@ fn wire_compare_prev_group(app: &MainWindow) {
 fn wire_compare_swap(app: &MainWindow) {
     let weak = app.as_weak();
     app.global::<AppState>().on_compare_swap(move || {
-        let app   = weak.upgrade().expect("wire_compare_swap: upgrade failed");
+        let app = weak.upgrade().expect("wire_compare_swap: upgrade failed");
         let state = app.global::<AppState>();
-        let li    = state.get_compare_left_idx();
-        let ri    = state.get_compare_right_idx();
+        let li = state.get_compare_left_idx();
+        let ri = state.get_compare_right_idx();
         let li_img = state.get_compare_left_image();
         let ri_img = state.get_compare_right_image();
         state.set_compare_left_idx(ri);
@@ -277,15 +291,17 @@ fn wire_compare_cancel_load(app: &MainWindow) {
 fn wire_compare_compute_diff(app: &MainWindow) {
     let weak = app.as_weak();
     app.global::<AppState>().on_compare_compute_diff(move || {
-        let app    = weak.upgrade().expect("wire_compare_compute_diff: upgrade failed");
-        let state  = app.global::<AppState>();
-        let li     = state.get_compare_left_idx()  as usize;
-        let ri     = state.get_compare_right_idx() as usize;
+        let app = weak.upgrade().expect("wire_compare_compute_diff: upgrade failed");
+        let state = app.global::<AppState>();
+        let li = state.get_compare_left_idx() as usize;
+        let ri = state.get_compare_right_idx() as usize;
         let images = state.get_compare_images();
 
-        let left_path  = images.row_data(li).map(|d| d.path.to_string()).unwrap_or_default();
+        let left_path = images.row_data(li).map(|d| d.path.to_string()).unwrap_or_default();
         let right_path = images.row_data(ri).map(|d| d.path.to_string()).unwrap_or_default();
-        if left_path.is_empty() || right_path.is_empty() { return; }
+        if left_path.is_empty() || right_path.is_empty() {
+            return;
+        }
 
         state.set_compare_diff_image(slint::Image::default());
         let (gen_counter, gen_val) = next_diff_gen();
@@ -293,7 +309,9 @@ fn wire_compare_compute_diff(app: &MainWindow) {
 
         thread::spawn(move || {
             let diff = compute_diff_image(&left_path, &right_path);
-            if gen_counter.load(Ordering::Relaxed) != gen_val { return; }
+            if gen_counter.load(Ordering::Relaxed) != gen_val {
+                return;
+            }
             weak2
                 .upgrade_in_event_loop(move |app| {
                     if gen_counter.load(Ordering::Relaxed) == gen_val
@@ -311,11 +329,15 @@ fn wire_compare_compute_diff(app: &MainWindow) {
 
 fn open_group(app: &MainWindow, group_idx: usize) {
     let groups = app.get_similar_images_groups();
-    let state  = app.global::<AppState>();
+    let state = app.global::<AppState>();
 
-    if group_idx >= groups.row_count() { return; }
+    if group_idx >= groups.row_count() {
+        return;
+    }
     let group = groups.row_data(group_idx).unwrap();
-    if group.items.row_count() == 0 { return; }
+    if group.items.row_count() == 0 {
+        return;
+    }
 
     let flat_model = app.get_similar_images_model();
     let mut compare_data: Vec<CompareImageData> = Vec::with_capacity(group.items.row_count());
@@ -325,33 +347,29 @@ fn open_group(app: &MainWindow, group_idx: usize) {
 
         // Use the live checked state from the flat model (may have changed since
         // the gallery group was last built).
-        let live_checked = flat_model
-            .row_data(item.flat_idx as usize)
-            .map_or(item.checked, |r| r.checked);
+        let live_checked = flat_model.row_data(item.flat_idx as usize).map_or(item.checked, |r| r.checked);
 
-        let get_str = |idx: usize| -> SharedString {
-            item.val_str.row_data(idx).unwrap_or_default()
-        };
+        let get_str = |idx: usize| -> SharedString { item.val_str.row_data(idx).unwrap_or_default() };
 
         compare_data.push(CompareImageData {
-            path:      item.full_path.clone(),
-            dir:       get_str(crate::common::STR_IDX_PATH),
-            name:      item.name.clone(),
-            size:      item.size.clone(),
-            dims:      get_str(crate::common::StrDataSimilarImages::DimsDisplay as usize),
-            modified:  get_str(crate::common::STR_IDX_MODIFIED),
-            checked:   live_checked,
+            path: item.full_path.clone(),
+            dir: get_str(crate::common::STR_IDX_PATH),
+            name: item.name.clone(),
+            size: item.size.clone(),
+            dims: get_str(crate::common::StrDataSimilarImages::DimsDisplay as usize),
+            modified: get_str(crate::common::STR_IDX_MODIFIED),
+            checked: live_checked,
             thumbnail: item.thumbnail.clone(),
-            flat_idx:  item.flat_idx,
+            flat_idx: item.flat_idx,
             group_idx: group_idx as i32,
-            item_idx:  i as i32,
+            item_idx: i as i32,
         });
     }
 
-    let total      = compare_data.len() as i32;
-    let left_idx   = 0i32;
-    let right_idx  = (total - 1).min(1);
-    let left_path  = compare_data.first().map(|s| s.path.to_string()).unwrap_or_default();
+    let total = compare_data.len() as i32;
+    let left_idx = 0i32;
+    let right_idx = (total - 1).min(1);
+    let left_path = compare_data.first().map(|s| s.path.to_string()).unwrap_or_default();
     let right_path = compare_data.get(right_idx as usize).map(|s| s.path.to_string()).unwrap_or_default();
 
     // Set up the full data model and show the overlay on the UI thread.
@@ -370,32 +388,30 @@ fn open_group(app: &MainWindow, group_idx: usize) {
 
     // Load full-size images in the background (only RawPixels are sent – they are Send).
     let cancel = new_cancel_token();
-    let weak   = app.as_weak();
+    let weak = app.as_weak();
 
     thread::spawn(move || {
         if cancel.load(Ordering::Relaxed) {
-            weak.upgrade_in_event_loop(|app| finish_cancel(&app))
-                .expect("open_group cancel1: upgrade failed");
+            weak.upgrade_in_event_loop(|app| finish_cancel(&app)).expect("open_group cancel1: upgrade failed");
             return;
         }
 
-        let left_full  = load_raw_image(&left_path,  1200, 900);
-        let right_full = if left_path != right_path {
-            load_raw_image(&right_path, 1200, 900)
-        } else {
-            None
-        };
+        let left_full = load_raw_image(&left_path, 1200, 900);
+        let right_full = if left_path != right_path { load_raw_image(&right_path, 1200, 900) } else { None };
 
         if cancel.load(Ordering::Relaxed) {
-            weak.upgrade_in_event_loop(|app| finish_cancel(&app))
-                .expect("open_group cancel2: upgrade failed");
+            weak.upgrade_in_event_loop(|app| finish_cancel(&app)).expect("open_group cancel2: upgrade failed");
             return;
         }
 
         weak.upgrade_in_event_loop(move |app| {
             let state = app.global::<AppState>();
-            if let Some(raw) = left_full  { state.set_compare_left_image(raw.into_slint_image()); }
-            if let Some(raw) = right_full { state.set_compare_right_image(raw.into_slint_image()); }
+            if let Some(raw) = left_full {
+                state.set_compare_left_image(raw.into_slint_image());
+            }
+            if let Some(raw) = right_full {
+                state.set_compare_right_image(raw.into_slint_image());
+            }
             state.set_compare_loading(false);
             state.set_compare_cancelling(false);
         })

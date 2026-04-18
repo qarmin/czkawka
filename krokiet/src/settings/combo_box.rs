@@ -132,11 +132,7 @@ impl StringComboBoxItems {
         let video_optimizer_noise_reduction =
             Self::convert_to_combobox_items(&[("none", "None", NoiseReductionMethod::None), ("hqdn3d", "hqdn3d (fast)", NoiseReductionMethod::Hqdn3d)]);
 
-        let similar_videos_engine = Self::convert_string_to_combobox_items(&[
-            ("vid_dup_finder", "VidDupFinder"),
-            ("perceptual", "Perceptual"),
-            ("audio", "Audio"),
-        ]);
+        let similar_videos_engine = Self::convert_string_to_combobox_items(&[("vid_dup_finder", "VidDupFinder"), ("perceptual", "Perceptual"), ("audio", "Audio")]);
 
         let similar_videos_perceptual_preset = Self::convert_string_to_combobox_items(&[
             ("fastest", "Fastest"),
@@ -146,11 +142,7 @@ impl StringComboBoxItems {
             ("maximum", "Maximum"),
         ]);
 
-        let similar_videos_audio_preset = Self::convert_string_to_combobox_items(&[
-            ("full", "Full"),
-            ("fast2min", "Fast 2 Min"),
-            ("skipintros", "Skip Intros"),
-        ]);
+        let similar_videos_audio_preset = Self::convert_string_to_combobox_items(&[("full", "Full"), ("fast2min", "Fast 2 Min"), ("skipintros", "Skip Intros")]);
 
         Self {
             languages,

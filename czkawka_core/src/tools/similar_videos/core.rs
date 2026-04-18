@@ -392,8 +392,7 @@ impl SimilarVideos {
             })
             .collect();
 
-        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) =
-            load_and_split_cache_generalized_by_path(&get_audio_cache_file(preset), audio_to_check, self);
+        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = load_and_split_cache_generalized_by_path(&get_audio_cache_file(preset), audio_to_check, self);
 
         let audio_config = preset.to_audio_config();
 
@@ -732,7 +731,11 @@ fn perceptual_cache_entry_to_videos_entry(entry: &PerceptualCacheEntry) -> Video
         bitrate: None,
         width: if entry.fingerprint.width > 0 { Some(entry.fingerprint.width) } else { None },
         height: if entry.fingerprint.height > 0 { Some(entry.fingerprint.height) } else { None },
-        duration: if entry.fingerprint.duration_secs > 0.0 { Some(entry.fingerprint.duration_secs) } else { None },
+        duration: if entry.fingerprint.duration_secs > 0.0 {
+            Some(entry.fingerprint.duration_secs)
+        } else {
+            None
+        },
         thumbnail_path: None,
     }
 }
@@ -753,7 +756,11 @@ fn audio_cache_entry_to_videos_entry(entry: &AudioCacheEntry) -> VideosEntry {
         bitrate: None,
         width: None,
         height: None,
-        duration: if entry.fingerprint.duration_secs > 0.0 { Some(entry.fingerprint.duration_secs) } else { None },
+        duration: if entry.fingerprint.duration_secs > 0.0 {
+            Some(entry.fingerprint.duration_secs)
+        } else {
+            None
+        },
         thumbnail_path: None,
     }
 }

@@ -276,7 +276,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_play_audio_on_scan_completion(basic_settings.play_audio_on_scan_completion);
     settings.set_show_notification_on_scan_completion(basic_settings.show_notification_on_scan_completion);
 
-     settings.set_select_show_oldest(basic_settings.select_show_oldest);
+    settings.set_select_show_oldest(basic_settings.select_show_oldest);
     settings.set_select_show_newest(basic_settings.select_show_newest);
     settings.set_select_show_smallest_size(basic_settings.select_show_smallest_size);
     settings.set_select_show_biggest_size(basic_settings.select_show_biggest_size);
@@ -369,8 +369,7 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     settings.set_similar_videos_perceptual_preset_value(display_names[idx].clone());
 
     // Similar videos audio preset
-    let (idx, display_names) =
-        StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_videos_audio_preset, &collected_items.similar_videos_audio_preset);
+    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_videos_audio_preset, &collected_items.similar_videos_audio_preset);
     settings.set_similar_videos_audio_preset_index(idx as i32);
     settings.set_similar_videos_audio_preset_value(display_names[idx].clone());
 
