@@ -23,6 +23,8 @@
 - Fixed an issue where thumbnail generation settings were not respected in Similar Videos mode - [#1809](https://github.com/qarmin/czkawka/pull/1809)  
 - Added notification support - [#1837](https://github.com/qarmin/czkawka/pull/1837)  
 - Femtovg backend no longer have blurry fonts - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Changed default select buttons from "select one item" to "select all except one item" - [#1913](https://github.com/qarmin/czkawka/pull/1913)
+- Added ability to choose which select buttons are visible in UI - [#1913](https://github.com/qarmin/czkawka/pull/1913)
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)  
