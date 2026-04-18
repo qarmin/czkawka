@@ -357,22 +357,6 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     settings.set_similar_videos_crop_detect_index(idx as i32);
     settings.set_similar_videos_crop_detect_value(display_names[idx].clone());
 
-    // Similar videos engine
-    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_videos_engine, &collected_items.similar_videos_engine);
-    settings.set_similar_videos_engine_index(idx as i32);
-    settings.set_similar_videos_engine_value(display_names[idx].clone());
-
-    // Similar videos perceptual preset
-    let (idx, display_names) =
-        StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_videos_perceptual_preset, &collected_items.similar_videos_perceptual_preset);
-    settings.set_similar_videos_perceptual_preset_index(idx as i32);
-    settings.set_similar_videos_perceptual_preset_value(display_names[idx].clone());
-
-    // Similar videos audio preset
-    let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_videos_audio_preset, &collected_items.similar_videos_audio_preset);
-    settings.set_similar_videos_audio_preset_index(idx as i32);
-    settings.set_similar_videos_audio_preset_value(display_names[idx].clone());
-
     // Video Optimizer mode
     let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.video_optimizer_mode, &collected_items.video_optimizer_mode);
     settings.set_video_optimizer_sub_mode_index(idx as i32);
@@ -649,9 +633,6 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_crop_detect = combo_box_items.videos_crop_detect.config_name.clone();
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
-    let similar_videos_engine = combo_box_items.similar_videos_engine.config_name.clone();
-    let similar_videos_perceptual_preset = combo_box_items.similar_videos_perceptual_preset.config_name.clone();
-    let similar_videos_audio_preset = combo_box_items.similar_videos_audio_preset.config_name.clone();
 
     let video_thumbnails_generate = settings.get_video_thumbnails_generate();
     let video_thumbnails_percentage = settings.get_video_thumbnails_percentage().round() as u8;
@@ -809,9 +790,6 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_skip_forward_amount,
         similar_videos_vid_hash_duration,
         similar_videos_crop_detect,
-        similar_videos_engine,
-        similar_videos_perceptual_preset,
-        similar_videos_audio_preset,
         video_thumbnails_generate,
         video_thumbnails_percentage,
         video_thumbnails_generate_grid,
@@ -870,9 +848,6 @@ pub(crate) fn collect_combo_box_settings(app: &MainWindow) -> ComboBoxItems {
     let video_optimizer_mode_idx = settings.get_video_optimizer_sub_mode_index() as usize;
     let video_optimizer_video_codec_idx = settings.get_video_optimizer_sub_video_codec_index() as usize;
     let video_optimizer_noise_reduction_idx = settings.get_video_optimizer_sub_noise_reduction_index() as usize;
-    let similar_videos_engine_idx = settings.get_similar_videos_engine_index() as usize;
-    let similar_videos_perceptual_preset_idx = settings.get_similar_videos_perceptual_preset_index() as usize;
-    let similar_videos_audio_preset_idx = settings.get_similar_videos_audio_preset_index() as usize;
 
     ComboBoxItems {
         language: collected_combo_boxes.languages[language_idx].clone(),
@@ -888,9 +863,6 @@ pub(crate) fn collect_combo_box_settings(app: &MainWindow) -> ComboBoxItems {
         video_optimizer_mode: collected_combo_boxes.video_optimizer_mode[video_optimizer_mode_idx].clone(),
         video_optimizer_video_codec: collected_combo_boxes.video_optimizer_video_codec[video_optimizer_video_codec_idx].clone(),
         video_optimizer_noise_reduction: collected_combo_boxes.video_optimizer_noise_reduction[video_optimizer_noise_reduction_idx].clone(),
-        similar_videos_engine: collected_combo_boxes.similar_videos_engine[similar_videos_engine_idx].clone(),
-        similar_videos_perceptual_preset: collected_combo_boxes.similar_videos_perceptual_preset[similar_videos_perceptual_preset_idx].clone(),
-        similar_videos_audio_preset: collected_combo_boxes.similar_videos_audio_preset[similar_videos_audio_preset_idx].clone(),
     }
 }
 

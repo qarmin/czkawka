@@ -7,7 +7,7 @@ use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path, split_path_compare};
 use czkawka_core::tools::similar_videos;
 use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
-use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosEngine, SimilarVideosParameters, VideosEntry};
+use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideosEntry};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
@@ -20,12 +20,6 @@ pub(crate) fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let engine = SimilarVideosEngine::from_str_opt(
-                &sd.custom_settings.similar_videos_engine,
-                &sd.custom_settings.similar_videos_perceptual_preset,
-                &sd.custom_settings.similar_videos_audio_preset,
-            )
-            .unwrap_or_default();
             let params = SimilarVideosParameters::new(
                 sd.custom_settings.similar_videos_sub_similarity,
                 sd.custom_settings.similar_videos_sub_ignore_same_size,
@@ -37,7 +31,6 @@ pub(crate) fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
                 sd.custom_settings.video_thumbnails_percentage,
                 sd.custom_settings.video_thumbnails_generate_grid,
                 sd.custom_settings.video_thumbnails_grid_tiles_per_side,
-                engine,
             );
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);

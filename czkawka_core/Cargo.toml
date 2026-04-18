@@ -51,9 +51,6 @@ tempfile = "3.13"
 vid_dup_finder_lib = "0.4"
 filetime = "0.2.26"
 
-# Perceptual video / audio similarity (alternative engine)
-similarrio_videoo = { path = "../../similarrio_videoo", features = ["audio"] }
-
 # For extracting video properties using ffprobe CLI
 # https://github.com/theduke/ffprobe-rs/issues/33
 #ffprobe = "0.4.0"

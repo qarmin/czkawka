@@ -384,12 +384,6 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_videos_crop_detect_text(flk!("subsettings_videos_crop_detect").into());
     translation.set_subsettings_videos_skip_forward_amount_text(flk!("subsettings_videos_skip_forward_amount").into());
     translation.set_subsettings_videos_vid_hash_duration_text(flk!("subsettings_videos_vid_hash_duration").into());
-    translation.set_subsettings_videos_engine_text(flk!("subsettings_videos_engine").into());
-    translation.set_subsettings_videos_engine_hint_text(flk!("subsettings_videos_engine_hint").into());
-    translation.set_subsettings_videos_perceptual_preset_text(flk!("subsettings_videos_perceptual_preset").into());
-    translation.set_subsettings_videos_perceptual_preset_hint_text(flk!("subsettings_videos_perceptual_preset_hint").into());
-    translation.set_subsettings_videos_audio_preset_text(flk!("subsettings_videos_audio_preset").into());
-    translation.set_subsettings_videos_audio_preset_hint_text(flk!("subsettings_videos_audio_preset_hint").into());
     translation.set_settings_load_tabs_sizes_at_startup_text(flk!("settings_load_tabs_sizes_at_startup").into());
     translation.set_settings_load_windows_size_at_startup_text(flk!("settings_load_windows_size_at_startup").into());
     translation.set_settings_limit_lines_of_messages_text(flk!("settings_limit_lines_of_messages").into());
