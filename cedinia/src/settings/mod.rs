@@ -27,7 +27,7 @@ fn default_search_mode() -> String {
     "biggest".to_string()
 }
 fn default_big_files_count() -> String {
-    "50".to_string()
+    "10000".to_string()
 }
 fn default_min_file_size() -> String {
     "none".to_string()

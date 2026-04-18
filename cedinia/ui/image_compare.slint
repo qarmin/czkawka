@@ -46,8 +46,9 @@ export component ImageCompareOverlay inherits Rectangle {
 
     private property <CompareMode> compare_mode: CompareMode.Normal;
     private property <bool>  info_visible:  false;
-    private property <float> split_pos:     0.5;
-    private property <float> overlay_alpha: 0.5;
+    // Single slider value shared by Split and Overlay modes so the knob
+    // position always matches the visual effect when switching between them.
+    private property <float> slider_value:  0.5;
 
     private property <bool> left_valid:
         AppState.compare_left_idx >= 0 &&
@@ -56,10 +57,13 @@ export component ImageCompareOverlay inherits Rectangle {
         AppState.compare_right_idx >= 0 &&
         AppState.compare_right_idx < AppState.compare_images.length;
 
+    // Compare actual loaded pixel dimensions – avoids false positives from
+    // differing display-string formatting (e.g. empty dims for reference images).
     private property <bool> res_mismatch:
-        left_valid && right_valid &&
-        AppState.compare_images[AppState.compare_left_idx].dims !=
-        AppState.compare_images[AppState.compare_right_idx].dims;
+        AppState.compare_left_image.width > 0 &&
+        AppState.compare_right_image.width > 0 &&
+        (AppState.compare_left_image.width  != AppState.compare_right_image.width ||
+         AppState.compare_left_image.height != AppState.compare_right_image.height);
 
     background: CediniaColors.bg_primary;
 
@@ -199,9 +203,9 @@ export component ImageCompareOverlay inherits Rectangle {
                             clicked => { AppState.compare_toggle_checkbox(AppState.compare_left_idx); }
                         }
                         Text {
-                            text: AppState.compare_images[AppState.compare_left_idx].checked ? "✓" : "";
+                            text: AppState.compare_images[AppState.compare_left_idx].checked ? Translations.ok_text : "";
                             color: #000000;
-                            font-size: 15px; font-weight: 700;
+                            font-size: 13px; font-weight: 700;
                             horizontal-alignment: TextHorizontalAlignment.center;
                             vertical-alignment:   TextVerticalAlignment.center;
                         }
@@ -247,9 +251,9 @@ export component ImageCompareOverlay inherits Rectangle {
                             clicked => { AppState.compare_toggle_checkbox(AppState.compare_right_idx); }
                         }
                         Text {
-                            text: AppState.compare_images[AppState.compare_right_idx].checked ? "✓" : "";
+                            text: AppState.compare_images[AppState.compare_right_idx].checked ? Translations.ok_text : "";
                             color: #000000;
-                            font-size: 15px; font-weight: 700;
+                            font-size: 13px; font-weight: 700;
                             horizontal-alignment: TextHorizontalAlignment.center;
                             vertical-alignment:   TextVerticalAlignment.center;
                         }
@@ -266,7 +270,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 Rectangle {
                     clip: true;
                     x: 0; y: 0;
-                    width: main_area.width * root.split_pos;
+                    width: main_area.width * root.slider_value;
                     height: main_area.height;
                     Image {
                         x: 0; y: 0;
@@ -279,11 +283,11 @@ export component ImageCompareOverlay inherits Rectangle {
                 // Right image – clipped from split position
                 Rectangle {
                     clip: true;
-                    x: main_area.width * root.split_pos; y: 0;
-                    width: main_area.width * (1.0 - root.split_pos);
+                    x: main_area.width * root.slider_value; y: 0;
+                    width: main_area.width * (1.0 - root.slider_value);
                     height: main_area.height;
                     Image {
-                        x: -(main_area.width * root.split_pos); y: 0;
+                        x: -(main_area.width * root.slider_value); y: 0;
                         width: main_area.width; height: main_area.height;
                         source: AppState.compare_right_image;
                         image-fit: ImageFit.contain;
@@ -292,7 +296,7 @@ export component ImageCompareOverlay inherits Rectangle {
 
                 // Static split divider line
                 Rectangle {
-                    x: main_area.width * root.split_pos; y: 0;
+                    x: main_area.width * root.slider_value; y: 0;
                     width: 2px; height: main_area.height;
                     background: #ffffffaa;
                 }
@@ -311,7 +315,7 @@ export component ImageCompareOverlay inherits Rectangle {
                     width: parent.width; height: parent.height;
                     source: AppState.compare_right_image;
                     image-fit: ImageFit.contain;
-                    opacity: root.overlay_alpha;
+                    opacity: root.slider_value;
                 }
             }
 
@@ -350,12 +354,9 @@ export component ImageCompareOverlay inherits Rectangle {
                 padding: 12px; spacing: 10px;
                 Slider {
                     horizontal-stretch: 1.0;
-                    value: compare_mode == CompareMode.Split ? root.split_pos : root.overlay_alpha;
+                    value: root.slider_value;
                     minimum: 0.0; maximum: 1.0;
-                    changed(v) => {
-                        if (compare_mode == CompareMode.Split) { root.split_pos = v; }
-                        else { root.overlay_alpha = v; }
-                    }
+                    changed(v) => { root.slider_value = v; }
                 }
             }
         }
@@ -571,19 +572,12 @@ export component ImageCompareOverlay inherits Rectangle {
                                 image-fit: ImageFit.contain;
                             }
 
-                            // Checked badge
+                            // Checked badge – coloured dot only at this size
                             if img.checked: Rectangle {
                                 x: parent.width - 22px; y: 4px;
                                 width: 18px; height: 18px;
                                 border-radius: 9px;
                                 background: CediniaColors.accent;
-                                Text {
-                                    text: "✓";
-                                    color: #000000;
-                                    font-size: 10px; font-weight: 700;
-                                    horizontal-alignment: TextHorizontalAlignment.center;
-                                    vertical-alignment:   TextVerticalAlignment.center;
-                                }
                             }
                         }
 
