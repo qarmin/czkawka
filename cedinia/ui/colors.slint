@@ -40,8 +40,9 @@ export global CediniaColors {
     out property <color> nav_inactive: GeneralSettings.use_dark_theme ? #606060 : #908878;
 
     // ── Foreground on coloured buttons ─────────────────────────────────────────
-    out property <color> fg_on_accent: #000000;   // black text on gold/bright buttons
-    out property <color> fg_on_danger: #ffffff;   // white text on red danger buttons
+    out property <color> fg_on_accent:          #000000;   // black text on gold/bright buttons
+    out property <color> fg_on_accent_disabled: #00000066; // dimmed black text on accent when disabled
+    out property <color> fg_on_danger:          #ffffff;   // white text on red danger buttons
 
     // ── Scrims (modal / overlay dimming) ───────────────────────────────────────
     out property <color> scrim:        #00000099;

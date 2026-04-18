@@ -9,7 +9,7 @@ export component SettingsScreen {
 
     if diag_confirm_action != "" : Rectangle {
         z: 100;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea { clicked => { diag_confirm_action = ""; } }
 
         Rectangle {
@@ -22,7 +22,7 @@ export component SettingsScreen {
             border-width: 1px;
             border-color: CediniaColors.divider;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #00000088;
+            drop-shadow-color: CediniaColors.shadow_md;
 
             diag_confirm_content := VerticalLayout {
                 padding: 24px;
@@ -54,7 +54,7 @@ export component SettingsScreen {
                         label: Translations.ok_text;
                         horizontal-stretch: 1.0;
                         bg: CediniaColors.danger;
-                        fg: #ffffff;
+                        fg: CediniaColors.fg_on_danger;
                         clicked => {
                             if (diag_confirm_action == "thumbnails") {
                                 AppState.clear_thumbnails_cache();
@@ -71,7 +71,7 @@ export component SettingsScreen {
 
     if AppState.collect_test_done : Rectangle {
         z: 100;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea { clicked => { AppState.collect_test_done = false; } }
 
         Rectangle {
@@ -84,7 +84,7 @@ export component SettingsScreen {
             border-width: 1px;
             border-color: CediniaColors.divider;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #00000088;
+            drop-shadow-color: CediniaColors.shadow_md;
 
             popup_content := VerticalLayout {
                 padding: 24px;
@@ -123,7 +123,7 @@ export component SettingsScreen {
                 TouchButton {
                     label: Translations.ok_text;
                     bg: CediniaColors.accent;
-                    fg: #000000;
+                    fg: CediniaColors.fg_on_accent;
                     clicked => { AppState.collect_test_done = false; }
                 }
             }
@@ -214,7 +214,7 @@ export component SettingsScreen {
                     TouchButton {
                         label: Translations.notifications_enable_button_text;
                         bg: CediniaColors.warning;
-                        fg: #000000;
+                        fg: CediniaColors.fg_on_accent;
                         min_h: 36px;
                         clicked => { AppState.open_notification_settings(); }
                     }
@@ -627,7 +627,7 @@ export component SettingsScreen {
                             if !AppState.storage_permission_granted : TouchButton {
                                 label: Translations.grant_text;
                                 bg: CediniaColors.warning;
-                                fg: #000000;
+                                fg: CediniaColors.fg_on_accent;
                                 min_h: 44px;
                                 clicked => { AppState.request_storage_permission(); }
                             }
@@ -672,7 +672,7 @@ export component SettingsScreen {
                                 TouchButton {
                                     label: AppState.collect_test_running ? Translations.diagnostics_collect_test_stop_text: Translations.diagnostics_collect_test_run_text;
                                     bg: AppState.collect_test_running ? CediniaColors.warning: CediniaColors.accent;
-                                    fg: #000000;
+                                    fg: CediniaColors.fg_on_accent;
                                     min_h: 44px;
                                     clicked => { 
                                         if (AppState.collect_test_running) {
@@ -728,7 +728,7 @@ export component SettingsScreen {
                                 horizontal-stretch: 1.0;
                                 min_h: 40px;
                                 bg: CediniaColors.danger.with-alpha(0.7);
-                                fg: #ffffff;
+                                fg: CediniaColors.fg_on_danger;
                                 clicked => { diag_confirm_action = "thumbnails"; }
                             }
 
@@ -737,7 +737,7 @@ export component SettingsScreen {
                                 horizontal-stretch: 1.0;
                                 min_h: 40px;
                                 bg: CediniaColors.danger.with-alpha(0.5);
-                                fg: #ffffff;
+                                fg: CediniaColors.fg_on_danger;
                                 clicked => { diag_confirm_action = "cache"; }
                             }
                         }
@@ -797,7 +797,7 @@ export component SettingsScreen {
         z: 100;
         x: 0; y: 0;
         width: root.width; height: root.height;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea { clicked => { AppState.licenses_popup_visible = false; } }
 
         Rectangle {

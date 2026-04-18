@@ -50,7 +50,7 @@ export component ResultsList {
                     label: "X";
                     min_h: 36px;
                     bg: CediniaColors.danger;
-                    fg: #ffffff;
+                    fg: CediniaColors.fg_on_danger;
                     clicked => { AppState.delete_selected(); }
                 }
 
@@ -213,7 +213,7 @@ export component ResultsList {
         width: root.width;
         height: root.height;
         z: 55;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea { clicked => { root.ctx_open_visible = false; } }
 
         Rectangle {
@@ -224,7 +224,7 @@ export component ResultsList {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000aa;
+            drop-shadow-color: CediniaColors.shadow_lg;
             clip: true;
 
             ctx_open_vl := VerticalLayout {
@@ -286,7 +286,7 @@ export component ResultsList {
         width: root.width;
         height: root.height;
         z: 50;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea {}
 
         Rectangle {
@@ -297,7 +297,7 @@ export component ResultsList {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000aa;
+            drop-shadow-color: CediniaColors.shadow_lg;
             clip: true;
 
             popup_sel_vl := VerticalLayout {
@@ -431,7 +431,7 @@ export component ResultsList {
         width: root.width;
         height: root.height;
         z: 50;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea {}
 
         Rectangle {
@@ -442,7 +442,7 @@ export component ResultsList {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000aa;
+            drop-shadow-color: CediniaColors.shadow_lg;
             clip: true;
 
             popup_desel_vl := VerticalLayout {
@@ -496,7 +496,7 @@ export component ResultsList {
         width: root.width;
         height: root.height;
         z: 40;
-        background: #000000bb;
+        background: CediniaColors.scrim_strong;
 
         TouchArea {}
 
@@ -508,7 +508,7 @@ export component ResultsList {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000cc;
+            drop-shadow-color: CediniaColors.shadow_xl;
 
             confirm-card := VerticalLayout {
                 padding: 20px;
@@ -540,7 +540,7 @@ export component ResultsList {
                         horizontal-stretch: 1.0;
                         min_h: 44px;
                         bg: (AppState.confirm_popup_action == ConfirmPopupAction.Rename || AppState.confirm_popup_action == ConfirmPopupAction.RenameBadNames) ? CediniaColors.accent_muted : CediniaColors.danger;
-                        fg: (AppState.confirm_popup_action == ConfirmPopupAction.Rename || AppState.confirm_popup_action == ConfirmPopupAction.RenameBadNames) ? CediniaColors.accent_light : #ffffff;
+                        fg: (AppState.confirm_popup_action == ConfirmPopupAction.Rename || AppState.confirm_popup_action == ConfirmPopupAction.RenameBadNames) ? CediniaColors.accent_light : CediniaColors.fg_on_danger;
                         clicked => { AppState.confirm_popup_ok(); }
                     }
                 }
@@ -556,7 +556,7 @@ export component ResultsList {
         width: root.width;
         height: root.height;
         z: 30;
-        background: #000000bb;
+        background: CediniaColors.scrim_strong;
 
         TouchArea {}
 
@@ -568,7 +568,7 @@ export component ResultsList {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000cc;
+            drop-shadow-color: CediniaColors.shadow_xl;
 
             err-card := VerticalLayout {
                 padding: 20px;
@@ -618,7 +618,7 @@ export component ResultsList {
                     ? CediniaColors.warning.with-alpha(0.5)
                     : CediniaColors.accent;
         drop-shadow-blur: 12px;
-        drop-shadow-color: #00000088;
+        drop-shadow-color: CediniaColors.shadow_md;
         animate background { duration: 200ms; }
 
         TouchArea {
@@ -636,7 +636,7 @@ export component ResultsList {
             text: AppState.scan_state == ScanState.Scanning || AppState.scan_state == ScanState.Stopping
                 ? "⏹" : "▶";
             font-size: 22px;
-            color: (!AppState.storage_permission_granted || AppState.scan_state == ScanState.Stopping) ? #00000066 : #000000;
+            color: (!AppState.storage_permission_granted || AppState.scan_state == ScanState.Stopping) ? CediniaColors.fg_on_accent_disabled : CediniaColors.fg_on_accent;
             horizontal-alignment: TextHorizontalAlignment.center;
             vertical-alignment: TextVerticalAlignment.center;
         }

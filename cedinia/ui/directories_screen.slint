@@ -809,7 +809,7 @@ export component DirectoriesScreen {
                         bg: AppState.path_edit_is_include
                             ? CediniaColors.success.with-alpha(0.8)
                             : CediniaColors.danger.with-alpha(0.8);
-                        fg: AppState.path_edit_is_include ? #000000 : #ffffff;
+                        fg: AppState.path_edit_is_include ? CediniaColors.fg_on_accent : CediniaColors.fg_on_danger;
                         clicked => {
                             AppState.path_edit_confirm();
                             AppState.save_settings_now();

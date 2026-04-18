@@ -213,7 +213,7 @@ export component MainWindow inherits Window {
 
     if AppState.scan_state == ScanState.Stopping : Rectangle {
         z: 150;
-        background: #000000bb;
+        background: CediniaColors.scrim_strong;
         // Block all pointer events so nothing behind the overlay is clickable.
         TouchArea {}
 
@@ -227,7 +227,7 @@ export component MainWindow inherits Window {
             border-width: 1px;
             border-color: CediniaColors.divider;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #00000088;
+            drop-shadow-color: CediniaColors.shadow_md;
 
             stopping_content := VerticalLayout {
                 padding: 24px;
@@ -255,7 +255,7 @@ export component MainWindow inherits Window {
 
     if AppState.show_permission_popup : Rectangle {
         z: 200;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea { clicked => { AppState.show_permission_popup = false; } }
 
         Rectangle {
@@ -268,7 +268,7 @@ export component MainWindow inherits Window {
             border-width: 1px;
             border-color: CediniaColors.divider;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #00000088;
+            drop-shadow-color: CediniaColors.shadow_md;
 
             perm_popup := VerticalLayout {
                 padding: 24px;
@@ -303,7 +303,7 @@ export component MainWindow inherits Window {
                     TouchButton {
                         label: Translations.grant_text;
                         bg: CediniaColors.accent;
-                        fg: #000000;
+                        fg: CediniaColors.fg_on_accent;
                         min_h: 48px;
                         horizontal-stretch: 1.0;
                         clicked => {
