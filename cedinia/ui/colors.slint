@@ -2,59 +2,59 @@ import { GeneralSettings } from "app_state.slint";
 
 export global CediniaColors {
 
-    // ── Background ─────────────────────────────────────────────────────────────
+    // Background
     out property <color> bg_primary:  GeneralSettings.use_dark_theme ? #0d0d0d : #f2efe8;
     out property <color> bg_surface:  GeneralSettings.use_dark_theme ? #1a1a1a : #e8e4db;
     out property <color> bg_elevated: GeneralSettings.use_dark_theme ? #252525 : #ddd9d0;
     out property <color> bg_card:     GeneralSettings.use_dark_theme ? #1e1e1e : #e5e1d8;
 
-    // ── Accent (gold/amber – kept identical in both modes) ────────────────────
+    // Accent (gold/amber – kept identical in both modes)
     out property <color> accent:       #c8960c;
     out property <color> accent_light: GeneralSettings.use_dark_theme ? #f0b429 : #7a5000;
     out property <color> accent_muted: GeneralSettings.use_dark_theme ? #7a5900 : #f0d884;
 
-    // ── Text ───────────────────────────────────────────────────────────────────
+    // Text
     out property <color> text_primary:   GeneralSettings.use_dark_theme ? #f0ece0 : #1a1208;
     out property <color> text_secondary: GeneralSettings.use_dark_theme ? #a89878 : #5a4428;
     out property <color> text_disabled:  GeneralSettings.use_dark_theme ? #787068 : #908878;
 
-    // ── Status ─────────────────────────────────────────────────────────────────
+    // Status
     out property <color> success: GeneralSettings.use_dark_theme ? #4caf50 : #2a7d2e;
     out property <color> warning: GeneralSettings.use_dark_theme ? #ff9800 : #bf5600;
     out property <color> danger:  GeneralSettings.use_dark_theme ? #f44336 : #c62828;
 
-    // ── UI elements ────────────────────────────────────────────────────────────
+    // UI elements
     out property <color> divider: GeneralSettings.use_dark_theme ? #333333 : #ccc6b8;
     out property <color> border:  GeneralSettings.use_dark_theme ? #3a3a3a : #c0baa8;
     out property <color> ripple:  GeneralSettings.use_dark_theme ? #c8960c40 : #c8960c28;
 
-    // ── Row colors ─────────────────────────────────────────────────────────────
+    // Row colors
     out property <color> row_normal:   GeneralSettings.use_dark_theme ? #1a1a1a : #e8e4db;
     out property <color> row_alt:      GeneralSettings.use_dark_theme ? #202020 : #e2ddd4;
     out property <color> row_selected: GeneralSettings.use_dark_theme ? #3a2e00 : #f5e898;
     out property <color> row_header:   GeneralSettings.use_dark_theme ? #111111 : #f0ece4;
 
-    // ── Navigation ─────────────────────────────────────────────────────────────
+    // Navigation
     out property <color> nav_bg:       GeneralSettings.use_dark_theme ? #111111 : #d8d4cb;
     out property <color> nav_active:   #c8960c;
     out property <color> nav_inactive: GeneralSettings.use_dark_theme ? #606060 : #908878;
 
-    // ── Foreground on coloured buttons ─────────────────────────────────────────
+    // Foreground on coloured buttons
     out property <color> fg_on_accent:          #000000;   // black text on gold/bright buttons
     out property <color> fg_on_accent_disabled: #00000066; // dimmed black text on accent when disabled
     out property <color> fg_on_danger:          #ffffff;   // white text on red danger buttons
 
-    // ── Scrims (modal / overlay dimming) ───────────────────────────────────────
+    // Scrims (modal / overlay dimming)
     out property <color> scrim:        #00000099;
     out property <color> scrim_strong: #000000bb;
 
-    // ── Drop shadows ─────────────────────────────────────────────────────────────
+    // Drop shadows
     out property <color> shadow_sm: #00000066;
     out property <color> shadow_md: #00000088;
     out property <color> shadow_lg: #000000aa;
     out property <color> shadow_xl: #000000cc;
 
-    // ── Image viewer ──────────────────────────────────────────────────────────────
+    // Image viewer
     // Kept dark in both modes so images look good regardless of UI theme.
     out property <color> image_viewer_bg: GeneralSettings.use_dark_theme ? #0d0d0d : #1a1a1a;
     // Split-mode divider line – must be visible on top of any image content.
@@ -62,7 +62,7 @@ export global CediniaColors {
     // Pressed overlay for gallery tiles.
     out property <color> tile_press:      GeneralSettings.use_dark_theme ? #ffffff22 : #00000022;
 
-    // ── Compare view ──────────────────────────────────────────────────────────────
+    // Compare view
     out property <color> compare_close_bg:       #2a4a6a;
     out property <color> compare_close_bg_hover: #3a6a9a;
     out property <color> compare_close_icon:     #8ac4e8;
@@ -70,14 +70,14 @@ export global CediniaColors {
     out property <color> compare_warn_banner:    #ff880033;
     out property <color> compare_diff_bg:        #000000;   // always black for diff
 
-    // ── Component constants ───────────────────────────────────────────────────────
+    // Component constants
     out property <color> toggle_knob:      #ffffff;
     out property <color> reference_border: #4488ff;
 
-    // ── Tool card icon circle ─────────────────────────────────────────────────────
+    // Tool card icon circle
     out property <float> tool_icon_circle_alpha: GeneralSettings.use_dark_theme ? 0.15 : 0.58;
 
-    // ── Tool card accent colours ──────────────────────────────────────────────────
+    // Tool card accent colours
     out property <color> tool_empty_folders: #ff9800;   // orange
     out property <color> tool_similar_imgs:  #9c27b0;   // purple
     out property <color> tool_empty_files:   #607d8b;   // blue-gray

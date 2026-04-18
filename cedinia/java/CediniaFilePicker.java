@@ -28,7 +28,7 @@ public class CediniaFilePicker {
     static final int REQ_INCLUDE = 0x4345_0001;
     static final int REQ_EXCLUDE = 0x4345_0002;
 
-    // ── permission helpers ────────────────────────────────────────────────
+    // permission helpers
 
     /**
      * Returns true if the app currently has broad file read access.
@@ -87,7 +87,7 @@ public class CediniaFilePicker {
         // Below API 23: permissions are granted at install time, nothing to do
     }
 
-    // ── nav bar visibility ────────────────────────────────────────────────
+    // nav bar visibility
 
     /**
      * Enables the "swipe from bottom edge to temporarily reveal the system nav bar"
@@ -136,7 +136,7 @@ public class CediniaFilePicker {
         });
     }
 
-    // ── called from Rust ──────────────────────────────────────────────────
+    // called from Rust
 
     /** Open a URL in the system browser. */
     public static void openUrl(final Activity activity, final String url) {
@@ -154,7 +154,7 @@ public class CediniaFilePicker {
         });
     }
 
-    // ── MIME type helper ──────────────────────────────────────────────────
+    // MIME type helper
 
     private static String getMimeType(String path) {
         int dot = path.lastIndexOf('.');
@@ -329,7 +329,7 @@ public class CediniaFilePicker {
         launchPicker(activity, false, startPath);
     }
 
-    // ── internal ──────────────────────────────────────────────────────────
+    // internal
 
     private static void launchPicker(final Activity activity, final boolean isInclude,
                                      final String startPath) {
@@ -474,7 +474,7 @@ public class CediniaFilePicker {
         }
     }
 
-    // ── native callback registered by Rust via register_native_methods ────
+    // native callback registered by Rust via register_native_methods
 
     /**
      * Called after the user picks a directory (either SAF or dialog).

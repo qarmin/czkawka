@@ -41,7 +41,7 @@ component CompareIconBtn inherits Rectangle {
     }
 }
 
-// ─── Main overlay component ────────────────────────────────────────────────
+// Main overlay component
 export component ImageCompareOverlay inherits Rectangle {
 
     private property <CompareMode> compare_mode: CompareMode.Normal;
@@ -86,7 +86,7 @@ export component ImageCompareOverlay inherits Rectangle {
     VerticalLayout {
         spacing: 0px;
 
-        // ── Top action bar ───────────────────────────────────────────────────
+        // Top action bar
         Rectangle {
             height: 56px;
             background: CediniaColors.bg_elevated;
@@ -147,7 +147,7 @@ export component ImageCompareOverlay inherits Rectangle {
             }
         }
 
-        // ── Resolution mismatch warning (diff mode only) ──────────────────
+        // Resolution mismatch warning (diff mode only)
         if res_mismatch && compare_mode == CompareMode.Diff: Rectangle {
             height: 26px;
             background: CediniaColors.compare_warn_banner;
@@ -161,13 +161,13 @@ export component ImageCompareOverlay inherits Rectangle {
             }
         }
 
-        // ── Main image area ──────────────────────────────────────────────
+        // Main image area
         main_area := Rectangle {
             vertical-stretch: 1.0;
             clip: true;
             background: CediniaColors.image_viewer_bg;
 
-            // ── Normal: side-by-side ─────────────────────────────────────
+            // Normal: side-by-side
             if compare_mode == CompareMode.Normal: Rectangle {
                 width: parent.width; height: parent.height;
 
@@ -261,7 +261,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 }
             }
 
-            // ── Split mode ───────────────────────────────────────────────
+            // Split mode
             if compare_mode == CompareMode.Split: Rectangle {
                 width: parent.width; height: parent.height;
                 background: CediniaColors.bg_surface;
@@ -302,7 +302,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 }
             }
 
-            // ── Overlay mode ─────────────────────────────────────────────
+            // Overlay mode
             if compare_mode == CompareMode.Overlay: Rectangle {
                 width: parent.width; height: parent.height;
                 background: CediniaColors.bg_surface;
@@ -319,7 +319,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 }
             }
 
-            // ── Diff mode ─────────────────────────────────────────────────
+            // Diff mode
             if compare_mode == CompareMode.Diff: Rectangle {
                 width: parent.width; height: parent.height;
                 background: CediniaColors.compare_diff_bg;
@@ -339,7 +339,7 @@ export component ImageCompareOverlay inherits Rectangle {
             }
         }
 
-        // ── Slider row (split or overlay mode) ──────────────────────────
+        // Slider row (split or overlay mode)
         if compare_mode == CompareMode.Split || compare_mode == CompareMode.Overlay: Rectangle {
             height: 52px;
             background: CediniaColors.bg_elevated;
@@ -361,7 +361,7 @@ export component ImageCompareOverlay inherits Rectangle {
             }
         }
 
-        // ── Info panel ───────────────────────────────────────────────────
+        // Info panel
         if info_visible: Rectangle {
             height: info_content.preferred-height + 16px;
             background: CediniaColors.bg_elevated;
@@ -440,7 +440,7 @@ export component ImageCompareOverlay inherits Rectangle {
             }
         }
 
-        // ── Mode selector ────────────────────────────────────────────────
+        // Mode selector
         Rectangle {
             height: 48px;
             background: CediniaColors.bg_elevated;
@@ -527,7 +527,7 @@ export component ImageCompareOverlay inherits Rectangle {
             }
         }
 
-        // ── Thumbnail strip ──────────────────────────────────────────────
+        // Thumbnail strip
         Rectangle {
             height: 118px;
             background: CediniaColors.bg_primary;
@@ -629,7 +629,7 @@ export component ImageCompareOverlay inherits Rectangle {
         }
     }
 
-    // ── Loading overlay ──────────────────────────────────────────────────────
+    // Loading overlay
     if AppState.compare_loading: Rectangle {
         z: 100;
         width: parent.width; height: parent.height;

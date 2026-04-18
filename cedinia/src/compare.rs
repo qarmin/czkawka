@@ -11,7 +11,7 @@ use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 use crate::{AppState, CompareImageData, MainWindow};
 
-// ── Cancel token ─────────────────────────────────────────────────────────────
+// Cancel token
 
 thread_local! {
     static CANCEL_TOKEN: RefCell<Arc<AtomicBool>> =
@@ -28,7 +28,7 @@ fn request_cancel() {
     CANCEL_TOKEN.with(|t| t.borrow().store(true, Ordering::Relaxed));
 }
 
-// ── Diff generation counter ───────────────────────────────────────────────────
+// Diff generation counter
 
 thread_local! {
     static DIFF_GEN: RefCell<Arc<AtomicU64>> =
@@ -43,7 +43,7 @@ fn next_diff_gen() -> (Arc<AtomicU64>, u64) {
     })
 }
 
-// ── Raw pixel buffer ──────────────────────────────────────────────────────────
+// Raw pixel buffer
 
 struct RawPixels {
     data: Vec<u8>,
@@ -61,7 +61,7 @@ impl RawPixels {
     }
 }
 
-// ── Image loading ─────────────────────────────────────────────────────────────
+// Image loading
 
 fn load_raw_image(path: &str, max_w: u32, max_h: u32) -> Option<RawPixels> {
     let meta = std::fs::metadata(path).ok()?;
@@ -93,7 +93,7 @@ fn load_raw_image(path: &str, max_w: u32, max_h: u32) -> Option<RawPixels> {
     }
 }
 
-// ── Diff computation ──────────────────────────────────────────────────────────
+// Diff computation
 
 fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {
     let left = load_raw_image(left_path, 1200, 900)?;
@@ -124,7 +124,7 @@ fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {
     Some(RawPixels { data: out, width: w, height: h })
 }
 
-// ── Public wiring function ────────────────────────────────────────────────────
+// Public wiring function
 
 pub fn wire_compare(app: &MainWindow) {
     wire_compare_open(app);
@@ -138,7 +138,7 @@ pub fn wire_compare(app: &MainWindow) {
     wire_compare_compute_diff(app);
 }
 
-// ── Individual callback wires ─────────────────────────────────────────────────
+// Individual callback wires
 
 fn wire_compare_open(app: &MainWindow) {
     let weak = app.as_weak();
@@ -325,7 +325,7 @@ fn wire_compare_compute_diff(app: &MainWindow) {
     });
 }
 
-// ── open_group ────────────────────────────────────────────────────────────────
+// open_group
 
 fn open_group(app: &MainWindow, group_idx: usize) {
     let groups = app.get_similar_images_groups();
