@@ -286,6 +286,15 @@ export component SettingsScreen {
                     }
                     Divider {}
 
+                    CategoryLabel { label: Translations.settings_appearance_label_text; }
+
+                    ToggleRow {
+                        label: Translations.settings_dark_theme_text;
+                        description: Translations.settings_dark_theme_desc_text;
+                        value <=> GeneralSettings.use_dark_theme;
+                    }
+                    Divider {}
+
                     CategoryLabel { label: Translations.settings_common_label_text; }
 
                     TextInputRow {

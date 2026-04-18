@@ -80,6 +80,8 @@ pub struct CediniaSettings {
     pub allowed_extensions: String,
     #[serde(default)]
     pub excluded_extensions: String,
+    #[serde(default = "ttrue")]
+    pub use_dark_theme: bool,
 
     #[serde(default = "default_check_method")]
     pub duplicates_check_method: String,
@@ -300,6 +302,7 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     win.global::<GeneralSettings>().set_excluded_items(s.excluded_items.clone().into());
     win.global::<GeneralSettings>().set_allowed_extensions(s.allowed_extensions.clone().into());
     win.global::<GeneralSettings>().set_excluded_extensions(s.excluded_extensions.clone().into());
+    win.global::<GeneralSettings>().set_use_dark_theme(s.use_dark_theme);
 
     let cm_idx = StringComboBoxItems::idx_from_config_name(&s.duplicates_check_method, &items.duplicates_check_method);
     win.global::<DuplicateSettings>().set_check_method(cm_idx as i32);
@@ -387,6 +390,7 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         excluded_items: g.get_excluded_items().to_string(),
         allowed_extensions: g.get_allowed_extensions().to_string(),
         excluded_extensions: g.get_excluded_extensions().to_string(),
+        use_dark_theme: g.get_use_dark_theme(),
         duplicates_check_method: items
             .duplicates_check_method
             .get(d.get_check_method() as usize)

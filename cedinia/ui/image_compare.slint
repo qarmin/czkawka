@@ -17,9 +17,9 @@ component CompareIconBtn inherits Rectangle {
     height: 44px;
     border-radius: 10px;
     background: ta.has-hover && root.enabled
-        ? (root.close_btn ? #3a6a9a
+        ? (root.close_btn ? CediniaColors.compare_close_bg_hover
           : root.active ? CediniaColors.accent.brighter(0.15) : CediniaColors.bg_surface)
-        : (root.close_btn ? #2a4a6a
+        : (root.close_btn ? CediniaColors.compare_close_bg
           : root.active ? CediniaColors.accent_muted : transparent);
     animate background { duration: 100ms; }
 
@@ -31,7 +31,7 @@ component CompareIconBtn inherits Rectangle {
     Image {
         source: root.icon;
         colorize: root.enabled
-            ? (root.close_btn ? #8ac4e8
+            ? (root.close_btn ? CediniaColors.compare_close_icon
               : root.active ? CediniaColors.accent_light : CediniaColors.text_secondary)
             : CediniaColors.text_disabled;
         width:  24px;
@@ -150,7 +150,7 @@ export component ImageCompareOverlay inherits Rectangle {
         // ── Resolution mismatch warning (diff mode only) ──────────────────
         if res_mismatch && compare_mode == CompareMode.Diff: Rectangle {
             height: 26px;
-            background: #ff880033;
+            background: CediniaColors.compare_warn_banner;
             Text {
                 text: Translations.compare_res_mismatch_text;
                 color: CediniaColors.warning;
@@ -165,7 +165,7 @@ export component ImageCompareOverlay inherits Rectangle {
         main_area := Rectangle {
             vertical-stretch: 1.0;
             clip: true;
-            background: #0d0d0d;
+            background: CediniaColors.image_viewer_bg;
 
             // ── Normal: side-by-side ─────────────────────────────────────
             if compare_mode == CompareMode.Normal: Rectangle {
@@ -197,14 +197,14 @@ export component ImageCompareOverlay inherits Rectangle {
                         border-color: AppState.compare_images[AppState.compare_left_idx].checked
                             ? CediniaColors.accent : CediniaColors.border;
                         drop-shadow-blur: 4px;
-                        drop-shadow-color: #00000066;
+                        drop-shadow-color: CediniaColors.shadow_sm;
                         animate background { duration: 100ms; }
                         TouchArea {
                             clicked => { AppState.compare_toggle_checkbox(AppState.compare_left_idx); }
                         }
                         Text {
                             text: AppState.compare_images[AppState.compare_left_idx].checked ? Translations.ok_text : "";
-                            color: #000000;
+                            color: CediniaColors.fg_on_accent;
                             font-size: 13px; font-weight: 700;
                             horizontal-alignment: TextHorizontalAlignment.center;
                             vertical-alignment:   TextVerticalAlignment.center;
@@ -245,14 +245,14 @@ export component ImageCompareOverlay inherits Rectangle {
                         border-color: AppState.compare_images[AppState.compare_right_idx].checked
                             ? CediniaColors.accent : CediniaColors.border;
                         drop-shadow-blur: 4px;
-                        drop-shadow-color: #00000066;
+                        drop-shadow-color: CediniaColors.shadow_sm;
                         animate background { duration: 100ms; }
                         TouchArea {
                             clicked => { AppState.compare_toggle_checkbox(AppState.compare_right_idx); }
                         }
                         Text {
                             text: AppState.compare_images[AppState.compare_right_idx].checked ? Translations.ok_text : "";
-                            color: #000000;
+                            color: CediniaColors.fg_on_accent;
                             font-size: 13px; font-weight: 700;
                             horizontal-alignment: TextHorizontalAlignment.center;
                             vertical-alignment:   TextVerticalAlignment.center;
@@ -298,7 +298,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 Rectangle {
                     x: main_area.width * root.slider_value; y: 0;
                     width: 2px; height: main_area.height;
-                    background: #ffffffaa;
+                    background: CediniaColors.split_line;
                 }
             }
 
@@ -322,7 +322,7 @@ export component ImageCompareOverlay inherits Rectangle {
             // ── Diff mode ─────────────────────────────────────────────────
             if compare_mode == CompareMode.Diff: Rectangle {
                 width: parent.width; height: parent.height;
-                background: #000000;
+                background: CediniaColors.compare_diff_bg;
                 Image {
                     width: parent.width; height: parent.height;
                     source: AppState.compare_diff_image;
@@ -560,7 +560,7 @@ export component ImageCompareOverlay inherits Rectangle {
                             border-width: 2px;
                             border-color:
                                 idx == AppState.compare_left_idx  ? CediniaColors.accent_light :
-                                idx == AppState.compare_right_idx ? #ff7755 : transparent;
+                                idx == AppState.compare_right_idx ? CediniaColors.compare_right_mark : transparent;
                             background: CediniaColors.bg_surface;
                             clip: true;
 
@@ -597,7 +597,7 @@ export component ImageCompareOverlay inherits Rectangle {
                                 }
                                 Text {
                                     text: "L";
-                                    color: idx == AppState.compare_left_idx ? #000000 : CediniaColors.text_secondary;
+                                    color: idx == AppState.compare_left_idx ? CediniaColors.fg_on_accent : CediniaColors.text_secondary;
                                     font-size: 12px; font-weight: 700;
                                     horizontal-alignment: TextHorizontalAlignment.center;
                                     vertical-alignment:   TextVerticalAlignment.center;
@@ -608,7 +608,7 @@ export component ImageCompareOverlay inherits Rectangle {
                                 horizontal-stretch: 1.0;
                                 border-radius: 5px;
                                 background: idx == AppState.compare_right_idx
-                                    ? #ff7755
+                                    ? CediniaColors.compare_right_mark
                                     : CediniaColors.bg_surface;
                                 r_ta := TouchArea {
                                     enabled: idx != AppState.compare_left_idx;
@@ -616,7 +616,7 @@ export component ImageCompareOverlay inherits Rectangle {
                                 }
                                 Text {
                                     text: "R";
-                                    color: idx == AppState.compare_right_idx ? #000000 : CediniaColors.text_secondary;
+                                    color: idx == AppState.compare_right_idx ? CediniaColors.fg_on_accent : CediniaColors.text_secondary;
                                     font-size: 12px; font-weight: 700;
                                     horizontal-alignment: TextHorizontalAlignment.center;
                                     vertical-alignment:   TextVerticalAlignment.center;
@@ -633,7 +633,7 @@ export component ImageCompareOverlay inherits Rectangle {
     if AppState.compare_loading: Rectangle {
         z: 100;
         width: parent.width; height: parent.height;
-        background: #000000bb;
+        background: CediniaColors.scrim_strong;
 
         // Consume all pointer events
         TouchArea {}
@@ -645,7 +645,7 @@ export component ImageCompareOverlay inherits Rectangle {
             border-radius: 16px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 20px;
-            drop-shadow-color: #000000aa;
+            drop-shadow-color: CediniaColors.shadow_lg;
 
             VerticalLayout {
                 padding: 24px; spacing: 12px;

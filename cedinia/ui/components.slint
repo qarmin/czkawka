@@ -4,7 +4,7 @@ import { FileEntryIdx } from "common.slint";
 export component TouchButton {
     in property <string>  label;
     in property <color>   bg:       CediniaColors.accent;
-    in property <color>   fg:       #000000;
+    in property <color>   fg:       CediniaColors.fg_on_accent;
     in property <bool>    enabled:  true;
     in property <length>  min_h:    52px;
     callback clicked;
