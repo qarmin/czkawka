@@ -103,7 +103,6 @@ fn main() {
     print_version_mode("Krokiet");
     print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
     print_krokiet_features();
-    print_available_hw_accelerations();
 
     create_default_settings_files();
 
@@ -222,15 +221,15 @@ pub(crate) fn print_available_hw_accelerations() {
 /// or device initialization problems cannot stall the event loop. If ffmpeg is absent the
 /// default hardcoded list is kept.
 fn update_available_hardware_encoders(app: &MainWindow) {
-    if !check_if_ffprobe_ffmpeg_exists() {
-        return;
-    }
-
     let settings = app.global::<Settings>();
     let current_value = settings.get_video_optimizer_sub_hardware_encoder_value().to_string();
 
     let app_weak = app.as_weak();
     std::thread::spawn(move || {
+        print_available_hw_accelerations();
+        if !check_if_ffprobe_ffmpeg_exists() {
+            return;
+        }
         let working = get_working_hardware_encoders();
         info!(
             "Working HW encoders({}): [{}]",

@@ -335,8 +335,8 @@ fn matches_str_filter(raw_value: &str, filter: &str, case_sensitive: bool) -> bo
 }
 
 fn matches_full_path_filter(col: &CustomSelectColumnModel, path_idx: usize, name_idx: usize, case_sensitive: bool, val_strs: &[SharedString]) -> bool {
-    let path = val_strs.get(path_idx).map_or("", |s| s.as_str());
-    let name = val_strs.get(name_idx).map_or("", |s| s.as_str());
+    let path = val_strs.get(path_idx).expect("path_idx must be a valid column index").as_str();
+    let name = val_strs.get(name_idx).expect("name_idx must be a valid column index").as_str();
     let full = format!("{path}/{name}");
     matches_str_filter(&full, col.filter_value.as_str(), case_sensitive)
 }
@@ -365,7 +365,7 @@ pub(super) fn select_custom_columns(
             let matches = match col.column_type {
                 ColumnType::Str => {
                     let idx = col.column_idx as usize;
-                    let raw = val_strs.get(idx).map_or("", |s| s.as_str());
+                    let raw = val_strs.get(idx).expect("column_idx must be a valid column index").as_str();
                     matches_str_filter(raw, col.filter_value.as_str(), case_sensitive)
                 }
                 ColumnType::Int => matches_int_filter(item, col),
