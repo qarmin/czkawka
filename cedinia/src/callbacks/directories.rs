@@ -22,7 +22,7 @@ pub(crate) fn wire_directories(
         window.global::<AppState>().on_pick_include_dir(move || {
             #[cfg(not(target_os = "android"))]
             {
-                let win = weak.unwrap();
+                let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
                 if let Some(path) = rfd::FileDialog::new().pick_folder() {
                     let nb = normalize_path(&path);
                     if !inc.borrow().contains(&nb) {
@@ -47,7 +47,7 @@ pub(crate) fn wire_directories(
         window.global::<AppState>().on_pick_exclude_dir(move || {
             #[cfg(not(target_os = "android"))]
             {
-                let win = weak.unwrap();
+                let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
                 if let Some(path) = rfd::FileDialog::new().pick_folder() {
                     let nb = normalize_path(&path);
                     if !exc.borrow().contains(&nb) {
@@ -71,7 +71,7 @@ pub(crate) fn wire_directories(
         let exc = excluded_dirs.clone();
         let refr = referenced_dirs.clone();
         window.global::<AppState>().on_add_include_dir(move |path| {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
             let nb = normalize_path(path.as_str());
             if !inc.borrow().contains(&nb) {
                 inc.borrow_mut().push(nb);
@@ -87,7 +87,7 @@ pub(crate) fn wire_directories(
         let exc = excluded_dirs.clone();
         let refr = referenced_dirs.clone();
         window.global::<AppState>().on_remove_include_dir(move |path| {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
             inc.borrow_mut().retain(|p| p.to_string_lossy() != path.as_str());
             refr.borrow_mut().retain(|p| p.to_string_lossy() != path.as_str());
             win.set_included_dirs_model(build_included_model(&inc.borrow(), &refr.borrow()));
@@ -100,7 +100,7 @@ pub(crate) fn wire_directories(
         let inc = included_dirs.clone();
         let exc = excluded_dirs.clone();
         window.global::<AppState>().on_add_exclude_dir(move |path| {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
             let nb = normalize_path(path.as_str());
             if !exc.borrow().contains(&nb) {
                 exc.borrow_mut().push(nb);
@@ -115,7 +115,7 @@ pub(crate) fn wire_directories(
         let inc = included_dirs.clone();
         let exc = excluded_dirs.clone();
         window.global::<AppState>().on_remove_exclude_dir(move |path| {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
             exc.borrow_mut().retain(|p| p.to_string_lossy() != path.as_str());
             win.set_excluded_dirs_model(build_excluded_model(&exc.borrow()));
             refresh_volumes_flags(&win, &inc.borrow(), &exc.borrow());
@@ -127,7 +127,7 @@ pub(crate) fn wire_directories(
         let inc = included_dirs.clone();
         let refr = referenced_dirs.clone();
         window.global::<AppState>().on_toggle_referenced_dir(move |path| {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
             let p = PathBuf::from(path.as_str());
             let mut refr_mut = refr.borrow_mut();
             if refr_mut.contains(&p) {
@@ -171,7 +171,7 @@ pub(crate) fn wire_directories(
         window.global::<AppState>().on_pick_include_from(move |start_path| {
             #[cfg(not(target_os = "android"))]
             {
-                let win = weak.unwrap();
+                let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
                 let start = PathBuf::from(start_path.as_str());
                 if let Some(path) = rfd::FileDialog::new().set_directory(&start).pick_folder() {
                     let nb = normalize_path(&path);
@@ -197,7 +197,7 @@ pub(crate) fn wire_directories(
         window.global::<AppState>().on_pick_exclude_from(move |start_path| {
             #[cfg(not(target_os = "android"))]
             {
-                let win = weak.unwrap();
+                let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
                 let start = PathBuf::from(start_path.as_str());
                 if let Some(path) = rfd::FileDialog::new().set_directory(&start).pick_folder() {
                     let nb = normalize_path(&path);
@@ -235,7 +235,7 @@ pub(crate) fn wire_directories(
         let exc = excluded_dirs.clone();
         let refr = referenced_dirs.clone();
         window.global::<AppState>().on_path_edit_confirm(move || {
-            let win = weak.unwrap();
+            let win = weak.upgrade().expect("MainWindow dropped while callback was still live");
             let path = win.global::<AppState>().get_path_edit_value().to_string();
             if path.is_empty() {
                 return;

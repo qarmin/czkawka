@@ -41,11 +41,16 @@ fn size_from_entry(e: &FileEntry) -> u64 {
 }
 
 fn get_val_str(e: &FileEntry, idx: usize) -> String {
-    e.val_str.row_data(idx).map(|s| s.to_string()).unwrap_or_default()
+    e.val_str
+        .row_data(idx)
+        .unwrap_or_else(|| panic!("get_val_str: val_str[{idx}] missing, full val_str={:?}", e.val_str.iter().collect::<Vec<_>>()))
+        .to_string()
 }
 
 fn get_val_int(e: &FileEntry, idx: usize) -> i32 {
-    e.val_int.row_data(idx).unwrap_or(0)
+    e.val_int
+        .row_data(idx)
+        .unwrap_or_else(|| panic!("get_val_int: val_int[{idx}] missing, full val_int={:?}", e.val_int.iter().collect::<Vec<_>>()))
 }
 
 fn full_path_of(e: &FileEntry) -> String {
@@ -642,12 +647,7 @@ pub(crate) fn select_except_one_per_group(model: &ModelRc<FileEntry>, select: bo
             if e.is_reference {
                 continue;
             }
-            e.checked = if first_non_ref_in_group {
-                first_non_ref_in_group = false;
-                false
-            } else {
-                true
-            };
+            e.checked = !std::mem::take(&mut first_non_ref_in_group);
         }
     } else {
         let mut i = 0;

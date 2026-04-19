@@ -120,13 +120,25 @@ impl StringComboBoxItems {
         ]);
 
         let video_optimizer_crop_type = Self::convert_to_combobox_items_i18n(&[
-            ("blackbars", VideoCroppingMechanism::BlackBars, DisplaySpec::Translatable("option_video_crop_type_black_bars")),
-            ("staticcontent", VideoCroppingMechanism::StaticContent, DisplaySpec::Translatable("option_video_crop_type_static_content")),
+            (
+                "blackbars",
+                VideoCroppingMechanism::BlackBars,
+                DisplaySpec::Translatable("option_video_crop_type_black_bars"),
+            ),
+            (
+                "staticcontent",
+                VideoCroppingMechanism::StaticContent,
+                DisplaySpec::Translatable("option_video_crop_type_static_content"),
+            ),
         ]);
 
         let video_optimizer_mode = Self::convert_to_combobox_items_i18n(&[
             ("crop", VideoOptimizerMode::VideoCrop, DisplaySpec::Translatable("option_video_optimizer_mode_crop")),
-            ("transcode", VideoOptimizerMode::VideoTranscode, DisplaySpec::Translatable("option_video_optimizer_mode_transcode")),
+            (
+                "transcode",
+                VideoOptimizerMode::VideoTranscode,
+                DisplaySpec::Translatable("option_video_optimizer_mode_transcode"),
+            ),
         ]);
 
         let video_optimizer_video_codec = Self::convert_to_combobox_items(&[

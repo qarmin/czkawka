@@ -118,9 +118,7 @@ fn connect_compare_set_left(app: &MainWindow) {
         if idx >= images.row_count() {
             return;
         }
-        let path = images.row_data(idx).expect(
-            "compare_idx must be a valid index into compare_images"
-        ).path.to_string();
+        let path = images.row_data(idx).expect("compare_idx must be a valid index into compare_images").path.to_string();
         gui_state.set_compare_left_idx(idx as i32);
         gui_state.set_compare_diff_image(slint::Image::default());
         if let Some(img) = load_full_image(&path) {
@@ -142,9 +140,7 @@ fn connect_compare_set_right(app: &MainWindow) {
         if idx >= images.row_count() {
             return;
         }
-        let path = images.row_data(idx).expect(
-            "compare_idx must be a valid index into compare_images"
-        ).path.to_string();
+        let path = images.row_data(idx).expect("compare_idx must be a valid index into compare_images").path.to_string();
         gui_state.set_compare_right_idx(idx as i32);
         gui_state.set_compare_diff_image(slint::Image::default());
         if let Some(img) = load_full_image(&path) {
@@ -329,8 +325,14 @@ fn open_group(app: &MainWindow, header_idx: usize) {
                 return;
             }
 
-            let dir = strs.get(StrDataSimilarImages::Path as usize).cloned().expect("SimilarImages row must contain a Path column");
-            let name = strs.get(StrDataSimilarImages::Name as usize).cloned().expect("SimilarImages row must contain a Name column");
+            let dir = strs
+                .get(StrDataSimilarImages::Path as usize)
+                .cloned()
+                .expect("SimilarImages row must contain a Path column");
+            let name = strs
+                .get(StrDataSimilarImages::Name as usize)
+                .cloned()
+                .expect("SimilarImages row must contain a Name column");
             let full_path = format!("{dir}/{name}");
             let thumbnail = load_raw_thumbnail(&full_path);
 
@@ -338,10 +340,22 @@ fn open_group(app: &MainWindow, header_idx: usize) {
                 path: full_path,
                 dir: dir.clone(),
                 name,
-                size: strs.get(StrDataSimilarImages::Size as usize).cloned().expect("SimilarImages row must contain a Size column"),
-                resolution: strs.get(StrDataSimilarImages::Resolution as usize).cloned().expect("SimilarImages row must contain a Resolution column"),
-                modification_date: strs.get(StrDataSimilarImages::ModificationDate as usize).cloned().expect("SimilarImages row must contain a ModificationDate column"),
-                similarity: strs.get(StrDataSimilarImages::Similarity as usize).cloned().expect("SimilarImages row must contain a Similarity column"),
+                size: strs
+                    .get(StrDataSimilarImages::Size as usize)
+                    .cloned()
+                    .expect("SimilarImages row must contain a Size column"),
+                resolution: strs
+                    .get(StrDataSimilarImages::Resolution as usize)
+                    .cloned()
+                    .expect("SimilarImages row must contain a Resolution column"),
+                modification_date: strs
+                    .get(StrDataSimilarImages::ModificationDate as usize)
+                    .cloned()
+                    .expect("SimilarImages row must contain a ModificationDate column"),
+                similarity: strs
+                    .get(StrDataSimilarImages::Similarity as usize)
+                    .cloned()
+                    .expect("SimilarImages row must contain a Similarity column"),
                 checked: *checked,
                 thumbnail,
                 flat_idx: *flat_idx as i32,
@@ -370,8 +384,14 @@ fn open_group(app: &MainWindow, header_idx: usize) {
             return;
         }
 
-        let left_path = raw_items.get(left_idx_slint as usize).map(|r| r.path.clone()).expect("left_idx_slint is 0 and raw_items is guaranteed to have at least 1 item");
-        let right_path = raw_items.get(right_idx_slint as usize).map(|r| r.path.clone()).expect("right_idx_slint is either 0 or 1 and raw_items is guaranteed to have at least 1 item");
+        let left_path = raw_items
+            .get(left_idx_slint as usize)
+            .map(|r| r.path.clone())
+            .expect("left_idx_slint is 0 and raw_items is guaranteed to have at least 1 item");
+        let right_path = raw_items
+            .get(right_idx_slint as usize)
+            .map(|r| r.path.clone())
+            .expect("right_idx_slint is either 0 or 1 and raw_items is guaranteed to have at least 1 item");
 
         let left_raw = load_raw_full_image(&left_path);
         let right_raw = load_raw_full_image(&right_path);

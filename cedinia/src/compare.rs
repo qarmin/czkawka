@@ -161,7 +161,11 @@ fn wire_compare_set_left(app: &MainWindow) {
         if idx >= images.row_count() {
             return;
         }
-        let path = images.row_data(idx).unwrap().path.to_string();
+        let path = images
+            .row_data(idx)
+            .unwrap_or_else(|| panic!("wire_compare_set_left: invalid compare_idx {compare_idx}"))
+            .path
+            .to_string();
         state.set_compare_left_idx(compare_idx);
         state.set_compare_diff_image(slint::Image::default());
         if let Some(raw) = load_raw_image(&path, 1200, 900) {
@@ -183,7 +187,7 @@ fn wire_compare_set_right(app: &MainWindow) {
         if idx >= images.row_count() {
             return;
         }
-        let path = images.row_data(idx).unwrap().path.to_string();
+        let path = images.row_data(idx).unwrap_or_else(|| panic!("wire_compare_set_right: invalid compare_idx {idx}")).path.to_string();
         state.set_compare_right_idx(compare_idx);
         state.set_compare_diff_image(slint::Image::default());
         if let Some(raw) = load_raw_image(&path, 1200, 900) {
@@ -204,7 +208,7 @@ fn wire_compare_toggle_checkbox(app: &MainWindow) {
             return;
         }
 
-        let item = images_model.row_data(cidx).unwrap();
+        let item = images_model.row_data(cidx).unwrap_or_else(|| panic!("wire_compare_toggle_checkbox: invalid compare_idx {cidx}"));
         let new_checked = !item.checked;
         let flat_idx = item.flat_idx as usize;
         let group_idx = item.group_idx as usize;
@@ -334,7 +338,7 @@ fn open_group(app: &MainWindow, group_idx: usize) {
     if group_idx >= groups.row_count() {
         return;
     }
-    let group = groups.row_data(group_idx).unwrap();
+    let group = groups.row_data(group_idx).unwrap_or_else(|| panic!("open_group: invalid group_idx {group_idx}"));
     if group.items.row_count() == 0 {
         return;
     }
@@ -343,13 +347,17 @@ fn open_group(app: &MainWindow, group_idx: usize) {
     let mut compare_data: Vec<CompareImageData> = Vec::with_capacity(group.items.row_count());
 
     for i in 0..group.items.row_count() {
-        let item = group.items.row_data(i).unwrap();
+        let item = group.items.row_data(i).unwrap_or_else(|| panic!("open_group: invalid item_idx {i} in group {group_idx}"));
 
         // Use the live checked state from the flat model (may have changed since
         // the gallery group was last built).
         let live_checked = flat_model.row_data(item.flat_idx as usize).map_or(item.checked, |r| r.checked);
 
-        let get_str = |idx: usize| -> SharedString { item.val_str.row_data(idx).unwrap_or_default() };
+        let get_str = |idx: usize| -> SharedString {
+            item.val_str
+                .row_data(idx)
+                .unwrap_or_else(|| panic!("open_group: val_str[{idx}] missing, full val_str={:?}", item.val_str.iter().collect::<Vec<_>>()))
+        };
 
         compare_data.push(CompareImageData {
             path: item.full_path.clone(),
@@ -427,10 +435,9 @@ fn finish_cancel(app: &MainWindow) {
 }
 
 fn update_compare_checked(images_model: &ModelRc<CompareImageData>, compare_idx: usize, new_checked: bool) {
-    if let Some(vm) = images_model.as_any().downcast_ref::<VecModel<CompareImageData>>() {
-        if let Some(mut item) = vm.row_data(compare_idx) {
+    if let Some(vm) = images_model.as_any().downcast_ref::<VecModel<CompareImageData>>()
+        && let Some(mut item) = vm.row_data(compare_idx) {
             item.checked = new_checked;
             vm.set_row_data(compare_idx, item);
         }
-    }
 }
