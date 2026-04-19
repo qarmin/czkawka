@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, macos-15-intel]
+        os: [macos-latest]
     steps:
       - uses: actions/checkout@v6
 
@@ -102,11 +102,25 @@ jobs:
           cargo build --profile fastci --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu,heif,libavif"
           mv target/fastci/krokiet mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}
 
+      - name: Package krokiet with launchers
+        run: |
+          mkdir krokiet_package
+          cp mac_krokiet_all_backends_${{ env.ARCHNAME }} krokiet_package/krokiet
+          chmod +x krokiet_package/krokiet
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-femtovg exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_winit_femtovg.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-skia-opengl exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_winit_skia_opengl.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-skia-vulkan exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_winit_skia_vulkan.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-software exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_winit_software.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=femtovg-wgpu exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_femtovg_wgpu.sh
+          chmod +x krokiet_package/*.sh
+          cd krokiet_package && zip -r ../mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip . && cd ..
+
       - name: Store MacOS
         uses: actions/upload-artifact@v6
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
@@ -118,7 +132,6 @@ jobs:
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
-            mac_krokiet_all_backends_${{ env.ARCHNAME }}
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
@@ -126,6 +139,7 @@ jobs:
         with:
           tag_name: "Nightly"
           files: |
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
@@ -137,5 +151,4 @@ jobs:
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
-            mac_krokiet_all_backends_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}

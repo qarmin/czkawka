@@ -118,15 +118,32 @@ jobs:
           
           Get-ChildItem windows_krokiet_on_windows_*.exe | ForEach-Object { ./rcedit-x64.exe $_.Name --set-icon krokiet/icons/krokiet_logo_flag.ico }
 
+      - name: Package krokiet with launchers
+        run: |
+          New-Item -ItemType Directory -Force krokiet_package | Out-Null
+          Copy-Item windows_krokiet_on_windows_all_backends.exe krokiet_package\krokiet.exe
+          $scripts = [ordered]@{
+            "krokiet_winit_femtovg.bat"     = "winit-femtovg"
+            "krokiet_winit_skia_opengl.bat" = "winit-skia-opengl"
+            "krokiet_winit_skia_vulkan.bat" = "winit-skia-vulkan"
+            "krokiet_winit_software.bat"    = "winit-software"
+            "krokiet_femtovg_wgpu.bat"      = "femtovg-wgpu"
+          }
+          foreach ($file in $scripts.Keys) {
+            $backend = $scripts[$file]
+            "@echo off`r`nset SLINT_BACKEND=$backend`r`n`"%~dp0krokiet.exe`" %*`r`n" | Set-Content -Encoding ASCII "krokiet_package\$file"
+          }
+          Compress-Archive -Path krokiet_package\* -DestinationPath windows_krokiet_on_windows_all_backends.zip
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
           name: krokiet-windows-on-windows-${{ github.sha }}
           path: |
+            windows_krokiet_on_windows_all_backends.zip
             windows_krokiet_on_windows_skia_opengl.exe
             windows_krokiet_on_windows_skia_vulkan.exe
             windows_krokiet_on_windows_femtovg_wgpu.exe
-            windows_krokiet_on_windows_all_backends.exe
           if-no-files-found: error
 
       - name: Release
@@ -135,10 +152,10 @@ jobs:
         with:
           tag_name: "Nightly"
           files: |
+            windows_krokiet_on_windows_all_backends.zip
             windows_krokiet_on_windows_skia_opengl.exe
             windows_krokiet_on_windows_skia_vulkan.exe
             windows_krokiet_on_windows_femtovg_wgpu.exe
-            windows_krokiet_on_windows_all_backends.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
   container_4_12:
@@ -217,14 +234,7 @@ jobs:
           mv libEGL.dll package/
           mv libGLESv2.dll package/
 
-          cp windows_krokiet_on_windows_all_backends.exe package/krokiet.exe
-
-          # krokiet SLINT_BACKEND launcher scripts
-          printf '@echo off\r\nset SLINT_BACKEND=winit-femtovg\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_winit_femtovg.bat
-          printf '@echo off\r\nset SLINT_BACKEND=winit-skia-opengl\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_winit_skia_opengl.bat
-          printf '@echo off\r\nset SLINT_BACKEND=winit-skia-vulkan\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_winit_skia_vulkan.bat
-          printf '@echo off\r\nset SLINT_BACKEND=winit-software\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_winit_software.bat
-          printf '@echo off\r\nset SLINT_BACKEND=femtovg-wgpu\r\n"%%~dp0krokiet.exe" %%*\r\n' > package/krokiet_femtovg_wgpu.bat
+          unzip windows_krokiet_on_windows_all_backends.zip -d package/
 
           {
             echo '# Czkawka'

@@ -74,6 +74,19 @@ jobs:
           cargo build --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu" --profile fastci
           mv target/fastci/krokiet linux_krokiet_all_backends_${{ env.ARCHNAME }}
 
+      - name: Package krokiet with launchers
+        run: |
+          mkdir krokiet_package
+          cp linux_krokiet_all_backends_${{ env.ARCHNAME }} krokiet_package/krokiet
+          chmod +x krokiet_package/krokiet
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-femtovg exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_winit_femtovg.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-skia-opengl exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_winit_skia_opengl.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-skia-vulkan exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_winit_skia_vulkan.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-software exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_winit_software.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=femtovg-wgpu exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package/krokiet_femtovg_wgpu.sh
+          chmod +x krokiet_package/*.sh
+          cd krokiet_package && zip -r ../linux_krokiet_all_backends_${{ env.ARCHNAME }}.zip . && cd ..
+
       - name: Pack with 7z
         run: |
           # 7z -mx=3 in rust files, takes 40% less space but is 2x slower than zip -mx=1
@@ -86,7 +99,8 @@ jobs:
             linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
             linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
             linux_krokiet_femtovg_wgpu_${{ env.ARCHNAME }} \
-            linux_krokiet_all_backends_${{ env.ARCHNAME }}
+            linux_krokiet_all_backends_${{ env.ARCHNAME }} \
+            linux_krokiet_all_backends_${{ env.ARCHNAME }}.zip
 
       - name: Store
         uses: actions/upload-artifact@v6
@@ -107,7 +121,7 @@ jobs:
             linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
             linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             linux_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
-            linux_krokiet_all_backends_${{ env.ARCHNAME }}
+            linux_krokiet_all_backends_${{ env.ARCHNAME }}.zip
           token: ${{ secrets.PAT_REPOSITORY }}
 
   # Some dependencies requires ubuntu 24.04
@@ -189,6 +203,23 @@ jobs:
             linux_krokiet_heif_raw_avif_femtovg_wgpu_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}
 
+      - name: Package krokiet (heif+avif) with launchers
+        run: |
+          mkdir krokiet_package_heif
+          cp linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }} krokiet_package_heif/krokiet
+          chmod +x krokiet_package_heif/krokiet
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-femtovg exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package_heif/krokiet_winit_femtovg.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-skia-opengl exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package_heif/krokiet_winit_skia_opengl.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-skia-vulkan exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package_heif/krokiet_winit_skia_vulkan.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=winit-software exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package_heif/krokiet_winit_software.sh
+          printf '#!/bin/sh\nSLINT_BACKEND=femtovg-wgpu exec "$(dirname "$0")/krokiet" "$@"\n' > krokiet_package_heif/krokiet_femtovg_wgpu.sh
+          chmod +x krokiet_package_heif/*.sh
+          cd krokiet_package_heif && zip -r ../linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}.zip . && cd ..
+
+      - name: Add krokiet zip to 7z archive
+        run: |
+          7z a -t7z -mx=3 czkawka_all.7z linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}.zip
+
       - name: Store
         uses: actions/upload-artifact@v6
         with:
@@ -208,7 +239,7 @@ jobs:
             linux_krokiet_heif_raw_avif_skia_opengl_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_avif_skia_vulkan_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_avif_femtovg_wgpu_${{ env.ARCHNAME }}
-            linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}.zip
           token: ${{ secrets.PAT_REPOSITORY }}
 
   ### MUSL CLI and Krokiet Release and Debug
