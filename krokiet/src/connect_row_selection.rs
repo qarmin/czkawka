@@ -996,7 +996,7 @@ mod context_menu {
 
             let row = model
                 .row_data(idx as usize)
-                .expect(&format!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
+                .unwrap_or_else(|| panic!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
             if row.header_row {
                 return;
             }
@@ -1004,7 +1004,7 @@ mod context_menu {
                 .val_str
                 .iter()
                 .nth(path_idx)
-                .expect(&format!("path_idx={path_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
+                .unwrap_or_else(|| panic!("path_idx={path_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
                 .to_string();
             add_excluded_paths(&app.global::<Settings>(), std::slice::from_ref(&path));
 
@@ -1039,7 +1039,9 @@ mod context_menu {
             let name_idx = active_tab.get_str_name_idx();
             let idx = idx as usize;
 
-            let row = model.row_data(idx).expect(&format!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
+            let row = model
+                .row_data(idx)
+                .unwrap_or_else(|| panic!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
             if row.header_row {
                 return;
             }
@@ -1047,13 +1049,13 @@ mod context_menu {
                 .val_str
                 .iter()
                 .nth(path_idx)
-                .expect(&format!("path_idx={path_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
+                .unwrap_or_else(|| panic!("path_idx={path_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
                 .to_string();
             let name = row
                 .val_str
                 .iter()
                 .nth(name_idx)
-                .expect(&format!("name_idx={name_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
+                .unwrap_or_else(|| panic!("name_idx={name_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
                 .to_string();
             let full_path = std::path::PathBuf::from(&path).join(&name).to_string_lossy().to_string();
             add_excluded_paths(&app.global::<Settings>(), &[full_path]);
@@ -1088,7 +1090,7 @@ mod context_menu {
 
             let row = model
                 .row_data(idx as usize)
-                .expect(&format!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
+                .unwrap_or_else(|| panic!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
             if row.header_row {
                 return;
             }
@@ -1096,7 +1098,7 @@ mod context_menu {
                 .val_str
                 .iter()
                 .nth(name_idx)
-                .expect(&format!("name_idx={name_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
+                .unwrap_or_else(|| panic!("name_idx={name_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
                 .to_string();
             set_clipboard(name);
         });
@@ -1112,7 +1114,7 @@ mod context_menu {
 
             let row = model
                 .row_data(idx as usize)
-                .expect(&format!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
+                .unwrap_or_else(|| panic!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
             if row.header_row {
                 return;
             }
@@ -1120,7 +1122,7 @@ mod context_menu {
                 .val_str
                 .iter()
                 .nth(path_idx)
-                .expect(&format!("path_idx={path_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
+                .unwrap_or_else(|| panic!("path_idx={path_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
                 .to_string();
             set_clipboard(path);
         });
@@ -1137,7 +1139,7 @@ mod context_menu {
 
             let row = model
                 .row_data(idx as usize)
-                .expect(&format!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
+                .unwrap_or_else(|| panic!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
             if row.header_row {
                 return;
             }
@@ -1145,13 +1147,13 @@ mod context_menu {
                 .val_str
                 .iter()
                 .nth(name_idx)
-                .expect(&format!("name_idx={name_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
+                .unwrap_or_else(|| panic!("name_idx={name_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
                 .to_string();
             let path = row
                 .val_str
                 .iter()
                 .nth(path_idx)
-                .expect(&format!("path_idx={path_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
+                .unwrap_or_else(|| panic!("path_idx={path_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
                 .to_string();
             let full_path = if path.is_empty() { name } else { format!("{path}/{name}") };
             set_clipboard(full_path);

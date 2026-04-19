@@ -506,10 +506,12 @@ fn run_app_inner(
                                     }
                                     let name = e
                                         .val_str
-                                        .row_data(0).map_or_else(|| panic!("Expected name in val_str[0] - {:?}", e.val_str), |s| s.to_string());
+                                        .row_data(0)
+                                        .map_or_else(|| panic!("Expected name in val_str[0] - {:?}", e.val_str), |s| s.to_string());
                                     let path = e
                                         .val_str
-                                        .row_data(1).map_or_else(|| panic!("Expected path in val_str[1] - {:?}", e.val_str), |s| s.to_string());
+                                        .row_data(1)
+                                        .map_or_else(|| panic!("Expected path in val_str[1] - {:?}", e.val_str), |s| s.to_string());
                                     let full = if path.is_empty() { name } else { format!("{path}/{name}") };
                                     !del_set.contains(&full)
                                 });

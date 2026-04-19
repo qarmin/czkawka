@@ -187,7 +187,11 @@ fn wire_compare_set_right(app: &MainWindow) {
         if idx >= images.row_count() {
             return;
         }
-        let path = images.row_data(idx).unwrap_or_else(|| panic!("wire_compare_set_right: invalid compare_idx {idx}")).path.to_string();
+        let path = images
+            .row_data(idx)
+            .unwrap_or_else(|| panic!("wire_compare_set_right: invalid compare_idx {idx}"))
+            .path
+            .to_string();
         state.set_compare_right_idx(compare_idx);
         state.set_compare_diff_image(slint::Image::default());
         if let Some(raw) = load_raw_image(&path, 1200, 900) {
@@ -208,7 +212,9 @@ fn wire_compare_toggle_checkbox(app: &MainWindow) {
             return;
         }
 
-        let item = images_model.row_data(cidx).unwrap_or_else(|| panic!("wire_compare_toggle_checkbox: invalid compare_idx {cidx}"));
+        let item = images_model
+            .row_data(cidx)
+            .unwrap_or_else(|| panic!("wire_compare_toggle_checkbox: invalid compare_idx {cidx}"));
         let new_checked = !item.checked;
         let flat_idx = item.flat_idx as usize;
         let group_idx = item.group_idx as usize;
@@ -436,8 +442,9 @@ fn finish_cancel(app: &MainWindow) {
 
 fn update_compare_checked(images_model: &ModelRc<CompareImageData>, compare_idx: usize, new_checked: bool) {
     if let Some(vm) = images_model.as_any().downcast_ref::<VecModel<CompareImageData>>()
-        && let Some(mut item) = vm.row_data(compare_idx) {
-            item.checked = new_checked;
-            vm.set_row_data(compare_idx, item);
-        }
+        && let Some(mut item) = vm.row_data(compare_idx)
+    {
+        item.checked = new_checked;
+        vm.set_row_data(compare_idx, item);
+    }
 }

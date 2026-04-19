@@ -12,7 +12,7 @@ use slint::SharedString;
 use crate::connect_translation::LANGUAGE_LIST;
 use crate::localizer_krokiet::LANGUAGE_LOADER_KROKIET;
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub enum DisplaySpec {
     Const(&'static str),
     Translatable(&'static str),
