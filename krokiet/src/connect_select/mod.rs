@@ -404,22 +404,24 @@ mod tests {
     fn invert_selection_in_group_only_changes_groups_with_selection() {
         let mut model = get_model_vec(7);
         model[1].header_row = true; // Group 1 header
-        // Group 1 (indices 0): items 0 - no selection initially
+        // Group 1 (indices 0): item 0 - no selection initially
         model[2].header_row = true; // Group 2 header
-        // Group 2 (indices 1): items 2, 3 - item 2 selected
-        model[2].checked = true;
+        // Group 2 (indices 3,4,5,6): items 3,4,5,6 - item 3 selected
+        model[3].checked = true;
         let model = create_model_from_model_vec(&model);
 
         let (checked_items, unchecked_items, new_model) = invert_selection_in_group(&model);
 
         // Group 1 has no selection, should remain unchanged
         assert!(!new_model.row_data(0).unwrap().checked);
-        // Group 2 has selection, should invert: item 2 checked->unchecked, item 3 unchecked->checked
-        assert!(!new_model.row_data(2).unwrap().checked);
-        assert!(new_model.row_data(3).unwrap().checked);
-        // Verify counts
-        assert_eq!(checked_items, 1); // item 3 was unchecked, now checked
-        assert_eq!(unchecked_items, 1); // item 2 was checked, now unchecked
+        // Group 2 has selection, should invert: item 3 checked->unchecked, others unchecked->checked
+        assert!(!new_model.row_data(3).unwrap().checked);
+        assert!(new_model.row_data(4).unwrap().checked);
+        assert!(new_model.row_data(5).unwrap().checked);
+        assert!(new_model.row_data(6).unwrap().checked);
+        // Verify counts: 3 items flipped from unchecked to checked, 1 from checked to unchecked
+        assert_eq!(checked_items, 3);
+        assert_eq!(unchecked_items, 1);
     }
 
     #[test]
