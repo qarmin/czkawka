@@ -132,6 +132,10 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_music_genre_text(flc!("settings_music_genre").into());
     t.set_settings_music_bitrate_text(flc!("settings_music_bitrate").into());
     t.set_settings_music_approx_text(flc!("settings_music_approx").into());
+    t.set_settings_temporary_files_header_text(flc!("settings_temporary_files_header").into());
+    t.set_settings_temporary_files_extensions_label_text(flc!("settings_temporary_files_extensions_label").into());
+    t.set_settings_temporary_files_extensions_placeholder_text(flc!("settings_temporary_files_extensions_placeholder").into());
+    t.set_settings_temporary_files_reset_text(flc!("settings_temporary_files_reset").into());
     t.set_settings_broken_files_header_text(flc!("settings_broken_files_header").into());
     t.set_settings_broken_files_note_text(flc!("settings_broken_files_note").into());
     t.set_settings_broken_files_types_label_text(flc!("settings_broken_files_types_label").into());

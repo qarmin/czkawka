@@ -295,6 +295,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_reset_text(flk!("subsettings_reset").into());
     translation.set_subsettings_exif_ignored_tags_text(flk!("subsettings_exif_ignored_tags_text").into());
     translation.set_subsettings_exif_ignored_tags_hint_text(flk!("subsettings_exif_ignored_tags_hint_text").into());
+    translation.set_subsettings_temporary_files_extensions_text(flk!("subsettings_temporary_files_extensions_text").into());
+    translation.set_subsettings_temporary_files_extensions_hint_text(flk!("subsettings_temporary_files_extensions_hint_text").into());
     translation.set_clean_button_text(flk!("clean_button_text").into());
     translation.set_clean_text(flk!("clean_text").into());
     translation.set_clean_confirmation_text(flk!("clean_confirmation_text").into());

@@ -14,19 +14,25 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::tools::temporary::{Info, TEMP_EXTENSIONS, Temporary, TemporaryFileEntry};
+use crate::tools::temporary::{Info, Temporary, TemporaryFileEntry, TemporaryParameters};
 
 impl Temporary {
-    pub fn new() -> Self {
+    pub fn new(params: TemporaryParameters) -> Self {
         Self {
             common_data: CommonToolData::new(ToolType::TemporaryFiles),
             information: Info::default(),
             temporary_files: Vec::new(),
+            params,
         }
     }
 
     #[fun_time(message = "check_files", level = "debug")]
     pub(crate) fn check_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+        if self.params.extensions.is_empty() {
+            self.common_data.text_messages.critical = Some("No temporary file extensions defined. Add at least one extension to search for.".to_string());
+            return WorkContinueStatus::Stop;
+        }
+
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
         let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
@@ -106,7 +112,7 @@ impl Temporary {
         let file_name = entry_data.file_name();
         let file_name_ascii_lowercase = file_name.to_ascii_lowercase();
         let file_name_lowercase = file_name_ascii_lowercase.to_string_lossy();
-        if !TEMP_EXTENSIONS.iter().any(|f| file_name_lowercase.ends_with(f)) {
+        if !self.params.extensions.iter().any(|f| file_name_lowercase.ends_with(f.as_str())) {
             return None;
         }
 

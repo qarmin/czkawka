@@ -90,6 +90,7 @@ pub enum ScanRequest {
     },
     TemporaryFiles {
         dirs: Vec<PathBuf>,
+        extensions: Vec<String>,
         filters: CommonFilters,
     },
     BigFiles {
@@ -234,9 +235,9 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 handler.on_result(ScanResult::EmptyFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
-            ScanRequest::TemporaryFiles { dirs, filters } => {
+            ScanRequest::TemporaryFiles { dirs, extensions, filters } => {
                 scan_id += 1;
-                let items = scan_temporary_files(dirs, &filters, stop_flag, &handler, scan_id);
+                let items = scan_temporary_files(dirs, extensions, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::TemporaryFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }

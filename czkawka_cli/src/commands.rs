@@ -235,6 +235,16 @@ pub struct TemporaryArgs {
     pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
     pub delete_method: SDMethod,
+    #[clap(
+        short = 'C',
+        long,
+        help = "Temporary file extension(s)",
+        long_help = "Extensions/suffixes to treat as temporary files (e.g. .log .swp). \
+If not specified, the built-in default list is used. \
+If specified, the provided list replaces the defaults entirely. \
+Matched using ends_with on the lowercased filename."
+    )]
+    pub extensions: Vec<String>,
 }
 
 #[derive(Debug, clap::Args)]

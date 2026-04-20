@@ -516,6 +516,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_video_optimizer_sub_custom_command(custom_settings.video_optimizer_custom_command.clone().into());
 
     settings.set_ignored_exif_tags(custom_settings.ignored_exif_tags.clone().into());
+    settings.set_temporary_files_sub_extensions(custom_settings.temporary_files_extensions.clone().into());
 
     // Popup-specific settings
     settings.set_popup_move_preserve_folder_structure(custom_settings.popup_move_preserve_folder_structure);
@@ -707,6 +708,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         .to_string();
 
     let ignored_exif_tags = settings.get_ignored_exif_tags().to_string();
+    let temporary_files_extensions = settings.get_temporary_files_sub_extensions().to_string();
 
     let column_sizes = BTreeMap::from([
         ("duplicates".to_string(), settings.get_duplicates_column_size().iter().collect::<Vec<_>>()),
@@ -815,6 +817,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         video_optimizer_custom_command,
         video_optimizer_hardware_encoder,
         ignored_exif_tags,
+        temporary_files_extensions,
         column_sizes,
         popup_move_preserve_folder_structure: settings.get_popup_move_preserve_folder_structure(),
         popup_move_copy_mode: settings.get_popup_move_copy_mode(),

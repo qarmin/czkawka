@@ -1,6 +1,6 @@
 import { CediniaColors } from "colors.slint";
 import { Divider, TouchButton } from "components.slint";
-import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings } from "app_state.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, TemporaryFilesSettings } from "app_state.slint";
 import { CategoryLabel, DropdownRow, SegmentRow, TextInputRow, ToggleRow, ToolGroupHeader } from "settings_components.slint";
 import { SettingsTab } from "common.slint";
 import { Translations } from "translations.slint";
@@ -450,6 +450,34 @@ export component SettingsScreen {
                             color: CediniaColors.warning;
                             font-size: 12px;
                             wrap: word-wrap;
+                        }
+                    }
+                    Divider {}
+
+
+                    ToolGroupHeader { label: Translations.settings_temporary_files_header_text; emoji: "🗑"; }
+
+                    CategoryLabel { label: Translations.settings_temporary_files_extensions_label_text; }
+
+                    TextInputRow {
+                        label: Translations.settings_temporary_files_extensions_label_text;
+                        placeholder: Translations.settings_temporary_files_extensions_placeholder_text;
+                        value <=> TemporaryFilesSettings.extensions;
+                    }
+                    Divider {}
+
+                    Rectangle {
+                        height: reset_btn.preferred-height + 16px;
+                        background: CediniaColors.bg_surface;
+                        reset_btn := TouchButton {
+                            x: 16px;
+                            y: 8px;
+                            label: Translations.settings_temporary_files_reset_text;
+                            bg: CediniaColors.bg_elevated;
+                            fg: CediniaColors.text_secondary;
+                            clicked => {
+                                TemporaryFilesSettings.extensions = "#,thumbs.db,.bak,~,.tmp,.temp,.ds_store,.crdownload,.part,.cache,.dmp,.download,.partial";
+                            }
                         }
                     }
                     Divider {}

@@ -275,10 +275,17 @@ pub(crate) fn scan_empty_files<H: ScanResultHandler>(dirs: Vec<PathBuf>, filters
     items
 }
 
-pub(crate) fn scan_temporary_files<H: ScanResultHandler>(dirs: Vec<PathBuf>, filters: &CommonFilters, stop: &Arc<AtomicBool>, handler: &Arc<H>, scan_id: u32) -> Vec<FileItem> {
-    use czkawka_core::tools::temporary::Temporary;
+pub(crate) fn scan_temporary_files<H: ScanResultHandler>(
+    dirs: Vec<PathBuf>,
+    extensions: Vec<String>,
+    filters: &CommonFilters,
+    stop: &Arc<AtomicBool>,
+    handler: &Arc<H>,
+    scan_id: u32,
+) -> Vec<FileItem> {
+    use czkawka_core::tools::temporary::{Temporary, TemporaryParameters};
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
-    let mut tool = Temporary::new();
+    let mut tool = Temporary::new(TemporaryParameters { extensions });
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
     tool.search(stop, Some(&ptx));

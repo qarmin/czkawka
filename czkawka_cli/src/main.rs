@@ -26,7 +26,7 @@ use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
-use czkawka_core::tools::temporary::Temporary;
+use czkawka_core::tools::temporary::{Temporary, TemporaryParameters};
 use czkawka_core::tools::video_optimizer::{
     HardwareEncoder, VideoCropFixParams, VideoCropParams, VideoCroppingMechanism, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeFixParams,
     VideoTranscodeParams,
@@ -199,9 +199,18 @@ fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progres
 }
 
 fn temporary(temporary: TemporaryArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    let TemporaryArgs { common_cli_items, delete_method } = temporary;
+    let TemporaryArgs {
+        common_cli_items,
+        delete_method,
+        extensions,
+    } = temporary;
 
-    let mut tool = Temporary::new();
+    let params = if extensions.is_empty() {
+        TemporaryParameters::default()
+    } else {
+        TemporaryParameters { extensions }
+    };
+    let mut tool = Temporary::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, None);
     set_simple_delete(&mut tool, delete_method);

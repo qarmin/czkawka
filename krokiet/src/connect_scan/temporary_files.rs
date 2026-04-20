@@ -6,7 +6,7 @@ use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path, split_path_compare};
 use czkawka_core::tools::temporary;
-use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry};
+use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry, TemporaryParameters};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
@@ -18,7 +18,19 @@ pub(crate) fn scan_temporary_files(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut tool = Temporary::new();
+            let extensions: Vec<String> = sd
+                .custom_settings
+                .temporary_files_extensions
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+            let params = if extensions.is_empty() {
+                TemporaryParameters::default()
+            } else {
+                TemporaryParameters { extensions }
+            };
+            let mut tool = Temporary::new(params);
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));

@@ -15,7 +15,7 @@ use crate::scan_runner::{CommonFilters, ScanRequest};
 use crate::settings::gui_settings_values::StringComboBoxItems;
 use crate::{
     ActiveTool, AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, FileEntry, GeneralSettings, MainWindow, SameMusicSettings, ScanState,
-    SimilarGroupCard, SimilarImagesSettings, flc,
+    SimilarGroupCard, SimilarImagesSettings, TemporaryFilesSettings, flc,
 };
 
 pub(crate) fn wire_scan(
@@ -168,7 +168,16 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
             }
         }
         ActiveTool::EmptyFiles => ScanRequest::EmptyFiles { dirs, filters },
-        ActiveTool::TemporaryFiles => ScanRequest::TemporaryFiles { dirs, filters },
+        ActiveTool::TemporaryFiles => {
+            let t = win.global::<TemporaryFilesSettings>();
+            let extensions: Vec<String> = t.get_extensions().as_str().split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let extensions = if extensions.is_empty() {
+                czkawka_core::tools::temporary::TEMP_EXTENSIONS.iter().map(|s| s.to_string()).collect()
+            } else {
+                extensions
+            };
+            ScanRequest::TemporaryFiles { dirs, extensions, filters }
+        }
         ActiveTool::BigFiles => {
             let b = win.global::<BigFilesSettings>();
             ScanRequest::BigFiles {
