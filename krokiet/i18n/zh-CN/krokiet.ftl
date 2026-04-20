@@ -188,6 +188,7 @@ sort_reverse = 反向顺序
 selection_all = 选择所有
 selection_deselect_all = 取消全选
 selection_invert_selection = 反转选择
+selection_invert_selection_in_group = 在组中反转选择
 selection_the_biggest_size = 选择最大的大小
 selection_the_biggest_resolution = 选择最大的分辨率
 selection_the_smallest_size = 选择最小尺寸

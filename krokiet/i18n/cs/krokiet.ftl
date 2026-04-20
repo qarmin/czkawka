@@ -188,6 +188,7 @@ sort_reverse = Obrácené pořadí
 selection_all = Vybrat vše
 selection_deselect_all = Zrušit výběr všeho
 selection_invert_selection = Invertovat výběr
+selection_invert_selection_in_group = Invertovat výběr ve skupině
 selection_the_biggest_size = Vybrat nejvyšší velikost
 selection_the_biggest_resolution = Vybrat nejvyšší rozlišení
 selection_the_smallest_size = Vybrat nejnižší velikost

@@ -190,6 +190,7 @@ sort_reverse = उल्टा क्रम
 selection_all = सभी का चयन करें।
 selection_deselect_all = सभी का चयन रद्द करें
 selection_invert_selection = चयन को उलटा करें
+selection_invert_selection_in_group = समूह में चयन उलटें
 selection_the_biggest_size = सबसे बड़ा आकार चुनें
 selection_the_biggest_resolution = सबसे बड़ा रिज़ॉल्यूशन चुनें
 selection_the_smallest_size = सबसे छोटा आकार चुनें

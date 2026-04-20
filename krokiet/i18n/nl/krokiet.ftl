@@ -186,6 +186,7 @@ sort_reverse = Omgekeerde volgorde
 selection_all = Alles selecteren
 selection_deselect_all = Deselecteer alles
 selection_invert_selection = Selectie omkeren
+selection_invert_selection_in_group = Selectie in groep omkeren
 selection_the_biggest_size = Selecteer de grootste grootte
 selection_the_biggest_resolution = Selecteer de grootste resolutie
 selection_the_smallest_size = Selecteer de kleinste grootte

@@ -188,6 +188,7 @@ sort_reverse = Đảo ngược thứ tự
 selection_all = Chọn tất cả
 selection_deselect_all = Bỏ chọn tất cả
 selection_invert_selection = Đảo ngược lựa chọn
+selection_invert_selection_in_group = Đảo ngược lựa chọn trong nhóm
 selection_the_biggest_size = Chọn kích thước lớn nhất
 selection_the_biggest_resolution = Chọn độ phân giải lớn nhất
 selection_the_smallest_size = Chọn kích thước nhỏ nhất

@@ -188,6 +188,7 @@ sort_reverse = Omvänd ordning
 selection_all = Markera alla
 selection_deselect_all = Avmarkera alla
 selection_invert_selection = Invertera markering
+selection_invert_selection_in_group = Invertera markering i grupp
 selection_the_biggest_size = Välj den största storleken
 selection_the_biggest_resolution = Välj den största upplösningen
 selection_the_smallest_size = Välj den minsta storleken
