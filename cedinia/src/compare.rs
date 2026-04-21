@@ -28,15 +28,49 @@ fn request_cancel() {
     CANCEL_TOKEN.with(|t| t.borrow().store(true, Ordering::Relaxed));
 }
 
-// Diff generation counter
+// Generation counters
 
 thread_local! {
     static DIFF_GEN: RefCell<Arc<AtomicU64>> =
+        RefCell::new(Arc::new(AtomicU64::new(0)));
+    // Separate counters for set-left / set-right thumbnail loads so they
+    // don't cancel each other when both sides are updated in quick succession.
+    static SET_LEFT_GEN: RefCell<Arc<AtomicU64>> =
+        RefCell::new(Arc::new(AtomicU64::new(0)));
+    static SET_RIGHT_GEN: RefCell<Arc<AtomicU64>> =
+        RefCell::new(Arc::new(AtomicU64::new(0)));
+    // Counter for open_group background loads – used to discard stale results
+    // when the user navigates to another group before the previous load finishes.
+    static OPEN_GEN: RefCell<Arc<AtomicU64>> =
         RefCell::new(Arc::new(AtomicU64::new(0)));
 }
 
 fn next_diff_gen() -> (Arc<AtomicU64>, u64) {
     DIFF_GEN.with(|g| {
+        let arc = g.borrow().clone();
+        let val = arc.fetch_add(1, Ordering::Relaxed) + 1;
+        (arc, val)
+    })
+}
+
+fn next_set_left_gen() -> (Arc<AtomicU64>, u64) {
+    SET_LEFT_GEN.with(|g| {
+        let arc = g.borrow().clone();
+        let val = arc.fetch_add(1, Ordering::Relaxed) + 1;
+        (arc, val)
+    })
+}
+
+fn next_set_right_gen() -> (Arc<AtomicU64>, u64) {
+    SET_RIGHT_GEN.with(|g| {
+        let arc = g.borrow().clone();
+        let val = arc.fetch_add(1, Ordering::Relaxed) + 1;
+        (arc, val)
+    })
+}
+
+fn next_open_gen() -> (Arc<AtomicU64>, u64) {
+    OPEN_GEN.with(|g| {
         let arc = g.borrow().clone();
         let val = arc.fetch_add(1, Ordering::Relaxed) + 1;
         (arc, val)
@@ -168,9 +202,25 @@ fn wire_compare_set_left(app: &MainWindow) {
             .to_string();
         state.set_compare_left_idx(compare_idx);
         state.set_compare_diff_image(slint::Image::default());
-        if let Some(raw) = load_raw_image(&path, 1200, 900) {
-            state.set_compare_left_image(raw.into_slint_image());
-        }
+
+        // Load the image on a background thread to avoid blocking the UI.
+        let (gen_counter, gen_val) = next_set_left_gen();
+        let weak2 = weak.clone();
+        thread::spawn(move || {
+            let raw = load_raw_image(&path, 1200, 900);
+            if gen_counter.load(Ordering::Relaxed) != gen_val {
+                return;
+            }
+            weak2
+                .upgrade_in_event_loop(move |app| {
+                    if gen_counter.load(Ordering::Relaxed) == gen_val
+                        && let Some(raw) = raw
+                    {
+                        app.global::<AppState>().set_compare_left_image(raw.into_slint_image());
+                    }
+                })
+                .expect("set_left: upgrade_in_event_loop failed");
+        });
     });
 }
 
@@ -194,9 +244,25 @@ fn wire_compare_set_right(app: &MainWindow) {
             .to_string();
         state.set_compare_right_idx(compare_idx);
         state.set_compare_diff_image(slint::Image::default());
-        if let Some(raw) = load_raw_image(&path, 1200, 900) {
-            state.set_compare_right_image(raw.into_slint_image());
-        }
+
+        // Load the image on a background thread to avoid blocking the UI.
+        let (gen_counter, gen_val) = next_set_right_gen();
+        let weak2 = weak.clone();
+        thread::spawn(move || {
+            let raw = load_raw_image(&path, 1200, 900);
+            if gen_counter.load(Ordering::Relaxed) != gen_val {
+                return;
+            }
+            weak2
+                .upgrade_in_event_loop(move |app| {
+                    if gen_counter.load(Ordering::Relaxed) == gen_val
+                        && let Some(raw) = raw
+                    {
+                        app.global::<AppState>().set_compare_right_image(raw.into_slint_image());
+                    }
+                })
+                .expect("set_right: upgrade_in_event_loop failed");
+        });
     });
 }
 
@@ -402,11 +468,15 @@ fn open_group(app: &MainWindow, group_idx: usize) {
 
     // Load full-size images in the background (only RawPixels are sent – they are Send).
     let cancel = new_cancel_token();
+    let (open_gen_counter, open_gen_val) = next_open_gen();
     let weak = app.as_weak();
 
     thread::spawn(move || {
         if cancel.load(Ordering::Relaxed) {
-            weak.upgrade_in_event_loop(|app| finish_cancel(&app)).expect("open_group cancel1: upgrade failed");
+            // Explicit user cancel – still the current group, so close the overlay.
+            if open_gen_counter.load(Ordering::Relaxed) == open_gen_val {
+                weak.upgrade_in_event_loop(|app| finish_cancel(&app)).expect("open_group cancel1: upgrade failed");
+            }
             return;
         }
 
@@ -414,11 +484,17 @@ fn open_group(app: &MainWindow, group_idx: usize) {
         let right_full = if left_path != right_path { load_raw_image(&right_path, 1200, 900) } else { None };
 
         if cancel.load(Ordering::Relaxed) {
-            weak.upgrade_in_event_loop(|app| finish_cancel(&app)).expect("open_group cancel2: upgrade failed");
+            if open_gen_counter.load(Ordering::Relaxed) == open_gen_val {
+                weak.upgrade_in_event_loop(|app| finish_cancel(&app)).expect("open_group cancel2: upgrade failed");
+            }
             return;
         }
 
         weak.upgrade_in_event_loop(move |app| {
+            // Stale: a newer open_group call superseded this one; discard results.
+            if open_gen_counter.load(Ordering::Relaxed) != open_gen_val {
+                return;
+            }
             let state = app.global::<AppState>();
             if let Some(raw) = left_full {
                 state.set_compare_left_image(raw.into_slint_image());

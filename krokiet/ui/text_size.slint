@@ -1,5 +1,5 @@
 // Utility component that measures the natural (preferred) width of a list of strings
-// rendered with given font settings, and exposes the maximum as `max_width`.
+// rendered with given font settings, and exposes the maximum as `measure_width`.
 //
 // Usage:
 //   m := MaxTextMeasure {
@@ -7,7 +7,7 @@
 //       font-size: FontSizes.normal;
 //       font-weight: 700;
 //   }
-//   some-element.width: m.max_width + 8px;
+//   some-element.width: m.measure_width + 8px;
 //
 // The component renders all strings as Text elements in an off-screen VerticalLayout.
 // Slint computes VerticalLayout.preferred-width = max of children's preferred-widths,

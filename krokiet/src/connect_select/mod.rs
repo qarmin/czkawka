@@ -256,6 +256,9 @@ fn select_all_except_by_property(model: &ModelRc<SingleMainListModel>, active_ta
     assert!(is_header_mode);
 
     let mut old_data = model.iter().collect::<Vec<_>>();
+    // Capture previous checked state before find_header_idx_and_deselect_all clears all flags,
+    // so the returned delta is relative to the actual prior selection.
+    let prev_checked: Vec<bool> = old_data.iter().map(|m| m.checked).collect();
     let headers_idx = find_header_idx_and_deselect_all(&mut old_data);
 
     for i in 0..(headers_idx.len() - 1) {
@@ -276,12 +279,12 @@ fn select_all_except_by_property(model: &ModelRc<SingleMainListModel>, active_ta
         // Select every item except the extreme one.
         for j in group_start..group_end {
             if j == extreme_idx {
-                if old_data[j].checked {
+                if prev_checked[j] {
                     unchecked_items += 1;
                 }
                 old_data[j].checked = false;
             } else {
-                if !old_data[j].checked {
+                if !prev_checked[j] {
                     checked_items += 1;
                 }
                 old_data[j].checked = true;
