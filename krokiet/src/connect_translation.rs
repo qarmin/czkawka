@@ -546,6 +546,7 @@ pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
         SelectMode::SelectAll => flk!("selection_all").into(),
         SelectMode::UnselectAll => flk!("selection_deselect_all").into(),
         SelectMode::InvertSelection => flk!("selection_invert_selection").into(),
+        SelectMode::InvertSelectionInGroup => flk!("selection_invert_selection_in_group").into(),
         SelectMode::SelectTheBiggestSize => flk!("selection_the_biggest_size").into(),
         SelectMode::SelectTheBiggestResolution => flk!("selection_the_biggest_resolution").into(),
         SelectMode::SelectTheSmallestSize => flk!("selection_the_smallest_size").into(),

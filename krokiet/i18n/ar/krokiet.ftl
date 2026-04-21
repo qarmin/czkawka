@@ -188,6 +188,7 @@ sort_reverse = عكس الترتيب
 selection_all = حدد الكل
 selection_deselect_all = إلغاء تحديد الكل
 selection_invert_selection = عكس التحديد
+selection_invert_selection_in_group = عكس التحديد في المجموعة
 selection_the_biggest_size = حدد أكبر حجم
 selection_the_biggest_resolution = حدد أكبر دقة
 selection_the_smallest_size = حدد أصغر حجم

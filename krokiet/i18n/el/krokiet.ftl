@@ -188,6 +188,7 @@ sort_reverse = Αντίστροφη σειρά
 selection_all = Επιλογή όλων
 selection_deselect_all = Αποεπιλογή όλων
 selection_invert_selection = Αντιστροφή επιλογής
+selection_invert_selection_in_group = Αντιστροφή επιλογής στην ομάδα
 selection_the_biggest_size = Επιλέξτε το μεγαλύτερο μέγεθος
 selection_the_biggest_resolution = Επιλέξτε τη μεγαλύτερη ανάλυση
 selection_the_smallest_size = Επιλέξτε το μικρότερο μέγεθος

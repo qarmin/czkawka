@@ -188,6 +188,7 @@ sort_reverse = Motsatt rekkefølge
 selection_all = Velg alle
 selection_deselect_all = Fjern all merking
 selection_invert_selection = Inverter merking
+selection_invert_selection_in_group = Inverter merking i gruppe
 selection_the_biggest_size = Velg den største størrelsen
 selection_the_biggest_resolution = Velg den største oppløsningen
 selection_the_smallest_size = Velg den minste størrelsen

@@ -188,6 +188,7 @@ sort_reverse = Odwróć kolejność
 selection_all = Zaznacz wszystko
 selection_deselect_all = Odznacz wszystko
 selection_invert_selection = Odwróć zaznaczenie
+selection_invert_selection_in_group = Odwróć zaznaczenie w grupie
 selection_the_biggest_size = Wybierz największe pliki
 selection_the_biggest_resolution = Wybierz największą rozdzielczość
 selection_the_smallest_size = Wybierz najmniejsze pliki

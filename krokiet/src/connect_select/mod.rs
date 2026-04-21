@@ -29,6 +29,7 @@ pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedM
             SelectMode::SelectAll => select_all(&current_model),
             SelectMode::UnselectAll => deselect_all(&current_model),
             SelectMode::InvertSelection => invert_selection(&current_model),
+            SelectMode::InvertSelectionInGroup => invert_selection_in_group(&current_model),
             SelectMode::SelectTheBiggestSize => select_by_property(&current_model, active_tab, Property::Size, true),
             SelectMode::SelectTheSmallestSize => select_by_property(&current_model, active_tab, Property::Size, false),
             SelectMode::SelectTheBiggestResolution => select_by_property(&current_model, active_tab, Property::Resolution, false),
@@ -102,6 +103,7 @@ pub(crate) fn set_select_buttons(app: &MainWindow) {
 
     let additional_buttons = match active_tab {
         ActiveTab::DuplicateFiles | ActiveTab::SimilarVideos | ActiveTab::SimilarMusic => vec![
+            SelectMode::InvertSelectionInGroup,
             SelectMode::SelectOldest,
             SelectMode::SelectNewest,
             SelectMode::SelectTheSmallestSize,
@@ -110,6 +112,7 @@ pub(crate) fn set_select_buttons(app: &MainWindow) {
             SelectMode::SelectLongestPath,
         ],
         ActiveTab::SimilarImages => vec![
+            SelectMode::InvertSelectionInGroup,
             SelectMode::SelectOldest,
             SelectMode::SelectNewest,
             SelectMode::SelectTheSmallestSize,
@@ -257,6 +260,41 @@ fn invert_selection(model: &ModelRc<SingleMainListModel>) -> SelectionResult {
     (checked_items, unchecked_items, ModelRc::new(VecModel::from(old_data)))
 }
 
+fn invert_selection_in_group(model: &ModelRc<SingleMainListModel>) -> SelectionResult {
+    let mut checked_items = 0;
+    let mut unchecked_items = 0;
+    let mut old_data = model.iter().collect::<Vec<_>>();
+
+    let header_idx: Vec<usize> = old_data
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, m)| if m.header_row { Some(idx) } else { None })
+        .chain(std::iter::once(old_data.len()))
+        .collect();
+
+    for group_idx in 0..header_idx.len() - 1 {
+        let group_start = header_idx[group_idx] + 1;
+        let group_end = header_idx[group_idx + 1];
+
+        let has_selection_in_group = old_data[group_start..group_end].iter().any(|x| x.checked);
+
+        if !has_selection_in_group {
+            continue;
+        }
+
+        for i in group_start..group_end {
+            if old_data[i].checked {
+                unchecked_items += 1;
+            } else {
+                checked_items += 1;
+            }
+            old_data[i].checked = !old_data[i].checked;
+        }
+    }
+
+    (checked_items, unchecked_items, ModelRc::new(VecModel::from(old_data)))
+}
+
 fn find_header_idx_and_deselect_all(old_data: &mut [SingleMainListModel]) -> Vec<usize> {
     let mut header_idx = old_data
         .iter()
@@ -360,5 +398,43 @@ mod tests {
         assert!(new_model.row_data(2).unwrap().checked);
         assert!(new_model.row_data(3).unwrap().checked);
         assert!(new_model.row_data(4).unwrap().checked);
+    }
+
+    #[test]
+    fn invert_selection_in_group_only_changes_groups_with_selection() {
+        let mut model = get_model_vec(7);
+        model[1].header_row = true; // Group 1 header
+        // Group 1 (indices 0): item 0 - no selection initially
+        model[2].header_row = true; // Group 2 header
+        // Group 2 (indices 3,4,5,6): items 3,4,5,6 - item 3 selected
+        model[3].checked = true;
+        let model = create_model_from_model_vec(&model);
+
+        let (checked_items, unchecked_items, new_model) = invert_selection_in_group(&model);
+
+        // Group 1 has no selection, should remain unchanged
+        assert!(!new_model.row_data(0).unwrap().checked);
+        // Group 2 has selection, should invert: item 3 checked->unchecked, others unchecked->checked
+        assert!(!new_model.row_data(3).unwrap().checked);
+        assert!(new_model.row_data(4).unwrap().checked);
+        assert!(new_model.row_data(5).unwrap().checked);
+        assert!(new_model.row_data(6).unwrap().checked);
+        // Verify counts: 3 items flipped from unchecked to checked, 1 from checked to unchecked
+        assert_eq!(checked_items, 3);
+        assert_eq!(unchecked_items, 1);
+    }
+
+    #[test]
+    fn invert_selection_in_group_does_nothing_when_no_groups_have_selection() {
+        let mut model = get_model_vec(5);
+        model[1].header_row = true;
+        let model = create_model_from_model_vec(&model);
+
+        let (checked_items, unchecked_items, new_model) = invert_selection_in_group(&model);
+
+        assert_eq!(checked_items, 0);
+        assert_eq!(unchecked_items, 0);
+        assert!(!new_model.row_data(0).unwrap().checked);
+        assert!(!new_model.row_data(2).unwrap().checked);
     }
 }

@@ -188,6 +188,7 @@ sort_reverse = Reihenfolge umkehren
 selection_all = Alles auswählen
 selection_deselect_all = Alle abwählen
 selection_invert_selection = Auswahl umkehren
+selection_invert_selection_in_group = Auswahl in Gruppe umkehren
 selection_the_biggest_size = Wählen Sie die größte Größe
 selection_the_biggest_resolution = Wählen Sie die größte Auflösung
 selection_the_smallest_size = Wählen Sie die kleinste Größe

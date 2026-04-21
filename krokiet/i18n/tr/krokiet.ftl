@@ -188,6 +188,7 @@ sort_reverse = Ters Sırala
 selection_all = Tümünü Seç
 selection_deselect_all = Seçili olanları kaldırın
 selection_invert_selection = Seçimi Ters Çevir
+selection_invert_selection_in_group = Grupta seçimi ters çevir
 selection_the_biggest_size = En Büyük Büyüklükteki Dosyayı Seç
 selection_the_biggest_resolution = En Yüksek Çözünürlüğü Seç
 selection_the_smallest_size = En Küçük Büyüklükteki Dosyayı Seç
