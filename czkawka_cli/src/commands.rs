@@ -160,8 +160,8 @@ pub struct DuplicatesArgs {
         long,
         value_parser = parse_minimal_file_size,
         default_value = "257144",
-        help = "Minimum cached file size in bytes",
-        long_help = "Minimum size of cached files in bytes, assigning bigger value may speed up the scan but loading the cache will be slower, assigning smaller value may slow down the scan and some files may need to be hashed again but loading the cache will be faster"
+        help = "Minimum size of files stored in the hash cache (bytes)",
+        long_help = "Minimum file size (in bytes) to be included in the hash cache. A higher value produces a smaller cache file, making cache loading faster, but more files will be excluded from the cache and must be re-hashed on each scan. A lower value stores more files in the cache, making the scan faster at the cost of a larger cache file and slower cache loading."
     )]
     pub minimal_cached_file_size: u64,
     #[clap(
