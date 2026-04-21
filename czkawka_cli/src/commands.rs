@@ -236,7 +236,7 @@ pub struct TemporaryArgs {
     #[clap(flatten)]
     pub delete_method: SDMethod,
     #[clap(
-        short = 'C',
+        short = 'L',
         long,
         help = "Temporary file extension(s)",
         long_help = "Extensions/suffixes to treat as temporary files (e.g. .log .swp). \

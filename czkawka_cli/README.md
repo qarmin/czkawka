@@ -14,7 +14,7 @@ If you want to use heif/libraw/libavif (build/runtime dependency), you need to i
 - macOS: `brew install ffmpeg libraw libheif libavif dav1d` - [ffmpeg formula](https://formulae.brew.sh/formula/ffmpeg)
 - Linux: `sudo apt install ffmpeg libraw-dev libheif-dev libavif-dev libdav1d-dev`
 - Windows: `choco install ffmpeg` - or, if not working, download from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) and
-  unpack to the location with `czkawka_cli.exe`. Heif and libraw are not supported on Windows.
+  unpack to the location with `czkawka_cli.exe`. `heif` and `libraw` features are very hard to set up on Windows and are not available in prebuild binaries(there are some unofficial builds, that enables this features)
 
 ## Compilation
 
