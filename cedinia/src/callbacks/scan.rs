@@ -170,7 +170,13 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
         ActiveTool::EmptyFiles => ScanRequest::EmptyFiles { dirs, filters },
         ActiveTool::TemporaryFiles => {
             let t = win.global::<TemporaryFilesSettings>();
-            let extensions: Vec<String> = t.get_extensions().as_str().split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+            let extensions: Vec<String> = t
+                .get_extensions()
+                .as_str()
+                .split(',')
+                .map(|s| s.trim().to_ascii_lowercase())
+                .filter(|s| !s.is_empty())
+                .collect();
             let extensions = if extensions.is_empty() {
                 czkawka_core::tools::temporary::TEMP_EXTENSIONS.iter().map(|s| s.to_string()).collect()
             } else {
