@@ -118,7 +118,7 @@ pub(crate) fn set_select_buttons(app: &MainWindow) {
 
     let additional_buttons = match active_tab {
         ActiveTab::DuplicateFiles | ActiveTab::SimilarVideos | ActiveTab::SimilarMusic => vec![
-            (SelectMode::InvertSelectionInGroup, todo!()),
+            (SelectMode::InvertSelectionInGroup, true),
             (SelectMode::SelectOldest, settings.get_select_show_oldest()),
             (SelectMode::SelectNewest, settings.get_select_show_newest()),
             (SelectMode::SelectTheSmallestSize, settings.get_select_show_smallest_size()),
@@ -133,7 +133,7 @@ pub(crate) fn set_select_buttons(app: &MainWindow) {
             (SelectMode::SelectAllExceptLongestPath, settings.get_select_show_except_longest_path()),
         ],
         ActiveTab::SimilarImages => vec![
-            (SelectMode::InvertSelectionInGroup, todo!()),
+            (SelectMode::InvertSelectionInGroup, true),
             (SelectMode::SelectOldest, settings.get_select_show_oldest()),
             (SelectMode::SelectNewest, settings.get_select_show_newest()),
             (SelectMode::SelectTheSmallestSize, settings.get_select_show_smallest_size()),
