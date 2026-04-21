@@ -119,21 +119,7 @@ jobs:
           Get-ChildItem windows_krokiet_on_windows_*.exe | ForEach-Object { ./rcedit-x64.exe $_.Name --set-icon krokiet/icons/krokiet_logo_flag.ico }
 
       - name: Package krokiet with launchers
-        run: |
-          New-Item -ItemType Directory -Force krokiet_package | Out-Null
-          Copy-Item windows_krokiet_on_windows_all_backends.exe krokiet_package\krokiet.exe
-          $scripts = [ordered]@{
-            "krokiet_winit_femtovg.bat"     = "winit-femtovg"
-            "krokiet_winit_skia_opengl.bat" = "winit-skia-opengl"
-            "krokiet_winit_skia_vulkan.bat" = "winit-skia-vulkan"
-            "krokiet_winit_software.bat"    = "winit-software"
-            "krokiet_femtovg_wgpu.bat"      = "femtovg-wgpu"
-          }
-          foreach ($file in $scripts.Keys) {
-            $backend = $scripts[$file]
-            "@echo off`r`nset SLINT_BACKEND=$backend`r`n`"%~dp0krokiet.exe`" %*`r`n" | Set-Content -Encoding ASCII "krokiet_package\$file"
-          }
-          Compress-Archive -Path krokiet_package\* -DestinationPath windows_krokiet_on_windows_all_backends.zip
+        run: pwsh misc/pack_all_backends.ps1 -Binary windows_krokiet_on_windows_all_backends.exe -OutputZip windows_krokiet_on_windows_all_backends.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
