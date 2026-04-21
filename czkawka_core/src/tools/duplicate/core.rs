@@ -381,11 +381,7 @@ impl DuplicateFinder {
     }
 
     #[fun_time(message = "prehash_save_cache_at_exit", level = "debug")]
-    fn prehash_save_cache_at_exit(
-        &mut self,
-        loaded_hash_map: BTreeMap<u64, Vec<DuplicateEntry>>,
-        pre_hash_results: Vec<(u64, BTreeMap<String, Vec<DuplicateEntry>>, Vec<String>)>,
-    ) {
+    fn prehash_save_cache_at_exit(&mut self, loaded_hash_map: BTreeMap<u64, Vec<DuplicateEntry>>, combined: &BTreeMap<u64, BTreeMap<String, Vec<DuplicateEntry>>>) {
         if self.get_params().use_prehash_cache {
             // All results = records already cached + computed results
             let mut save_cache_to_hashmap: BTreeMap<String, DuplicateEntry> = Default::default();
@@ -398,11 +394,11 @@ impl DuplicateFinder {
                 }
             }
 
-            for (size, hash_map, _errors) in pre_hash_results {
+            for (&size, hash_map) in combined {
                 if size >= self.get_params().minimal_prehash_cache_file_size {
-                    for vec_file_entry in hash_map.into_values() {
+                    for vec_file_entry in hash_map.values() {
                         for file_entry in vec_file_entry {
-                            save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry);
+                            save_cache_to_hashmap.insert(file_entry.path.to_string_lossy().to_string(), file_entry.clone());
                         }
                     }
                 }
@@ -491,24 +487,35 @@ impl DuplicateFinder {
         // Saving into cache
         let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheSaving, 0, self.get_test_type(), 0);
 
-        // Add data from cache
-        for (size, mut vec_file_entry) in records_already_cached {
-            pre_checked_map.entry(size).or_default().append(&mut vec_file_entry);
+        // Merge cached and freshly-computed entries into (size -> hash -> files) groups,
+        // then only pass groups with >1 file to full hashing.  Merging is required so that
+        // a cached file and a freshly-computed file sharing the same prehash are recognised
+        // as a collision even when neither set alone has more than one entry for that hash.
+        // pre_hash_results is consumed here so entries are moved, not cloned.
+        let mut combined: BTreeMap<u64, BTreeMap<String, Vec<DuplicateEntry>>> = BTreeMap::new();
+        for (size, vec_file_entry) in records_already_cached {
+            for file_entry in vec_file_entry {
+                combined.entry(size).or_default().entry(file_entry.hash.clone()).or_default().push(file_entry);
+            }
+        }
+        for (size, hash_map, errors) in pre_hash_results {
+            if !errors.is_empty() {
+                self.common_data.text_messages.warnings.extend(errors);
+            }
+            for (hash, vec_file_entry) in hash_map {
+                combined.entry(size).or_default().entry(hash).or_default().extend(vec_file_entry);
+            }
         }
 
-        // Check results
-        for (size, hash_map, errors) in &pre_hash_results {
-            if !errors.is_empty() {
-                self.common_data.text_messages.warnings.append(&mut errors.clone());
-            }
-            for vec_file_entry in hash_map.values() {
-                if vec_file_entry.len() > 1 {
-                    pre_checked_map.entry(*size).or_default().append(&mut vec_file_entry.clone());
+        self.prehash_save_cache_at_exit(loaded_hash_map, &combined);
+
+        for (size, hash_groups) in combined {
+            for group in hash_groups.into_values() {
+                if group.len() > 1 {
+                    pre_checked_map.entry(size).or_default().extend(group);
                 }
             }
         }
-
-        self.prehash_save_cache_at_exit(loaded_hash_map, pre_hash_results);
 
         progress_handler.join_thread();
 
