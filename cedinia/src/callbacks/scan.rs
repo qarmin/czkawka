@@ -15,7 +15,7 @@ use crate::scan_runner::{CommonFilters, ScanRequest};
 use crate::settings::gui_settings_values::StringComboBoxItems;
 use crate::{
     ActiveTool, AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, FileEntry, GeneralSettings, MainWindow, SameMusicSettings, ScanState,
-    SimilarGroupCard, SimilarImagesSettings, flc,
+    SimilarGroupCard, SimilarImagesSettings, TemporaryFilesSettings, flc,
 };
 
 pub(crate) fn wire_scan(
@@ -23,12 +23,14 @@ pub(crate) fn wire_scan(
     stop_flag: Arc<AtomicBool>,
     scan_tx: Rc<Sender<ScanRequest>>,
     included_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
+    excluded_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
     referenced_dirs: Rc<std::cell::RefCell<Vec<PathBuf>>>,
     scan_gen: Arc<AtomicU32>,
 ) {
     {
         let weak = window.as_weak();
         let inc = included_dirs;
+        let exc = excluded_dirs;
         let refr = referenced_dirs;
         let stop = stop_flag.clone();
         let tx = scan_tx.clone();
@@ -40,10 +42,11 @@ pub(crate) fn wire_scan(
             win.global::<AppState>().set_status_message(SharedString::from(flc!("scanning_fallback")));
             stop.store(false, Ordering::Relaxed);
             let dirs = inc.borrow().clone();
+            let excluded = exc.borrow().clone();
             let refs = refr.borrow().clone();
             let tool = win.global::<AppState>().get_active_tool();
             clear_tool_results(&win, tool);
-            let req = build_scan_request(&win, tool, dirs, refs);
+            let req = build_scan_request(&win, tool, dirs, excluded, refs);
             let _ = tx.send(req);
         });
     }
@@ -103,7 +106,7 @@ fn clear_tool_results(win: &MainWindow, tool: ActiveTool) {
     win.global::<AppState>().set_selected_count(0);
 }
 
-fn build_common_filters(win: &MainWindow, referenced_dirs: Vec<PathBuf>) -> CommonFilters {
+fn build_common_filters(win: &MainWindow, excluded_paths: Vec<PathBuf>, referenced_dirs: Vec<PathBuf>) -> CommonFilters {
     let g = win.global::<GeneralSettings>();
     let items = StringComboBoxItems::new();
     let min_file_size_bytes = items.min_file_size.get(g.get_min_file_size_idx() as usize).map_or(0, |e| e.value.to_bytes());
@@ -124,12 +127,18 @@ fn build_common_filters(win: &MainWindow, referenced_dirs: Vec<PathBuf>) -> Comm
         excluded_extensions: split_csv(g.get_excluded_extensions()),
         min_file_size_bytes,
         max_file_size_bytes,
+        recursive_search: true,
+        use_cache: g.get_use_cache(),
+        hide_hard_links: false,
+        delete_outdated_cache: true,
+        save_also_as_json: false,
+        excluded_paths,
         referenced_dirs,
     }
 }
 
-fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, referenced_dirs: Vec<PathBuf>) -> ScanRequest {
-    let filters = build_common_filters(win, referenced_dirs);
+fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, excluded_paths: Vec<PathBuf>, referenced_dirs: Vec<PathBuf>) -> ScanRequest {
+    let filters = build_common_filters(win, excluded_paths, referenced_dirs);
     let items = StringComboBoxItems::new();
 
     let duplicate_request = || {
@@ -138,7 +147,6 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, re
             dirs: dirs.clone(),
             check_method: StringComboBoxItems::value_from_idx(&items.duplicates_check_method, d.get_check_method(), CheckingMethod::Hash),
             hash_type: StringComboBoxItems::value_from_idx(&items.duplicates_hash_type, d.get_hash_type(), HashType::Blake3),
-            use_cache: win.global::<GeneralSettings>().get_use_cache(),
             filters: filters.clone(),
         }
     };
@@ -160,7 +168,22 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, re
             }
         }
         ActiveTool::EmptyFiles => ScanRequest::EmptyFiles { dirs, filters },
-        ActiveTool::TemporaryFiles => ScanRequest::TemporaryFiles { dirs, filters },
+        ActiveTool::TemporaryFiles => {
+            let t = win.global::<TemporaryFilesSettings>();
+            let extensions: Vec<String> = t
+                .get_extensions()
+                .as_str()
+                .split(',')
+                .map(|s| s.trim().to_ascii_lowercase())
+                .filter(|s| !s.is_empty())
+                .collect();
+            let extensions = if extensions.is_empty() {
+                czkawka_core::tools::temporary::TEMP_EXTENSIONS.iter().map(|s| s.to_string()).collect()
+            } else {
+                extensions
+            };
+            ScanRequest::TemporaryFiles { dirs, extensions, filters }
+        }
         ActiveTool::BigFiles => {
             let b = win.global::<BigFilesSettings>();
             ScanRequest::BigFiles {

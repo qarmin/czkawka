@@ -330,6 +330,35 @@ export component ToolSettings {
         }
 
         VerticalLayout {
+            visible: GuiState.active_tab == ActiveTab.TemporaryFiles;
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+
+            LabelText { label_text: Translations.subsettings_temporary_files_extensions_text; }
+
+            HorizontalLayout {
+                spacing: 5px;
+                LineEdit {
+                    text <=> Settings.temporary_files_sub_extensions;
+                    font-size: FontSizes.normal;
+                }
+                Button {
+                    text: Translations.subsettings_reset_text;
+                    clicked => {
+                        Settings.temporary_files_sub_extensions = "#,thumbs.db,.bak,~,.tmp,.temp,.ds_store,.crdownload,.part,.cache,.dmp,.download,.partial";
+                    }
+                }
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_temporary_files_extensions_hint_text;
+            }
+
+            Rectangle { }
+        }
+
+        VerticalLayout {
             visible: GuiState.active_tab == ActiveTab.BrokenFiles;
             spacing: 5px;
             padding: 10px;

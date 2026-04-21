@@ -132,6 +132,10 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_music_genre_text(flc!("settings_music_genre").into());
     t.set_settings_music_bitrate_text(flc!("settings_music_bitrate").into());
     t.set_settings_music_approx_text(flc!("settings_music_approx").into());
+    t.set_settings_temporary_files_header_text(flc!("settings_temporary_files_header").into());
+    t.set_settings_temporary_files_extensions_label_text(flc!("settings_temporary_files_extensions_label").into());
+    t.set_settings_temporary_files_extensions_placeholder_text(flc!("settings_temporary_files_extensions_placeholder").into());
+    t.set_settings_temporary_files_reset_text(flc!("settings_temporary_files_reset").into());
     t.set_settings_broken_files_header_text(flc!("settings_broken_files_header").into());
     t.set_settings_broken_files_note_text(flc!("settings_broken_files_note").into());
     t.set_settings_broken_files_types_label_text(flc!("settings_broken_files_types_label").into());
@@ -248,6 +252,19 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_ctx_menu_title_text(flc!("ctx_menu_title").into());
     t.set_ctx_open_file_text(flc!("ctx_open_file").into());
     t.set_ctx_open_folder_text(flc!("ctx_open_folder").into());
+    t.set_settings_ignore_same_resolution_text(flc!("settings_ignore_same_resolution").into());
+    t.set_settings_appearance_label_text(flc!("settings_appearance_label").into());
+    t.set_settings_dark_theme_text(flc!("settings_dark_theme").into());
+    t.set_settings_dark_theme_desc_text(flc!("settings_dark_theme_desc").into());
+    t.set_compare_label_text(flc!("compare_label").into());
+    t.set_compare_loading_text(flc!("compare_loading").into());
+    t.set_compare_cancelling_text(flc!("compare_cancelling").into());
+    t.set_compare_computing_text(flc!("compare_computing").into());
+    t.set_compare_mode_normal_text(flc!("compare_mode_normal").into());
+    t.set_compare_mode_split_text(flc!("compare_mode_split").into());
+    t.set_compare_mode_overlay_text(flc!("compare_mode_overlay").into());
+    t.set_compare_mode_diff_text(flc!("compare_mode_diff").into());
+    t.set_compare_res_mismatch_text(flc!("compare_res_mismatch").into());
     t.set_dir_open_folder_text(flc!("dir_open_folder").into());
 
     use std::fmt::Debug;

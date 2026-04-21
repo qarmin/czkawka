@@ -1,18 +1,19 @@
 import { CediniaColors } from "colors.slint";
 import { ActiveTool, DirectoryEntry, FileEntry, ScanState, SimilarGroupCard } from "common.slint";
-import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings } from "app_state.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, TemporaryFilesSettings } from "app_state.slint";
 import { TopAppBar } from "top_bar.slint";
 import { BottomNavBar } from "bottom_nav.slint";
 import { ScanProgressBar } from "scan_progress.slint";
 import { ResultsList } from "results_list.slint";
 import { SimilarImagesGallery } from "similar_images_gallery.slint";
+import { ImageCompareOverlay } from "image_compare.slint";
 import { SettingsScreen } from "settings_screen.slint";
 import { HomeScreen } from "home_screen.slint";
 import { DirectoriesScreen } from "directories_screen.slint";
 import { TouchButton } from "components.slint";
 import { Translations } from "translations.slint";
 
-export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, Translations }
+export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, TemporaryFilesSettings, Translations }
 export component MainWindow inherits Window {
     title: "Cedinia";
     background: CediniaColors.bg_primary;
@@ -199,9 +200,20 @@ export component MainWindow inherits Window {
     }
 
 
+    // Image Compare overlay (full-screen, above all normal content)
+    if AppState.compare_visible: ImageCompareOverlay {
+        z: 100;
+        x: 0;
+        y: root.safe-area-insets.top;
+        width: root.width;
+        height: root.height
+            - root.safe-area-insets.top
+            - max(AppState.inset_bottom, root.safe-area-insets.bottom);
+    }
+
     if AppState.scan_state == ScanState.Stopping : Rectangle {
         z: 150;
-        background: #000000bb;
+        background: CediniaColors.scrim_strong;
         // Block all pointer events so nothing behind the overlay is clickable.
         TouchArea {}
 
@@ -215,7 +227,7 @@ export component MainWindow inherits Window {
             border-width: 1px;
             border-color: CediniaColors.divider;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #00000088;
+            drop-shadow-color: CediniaColors.shadow_md;
 
             stopping_content := VerticalLayout {
                 padding: 24px;
@@ -243,7 +255,7 @@ export component MainWindow inherits Window {
 
     if AppState.show_permission_popup : Rectangle {
         z: 200;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea { clicked => { AppState.show_permission_popup = false; } }
 
         Rectangle {
@@ -256,7 +268,7 @@ export component MainWindow inherits Window {
             border-width: 1px;
             border-color: CediniaColors.divider;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #00000088;
+            drop-shadow-color: CediniaColors.shadow_md;
 
             perm_popup := VerticalLayout {
                 padding: 24px;
@@ -291,7 +303,7 @@ export component MainWindow inherits Window {
                     TouchButton {
                         label: Translations.grant_text;
                         bg: CediniaColors.accent;
-                        fg: #000000;
+                        fg: CediniaColors.fg_on_accent;
                         min_h: 48px;
                         horizontal-stretch: 1.0;
                         clicked => {

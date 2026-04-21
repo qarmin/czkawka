@@ -82,7 +82,7 @@ winit_skia_opengl = ["slint/renderer-winit-skia-opengl"]
 winit_skia_vulkan = ["slint/renderer-winit-skia-vulkan"]
 winit_software = ["slint/renderer-winit-software"]
 
-# ── Android packaging metadata (used by cargo-apk) ───────────────────────────
+#  Android packaging metadata (used by cargo-apk)
 [package.metadata.android]
 package = "io.github.qarmin.cedinia"
 label = "Cedinia"

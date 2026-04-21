@@ -182,7 +182,7 @@ Also, I really appreciate work of people that create crates on which Czkawka is 
 
 
 ## AI Policy
-The vast majority of the code in this project was written by me (qarmin) without using AI. However, as AI tools have improved and can significantly simplify development and reduce boilerplate, I see no reason to forbid their use. I have also added a CLAUDE.md file to the repo to make it easier to provide AI tools with context about the project’s style and code structure.
+The vast majority of the code in this project was written by me (qarmin) without using AI. However, as AI tools have improved and can significantly simplify development and reduce boilerplate, I see no reason to forbid their use. I have also added a AGENTS.md file to the repo to make it easier to provide AI tools with context about the project’s style and code structure.
 
 That said, every pull request, whether created with AI or not, must meet proper quality standards. The author must be able to clearly explain what the code does, without relying on AI for that explanation. I manually review every PR and test each change, so the risk of incorrect code slipping through is low. Still, to avoid wasting time, please refrain from submitting AI Slop PRs.
 

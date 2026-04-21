@@ -5,6 +5,7 @@ import { GuiState } from "gui_state.slint";
 import { Callabler } from "callabler.slint";
 import { FontSizes } from "fonts.slint";
 import { Translations } from "translations.slint";
+import { MaxTextMeasure } from "text_size.slint";
 
 component TabItem {
     in property <string> text;
@@ -70,41 +71,30 @@ component TabItem {
 export component LeftSidePanel {
     callback changed_active_tab();
 
-    // Hidden off-screen Text elements to measure the natural width of each tool label.
-    // The panel width is set to the widest one plus a small padding so that no manual
-    // per-language constant is needed, like it was done in previous versions
-    t_duplicate   := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_duplicate_files_text; }
-    t_empty_f     := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_empty_folders_text; }
-    t_big         := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_big_files_text; }
-    t_empty_fi    := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_empty_files_text; }
-    t_temp        := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_temporary_files_text; }
-    t_sim_img     := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_similar_images_text; }
-    t_sim_vid     := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_similar_videos_text; }
-    t_music       := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_music_duplicates_text; }
-    t_symlinks    := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_invalid_symlinks_text; }
-    t_broken      := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_broken_files_text; }
-    t_bad_ext     := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_bad_extensions_text; }
-    t_exif        := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_exif_remover_text; }
-    t_vid_opt     := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_video_optimizer_text; }
-    t_bad_names   := Text { x: -10000px; y: -10000px; height: 0; font-size: FontSizes.normal; font-weight: FontSizes.bold_light; text: Translations.tool_bad_names_text; }
+    // Measure the natural width of every tool label so the panel auto-sizes
+    // to the widest translated name without any hard-coded per-language constant.
+    t_tools := MaxTextMeasure {
+        font-size: FontSizes.normal;
+        font-weight: FontSizes.bold_light;
+        texts: [
+            Translations.tool_duplicate_files_text,
+            Translations.tool_empty_folders_text,
+            Translations.tool_big_files_text,
+            Translations.tool_empty_files_text,
+            Translations.tool_temporary_files_text,
+            Translations.tool_similar_images_text,
+            Translations.tool_similar_videos_text,
+            Translations.tool_music_duplicates_text,
+            Translations.tool_invalid_symlinks_text,
+            Translations.tool_broken_files_text,
+            Translations.tool_bad_extensions_text,
+            Translations.tool_exif_remover_text,
+            Translations.tool_video_optimizer_text,
+            Translations.tool_bad_names_text,
+        ];
+    }
 
-    property <length> max_tool_text_width:
-        max(t_duplicate.preferred-width,
-        max(t_empty_f.preferred-width,
-        max(t_big.preferred-width,
-        max(t_empty_fi.preferred-width,
-        max(t_temp.preferred-width,
-        max(t_sim_img.preferred-width,
-        max(t_sim_vid.preferred-width,
-        max(t_music.preferred-width,
-        max(t_symlinks.preferred-width,
-        max(t_broken.preferred-width,
-        max(t_bad_ext.preferred-width,
-        max(t_exif.preferred-width,
-        max(t_vid_opt.preferred-width,
-            t_bad_names.preferred-width)))))))))))));
-
-    preferred-width: max_tool_text_width + 20px;
+    preferred-width: t_tools.measure_width + 20px;
     VerticalLayout {
         spacing: 2px;
         Rectangle {

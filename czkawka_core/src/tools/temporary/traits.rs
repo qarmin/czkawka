@@ -10,7 +10,7 @@ use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
-use crate::tools::temporary::{Info, Temporary};
+use crate::tools::temporary::{Info, Temporary, TemporaryParameters};
 
 impl AllTraits for Temporary {}
 
@@ -70,12 +70,14 @@ impl PrintResults for Temporary {
 
 impl CommonData for Temporary {
     type Info = Info;
-    type Parameters = ();
+    type Parameters = TemporaryParameters;
 
     fn get_information(&self) -> Self::Info {
         self.information
     }
-    fn get_params(&self) -> Self::Parameters {}
+    fn get_params(&self) -> Self::Parameters {
+        self.params.clone()
+    }
     fn get_cd(&self) -> &CommonToolData {
         &self.common_data
     }

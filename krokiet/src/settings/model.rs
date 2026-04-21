@@ -7,6 +7,7 @@ use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_videos::{DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL};
+use czkawka_core::tools::temporary::DEFAULT_TEMP_EXTENSIONS_STR;
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use home::home_dir;
 use image::imageops::FilterType;
@@ -213,6 +214,8 @@ pub struct SettingsCustom {
     pub video_optimizer_hardware_encoder: String,
     #[serde(default = "default_ignored_exif_tags")]
     pub ignored_exif_tags: String,
+    #[serde(default = "default_temporary_files_extensions")]
+    pub temporary_files_extensions: String,
     #[serde(default)]
     pub column_sizes: BTreeMap<String, Vec<f32>>,
 
@@ -294,6 +297,40 @@ pub struct BasicSettings {
     pub play_audio_on_scan_completion: bool,
     #[serde(default)]
     pub show_notification_on_scan_completion: bool,
+
+    // Select popup visibility – global (not per-preset)
+    #[serde(default)]
+    pub select_show_oldest: bool,
+    #[serde(default)]
+    pub select_show_newest: bool,
+    #[serde(default)]
+    pub select_show_smallest_size: bool,
+    #[serde(default)]
+    pub select_show_biggest_size: bool,
+    #[serde(default)]
+    pub select_show_smallest_resolution: bool,
+    #[serde(default)]
+    pub select_show_biggest_resolution: bool,
+    #[serde(default)]
+    pub select_show_shortest_path: bool,
+    #[serde(default)]
+    pub select_show_longest_path: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_oldest: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_newest: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_smallest_size: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_biggest_size: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_smallest_resolution: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_biggest_resolution: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_shortest_path: bool,
+    #[serde(default = "ttrue")]
+    pub select_show_except_longest_path: bool,
 }
 
 impl Default for BasicSettings {
@@ -467,6 +504,9 @@ pub(crate) fn default_use_manual_application_scale() -> bool {
 }
 pub(crate) fn default_ignored_exif_tags() -> String {
     "Orientation".to_string()
+}
+pub(crate) fn default_temporary_files_extensions() -> String {
+    DEFAULT_TEMP_EXTENSIONS_STR.to_string()
 }
 pub(crate) fn default_video_optimizer_hardware_encoder() -> String {
     "none".to_string()

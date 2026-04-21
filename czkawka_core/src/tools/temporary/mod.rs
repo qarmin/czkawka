@@ -9,7 +9,7 @@ use serde::Serialize;
 use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
 
-const TEMP_EXTENSIONS: &[&str] = &[
+pub const TEMP_EXTENSIONS: &[&str] = &[
     "#",
     "thumbs.db",
     ".bak",
@@ -24,6 +24,10 @@ const TEMP_EXTENSIONS: &[&str] = &[
     ".download",
     ".partial",
 ];
+
+/// Default extensions as a comma-separated string (mirrors `TEMP_EXTENSIONS`).
+/// Used by UIs to pre-populate the extensions field and as the reset value.
+pub const DEFAULT_TEMP_EXTENSIONS_STR: &str = "#,thumbs.db,.bak,~,.tmp,.temp,.ds_store,.crdownload,.part,.cache,.dmp,.download,.partial";
 
 #[derive(Clone, Serialize, Debug)]
 pub struct TemporaryFileEntry {
@@ -50,16 +54,34 @@ pub struct Info {
     pub scanning_time: Duration,
 }
 
+#[derive(Clone, Debug)]
+pub struct TemporaryParameters {
+    /// Full list of extensions/suffixes treated as temporary files.
+    /// Each entry is matched against the lowercased filename using `ends_with`.
+    /// Defaults to the built-in `TEMP_EXTENSIONS` list.
+    /// Must not be empty - the core will return an error if it is.
+    pub extensions: Vec<String>,
+}
+
+impl Default for TemporaryParameters {
+    fn default() -> Self {
+        Self {
+            extensions: TEMP_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
+        }
+    }
+}
+
+impl TemporaryParameters {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
 pub struct Temporary {
     common_data: CommonToolData,
     information: Info,
     temporary_files: Vec<TemporaryFileEntry>,
-}
-
-impl Default for Temporary {
-    fn default() -> Self {
-        Self::new()
-    }
+    params: TemporaryParameters,
 }
 
 impl Temporary {

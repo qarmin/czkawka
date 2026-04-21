@@ -17,9 +17,9 @@ resolver = "3"
 
 # Temporary solution for spamming mouse events in Slint
 # Even with workaround, performance is quite low in specific cases in Cedinia
-[patch.crates-io]
-slint = { git = "https://github.com/slint-ui/slint.git" }
-slint-build = { git = "https://github.com/slint-ui/slint.git" }
+#[patch.crates-io]
+#slint = { git = "https://github.com/slint-ui/slint.git" }
+#slint-build = { git = "https://github.com/slint-ui/slint.git" }
 
 [profile.release]
 # panic = "unwind" in opposite to "abort", allows to catch panic!()
@@ -40,8 +40,8 @@ overflow-checks = true
 #codegen-units = 1
 
 # Optimize all dependencies except application/workspaces, even in debug builds to get reasonable performance e.g. when opening images
-#[profile.dev.package."*"] # OPT PACKAGES
-#opt-level = 3 # OPT PACKAGES
+[profile.dev.package."*"] # OPT PACKAGES
+opt-level = 3 # OPT PACKAGES
 
 [profile.fast_release]
 inherits = "release"

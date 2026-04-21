@@ -23,6 +23,8 @@
 - Fixed an issue where thumbnail generation settings were not respected in Similar Videos mode - [#1809](https://github.com/qarmin/czkawka/pull/1809)  
 - Added notification support - [#1837](https://github.com/qarmin/czkawka/pull/1837)  
 - Femtovg backend no longer have blurry fonts - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Changed default select buttons from "select one item" to "select all except one item" - [#1913](https://github.com/qarmin/czkawka/pull/1913)
+- Added ability to choose which select buttons are visible in UI - [#1913](https://github.com/qarmin/czkawka/pull/1913)
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)  
@@ -30,6 +32,8 @@
 ### Prebuilt binaries
 - Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d` installed on the system)  
 - Windows ZIP package now includes Krokiet binaries and a README to simplify migration to the new frontend
+- All backends Krokiet binaries on all systems, are now packed into zip files, with additional scripts to open them with selected backend
+- Mac Intel binaries are no longer provided, due very long build times on GitHub CI
 
 ## Version 11.0.1 - 20.02.2026r
 ### Core

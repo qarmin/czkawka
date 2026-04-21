@@ -262,7 +262,7 @@ pub(crate) fn select_function_header(header_id: i32) -> Box<dyn Fn(&TreeSelectio
 }
 
 // pub(crate) fn select_function_always_true_no_args() -> Box<dyn Fn(&TreeSelection, &TreeModel, &TreePath, bool) -> bool> {
-//     Box::new(|_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool| true)
+//    Box::new(|_tree_selection: &gtk4::TreeSelection, _tree_model: &gtk4::TreeModel, _tree_path: &gtk4::TreePath, _is_path_currently_selected: bool| true)
 // }
 
 pub(crate) fn select_function_always_true(

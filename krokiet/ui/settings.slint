@@ -192,6 +192,9 @@ export global Settings {
     // Exif Finder
     in-out property <string> ignored_exif_tags: "";
 
+    // Temporary Files
+    in-out property <string> temporary_files_sub_extensions: "#,thumbs.db,.bak,~,.tmp,.temp,.ds_store,.crdownload,.part,.cache,.dmp,.download,.partial";
+
     // Move/Copy popup settings
     in-out property <bool> popup_move_preserve_folder_structure: false;
     in-out property <bool> popup_move_copy_mode: false;
@@ -217,6 +220,24 @@ export global Settings {
 
     // Notifications
     in-out property <bool> show_notification_on_scan_completion: false;
+
+    // Select popup visibility – global (not per-preset)
+    in-out property <bool> select_show_oldest: true;
+    in-out property <bool> select_show_newest: true;
+    in-out property <bool> select_show_smallest_size: true;
+    in-out property <bool> select_show_biggest_size: true;
+    in-out property <bool> select_show_smallest_resolution: true;
+    in-out property <bool> select_show_biggest_resolution: true;
+    in-out property <bool> select_show_shortest_path: true;
+    in-out property <bool> select_show_longest_path: true;
+    in-out property <bool> select_show_except_oldest: true;
+    in-out property <bool> select_show_except_newest: true;
+    in-out property <bool> select_show_except_smallest_size: true;
+    in-out property <bool> select_show_except_biggest_size: true;
+    in-out property <bool> select_show_except_smallest_resolution: true;
+    in-out property <bool> select_show_except_biggest_resolution: true;
+    in-out property <bool> select_show_except_shortest_path: true;
+    in-out property <bool> select_show_except_longest_path: true;
 
     out property <length> path_px: 350px;
     out property <length> name_px: 100px;

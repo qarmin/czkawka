@@ -74,6 +74,9 @@ jobs:
           cargo build --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu" --profile fastci
           mv target/fastci/krokiet linux_krokiet_all_backends_${{ env.ARCHNAME }}
 
+      - name: Package krokiet with launchers
+        run: bash misc/pack_all_backends.sh linux_krokiet_all_backends_${{ env.ARCHNAME }} linux_krokiet_all_backends_${{ env.ARCHNAME }}.zip
+
       - name: Pack with 7z
         run: |
           # 7z -mx=3 in rust files, takes 40% less space but is 2x slower than zip -mx=1
@@ -86,7 +89,7 @@ jobs:
             linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
             linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
             linux_krokiet_femtovg_wgpu_${{ env.ARCHNAME }} \
-            linux_krokiet_all_backends_${{ env.ARCHNAME }}
+            linux_krokiet_all_backends_${{ env.ARCHNAME }}.zip
 
       - name: Store
         uses: actions/upload-artifact@v6
@@ -107,7 +110,7 @@ jobs:
             linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
             linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             linux_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
-            linux_krokiet_all_backends_${{ env.ARCHNAME }}
+            linux_krokiet_all_backends_${{ env.ARCHNAME }}.zip
           token: ${{ secrets.PAT_REPOSITORY }}
 
   # Some dependencies requires ubuntu 24.04
@@ -175,6 +178,9 @@ jobs:
           cargo build --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu,heif,libraw,libavif" --profile fastci
           mv target/fastci/krokiet linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}
 
+      - name: Package krokiet (heif+avif) with launchers
+        run: bash misc/pack_all_backends.sh linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }} linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}.zip
+
       - name: Pack with 7z
         run: |
           # 7z -mx=3 in rust files, takes 40% less space but is 2x slower than zip -mx=1
@@ -187,7 +193,7 @@ jobs:
             linux_krokiet_heif_raw_avif_skia_opengl_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_avif_skia_vulkan_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_avif_femtovg_wgpu_${{ env.ARCHNAME }} \
-            linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}.zip
 
       - name: Store
         uses: actions/upload-artifact@v6
@@ -208,7 +214,7 @@ jobs:
             linux_krokiet_heif_raw_avif_skia_opengl_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_avif_skia_vulkan_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_avif_femtovg_wgpu_${{ env.ARCHNAME }}
-            linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}
+            linux_krokiet_heif_raw_avif_all_backends_${{ env.ARCHNAME }}.zip
           token: ${{ secrets.PAT_REPOSITORY }}
 
   ### MUSL CLI and Krokiet Release and Debug

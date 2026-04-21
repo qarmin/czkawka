@@ -139,6 +139,10 @@ settings_music_length = Length
 settings_music_genre = Genre
 settings_music_bitrate = Bitrate
 settings_music_approx = Approximate tag comparison
+settings_temporary_files_header = TEMPORARY FILES
+settings_temporary_files_extensions_label = EXTENSIONS
+settings_temporary_files_extensions_placeholder = e.g. .tmp,.bak,~
+settings_temporary_files_reset = Reset to defaults
 settings_broken_files_header = BROKEN FILES
 settings_broken_files_note = Resource-intensive scan. For best performance use Krokiet on desktop.
 settings_broken_files_types_label = CHECKED TYPES
@@ -153,6 +157,12 @@ settings_bad_names_emoji = Emoji in name
 settings_bad_names_space = Spaces at start/end
 settings_bad_names_non_ascii = Non-ASCII characters
 settings_bad_names_duplicated = Repeated characters
+settings_ignore_same_resolution = Ignore images with the same resolution
+
+# Settings - Appearance section
+settings_appearance_label = APPEARANCE
+settings_dark_theme = Dark theme
+settings_dark_theme_desc = Use dark colour scheme
 
 # Settings - Diagnostics tab
 diagnostics_header = DIAGNOSTICS
@@ -336,4 +346,15 @@ ctx_menu_title = Open
 ctx_open_file = Open item
 ctx_open_folder = Open parent folder
 dir_open_folder = Open folder
+
+# Compare view
+compare_label = Compare
+compare_loading = Loading images…
+compare_cancelling = Cancelling…
+compare_computing = Computing diff…
+compare_mode_normal = Side
+compare_mode_split = Split
+compare_mode_overlay = Overlay
+compare_mode_diff = Diff
+compare_res_mismatch = Different resolutions – diff may be inaccurate
 

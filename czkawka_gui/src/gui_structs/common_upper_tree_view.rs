@@ -39,8 +39,8 @@ impl CommonUpperTreeViews {
         &self.get_subview(item).tree_view
     }
     // pub fn get_current_page(&self) -> Option<NotebookMainEnum {
-    //     let current_page = self.notebook_main.current_page().expect("Cannot get current page from notebook");
-    //     NOTEBOOKS_INFO[current_page as usize].notebook_type
+    //    let current_page = self.notebook_main.current_page().expect("Cannot get current page from notebook");
+    //    NOTEBOOKS_INFO[current_page as usize].notebook_type
     // }
     pub fn setup(&self) {
         for subview in &self.subviews {
@@ -51,13 +51,13 @@ impl CommonUpperTreeViews {
 
 impl UpperSubView {
     // pub fn get_model(&self) -> ListStore {
-    //     self.tree_view.get_model()
+    //    self.tree_view.get_model()
     // }
     // pub fn get_tree_model(&self) -> TreeModel {
-    //     self.tree_view.model().expect("TreeView has no model")
+    //    self.tree_view.model().expect("TreeView has no model")
     // }
     // pub fn get_tree_selection(&self) -> TreeSelection {
-    //     self.tree_view.selection()
+    //    self.tree_view.selection()
     // }
     pub fn new(builder: &Builder, scrolled_name: &str, enum_value: NotebookUpperEnum, upper_tree_view_enum: UpperTreeViewEnum, tree_view_name: &'static str) -> Self {
         let tree_view: TreeView = TreeView::new();

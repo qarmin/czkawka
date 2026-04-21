@@ -205,7 +205,7 @@ export component DirectoriesScreen {
 
     property <bool> path_enter_error: false;
 
-    //  Main layout
+    // Main layout
     VerticalLayout {
         height: parent.height;
         spacing: 0px;
@@ -351,7 +351,7 @@ export component DirectoriesScreen {
         }
     }
 
-    //  Volumes popup
+    // Volumes popup
     if AppState.storage_volumes.length > 0 && !AppState.custom_paths_popup_visible : Rectangle {
         x: 0;
         y: root.height - self.height - 74px;
@@ -361,7 +361,7 @@ export component DirectoriesScreen {
         border-width: 1px;
         border-color: CediniaColors.divider;
         drop-shadow-blur: 16px;
-        drop-shadow-color: #00000066;
+        drop-shadow-color: CediniaColors.shadow_sm;
 
         vol_popup_layout := VerticalLayout {
             spacing: 0px;
@@ -468,7 +468,7 @@ export component DirectoriesScreen {
                                     bg: vol.is_included
                                         ? CediniaColors.success.with-alpha(0.2)
                                         : CediniaColors.success.with-alpha(0.8);
-                                    fg: vol.is_included ? CediniaColors.success : #000000;
+                                    fg: vol.is_included ? CediniaColors.success : CediniaColors.fg_on_accent;
                                     clicked => {
                                         if (vol.is_included) {
                                             AppState.remove_include_dir(vol.path);
@@ -485,7 +485,7 @@ export component DirectoriesScreen {
                                     bg: vol.is_excluded
                                         ? CediniaColors.danger.with-alpha(0.2)
                                         : CediniaColors.danger.with-alpha(0.8);
-                                    fg: vol.is_excluded ? CediniaColors.danger : #ffffff;
+                                    fg: vol.is_excluded ? CediniaColors.danger : CediniaColors.fg_on_danger;
                                     clicked => {
                                         if (vol.is_excluded) {
                                             AppState.remove_exclude_dir(vol.path);
@@ -515,7 +515,7 @@ export component DirectoriesScreen {
         border-width: 1px;
         border-color: CediniaColors.divider;
         drop-shadow-blur: 16px;
-        drop-shadow-color: #00000066;
+        drop-shadow-color: CediniaColors.shadow_sm;
 
         cp_layout := VerticalLayout {
             spacing: 0px;
@@ -716,13 +716,13 @@ export component DirectoriesScreen {
         }
     }
 
-    //  Path edit popup (centered overlay)
+    // Path edit popup (centered overlay)
     if AppState.path_edit_popup_visible : Rectangle {
         x: 0;
         y: 0;
         width: root.width;
         height: root.height;
-        background: #00000066;
+        background: CediniaColors.shadow_sm;
 
         TouchArea { }  // consume clicks on overlay
 
@@ -734,7 +734,7 @@ export component DirectoriesScreen {
             background: CediniaColors.bg_surface;
             border-radius: 12px;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #00000099;
+            drop-shadow-color: CediniaColors.scrim;
 
             path_edit_layout := VerticalLayout {
                 padding: 16px;
@@ -809,7 +809,7 @@ export component DirectoriesScreen {
                         bg: AppState.path_edit_is_include
                             ? CediniaColors.success.with-alpha(0.8)
                             : CediniaColors.danger.with-alpha(0.8);
-                        fg: AppState.path_edit_is_include ? #000000 : #ffffff;
+                        fg: AppState.path_edit_is_include ? CediniaColors.fg_on_accent : CediniaColors.fg_on_danger;
                         clicked => {
                             AppState.path_edit_confirm();
                             AppState.save_settings_now();
@@ -820,13 +820,13 @@ export component DirectoriesScreen {
         }
     }
 
-    //  Directory statistics popup (centered overlay) ─────────────────────────
+    // Directory statistics popup (centered overlay)
     if AppState.dirs_check_popup_visible : Rectangle {
         x: 0;
         y: 0;
         width: root.width;
         height: root.height;
-        background: #00000066;
+        background: CediniaColors.shadow_sm;
 
         TouchArea { }  // consume clicks on overlay
 
@@ -838,7 +838,7 @@ export component DirectoriesScreen {
             background: CediniaColors.bg_surface;
             border-radius: 12px;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #00000099;
+            drop-shadow-color: CediniaColors.scrim;
 
             dirs_check_content := VerticalLayout {
                 padding: 16px;

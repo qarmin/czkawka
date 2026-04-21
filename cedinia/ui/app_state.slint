@@ -1,10 +1,11 @@
-import { ActiveTool, CollectTestResult, ConfirmPopupAction, ProgressData, ScanState, VolumeEntry } from "common.slint";
+import { ActiveTool, CollectTestResult, CompareImageData, ConfirmPopupAction, ProgressData, ScanState, VolumeEntry } from "common.slint";
 
 export global GeneralSettings {
     in-out property <bool>   use_cache:                   true;
     in-out property <bool>   ignore_hidden:               true;
     in-out property <bool>   show_notification:           false;
     in-out property <bool>   notify_only_background:      true;
+    in-out property <bool>   use_dark_theme:              true;
 
     in-out property <int>    min_file_size_idx:    0;
     in-out property <[string]> min_file_size_options: ["Brak", "1 KB", "8 KB", "64 KB", "1 MB"];
@@ -71,6 +72,11 @@ export global SameMusicSettings {
 }
 
 
+export global TemporaryFilesSettings {
+    in-out property <string> extensions: "#,thumbs.db,.bak,~,.tmp,.temp,.ds_store,.crdownload,.part,.cache,.dmp,.download,.partial";
+}
+
+
 export global BrokenFilesSettings {
     in-out property <bool> check_audio:   true;
     in-out property <bool> check_pdf:     true;
@@ -93,8 +99,8 @@ export global BigFilesSettings {
     in-out property <string> search_mode_value: "biggest";
     in-out property <[string]> search_mode_options: ["Biggest", "Smallest"];
 
-    in-out property <int>    count_idx:         1;
-    in-out property <string> count_value:       "100";
+    in-out property <int>    count_idx:         3;
+    in-out property <string> count_value:       "10000";
     in-out property <[string]> count_options:   ["10", "100", "1000", "10000"];
 }
 
@@ -237,4 +243,29 @@ export global AppState {
     in-out property <bool>   licenses_popup_visible: false;
     in-out property <string> licenses_text: "";
     callback show_third_party_licenses();
+
+
+    // Image Compare
+    in-out property <bool>               compare_visible:          false;
+    in-out property <bool>               compare_loading:          false;
+    in-out property <bool>               compare_cancelling:       false;
+    in-out property <int>                compare_loading_current:  0;
+    in-out property <int>                compare_loading_total:    0;
+    in-out property <int>                compare_left_idx:         0;
+    in-out property <int>                compare_right_idx:        1;
+    in-out property <image>              compare_left_image;
+    in-out property <image>              compare_right_image;
+    in-out property <image>              compare_diff_image;
+    in-out property <[CompareImageData]> compare_images:           [];
+    in-out property <int>                compare_current_group_idx: 0;
+
+    callback compare_open(int);           // group_idx in similar_images_groups
+    callback compare_set_left(int);       // compare_idx
+    callback compare_set_right(int);      // compare_idx
+    callback compare_toggle_checkbox(int); // compare_idx
+    callback compare_next_group();
+    callback compare_prev_group();
+    callback compare_swap();
+    callback compare_cancel_load();
+    callback compare_compute_diff();
 }

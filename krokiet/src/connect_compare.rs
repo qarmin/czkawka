@@ -118,7 +118,7 @@ fn connect_compare_set_left(app: &MainWindow) {
         if idx >= images.row_count() {
             return;
         }
-        let path = images.row_data(idx).unwrap().path.to_string();
+        let path = images.row_data(idx).expect("compare_idx must be a valid index into compare_images").path.to_string();
         gui_state.set_compare_left_idx(idx as i32);
         gui_state.set_compare_diff_image(slint::Image::default());
         if let Some(img) = load_full_image(&path) {
@@ -140,7 +140,7 @@ fn connect_compare_set_right(app: &MainWindow) {
         if idx >= images.row_count() {
             return;
         }
-        let path = images.row_data(idx).unwrap().path.to_string();
+        let path = images.row_data(idx).expect("compare_idx must be a valid index into compare_images").path.to_string();
         gui_state.set_compare_right_idx(idx as i32);
         gui_state.set_compare_diff_image(slint::Image::default());
         if let Some(img) = load_full_image(&path) {
@@ -161,7 +161,7 @@ fn connect_compare_toggle_checkbox(app: &MainWindow) {
             return;
         }
 
-        let item = images_model.row_data(compare_idx).unwrap();
+        let item = images_model.row_data(compare_idx).expect("compare_idx must be a valid index into compare_images");
         let flat_idx = item.flat_idx as usize;
         let new_checked = !item.checked;
 
@@ -243,8 +243,8 @@ fn connect_compare_compute_diff(app: &MainWindow) {
         let right_idx = gui_state.get_compare_right_idx() as usize;
         let images = gui_state.get_compare_images();
 
-        let left_path = images.row_data(left_idx).map(|d| d.path.to_string()).unwrap_or_default();
-        let right_path = images.row_data(right_idx).map(|d| d.path.to_string()).unwrap_or_default();
+        let left_path = images.row_data(left_idx).map(|d| d.path.to_string()).expect("path_idx must be a valid column index");
+        let right_path = images.row_data(right_idx).map(|d| d.path.to_string()).expect("path_idx must be a valid column index");
 
         if left_path.is_empty() || right_path.is_empty() {
             return;
@@ -285,9 +285,9 @@ fn open_group(app: &MainWindow, header_idx: usize) {
     let rows: Vec<(usize, bool, Vec<String>)> = data_indices
         .iter()
         .map(|&flat_idx| {
-            let row = model.row_data(flat_idx).unwrap();
+            let row = model.row_data(flat_idx).expect("data_indices must contain valid model indices");
             let strs: Vec<String> = (0..row.val_str.row_count())
-                .map(|i| row.val_str.row_data(i).map(|s| s.to_string()).unwrap_or_default())
+                .map(|i| row.val_str.row_data(i).map(|s| s.to_string()).expect("SimilarImages row must have enough columns"))
                 .collect();
             (flat_idx, row.checked, strs)
         })
@@ -325,8 +325,14 @@ fn open_group(app: &MainWindow, header_idx: usize) {
                 return;
             }
 
-            let dir = strs.get(StrDataSimilarImages::Path as usize).cloned().unwrap_or_default();
-            let name = strs.get(StrDataSimilarImages::Name as usize).cloned().unwrap_or_default();
+            let dir = strs
+                .get(StrDataSimilarImages::Path as usize)
+                .cloned()
+                .expect("SimilarImages row must contain a Path column");
+            let name = strs
+                .get(StrDataSimilarImages::Name as usize)
+                .cloned()
+                .expect("SimilarImages row must contain a Name column");
             let full_path = format!("{dir}/{name}");
             let thumbnail = load_raw_thumbnail(&full_path);
 
@@ -334,10 +340,22 @@ fn open_group(app: &MainWindow, header_idx: usize) {
                 path: full_path,
                 dir: dir.clone(),
                 name,
-                size: strs.get(StrDataSimilarImages::Size as usize).cloned().unwrap_or_default(),
-                resolution: strs.get(StrDataSimilarImages::Resolution as usize).cloned().unwrap_or_default(),
-                modification_date: strs.get(StrDataSimilarImages::ModificationDate as usize).cloned().unwrap_or_default(),
-                similarity: strs.get(StrDataSimilarImages::Similarity as usize).cloned().unwrap_or_default(),
+                size: strs
+                    .get(StrDataSimilarImages::Size as usize)
+                    .cloned()
+                    .expect("SimilarImages row must contain a Size column"),
+                resolution: strs
+                    .get(StrDataSimilarImages::Resolution as usize)
+                    .cloned()
+                    .expect("SimilarImages row must contain a Resolution column"),
+                modification_date: strs
+                    .get(StrDataSimilarImages::ModificationDate as usize)
+                    .cloned()
+                    .expect("SimilarImages row must contain a ModificationDate column"),
+                similarity: strs
+                    .get(StrDataSimilarImages::Similarity as usize)
+                    .cloned()
+                    .expect("SimilarImages row must contain a Similarity column"),
                 checked: *checked,
                 thumbnail,
                 flat_idx: *flat_idx as i32,
@@ -366,8 +384,14 @@ fn open_group(app: &MainWindow, header_idx: usize) {
             return;
         }
 
-        let left_path = raw_items.get(left_idx_slint as usize).map(|r| r.path.clone()).unwrap_or_default();
-        let right_path = raw_items.get(right_idx_slint as usize).map(|r| r.path.clone()).unwrap_or_default();
+        let left_path = raw_items
+            .get(left_idx_slint as usize)
+            .map(|r| r.path.clone())
+            .expect("left_idx_slint is 0 and raw_items is guaranteed to have at least 1 item");
+        let right_path = raw_items
+            .get(right_idx_slint as usize)
+            .map(|r| r.path.clone())
+            .expect("right_idx_slint is either 0 or 1 and raw_items is guaranteed to have at least 1 item");
 
         let left_raw = load_raw_full_image(&left_path);
         let right_raw = load_raw_full_image(&right_path);

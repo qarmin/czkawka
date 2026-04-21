@@ -5,6 +5,31 @@ import { StatusChip, TouchButton } from "components.slint";
 import { Translations } from "translations.slint";
 import { ListView } from "std-widgets.slint";
 
+// Index of the group within similar_images_groups – passed in by the repeater.
+// Used so the Compare button can open the right group.
+component GroupCompareBtn inherits Rectangle {
+    in property <int> group_idx;
+
+    height: 28px;
+    width: lbl.preferred-width + 20px;
+    border-radius: 6px;
+    background: ta.has-hover ? CediniaColors.accent.brighter(0.12) : CediniaColors.accent.with-alpha(0.75);
+    animate background { duration: 80ms; }
+
+    ta := TouchArea {
+        clicked => { AppState.compare_open(root.group_idx); }
+    }
+
+    lbl := Text {
+        text: Translations.compare_label_text;
+        color: CediniaColors.fg_on_accent;
+        font-size: 11px;
+        font-weight: 700;
+        horizontal-alignment: TextHorizontalAlignment.center;
+        vertical-alignment:   TextVerticalAlignment.center;
+    }
+}
+
 component GalleryImageCell {
     in property <image>  thumbnail;
     in property <string> img_name;
@@ -28,18 +53,31 @@ component GalleryImageCell {
     // Suppresses the clicked event that fires right after the long-press timer.
     property <bool> lp_fired: false;
 
-    // Stored press coordinates for the 30 px dead-zone check (Android).
+    // Explicit armed flag – set to true only while a genuine long-press is in
+    // progress.  Cleared imperatively by every cancellation path so that even
+    // if the timer callback runs just after a cancel/up/move event it will not
+    // open the popup.  This is more reliable than checking `ta.pressed` because
+    // Slint may not clear pressed before the timer callback runs.
+    property <bool> _lp_active: false;
+
+    // Stored press coordinates for the 30 px dead-zone check.
     property <length> _lp_start_x: 0px;
     property <length> _lp_start_y: 0px;
-    // Tracks the most-recent pointer position so the timer can re-check
-    // displacement even after the TouchArea stops receiving move events
-    // (i.e. when a SwipeGestureHandler has claimed the gesture).
-    property <length> _lp_cur_x:   0px;
-    property <length> _lp_cur_y:   0px;
 
-    // Cancel immediately when either SGR takes over the swipe gesture.
+    // Watch ta.pressed: the moment it goes false (up, cancel, gesture-steal)
+    // disarm the long-press even if the event callback hasn't run yet.
+    property <bool> _ta_pressed_watch: ta.pressed;
+    changed _ta_pressed_watch => {
+        if (!_ta_pressed_watch) {
+            root._lp_active = false;
+            cell_lp_timer.running = false;
+        }
+    }
+
+    // Cancel immediately when the horizontal SwipeGestureHandler takes over.
     changed any_sgr_swiping => {
         if (root.any_sgr_swiping) {
+            root._lp_active = false;
             cell_lp_timer.running = false;
         }
     }
@@ -56,25 +94,25 @@ component GalleryImageCell {
         }
         pointer-event(e) => {
             if (e.kind == PointerEventKind.down) {
-                root._lp_start_x = ta.mouse-x;
-                root._lp_start_y = ta.mouse-y;
-                root._lp_cur_x   = ta.mouse-x;
-                root._lp_cur_y   = ta.mouse-y;
+                root._lp_start_x = self.mouse-x;
+                root._lp_start_y = self.mouse-y;
+                root._lp_active  = true;
                 cell_lp_timer.running = true;
                 cell_lp_timer.restart();
-            } else if (e.kind == PointerEventKind.up) {
+            } else if (e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel) {
+                root._lp_active = false;
                 cell_lp_timer.running = false;
-            } else if (e.kind == PointerEventKind.move) {
-                root._lp_cur_x = ta.mouse-x;
-                root._lp_cur_y = ta.mouse-y;
-                // 30 px dead zone – cancels on real scroll gestures while
-                // tolerating Android micro-moves on a stationary finger.
-                if (ta.mouse-x - root._lp_start_x > 30px
-                        || root._lp_start_x - ta.mouse-x > 30px
-                        || ta.mouse-y - root._lp_start_y > 30px
-                        || root._lp_start_y - ta.mouse-y > 30px) {
-                    cell_lp_timer.running = false;
-                }
+            }
+        }
+        // Fires while finger is held and moving – cancel on dead-zone breach.
+        moved => {
+            // Well - this rarely works, because faster cancel event is gathered
+            if (self.mouse-x - root._lp_start_x > 30px
+                    || root._lp_start_x - self.mouse-x > 30px
+                    || self.mouse-y - root._lp_start_y > 30px
+                    || root._lp_start_y - self.mouse-y > 30px) {
+                root._lp_active = false;
+                cell_lp_timer.running = false;
             }
         }
     }
@@ -84,14 +122,8 @@ component GalleryImageCell {
         running: false;
         triggered => {
             self.running = false;
-            // Final guard: even if any_sgr_swiping didn't cancel in time,
-            // refuse to fire if the finger has drifted beyond the dead zone.
-            if (root._lp_cur_x - root._lp_start_x > 30px
-                    || root._lp_start_x - root._lp_cur_x > 30px
-                    || root._lp_cur_y - root._lp_start_y > 30px
-                    || root._lp_start_y - root._lp_cur_y > 30px) {
-                return;
-            }
+            if (!root._lp_active) { return; }
+            root._lp_active = false;
             root.lp_fired = true;
             root.cell_long_pressed(
                 root.img_full_path,
@@ -121,14 +153,14 @@ component GalleryImageCell {
 
             Rectangle {
                 border-radius: 8px;
-                background: ta.pressed ? #ffffff22 : transparent;
+                background: ta.pressed ? CediniaColors.tile_press : transparent;
             }
 
             // Border drawn after the image so it is not covered by it.
             Rectangle {
                 border-radius: 8px;
                 border-width: (root.checked || root.is_reference) ? 3px : 0px;
-                border-color: root.is_reference ? #4488ff : CediniaColors.accent;
+                border-color: root.is_reference ? CediniaColors.reference_border : CediniaColors.accent;
                 background: transparent;
                 animate border-width { duration: 100ms; }
             }
@@ -143,7 +175,7 @@ component GalleryImageCell {
                 z: 5;
                 Text {
                     text: Translations.ok_text;
-                    color: #000000;
+                    color: CediniaColors.fg_on_accent;
                     font-size: 11px;
                     font-weight: 700;
                     horizontal-alignment: TextHorizontalAlignment.center;
@@ -221,7 +253,7 @@ component GalleryToggleBar {
                 label: "X";
                 min_h: 36px;
                 bg: CediniaColors.danger;
-                fg: #ffffff;
+                fg: CediniaColors.fg_on_danger;
                 clicked => { AppState.request_gallery_delete(); }
             }
 
@@ -304,7 +336,7 @@ export component SimilarImagesGallery {
         if groups.length > 0 : gallery_scroll := ListView {
             vertical-stretch: 1.0;
 
-            for group in root.groups : VerticalLayout {
+            for group[group_idx] in root.groups : VerticalLayout {
                 padding-left: 8px;
                 padding-right: 8px;
                 padding-top: 8px;
@@ -315,17 +347,26 @@ export component SimilarImagesGallery {
                     height: 34px;
                     border-radius: 8px;
                     background: CediniaColors.accent.with-alpha(0.85);
+
+                    // Group label (leaves room for the Compare button on the right)
                     Text {
                         x: 12px;
                         y: 0px;
                         height: parent.height;
-                        width: parent.width - 24px;
+                        width: parent.width - 24px - compare_btn.width - 8px;
                         text: group.label;
-                        color: #000000;
+                        color: CediniaColors.fg_on_accent;
                         font-size: 13px;
                         font-weight: 700;
                         vertical-alignment: TextVerticalAlignment.center;
                         overflow: TextOverflow.elide;
+                    }
+
+                    // Compare button (right-aligned inside the header)
+                    compare_btn := GroupCompareBtn {
+                        group_idx: group_idx;
+                        x: parent.width - self.width - 6px;
+                        y: (parent.height - self.height) / 2;
                     }
                 }
 
@@ -400,7 +441,7 @@ export component SimilarImagesGallery {
         width: root.width;
         height: root.height;
         z: 55;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea { clicked => { root.ctx_open_visible = false; } }
 
         Rectangle {
@@ -411,7 +452,7 @@ export component SimilarImagesGallery {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000aa;
+            drop-shadow-color: CediniaColors.shadow_lg;
             clip: true;
 
             ctx_open_vl := VerticalLayout {
@@ -473,7 +514,7 @@ export component SimilarImagesGallery {
         width: root.width;
         height: root.height;
         z: 50;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea {}
 
         Rectangle {
@@ -484,7 +525,7 @@ export component SimilarImagesGallery {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000aa;
+            drop-shadow-color: CediniaColors.shadow_lg;
             clip: true;
 
             popup_sel_vl := VerticalLayout {
@@ -582,7 +623,7 @@ export component SimilarImagesGallery {
         width: root.width;
         height: root.height;
         z: 50;
-        background: #00000099;
+        background: CediniaColors.scrim;
         TouchArea {}
 
         Rectangle {
@@ -593,7 +634,7 @@ export component SimilarImagesGallery {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000aa;
+            drop-shadow-color: CediniaColors.shadow_lg;
             clip: true;
 
             popup_desel_vl := VerticalLayout {
@@ -637,7 +678,7 @@ export component SimilarImagesGallery {
         width: root.width;
         height: root.height;
         z: 25;
-        background: #000000bb;
+        background: CediniaColors.scrim_strong;
 
 
         TouchArea {}
@@ -651,7 +692,7 @@ export component SimilarImagesGallery {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 28px;
-            drop-shadow-color: #000000cc;
+            drop-shadow-color: CediniaColors.shadow_xl;
 
             card := VerticalLayout {
                 padding: 24px;
@@ -691,7 +732,7 @@ export component SimilarImagesGallery {
                         horizontal-stretch: 1.0;
                         min_h: 48px;
                         bg: CediniaColors.danger;
-                        fg: #ffffff;
+                        fg: CediniaColors.fg_on_danger;
                         clicked => { AppState.confirm_gallery_delete(); }
                     }
                 }
@@ -706,7 +747,7 @@ export component SimilarImagesGallery {
         width: root.width;
         height: root.height;
         z: 26;
-        background: #000000bb;
+        background: CediniaColors.scrim_strong;
 
         TouchArea {} 
         Rectangle {
@@ -717,7 +758,7 @@ export component SimilarImagesGallery {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000cc;
+            drop-shadow-color: CediniaColors.shadow_xl;
 
             prog-card := VerticalLayout {
                 padding: 24px;
@@ -742,7 +783,7 @@ export component SimilarImagesGallery {
                     label: Translations.stop_text;
                     min_h: 44px;
                     bg: CediniaColors.warning;
-                    fg: #000000;
+                    fg: CediniaColors.fg_on_accent;
                     clicked => { AppState.delete_stop_requested(); }
                 }
             }
@@ -756,7 +797,7 @@ export component SimilarImagesGallery {
         width: root.width;
         height: root.height;
         z: 27;
-        background: #000000bb;
+        background: CediniaColors.scrim_strong;
 
         TouchArea {}
 
@@ -768,7 +809,7 @@ export component SimilarImagesGallery {
             border-radius: 14px;
             background: CediniaColors.bg_elevated;
             drop-shadow-blur: 24px;
-            drop-shadow-color: #000000cc;
+            drop-shadow-color: CediniaColors.shadow_xl;
 
             err-card := VerticalLayout {
                 padding: 20px;
@@ -817,7 +858,7 @@ export component SimilarImagesGallery {
                     ? CediniaColors.warning.with-alpha(0.5)
                     : CediniaColors.accent;
         drop-shadow-blur: 12px;
-        drop-shadow-color: #00000088;
+        drop-shadow-color: CediniaColors.shadow_md;
         animate background { duration: 200ms; }
 
         TouchArea {
@@ -835,7 +876,7 @@ export component SimilarImagesGallery {
             text: AppState.scan_state == ScanState.Scanning
                 || AppState.scan_state == ScanState.Stopping ? "⏹" : "▶";
             font-size: 22px;
-            color: (!AppState.storage_permission_granted || AppState.scan_state == ScanState.Stopping) ? #00000066 : #000000;
+            color: (!AppState.storage_permission_granted || AppState.scan_state == ScanState.Stopping) ? CediniaColors.fg_on_accent_disabled : CediniaColors.fg_on_accent;
             horizontal-alignment: TextHorizontalAlignment.center;
             vertical-alignment: TextVerticalAlignment.center;
         }

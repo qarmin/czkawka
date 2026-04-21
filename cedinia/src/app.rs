@@ -12,6 +12,7 @@ use crate::callbacks::{
     DeleteEvent, build_excluded_model, build_included_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_licenses_popup,
     wire_notification_settings, wire_open_path, wire_open_url, wire_permission, wire_save_settings_now, wire_scan, wire_selection,
 };
+use crate::compare::wire_compare;
 use crate::model::make_file_model;
 use crate::scan_runner::{FileItem, ScanResult, ScanResultHandler, start_worker};
 use crate::set_initial_gui_infos::set_initial_gui_infos;
@@ -412,7 +413,15 @@ fn run_app_inner(
     let delete_rx = Rc::new(std::cell::RefCell::new(delete_rx));
     let delete_stop: Rc<std::cell::RefCell<Arc<AtomicBool>>> = Rc::new(std::cell::RefCell::new(Arc::new(AtomicBool::new(false))));
 
-    wire_scan(&window, stop_flag, scan_tx, included_dirs.clone(), referenced_dirs.clone(), scan_gen.clone());
+    wire_scan(
+        &window,
+        stop_flag,
+        scan_tx,
+        included_dirs.clone(),
+        excluded_dirs.clone(),
+        referenced_dirs.clone(),
+        scan_gen.clone(),
+    );
     wire_permission(&window);
     wire_notification_settings(&window);
     wire_selection(&window, delete_tx, Rc::clone(&delete_stop));
@@ -424,6 +433,7 @@ fn run_app_inner(
     wire_cache_info(&window);
     wire_licenses_popup(&window);
     wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone());
+    wire_compare(&window);
 
     let weak = window.as_weak();
     let thumb_rx = Rc::new(std::cell::RefCell::new(thumb_rx));
@@ -494,8 +504,14 @@ fn run_app_inner(
                                     if e.is_header {
                                         return true;
                                     }
-                                    let name = e.val_str.row_data(0).map(|s| s.to_string()).unwrap_or_default();
-                                    let path = e.val_str.row_data(1).map(|s| s.to_string()).unwrap_or_default();
+                                    let name = e
+                                        .val_str
+                                        .row_data(0)
+                                        .map_or_else(|| panic!("Expected name in val_str[0] - {:?}", e.val_str), |s| s.to_string());
+                                    let path = e
+                                        .val_str
+                                        .row_data(1)
+                                        .map_or_else(|| panic!("Expected path in val_str[1] - {:?}", e.val_str), |s| s.to_string());
                                     let full = if path.is_empty() { name } else { format!("{path}/{name}") };
                                     !del_set.contains(&full)
                                 });
@@ -585,8 +601,8 @@ fn run_app_inner(
                                         if e.is_header {
                                             return true;
                                         }
-                                        let name = e.val_str.row_data(0).map(|s| s.to_string()).unwrap_or_default();
-                                        let path = e.val_str.row_data(1).map(|s| s.to_string()).unwrap_or_default();
+                                        let name = e.val_str.row_data(0).map(|s| s.to_string()).expect("Expected name in val_str[0]");
+                                        let path = e.val_str.row_data(1).map(|s| s.to_string()).expect("Expected path in val_str[1]");
                                         let full = if path.is_empty() { name } else { format!("{path}/{name}") };
                                         !cleaned_set.contains(&full)
                                     })

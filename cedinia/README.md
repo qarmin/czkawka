@@ -21,9 +21,7 @@ Quite complicated - look for now at the CI or TMP_INSTALL.md to see what needs t
 - The Android <-> Rust integration via JNI is quite complex, so some features may not work as expected
 
 ## AI usage
-Because this project goes into parts of Android that I am not familiar with, I used a lot of AI assistance during development. I reviewed and guided every step myself, but AI helped speed things up. 
-
-AI is a tool, like any other tool such as IntelliSense, debuggers, or documentation search, it can be used well or poorly. I simply try to use the available tools responsibly to build good software.
+Because this project goes into parts of Android that I am not familiar with, I used a lot of AI assistance during development(especially because this app have quite similar frontend like Krokiet). I reviewed and guided every step myself, but AI helped speed things up. 
 
 ## License
 
