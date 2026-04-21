@@ -227,6 +227,18 @@ pub struct EmptyFilesArgs {
     pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
     pub delete_method: SDMethod,
+    #[clap(
+        long,
+        help = "Also find files filled entirely with null bytes",
+        long_help = "Also find non-empty files whose entire content consists of null bytes (0x00). These files take disk space but carry no meaningful data."
+    )]
+    pub zero_byte_content: bool,
+    #[clap(
+        long,
+        help = "Also find files filled entirely with whitespace characters",
+        long_help = "Also find non-empty files whose entire content consists of whitespace or non-printing ASCII characters: null (0x00), tab (0x09), LF (0x0A), VT (0x0B), FF (0x0C), CR (0x0D), space (0x20). Implies --zero-byte-content."
+    )]
+    pub whitespace_content: bool,
 }
 
 #[derive(Debug, clap::Args)]

@@ -71,12 +71,13 @@ fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
         | CurrentStage::BrokenFilesChecking
         | CurrentStage::BadExtensionsChecking
         | CurrentStage::BadNamesChecking
-        | CurrentStage::ExifRemoverExtractingTags
+        | CurrentStage::EmptyFilesCheckingContent
         | CurrentStage::VideoOptimizerCreatingThumbnails
         | CurrentStage::VideoOptimizerProcessingVideos
         | CurrentStage::SimilarImagesHidingHardLinks
         | CurrentStage::SimilarVideosHidingHardLinks
-        | CurrentStage::DuplicateHidingHardLinks => unreachable!(),
+        | CurrentStage::DuplicateHidingHardLinks
+        | CurrentStage::ExifRemoverExtractingTags => unreachable!(),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
     ProgressToSend {
@@ -123,6 +124,7 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::BrokenFilesChecking => flk!("rust_checked_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::BadExtensionsChecking => flk!("rust_checked_files_bad_extensions", items_stats = items_stats),
         CurrentStage::BadNamesChecking => flk!("rust_checked_files_bad_names", items_stats = items_stats),
+        CurrentStage::EmptyFilesCheckingContent => flk!("rust_checking_empty_files_content", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::SimilarVideosCreatingThumbnails | CurrentStage::VideoOptimizerCreatingThumbnails => flk!("rust_created_thumbnails", items_stats = items_stats),
         CurrentStage::VideoOptimizerProcessingVideos => flk!("rust_checked_videos", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicatePreHashing => flk!("rust_analyzed_partial_hash", items_stats = items_stats, size_stats = size_stats),

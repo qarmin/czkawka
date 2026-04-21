@@ -42,6 +42,7 @@ pub enum CheckingMethod {
     Hash,
     AudioTags,
     AudioContent,
+    EmptyFilesContent,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]

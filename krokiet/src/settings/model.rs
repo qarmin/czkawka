@@ -132,6 +132,10 @@ pub struct SettingsCustom {
     pub similar_music_sub_maximum_difference_value: f32,
     #[serde(default = "default_minimal_fragment_duration_value")]
     pub similar_music_sub_minimal_fragment_duration_value: f32,
+    #[serde(default)]
+    pub empty_files_sub_zero_byte_content: bool,
+    #[serde(default)]
+    pub empty_files_sub_whitespace_content: bool,
     #[serde(default = "ttrue")]
     pub broken_files_sub_audio: bool,
     #[serde(default = "ttrue")]

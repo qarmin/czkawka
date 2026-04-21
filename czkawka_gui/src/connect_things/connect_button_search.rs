@@ -292,7 +292,7 @@ fn empty_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut tool = EmptyFiles::new();
+            let mut tool = EmptyFiles::default();
 
             set_common_settings(&mut tool, &loaded_commons);
             tool.search(&stop_flag, Some(&progress_data_sender));

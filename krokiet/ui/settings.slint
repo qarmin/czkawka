@@ -122,6 +122,10 @@ export global Settings {
     in-out property <float> similar_music_sub_maximum_difference_max: 10.0;
 
     // Broken Files
+    in-out property <bool> empty_files_sub_zero_byte_content: false;
+    in-out property <bool> empty_files_sub_whitespace_content: false;
+
+    // Broken Files
     in-out property <bool> broken_files_sub_audio: true;
     in-out property <bool> broken_files_sub_pdf: false;
     in-out property <bool> broken_files_sub_archive: false;
@@ -250,8 +254,8 @@ export global Settings {
     in-out property <[length]> empty_folders_column_size: [35px, name_px, path_px, mod_px];
     in-out property <[string]> big_files_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
     in-out property <[length]> big_files_column_size: [35px, size_px, name_px, path_px, mod_px];
-    in-out property <[string]> empty_files_column_name: ["Selection", "File Name", "Path", "Modification Date"];
-    in-out property <[length]> empty_files_column_size: [35px, name_px, path_px, mod_px];
+    in-out property <[string]> empty_files_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> empty_files_column_size: [35px, size_px, name_px, path_px, mod_px];
     in-out property <[string]> temporary_files_column_name: ["Selection", "File Name", "Path", "Modification Date"];
     in-out property <[length]> temporary_files_column_size: [35px, name_px, path_px, mod_px];
     in-out property <[string]> similar_images_column_name: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];

@@ -330,6 +330,35 @@ export component ToolSettings {
         }
 
         VerticalLayout {
+            visible: GuiState.active_tab == ActiveTab.EmptyFiles;
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+
+            LabelText { label_text: Translations.subsettings_empty_files_type_text; }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_empty_files_zero_byte_content_text;
+                checked <=> Settings.empty_files_sub_zero_byte_content;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_empty_files_zero_byte_content_hint_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_empty_files_whitespace_content_text;
+                checked <=> Settings.empty_files_sub_whitespace_content;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_empty_files_whitespace_content_hint_text;
+            }
+
+            Rectangle { }
+        }
+
+        VerticalLayout {
             visible: GuiState.active_tab == ActiveTab.TemporaryFiles;
             spacing: 5px;
             padding: 10px;
