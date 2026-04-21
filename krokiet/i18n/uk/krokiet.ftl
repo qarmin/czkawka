@@ -188,6 +188,7 @@ sort_reverse = У зворотньому порядку
 selection_all = Виділити все
 selection_deselect_all = Зняти всі виділення
 selection_invert_selection = Інвертувати виділення
+selection_invert_selection_in_group = Інвертувати виділення в групі
 selection_the_biggest_size = Виберіть найбільший розмір
 selection_the_biggest_resolution = Виберіть найбільшу роздільну здатність
 selection_the_smallest_size = Оберіть найменший розмір

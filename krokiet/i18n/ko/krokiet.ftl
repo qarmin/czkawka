@@ -191,6 +191,7 @@ sort_reverse = 역순 정렬
 selection_all = 전체 선택
 selection_deselect_all = 전체 선택 해제
 selection_invert_selection = 선택 반전
+selection_invert_selection_in_group = 그룹 내 선택 반전
 selection_the_biggest_size = 가장 큰 파일 선택
 selection_the_biggest_resolution = 가장 큰 해상도 선택
 selection_the_smallest_size = 가장 작은 파일 선택

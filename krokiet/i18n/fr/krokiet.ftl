@@ -188,6 +188,7 @@ sort_reverse = Inverser l'ordre
 selection_all = Tout sélectionner
 selection_deselect_all = Désélectionner tout
 selection_invert_selection = Inverser la sélection
+selection_invert_selection_in_group = Inverser la sélection dans le groupe
 selection_the_biggest_size = Sélectionnez la taille la plus grande
 selection_the_biggest_resolution = Sélectionnez la plus grande résolution
 selection_the_smallest_size = Sélectionnez la taille la plus petite

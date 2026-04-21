@@ -190,6 +190,7 @@ sort_reverse = Urutan terbalik
 selection_all = Pilih Semua
 selection_deselect_all = Batalkan semua pilihan
 selection_invert_selection = Balikkan pilihan
+selection_invert_selection_in_group = Balikkan pilihan dalam grup
 selection_the_biggest_size = Pilih ukuran yang paling besar
 selection_the_biggest_resolution = Pilih resolusi terbesar
 selection_the_smallest_size = Pilih ukuran terkecil

@@ -188,6 +188,7 @@ sort_reverse = 反向排序
 selection_all = 選擇全部
 selection_deselect_all = 取消全部
 selection_invert_selection = 反向選擇
+selection_invert_selection_in_group = 在群組中反向選擇
 selection_the_biggest_size = 選擇最大檔案
 selection_the_biggest_resolution = 選擇最大解析度
 selection_the_smallest_size = 選擇最小檔案

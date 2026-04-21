@@ -192,6 +192,7 @@ sort_reverse = 順序を逆にする
 selection_all = すべて選択
 selection_deselect_all = すべての選択を解除
 selection_invert_selection = 選択を反転
+selection_invert_selection_in_group = グループ内で選択を反転
 selection_the_biggest_size = 最大サイズを選択
 selection_the_biggest_resolution = 最大解像度を選択
 selection_the_smallest_size = 最小サイズを選択

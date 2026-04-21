@@ -188,6 +188,7 @@ sort_reverse = سیر opposition
 selection_all = انتخاب همه
 selection_deselect_all = تمامی را حذف کنید
 selection_invert_selection = انتخاب را دور زنید
+selection_invert_selection_in_group = انتخاب را در گروه برگردانید
 selection_the_biggest_size = حجم بزرگترین را انتخاب کنید
 selection_the_biggest_resolution = گزینه‌ی بزرگترین حلوله را انتخاب کنید
 selection_the_smallest_size = چویید حجم کوچکترین را

@@ -191,6 +191,7 @@ sort_reverse = Обратен ред
 selection_all = Избери всички
 selection_deselect_all = Отключи всичко
 selection_invert_selection = Инверсия на избора
+selection_invert_selection_in_group = Инверсия на избора в група
 selection_the_biggest_size = Избери най-голям файл
 selection_the_biggest_resolution = Избери най-голямо резолюция
 selection_the_smallest_size = Избери най-малък файл
