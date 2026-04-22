@@ -99,7 +99,7 @@ fn test_find_whitespace_content_files() {
     fs::write(path.join("regular.txt"), b"hello").unwrap();
     fs::write(path.join("truly_empty.txt"), b"").unwrap();
 
-    let mut finder = EmptyFiles::new(EmptyFilesParameters { search_whitespace_content_files: true, ..Default::default() });
+    let mut finder = EmptyFiles::new(EmptyFilesParameters { search_non_printable_content_files: true, ..Default::default() });
     finder.set_included_paths(vec![path.to_path_buf()]);
     finder.set_recursive_search(true);
 

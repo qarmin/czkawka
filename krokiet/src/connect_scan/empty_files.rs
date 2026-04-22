@@ -21,8 +21,8 @@ pub(crate) fn scan_empty_files(a: Weak<MainWindow>, sd: ScanData) {
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let params = EmptyFilesParameters {
-                search_zero_byte_content_files: sd.custom_settings.empty_files_sub_zero_byte_content || sd.custom_settings.empty_files_sub_whitespace_content,
-                search_whitespace_content_files: sd.custom_settings.empty_files_sub_whitespace_content,
+                search_zero_byte_content_files: sd.custom_settings.empty_files_sub_zero_byte_content || sd.custom_settings.empty_files_sub_non_printable_content,
+                search_non_printable_content_files: sd.custom_settings.empty_files_sub_non_printable_content,
             };
             let mut tool = EmptyFiles::new(params);
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);

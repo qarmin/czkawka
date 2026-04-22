@@ -235,10 +235,10 @@ pub struct EmptyFilesArgs {
     pub zero_byte_content: bool,
     #[clap(
         long,
-        help = "Also find files filled entirely with whitespace characters",
-        long_help = "Also find non-empty files whose entire content consists of whitespace or non-printing ASCII characters: null (0x00), tab (0x09), LF (0x0A), VT (0x0B), FF (0x0C), CR (0x0D), space (0x20). Implies --zero-byte-content."
+        help = "Also find files filled entirely with non-printable characters",
+        long_help = "Also find non-empty files whose entire content consists of non-printable ASCII characters: null (0x00), tab (0x09), LF (0x0A), VT (0x0B), FF (0x0C), CR (0x0D), space (0x20). Implies --zero-byte-content."
     )]
-    pub whitespace_content: bool,
+    pub non_printable_content: bool,
 }
 
 #[derive(Debug, clap::Args)]

@@ -1,5 +1,6 @@
-use std::fs;
+use std::io::Read;
 use std::mem;
+use std::{fs, io};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -15,6 +16,28 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::CommonToolData;
 use crate::tools::empty_files::{EmptyFiles, EmptyFilesParameters, Info};
 
+const CHUNK_SIZE: usize = 8 * 1024;
+
+fn check_content_chunked(path: &std::path::Path, search_non_printable: bool) -> io::Result<bool> {
+    let mut file = fs::File::open(path)?;
+    let mut buf = [0u8; CHUNK_SIZE];
+    loop {
+        let n = file.read(&mut buf)?;
+        if n == 0 {
+            return Ok(true);
+        }
+        let chunk = &buf[..n];
+        let all_match = if search_non_printable {
+            chunk.iter().all(|&b| !b.is_ascii_graphic())
+        } else {
+            chunk.iter().all(|&b| b == 0x00)
+        };
+        if !all_match {
+            return Ok(false);
+        }
+    }
+}
+
 impl EmptyFiles {
     pub fn new(params: EmptyFilesParameters) -> Self {
         Self {
@@ -27,16 +50,13 @@ impl EmptyFiles {
     }
 
     fn effective_checking_method(&self) -> CheckingMethod {
-        if self.params.search_zero_byte_content_files || self.params.search_whitespace_content_files {
+        if self.params.search_zero_byte_content_files || self.params.search_non_printable_content_files {
             CheckingMethod::EmptyFilesContent
         } else {
             CheckingMethod::None
         }
     }
 
-    /// Stage 0 – traverses the directory tree and splits results:
-    /// - zero-size files go directly into `self.empty_files`
-    /// - non-zero files are stored in `self.files_to_check` for stage 1 (content check mode only)
     #[fun_time(message = "collect_files", level = "debug")]
     pub(crate) fn collect_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let checking_method = self.effective_checking_method();
@@ -74,9 +94,6 @@ impl EmptyFiles {
         }
     }
 
-    /// Stage 1 – reads every file from `self.files_to_check` and keeps only those whose
-    /// entire content consists of null bytes (zero-byte mode) or ASCII whitespace characters
-    /// (whitespace mode).  Clears `self.files_to_check` when done.
     #[fun_time(message = "check_content", level = "debug")]
     pub(crate) fn check_content(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let files = mem::take(&mut self.files_to_check);
@@ -93,7 +110,7 @@ impl EmptyFiles {
             total_size,
         );
 
-        let search_whitespace = self.params.search_whitespace_content_files;
+        let search_whitespace = self.params.search_non_printable_content_files;
         let stopped = AtomicBool::new(false);
 
         let mut matches: Vec<FileEntry> = files
@@ -104,15 +121,13 @@ impl EmptyFiles {
                     return None;
                 }
                 let size = fe.size;
-                let Ok(content) = fs::read(&fe.path) else {
-                    progress_handler.increase_items(1);
-                    progress_handler.increase_size(size);
-                    return Some(None);
-                };
-                let is_match = if search_whitespace {
-                    content.iter().all(|&b| !b.is_ascii_graphic())
-                } else {
-                    content.iter().all(|&b| b == 0x00)
+                let is_match = match check_content_chunked(&fe.path, search_whitespace) {
+                    Ok(result) => result,
+                    Err(_) => {
+                        progress_handler.increase_items(1);
+                        progress_handler.increase_size(size);
+                        return Some(None);
+                    }
                 };
                 progress_handler.increase_items(1);
                 progress_handler.increase_size(size);
@@ -137,7 +152,7 @@ impl EmptyFiles {
         if self.collect_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
         }
-        if self.params.search_zero_byte_content_files || self.params.search_whitespace_content_files {
+        if self.params.search_zero_byte_content_files || self.params.search_non_printable_content_files {
             if self.check_content(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 return WorkContinueStatus::Stop;
             }

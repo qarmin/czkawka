@@ -135,7 +135,7 @@ pub struct SettingsCustom {
     #[serde(default)]
     pub empty_files_sub_zero_byte_content: bool,
     #[serde(default)]
-    pub empty_files_sub_whitespace_content: bool,
+    pub empty_files_sub_non_printable_content: bool,
     #[serde(default = "ttrue")]
     pub broken_files_sub_audio: bool,
     #[serde(default = "ttrue")]

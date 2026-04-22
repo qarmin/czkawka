@@ -485,7 +485,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_music_sub_minimal_fragment_duration_value(custom_settings.similar_music_sub_minimal_fragment_duration_value);
 
     settings.set_empty_files_sub_zero_byte_content(custom_settings.empty_files_sub_zero_byte_content);
-    settings.set_empty_files_sub_whitespace_content(custom_settings.empty_files_sub_whitespace_content);
+    settings.set_empty_files_sub_non_printable_content(custom_settings.empty_files_sub_non_printable_content);
     settings.set_broken_files_sub_audio(custom_settings.broken_files_sub_audio);    settings.set_broken_files_sub_pdf(custom_settings.broken_files_sub_pdf);
     settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
@@ -653,7 +653,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_music_sub_minimal_fragment_duration_value = settings.get_similar_music_sub_minimal_fragment_duration_value();
 
     let empty_files_sub_zero_byte_content = settings.get_empty_files_sub_zero_byte_content();
-    let empty_files_sub_whitespace_content = settings.get_empty_files_sub_whitespace_content();
+    let empty_files_sub_non_printable_content = settings.get_empty_files_sub_non_printable_content();
     let broken_files_sub_audio = settings.get_broken_files_sub_audio();    let broken_files_sub_pdf = settings.get_broken_files_sub_pdf();
     let broken_files_sub_archive = settings.get_broken_files_sub_archive();
     let broken_files_sub_image = settings.get_broken_files_sub_image();
@@ -779,7 +779,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_music_sub_maximum_difference_value,
         similar_music_sub_minimal_fragment_duration_value,
         empty_files_sub_zero_byte_content,
-        empty_files_sub_whitespace_content,
+        empty_files_sub_non_printable_content,
         broken_files_sub_audio,
         broken_files_sub_pdf,
         broken_files_sub_archive,

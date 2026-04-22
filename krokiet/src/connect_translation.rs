@@ -254,8 +254,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_empty_files_type_text(flk!("subsettings_empty_files_type").into());
     translation.set_subsettings_empty_files_zero_byte_content_text(flk!("subsettings_empty_files_zero_byte_content").into());
     translation.set_subsettings_empty_files_zero_byte_content_hint_text(flk!("subsettings_empty_files_zero_byte_content_hint").into());
-    translation.set_subsettings_empty_files_whitespace_content_text(flk!("subsettings_empty_files_whitespace_content").into());
-    translation.set_subsettings_empty_files_whitespace_content_hint_text(flk!("subsettings_empty_files_whitespace_content_hint").into());
+    translation.set_subsettings_empty_files_non_printable_content_text(flk!("subsettings_empty_files_non_printable_content").into());
+    translation.set_subsettings_empty_files_non_printable_content_hint_text(flk!("subsettings_empty_files_non_printable_content_hint").into());
     translation.set_subsettings_broken_files_audio_text(flk!("subsettings_broken_files_audio").into());
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
@@ -551,7 +551,7 @@ fn translate_items(app: &MainWindow) {
 
     settings.set_duplicates_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_empty_folders_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
-    settings.set_empty_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
+    settings.set_empty_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_temporary_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
     settings.set_big_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_similar_images_column_name(fnm(&[&selection, &similarity, &size, &dimensions, &file_name, &path, &mod_date]));

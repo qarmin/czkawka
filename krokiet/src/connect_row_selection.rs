@@ -1069,10 +1069,10 @@ mod context_menu {
     }
 
     fn set_clipboard(text: String) {
-        use copypasta::{ClipboardContext, ClipboardProvider};
-        match ClipboardContext::new() {
+        use arboard::Clipboard;
+        match Clipboard::new() {
             Ok(mut ctx) => {
-                if let Err(e) = ctx.set_contents(text) {
+                if let Err(e) = ctx.set_text(text) {
                     warn!("Failed to set clipboard contents: {e}");
                 }
             }

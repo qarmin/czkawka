@@ -18,9 +18,9 @@ pub struct Info {
 pub struct EmptyFilesParameters {
     /// Also find non-empty files whose entire content consists of null bytes (`\0`).
     pub search_zero_byte_content_files: bool,
-    /// Also find non-empty files whose entire content consists of whitespace/non-printing ASCII
+    /// Also find non-empty files whose entire content consists of non-printable ASCII
     /// characters (null, space, tab, CR, LF, VT, FF).
-    pub search_whitespace_content_files: bool,
+    pub search_non_printable_content_files: bool,
 }
 
 pub struct EmptyFiles {
