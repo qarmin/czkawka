@@ -13,7 +13,10 @@ use lopdf::Document;
 use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_BROKEN_FILES_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
-use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS};
+use crate::common::consts::{
+    AUDIO_FILES_EXTENSIONS, FONT_FILES_EXTENSIONS, GZ_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, JSON_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, SEVENZ_FILES_EXTENSIONS,
+    TAR_FILES_EXTENSIONS, TOML_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, XML_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS, ZST_FILES_EXTENSIONS,
+};
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
@@ -101,6 +104,146 @@ impl BrokenFiles {
             Err(_inspected) => None,
         }
     }
+
+    // Checks 7z archive by reading and validating the archive header structure.
+    // Uses sevenz-rust2 (pure Rust, local fork).
+    fn check_broken_7z(mut file_entry: BrokenEntry) -> BrokenEntry {
+        let error = match sevenz_rust2::Archive::open(&file_entry.path) {
+            Err(e) => e.to_string().trim().to_string(),
+            Ok(_) => String::new(),
+        };
+        file_entry.errors.insert(CheckedTypesSingle::Archive, error);
+        file_entry
+    }
+
+    // Checks gzip files (including .tar.gz / .tgz) by fully decompressing to /dev/null,
+    // which validates both the header and the trailing CRC32.
+    // Uses flate2 with rust_backend (miniz_oxide) - pure Rust.
+    fn check_broken_gz(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+        match File::open(&file_entry.path) {
+            Ok(file) => {
+                let mut decoder = flate2::read::GzDecoder::new(file);
+                let error = match std::io::copy(&mut decoder, &mut std::io::sink()) {
+                    Err(e) => e.to_string().trim().to_string(),
+                    Ok(_) => String::new(),
+                };
+                file_entry.errors.insert(CheckedTypesSingle::Archive, error);
+                Some(file_entry)
+            }
+            Err(_inspected) => None,
+        }
+    }
+
+    // Checks zstd compressed files (including .tar.zst / .tzst) by fully decompressing to /dev/null.
+    // Uses ruzstd - pure Rust.
+    fn check_broken_zst(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+        match File::open(&file_entry.path) {
+            Ok(file) => {
+                let error = match ruzstd::StreamingDecoder::new(file) {
+                    Err(e) => e.to_string().trim().to_string(),
+                    Ok(mut decoder) => match std::io::copy(&mut decoder, &mut std::io::sink()) {
+                        Err(e) => e.to_string().trim().to_string(),
+                        Ok(_) => String::new(),
+                    },
+                };
+                file_entry.errors.insert(CheckedTypesSingle::Archive, error);
+                Some(file_entry)
+            }
+            Err(_inspected) => None,
+        }
+    }
+
+    // Checks tar archives by iterating all entry headers without extracting file data.
+    // Uses tar crate - pure Rust.
+    fn check_broken_tar(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+        match File::open(&file_entry.path) {
+            Ok(file) => {
+                let mut archive = tar::Archive::new(file);
+                let error = match archive.entries() {
+                    Err(e) => e.to_string().trim().to_string(),
+                    Ok(entries) => {
+                        let mut err_str = String::new();
+                        for entry in entries {
+                            if let Err(e) = entry {
+                                err_str = e.to_string().trim().to_string();
+                                break;
+                            }
+                        }
+                        err_str
+                    }
+                };
+                file_entry.errors.insert(CheckedTypesSingle::Archive, error);
+                Some(file_entry)
+            }
+            Err(_inspected) => None,
+        }
+    }
+    // Checks JSON files by parsing them with serde_json - pure Rust.
+    fn check_broken_json(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+        match std::fs::read(&file_entry.path) {
+            Ok(data) => {
+                let error = match serde_json::from_slice::<serde_json::Value>(&data) {
+                    Err(e) => e.to_string().trim().to_string(),
+                    Ok(_) => String::new(),
+                };
+                file_entry.errors.insert(CheckedTypesSingle::Markup, error);
+                Some(file_entry)
+            }
+            Err(_inspected) => None,
+        }
+    }
+
+    // Checks XML files (including SVG, XHTML, etc.) by parsing with quick-xml - pure Rust.
+    fn check_broken_xml(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+        match std::fs::read(&file_entry.path) {
+            Ok(data) => {
+                let mut reader = quick_xml::Reader::from_reader(data.as_slice());
+                reader.config_mut().check_end_names = true;
+                let error = loop {
+                    match reader.read_event() {
+                        Err(e) => break e.to_string().trim().to_string(),
+                        Ok(quick_xml::events::Event::Eof) => break String::new(),
+                        Ok(_) => {}
+                    }
+                };
+                file_entry.errors.insert(CheckedTypesSingle::Markup, error);
+                Some(file_entry)
+            }
+            Err(_inspected) => None,
+        }
+    }
+
+    // Checks TOML files by parsing them with the toml crate - pure Rust.
+    fn check_broken_toml(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+        match std::fs::read_to_string(&file_entry.path) {
+            Ok(text) => {
+                let error = match text.parse::<toml::Table>() {
+                    Err(e) => e.to_string().trim().to_string(),
+                    Ok(_) => String::new(),
+                };
+                file_entry.errors.insert(CheckedTypesSingle::Markup, error);
+                Some(file_entry)
+            }
+            Err(_inspected) => None,
+        }
+    }
+
+    // Checks font files by parsing their structure.
+    // Uses ttf-parser - pure Rust. Supports TTF, OTF, TTC, WOFF.
+    fn check_broken_font(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+        match std::fs::read(&file_entry.path) {
+            Ok(data) => {
+                let error = match ttf_parser::Face::parse(&data, 0) {
+                    Err(e) => format!("{e:?}").trim().to_string(),
+                    Ok(_) => String::new(),
+                };
+                file_entry.errors.insert(CheckedTypesSingle::Font, error);
+                Some(file_entry)
+            }
+            Err(_inspected) => None,
+        }
+    }
+
     fn check_broken_audio(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
         match File::open(&file_entry.path) {
             Ok(file) => {
@@ -277,6 +420,14 @@ impl BrokenFiles {
         match check_extension_availability(&file_entry.path) {
             TypeOfFile::Image => Some(Some(Self::check_broken_image(file_entry))),
             TypeOfFile::ArchiveZip => Some(Self::check_broken_zip(file_entry)),
+            TypeOfFile::Archive7z => Some(Some(Self::check_broken_7z(file_entry))),
+            TypeOfFile::ArchiveGz => Some(Self::check_broken_gz(file_entry)),
+            TypeOfFile::ArchiveTar => Some(Self::check_broken_tar(file_entry)),
+            TypeOfFile::ArchiveZst => Some(Self::check_broken_zst(file_entry)),
+            TypeOfFile::Font => Some(Self::check_broken_font(file_entry)),
+            TypeOfFile::Json => Some(Self::check_broken_json(file_entry)),
+            TypeOfFile::Xml => Some(Self::check_broken_xml(file_entry)),
+            TypeOfFile::Toml => Some(Self::check_broken_toml(file_entry)),
             TypeOfFile::Audio => Some(Self::check_broken_audio(file_entry)),
             TypeOfFile::Pdf => Some(Some(Self::check_broken_pdf(file_entry))),
             TypeOfFile::Video => Self::check_broken_video(file_entry, stop_flag, checked_types).map(Some),
@@ -365,6 +516,22 @@ fn check_extension_availability(full_name: &Path) -> TypeOfFile {
         TypeOfFile::Image
     } else if ZIP_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
         TypeOfFile::ArchiveZip
+    } else if SEVENZ_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::Archive7z
+    } else if GZ_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::ArchiveGz
+    } else if TAR_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::ArchiveTar
+    } else if ZST_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::ArchiveZst
+    } else if FONT_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::Font
+    } else if JSON_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::Json
+    } else if XML_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::Xml
+    } else if TOML_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+        TypeOfFile::Toml
     } else if PDF_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
         TypeOfFile::Pdf
     } else if AUDIO_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {

@@ -209,6 +209,12 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
             if b.get_check_image() {
                 types |= CheckedTypes::IMAGE;
             }
+            if b.get_check_font() {
+                types |= CheckedTypes::FONT;
+            }
+            if b.get_check_markup() {
+                types |= CheckedTypes::MARKUP;
+            }
             ScanRequest::BrokenFiles {
                 dirs,
                 filters,

@@ -35,6 +35,20 @@ lofty = "0.24"
 # Needed by broken files
 zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 lopdf = "0.40.0"
+# sevenz-rust2 - pure Rust 7z decompressor (local fork)
+sevenz-rust2 = { path = "../sevenz-rust2", default-features = false }
+# flate2 with rust_backend (miniz_oxide) - pure Rust gz/deflate support
+flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
+# tar - pure Rust tar archive reader
+tar = { version = "0.4", default-features = false }
+# ruzstd - pure Rust zstd decoder
+ruzstd = "0.7"
+# ttf-parser - pure Rust font parser (TTF, OTF, TTC, WOFF)
+ttf-parser = "0.25"
+# quick-xml - pure Rust XML parser
+quick-xml = "0.37"
+# toml - pure Rust TOML parser
+toml = { version = "0.8", default-features = false, features = ["parse"] }
 
 # Needed by audio similarity feature
 rusty-chromaprint = "0.3"

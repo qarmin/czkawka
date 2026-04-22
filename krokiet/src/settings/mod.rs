@@ -492,6 +492,8 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
     settings.set_broken_files_sub_video_ffprobe(custom_settings.broken_files_sub_video_ffprobe);
     settings.set_broken_files_sub_video_ffmpeg(custom_settings.broken_files_sub_video_ffmpeg);
+    settings.set_broken_files_sub_font(custom_settings.broken_files_sub_font);
+    settings.set_broken_files_sub_markup(custom_settings.broken_files_sub_markup);
 
     settings.set_bad_names_sub_uppercase_extension(custom_settings.bad_names_sub_uppercase_extension);
     settings.set_bad_names_sub_emoji_used(custom_settings.bad_names_sub_emoji_used);
@@ -661,6 +663,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let broken_files_sub_image = settings.get_broken_files_sub_image();
     let broken_files_sub_video_ffprobe = settings.get_broken_files_sub_video_ffprobe();
     let broken_files_sub_video_ffmpeg = settings.get_broken_files_sub_video_ffmpeg();
+    let broken_files_sub_font = settings.get_broken_files_sub_font();
+    let broken_files_sub_markup = settings.get_broken_files_sub_markup();
 
     let bad_names_sub_uppercase_extension = settings.get_bad_names_sub_uppercase_extension();
     let bad_names_sub_emoji_used = settings.get_bad_names_sub_emoji_used();
@@ -788,6 +792,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_image,
         broken_files_sub_video_ffprobe,
         broken_files_sub_video_ffmpeg,
+        broken_files_sub_font,
+        broken_files_sub_markup,
         bad_names_sub_uppercase_extension,
         bad_names_sub_emoji_used,
         bad_names_sub_space_at_start_end,

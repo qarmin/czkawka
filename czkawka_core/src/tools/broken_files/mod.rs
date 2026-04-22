@@ -23,6 +23,8 @@ pub enum CheckedTypesSingle {
     Archive,
     VideoFfprobe,
     VideoFfmpeg,
+    Font,
+    Markup,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -74,6 +76,14 @@ pub enum TypeOfFile {
     Audio,
     Pdf,
     Video,
+    Archive7z,
+    ArchiveGz,
+    ArchiveTar,
+    ArchiveZst,
+    Font,
+    Json,
+    Xml,
+    Toml,
 }
 
 bitflags! {
@@ -87,6 +97,8 @@ bitflags! {
         const ARCHIVE = 0b1000;
         const VIDEO_FFPROBE = 0b10000;
         const VIDEO_FFMPEG = 0b100000;
+        const FONT = 0b1000000;
+        const MARKUP = 0b10000000;
     }
 }
 

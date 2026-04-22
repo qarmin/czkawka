@@ -433,6 +433,16 @@ export component ToolSettings {
                 hint_text: Translations.subsettings_broken_files_video_ffmpeg_info_text;
             }
 
+            CheckBoxWrapper {
+                text: Translations.subsettings_broken_files_font_text;
+                checked <=> Settings.broken_files_sub_font;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_broken_files_markup_text;
+                checked <=> Settings.broken_files_sub_markup;
+            }
+
             Rectangle { }
         }
 

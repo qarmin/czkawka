@@ -133,6 +133,10 @@ pub struct CediniaSettings {
     pub broken_files_archive: bool,
     #[serde(default = "ttrue")]
     pub broken_files_image: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_font: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_markup: bool,
 
     #[serde(default = "ttrue")]
     pub bad_names_uppercase_extension: bool,
@@ -358,6 +362,8 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     bf.set_check_pdf(s.broken_files_pdf);
     bf.set_check_archive(s.broken_files_archive);
     bf.set_check_image(s.broken_files_image);
+    bf.set_check_font(s.broken_files_font);
+    bf.set_check_markup(s.broken_files_markup);
 
     let bn = win.global::<BadNamesSettings>();
     bn.set_uppercase_extension(s.bad_names_uppercase_extension);
@@ -441,6 +447,8 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         broken_files_pdf: bf.get_check_pdf(),
         broken_files_archive: bf.get_check_archive(),
         broken_files_image: bf.get_check_image(),
+        broken_files_font: bf.get_check_font(),
+        broken_files_markup: bf.get_check_markup(),
         bad_names_uppercase_extension: bn.get_uppercase_extension(),
         bad_names_emoji_used: bn.get_emoji_used(),
         bad_names_space_at_start_or_end: bn.get_space_at_start_or_end(),

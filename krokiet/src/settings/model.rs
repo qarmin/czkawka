@@ -149,6 +149,10 @@ pub struct SettingsCustom {
     #[serde(default)]
     pub broken_files_sub_video_ffmpeg: bool,
     #[serde(default = "ttrue")]
+    pub broken_files_sub_font: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_sub_markup: bool,
+    #[serde(default = "ttrue")]
     pub bad_names_sub_uppercase_extension: bool,
     #[serde(default = "ttrue")]
     pub bad_names_sub_emoji_used: bool,

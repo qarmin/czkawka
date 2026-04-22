@@ -27,6 +27,18 @@ pub const IMAGE_RS_BROKEN_FILES_EXTENSIONS: &[&str] = &[
 ];
 pub const HEIC_EXTENSIONS: &[&str] = &["heif", "heifs", "heic", "heics", "avci", "avcs", "hif"];
 pub const ZIP_FILES_EXTENSIONS: &[&str] = &["zip", "jar"];
+pub const SEVENZ_FILES_EXTENSIONS: &[&str] = &["7z"];
+// gz and tgz - last extension is always "gz" or "tgz", includes .tar.gz
+pub const GZ_FILES_EXTENSIONS: &[&str] = &["gz", "tgz"];
+pub const TAR_FILES_EXTENSIONS: &[&str] = &["tar"];
+// zst and tzst - last extension is always "zst" or "tzst", includes .tar.zst
+pub const ZST_FILES_EXTENSIONS: &[&str] = &["zst", "tzst"];
+// Font files - ttf-parser supports TTF, OTF, TTC, WOFF (not WOFF2 which requires Brotli)
+pub const FONT_FILES_EXTENSIONS: &[&str] = &["ttf", "otf", "ttc", "woff"];
+// Markup/structured-text files - validated as JSON, XML or TOML
+pub const JSON_FILES_EXTENSIONS: &[&str] = &["json"];
+pub const XML_FILES_EXTENSIONS: &[&str] = &["xml", "svg", "xhtml", "xsd", "xsl", "xslt", "rss", "atom"];
+pub const TOML_FILES_EXTENSIONS: &[&str] = &["toml"];
 pub const PDF_FILES_EXTENSIONS: &[&str] = &["pdf"];
 pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
     "mp3", "flac", "wav", "ogg", "m4a", "aac", "aiff", "pcm", "aif", "aiff", "aifc", "m3a", "mp2", "mp4a", "mp2a", "mpga", "wave", "weba", "wma", "oga",
