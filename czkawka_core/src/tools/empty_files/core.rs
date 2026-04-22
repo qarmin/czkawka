@@ -1,8 +1,7 @@
 use std::io::Read;
-use std::mem;
-use std::{fs, io};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::{fs, io, mem};
 
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
@@ -26,6 +25,7 @@ fn check_content_chunked(path: &std::path::Path, search_non_printable: bool) -> 
         if n == 0 {
             return Ok(true);
         }
+        #[expect(clippy::indexing_slicing)] // Safe, because n is always <= buffer size
         let chunk = &buf[..n];
         let all_match = if search_non_printable {
             chunk.iter().all(|&b| !b.is_ascii_graphic())
@@ -110,7 +110,7 @@ impl EmptyFiles {
             total_size,
         );
 
-        let search_whitespace = self.params.search_non_printable_content_files;
+        let search_non_printable = self.params.search_non_printable_content_files;
         let stopped = AtomicBool::new(false);
 
         let mut matches: Vec<FileEntry> = files
@@ -121,13 +121,10 @@ impl EmptyFiles {
                     return None;
                 }
                 let size = fe.size;
-                let is_match = match check_content_chunked(&fe.path, search_whitespace) {
-                    Ok(result) => result,
-                    Err(_) => {
-                        progress_handler.increase_items(1);
-                        progress_handler.increase_size(size);
-                        return Some(None);
-                    }
+                let Ok(is_match) = check_content_chunked(&fe.path, search_non_printable) else {
+                    progress_handler.increase_items(1);
+                    progress_handler.increase_size(size);
+                    return Some(None);
                 };
                 progress_handler.increase_items(1);
                 progress_handler.increase_size(size);
@@ -152,10 +149,10 @@ impl EmptyFiles {
         if self.collect_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
         }
-        if self.params.search_zero_byte_content_files || self.params.search_non_printable_content_files {
-            if self.check_content(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                return WorkContinueStatus::Stop;
-            }
+        if (self.params.search_zero_byte_content_files || self.params.search_non_printable_content_files)
+            && self.check_content(stop_flag, progress_sender) == WorkContinueStatus::Stop
+        {
+            return WorkContinueStatus::Stop;
         }
         self.information.number_of_empty_files = self.empty_files.len();
         debug!("Found {} empty files total.", self.information.number_of_empty_files);

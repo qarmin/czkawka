@@ -6,9 +6,9 @@ use czkawka_core::common::model::FileEntry;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path, split_path_compare};
-use humansize::{BINARY, format_size};
 use czkawka_core::tools::empty_files;
 use czkawka_core::tools::empty_files::{EmptyFiles, EmptyFilesParameters};
+use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 

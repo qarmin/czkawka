@@ -186,7 +186,12 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
 }
 
 fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    let EmptyFilesArgs { common_cli_items, delete_method, zero_byte_content, non_printable_content } = empty_files;
+    let EmptyFilesArgs {
+        common_cli_items,
+        delete_method,
+        zero_byte_content,
+        non_printable_content,
+    } = empty_files;
 
     let params = EmptyFilesParameters {
         search_zero_byte_content_files: zero_byte_content || non_printable_content,

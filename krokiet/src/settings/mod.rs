@@ -486,7 +486,8 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
 
     settings.set_empty_files_sub_zero_byte_content(custom_settings.empty_files_sub_zero_byte_content);
     settings.set_empty_files_sub_non_printable_content(custom_settings.empty_files_sub_non_printable_content);
-    settings.set_broken_files_sub_audio(custom_settings.broken_files_sub_audio);    settings.set_broken_files_sub_pdf(custom_settings.broken_files_sub_pdf);
+    settings.set_broken_files_sub_audio(custom_settings.broken_files_sub_audio);
+    settings.set_broken_files_sub_pdf(custom_settings.broken_files_sub_pdf);
     settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
     settings.set_broken_files_sub_video_ffprobe(custom_settings.broken_files_sub_video_ffprobe);
@@ -654,7 +655,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
 
     let empty_files_sub_zero_byte_content = settings.get_empty_files_sub_zero_byte_content();
     let empty_files_sub_non_printable_content = settings.get_empty_files_sub_non_printable_content();
-    let broken_files_sub_audio = settings.get_broken_files_sub_audio();    let broken_files_sub_pdf = settings.get_broken_files_sub_pdf();
+    let broken_files_sub_audio = settings.get_broken_files_sub_audio();
+    let broken_files_sub_pdf = settings.get_broken_files_sub_pdf();
     let broken_files_sub_archive = settings.get_broken_files_sub_archive();
     let broken_files_sub_image = settings.get_broken_files_sub_image();
     let broken_files_sub_video_ffprobe = settings.get_broken_files_sub_video_ffprobe();
