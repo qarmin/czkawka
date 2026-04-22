@@ -337,8 +337,16 @@ pub trait CommonData {
             let res = files_to_process
                 .into_iter()
                 .map(|values| {
-                    let mut all_values = sort_items(values);
-                    let original = all_values.remove(0);
+                    let mut all_values = values;
+                    let original;
+                    if self.get_use_reference_folders() {
+                        // The reference should be the first item.
+                        original = all_values.remove(0);
+                        all_values = sort_items(all_values);
+                    } else {
+                        all_values = sort_items(all_values);
+                        original = all_values.remove(0);
+                    }
                     (original, all_values)
                 })
                 .collect::<Vec<_>>();
@@ -347,8 +355,25 @@ pub trait CommonData {
             let res = files_to_process
                 .into_iter()
                 .flat_map(|values| {
-                    let len = values.len();
-                    let mut all_values = sort_items(values);
+                    let mut all_values = values;
+                    if self.get_use_reference_folders() {
+                        match all_values.len() {
+                            0 | 1 => unreachable!("Using reference folders you should not get less than 2 items"),
+                            2 => {
+                                // The reference should be the first item, and should not be deleted.
+                                all_values.remove(0);
+                                return all_values;
+                            }
+                            _ => {
+                                // The reference should be the first item, and should not be deleted.
+                                all_values.remove(0);
+                                all_values = sort_items(all_values);
+                            }
+                        }
+                    } else {
+                        all_values = sort_items(all_values)
+                    }
+                    let len = all_values.len();
                     match delete_method {
                         DeleteMethod::Delete => all_values,
                         DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptBiggest => {

@@ -26,7 +26,23 @@ impl DeletingItems for DuplicateFinder {
         let files_to_delete = match self.get_params().check_method {
             CheckingMethod::Name => self.files_with_identical_names.values().cloned().collect::<Vec<_>>(),
             CheckingMethod::SizeName => self.files_with_identical_size_names.values().cloned().collect::<Vec<_>>(),
-            CheckingMethod::Hash => self.files_with_identical_hashes.values().flatten().cloned().collect::<Vec<_>>(),
+            CheckingMethod::Hash => {
+                if self.get_use_reference() {
+                    self.files_with_identical_hashes_referenced
+                        .values()
+                        .flat_map(|e| {
+                            e.iter().map(|(reference, rest)| {
+                                let mut combined = Vec::with_capacity(1 + rest.len());
+                                combined.push(reference.to_owned());
+                                combined.extend(rest.to_owned());
+                                combined
+                            })
+                        })
+                        .collect::<Vec<_>>()
+                } else {
+                    self.files_with_identical_hashes.values().flatten().cloned().collect::<Vec<_>>()
+                }
+            }
             CheckingMethod::Size => self.files_with_identical_size.values().cloned().collect::<Vec<_>>(),
             _ => panic!(),
         };
