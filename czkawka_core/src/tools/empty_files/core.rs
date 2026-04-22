@@ -63,7 +63,11 @@ impl EmptyFiles {
                     }
                 }
                 self.common_data.text_messages.warnings.extend(warnings);
-                debug!("collect_files – {} zero-size, {} queued for content check", self.empty_files.len(), self.files_to_check.len());
+                debug!(
+                    "collect_files – {} zero-size, {} queued for content check",
+                    self.empty_files.len(),
+                    self.files_to_check.len()
+                );
                 WorkContinueStatus::Continue
             }
             DirTraversalResult::Stopped => WorkContinueStatus::Stop,
@@ -106,9 +110,8 @@ impl EmptyFiles {
                     return Some(None);
                 };
                 let is_match = if search_whitespace {
-                    content.iter().all(|&b| matches!(b, 0x00 | 0x09 | 0x0A | 0x0B | 0x0C | 0x0D | 0x20))
+                    content.iter().all(|&b| !b.is_ascii_graphic())
                 } else {
-                    // search_zero_byte_content_files is guaranteed true here
                     content.iter().all(|&b| b == 0x00)
                 };
                 progress_handler.increase_items(1);
