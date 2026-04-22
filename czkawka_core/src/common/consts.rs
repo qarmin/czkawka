@@ -33,8 +33,10 @@ pub const GZ_FILES_EXTENSIONS: &[&str] = &["gz", "tgz"];
 pub const TAR_FILES_EXTENSIONS: &[&str] = &["tar"];
 // zst and tzst - last extension is always "zst" or "tzst", includes .tar.zst
 pub const ZST_FILES_EXTENSIONS: &[&str] = &["zst", "tzst"];
-// Font files - ttf-parser supports TTF, OTF, TTC, WOFF (not WOFF2 which requires Brotli)
-pub const FONT_FILES_EXTENSIONS: &[&str] = &["ttf", "otf", "ttc", "woff"];
+// Font files - ttf-parser supports TTF, OTF, TTC
+// WOFF and WOFF2 are excluded: they wrap TTF/OTF in a compressed container that ttf-parser
+// does not decompress, causing false positives (valid fonts reported as broken).
+pub const FONT_FILES_EXTENSIONS: &[&str] = &["ttf", "otf", "ttc"];
 // Markup/structured-text files - validated as JSON, XML or TOML
 pub const JSON_FILES_EXTENSIONS: &[&str] = &["json"];
 pub const XML_FILES_EXTENSIONS: &[&str] = &["xml", "svg", "xhtml", "xsd", "xsl", "xslt", "rss", "atom"];
