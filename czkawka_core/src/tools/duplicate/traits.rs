@@ -38,15 +38,18 @@ impl DeletingItems for DuplicateFinder {
                 return self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::HardlinkingFiles(hardlink_items));
             }
             // For non-HardLink methods with reference folders, delete every non-reference
-            // duplicate.  The reference file is already retained as the "original".
-            let files_to_delete = match self.get_params().check_method {
-                CheckingMethod::Name => self.files_with_identical_names_referenced.values().map(|(_, files)| files.clone()).collect::<Vec<_>>(),
-                CheckingMethod::SizeName => self.files_with_identical_size_names_referenced.values().map(|(_, files)| files.clone()).collect::<Vec<_>>(),
-                CheckingMethod::Size => self.files_with_identical_size_referenced.values().map(|(_, files)| files.clone()).collect::<Vec<_>>(),
-                CheckingMethod::Hash => self.files_with_identical_hashes_referenced.values().flatten().map(|(_, files)| files.clone()).collect::<Vec<_>>(),
+            // duplicate.  The reference file is already retained as the "original", so we
+            // flatten all destination lists and delete them unconditionally — bypassing the
+            // "keep one" group-selection logic of delete_advanced_elements which would
+            // incorrectly preserve files in single-element groups (AllExcept* modes).
+            let files_to_delete: Vec<_> = match self.get_params().check_method {
+                CheckingMethod::Name => self.files_with_identical_names_referenced.values().flat_map(|(_, files)| files.iter().cloned()).collect(),
+                CheckingMethod::SizeName => self.files_with_identical_size_names_referenced.values().flat_map(|(_, files)| files.iter().cloned()).collect(),
+                CheckingMethod::Size => self.files_with_identical_size_referenced.values().flat_map(|(_, files)| files.iter().cloned()).collect(),
+                CheckingMethod::Hash => self.files_with_identical_hashes_referenced.values().flatten().flat_map(|(_, files)| files.iter().cloned()).collect(),
                 _ => panic!(),
             };
-            return self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete);
+            return self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(files_to_delete));
         }
 
         let files_to_delete = match self.get_params().check_method {
