@@ -836,7 +836,7 @@ mod context_menu {
             return;
         }
         let target_path = clicked_row.val_str.iter().nth(path_idx).map(|s| s.to_string()).unwrap_or_default();
-        let target_prefix = format!("{target_path}/");
+        let target_prefix = format!("{target_path}{}", std::path::MAIN_SEPARATOR);
 
         let mut in_reference_group = false;
         let new_items: Vec<SingleMainListModel> = model
@@ -887,7 +887,7 @@ mod context_menu {
             return;
         }
         let target_path = clicked_row.val_str.iter().nth(path_idx).map(|s| s.to_string()).unwrap_or_default();
-        let target_prefix = format!("{target_path}/");
+        let target_prefix = format!("{target_path}{}", std::path::MAIN_SEPARATOR);
 
         let items: Vec<SingleMainListModel> = model.iter().collect();
         let n = items.len();
