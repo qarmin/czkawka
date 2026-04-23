@@ -18,7 +18,7 @@ use crate::common::consts::{
     SEVENZ_FILES_EXTENSIONS, SVG_FILES_EXTENSIONS, TAR_FILES_EXTENSIONS, TOML_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, XML_FILES_EXTENSIONS, XZ_FILES_EXTENSIONS,
     YAML_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS, ZST_FILES_EXTENSIONS,
 };
-use crate::common::create_crash_message;
+use crate::common::create_crash_message_generic;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::process_utils::run_command_interruptible;
@@ -69,28 +69,18 @@ impl BrokenFiles {
     }
 
     fn check_broken_image(mut file_entry: BrokenEntry) -> BrokenEntry {
-        let mut file_entry_clone = file_entry.clone();
-
-        panic::catch_unwind(|| {
-            let error = match image::open(&file_entry.path) {
-                Ok(img) => {
-                    if img.width() == 0 || img.height() == 0 {
-                        "Image has zero width or height".to_string()
-                    } else {
-                        String::new()
-                    }
+        let error = match image::open(&file_entry.path) {
+            Ok(img) => {
+                if img.width() == 0 || img.height() == 0 {
+                    "Image has zero width or height".to_string()
+                } else {
+                    String::new()
                 }
-                Err(e) => e.to_string().trim().to_string(),
-            };
-            file_entry.errors.insert(CheckedTypesSingle::Image, error);
-            file_entry
-        })
-        .unwrap_or_else(|_| {
-            let message = create_crash_message("Image-rs", &file_entry_clone.path.to_string_lossy(), "https://github.com/image-rs/image");
-            error!("{message}");
-            file_entry_clone.errors.insert(CheckedTypesSingle::Image, message);
-            file_entry_clone
-        })
+            }
+            Err(e) => e.to_string().trim().to_string(),
+        };
+        file_entry.errors.insert(CheckedTypesSingle::Image, error);
+        file_entry
     }
 
     fn check_broken_zip(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
@@ -134,7 +124,7 @@ impl BrokenFiles {
     fn check_broken_zst(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
         match File::open(&file_entry.path) {
             Ok(file) => {
-                let error = match ruzstd::StreamingDecoder::new(file) {
+                let error = match ruzstd::decoding::StreamingDecoder::new(file) {
                     Err(e) => e.to_string().trim().to_string(),
                     Ok(mut decoder) => match std::io::copy(&mut decoder, &mut std::io::sink()) {
                         Err(e) => e.to_string().trim().to_string(),
@@ -207,7 +197,7 @@ impl BrokenFiles {
     fn check_broken_toml(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
         match std::fs::read_to_string(&file_entry.path) {
             Ok(text) => {
-                let error = match text.parse::<toml::Table>() {
+                let error = match text.parse::<toml::Value>() {
                     Err(e) => e.to_string().trim().to_string(),
                     Ok(_) => String::new(),
                 };
@@ -293,52 +283,33 @@ impl BrokenFiles {
     fn check_broken_audio(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
         match File::open(&file_entry.path) {
             Ok(file) => {
-                let mut file_entry_clone = file_entry.clone();
-
-                panic::catch_unwind(|| {
-                    let error = match audio_checker::parse_audio_file(file) {
-                        Err(e) => {
-                            let err_str = e.to_string();
-                            if err_str.contains("not supported codec") {
-                                String::new()
-                            } else {
-                                err_str.trim().to_string()
-                            }
+                let error = match audio_checker::parse_audio_file(file) {
+                    Err(e) => {
+                        let err_str = e.to_string();
+                        if err_str.contains("not supported codec") {
+                            String::new()
+                        } else {
+                            err_str.trim().to_string()
                         }
-                        Ok(()) => String::new(),
-                    };
-                    file_entry.errors.insert(CheckedTypesSingle::Audio, error);
-                    Some(file_entry)
-                })
-                .unwrap_or_else(|_| {
-                    let message = create_crash_message("Symphonia", &file_entry_clone.path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
-                    error!("{message}");
-                    file_entry_clone.errors.insert(CheckedTypesSingle::Audio, message);
-                    Some(file_entry_clone)
-                })
+                    }
+                    Ok(()) => String::new(),
+                };
+                file_entry.errors.insert(CheckedTypesSingle::Audio, error);
+                Some(file_entry)
             }
             Err(_inspected) => None,
         }
     }
     fn check_broken_pdf(mut file_entry: BrokenEntry) -> BrokenEntry {
-        let mut file_entry_clone = file_entry.clone();
-        panic::catch_unwind(|| {
-            let error = match File::open(&file_entry.path) {
-                Ok(file) => match Document::load_from(file) {
-                    Err(e) => e.to_string().trim().to_string(),
-                    Ok(_) => String::new(),
-                },
+        let error = match File::open(&file_entry.path) {
+            Ok(file) => match Document::load_from(file) {
                 Err(e) => e.to_string().trim().to_string(),
-            };
-            file_entry.errors.insert(CheckedTypesSingle::Pdf, error);
-            file_entry
-        })
-        .unwrap_or_else(|_| {
-            let message = create_crash_message("lopdf", &file_entry_clone.path.to_string_lossy(), "https://github.com/J-F-Liu/lopdf");
-            error!("{message}");
-            file_entry_clone.errors.insert(CheckedTypesSingle::Pdf, message);
-            file_entry_clone
-        })
+                Ok(_) => String::new(),
+            },
+            Err(e) => e.to_string().trim().to_string(),
+        };
+        file_entry.errors.insert(CheckedTypesSingle::Pdf, error);
+        file_entry
     }
 
     fn check_broken_video_ffprobe(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<BrokenEntry> {
@@ -462,8 +433,32 @@ impl BrokenFiles {
         save_and_connect_cache_generalized_by_path(&get_broken_files_cache_file(), vec_file_entry, loaded_hash_map, self);
     }
 
+    fn file_type_to_checked_type_single(file_type: TypeOfFile) -> CheckedTypesSingle {
+        match file_type {
+            TypeOfFile::Image => CheckedTypesSingle::Image,
+            TypeOfFile::ArchiveZip | TypeOfFile::Archive7z | TypeOfFile::ArchiveGz | TypeOfFile::ArchiveTar | TypeOfFile::ArchiveZst | TypeOfFile::ArchiveBz2 | TypeOfFile::ArchiveXz => {
+                CheckedTypesSingle::Archive
+            }
+            TypeOfFile::Audio => CheckedTypesSingle::Audio,
+            TypeOfFile::Pdf => CheckedTypesSingle::Pdf,
+            TypeOfFile::Video => CheckedTypesSingle::VideoFfprobe,
+            TypeOfFile::Font => CheckedTypesSingle::Font,
+            TypeOfFile::Json | TypeOfFile::Xml | TypeOfFile::Toml | TypeOfFile::Yaml | TypeOfFile::Svg => CheckedTypesSingle::Markup,
+            TypeOfFile::Unknown => unreachable!(),
+        }
+    }
+
     fn check_file(file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>, checked_types: CheckedTypes) -> Option<Option<BrokenEntry>> {
-        match check_extension_availability(&file_entry.path) {
+        let file_type = check_extension_availability(&file_entry.path);
+        if file_type == TypeOfFile::Unknown {
+            error!("Unknown file type of: {file_entry:?}");
+            debug_assert!(false, "Unknown file type: {:?}", file_entry.path);
+            return Some(None);
+        }
+
+        let mut file_entry_fallback = file_entry.clone();
+
+        let result = panic::catch_unwind(panic::AssertUnwindSafe(|| match file_type {
             TypeOfFile::Image => Some(Some(Self::check_broken_image(file_entry))),
             TypeOfFile::ArchiveZip => Some(Self::check_broken_zip(file_entry)),
             TypeOfFile::Archive7z => Some(Some(Self::check_broken_7z(file_entry))),
@@ -481,9 +476,17 @@ impl BrokenFiles {
             TypeOfFile::Audio => Some(Self::check_broken_audio(file_entry)),
             TypeOfFile::Pdf => Some(Some(Self::check_broken_pdf(file_entry))),
             TypeOfFile::Video => Self::check_broken_video(file_entry, stop_flag, checked_types).map(Some),
-            TypeOfFile::Unknown => {
-                error!("Unknown file type of: {file_entry:?}");
-                Some(None)
+            TypeOfFile::Unknown => unreachable!(),
+        }));
+
+        match result {
+            Ok(v) => v,
+            Err(_) => {
+                let checked_type_single = Self::file_type_to_checked_type_single(file_type);
+                let message = create_crash_message_generic(&file_entry_fallback.path.to_string_lossy());
+                error!("{message}");
+                file_entry_fallback.errors.insert(checked_type_single, message);
+                Some(Some(file_entry_fallback))
             }
         }
     }

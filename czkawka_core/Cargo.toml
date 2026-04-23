@@ -41,7 +41,7 @@ tar = { version = "0.4", default-features = false }
 ruzstd = "0.8"
 ttf-parser = "0.25"
 quick-xml = "0.39"
-toml = { version = "1.1", default-features = false, features = ["parse"] }
+toml = { version = "1.1", default-features = false, features = ["parse", "serde"] }
 yaml-rust2 = "0.11"
 usvg = { version = "0.47", default-features = false }
 bzip2-rs = "0.1"
