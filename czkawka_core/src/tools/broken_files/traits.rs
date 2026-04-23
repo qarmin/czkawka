@@ -7,8 +7,9 @@ use crossbeam_channel::Sender;
 use fun_time::fun_time;
 
 use crate::common::consts::{
-    AUDIO_FILES_EXTENSIONS, FONT_FILES_EXTENSIONS, GZ_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, JSON_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS, SEVENZ_FILES_EXTENSIONS,
-    TAR_FILES_EXTENSIONS, TOML_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, XML_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS, ZST_FILES_EXTENSIONS,
+    AUDIO_FILES_EXTENSIONS, BZ2_FILES_EXTENSIONS, FONT_FILES_EXTENSIONS, GZ_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, JSON_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS,
+    SEVENZ_FILES_EXTENSIONS, SVG_FILES_EXTENSIONS, TAR_FILES_EXTENSIONS, TOML_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, XML_FILES_EXTENSIONS, XZ_FILES_EXTENSIONS,
+    YAML_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS, ZST_FILES_EXTENSIONS,
 };
 use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::WorkContinueStatus;
@@ -52,6 +53,8 @@ impl Search for BrokenFiles {
                 extensions.extend_from_slice(GZ_FILES_EXTENSIONS);
                 extensions.extend_from_slice(TAR_FILES_EXTENSIONS);
                 extensions.extend_from_slice(ZST_FILES_EXTENSIONS);
+                extensions.extend_from_slice(BZ2_FILES_EXTENSIONS);
+                extensions.extend_from_slice(XZ_FILES_EXTENSIONS);
             }
 
             if self.get_params().checked_types.contains(CheckedTypes::FONT) {
@@ -62,6 +65,8 @@ impl Search for BrokenFiles {
                 extensions.extend_from_slice(JSON_FILES_EXTENSIONS);
                 extensions.extend_from_slice(XML_FILES_EXTENSIONS);
                 extensions.extend_from_slice(TOML_FILES_EXTENSIONS);
+                extensions.extend_from_slice(YAML_FILES_EXTENSIONS);
+                extensions.extend_from_slice(SVG_FILES_EXTENSIONS);
             }
 
             if self.get_params().checked_types.intersects(video_types) {
