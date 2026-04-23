@@ -70,7 +70,6 @@ impl FileEntry {
 
 #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum TypeOfFile {
-    Unknown = -1,
     Image = 0,
     ArchiveZip,
     Audio,

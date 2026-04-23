@@ -257,7 +257,7 @@ impl BrokenFiles {
                 let mut reader = std::io::BufReader::new(file);
                 let error = match lzma_rs::xz_decompress(&mut reader, &mut std::io::sink()) {
                     Err(e) => e.to_string().trim().to_string(),
-                    Ok(_) => String::new(),
+                    Ok(()) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Archive, error);
                 Some(file_entry)
@@ -436,25 +436,27 @@ impl BrokenFiles {
     fn file_type_to_checked_type_single(file_type: TypeOfFile) -> CheckedTypesSingle {
         match file_type {
             TypeOfFile::Image => CheckedTypesSingle::Image,
-            TypeOfFile::ArchiveZip | TypeOfFile::Archive7z | TypeOfFile::ArchiveGz | TypeOfFile::ArchiveTar | TypeOfFile::ArchiveZst | TypeOfFile::ArchiveBz2 | TypeOfFile::ArchiveXz => {
-                CheckedTypesSingle::Archive
-            }
+            TypeOfFile::ArchiveZip
+            | TypeOfFile::Archive7z
+            | TypeOfFile::ArchiveGz
+            | TypeOfFile::ArchiveTar
+            | TypeOfFile::ArchiveZst
+            | TypeOfFile::ArchiveBz2
+            | TypeOfFile::ArchiveXz => CheckedTypesSingle::Archive,
             TypeOfFile::Audio => CheckedTypesSingle::Audio,
             TypeOfFile::Pdf => CheckedTypesSingle::Pdf,
             TypeOfFile::Video => CheckedTypesSingle::VideoFfprobe,
             TypeOfFile::Font => CheckedTypesSingle::Font,
             TypeOfFile::Json | TypeOfFile::Xml | TypeOfFile::Toml | TypeOfFile::Yaml | TypeOfFile::Svg => CheckedTypesSingle::Markup,
-            TypeOfFile::Unknown => unreachable!(),
         }
     }
 
     fn check_file(file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>, checked_types: CheckedTypes) -> Option<Option<BrokenEntry>> {
-        let file_type = check_extension_availability(&file_entry.path);
-        if file_type == TypeOfFile::Unknown {
+        let Some(file_type) = check_extension_availability(&file_entry.path) else {
             error!("Unknown file type of: {file_entry:?}");
             debug_assert!(false, "Unknown file type: {:?}", file_entry.path);
             return Some(None);
-        }
+        };
 
         let mut file_entry_fallback = file_entry.clone();
 
@@ -476,7 +478,6 @@ impl BrokenFiles {
             TypeOfFile::Audio => Some(Self::check_broken_audio(file_entry)),
             TypeOfFile::Pdf => Some(Some(Self::check_broken_pdf(file_entry))),
             TypeOfFile::Video => Self::check_broken_video(file_entry, stop_flag, checked_types).map(Some),
-            TypeOfFile::Unknown => unreachable!(),
         }));
 
         match result {
@@ -551,58 +552,58 @@ impl BrokenFiles {
 }
 
 #[expect(clippy::string_slice)] // Valid, because we address up to the dot, which is known ascii character
-fn check_extension_availability(full_name: &Path) -> TypeOfFile {
+fn check_extension_availability(full_name: &Path) -> Option<TypeOfFile> {
     let Some(file_name) = full_name.file_name() else {
         error!("Missing file name in file - \"{}\"", full_name.to_string_lossy());
         debug_assert!(false, "Missing file name in file - \"{}\"", full_name.to_string_lossy());
-        return TypeOfFile::Unknown;
+        return None;
     };
 
     // Faster manual conversion than using Path::extension()
-    let Some(file_name_str) = file_name.to_str() else { return TypeOfFile::Unknown };
-    let Some(extension_idx) = file_name_str.rfind('.') else { return TypeOfFile::Unknown };
+    let Some(file_name_str) = file_name.to_str() else { return None };
+    let Some(extension_idx) = file_name_str.rfind('.') else { return None };
     let extension_str = &file_name_str[extension_idx + 1..];
 
     let extension_lowercase = extension_str.to_ascii_lowercase();
 
     if IMAGE_RS_BROKEN_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Image
+        Some(TypeOfFile::Image)
     } else if ZIP_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::ArchiveZip
+        Some(TypeOfFile::ArchiveZip)
     } else if SEVENZ_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Archive7z
+        Some(TypeOfFile::Archive7z)
     } else if GZ_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::ArchiveGz
+        Some(TypeOfFile::ArchiveGz)
     } else if TAR_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::ArchiveTar
+        Some(TypeOfFile::ArchiveTar)
     } else if ZST_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::ArchiveZst
+        Some(TypeOfFile::ArchiveZst)
     } else if FONT_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Font
+        Some(TypeOfFile::Font)
     } else if JSON_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Json
+        Some(TypeOfFile::Json)
     } else if SVG_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Svg
+        Some(TypeOfFile::Svg)
     } else if XML_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Xml
+        Some(TypeOfFile::Xml)
     } else if TOML_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Toml
+        Some(TypeOfFile::Toml)
     } else if YAML_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Yaml
+        Some(TypeOfFile::Yaml)
     } else if BZ2_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::ArchiveBz2
+        Some(TypeOfFile::ArchiveBz2)
     } else if XZ_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::ArchiveXz
+        Some(TypeOfFile::ArchiveXz)
     } else if PDF_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Pdf
+        Some(TypeOfFile::Pdf)
     } else if AUDIO_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Audio
+        Some(TypeOfFile::Audio)
     } else if VIDEO_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
-        TypeOfFile::Video
+        Some(TypeOfFile::Video)
     } else {
         error!("File with unknown extension: \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
         debug_assert!(false, "File with unknown extension - \"{}\" - {extension_lowercase}", full_name.to_string_lossy());
-        TypeOfFile::Unknown
+        None
     }
 }
 
