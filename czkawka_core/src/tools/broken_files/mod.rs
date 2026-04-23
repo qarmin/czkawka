@@ -84,6 +84,10 @@ pub enum TypeOfFile {
     Json,
     Xml,
     Toml,
+    Yaml,
+    ArchiveBz2,
+    ArchiveXz,
+    Svg,
 }
 
 bitflags! {

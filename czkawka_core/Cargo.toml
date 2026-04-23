@@ -49,6 +49,10 @@ ttf-parser = "0.25"
 quick-xml = "0.37"
 # toml - pure Rust TOML parser
 toml = { version = "0.8", default-features = false, features = ["parse"] }
+yaml-rust2 = "0.10"
+usvg = { version = "0.47", default-features = false }
+bzip2-rs = "0.1"
+lzma-rs = "0.3"
 
 # Needed by audio similarity feature
 rusty-chromaprint = "0.3"
