@@ -549,7 +549,7 @@ mod tests {
         assert!(!new_model.row_data(2).unwrap().checked);
     }
 
-    // ── select_all_except_by_property ────────────────────────────────────────
+    //  select_all_except_by_property
 
     #[test]
     fn select_all_except_biggest_spares_largest_item() {

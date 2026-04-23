@@ -18,13 +18,13 @@ use crate::common::consts::{
     SEVENZ_FILES_EXTENSIONS, SVG_FILES_EXTENSIONS, TAR_FILES_EXTENSIONS, TOML_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, XML_FILES_EXTENSIONS, XZ_FILES_EXTENSIONS,
     YAML_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS, ZST_FILES_EXTENSIONS,
 };
-use crate::common::create_crash_message_generic;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::process_utils::run_command_interruptible;
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::{create_crash_message_generic, normalize_error_string};
 use crate::helpers::audio_checker;
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, CheckedTypesSingle, Info, TypeOfFile};
 
@@ -77,7 +77,7 @@ impl BrokenFiles {
                     String::new()
                 }
             }
-            Err(e) => e.to_string().trim().to_string(),
+            Err(e) => normalize_error_string(&e.to_string()),
         };
         file_entry.errors.insert(CheckedTypesSingle::Image, error);
         file_entry
@@ -87,7 +87,7 @@ impl BrokenFiles {
         match File::open(&file_entry.path) {
             Ok(file) => {
                 let error = match zip::ZipArchive::new(file) {
-                    Err(e) => e.to_string().trim().to_string(),
+                    Err(e) => normalize_error_string(&e.to_string()),
                     Ok(_) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Archive, error);
@@ -99,8 +99,8 @@ impl BrokenFiles {
 
     fn check_broken_7z(mut file_entry: BrokenEntry) -> BrokenEntry {
         let error = match sevenz_rust2::Archive::open(&file_entry.path) {
-            Err(e) => e.to_string().trim().to_string(),
-            Ok(_) => String::new(),
+            Err(sevenz_rust2::Error::PasswordRequired) | Ok(_) => String::new(),
+            Err(e) => normalize_error_string(&e.to_string()),
         };
         file_entry.errors.insert(CheckedTypesSingle::Archive, error);
         file_entry
@@ -111,7 +111,7 @@ impl BrokenFiles {
             Ok(file) => {
                 let mut decoder = flate2::read::GzDecoder::new(file);
                 let error = match std::io::copy(&mut decoder, &mut std::io::sink()) {
-                    Err(e) => e.to_string().trim().to_string(),
+                    Err(e) => normalize_error_string(&e.to_string()),
                     Ok(_) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Archive, error);
@@ -125,9 +125,9 @@ impl BrokenFiles {
         match File::open(&file_entry.path) {
             Ok(file) => {
                 let error = match ruzstd::decoding::StreamingDecoder::new(file) {
-                    Err(e) => e.to_string().trim().to_string(),
+                    Err(e) => normalize_error_string(&e.to_string()),
                     Ok(mut decoder) => match std::io::copy(&mut decoder, &mut std::io::sink()) {
-                        Err(e) => e.to_string().trim().to_string(),
+                        Err(e) => normalize_error_string(&e.to_string()),
                         Ok(_) => String::new(),
                     },
                 };
@@ -143,12 +143,12 @@ impl BrokenFiles {
             Ok(file) => {
                 let mut archive = tar::Archive::new(file);
                 let error = match archive.entries() {
-                    Err(e) => e.to_string().trim().to_string(),
+                    Err(e) => normalize_error_string(&e.to_string()),
                     Ok(entries) => {
                         let mut err_str = String::new();
                         for entry in entries {
                             if let Err(e) = entry {
-                                err_str = e.to_string().trim().to_string();
+                                err_str = normalize_error_string(&e.to_string());
                                 break;
                             }
                         }
@@ -165,7 +165,7 @@ impl BrokenFiles {
         match std::fs::read(&file_entry.path) {
             Ok(data) => {
                 let error = match serde_json::from_slice::<serde_json::Value>(&data) {
-                    Err(e) => e.to_string().trim().to_string(),
+                    Err(e) => normalize_error_string(&e.to_string()),
                     Ok(_) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Markup, error);
@@ -182,7 +182,7 @@ impl BrokenFiles {
                 reader.config_mut().check_end_names = true;
                 let error = loop {
                     match reader.read_event() {
-                        Err(e) => break e.to_string().trim().to_string(),
+                        Err(e) => break normalize_error_string(&e.to_string()),
                         Ok(quick_xml::events::Event::Eof) => break String::new(),
                         Ok(_) => {}
                     }
@@ -197,8 +197,8 @@ impl BrokenFiles {
     fn check_broken_toml(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
         match std::fs::read_to_string(&file_entry.path) {
             Ok(text) => {
-                let error = match text.parse::<toml::Value>() {
-                    Err(e) => e.to_string().trim().to_string(),
+                let error = match toml::from_str::<toml::Table>(&text) {
+                    Err(e) => normalize_error_string(&e.to_string()),
                     Ok(_) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Markup, error);
@@ -212,7 +212,7 @@ impl BrokenFiles {
         match std::fs::read_to_string(&file_entry.path) {
             Ok(text) => {
                 let error = match yaml_rust2::YamlLoader::load_from_str(&text) {
-                    Err(e) => e.to_string().trim().to_string(),
+                    Err(e) => normalize_error_string(&e.to_string()),
                     Ok(_) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Markup, error);
@@ -226,7 +226,7 @@ impl BrokenFiles {
         match std::fs::read(&file_entry.path) {
             Ok(data) => {
                 let error = match usvg::Tree::from_data(&data, &usvg::Options::default()) {
-                    Err(e) => format!("{e:?}").trim().to_string(),
+                    Err(e) => normalize_error_string(&format!("{e:?}")),
                     Ok(_) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Markup, error);
@@ -241,7 +241,7 @@ impl BrokenFiles {
             Ok(file) => {
                 let mut decoder = bzip2_rs::DecoderReader::new(file);
                 let error = match std::io::copy(&mut decoder, &mut std::io::sink()) {
-                    Err(e) => e.to_string().trim().to_string(),
+                    Err(e) => normalize_error_string(&e.to_string()),
                     Ok(_) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Archive, error);
@@ -256,7 +256,7 @@ impl BrokenFiles {
             Ok(file) => {
                 let mut reader = std::io::BufReader::new(file);
                 let error = match lzma_rs::xz_decompress(&mut reader, &mut std::io::sink()) {
-                    Err(e) => e.to_string().trim().to_string(),
+                    Err(e) => normalize_error_string(&e.to_string()),
                     Ok(()) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Archive, error);
@@ -270,7 +270,7 @@ impl BrokenFiles {
         match std::fs::read(&file_entry.path) {
             Ok(data) => {
                 let error = match ttf_parser::Face::parse(&data, 0) {
-                    Err(e) => format!("{e:?}").trim().to_string(),
+                    Err(e) => normalize_error_string(&format!("{e:?}")),
                     Ok(_) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Font, error);
@@ -289,7 +289,7 @@ impl BrokenFiles {
                         if err_str.contains("not supported codec") {
                             String::new()
                         } else {
-                            err_str.trim().to_string()
+                            normalize_error_string(&err_str)
                         }
                     }
                     Ok(()) => String::new(),
@@ -303,10 +303,10 @@ impl BrokenFiles {
     fn check_broken_pdf(mut file_entry: BrokenEntry) -> BrokenEntry {
         let error = match File::open(&file_entry.path) {
             Ok(file) => match Document::load_from(file) {
-                Err(e) => e.to_string().trim().to_string(),
+                Err(e) => normalize_error_string(&e.to_string()),
                 Ok(_) => String::new(),
             },
-            Err(e) => e.to_string().trim().to_string(),
+            Err(e) => normalize_error_string(&e.to_string()),
         };
         file_entry.errors.insert(CheckedTypesSingle::Pdf, error);
         file_entry
@@ -329,7 +329,7 @@ impl BrokenFiles {
             None => return None,
             Some(Err(e)) => {
                 debug!("Failed to run ffprobe on {:?}: {}", file_entry.path, e);
-                format!("Failed to run ffprobe: {e}").trim().to_string()
+                normalize_error_string(&format!("Failed to run ffprobe: {e}"))
             }
             Some(Ok(output)) => {
                 let combined = format!("{}{}", output.stdout.trim(), output.stderr.trim());
@@ -392,7 +392,7 @@ impl BrokenFiles {
             None => return None,
             Some(Err(e)) => {
                 debug!("Failed to run ffmpeg on {:?}: {}", file_entry.path, e);
-                format!("Failed to run ffmpeg: {}", e.trim())
+                normalize_error_string(&format!("Failed to run ffmpeg: {e}"))
             }
             Some(Ok(output)) => {
                 let combined = format!("{}{}", output.stdout.trim(), output.stderr.trim());
@@ -560,8 +560,8 @@ fn check_extension_availability(full_name: &Path) -> Option<TypeOfFile> {
     };
 
     // Faster manual conversion than using Path::extension()
-    let Some(file_name_str) = file_name.to_str() else { return None };
-    let Some(extension_idx) = file_name_str.rfind('.') else { return None };
+    let file_name_str = file_name.to_str()?;
+    let extension_idx = file_name_str.rfind('.')?;
     let extension_str = &file_name_str[extension_idx + 1..];
 
     let extension_lowercase = extension_str.to_ascii_lowercase();
