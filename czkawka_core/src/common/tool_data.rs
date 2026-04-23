@@ -462,7 +462,21 @@ pub trait CommonData {
                     }
 
                     if dry_run {
-                        return Some(files.iter().map(|e| (e, None)).collect::<Vec<_>>());
+                        return Some(
+                            files
+                                .iter()
+                                .map(|e| {
+                                    (
+                                        e,
+                                        Some(format!(
+                                            "Would hardlink: \"{}\" to \"{}\"",
+                                            original.get_path().to_string_lossy(),
+                                            e.get_path().to_string_lossy()
+                                        )),
+                                    )
+                                })
+                                .collect::<Vec<_>>(),
+                        );
                     }
 
                     let res = files
@@ -490,20 +504,20 @@ pub trait CommonData {
         let mut delete_result = DeleteResult::default();
 
         for (file_entry, delete_err) in res {
-            if let Some(err) = delete_err {
-                delete_result.errors.push(err);
-                delete_result.failed_to_delete_files += 1;
+            if let Some(msg) = delete_err {
+                if dry_run && is_hardlinking {
+                    // In dry-run hardlink mode the message field holds the pre-formatted
+                    // "Would hardlink: A to B" string rather than an actual error.
+                    delete_result.infos.push(msg);
+                    delete_result.deleted_files += 1;
+                    delete_result.gained_bytes += file_entry.get_size();
+                } else {
+                    delete_result.errors.push(msg);
+                    delete_result.failed_to_delete_files += 1;
+                }
             } else {
                 if dry_run {
-                    if is_hardlinking {
-                        delete_result.infos.push(format!(
-                            "Would hardlink: \"{}\" to \"{}\"",
-                            file_entry.get_path().to_string_lossy(),
-                            file_entry.get_path().to_string_lossy()
-                        ));
-                    } else {
-                        delete_result.infos.push(format!("Would delete: \"{}\"", file_entry.get_path().to_string_lossy()));
-                    }
+                    delete_result.infos.push(format!("Would delete: \"{}\"", file_entry.get_path().to_string_lossy()));
                 }
                 delete_result.deleted_files += 1;
                 delete_result.gained_bytes += file_entry.get_size();

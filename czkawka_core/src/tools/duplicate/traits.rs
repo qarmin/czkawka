@@ -10,7 +10,7 @@ use humansize::{BINARY, format_size};
 
 use crate::common::model::{CheckingMethod, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters, Info};
 
@@ -21,6 +21,32 @@ impl DeletingItems for DuplicateFinder {
     fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.common_data.delete_method == DeleteMethod::None {
             return WorkContinueStatus::Continue;
+        }
+
+        if self.common_data.use_reference_folders {
+            if self.common_data.delete_method == DeleteMethod::HardLink {
+                // For each group the referenced map already holds (original, destinations).
+                // Feed this directly into HardlinkingFiles so the reference file is used as
+                // the hardlink source and the non-reference duplicates are replaced.
+                let hardlink_items = match self.get_params().check_method {
+                    CheckingMethod::Name => self.files_with_identical_names_referenced.values().cloned().collect::<Vec<_>>(),
+                    CheckingMethod::SizeName => self.files_with_identical_size_names_referenced.values().cloned().collect::<Vec<_>>(),
+                    CheckingMethod::Size => self.files_with_identical_size_referenced.values().cloned().collect::<Vec<_>>(),
+                    CheckingMethod::Hash => self.files_with_identical_hashes_referenced.values().flatten().cloned().collect::<Vec<_>>(),
+                    _ => panic!(),
+                };
+                return self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::HardlinkingFiles(hardlink_items));
+            }
+            // For non-HardLink methods with reference folders, delete every non-reference
+            // duplicate.  The reference file is already retained as the "original".
+            let files_to_delete = match self.get_params().check_method {
+                CheckingMethod::Name => self.files_with_identical_names_referenced.values().map(|(_, files)| files.clone()).collect::<Vec<_>>(),
+                CheckingMethod::SizeName => self.files_with_identical_size_names_referenced.values().map(|(_, files)| files.clone()).collect::<Vec<_>>(),
+                CheckingMethod::Size => self.files_with_identical_size_referenced.values().map(|(_, files)| files.clone()).collect::<Vec<_>>(),
+                CheckingMethod::Hash => self.files_with_identical_hashes_referenced.values().flatten().map(|(_, files)| files.clone()).collect::<Vec<_>>(),
+                _ => panic!(),
+            };
+            return self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete);
         }
 
         let files_to_delete = match self.get_params().check_method {
