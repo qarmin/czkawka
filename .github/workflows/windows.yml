@@ -22,7 +22,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.92.0
+          rustup default 1.94.1
           rustup target add x86_64-pc-windows-gnu
 
       - name: Download rcedit
@@ -82,7 +82,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.92.0
+          rustup default 1.94.1
 
       - name: Download rcedit
         run: |
@@ -162,7 +162,7 @@ jobs:
           dnf install curl wget2 wget unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme wine -y && dnf clean all -y
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           source "$HOME/.cargo/env"
-          rustup default 1.92.0
+          rustup default 1.94.1
           rustup target add x86_64-pc-windows-gnu
           
           mkdir -p package
@@ -275,7 +275,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.92.0
+          rustup default 1.94.1
 
       # Both additional features and gtk gui are non-testable due really complicated setup of environment on Windows
       - name: Test
