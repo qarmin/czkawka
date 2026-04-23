@@ -133,17 +133,18 @@ impl SameMusic {
                     return None;
                 }
 
-                let res = calc_fingerprint_helper(path, configuration);
+                let res = calc_fingerprint_helper(path, configuration, stop_flag);
                 progress_handler.increase_size(music_entry.size);
                 progress_handler.increase_items(1);
 
-                let Ok(fingerprint) = res else {
-                    return Some(None);
-                };
-
-                music_entry.fingerprint = fingerprint;
-
-                Some(Some(music_entry))
+                match res {
+                    Err(_) => Some(None),         // processing error, skip this entry
+                    Ok(None) => None,              // stop flag was set
+                    Ok(Some(fingerprint)) => {
+                        music_entry.fingerprint = fingerprint;
+                        Some(Some(music_entry))
+                    }
+                }
             })
             .while_some()
             .flatten()
@@ -532,7 +533,7 @@ impl SameMusic {
 }
 
 // TODO this should be taken from rusty-chromaprint repo, not reimplemented here
-fn calc_fingerprint_helper<P: AsRef<Path>>(path: P, config: &Configuration) -> Result<Vec<u32>, String> {
+fn calc_fingerprint_helper<P: AsRef<Path>>(path: P, config: &Configuration, stop_flag: &Arc<AtomicBool>) -> Result<Option<Vec<u32>>, String> {
     let path = path.as_ref().to_path_buf();
     panic::catch_unwind(|| {
         let path = &path;
@@ -576,6 +577,10 @@ fn calc_fingerprint_helper<P: AsRef<Path>>(path: P, config: &Configuration) -> R
         let mut sample_buf = None;
 
         while let Ok(packet) = format.next_packet() {
+            if check_if_stop_received(stop_flag) {
+                return Ok(None);
+            }
+
             if packet.track_id() != track_id {
                 continue;
             }
@@ -599,7 +604,7 @@ fn calc_fingerprint_helper<P: AsRef<Path>>(path: P, config: &Configuration) -> R
         }
 
         printer.finish();
-        Ok(printer.fingerprint().to_vec())
+        Ok(Some(printer.fingerprint().to_vec()))
     })
     .unwrap_or_else(|_| {
         let message = create_crash_message("Symphonia", &path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");

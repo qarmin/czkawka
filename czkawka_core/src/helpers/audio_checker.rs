@@ -1,12 +1,16 @@
 use std::fs::File;
 use std::io;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
 use symphonia::core::codecs::CODEC_TYPE_NULL;
 use symphonia::core::errors::Error;
 use symphonia::core::errors::Error::IoError;
 use symphonia::core::io::MediaSourceStream;
 
-pub fn parse_audio_file(file_handler: File) -> Result<(), Error> {
+use crate::common::progress_stop_handler::check_if_stop_received;
+
+pub fn parse_audio_file(file_handler: File, stop_flag: &Arc<AtomicBool>) -> Result<Option<()>, Error> {
     let mss = MediaSourceStream::new(Box::new(file_handler), Default::default());
 
     let Ok(probed) = symphonia::default::get_probe().format(&Default::default(), mss, &Default::default(), &Default::default()) else {
@@ -24,6 +28,10 @@ pub fn parse_audio_file(file_handler: File) -> Result<(), Error> {
     };
 
     loop {
+        if check_if_stop_received(stop_flag) {
+            return Ok(None);
+        }
+
         let packet = match format.next_packet() {
             Ok(packet) => packet,
             Err(Error::ResetRequired) => {
@@ -33,7 +41,7 @@ pub fn parse_audio_file(file_handler: File) -> Result<(), Error> {
                 if let IoError(ref er) = err {
                     // Catch eof, not sure how to do it properly
                     if er.kind() == io::ErrorKind::UnexpectedEof {
-                        return Ok(());
+                        return Ok(Some(()));
                     }
                 }
                 return Err(err);

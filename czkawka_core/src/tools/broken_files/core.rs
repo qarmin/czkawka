@@ -280,10 +280,10 @@ impl BrokenFiles {
         }
     }
 
-    fn check_broken_audio(mut file_entry: BrokenEntry) -> Option<BrokenEntry> {
+    fn check_broken_audio(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>) -> Option<Option<BrokenEntry>> {
         match File::open(&file_entry.path) {
             Ok(file) => {
-                let error = match audio_checker::parse_audio_file(file) {
+                let error = match audio_checker::parse_audio_file(file, stop_flag) {
                     Err(e) => {
                         let err_str = e.to_string();
                         if err_str.contains("not supported codec") {
@@ -292,12 +292,13 @@ impl BrokenFiles {
                             normalize_error_string(&err_str)
                         }
                     }
-                    Ok(()) => String::new(),
+                    Ok(None) => return None, // stop flag was set
+                    Ok(Some(())) => String::new(),
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Audio, error);
-                Some(file_entry)
+                Some(Some(file_entry))
             }
-            Err(_inspected) => None,
+            Err(_inspected) => Some(None),
         }
     }
     fn check_broken_pdf(mut file_entry: BrokenEntry) -> BrokenEntry {
@@ -475,7 +476,7 @@ impl BrokenFiles {
             TypeOfFile::Svg => Some(Self::check_broken_svg(file_entry)),
             TypeOfFile::ArchiveBz2 => Some(Self::check_broken_bz2(file_entry)),
             TypeOfFile::ArchiveXz => Some(Self::check_broken_xz(file_entry)),
-            TypeOfFile::Audio => Some(Self::check_broken_audio(file_entry)),
+            TypeOfFile::Audio => Self::check_broken_audio(file_entry, stop_flag),
             TypeOfFile::Pdf => Some(Some(Self::check_broken_pdf(file_entry))),
             TypeOfFile::Video => Self::check_broken_video(file_entry, stop_flag, checked_types).map(Some),
         }));
