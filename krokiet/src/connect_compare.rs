@@ -470,7 +470,7 @@ fn collect_group_data_indices(model: &ModelRc<SingleMainListModel>, header_idx: 
 }
 
 fn find_group_header_for_current_selection(model: &ModelRc<SingleMainListModel>) -> usize {
-    if let Some(sel_idx) = model.iter().enumerate().find(|(_, r)| r.selected_row && !r.header_row).map(|(i, _)| i) {
+    if let Some(sel_idx) = model.iter().enumerate().find(|(_, r)| r.focused_row && !r.header_row).map(|(i, _)| i) {
         for i in (0..=sel_idx).rev() {
             if model.row_data(i).expect("i is within sel_idx bounds which is within row_count").header_row {
                 return i;
@@ -596,7 +596,7 @@ mod tests {
         SingleMainListModel {
             header_row: header,
             filled_header_row: filled,
-            selected_row: selected,
+            focused_row: selected,
             ..Default::default()
         }
     }

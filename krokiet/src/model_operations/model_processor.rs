@@ -351,7 +351,7 @@ impl ModelProcessor {
                 let mut new_model_after_removing_useless_items = self.remove_single_items_in_groups(new_simple_model.to_vec_model());
                 // Selection cache was invalidated, so we need to reset it
                 for e in &mut new_model_after_removing_useless_items {
-                    e.selected_row = false;
+                    e.focused_row = false;
                 }
                 let checked_items = new_model_after_removing_useless_items.iter().filter(|e| e.checked).count();
                 self.active_tab.set_tool_model(&app, ModelRc::new(VecModel::from(new_model_after_removing_useless_items)));

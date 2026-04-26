@@ -664,7 +664,7 @@ pub(crate) fn create_included_paths_model_from_pathbuf(items: &[PathBuf], refere
             IncludedPathsModel {
                 path: x.to_string_lossy().to_string().into(),
                 referenced_path: referenced_as_string.contains(&path_as_string),
-                selected_row: false,
+                focused_row: false,
             }
         })
         .collect::<Vec<_>>();
@@ -676,7 +676,7 @@ pub(crate) fn create_excluded_paths_model_from_pathbuf(items: &[PathBuf]) -> Mod
         .iter()
         .map(|x| ExcludedPathsModel {
             path: x.to_string_lossy().to_string().into(),
-            selected_row: false,
+            focused_row: false,
         })
         .collect::<Vec<_>>();
     ModelRc::new(VecModel::from(converted))

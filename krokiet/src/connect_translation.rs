@@ -215,7 +215,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_video_optimizer_text(flk!("tool_video_optimizer").into());
     translation.set_tool_bad_names_text(flk!("tool_bad_names").into());
     translation.set_sort_by_full_name_text(flk!("sort_by_full_name").into());
-    translation.set_sort_by_selection_text(flk!("sort_by_selection").into());
+    translation.set_sort_by_focus_text(flk!("sort_by_focus").into());
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
     translation.set_settings_dark_theme_text(flk!("settings_dark_theme").into());
     translation.set_settings_show_only_icons_text(flk!("settings_show_only_icons").into());
@@ -509,8 +509,8 @@ fn translate_items(app: &MainWindow) {
             name: flk!("sort_by_full_name").into(),
         },
         SortModel {
-            data: SortMode::Selection,
-            name: flk!("sort_by_selection").into(),
+            data: SortMode::Focus,
+            name: flk!("sort_by_focus").into(),
         },
         SortModel {
             data: SortMode::Reverse,
@@ -596,7 +596,7 @@ pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
 pub(crate) fn translate_sort_mode(sort_mode: SortMode) -> SharedString {
     match sort_mode {
         SortMode::FullName => flk!("sort_by_full_name").into(),
-        SortMode::Selection => flk!("sort_by_selection").into(),
+        SortMode::Focus => flk!("sort_by_focus").into(),
         SortMode::Reverse => flk!("sort_reverse").into(),
     }
 }
