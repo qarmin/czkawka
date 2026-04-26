@@ -451,7 +451,7 @@ mod tests {
             checked: false,
             filled_header_row: false,
             header_row: false,
-            selected_row: false,
+            focused_row: false,
             val_str: ModelRc::new(VecModel::from(val_str.iter().map(|s| SharedString::from(*s)).collect::<Vec<_>>())),
             val_int: ModelRc::new(VecModel::from(val_int.to_vec())),
         }
@@ -481,7 +481,7 @@ mod tests {
             checked: false,
             filled_header_row: false,
             header_row: false,
-            selected_row: false,
+            focused_row: false,
             val_str: ModelRc::new(VecModel::from(val_str.to_vec())),
             val_int: ModelRc::new(VecModel::from(val_int.to_vec())),
         }

@@ -330,6 +330,35 @@ export component ToolSettings {
         }
 
         VerticalLayout {
+            visible: GuiState.active_tab == ActiveTab.EmptyFiles;
+            spacing: 5px;
+            padding: 10px;
+            SubsettingsHeader { }
+
+            LabelText { label_text: Translations.subsettings_empty_files_type_text; }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_empty_files_zero_byte_content_text;
+                checked <=> Settings.empty_files_sub_zero_byte_content;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_empty_files_zero_byte_content_hint_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_empty_files_non_printable_content_text;
+                checked <=> Settings.empty_files_sub_non_printable_content;
+            }
+
+            HintText {
+                hint_text: Translations.subsettings_empty_files_non_printable_content_hint_text;
+            }
+
+            Rectangle { }
+        }
+
+        VerticalLayout {
             visible: GuiState.active_tab == ActiveTab.TemporaryFiles;
             spacing: 5px;
             padding: 10px;
@@ -402,6 +431,16 @@ export component ToolSettings {
 
             HintText {
                 hint_text: Translations.subsettings_broken_files_video_ffmpeg_info_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_broken_files_font_text;
+                checked <=> Settings.broken_files_sub_font;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_broken_files_markup_text;
+                checked <=> Settings.broken_files_sub_markup;
             }
 
             Rectangle { }

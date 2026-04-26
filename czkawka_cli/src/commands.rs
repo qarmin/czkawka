@@ -160,8 +160,8 @@ pub struct DuplicatesArgs {
         long,
         value_parser = parse_minimal_file_size,
         default_value = "257144",
-        help = "Minimum cached file size in bytes",
-        long_help = "Minimum size of cached files in bytes, assigning bigger value may speed up the scan but loading the cache will be slower, assigning smaller value may slow down the scan and some files may need to be hashed again but loading the cache will be faster"
+        help = "Minimum size of files stored in the hash cache (bytes)",
+        long_help = "Minimum file size (in bytes) to be included in the hash cache. A higher value produces a smaller cache file, making cache loading faster, but more files will be excluded from the cache and must be re-hashed on each scan. A lower value stores more files in the cache, making the scan faster at the cost of a larger cache file and slower cache loading."
     )]
     pub minimal_cached_file_size: u64,
     #[clap(
@@ -227,6 +227,18 @@ pub struct EmptyFilesArgs {
     pub common_cli_items: CommonCliItems,
     #[clap(flatten)]
     pub delete_method: SDMethod,
+    #[clap(
+        long,
+        help = "Also find files filled entirely with null bytes",
+        long_help = "Also find non-empty files whose entire content consists of null bytes (0x00). These files take disk space but carry no meaningful data."
+    )]
+    pub zero_byte_content: bool,
+    #[clap(
+        long,
+        help = "Also find files filled entirely with non-printable characters",
+        long_help = "Also find non-empty files whose entire content consists of non-printable ASCII characters: null (0x00), tab (0x09), LF (0x0A), VT (0x0B), FF (0x0C), CR (0x0D), space (0x20). Implies --zero-byte-content."
+    )]
+    pub non_printable_content: bool,
 }
 
 #[derive(Debug, clap::Args)]
@@ -443,8 +455,8 @@ pub struct BrokenFilesArgs {
         long,
         default_value = "PDF",
         value_parser = parse_broken_files,
-        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE, VIDEO_FFPROBE, VIDEO_FFMPEG)",
-        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files,\nVIDEO_FFPROBE - quick video check using ffprobe (header validation),\nVIDEO_FFMPEG - deep video check using ffmpeg (full decode)"
+        help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE, FONT, MARKUP, VIDEO_FFPROBE, VIDEO_FFMPEG)",
+        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files (zip, 7z, gz, tar, zst, bz2, xz),\nFONT - finds broken font files (ttf, otf, ttc),\nMARKUP - finds broken JSON/XML/TOML/YAML/SVG files,\nVIDEO_FFPROBE - quick video check using ffprobe (header validation),\nVIDEO_FFMPEG - deep video check using ffmpeg (full decode)"
     )]
     pub checked_types: Vec<CheckedTypes>,
 }
@@ -1141,7 +1153,9 @@ fn parse_broken_files(src: &str) -> Result<CheckedTypes, &'static str> {
         "archive" => Ok(CheckedTypes::ARCHIVE),
         "video_ffprobe" => Ok(CheckedTypes::VIDEO_FFPROBE),
         "video_ffmpeg" => Ok(CheckedTypes::VIDEO_FFMPEG),
-        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE, VIDEO_FFPROBE, VIDEO_FFMPEG)"),
+        "font" => Ok(CheckedTypes::FONT),
+        "markup" => Ok(CheckedTypes::MARKUP),
+        _ => Err("Couldn't parse the broken files type (allowed: PDF, AUDIO, IMAGE, ARCHIVE, FONT, MARKUP, VIDEO_FFPROBE, VIDEO_FFMPEG)"),
     }
 }
 

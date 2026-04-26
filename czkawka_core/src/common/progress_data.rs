@@ -1,8 +1,12 @@
 use log::error;
 
 use crate::common::model::{CheckingMethod, ToolType};
-// Empty files
+// Empty files (basic mode)
 // 0 - Collecting files
+
+// Empty files (content check mode)
+// 0 - Collecting files
+// 1 - Checking content
 
 // Empty folders
 // 0 - Collecting folders
@@ -138,6 +142,7 @@ pub enum CurrentStage {
     BrokenFilesChecking,
     BadExtensionsChecking,
     BadNamesChecking,
+    EmptyFilesCheckingContent,
     ExifRemoverCacheLoading,
     ExifRemoverExtractingTags,
     ExifRemoverCacheSaving,
@@ -183,6 +188,7 @@ impl ProgressData {
         let tool_type_checking_method: Option<ToolType> = match self.checking_method {
             CheckingMethod::AudioTags | CheckingMethod::AudioContent => Some(ToolType::SameMusic),
             CheckingMethod::Name | CheckingMethod::SizeName | CheckingMethod::Size | CheckingMethod::Hash => Some(ToolType::Duplicate),
+            CheckingMethod::EmptyFilesContent => Some(ToolType::EmptyFiles),
             CheckingMethod::None => None,
         };
         if let Some(tool_type) = tool_type_checking_method {
@@ -221,6 +227,7 @@ impl ProgressData {
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
             CurrentStage::BadNamesChecking => Some(ToolType::BadNames),
+            CurrentStage::EmptyFilesCheckingContent => Some(ToolType::EmptyFiles),
             CurrentStage::ExifRemoverCacheLoading | CurrentStage::ExifRemoverExtractingTags | CurrentStage::ExifRemoverCacheSaving => Some(ToolType::ExifRemover),
             CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::VideoOptimizerProcessingVideos => Some(ToolType::VideoOptimizer),
         };
@@ -234,7 +241,11 @@ impl ToolType {
     pub(crate) fn get_max_stage(self, checking_method: CheckingMethod) -> u8 {
         match self {
             Self::Duplicate => 7,
-            Self::EmptyFolders | Self::EmptyFiles | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
+            Self::EmptyFolders | Self::InvalidSymlinks | Self::BigFile | Self::TemporaryFiles => 0,
+            Self::EmptyFiles => match checking_method {
+                CheckingMethod::EmptyFilesContent => 1,
+                _ => 0,
+            },
             Self::BrokenFiles | Self::BadExtensions | Self::BadNames => 1,
             Self::SimilarImages | Self::SimilarVideos | Self::ExifRemover => 3,
             Self::VideoOptimizer => 2,
@@ -286,6 +297,7 @@ impl CurrentStage {
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
             Self::BadNamesChecking => 1,
+            Self::EmptyFilesCheckingContent => 1,
             Self::VideoOptimizerCreatingThumbnails => 2,
             Self::VideoOptimizerProcessingVideos => 1,
             Self::SameMusicCacheLoadingTags => 1,

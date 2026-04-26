@@ -8,10 +8,10 @@ import { PopupContextMenu } from "popup_context_menu.slint";
 export component SelectableTableView inherits Rectangle {
     in property <[string]> columns;
     in-out property <[SingleMainListModel]> values: [
-        {checked: false, selected_row: false, header_row: true, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
+        {checked: false, focused_row: false, header_row: true, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
+        {checked: false, focused_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
+        {checked: false, focused_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
+        {checked: true, focused_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
     in-out property <[length]> column_sizes: [30px, 80px, 150px, 160px];
     private property <int> column_number: column_sizes.length + 1;
@@ -113,7 +113,7 @@ export component SelectableTableView inherits Rectangle {
                 width: list_view_width;
                 border-radius: 5px;
                 height: item_height;
-                background: ColorPalette.get_listview_color_with_header(r.selected_row, touch-area.has-hover, r.header_row);
+                background: ColorPalette.get_listview_color_with_header(r.focused_row, touch-area.has-hover, r.header_row);
                 touch_area := TouchArea {
                     forward-focus: focus_item;
                     double-clicked => {

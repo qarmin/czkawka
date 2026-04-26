@@ -7,7 +7,18 @@ use tempfile::TempDir;
 
 use crate::common::tool_data::CommonData;
 use crate::common::traits::Search;
-use crate::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
+use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
+
+fn run_check(dir: &TempDir, checked_types: CheckedTypes) -> Vec<BrokenEntry> {
+    let params = BrokenFilesParameters::new(checked_types);
+    let mut finder = BrokenFiles::new(params);
+    finder.set_included_paths(vec![dir.path().to_path_buf()]);
+    finder.set_recursive_search(true);
+    finder.set_use_cache(false);
+    let stop_flag = Arc::new(AtomicBool::new(false));
+    finder.search(&stop_flag, None);
+    finder.get_broken_files().clone()
+}
 
 fn get_test_resources_path() -> PathBuf {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources");
@@ -163,6 +174,129 @@ fn test_empty_directory() {
     let broken_files = finder.get_broken_files();
     assert_eq!(broken_files.len(), 0, "Should find no broken files in empty directory");
 }
+
+//  JSON
+
+#[test]
+fn test_valid_json() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("valid.json"), r#"{"key": "value", "number": 42, "arr": [1, 2, 3]}"#).unwrap();
+    assert_eq!(run_check(&dir, CheckedTypes::MARKUP).len(), 0, "valid JSON should not be flagged");
+}
+
+#[test]
+fn test_broken_json_unclosed_brace() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("broken.json"), r#"{"key": "value""#).unwrap();
+    let results = run_check(&dir, CheckedTypes::MARKUP);
+    assert_eq!(results.len(), 1);
+    assert!(results[0].has_errors());
+}
+
+#[test]
+fn test_broken_json_invalid_value() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("broken.json"), r#"{"key": undefined}"#).unwrap();
+    let results = run_check(&dir, CheckedTypes::MARKUP);
+    assert_eq!(results.len(), 1);
+    assert!(results[0].has_errors());
+}
+
+//  TOML
+
+#[test]
+fn test_valid_toml() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("valid.toml"), "[section]\nkey = \"value\"\nnumber = 42\n").unwrap();
+    assert_eq!(run_check(&dir, CheckedTypes::MARKUP).len(), 0, "valid TOML should not be flagged");
+}
+
+#[test]
+fn test_broken_toml_missing_value() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("broken.toml"), "[section]\nkey =\n").unwrap();
+    let results = run_check(&dir, CheckedTypes::MARKUP);
+    assert_eq!(results.len(), 1);
+    assert!(results[0].has_errors());
+}
+
+#[test]
+fn test_broken_toml_duplicate_key() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("broken.toml"), "key = 1\nkey = 2\n").unwrap();
+    let results = run_check(&dir, CheckedTypes::MARKUP);
+    assert_eq!(results.len(), 1);
+    assert!(results[0].has_errors());
+}
+
+//  YAML
+
+#[test]
+fn test_valid_yaml() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("valid.yaml"), "key: value\nnumber: 42\nlist:\n  - a\n  - b\n").unwrap();
+    assert_eq!(run_check(&dir, CheckedTypes::MARKUP).len(), 0, "valid YAML should not be flagged");
+}
+
+#[test]
+fn test_broken_yaml_bad_indent() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("broken.yaml"), "key: value\n  bad_indent: {\n").unwrap();
+    let results = run_check(&dir, CheckedTypes::MARKUP);
+    assert_eq!(results.len(), 1);
+    assert!(results[0].has_errors());
+}
+
+//  XML
+
+#[test]
+fn test_valid_xml() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("valid.xml"), r#"<?xml version="1.0"?><root><child>value</child></root>"#).unwrap();
+    assert_eq!(run_check(&dir, CheckedTypes::MARKUP).len(), 0, "valid XML should not be flagged");
+}
+
+#[test]
+fn test_broken_xml_mismatched_tag() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("broken.xml"), "<root><child>value</root>").unwrap();
+    let results = run_check(&dir, CheckedTypes::MARKUP);
+    assert_eq!(results.len(), 1);
+    assert!(results[0].has_errors());
+}
+
+#[test]
+fn test_broken_xml_unclosed_tag() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("broken.xml"), "<root><unclosed").unwrap();
+    let results = run_check(&dir, CheckedTypes::MARKUP);
+    assert_eq!(results.len(), 1);
+    assert!(results[0].has_errors());
+}
+
+//  SVG
+
+#[test]
+fn test_valid_svg() {
+    let dir = TempDir::new().unwrap();
+    fs::write(
+        dir.path().join("valid.svg"),
+        r#"<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="10" height="10"/></svg>"#,
+    )
+    .unwrap();
+    assert_eq!(run_check(&dir, CheckedTypes::MARKUP).len(), 0, "valid SVG should not be flagged");
+}
+
+#[test]
+fn test_broken_svg_not_xml() {
+    let dir = TempDir::new().unwrap();
+    fs::write(dir.path().join("broken.svg"), "this is not svg content at all <<<>>>").unwrap();
+    let results = run_check(&dir, CheckedTypes::MARKUP);
+    assert_eq!(results.len(), 1);
+    assert!(results[0].has_errors());
+}
+
+//  No file types selected
 
 #[test]
 fn test_no_file_types_selected() {

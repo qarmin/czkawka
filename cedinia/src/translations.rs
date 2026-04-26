@@ -143,6 +143,8 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_broken_pdf_text(flc!("settings_broken_pdf").into());
     t.set_settings_broken_archive_text(flc!("settings_broken_archive").into());
     t.set_settings_broken_image_text(flc!("settings_broken_image").into());
+    t.set_settings_broken_font_text(flc!("settings_broken_font").into());
+    t.set_settings_broken_markup_text(flc!("settings_broken_markup").into());
     t.set_settings_bad_names_header_text(flc!("settings_bad_names_header").into());
     t.set_settings_bad_names_checks_label_text(flc!("settings_bad_names_checks_label").into());
     t.set_settings_bad_names_uppercase_ext_text(flc!("settings_bad_names_uppercase_ext").into());

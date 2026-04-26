@@ -484,12 +484,16 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_music_sub_maximum_difference_value(custom_settings.similar_music_sub_maximum_difference_value);
     settings.set_similar_music_sub_minimal_fragment_duration_value(custom_settings.similar_music_sub_minimal_fragment_duration_value);
 
+    settings.set_empty_files_sub_zero_byte_content(custom_settings.empty_files_sub_zero_byte_content);
+    settings.set_empty_files_sub_non_printable_content(custom_settings.empty_files_sub_non_printable_content);
     settings.set_broken_files_sub_audio(custom_settings.broken_files_sub_audio);
     settings.set_broken_files_sub_pdf(custom_settings.broken_files_sub_pdf);
     settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
     settings.set_broken_files_sub_video_ffprobe(custom_settings.broken_files_sub_video_ffprobe);
     settings.set_broken_files_sub_video_ffmpeg(custom_settings.broken_files_sub_video_ffmpeg);
+    settings.set_broken_files_sub_font(custom_settings.broken_files_sub_font);
+    settings.set_broken_files_sub_markup(custom_settings.broken_files_sub_markup);
 
     settings.set_bad_names_sub_uppercase_extension(custom_settings.bad_names_sub_uppercase_extension);
     settings.set_bad_names_sub_emoji_used(custom_settings.bad_names_sub_emoji_used);
@@ -552,7 +556,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     if base_settings.settings_load_tabs_sizes_at_startup {
         settings.set_duplicates_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "duplicates"));
         settings.set_empty_folders_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_folders"));
-        settings.set_empty_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_files"));
+        settings.set_empty_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "empty_files"));
         settings.set_temporary_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "temporary_files"));
         settings.set_big_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "big_files"));
         settings.set_similar_images_column_size(fnm(&[sel_px, 80.0, 80.0, 80.0, name_px, path_px, mod_px], "similar_images"));
@@ -651,12 +655,16 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_music_sub_maximum_difference_value = settings.get_similar_music_sub_maximum_difference_value();
     let similar_music_sub_minimal_fragment_duration_value = settings.get_similar_music_sub_minimal_fragment_duration_value();
 
+    let empty_files_sub_zero_byte_content = settings.get_empty_files_sub_zero_byte_content();
+    let empty_files_sub_non_printable_content = settings.get_empty_files_sub_non_printable_content();
     let broken_files_sub_audio = settings.get_broken_files_sub_audio();
     let broken_files_sub_pdf = settings.get_broken_files_sub_pdf();
     let broken_files_sub_archive = settings.get_broken_files_sub_archive();
     let broken_files_sub_image = settings.get_broken_files_sub_image();
     let broken_files_sub_video_ffprobe = settings.get_broken_files_sub_video_ffprobe();
     let broken_files_sub_video_ffmpeg = settings.get_broken_files_sub_video_ffmpeg();
+    let broken_files_sub_font = settings.get_broken_files_sub_font();
+    let broken_files_sub_markup = settings.get_broken_files_sub_markup();
 
     let bad_names_sub_uppercase_extension = settings.get_bad_names_sub_uppercase_extension();
     let bad_names_sub_emoji_used = settings.get_bad_names_sub_emoji_used();
@@ -776,12 +784,16 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_music_sub_length,
         similar_music_sub_maximum_difference_value,
         similar_music_sub_minimal_fragment_duration_value,
+        empty_files_sub_zero_byte_content,
+        empty_files_sub_non_printable_content,
         broken_files_sub_audio,
         broken_files_sub_pdf,
         broken_files_sub_archive,
         broken_files_sub_image,
         broken_files_sub_video_ffprobe,
         broken_files_sub_video_ffmpeg,
+        broken_files_sub_font,
+        broken_files_sub_markup,
         bad_names_sub_uppercase_extension,
         bad_names_sub_emoji_used,
         bad_names_sub_space_at_start_end,

@@ -25,7 +25,7 @@ use crate::flc;
 use crate::helpers::messages::Messages;
 
 pub(crate) const CACHE_VERSION: u8 = 100;
-pub(crate) const CACHE_DUPLICATE_VERSION: u8 = 100;
+pub(crate) const CACHE_DUPLICATE_VERSION: u8 = 120;
 pub(crate) const CACHE_IMAGE_VERSION: u8 = 100;
 pub(crate) const CACHE_VIDEO_VERSION: u8 = 110;
 pub(crate) const CACHE_BROKEN_FILES_VERSION: u8 = 120;

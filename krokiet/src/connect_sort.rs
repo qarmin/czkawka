@@ -70,7 +70,7 @@ pub(crate) fn connect_sort(app: &MainWindow) {
 
         let new_model = match sort_mode {
             SortMode::FullName => sorts::sort_by_full_name(&current_model, active_tab),
-            SortMode::Selection => sorts::sort_selection(&current_model, active_tab),
+            SortMode::Focus => sorts::sort_focus(&current_model, active_tab),
             SortMode::Reverse => sorts::reverse_sort(&current_model, active_tab),
         };
 
@@ -79,7 +79,7 @@ pub(crate) fn connect_sort(app: &MainWindow) {
 }
 
 pub(crate) fn set_sort_buttons(app: &MainWindow) {
-    let mut base_buttons = vec![SortMode::FullName, SortMode::Reverse, SortMode::Selection];
+    let mut base_buttons = vec![SortMode::FullName, SortMode::Reverse, SortMode::Focus];
     base_buttons.reverse();
 
     let new_sort_model = base_buttons
@@ -117,8 +117,8 @@ mod sorts {
         new_model
     }
 
-    pub(super) fn sort_selection(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab) -> ModelRc<SingleMainListModel> {
-        let sort_function = |e: &SingleMainListModel| !e.selected_row;
+    pub(super) fn sort_focus(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab) -> ModelRc<SingleMainListModel> {
+        let sort_function = |e: &SingleMainListModel| !e.focused_row;
 
         common_sort_function(model, active_tab, sort_function, false)
     }
@@ -210,7 +210,7 @@ mod tests {
 
     use crate::common::create_model_from_model_vec;
     use crate::connect_row_selection::initialize_selection_struct;
-    use crate::connect_sort::sorts::{reverse_sort, sort_by_full_name, sort_selection};
+    use crate::connect_sort::sorts::{reverse_sort, sort_by_full_name, sort_focus};
     use crate::connect_sort::{convert_group_header_into_rc_model, group_by_header};
     use crate::test_common::get_model_vec;
     use crate::{ActiveTab, SingleMainListModel};
@@ -340,32 +340,32 @@ mod tests {
     }
 
     #[test]
-    fn sort_by_selection_sorts_flat_model_correctly() {
+    fn sort_by_focus_sorts_flat_model_correctly() {
         initialize_selection_struct();
         let active_tab = ActiveTab::BigFiles;
         // To be sure that we set correct values in val_int, which must be equal to index
         assert!(!active_tab.get_is_header_mode());
 
         let mut model = get_model_vec(4);
-        model[0].selected_row = true;
+        model[0].focused_row = true;
         model[0].val_int = create_model_from_model_vec(&[15]);
-        model[1].selected_row = false;
+        model[1].focused_row = false;
         model[1].val_int = create_model_from_model_vec(&[14]);
-        model[2].selected_row = true;
+        model[2].focused_row = true;
         model[2].val_int = create_model_from_model_vec(&[9]);
-        model[3].selected_row = false;
+        model[3].focused_row = false;
         model[3].val_int = create_model_from_model_vec(&[29]);
         let model = create_model_from_model_vec(&model);
 
-        let sorted_model = sort_selection(&model, active_tab);
+        let sorted_model = sort_focus(&model, active_tab);
 
-        assert!(sorted_model.row_data(0).unwrap().selected_row);
+        assert!(sorted_model.row_data(0).unwrap().focused_row);
         assert_eq!(sorted_model.row_data(0).unwrap().val_int.iter().collect::<Vec<_>>(), vec![15]);
-        assert!(sorted_model.row_data(1).unwrap().selected_row);
+        assert!(sorted_model.row_data(1).unwrap().focused_row);
         assert_eq!(sorted_model.row_data(1).unwrap().val_int.iter().collect::<Vec<_>>(), vec![9]);
-        assert!(!sorted_model.row_data(2).unwrap().selected_row);
+        assert!(!sorted_model.row_data(2).unwrap().focused_row);
         assert_eq!(sorted_model.row_data(2).unwrap().val_int.iter().collect::<Vec<_>>(), vec![14]);
-        assert!(!sorted_model.row_data(3).unwrap().selected_row);
+        assert!(!sorted_model.row_data(3).unwrap().focused_row);
         assert_eq!(sorted_model.row_data(3).unwrap().val_int.iter().collect::<Vec<_>>(), vec![29]);
     }
 

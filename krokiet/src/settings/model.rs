@@ -132,6 +132,10 @@ pub struct SettingsCustom {
     pub similar_music_sub_maximum_difference_value: f32,
     #[serde(default = "default_minimal_fragment_duration_value")]
     pub similar_music_sub_minimal_fragment_duration_value: f32,
+    #[serde(default)]
+    pub empty_files_sub_zero_byte_content: bool,
+    #[serde(default)]
+    pub empty_files_sub_non_printable_content: bool,
     #[serde(default = "ttrue")]
     pub broken_files_sub_audio: bool,
     #[serde(default = "ttrue")]
@@ -144,6 +148,10 @@ pub struct SettingsCustom {
     pub broken_files_sub_video_ffprobe: bool,
     #[serde(default)]
     pub broken_files_sub_video_ffmpeg: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_sub_font: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_sub_markup: bool,
     #[serde(default = "ttrue")]
     pub bad_names_sub_uppercase_extension: bool,
     #[serde(default = "ttrue")]

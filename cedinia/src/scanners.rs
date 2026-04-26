@@ -251,7 +251,7 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
 pub(crate) fn scan_empty_files<H: ScanResultHandler>(dirs: Vec<PathBuf>, filters: &CommonFilters, stop: &Arc<AtomicBool>, handler: &Arc<H>, scan_id: u32) -> Vec<FileItem> {
     use czkawka_core::tools::empty_files::EmptyFiles;
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
-    let mut tool = EmptyFiles::new();
+    let mut tool = EmptyFiles::default();
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
     tool.search(stop, Some(&ptx));

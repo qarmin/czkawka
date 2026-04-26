@@ -215,7 +215,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_video_optimizer_text(flk!("tool_video_optimizer").into());
     translation.set_tool_bad_names_text(flk!("tool_bad_names").into());
     translation.set_sort_by_full_name_text(flk!("sort_by_full_name").into());
-    translation.set_sort_by_selection_text(flk!("sort_by_selection").into());
+    translation.set_sort_by_focus_text(flk!("sort_by_focus").into());
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
     translation.set_settings_dark_theme_text(flk!("settings_dark_theme").into());
     translation.set_settings_show_only_icons_text(flk!("settings_show_only_icons").into());
@@ -251,6 +251,11 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_music_minimal_fragment_duration_text(flk!("subsettings_music_minimal_fragment_duration").into());
     translation.set_subsettings_music_compare_fingerprints_only_with_similar_titles_text(flk!("subsettings_music_compare_fingerprints_only_with_similar_titles").into());
     translation.set_subsettings_broken_files_type_text(flk!("subsettings_broken_files_type").into());
+    translation.set_subsettings_empty_files_type_text(flk!("subsettings_empty_files_type").into());
+    translation.set_subsettings_empty_files_zero_byte_content_text(flk!("subsettings_empty_files_zero_byte_content").into());
+    translation.set_subsettings_empty_files_zero_byte_content_hint_text(flk!("subsettings_empty_files_zero_byte_content_hint").into());
+    translation.set_subsettings_empty_files_non_printable_content_text(flk!("subsettings_empty_files_non_printable_content").into());
+    translation.set_subsettings_empty_files_non_printable_content_hint_text(flk!("subsettings_empty_files_non_printable_content_hint").into());
     translation.set_subsettings_broken_files_audio_text(flk!("subsettings_broken_files_audio").into());
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
@@ -259,6 +264,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_broken_files_video_ffprobe_info_text(flk!("subsettings_broken_files_video_ffprobe_info").into());
     translation.set_subsettings_broken_files_video_ffmpeg_text(flk!("subsettings_broken_files_video_ffmpeg").into());
     translation.set_subsettings_broken_files_video_ffmpeg_info_text(flk!("subsettings_broken_files_video_ffmpeg_info").into());
+    translation.set_subsettings_broken_files_font_text(flk!("subsettings_broken_files_font").into());
+    translation.set_subsettings_broken_files_markup_text(flk!("subsettings_broken_files_markup").into());
     translation.set_subsettings_bad_names_issues_text(flk!("subsettings_bad_names_issues").into());
     translation.set_subsettings_bad_names_uppercase_extension_text(flk!("subsettings_bad_names_uppercase_extension").into());
     translation.set_subsettings_bad_names_uppercase_extension_hint_text(flk!("subsettings_bad_names_uppercase_extension_hint").into());
@@ -502,8 +509,8 @@ fn translate_items(app: &MainWindow) {
             name: flk!("sort_by_full_name").into(),
         },
         SortModel {
-            data: SortMode::Selection,
-            name: flk!("sort_by_selection").into(),
+            data: SortMode::Focus,
+            name: flk!("sort_by_focus").into(),
         },
         SortModel {
             data: SortMode::Reverse,
@@ -546,7 +553,7 @@ fn translate_items(app: &MainWindow) {
 
     settings.set_duplicates_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_empty_folders_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
-    settings.set_empty_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
+    settings.set_empty_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_temporary_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
     settings.set_big_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_similar_images_column_name(fnm(&[&selection, &similarity, &size, &dimensions, &file_name, &path, &mod_date]));
@@ -589,7 +596,7 @@ pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
 pub(crate) fn translate_sort_mode(sort_mode: SortMode) -> SharedString {
     match sort_mode {
         SortMode::FullName => flk!("sort_by_full_name").into(),
-        SortMode::Selection => flk!("sort_by_selection").into(),
+        SortMode::Focus => flk!("sort_by_focus").into(),
         SortMode::Reverse => flk!("sort_reverse").into(),
     }
 }

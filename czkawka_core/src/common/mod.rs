@@ -278,6 +278,19 @@ pub(crate) fn create_crash_message(library_name: &str, file_path: &str, home_lib
     )
 }
 
+pub(crate) fn create_crash_message_generic(file_path: &str) -> String {
+    format!("A panic/crash occurred while processing \"{file_path}\"")
+}
+
+pub(crate) fn normalize_error_string(s: &str) -> String {
+    s.chars()
+        .map(|c| if c.is_control() { ' ' } else { c })
+        .collect::<String>()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 #[expect(clippy::string_slice)]
 #[expect(clippy::indexing_slicing)]
 pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -> bool {

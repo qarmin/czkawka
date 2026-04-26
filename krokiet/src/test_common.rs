@@ -5,7 +5,7 @@ pub(crate) fn get_main_list_model() -> SingleMainListModel {
         checked: false,
         filled_header_row: false,
         header_row: false,
-        selected_row: false,
+        focused_row: false,
         val_int: Default::default(),
         val_str: Default::default(),
     }

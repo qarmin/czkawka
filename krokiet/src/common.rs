@@ -82,6 +82,7 @@ pub const MAX_INT_DATA_EMPTY_FILES: usize = IntDataEmptyFiles::SizePart2 as usiz
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
 pub enum StrDataEmptyFiles {
+    Size,
     Name,
     Path,
     ModificationDate,
@@ -359,6 +360,7 @@ impl ActiveTab {
             Self::EmptyFiles => match StrDataEmptyFiles::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for EmptyFiles")) {
                 StrDataEmptyFiles::Name | StrDataEmptyFiles::Path => SortIdx::StrIdx(str_idx),
                 StrDataEmptyFiles::ModificationDate => SortIdx::IntIdxPair(IntDataEmptyFiles::ModificationDatePart1 as i32, IntDataEmptyFiles::ModificationDatePart2 as i32),
+                StrDataEmptyFiles::Size => SortIdx::IntIdxPair(IntDataEmptyFiles::SizePart1 as i32, IntDataEmptyFiles::SizePart2 as i32),
             },
             Self::SimilarImages => match StrDataSimilarImages::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarImages")) {
                 StrDataSimilarImages::Similarity | StrDataSimilarImages::Name | StrDataSimilarImages::Path => SortIdx::StrIdx(str_idx),
@@ -662,7 +664,7 @@ pub(crate) fn create_included_paths_model_from_pathbuf(items: &[PathBuf], refere
             IncludedPathsModel {
                 path: x.to_string_lossy().to_string().into(),
                 referenced_path: referenced_as_string.contains(&path_as_string),
-                selected_row: false,
+                focused_row: false,
             }
         })
         .collect::<Vec<_>>();
@@ -674,7 +676,7 @@ pub(crate) fn create_excluded_paths_model_from_pathbuf(items: &[PathBuf]) -> Mod
         .iter()
         .map(|x| ExcludedPathsModel {
             path: x.to_string_lossy().to_string().into(),
-            selected_row: false,
+            focused_row: false,
         })
         .collect::<Vec<_>>();
     ModelRc::new(VecModel::from(converted))

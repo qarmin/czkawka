@@ -441,7 +441,10 @@ impl DuplicateFinder {
             self.get_test_type(),
             non_cached_files_to_check
                 .iter()
-                .map(|(size, items)| items.len() as u64 * PREHASHING_BUFFER_SIZE.min(*size))
+                .map(|(size, items)| {
+                    let bytes_per_file = if *size <= PREHASHING_BUFFER_SIZE { *size } else { 2 * PREHASHING_BUFFER_SIZE };
+                    items.len() as u64 * bytes_per_file
+                })
                 .sum::<u64>(),
         );
 
