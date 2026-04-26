@@ -138,8 +138,8 @@ impl SameMusic {
                 progress_handler.increase_items(1);
 
                 match res {
-                    Err(_) => Some(None),         // processing error, skip this entry
-                    Ok(None) => None,              // stop flag was set
+                    Err(_) => Some(None), // processing error, skip this entry
+                    Ok(None) => None,     // stop flag was set
                     Ok(Some(fingerprint)) => {
                         music_entry.fingerprint = fingerprint;
                         Some(Some(music_entry))

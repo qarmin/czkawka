@@ -44,9 +44,18 @@ impl DeletingItems for DuplicateFinder {
             // incorrectly preserve files in single-element groups (AllExcept* modes).
             let files_to_delete: Vec<_> = match self.get_params().check_method {
                 CheckingMethod::Name => self.files_with_identical_names_referenced.values().flat_map(|(_, files)| files.iter().cloned()).collect(),
-                CheckingMethod::SizeName => self.files_with_identical_size_names_referenced.values().flat_map(|(_, files)| files.iter().cloned()).collect(),
+                CheckingMethod::SizeName => self
+                    .files_with_identical_size_names_referenced
+                    .values()
+                    .flat_map(|(_, files)| files.iter().cloned())
+                    .collect(),
                 CheckingMethod::Size => self.files_with_identical_size_referenced.values().flat_map(|(_, files)| files.iter().cloned()).collect(),
-                CheckingMethod::Hash => self.files_with_identical_hashes_referenced.values().flatten().flat_map(|(_, files)| files.iter().cloned()).collect(),
+                CheckingMethod::Hash => self
+                    .files_with_identical_hashes_referenced
+                    .values()
+                    .flatten()
+                    .flat_map(|(_, files)| files.iter().cloned())
+                    .collect(),
                 _ => panic!(),
             };
             return self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(files_to_delete));

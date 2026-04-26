@@ -10,8 +10,8 @@ use std::fmt::Debug;
 use std::fs;
 use std::fs::File;
 use std::hash::Hasher;
-use std::io::prelude::*;
 use std::io::SeekFrom;
+use std::io::prelude::*;
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
@@ -430,12 +430,20 @@ mod tests2 {
 
         // File B: identical to A except the very last byte differs.
         let src_b = dir.path().join("b");
-        let mut content_b = content_a.clone();
+        let mut content_b = content_a;
         content_b[file_size as usize - 1] = 1;
         File::create(&src_b)?.write_all(&content_b)?;
 
-        let e_a = DuplicateEntry { path: src_a, size: file_size, ..Default::default() };
-        let e_b = DuplicateEntry { path: src_b, size: file_size, ..Default::default() };
+        let e_a = DuplicateEntry {
+            path: src_a,
+            size: file_size,
+            ..Default::default()
+        };
+        let e_b = DuplicateEntry {
+            path: src_b,
+            size: file_size,
+            ..Default::default()
+        };
         let counter_a = Arc::new(AtomicU64::new(0));
         let counter_b = Arc::new(AtomicU64::new(0));
 
