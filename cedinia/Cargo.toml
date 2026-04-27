@@ -128,6 +128,10 @@ name = "android.permission.WRITE_EXTERNAL_STORAGE"
 [[package.metadata.android.uses_permission]]
 name = "android.permission.POST_NOTIFICATIONS"
 
+# Keeps CPU alive during background scanning so Android does not throttle the app
+[[package.metadata.android.uses_permission]]
+name = "android.permission.WAKE_LOCK"
+
 [package.metadata.android.signing.dev]
 path = "android/keystore/debug.keystore"
 keystore_password = "TO_REPLACE_KEYSTORE_PASSWORD"

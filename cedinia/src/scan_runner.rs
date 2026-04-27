@@ -161,6 +161,27 @@ pub trait ScanResultHandler: Send + Sync + 'static {
     fn on_result(&self, result: ScanResult);
 }
 
+/// RAII guard that acquires a WakeLock on construction and releases it on drop.
+/// Keeps the CPU running while a scan executes in the background so Android
+/// does not throttle the worker thread.
+#[cfg(target_os = "android")]
+struct ScanWakeLock;
+
+#[cfg(target_os = "android")]
+impl ScanWakeLock {
+    fn acquire() -> Self {
+        crate::file_picker_android::acquire_wakelock();
+        ScanWakeLock
+    }
+}
+
+#[cfg(target_os = "android")]
+impl Drop for ScanWakeLock {
+    fn drop(&mut self) {
+        crate::file_picker_android::release_wakelock();
+    }
+}
+
 pub fn start_worker<H: ScanResultHandler>(handler: H) -> (Sender<ScanRequest>, Arc<AtomicBool>) {
     let stop_flag = Arc::new(AtomicBool::new(false));
     let (req_tx, req_rx) = unbounded::<ScanRequest>();
@@ -181,23 +202,31 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
     let handler = Arc::new(handler);
 
     while let Ok(req) = req_rx.recv() {
+        if let ScanRequest::Stop = req {
+            stop_flag.store(true, Ordering::Relaxed);
+            continue;
+        }
+
+        scan_id += 1;
+        // Acquire a CPU WakeLock for the duration of the scan so Android does
+        // not throttle this worker thread when the app is in the background.
+        // The guard is automatically released via Drop at the end of the block.
+        #[cfg(target_os = "android")]
+        let _wakelock = ScanWakeLock::acquire();
+
         match req {
-            ScanRequest::Stop => {
-                stop_flag.store(true, Ordering::Relaxed);
-            }
+            ScanRequest::Stop => unreachable!(),
             ScanRequest::DuplicateFiles {
                 dirs,
                 check_method,
                 hash_type,
                 filters,
             } => {
-                scan_id += 1;
                 let items = scan_duplicate_files(dirs, check_method, hash_type, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::DuplicateFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::EmptyFolders { dirs, filters } => {
-                scan_id += 1;
                 let items = scan_empty_folders(dirs, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::EmptyFolders(items));
                 handler.on_result(ScanResult::Finished(scan_id));
@@ -212,7 +241,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 ignore_same_resolution,
                 filters,
             } => {
-                scan_id += 1;
                 let items = scan_similar_images(
                     dirs,
                     similarity_preset,
@@ -230,13 +258,11 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::EmptyFiles { dirs, filters } => {
-                scan_id += 1;
                 let items = scan_empty_files(dirs, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::EmptyFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::TemporaryFiles { dirs, extensions, filters } => {
-                scan_id += 1;
                 let items = scan_temporary_files(dirs, extensions, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::TemporaryFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
@@ -247,19 +273,16 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 count,
                 filters,
             } => {
-                scan_id += 1;
                 let items = scan_big_files(dirs, search_mode, count, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::BigFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::BrokenFiles { dirs, checked_types, filters } => {
-                scan_id += 1;
                 let items = scan_broken_files(dirs, checked_types, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::BrokenFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::BadExtensions { dirs, filters } => {
-                scan_id += 1;
                 let items = scan_bad_extensions(dirs, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::BadExtensions(items));
                 handler.on_result(ScanResult::Finished(scan_id));
@@ -271,7 +294,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 check_method,
                 filters,
             } => {
-                scan_id += 1;
                 let items = scan_same_music(dirs, music_similarity, approximate, check_method, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::SameMusic(items));
                 handler.on_result(ScanResult::Finished(scan_id));
@@ -285,7 +307,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 non_ascii_graphical,
                 remove_duplicated_non_alpha,
             } => {
-                scan_id += 1;
                 let items = scan_bad_names(
                     dirs,
                     &filters,
@@ -302,7 +323,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::ExifRemover { dirs, filters } => {
-                scan_id += 1;
                 let items = scan_exif_remover(dirs, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::ExifRemover(items));
                 handler.on_result(ScanResult::Finished(scan_id));

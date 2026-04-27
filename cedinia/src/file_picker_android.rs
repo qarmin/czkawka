@@ -396,6 +396,88 @@ pub fn setup_nav_bar() {
     .unwrap_or_else(|e| log::error!("setup_nav_bar: JNI failed: {:?}", e));
 }
 
+pub fn acquire_wakelock() {
+    let Some(app) = get_android_app() else {
+        log::error!("acquire_wakelock: AndroidApp not initialised");
+        return;
+    };
+    let Some(loader_ref) = get_loader() else {
+        log::error!("acquire_wakelock: DEX loader not initialised");
+        return;
+    };
+    let Some(activity_ref) = get_activity_global_ref() else {
+        log::error!("acquire_wakelock: activity global ref not initialised");
+        return;
+    };
+
+    let Some(vm) = try_jvm(&app) else {
+        return;
+    };
+    vm.attach_current_thread(|env| -> jni::errors::Result<()> {
+        let native_activity = activity_ref.as_obj();
+        let class_name = env.new_string("CediniaFilePicker")?;
+        let picker_class_obj = env
+            .call_method(
+                loader_ref.as_obj(),
+                jni_str!("findClass"),
+                jni_sig!((name: java.lang.String) -> java.lang.Class),
+                &[JValue::Object(&class_name)],
+            )?
+            .l()?;
+        let picker_class: JClass = unsafe { JClass::from_raw(env, picker_class_obj.as_raw()) };
+        env.call_static_method(
+            &picker_class,
+            jni_str!("acquireWakeLock"),
+            jni_sig!((activity: android.app.Activity) -> void),
+            &[JValue::Object(&native_activity)],
+        )?;
+        log::info!("acquire_wakelock: Java call succeeded");
+        Ok(())
+    })
+    .unwrap_or_else(|e| log::error!("acquire_wakelock: JNI failed: {:?}", e));
+}
+
+pub fn release_wakelock() {
+    let Some(app) = get_android_app() else {
+        log::error!("release_wakelock: AndroidApp not initialised");
+        return;
+    };
+    let Some(loader_ref) = get_loader() else {
+        log::error!("release_wakelock: DEX loader not initialised");
+        return;
+    };
+    let Some(activity_ref) = get_activity_global_ref() else {
+        log::error!("release_wakelock: activity global ref not initialised");
+        return;
+    };
+
+    let Some(vm) = try_jvm(&app) else {
+        return;
+    };
+    vm.attach_current_thread(|env| -> jni::errors::Result<()> {
+        let native_activity = activity_ref.as_obj();
+        let class_name = env.new_string("CediniaFilePicker")?;
+        let picker_class_obj = env
+            .call_method(
+                loader_ref.as_obj(),
+                jni_str!("findClass"),
+                jni_sig!((name: java.lang.String) -> java.lang.Class),
+                &[JValue::Object(&class_name)],
+            )?
+            .l()?;
+        let picker_class: JClass = unsafe { JClass::from_raw(env, picker_class_obj.as_raw()) };
+        env.call_static_method(
+            &picker_class,
+            jni_str!("releaseWakeLock"),
+            jni_sig!((activity: android.app.Activity) -> void),
+            &[JValue::Object(&native_activity)],
+        )?;
+        log::info!("release_wakelock: Java call succeeded");
+        Ok(())
+    })
+    .unwrap_or_else(|e| log::error!("release_wakelock: JNI failed: {:?}", e));
+}
+
 pub fn check_storage_permission() -> bool {
     let Some(app) = get_android_app() else { return false };
     let Some(loader_ref) = get_loader() else { return false };
