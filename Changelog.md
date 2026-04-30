@@ -43,7 +43,7 @@ This is the latest version of Czkawka GTK. From now on, I will no longer provide
 - Added ability to choose which select buttons are visible in UI - [#1913](https://github.com/qarmin/czkawka/pull/1913)
 - Added an overlay that blocks UI interaction while a system file dialog is open, which avoids freezing entire ui and "App is not responsisble messages" making it clear the dialog is pending - [#1809](https://github.com/qarmin/czkawka/pull/1809)
 - Added invert selection in group feature - [#1915](https://github.com/qarmin/czkawka/pull/1915)
-- Fixed shortest/longest path selection modes which only worked partially by - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Fixed shortest/longest path selection modes which only worked partially by comparing only paths without file names - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)
@@ -53,7 +53,7 @@ This is the latest version of Czkawka GTK. From now on, I will no longer provide
 - Windows ZIP package now includes Krokiet binaries and a README to simplify migration to the new frontend
 - All backends Krokiet binaries on all systems, are now packed into zip files, with additional scripts to open them with selected backend
 - Mac Intel binaries are no longer provided, due very long build times on GitHub CI
-- Added installation scripts (`misc/install_scripts/`) for Linux (auto-detects apt/dnf/pacman/zypper), macOS (Homebrew), and Windows (winget)
+- Added installation scripts (`misc/install_scripts/`) for Linux (apt/dnf/pacman/zypper), macOS (Homebrew), and Windows (winget)
 
 ## Version 11.0.1 - 20.02.2026r
 ### Core
