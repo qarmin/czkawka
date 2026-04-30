@@ -55,10 +55,10 @@ fn progress_save_load_cache(gui_data: &GuiData, item: &ProgressData) {
     taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
 
     let text = match item.sstage {
-        CurrentStage::SameMusicCacheLoadingFingerprints | CurrentStage::SameMusicCacheLoadingTags => {
+        CurrentStage::SameMusicCacheLoadingFingerprints | CurrentStage::SameMusicCacheLoadingTags | CurrentStage::SimilarVideosAudioCacheLoading => {
             flg!("progress_cache_loading")
         }
-        CurrentStage::SameMusicCacheSavingFingerprints | CurrentStage::SameMusicCacheSavingTags => {
+        CurrentStage::SameMusicCacheSavingFingerprints | CurrentStage::SameMusicCacheSavingTags | CurrentStage::SimilarVideosAudioCacheSaving => {
             flg!("progress_cache_saving")
         }
         CurrentStage::DuplicateCacheLoading => {
@@ -144,6 +144,12 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
         }
         CurrentStage::SimilarVideosCreatingThumbnails => {
             label_stage.set_text(&flg!("progress_creating_video_thumbnails", progress_ratio_tm(item)));
+        }
+        CurrentStage::SimilarVideosAudioCalculatingFingerprints => {
+            label_stage.set_text(&flg!("progress_scanning_music_content", progress_ratio_tm(item)));
+        }
+        CurrentStage::SimilarVideosAudioComparingFingerprints => {
+            label_stage.set_text(&flg!("progress_scanning_music_content_end", progress_ratio_tm(item)));
         }
         CurrentStage::BrokenFilesChecking => {
             label_stage.set_text(&flg!("progress_scanning_broken_files", progress_ratio_tm(item)));

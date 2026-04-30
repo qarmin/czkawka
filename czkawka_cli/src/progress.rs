@@ -65,6 +65,8 @@ pub(crate) fn get_progress_message(progress_data: &ProgressData) -> String {
         CurrentStage::SimilarImagesCalculatingHashes => "Calculating image hashes",
         CurrentStage::SimilarImagesComparingHashes => "Comparing image hashes",
         CurrentStage::SimilarVideosCalculatingHashes => "Reading similar values",
+        CurrentStage::SimilarVideosAudioCalculatingFingerprints => "Calculating audio fingerprints",
+        CurrentStage::SimilarVideosAudioComparingFingerprints => "Comparing audio fingerprints",
         CurrentStage::SimilarVideosCreatingThumbnails | CurrentStage::VideoOptimizerCreatingThumbnails => "Creating video thumbnails",
         CurrentStage::BrokenFilesChecking => "Checking broken files",
         CurrentStage::BadExtensionsChecking => "Checking extensions of files",
@@ -94,7 +96,9 @@ pub(crate) fn get_progress_message(progress_data: &ProgressData) -> String {
         | CurrentStage::SameMusicCacheSavingFingerprints
         | CurrentStage::SameMusicCacheLoadingFingerprints
         | CurrentStage::ExifRemoverCacheLoading
-        | CurrentStage::ExifRemoverCacheSaving => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
+        | CurrentStage::ExifRemoverCacheSaving
+        | CurrentStage::SimilarVideosAudioCacheLoading
+        | CurrentStage::SimilarVideosAudioCacheSaving => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
     }
     .to_string()
 }

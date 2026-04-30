@@ -47,6 +47,8 @@ fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
         CurrentStage::DuplicateCacheSaving => flk!("rust_saving_hash_cache"),
         CurrentStage::ExifRemoverCacheLoading => flk!("rust_loading_exif_cache"),
         CurrentStage::ExifRemoverCacheSaving => flk!("rust_saving_exif_cache"),
+        CurrentStage::SimilarVideosAudioCacheLoading => flk!("rust_loading_fingerprints_cache"),
+        CurrentStage::SimilarVideosAudioCacheSaving => flk!("rust_saving_fingerprints_cache"),
         CurrentStage::DeletingFiles
         | CurrentStage::RenamingFiles
         | CurrentStage::MovingFiles
@@ -68,6 +70,8 @@ fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
         | CurrentStage::SimilarImagesComparingHashes
         | CurrentStage::SimilarVideosCalculatingHashes
         | CurrentStage::SimilarVideosCreatingThumbnails
+        | CurrentStage::SimilarVideosAudioCalculatingFingerprints
+        | CurrentStage::SimilarVideosAudioComparingFingerprints
         | CurrentStage::BrokenFilesChecking
         | CurrentStage::BadExtensionsChecking
         | CurrentStage::BadNamesChecking
@@ -121,6 +125,8 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::SimilarImagesCalculatingHashes => flk!("rust_hashed_images", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::SimilarImagesComparingHashes => flk!("rust_compared_image_hashes", items_stats = items_stats),
         CurrentStage::SimilarVideosCalculatingHashes => flk!("rust_hashed_videos", items_stats = items_stats),
+        CurrentStage::SimilarVideosAudioCalculatingFingerprints => flk!("rust_checked_content", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::SimilarVideosAudioComparingFingerprints => flk!("rust_compared_content", items_stats = items_stats),
         CurrentStage::BrokenFilesChecking => flk!("rust_checked_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::BadExtensionsChecking => flk!("rust_checked_files_bad_extensions", items_stats = items_stats),
         CurrentStage::BadNamesChecking => flk!("rust_checked_files_bad_names", items_stats = items_stats),
@@ -162,7 +168,9 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         | CurrentStage::SameMusicCacheSavingFingerprints
         | CurrentStage::SameMusicCacheLoadingFingerprints
         | CurrentStage::ExifRemoverCacheLoading
-        | CurrentStage::ExifRemoverCacheSaving => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
+        | CurrentStage::ExifRemoverCacheSaving
+        | CurrentStage::SimilarVideosAudioCacheLoading
+        | CurrentStage::SimilarVideosAudioCacheSaving => unreachable!("This stages(caches, initial files scanning) should be handled somewhere else"),
     };
     let (all_progress, current_progress, current_progress_size) = common_get_data(item);
 

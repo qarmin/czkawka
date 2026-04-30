@@ -402,3 +402,11 @@ heaptrack bin:
     cargo build --profile rdebug --bin {{bin}}
     heaptrack target/rdebug/{{bin}}
     heaptrack_gui --appimage-extract-and-run "$(ls -t *.zst | head -n1)"
+
+diffs VERSION:
+    mkdir -p DIFFS
+
+    git diff --name-only {{VERSION}} HEAD | while read file; do
+      mkdir -p "DIFFS/$(dirname "$file")"
+      git diff {{VERSION}} HEAD -- "$file" > "DIFFS/$file"
+    done

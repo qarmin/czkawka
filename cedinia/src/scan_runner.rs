@@ -202,7 +202,7 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
     let handler = Arc::new(handler);
 
     while let Ok(req) = req_rx.recv() {
-        if let ScanRequest::Stop = req {
+        if matches!(req, ScanRequest::Stop) {
             stop_flag.store(true, Ordering::Relaxed);
             continue;
         }
@@ -350,15 +350,19 @@ fn stage_label(stage: CurrentStage) -> String {
         | CurrentStage::DuplicatePreHashCacheLoading
         | CurrentStage::SameMusicCacheLoadingTags
         | CurrentStage::SameMusicCacheLoadingFingerprints
-        | CurrentStage::ExifRemoverCacheLoading => flc!("stage_loading_cache"),
+        | CurrentStage::ExifRemoverCacheLoading
+        | CurrentStage::SimilarVideosAudioCacheLoading => flc!("stage_loading_cache"),
         CurrentStage::DuplicateCacheSaving
         | CurrentStage::DuplicatePreHashCacheSaving
         | CurrentStage::SameMusicCacheSavingTags
         | CurrentStage::SameMusicCacheSavingFingerprints
-        | CurrentStage::ExifRemoverCacheSaving => flc!("stage_saving_cache"),
+        | CurrentStage::ExifRemoverCacheSaving
+        | CurrentStage::SimilarVideosAudioCacheSaving => flc!("stage_saving_cache"),
         CurrentStage::SimilarImagesCalculatingHashes => flc!("stage_calculating_image_hashes"),
         CurrentStage::SimilarImagesComparingHashes => flc!("stage_comparing_images"),
         CurrentStage::SimilarVideosCalculatingHashes => flc!("stage_calculating_video_hashes"),
+        CurrentStage::SimilarVideosAudioCalculatingFingerprints => flc!("stage_calculating_music_fingerprints"),
+        CurrentStage::SimilarVideosAudioComparingFingerprints => flc!("stage_comparing_fingerprints"),
         CurrentStage::BrokenFilesChecking => flc!("stage_checking_files"),
         CurrentStage::BadExtensionsChecking => flc!("stage_checking_extensions"),
         CurrentStage::BadNamesChecking => flc!("stage_checking_names"),

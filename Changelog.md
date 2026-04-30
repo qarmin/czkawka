@@ -1,4 +1,11 @@
 ## Version ? - ??.??.????r 
+
+# Czkawka Gtk deprecation note
+This is the lastest version of Czkawka Gtk, since now I will not provide any binaries for it, so everyone is encouraged to switch to Krokiet. Project will still be visible in git, I will ensure, that it will compile with czkawka_core and still will be available to compile manually, but all issues and features limited to Czkawka Gtk will be closed(except critical issues, that happens with some more used unnoficial binaries like )   
+
+## Breaking changes
+### Users
+- Due changes in broken files mode, that now supports multiple checkers and contains additional checks, the file type is no longer stored in cache, so existing cache files are incompatible with this version and will be automatically regenerated.
 ### Core
 - Switched AV1 encoding from the very slow `libaom-av1` to `libsvtav1` - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
 - Added a noise reduction option to Video Optimizer mode, which can significantly reduce file size for noisy videos - [#1888](https://github.com/qarmin/czkawka/pull/1888)  

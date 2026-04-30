@@ -9,7 +9,7 @@ use czkawka_core::TOOLS_NUMBER;
 use czkawka_core::common::basic_gui_cli::CliResult;
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
-use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
+use czkawka_core::tools::similar_videos::{ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize};
@@ -461,6 +461,19 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
 
+    settings.set_similar_videos_audio_check_content(custom_settings.similar_videos_audio_check_content);
+    settings.set_similar_videos_audio_max_duration_diff_ratio(
+        custom_settings
+            .similar_videos_audio_max_duration_diff_ratio
+            .clamp(*ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.start() as f32, *ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.end() as f32),
+    );
+    settings.set_similar_videos_audio_max_duration_diff_ratio_min(*ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.start() as f32);
+    settings.set_similar_videos_audio_max_duration_diff_ratio_max(*ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.end() as f32);
+    settings.set_similar_videos_audio_minimum_segment_duration(custom_settings.similar_videos_audio_minimum_segment_duration.max(0.0));
+    settings.set_similar_videos_audio_minimum_segment_duration_max(180.0);
+    settings.set_similar_videos_audio_maximum_difference(custom_settings.similar_videos_audio_maximum_difference.max(0.0));
+    settings.set_similar_videos_audio_maximum_difference_max(10.0);
+
     settings.set_video_thumbnails_generate(custom_settings.video_thumbnails_generate);
     settings.set_video_thumbnails_percentage(
         custom_settings
@@ -638,6 +651,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_crop_detect = combo_box_items.videos_crop_detect.config_name.clone();
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
+    let similar_videos_audio_check_content = settings.get_similar_videos_audio_check_content();
+    let similar_videos_audio_max_duration_diff_ratio = settings.get_similar_videos_audio_max_duration_diff_ratio();
+    let similar_videos_audio_minimum_segment_duration = settings.get_similar_videos_audio_minimum_segment_duration();
+    let similar_videos_audio_maximum_difference = settings.get_similar_videos_audio_maximum_difference();
 
     let video_thumbnails_generate = settings.get_video_thumbnails_generate();
     let video_thumbnails_percentage = settings.get_video_thumbnails_percentage().round() as u8;
@@ -773,8 +790,11 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_sub_ignore_same_size,
         similar_videos_sub_ignore_same_resolution,
         similar_videos_sub_similarity,
-        similar_music_sub_audio_check_type,
-        similar_music_sub_approximate_comparison,
+        similar_videos_audio_check_content,
+        similar_videos_audio_max_duration_diff_ratio,
+        similar_videos_audio_minimum_segment_duration,
+        similar_videos_audio_maximum_difference,
+        similar_music_sub_audio_check_type,        similar_music_sub_approximate_comparison,
         similar_music_compare_fingerprints_only_with_similar_titles,
         similar_music_sub_title,
         similar_music_sub_artist,

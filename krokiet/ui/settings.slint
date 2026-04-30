@@ -103,6 +103,16 @@ export global Settings {
     in-out property <string> similar_videos_crop_detect_value: "letterbox";
     in-out property <int> similar_videos_crop_detect_index: 0;
 
+    // Audio fingerprint sub-mode
+    in-out property <bool> similar_videos_audio_check_content: false;
+    in-out property <float> similar_videos_audio_max_duration_diff_ratio: 0.20;
+    in-out property <float> similar_videos_audio_max_duration_diff_ratio_max: 1.0;
+    in-out property <float> similar_videos_audio_max_duration_diff_ratio_min: 0.0;
+    in-out property <float> similar_videos_audio_minimum_segment_duration: 5.0;
+    in-out property <float> similar_videos_audio_minimum_segment_duration_max: 180.0;
+    in-out property <float> similar_videos_audio_maximum_difference: 3.0;
+    in-out property <float> similar_videos_audio_maximum_difference_max: 10.0;
+
 
     // Same Music
     in-out property <[string]> similar_music_sub_audio_check_type: ["Tags", "Fingerprint"];

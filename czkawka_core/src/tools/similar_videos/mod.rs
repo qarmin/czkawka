@@ -9,6 +9,7 @@ use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
+use rusty_chromaprint::Configuration;
 use serde::{Deserialize, Serialize};
 use vid_dup_finder_lib::{Cropdetect, VideoHash};
 
@@ -28,6 +29,12 @@ pub const DEFAULT_VID_HASH_DURATION: u32 = 10;
 
 pub const DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL: u8 = 10;
 
+// Audio fingerprint mode constants
+pub const ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO: RangeInclusive<f64> = 0.0..=1.0;
+pub const DEFAULT_AUDIO_MAX_DURATION_DIFFERENCE_RATIO: f64 = 0.20;
+pub const DEFAULT_AUDIO_MINIMUM_SEGMENT_DURATION: f32 = 5.0;
+pub const DEFAULT_AUDIO_MAXIMUM_DIFFERENCE: f64 = 3.0;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VideosEntry {
     pub path: PathBuf,
@@ -46,6 +53,29 @@ pub struct VideosEntry {
 
     #[serde(skip)] // Saving it to cache is bad idea, because cache can be moved to another locations
     pub thumbnail_path: Option<PathBuf>,
+}
+
+/// Minimal cache entry used to persist audio fingerprint data for video files.
+/// Kept separate from `VideosEntry` so the visual-hash cache format is not affected.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct VideoAudioEntry {
+    pub path: PathBuf,
+    pub size: u64,
+    pub modified_date: u64,
+    pub fingerprint: Vec<u32>,
+    pub audio_duration_seconds: u32,
+}
+
+impl ResultEntry for VideoAudioEntry {
+    fn get_path(&self) -> &Path {
+        &self.path
+    }
+    fn get_modified_date(&self) -> u64 {
+        self.modified_date
+    }
+    fn get_size(&self) -> u64 {
+        self.size
+    }
 }
 
 impl ResultEntry for VideosEntry {
@@ -78,6 +108,16 @@ impl FileEntry {
             thumbnail_path: None,
         }
     }
+
+    pub(crate) fn into_video_audio_entry(self) -> VideoAudioEntry {
+        VideoAudioEntry {
+            size: self.size,
+            path: self.path,
+            modified_date: self.modified_date,
+            fingerprint: Vec::new(),
+            audio_duration_seconds: 0,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -92,6 +132,16 @@ pub struct SimilarVideosParameters {
     pub thumbnail_video_percentage_from_start: u8,
     pub generate_thumbnail_grid_instead_of_single: bool,
     pub thumbnail_grid_tiles_per_side: u8,
+
+    /// When true, compare videos by audio fingerprint instead of visual hash.
+    pub check_audio_content: bool,
+    /// Chromaprint: minimum matching segment duration in seconds.
+    pub minimum_segment_duration: f32,
+    /// Chromaprint: maximum allowed score difference for a segment to be considered a match.
+    pub maximum_difference: f64,
+    /// Only compare audio between videos whose durations differ by at most this fraction.
+    /// E.g. 0.20 means at most 20% difference. Range: 0.0–1.0.
+    pub max_duration_difference_ratio: f64,
 }
 
 pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
@@ -115,10 +165,15 @@ impl SimilarVideosParameters {
         thumbnail_video_percentage_from_start: u8,
         generate_thumbnail_grid_instead_of_single: bool,
         thumbnail_grid_tiles_per_side: u8,
+        check_audio_content: bool,
+        minimum_segment_duration: f32,
+        maximum_difference: f64,
+        max_duration_difference_ratio: f64,
     ) -> Self {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
         assert!(ALLOWED_VID_HASH_DURATION.contains(&duration));
+        assert!(ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.contains(&max_duration_difference_ratio));
         Self {
             tolerance,
             exclude_videos_with_same_size,
@@ -130,18 +185,25 @@ impl SimilarVideosParameters {
             thumbnail_video_percentage_from_start,
             generate_thumbnail_grid_instead_of_single,
             thumbnail_grid_tiles_per_side,
+            check_audio_content,
+            minimum_segment_duration,
+            maximum_difference,
+            max_duration_difference_ratio,
         }
     }
 }
 
 pub struct SimilarVideos {
-    common_data: CommonToolData,
-    information: Info,
-    similar_vectors: Vec<Vec<VideosEntry>>,
-    similar_referenced_vectors: Vec<(VideosEntry, Vec<VideosEntry>)>,
-    videos_hashes: BTreeMap<Vec<u8>, Vec<VideosEntry>>,
-    videos_to_check: BTreeMap<String, VideosEntry>,
-    params: SimilarVideosParameters,
+    pub(crate) common_data: CommonToolData,
+    pub(crate) information: Info,
+    pub(crate) similar_vectors: Vec<Vec<VideosEntry>>,
+    pub(crate) similar_referenced_vectors: Vec<(VideosEntry, Vec<VideosEntry>)>,
+    pub(crate) videos_hashes: BTreeMap<Vec<u8>, Vec<VideosEntry>>,
+    pub(crate) videos_to_check: BTreeMap<String, VideosEntry>,
+    /// Entries for the audio fingerprint pass, keyed by path string.
+    pub(crate) audio_to_check: BTreeMap<String, VideoAudioEntry>,
+    pub(crate) params: SimilarVideosParameters,
+    pub(crate) audio_config: Configuration,
 }
 
 #[derive(Default, Clone, Copy)]

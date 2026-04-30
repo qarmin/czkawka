@@ -34,8 +34,16 @@ use crate::common::model::{CheckingMethod, ToolType};
 // Similar videos
 // 0 - Collecting files
 // 1 - Hiding hard links
-// 2 - Scanning videos
+// 2 - Scanning videos (visual hash)
 // 3 - Creating thumbnails
+
+// Similar videos (VideoAudioContent mode)
+// 0 - Collecting files
+// 1 - Hiding hard links
+// 2 - Loading audio cache
+// 3 - Calculating audio fingerprints
+// 4 - Saving audio cache
+// 5 - Comparing audio fingerprints
 
 // Temporary files
 // 0 - Collecting files
@@ -139,6 +147,10 @@ pub enum CurrentStage {
     SimilarVideosHidingHardLinks,
     SimilarVideosCalculatingHashes,
     SimilarVideosCreatingThumbnails,
+    SimilarVideosAudioCacheLoading,
+    SimilarVideosAudioCalculatingFingerprints,
+    SimilarVideosAudioCacheSaving,
+    SimilarVideosAudioComparingFingerprints,
     BrokenFilesChecking,
     BadExtensionsChecking,
     BadNamesChecking,
@@ -187,6 +199,7 @@ impl ProgressData {
 
         let tool_type_checking_method: Option<ToolType> = match self.checking_method {
             CheckingMethod::AudioTags | CheckingMethod::AudioContent => Some(ToolType::SameMusic),
+            CheckingMethod::VideoAudioContent => Some(ToolType::SimilarVideos),
             CheckingMethod::Name | CheckingMethod::SizeName | CheckingMethod::Size | CheckingMethod::Hash => Some(ToolType::Duplicate),
             CheckingMethod::EmptyFilesContent => Some(ToolType::EmptyFiles),
             CheckingMethod::None => None,
@@ -221,9 +234,13 @@ impl ProgressData {
             | CurrentStage::SameMusicComparingFingerprints
             | CurrentStage::SameMusicCalculatingFingerprints => Some(ToolType::SameMusic),
             CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarImagesCalculatingHashes | CurrentStage::SimilarImagesComparingHashes => Some(ToolType::SimilarImages),
-            CurrentStage::SimilarVideosHidingHardLinks | CurrentStage::SimilarVideosCalculatingHashes | CurrentStage::SimilarVideosCreatingThumbnails => {
-                Some(ToolType::SimilarVideos)
-            }
+            CurrentStage::SimilarVideosHidingHardLinks
+            | CurrentStage::SimilarVideosCalculatingHashes
+            | CurrentStage::SimilarVideosCreatingThumbnails
+            | CurrentStage::SimilarVideosAudioCacheLoading
+            | CurrentStage::SimilarVideosAudioCalculatingFingerprints
+            | CurrentStage::SimilarVideosAudioCacheSaving
+            | CurrentStage::SimilarVideosAudioComparingFingerprints => Some(ToolType::SimilarVideos),
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
             CurrentStage::BadNamesChecking => Some(ToolType::BadNames),
@@ -247,7 +264,11 @@ impl ToolType {
                 _ => 0,
             },
             Self::BrokenFiles | Self::BadExtensions | Self::BadNames => 1,
-            Self::SimilarImages | Self::SimilarVideos | Self::ExifRemover => 3,
+            Self::SimilarImages | Self::ExifRemover => 3,
+            Self::SimilarVideos => match checking_method {
+                CheckingMethod::VideoAudioContent => 5,
+                _ => 3,
+            },
             Self::VideoOptimizer => 2,
             Self::None => unreachable!("ToolType::None is not allowed"),
             Self::SameMusic => match checking_method {
@@ -294,6 +315,10 @@ impl CurrentStage {
             Self::SimilarVideosHidingHardLinks => 1,
             Self::SimilarVideosCalculatingHashes => 2,
             Self::SimilarVideosCreatingThumbnails => 3,
+            Self::SimilarVideosAudioCacheLoading => 2,
+            Self::SimilarVideosAudioCalculatingFingerprints => 3,
+            Self::SimilarVideosAudioCacheSaving => 4,
+            Self::SimilarVideosAudioComparingFingerprints => 5,
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
             Self::BadNamesChecking => 1,
@@ -324,12 +349,18 @@ impl CurrentStage {
                 | Self::DuplicateCacheLoading
                 | Self::DuplicatePreHashCacheLoading
                 | Self::ExifRemoverCacheLoading
+                | Self::SimilarVideosAudioCacheLoading
         )
     }
     pub fn check_if_saving_cache(self) -> bool {
         matches!(
             self,
-            Self::SameMusicCacheSavingFingerprints | Self::SameMusicCacheSavingTags | Self::DuplicateCacheSaving | Self::DuplicatePreHashCacheSaving | Self::ExifRemoverCacheSaving
+            Self::SameMusicCacheSavingFingerprints
+                | Self::SameMusicCacheSavingTags
+                | Self::DuplicateCacheSaving
+                | Self::DuplicatePreHashCacheSaving
+                | Self::ExifRemoverCacheSaving
+                | Self::SimilarVideosAudioCacheSaving
         )
     }
 }
