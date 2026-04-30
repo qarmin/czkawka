@@ -1,7 +1,7 @@
 ## Version ? - ??.??.????r 
 
-# Czkawka Gtk deprecation note
-This is the lastest version of Czkawka Gtk, since now I will not provide any binaries for it, so everyone is encouraged to switch to Krokiet. Project will still be visible in git, I will ensure, that it will compile with czkawka_core and still will be available to compile manually, but all issues and features limited to Czkawka Gtk will be closed(except critical issues, that happens with some more used unnoficial binaries like )   
+# Czkawka GTK Deprecation Notice
+This is the latest version of Czkawka GTK. From now on, I will no longer provide binaries for it, and everyone is encouraged to switch to Krokiet. The project will remain available in the repository. I will ensure it continues to compile with czkawka_core, so it can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds, such as Debian or Docker packages.
 
 ## Breaking changes
 ### Users
