@@ -6,6 +6,8 @@ This is the latest version of Czkawka GTK. From now on, I will no longer provide
 ## Breaking changes
 ### Users
 - Due changes in broken files mode, that now supports multiple checkers and contains additional checks, the file type is no longer stored in cache, so existing cache files are incompatible with this version and will be automatically regenerated.
+- New prehash method, now 
+
 ### Core
 - Switched AV1 encoding from the very slow `libaom-av1` to `libsvtav1` - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
 - Added a noise reduction option to Video Optimizer mode, which can significantly reduce file size for noisy videos - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
@@ -15,6 +17,11 @@ This is the latest version of Czkawka GTK. From now on, I will no longer provide
 - Checking for broken videos was split into fast(ffprobe - only headers) and slow(ffmpeg - full decoding) checks - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
 - Added ability to stop ignoring hardlinks search and added progress tracking for this operation - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
 - Added ability to exclude images/videos with the same resolution - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Added ability to find similar videos, by comparing audio inside them - []()
+- Empty files, now allows to check for files that contains non-printable ascii chars or zeroed files(which contains only null - \0 chars) - []()
+- Temporary files now allows to change searched file extensions - []()
+- Prehash method was changed to hash also end of the file, to earlier detect different files with same start bytes - []()
+- Fonts(TTF, OTF, TTC), Markup(JSON, XML, TOML, YAML, SVG) and Archive(7z, gz/tgz, tar, zst, bz2, xz) files, can be now checked for brokenness - []()
 
 ### CLI
 
