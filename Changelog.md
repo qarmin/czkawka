@@ -1,29 +1,32 @@
-## Version ? - ??.??.????r
+## Version ? - ??.??.????
 
-# Czkawka GTK Deprecation Notice
-This is the latest version of Czkawka GTK. From now on, I will no longer provide binaries for it, and everyone is encouraged to switch to Krokiet. The project will remain available in the repository. I will ensure it continues to compile with czkawka_core, so it can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds, such as Debian or Docker packages.
+## Czkawka GTK Deprecation Notice
+This is the latest version of Czkawka GTK. From now on, I will no longer provide binaries for it, and users are encouraged to switch to Krokiet.
+
+The project will remain available in the repository. I will ensure it continues to compile with `czkawka_core`, so it can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds, such as Debian or Docker packages.
 
 ## Breaking changes
+
 ### Users
-- Due changes in broken files mode, that now supports multiple checkers and contains additional checks, the file type is no longer stored in cache, so existing cache files are incompatible with this version and will be automatically regenerated.
-- New prehash method, now
+- Due to changes in the broken files mode, which now supports multiple checkers and includes additional checks, the file type is no longer stored in the cache. Existing cache files are incompatible with this version and will be automatically regenerated
+- The prehash method has been updated, so cached hash is no longer valid, so it will be automatically regenerated
 
 ### Core
 - Switched AV1 encoding from the very slow `libaom-av1` to `libsvtav1` - [#1888](https://github.com/qarmin/czkawka/pull/1888)
 - Added a noise reduction option to Video Optimizer mode, which can significantly reduce file size for noisy videos - [#1888](https://github.com/qarmin/czkawka/pull/1888)
 - Added support for custom optimization commands in Video Optimizer mode - [#1888](https://github.com/qarmin/czkawka/pull/1888)
 - Added experimental hardware-accelerated video encoding - [#1900](https://github.com/qarmin/czkawka/pull/1900)
-- Broken files now allows to check file with multiple different checkers - [#1900](https://github.com/qarmin/czkawka/pull/1900)
-- Checking for broken videos was split into fast(ffprobe - only headers) and slow(ffmpeg - full decoding) checks - [#1900](https://github.com/qarmin/czkawka/pull/1900)
-- Added ability to stop ignoring hardlinks search and added progress tracking for this operation - [#1900](https://github.com/qarmin/czkawka/pull/1900)
-- Added ability to exclude images/videos with the same resolution - [#1900](https://github.com/qarmin/czkawka/pull/1900)
-- Added ability to find similar videos, by comparing audio inside them - [#1919](https://github.com/qarmin/czkawka/pull/1919)
-- Empty files, now allows to check for files that contains non-printable ascii chars or zeroed files(which contains only null - \0 chars) - [#1919](https://github.com/qarmin/czkawka/pull/1919)
-- Temporary files now allows to change searched file extensions - [#1919](https://github.com/qarmin/czkawka/pull/1919)
-- Prehash method was changed to hash also end of the file, to earlier detect different files with same start bytes - [#1919](https://github.com/qarmin/czkawka/pull/1919)
-- Fonts(TTF, OTF, TTC), Markup(JSON, XML, TOML, YAML, SVG) and Archive(7z, gz/tgz, tar, zst, bz2, xz) files, can be now checked for brokenness - [#1919](https://github.com/qarmin/czkawka/pull/1919)
-- Fixed a bug where relative symlinks were resolved without taking the parent directory into account - [#1900](https://github.com/qarmin/czkawka/pull/1900)
-- Fixed prehash cache bypass that caused full hash computation on all files during a second scan - [#1907](https://github.com/qarmin/czkawka/pull/1907)
+- Broken files can now be checked using multiple checkers - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Checking for broken videos has been split into fast (ffprobe - headers only) and slow (ffmpeg - full decoding) modes - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Added the ability to stop checking for hardlinks along with progress tracking of this operation - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Added the ability to exclude images/videos with the same resolution - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Added the ability to find similar videos by comparing their audio - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Empty files mode now allows detection of files containing only non-printable ASCII characters or null bytes (`\0`) - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Temporary files mode now allows customization of searched file extensions - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Prehash now also hashes the end of files to detect differences earlier - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Added support for detecting corruption in Fonts (TTF, OTF, TTC), Markup (JSON, XML, TOML, YAML, SVG), and Archives (7z, gz/tgz, tar, zst, bz2, xz) - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Fixed a bug where relative symlinks were resolved without considering the parent directory - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Fixed a prehash cache bypass that caused full hash computation on some files during a second scan - [#1907](https://github.com/qarmin/czkawka/pull/1907)
 
 ### CLI
 
@@ -35,24 +38,23 @@ This is the latest version of Czkawka GTK. From now on, I will no longer provide
 - Added a new custom selection popup - [#1809](https://github.com/qarmin/czkawka/pull/1809)
 - Added an image comparison tool to detect visual differences between similar images - [#1888](https://github.com/qarmin/czkawka/pull/1888)
 - Added a context menu (right-click) - [#1888](https://github.com/qarmin/czkawka/pull/1888)
-- File/folder selection dialogs no longer block the main thread - [#1809](https://github.com/qarmin/czkawka/pull/1809)
+- File and folder selection dialogs no longer blocks the main thread - [#1809](https://github.com/qarmin/czkawka/pull/1809)
 - Fixed an issue where thumbnail generation settings were not respected in Similar Videos mode - [#1809](https://github.com/qarmin/czkawka/pull/1809)
 - Added notification support - [#1837](https://github.com/qarmin/czkawka/pull/1837)
-- Femtovg backend no longer have blurry fonts - [#1900](https://github.com/qarmin/czkawka/pull/1900)
-- Changed default select buttons from "select one item" to "select all except one item" - [#1913](https://github.com/qarmin/czkawka/pull/1913)
-- Added ability to choose which select buttons are visible in UI - [#1913](https://github.com/qarmin/czkawka/pull/1913)
-- Added an overlay that blocks UI interaction while a system file dialog is open, which avoids freezing entire ui and "App is not responsisble messages" making it clear the dialog is pending - [#1809](https://github.com/qarmin/czkawka/pull/1809)
-- Added invert selection in group feature - [#1915](https://github.com/qarmin/czkawka/pull/1915)
-- Fixed shortest/longest path selection modes which only worked partially by comparing only paths without file names - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- The femtovg backend no longer produces blurry fonts - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Changed default selection behavior from "select one item" to "select all except one item" - [#1913](https://github.com/qarmin/czkawka/pull/1913)
+- Added the ability to configure which selection buttons are visible in the UI - [#1913](https://github.com/qarmin/czkawka/pull/1913)
+- Added invert selection within groups - [#1915](https://github.com/qarmin/czkawka/pull/1915)
+- Fixed shortest/longest path selection modes, which previously compared only paths without file names - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)
 
 ### Prebuilt binaries
-- Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d` installed on the system)
+- Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d`)
 - Windows ZIP package now includes Krokiet binaries and a README to simplify migration to the new frontend
-- All backends Krokiet binaries on all systems, are now packed into zip files, with additional scripts to open them with selected backend
-- Mac Intel binaries are no longer provided, due very long build times on GitHub CI
+- Krokiet binaries for all backends are now packaged in ZIP files, with additional scripts to launch them with a selected backend
+- Mac Intel binaries are no longer provided due to very long build times on GitHub CI
 - Added installation scripts (`misc/install_scripts/`) for Linux (apt/dnf/pacman/zypper), macOS (Homebrew), and Windows (winget)
 
 ## Version 11.0.1 - 20.02.2026r

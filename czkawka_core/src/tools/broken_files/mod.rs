@@ -32,16 +32,16 @@ pub struct BrokenEntry {
     pub path: PathBuf,
     pub modified_date: u64,
     pub size: u64,
-    pub errors: BTreeMap<CheckedTypesSingle, String>,
+    pub errors: BTreeMap<CheckedTypesSingle, Option<String>>,
 }
 
 impl BrokenEntry {
     pub fn has_errors(&self) -> bool {
-        self.errors.values().any(|e| !e.is_empty())
+        self.errors.values().any(Option::is_some)
     }
 
     pub fn get_error_string(&self) -> String {
-        self.errors.values().filter(|e| !e.is_empty()).cloned().collect::<Vec<_>>().join(", ")
+        self.errors.values().filter_map(Option::as_deref).collect::<Vec<_>>().join(", ")
     }
 }
 
