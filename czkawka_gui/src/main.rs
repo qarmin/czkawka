@@ -75,8 +75,10 @@ pub const CZKAWKA_GTK_TOOL_NUMBER: usize = TOOLS_NUMBER - 3; // Missing exif, vi
 fn main() {
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Czkawka");
+
+    // To remove info dialog about deprecated czkawka, remove exists_krokiet_info_file and set needs_to_open_dialog_about_krokiet to false
     let exists_krokiet_info_file = get_config_cache_path().is_some_and(|cache_config| {
-        let file_path = cache_config.cache_folder.join("krokiet_info_dialog_seen.txt");
+        let file_path = cache_config.cache_folder.join("krokiet_info_dialog_seen2.txt");
         let exists = file_path.exists();
         if !exists {
             let _ = std::fs::write(
