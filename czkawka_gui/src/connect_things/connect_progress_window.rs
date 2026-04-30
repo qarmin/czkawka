@@ -124,13 +124,10 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
         CurrentStage::SameMusicReadingTags => {
             label_stage.set_text(&flg!("progress_scanning_music_tags", progress_ratio_tm(item)));
         }
-        CurrentStage::SameMusicCalculatingFingerprints => {
-            label_stage.set_text(&flg!("progress_scanning_music_content", progress_ratio_tm(item)));
-        }
         CurrentStage::SameMusicComparingTags => {
             label_stage.set_text(&flg!("progress_scanning_music_tags_end", progress_ratio_tm(item)));
         }
-        CurrentStage::SameMusicComparingFingerprints => {
+        CurrentStage::SameMusicCalculatingFingerprints | CurrentStage::SameMusicComparingFingerprints => {
             label_stage.set_text(&flg!("progress_scanning_music_content_end", progress_ratio_tm(item)));
         }
         CurrentStage::SimilarImagesCalculatingHashes => {

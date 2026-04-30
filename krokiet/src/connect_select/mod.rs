@@ -737,7 +737,7 @@ mod tests {
         // long_dir  + short_name → dir=20, name=3  → was sum=23, now key=(20<<32)|3
         let items = vec![
             header,
-            make_item_with_path("/sd", "a_very_long_filename.jpg"), // dir shorter → spared
+            make_item_with_path("/sd", "a_very_long_filename.jpg"),   // dir shorter → spared
             make_item_with_path("/a/much/longer/directory", "b.jpg"), // dir longer → selected
         ];
         let model = create_model_from_model_vec(&items);

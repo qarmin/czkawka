@@ -462,11 +462,10 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
 
     settings.set_similar_videos_audio_check_content(custom_settings.similar_videos_audio_check_content);
-    settings.set_similar_videos_audio_max_duration_diff_ratio(
-        custom_settings
-            .similar_videos_audio_max_duration_diff_ratio
-            .clamp(*ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.start() as f32, *ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.end() as f32),
-    );
+    settings.set_similar_videos_audio_max_duration_diff_ratio(custom_settings.similar_videos_audio_max_duration_diff_ratio.clamp(
+        *ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.start() as f32,
+        *ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.end() as f32,
+    ));
     settings.set_similar_videos_audio_max_duration_diff_ratio_min(*ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.start() as f32);
     settings.set_similar_videos_audio_max_duration_diff_ratio_max(*ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.end() as f32);
     settings.set_similar_videos_audio_minimum_segment_duration(custom_settings.similar_videos_audio_minimum_segment_duration.max(0.0));
@@ -794,7 +793,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_audio_max_duration_diff_ratio,
         similar_videos_audio_minimum_segment_duration,
         similar_videos_audio_maximum_difference,
-        similar_music_sub_audio_check_type,        similar_music_sub_approximate_comparison,
+        similar_music_sub_audio_check_type,
+        similar_music_sub_approximate_comparison,
         similar_music_compare_fingerprints_only_with_similar_titles,
         similar_music_sub_title,
         similar_music_sub_artist,

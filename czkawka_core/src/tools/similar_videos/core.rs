@@ -572,23 +572,19 @@ fn group_entries_by_duration(mut entries: Vec<VideoAudioEntry>, max_ratio: f64) 
     let mut current_group: Vec<VideoAudioEntry> = Vec::new();
 
     for entry in entries {
-        if current_group.is_empty() {
-            current_group.push(entry);
-        } else {
+        if !current_group.is_empty() {
             #[expect(clippy::indexing_slicing)]
             let anchor = f64::from(current_group[0].audio_duration_seconds);
             let this = f64::from(entry.audio_duration_seconds);
-            if anchor == 0.0 || this <= anchor * (1.0 + max_ratio) {
-                current_group.push(entry);
-            } else {
+            if !(anchor == 0.0 || this <= anchor * (1.0 + max_ratio)) {
                 if current_group.len() >= 2 {
                     groups.push(mem::take(&mut current_group));
                 } else {
                     current_group.clear();
                 }
-                current_group.push(entry);
             }
         }
+        current_group.push(entry);
     }
     if current_group.len() >= 2 {
         groups.push(current_group);

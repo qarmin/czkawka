@@ -361,14 +361,14 @@ fn stage_label(stage: CurrentStage) -> String {
         CurrentStage::SimilarImagesCalculatingHashes => flc!("stage_calculating_image_hashes"),
         CurrentStage::SimilarImagesComparingHashes => flc!("stage_comparing_images"),
         CurrentStage::SimilarVideosCalculatingHashes => flc!("stage_calculating_video_hashes"),
-        CurrentStage::SimilarVideosAudioCalculatingFingerprints => flc!("stage_calculating_music_fingerprints"),
-        CurrentStage::SimilarVideosAudioComparingFingerprints => flc!("stage_comparing_fingerprints"),
         CurrentStage::BrokenFilesChecking => flc!("stage_checking_files"),
         CurrentStage::BadExtensionsChecking => flc!("stage_checking_extensions"),
         CurrentStage::BadNamesChecking => flc!("stage_checking_names"),
         CurrentStage::SameMusicReadingTags => flc!("stage_reading_music_tags"),
         CurrentStage::SameMusicComparingTags => flc!("stage_comparing_tags"),
-        CurrentStage::SameMusicCalculatingFingerprints => flc!("stage_calculating_music_fingerprints"),
+        CurrentStage::SimilarVideosAudioCalculatingFingerprints | CurrentStage::SimilarVideosAudioComparingFingerprints | CurrentStage::SameMusicCalculatingFingerprints => {
+            flc!("stage_calculating_music_fingerprints")
+        }
         CurrentStage::SameMusicComparingFingerprints => flc!("stage_comparing_fingerprints"),
         CurrentStage::ExifRemoverExtractingTags => flc!("stage_extracting_exif"),
         CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails => flc!("stage_creating_video_thumbnails"),
