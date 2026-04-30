@@ -1,4 +1,4 @@
-## Version ? - ??.??.????r 
+## Version ? - ??.??.????r
 
 # Czkawka GTK Deprecation Notice
 This is the latest version of Czkawka GTK. From now on, I will no longer provide binaries for it, and everyone is encouraged to switch to Krokiet. The project will remain available in the repository. I will ensure it continues to compile with czkawka_core, so it can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds, such as Debian or Docker packages.
@@ -6,48 +6,54 @@ This is the latest version of Czkawka GTK. From now on, I will no longer provide
 ## Breaking changes
 ### Users
 - Due changes in broken files mode, that now supports multiple checkers and contains additional checks, the file type is no longer stored in cache, so existing cache files are incompatible with this version and will be automatically regenerated.
-- New prehash method, now 
+- New prehash method, now
 
 ### Core
-- Switched AV1 encoding from the very slow `libaom-av1` to `libsvtav1` - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
-- Added a noise reduction option to Video Optimizer mode, which can significantly reduce file size for noisy videos - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
-- Added support for custom optimization commands in Video Optimizer mode - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
-- Added experimental hardware-accelerated video encoding - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
-- Broken files now allows to check file with multiple different checkers - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
-- Checking for broken videos was split into fast(ffprobe - only headers) and slow(ffmpeg - full decoding) checks - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
-- Added ability to stop ignoring hardlinks search and added progress tracking for this operation - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
-- Added ability to exclude images/videos with the same resolution - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
-- Added ability to find similar videos, by comparing audio inside them - []()
-- Empty files, now allows to check for files that contains non-printable ascii chars or zeroed files(which contains only null - \0 chars) - []()
-- Temporary files now allows to change searched file extensions - []()
-- Prehash method was changed to hash also end of the file, to earlier detect different files with same start bytes - []()
-- Fonts(TTF, OTF, TTC), Markup(JSON, XML, TOML, YAML, SVG) and Archive(7z, gz/tgz, tar, zst, bz2, xz) files, can be now checked for brokenness - []()
+- Switched AV1 encoding from the very slow `libaom-av1` to `libsvtav1` - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- Added a noise reduction option to Video Optimizer mode, which can significantly reduce file size for noisy videos - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- Added support for custom optimization commands in Video Optimizer mode - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- Added experimental hardware-accelerated video encoding - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Broken files now allows to check file with multiple different checkers - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Checking for broken videos was split into fast(ffprobe - only headers) and slow(ffmpeg - full decoding) checks - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Added ability to stop ignoring hardlinks search and added progress tracking for this operation - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Added ability to exclude images/videos with the same resolution - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Added ability to find similar videos, by comparing audio inside them - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Empty files, now allows to check for files that contains non-printable ascii chars or zeroed files(which contains only null - \0 chars) - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Temporary files now allows to change searched file extensions - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Prehash method was changed to hash also end of the file, to earlier detect different files with same start bytes - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Fonts(TTF, OTF, TTC), Markup(JSON, XML, TOML, YAML, SVG) and Archive(7z, gz/tgz, tar, zst, bz2, xz) files, can be now checked for brokenness - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Fixed a bug where relative symlinks were resolved without taking the parent directory into account - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Fixed prehash cache bypass that caused full hash computation on all files during a second scan - [#1907](https://github.com/qarmin/czkawka/pull/1907)
 
 ### CLI
 
 ### GTK GUI
-- Fixed a crash when using the sort button - [#1837](https://github.com/qarmin/czkawka/pull/1837)  
+- Fixed a crash when using the sort button - [#1837](https://github.com/qarmin/czkawka/pull/1837)
 
 ### Krokiet
-- Added separate buttons for moving files to trash and permanently deleting them - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
-- Added a new custom selection popup - [#1809](https://github.com/qarmin/czkawka/pull/1809)  
-- Added an image comparison tool to detect visual differences between similar images - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
-- Added a context menu (right-click) - [#1888](https://github.com/qarmin/czkawka/pull/1888)  
-- File/folder selection dialogs no longer block the main thread - [#1809](https://github.com/qarmin/czkawka/pull/1809)  
-- Fixed an issue where thumbnail generation settings were not respected in Similar Videos mode - [#1809](https://github.com/qarmin/czkawka/pull/1809)  
-- Added notification support - [#1837](https://github.com/qarmin/czkawka/pull/1837)  
-- Femtovg backend no longer have blurry fonts - [#1900](https://github.com/qarmin/czkawka/pull/1900)  
+- Added separate buttons for moving files to trash and permanently deleting them - [#1900](https://github.com/qarmin/czkawka/pull/1900)
+- Added a new custom selection popup - [#1809](https://github.com/qarmin/czkawka/pull/1809)
+- Added an image comparison tool to detect visual differences between similar images - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- Added a context menu (right-click) - [#1888](https://github.com/qarmin/czkawka/pull/1888)
+- File/folder selection dialogs no longer block the main thread - [#1809](https://github.com/qarmin/czkawka/pull/1809)
+- Fixed an issue where thumbnail generation settings were not respected in Similar Videos mode - [#1809](https://github.com/qarmin/czkawka/pull/1809)
+- Added notification support - [#1837](https://github.com/qarmin/czkawka/pull/1837)
+- Femtovg backend no longer have blurry fonts - [#1900](https://github.com/qarmin/czkawka/pull/1900)
 - Changed default select buttons from "select one item" to "select all except one item" - [#1913](https://github.com/qarmin/czkawka/pull/1913)
 - Added ability to choose which select buttons are visible in UI - [#1913](https://github.com/qarmin/czkawka/pull/1913)
+- Added an overlay that blocks UI interaction while a system file dialog is open, which avoids freezing entire ui and "App is not responsisble messages" making it clear the dialog is pending - [#1809](https://github.com/qarmin/czkawka/pull/1809)
+- Added invert selection in group feature - [#1915](https://github.com/qarmin/czkawka/pull/1915)
+- Fixed shortest/longest path selection modes which only worked partially by - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 
 ### Cedinia
-- Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)  
+- Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)
 
 ### Prebuilt binaries
-- Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d` installed on the system)  
+- Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d` installed on the system)
 - Windows ZIP package now includes Krokiet binaries and a README to simplify migration to the new frontend
 - All backends Krokiet binaries on all systems, are now packed into zip files, with additional scripts to open them with selected backend
 - Mac Intel binaries are no longer provided, due very long build times on GitHub CI
+- Added installation scripts (`misc/install_scripts/`) for Linux (auto-detects apt/dnf/pacman/zypper), macOS (Homebrew), and Windows (winget)
 
 ## Version 11.0.1 - 20.02.2026r
 ### Core
@@ -210,11 +216,11 @@ This is the latest version of Czkawka GTK. From now on, I will no longer provide
 - Improved appearance of bottom directories panel - [#1569](https://github.com/qarmin/czkawka/pull/1569)
 - Some buttons, are disabled, when there is no files selected - [#1586](https://github.com/qarmin/czkawka/pull/1586)
 - Added info about the number of items selected to delete - [#1589](https://github.com/qarmin/czkawka/pull/1589)
-- Limit image preview to max 1024 width/height, to speedup preview loading and fixing crash in software renderer - [#1590](https://github.com/qarmin/czkawka/pull/1590) 
+- Limit image preview to max 1024 width/height, to speedup preview loading and fixing crash in software renderer - [#1590](https://github.com/qarmin/czkawka/pull/1590)
 
 ### External
 - There is a new unofficial Tauri-based frontend for Czkawka - [Czkawka Tauri](https://github.com/shixinhuang99/czkawka-tauri)
-- Czkawka 8.0.0 is now available in Debian Sid - [Cli](https://packages.debian.org/sid/czkawka-cli)/[Gui Gtk](https://packages.debian.org/sid/czkawka-gui) 
+- Czkawka 8.0.0 is now available in Debian Sid - [Cli](https://packages.debian.org/sid/czkawka-cli)/[Gui Gtk](https://packages.debian.org/sid/czkawka-gui)
 
 ### CI
 - Compilation for 32-bit targets is now checked in CI
@@ -272,7 +278,7 @@ This is the latest version of Czkawka GTK. From now on, I will no longer provide
 - Arm linux builds needs at least Ubuntu 24.04
 - Gtk 4.12 is used to build windows gtk gui instead gtk 4.10
 - Dropping support for snap builds - too much time-consuming to maintain and testing(also it is broken currently)
-- Removed native windows build krokiet version - now it is available only cross-compiled version from linux(should not be any difference) 
+- Removed native windows build krokiet version - now it is available only cross-compiled version from linux(should not be any difference)
 
 ## Version 8.0.0 - 11.10.2024r
 

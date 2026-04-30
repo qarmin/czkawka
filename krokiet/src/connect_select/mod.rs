@@ -195,7 +195,9 @@ fn extract_comparable_field(model: &SingleMainListModel, property: Property, act
         Property::PathLength => {
             let path_len = model.val_str.iter().nth(active_tab.get_str_path_idx()).expect("can find file path property").len();
             let name_len = model.val_str.iter().nth(active_tab.get_str_name_idx()).expect("can find file name property").len();
-            (path_len + name_len) as u64
+            // Primary key: directory path length; secondary key: filename length.
+            // Packed into a single u64 so the existing comparison infrastructure works unchanged.
+            ((path_len as u64) << 32) | (name_len as u64)
         }
         Property::Resolution => val_ints.nth(active_tab.get_int_pixel_count_idx()).expect("can find pixel count proerty") as u64,
     }
@@ -662,12 +664,12 @@ mod tests {
     #[test]
     fn select_all_except_longest_path_spares_item_with_longest_full_path() {
         // StrDataDuplicateFiles: [Size_display, Name, Path, ModDate]
-        // Full path length = path.len() + name.len()
+        // Primary sort key: directory path length; secondary: filename length.
         let mut header = crate::test_common::get_main_list_model();
         header.header_row = true;
-        // short: "/a" + "x.jpg"    = 7
-        // medium: "/ab" + "x.jpg"  = 8
-        // long: "/abc" + "x.jpg"   = 9
+        // short: "/a" (dir=2) + "x.jpg"    → key (2, 5)
+        // medium: "/ab" (dir=3) + "x.jpg"  → key (3, 5)
+        // long: "/abc" (dir=4) + "x.jpg"   → key (4, 5)
         let items = vec![
             header,
             make_item_with_path("/a", "x.jpg"),
@@ -685,6 +687,7 @@ mod tests {
 
     #[test]
     fn select_all_except_shortest_path_spares_item_with_shortest_full_path() {
+        // Primary sort key: directory path length; secondary: filename length.
         let mut header = crate::test_common::get_main_list_model();
         header.header_row = true;
         let items = vec![
@@ -721,5 +724,27 @@ mod tests {
         assert!(!new_model.row_data(1).unwrap().checked); // IMG_0001.JPG – spared (shortest)
         assert!(new_model.row_data(2).unwrap().checked);
         assert!(new_model.row_data(3).unwrap().checked);
+    }
+
+    #[test]
+    fn select_all_except_shortest_path_prefers_directory_length_over_filename_length() {
+        // File in a shorter directory but with a long name must still be spared
+        // over a file in a longer directory with a short name.
+        // Before the fix, summing lengths could invert this result.
+        let mut header = crate::test_common::get_main_list_model();
+        header.header_row = true;
+        // short_dir + long_name  → dir=3, name=20 → was sum=23, now key=(3<<32)|20
+        // long_dir  + short_name → dir=20, name=3  → was sum=23, now key=(20<<32)|3
+        let items = vec![
+            header,
+            make_item_with_path("/sd", "a_very_long_filename.jpg"), // dir shorter → spared
+            make_item_with_path("/a/much/longer/directory", "b.jpg"), // dir longer → selected
+        ];
+        let model = create_model_from_model_vec(&items);
+
+        let (_checked, _unchecked, new_model) = select_all_except_by_property(&model, ActiveTab::DuplicateFiles, Property::PathLength, false);
+
+        assert!(!new_model.row_data(1).unwrap().checked); // shorter dir – spared
+        assert!(new_model.row_data(2).unwrap().checked); // longer dir – selected
     }
 }
