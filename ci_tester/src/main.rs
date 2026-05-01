@@ -23,7 +23,7 @@ pub(crate) struct CollectedFiles {
 pub(crate) static CZKAWKA_PATH: state::InitCell<String> = state::InitCell::new();
 static COLLECTED_FILES: state::InitCell<CollectedFiles> = state::InitCell::new();
 
-const ATTEMPTS: u32 = 10;
+const ATTEMPTS: u32 = 5;
 
 struct Failure {
     name: String,
