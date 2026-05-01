@@ -46,6 +46,7 @@ The project will remain available in the repository. I will ensure it continues 
 - Added the ability to configure which selection buttons are visible in the UI - [#1913](https://github.com/qarmin/czkawka/pull/1913)
 - Added invert selection within groups - [#1915](https://github.com/qarmin/czkawka/pull/1915)
 - Fixed shortest/longest path selection modes, which previously compared only paths without file names - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Ability to restore save/restore data in custom popup - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)
