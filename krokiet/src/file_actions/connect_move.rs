@@ -103,21 +103,32 @@ fn move_single_item(data: &SimplerSingleMainListModel, path_idx: usize, name_idx
 
 // Tries to copy file/folder, and returns error if it fails
 fn try_to_copy_item(input_file: &Path, output_file: &Path) -> Result<(), String> {
-    let res = if input_file.is_dir() {
-        let options = fs_extra::dir::CopyOptions::new();
-        fs_extra::dir::copy(input_file, output_file, &options) // TODO consider to use less buggy library
-    } else {
-        let options = fs_extra::file::CopyOptions::new();
-        fs_extra::file::copy(input_file, output_file, &options)
-    };
-    if let Err(e) = res {
-        return Err(flk!(
+    copy_with_attrs(input_file, output_file).map_err(|e| {
+        flk!(
             "rust_error_copying_file",
             input = input_file.to_string_lossy().to_string(),
             output = output_file.to_string_lossy().to_string(),
             reason = e.to_string()
-        ));
+        )
+    })
+}
+
+fn copy_with_attrs(src: &Path, dst: &Path) -> std::io::Result<()> {
+    let metadata = src.metadata()?;
+    if metadata.is_dir() {
+        fs::create_dir_all(dst)?;
+        for entry in fs::read_dir(src)? {
+            let entry = entry?;
+            copy_with_attrs(&entry.path(), &dst.join(entry.file_name()))?;
+        }
+    } else {
+        fs::copy(src, dst)?;
+        let times = fs::FileTimes::new()
+            .set_accessed(metadata.accessed()?)
+            .set_modified(metadata.modified()?);
+        fs::OpenOptions::new().write(true).open(dst)?.set_times(times)?;
     }
+    fs::set_permissions(dst, metadata.permissions())?;
     Ok(())
 }
 
