@@ -123,9 +123,7 @@ fn copy_with_attrs(src: &Path, dst: &Path) -> std::io::Result<()> {
         }
     } else {
         fs::copy(src, dst)?;
-        let times = fs::FileTimes::new()
-            .set_accessed(metadata.accessed()?)
-            .set_modified(metadata.modified()?);
+        let times = fs::FileTimes::new().set_accessed(metadata.accessed()?).set_modified(metadata.modified()?);
         fs::OpenOptions::new().write(true).open(dst)?.set_times(times)?;
     }
     fs::set_permissions(dst, metadata.permissions())?;
