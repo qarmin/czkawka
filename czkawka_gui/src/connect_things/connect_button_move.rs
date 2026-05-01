@@ -166,11 +166,7 @@ fn move_item_preserving_attrs(src: &Path, dst: &Path) -> std::io::Result<()> {
         return Ok(());
     }
     copy_item_preserving_attrs(src, dst)?;
-    if src.is_dir() {
-        std::fs::remove_dir_all(src)
-    } else {
-        std::fs::remove_file(src)
-    }
+    if src.is_dir() { std::fs::remove_dir_all(src) } else { std::fs::remove_file(src) }
 }
 
 fn copy_item_preserving_attrs(src: &Path, dst: &Path) -> std::io::Result<()> {
@@ -183,9 +179,7 @@ fn copy_item_preserving_attrs(src: &Path, dst: &Path) -> std::io::Result<()> {
         }
     } else {
         std::fs::copy(src, dst)?;
-        let times = std::fs::FileTimes::new()
-            .set_accessed(metadata.accessed()?)
-            .set_modified(metadata.modified()?);
+        let times = std::fs::FileTimes::new().set_accessed(metadata.accessed()?).set_modified(metadata.modified()?);
         std::fs::OpenOptions::new().write(true).open(dst)?.set_times(times)?;
     }
     std::fs::set_permissions(dst, metadata.permissions())?;
