@@ -297,16 +297,19 @@ fn test_dup_detect_manual_copy(dir: &str) -> Result<(), String> {
 // ─── reference directory edge-cases ──────────────────────────────────────────
 
 /// Reference files are NEVER subject to deletion, regardless of the -D strategy.
+ /// Furthermore, when a reference directory is active, czkawka unconditionally
+/// deletes ALL non-reference duplicates (the deletion strategy such as AEO/AEN
+/// is bypassed entirely for ref-mode groups).
 ///
 /// Layout:
-///   ref/master.bin          (old mtime – would be kept by AEO anyway, but is ref)
-///   scan/old_copy.bin       (old mtime)
-///   scan/new_copy.bin       (new mtime)
+///   ref/master.bin          (old mtime – reference, always protected)
+///   scan/old_copy.bin       (mtime 2021 – non-ref)
+///   scan/new_copy.bin       (mtime 2024 – non-ref)
 ///
-/// With -D AEO (all except oldest):
+/// With -D AEO and a reference dir:
 ///   - ref/master.bin  → kept (reference, untouchable)
-///   - scan/old_copy.bin → kept (oldest among non-ref files)
-///   - scan/new_copy.bin → deleted (newer non-ref file)
+///   - scan/old_copy.bin → deleted (ALL non-ref copies removed unconditionally)
+///   - scan/new_copy.bin → deleted (same)
 fn test_ref_never_deleted_aeo(dir: &str) -> Result<(), String> {
     let content   = make_content(6);
     let ref_file  = format!("{dir}/ref/master.bin");
@@ -329,9 +332,9 @@ fn test_ref_never_deleted_aeo(dir: &str) -> Result<(), String> {
         false,
     )?;
 
-    ensure_exists(&ref_file)?;   // ref: always kept
-    ensure_exists(&scan_old)?;   // oldest non-ref: kept by AEO
-    ensure_missing(&scan_new)    // newer non-ref: deleted by AEO
+    ensure_exists(&ref_file)?;    // ref: always kept
+    ensure_missing(&scan_old)?;   // non-ref: unconditionally deleted in ref mode
+    ensure_missing(&scan_new)     // non-ref: unconditionally deleted in ref mode
 }
 
 /// When every duplicate in a group lives in a reference directory, there are
@@ -364,13 +367,19 @@ fn test_ref_all_dups_in_ref_no_scan_deletions(dir: &str) -> Result<(), String> {
     ensure_exists(&format!("{dir}/ref/copy_b.bin"))
 }
 
-/// AEN (all except newest) applied to non-reference files only.
-/// The reference file's age does not influence which non-ref copy survives.
+/// With a reference directory, ALL non-ref duplicates are unconditionally deleted,
+/// even when a "keep one" strategy like AEN is used.  The strategy is bypassed
+/// in ref mode; only HARD is handled specially (hardlink instead of delete).
 ///
 /// Layout:
 ///   ref/master.bin           (mtime: 2024 – newest overall, but it's a ref)
-///   scan/older_copy.bin      (mtime: 2021)
-///   scan/newer_copy.bin      (mtime: 2023 – newest among non-ref → kept by AEN)
+///   scan/older_copy.bin      (mtime: 2021 – non-ref)
+///   scan/newer_copy.bin      (mtime: 2023 – non-ref, newer among non-ref)
+///
+/// With -D AEN and a reference dir:
+///   - ref/master.bin    → kept (reference, untouchable)
+///   - scan/older_copy.bin → deleted (ALL non-ref copies removed unconditionally)
+///   - scan/newer_copy.bin → deleted (same – NOT kept even though it's "newest non-ref")
 fn test_ref_aen_keeps_newest_nonref(dir: &str) -> Result<(), String> {
     let content = make_content(9);
     let ref_file   = format!("{dir}/ref/master.bin");
@@ -381,7 +390,7 @@ fn test_ref_aen_keeps_newest_nonref(dir: &str) -> Result<(), String> {
     write_file(&scan_older, &content)?;
     write_file(&scan_newer, &content)?;
 
-    set_mtime(&ref_file,   "202401010000")?;  // 2024 (ref, not subject to deletion)
+    set_mtime(&ref_file,   "202401010000")?;  // 2024 (ref)
     set_mtime(&scan_older, "202101010000")?;  // 2021
     set_mtime(&scan_newer, "202301010000")?;  // 2023 – newest non-ref
 
@@ -394,8 +403,8 @@ fn test_ref_aen_keeps_newest_nonref(dir: &str) -> Result<(), String> {
     )?;
 
     ensure_exists(&ref_file)?;    // ref: never touched
-    ensure_missing(&scan_older)?; // older non-ref: deleted by AEN
-    ensure_exists(&scan_newer)    // newest non-ref: kept by AEN
+    ensure_missing(&scan_older)?; // non-ref: unconditionally deleted in ref mode
+    ensure_missing(&scan_newer)   // non-ref: unconditionally deleted in ref mode
 }
 
 /// With -r + -D HARD the non-reference copy should be hardlinked to the
