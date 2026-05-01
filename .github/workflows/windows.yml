@@ -159,14 +159,42 @@ jobs:
       - name: Install additional dependencies
         # gio is for the build script
         run: |
-          dnf install curl wget2 wget unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme wine -y && dnf clean all -y
+          dnf install curl wget2 wget unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme wine mingw64-cmake mingw64-gcc-c++ mingw64-libde265-devel -y && dnf clean all -y
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           source "$HOME/.cargo/env"
           rustup default 1.92.0
           rustup target add x86_64-pc-windows-gnu
-          
+
           mkdir -p package
           curl -L https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -o rcedit-x64.exe
+
+      - name: Build libheif for Windows
+        run: |
+          HEIF_VERSION=1.19.5
+          mkdir -p /tmp/libheif_build && cd /tmp/libheif_build
+          curl -L "https://github.com/strukturag/libheif/releases/download/v${HEIF_VERSION}/libheif-${HEIF_VERSION}.tar.gz" -o libheif.tar.gz
+          tar xzf libheif.tar.gz
+          cd libheif-${HEIF_VERSION}
+          mkdir _build && cd _build
+          mingw64-cmake \
+            -DCMAKE_INSTALL_PREFIX=$MINGW_PREFIX \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWITH_EXAMPLES=OFF \
+            -DWITH_LIBSHARPYUV=OFF \
+            -DWITH_X265=OFF \
+            -DWITH_AOM_ENCODER=OFF \
+            -DWITH_AOM_DECODER=OFF \
+            -DWITH_DAV1D=OFF \
+            -DWITH_FFMPEG_DECODER=OFF \
+            -DWITH_JPEG_DECODER=OFF \
+            -DWITH_JPEG_ENCODER=OFF \
+            -DWITH_OpenJPEG_DECODER=OFF \
+            -DWITH_OpenJPEG_ENCODER=OFF \
+            -DWITH_KVAZAAR=OFF \
+            -DWITH_LIBDE265=ON \
+            ..
+          make -j$(nproc) && make install
+          cd / && rm -rf /tmp/libheif_build
 
       - name: Cross compile for Windows - Release
         if: ${{ github.ref == 'refs/heads/master' }}
