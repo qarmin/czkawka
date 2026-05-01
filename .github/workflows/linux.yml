@@ -228,7 +228,7 @@ jobs:
 
       - name: Install basic libraries
         run: |
-          sudo apt update || true; sudo apt install musl-tools -y
+          sudo apt update || true; sudo apt install musl-tools libheif-dev libde265-dev -y
 
       - name: Setup rust version
         run: |
@@ -240,8 +240,8 @@ jobs:
         run: |
           sed -i 's/#lto = /lto = /g' Cargo.toml
           sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
-          cargo build --release --bin czkawka_cli --target x86_64-unknown-linux-musl
-          
+          PKG_CONFIG_ALLOW_CROSS=1 cargo build --release --bin czkawka_cli --target x86_64-unknown-linux-musl
+
           mv target/x86_64-unknown-linux-musl/release/czkawka_cli linux_czkawka_cli_musl
 
       - name: Build Debug
@@ -249,8 +249,8 @@ jobs:
         run: |
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
-          cargo build --bin czkawka_cli --target x86_64-unknown-linux-musl
-          
+          PKG_CONFIG_ALLOW_CROSS=1 cargo build --bin czkawka_cli --target x86_64-unknown-linux-musl
+
           mv target/x86_64-unknown-linux-musl/debug/czkawka_cli linux_czkawka_cli_musl
 
       - name: Store Linux CLI
