@@ -38,17 +38,15 @@ pub(crate) fn connect_progress_gathering(app: &MainWindow, progress_receiver: Re
 fn progress_save_load_cache(item: &ProgressData) -> ProgressToSend {
     let step_name = match item.sstage {
         CurrentStage::SameMusicCacheLoadingTags => flk!("rust_loading_tags_cache"),
-        CurrentStage::SameMusicCacheLoadingFingerprints => flk!("rust_loading_fingerprints_cache"),
+        CurrentStage::SameMusicCacheLoadingFingerprints | CurrentStage::SimilarVideosAudioCacheLoading => flk!("rust_loading_fingerprints_cache"),
         CurrentStage::SameMusicCacheSavingTags => flk!("rust_saving_tags_cache"),
-        CurrentStage::SameMusicCacheSavingFingerprints => flk!("rust_saving_fingerprints_cache"),
+        CurrentStage::SameMusicCacheSavingFingerprints | CurrentStage::SimilarVideosAudioCacheSaving => flk!("rust_saving_fingerprints_cache"),
         CurrentStage::DuplicatePreHashCacheLoading => flk!("rust_loading_prehash_cache"),
         CurrentStage::DuplicatePreHashCacheSaving => flk!("rust_saving_prehash_cache"),
         CurrentStage::DuplicateCacheLoading => flk!("rust_loading_hash_cache"),
         CurrentStage::DuplicateCacheSaving => flk!("rust_saving_hash_cache"),
         CurrentStage::ExifRemoverCacheLoading => flk!("rust_loading_exif_cache"),
         CurrentStage::ExifRemoverCacheSaving => flk!("rust_saving_exif_cache"),
-        CurrentStage::SimilarVideosAudioCacheLoading => flk!("rust_loading_fingerprints_cache"),
-        CurrentStage::SimilarVideosAudioCacheSaving => flk!("rust_saving_fingerprints_cache"),
         CurrentStage::DeletingFiles
         | CurrentStage::RenamingFiles
         | CurrentStage::MovingFiles
@@ -119,14 +117,14 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
     let size_stats = format!("{}/{}", format_size(item.bytes_checked, BINARY), format_size(item.bytes_to_check, BINARY));
     let step_name = match item.sstage {
         CurrentStage::SameMusicReadingTags => flk!("rust_checked_tags", items_stats = items_stats),
-        CurrentStage::SameMusicCalculatingFingerprints => flk!("rust_checked_content", items_stats = items_stats, size_stats = size_stats),
+        CurrentStage::SameMusicCalculatingFingerprints | CurrentStage::SimilarVideosAudioCalculatingFingerprints => {
+            flk!("rust_checked_content", items_stats = items_stats, size_stats = size_stats)
+        }
         CurrentStage::SameMusicComparingTags => flk!("rust_compared_tags", items_stats = items_stats),
-        CurrentStage::SameMusicComparingFingerprints => flk!("rust_compared_content", items_stats = items_stats),
+        CurrentStage::SameMusicComparingFingerprints | CurrentStage::SimilarVideosAudioComparingFingerprints => flk!("rust_compared_content", items_stats = items_stats),
         CurrentStage::SimilarImagesCalculatingHashes => flk!("rust_hashed_images", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::SimilarImagesComparingHashes => flk!("rust_compared_image_hashes", items_stats = items_stats),
         CurrentStage::SimilarVideosCalculatingHashes => flk!("rust_hashed_videos", items_stats = items_stats),
-        CurrentStage::SimilarVideosAudioCalculatingFingerprints => flk!("rust_checked_content", items_stats = items_stats, size_stats = size_stats),
-        CurrentStage::SimilarVideosAudioComparingFingerprints => flk!("rust_compared_content", items_stats = items_stats),
         CurrentStage::BrokenFilesChecking => flk!("rust_checked_files", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::BadExtensionsChecking => flk!("rust_checked_files_bad_extensions", items_stats = items_stats),
         CurrentStage::BadNamesChecking => flk!("rust_checked_files_bad_names", items_stats = items_stats),

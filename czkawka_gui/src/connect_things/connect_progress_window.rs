@@ -127,7 +127,7 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
         CurrentStage::SameMusicComparingTags => {
             label_stage.set_text(&flg!("progress_scanning_music_tags_end", progress_ratio_tm(item)));
         }
-        CurrentStage::SameMusicCalculatingFingerprints | CurrentStage::SameMusicComparingFingerprints => {
+        CurrentStage::SameMusicCalculatingFingerprints | CurrentStage::SameMusicComparingFingerprints | CurrentStage::SimilarVideosAudioComparingFingerprints => {
             label_stage.set_text(&flg!("progress_scanning_music_content_end", progress_ratio_tm(item)));
         }
         CurrentStage::SimilarImagesCalculatingHashes => {
@@ -144,9 +144,6 @@ fn progress_default(gui_data: &GuiData, item: &ProgressData) {
         }
         CurrentStage::SimilarVideosAudioCalculatingFingerprints => {
             label_stage.set_text(&flg!("progress_scanning_music_content", progress_ratio_tm(item)));
-        }
-        CurrentStage::SimilarVideosAudioComparingFingerprints => {
-            label_stage.set_text(&flg!("progress_scanning_music_content_end", progress_ratio_tm(item)));
         }
         CurrentStage::BrokenFilesChecking => {
             label_stage.set_text(&flg!("progress_scanning_broken_files", progress_ratio_tm(item)));
