@@ -102,12 +102,12 @@ fn check_same_inode(_a: &str, _b: &str) -> Result<(), String> { Ok(()) }
 #[cfg(not(unix))]
 fn check_nlink(_path: &str, _expected: u64) -> Result<(), String> { Ok(()) }
 
-// Unique content per test so we don't accidentally match other files.
-const CONTENT_HL_TWO_DIRS: &[u8]       = b"ci_tester:hardlink_two_dirs:v1 - unique payload 111111111";
-const CONTENT_HL_SIZE_ONLY: &[u8]      = b"ci_tester:hardlink_size_only:v1 - unique payload 222222222";
-const CONTENT_HL_REF: &[u8]            = b"ci_tester:hardlink_ref_dir:v1 - unique payload 333333333";
-const CONTENT_HL_SAME_DIR: &[u8]       = b"ci_tester:hardlink_same_dir:v1 - unique payload 444444444";
-const CONTENT_HL_ALREADY: &[u8]        = b"ci_tester:hardlink_already:v1  - unique payload 555555555";
+/// Returns 16 KiB of deterministic content that is unique per `tag`.
+/// Files must exceed the default dup minimum size of 8 192 bytes to be
+/// detected without `-m 1`.
+fn make_content(tag: u8) -> Vec<u8> {
+    (0..16_384usize).map(|i| tag ^ ((i & 0xff) as u8)).collect()
+}
 
 // ─── individual tests ─────────────────────────────────────────────────────────
 
@@ -120,10 +120,11 @@ const CONTENT_HL_ALREADY: &[u8]        = b"ci_tester:hardlink_already:v1  - uniq
 ///
 /// Expected after `dup -D HARD -W`: both files exist and share the same inode.
 fn test_hardlink_two_dirs(dir: &str) -> Result<(), String> {
+    let content = make_content(1);
     let file_a = format!("{dir}/a/file1.bin");
     let file_b = format!("{dir}/b/file2.bin");
-    write_file(&file_a, CONTENT_HL_TWO_DIRS)?;
-    write_file(&file_b, CONTENT_HL_TWO_DIRS)?;
+    write_file(&file_a, &content)?;
+    write_file(&file_b, &content)?;
 
     let czkawka = crate::CZKAWKA_PATH.get().as_str();
     crate::run_with_good_status(
@@ -140,10 +141,11 @@ fn test_hardlink_two_dirs(dir: &str) -> Result<(), String> {
 /// Same scenario as above but using SIZE-only comparison (`-s SIZE`).
 /// This matches the exact flags used in the original bug report.
 fn test_hardlink_two_dirs_size_only(dir: &str) -> Result<(), String> {
+    let content = make_content(2);
     let file_a = format!("{dir}/a/file1.bin");
     let file_b = format!("{dir}/b/file2.bin");
-    write_file(&file_a, CONTENT_HL_SIZE_ONLY)?;
-    write_file(&file_b, CONTENT_HL_SIZE_ONLY)?;
+    write_file(&file_a, &content)?;
+    write_file(&file_b, &content)?;
 
     let czkawka = crate::CZKAWKA_PATH.get().as_str();
     crate::run_with_good_status(
@@ -166,10 +168,11 @@ fn test_hardlink_two_dirs_size_only(dir: &str) -> Result<(), String> {
 ///
 /// Expected: duplicate.bin gets the same inode as original.bin.
 fn test_hardlink_reference_dir(dir: &str) -> Result<(), String> {
+    let content = make_content(3);
     let file_ref = format!("{dir}/ref_dir/original.bin");
     let file_dup = format!("{dir}/scan_dir/duplicate.bin");
-    write_file(&file_ref, CONTENT_HL_REF)?;
-    write_file(&file_dup, CONTENT_HL_REF)?;
+    write_file(&file_ref, &content)?;
+    write_file(&file_dup, &content)?;
 
     let ref_dir  = format!("{dir}/ref_dir");
     let scan_dir = format!("{dir}/scan_dir");
@@ -192,10 +195,11 @@ fn test_hardlink_reference_dir(dir: &str) -> Result<(), String> {
 ///   dir/file1.bin  ─┐  (same content)
 ///   dir/file2.bin  ─┘
 fn test_hardlink_same_dir(dir: &str) -> Result<(), String> {
+    let content = make_content(4);
     let file1 = format!("{dir}/file1.bin");
     let file2 = format!("{dir}/file2.bin");
-    write_file(&file1, CONTENT_HL_SAME_DIR)?;
-    write_file(&file2, CONTENT_HL_SAME_DIR)?;
+    write_file(&file1, &content)?;
+    write_file(&file2, &content)?;
 
     let czkawka = crate::CZKAWKA_PATH.get().as_str();
     crate::run_with_good_status(
@@ -212,9 +216,10 @@ fn test_hardlink_same_dir(dir: &str) -> Result<(), String> {
 /// Re-running `dup -D HARD` on files that are already hardlinked must succeed
 /// without errors and must not change the inode count.
 fn test_hardlink_already_linked(dir: &str) -> Result<(), String> {
+    let content = make_content(5);
     let file1 = format!("{dir}/file1.bin");
     let file2 = format!("{dir}/file2.bin");
-    write_file(&file1, CONTENT_HL_ALREADY)?;
+    write_file(&file1, &content)?;
     // Create file2 as a hardlink of file1 from the start
     fs::hard_link(&file1, &file2).map_err(|e| format!("hard_link: {e}"))?;
 

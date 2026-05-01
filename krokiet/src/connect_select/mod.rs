@@ -80,8 +80,7 @@ pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedM
 
         if save_restore {
             let tab_key = format!("{active_tab:?}");
-            let saved_states: BTreeMap<String, SavedCustomSelectTabState> =
-                load_data_from_file(get_custom_select_state_file()).unwrap_or_default();
+            let saved_states: BTreeMap<String, SavedCustomSelectTabState> = load_data_from_file(get_custom_select_state_file()).unwrap_or_default();
             if let Some(saved) = saved_states.get(&tab_key) {
                 for (col, saved_col) in columns.iter_mut().zip(saved.columns.iter()) {
                     col.enabled = saved_col.enabled;
@@ -122,8 +121,7 @@ pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedM
 
             if save_restore {
                 let tab_key = format!("{active_tab:?}");
-                let mut saved_states: BTreeMap<String, SavedCustomSelectTabState> =
-                    load_data_from_file(get_custom_select_state_file()).unwrap_or_default();
+                let mut saved_states: BTreeMap<String, SavedCustomSelectTabState> = load_data_from_file(get_custom_select_state_file()).unwrap_or_default();
                 let saved_columns = columns
                     .iter()
                     .map(|c| SavedCustomSelectColumnState {

@@ -4,7 +4,7 @@ mod test_cases;
 use advanced_tests::{AdvancedTestCase, all_advanced_test_cases};
 use test_cases::{TestCase, all_test_cases};
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::process::{Command, Output, Stdio};
 use std::env;
@@ -24,6 +24,11 @@ pub(crate) static CZKAWKA_PATH: state::InitCell<String> = state::InitCell::new()
 static COLLECTED_FILES: state::InitCell<CollectedFiles> = state::InitCell::new();
 
 const ATTEMPTS: u32 = 10;
+
+struct Failure {
+    name: String,
+    error: String,
+}
 
 // ─── entry point ──────────────────────────────────────────────────────────────
 
@@ -53,34 +58,28 @@ fn main() {
         ATTEMPTS,
     );
 
-    let mut all_failures: Vec<String> = Vec::new();
+    let mut all_failures: Vec<Failure> = Vec::new();
 
     for attempt in 0..ATTEMPTS {
-        let standard_failures: Vec<String> = test_cases
+        let standard_failures: Vec<Failure> = test_cases
             .par_iter()
             .filter_map(|tc| {
                 info!("[{}/{}] {}", attempt + 1, ATTEMPTS, tc.name);
-                match run_standard_test(tc) {
-                    Ok(()) => None,
-                    Err(e) => Some(format!(
-                        "[attempt {}/{}] {}: {e}",
-                        attempt + 1, ATTEMPTS, tc.name
-                    )),
-                }
+                run_standard_test(tc).err().map(|e| Failure {
+                    name: tc.name.to_string(),
+                    error: e,
+                })
             })
             .collect();
 
-        let advanced_failures: Vec<String> = advanced_cases
+        let advanced_failures: Vec<Failure> = advanced_cases
             .par_iter()
             .filter_map(|tc| {
                 info!("[{}/{}] adv:{}", attempt + 1, ATTEMPTS, tc.name);
-                match run_advanced_test(tc) {
-                    Ok(()) => None,
-                    Err(e) => Some(format!(
-                        "[attempt {}/{}] adv:{}: {e}",
-                        attempt + 1, ATTEMPTS, tc.name
-                    )),
-                }
+                run_advanced_test(tc).err().map(|e| Failure {
+                    name: format!("adv:{}", tc.name),
+                    error: e,
+                })
             })
             .collect();
 
@@ -103,9 +102,27 @@ fn main() {
             ATTEMPTS,
         );
     } else {
-        eprintln!("\n====== {} FAILURE(S) ======", all_failures.len());
-        for f in &all_failures {
-            eprintln!("  FAIL: {f}");
+        // Group by test name so repeated failures across attempts are shown once.
+        let mut by_name: BTreeMap<String, Vec<String>> = BTreeMap::new();
+        for f in all_failures {
+            by_name.entry(f.name).or_default().push(f.error);
+        }
+
+        let total_failures: usize = by_name.values().map(|v| v.len()).sum();
+        eprintln!(
+            "\n====== {} UNIQUE FAILURE(S) ({} total across {} attempts) ======",
+            by_name.len(), total_failures, ATTEMPTS,
+        );
+        for (name, errors) in &by_name {
+            eprintln!("  [{}/{}] {}", errors.len(), ATTEMPTS, name);
+            // Indent the first error message as an example
+            let example = errors[0].replace('\n', "\n      ");
+            eprintln!("      {example}");
+            // Warn if errors varied across attempts
+            let unique: BTreeSet<_> = errors.iter().collect();
+            if unique.len() > 1 {
+                eprintln!("      ({} distinct error messages across attempts)", unique.len());
+            }
         }
         std::process::exit(1);
     }
