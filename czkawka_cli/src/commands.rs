@@ -456,7 +456,7 @@ pub struct BrokenFilesArgs {
         default_value = "PDF",
         value_parser = parse_broken_files,
         help = "Checking file types (PDF, AUDIO, IMAGE, ARCHIVE, FONT, MARKUP, VIDEO_FFPROBE, VIDEO_FFMPEG)",
-        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files (zip, 7z, gz, tar, zst, bz2, xz),\nFONT - finds broken font files (ttf, otf, ttc, woff),\nMARKUP - finds broken JSON/XML/TOML/YAML/SVG files,\nVIDEO_FFPROBE - quick video check using ffprobe (header validation),\nVIDEO_FFMPEG - deep video check using ffmpeg (full decode)"
+        long_help = "Methods to search files - default PDF.\nPDF - finds broken PDF files,\nAUDIO - finds broken audio files,\nIMAGE - finds broken image files,\nARCHIVE - finds broken archive files (zip, 7z, gz, tar, zst, bz2, xz),\nFONT - finds broken font files (ttf, otf, ttc),\nMARKUP - finds broken JSON/XML/TOML/YAML/SVG files,\nVIDEO_FFPROBE - quick video check using ffprobe (header validation),\nVIDEO_FFMPEG - deep video check using ffmpeg (full decode)"
     )]
     pub checked_types: Vec<CheckedTypes>,
 }
