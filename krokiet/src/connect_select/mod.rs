@@ -1,13 +1,17 @@
 pub(crate) mod custom_select;
 
+use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex};
 
+use log::error;
 use regex::Regex;
-use slint::{ComponentHandle, Model, ModelRc, VecModel};
+use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 use crate::common::{connect_i32_into_u64, create_model_from_model_vec};
 use crate::connect_row_selection::checker::change_number_of_enabled_items;
 use crate::connect_translation::translate_select_mode;
+use crate::settings::model::{SavedCustomSelectColumnState, SavedCustomSelectTabState};
+use crate::settings::{get_custom_select_state_file, load_data_from_file, save_data_to_file};
 use crate::shared_models::SharedModels;
 use crate::{ActiveTab, Callabler, CustomSelectColumnModel, GuiState, MainWindow, SelectMode, SelectModel, Settings, SingleMainListModel};
 
@@ -70,7 +74,27 @@ pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedM
     app.global::<Callabler>().on_populate_custom_select_columns(move || {
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
-        let columns = custom_select::build_custom_select_columns(active_tab);
+        let save_restore = app.global::<Settings>().get_popup_custom_select_save_restore();
+
+        let mut columns = custom_select::build_custom_select_columns(active_tab);
+
+        if save_restore {
+            let tab_key = format!("{active_tab:?}");
+            let saved_states: BTreeMap<String, SavedCustomSelectTabState> =
+                load_data_from_file(get_custom_select_state_file()).unwrap_or_default();
+            if let Some(saved) = saved_states.get(&tab_key) {
+                for (col, saved_col) in columns.iter_mut().zip(saved.columns.iter()) {
+                    col.enabled = saved_col.enabled;
+                    col.filter_value = SharedString::from(saved_col.filter_value.as_str());
+                }
+                app.global::<GuiState>().set_custom_select_restored_case_sensitive(saved.case_sensitive);
+                app.global::<GuiState>().set_custom_select_restored_leave_one_in_group(saved.leave_one_in_group);
+            } else {
+                app.global::<GuiState>().set_custom_select_restored_case_sensitive(false);
+                app.global::<GuiState>().set_custom_select_restored_leave_one_in_group(true);
+            }
+        }
+
         app.global::<GuiState>().set_custom_select_columns(create_model_from_model_vec(&columns));
     });
 
@@ -88,13 +112,37 @@ pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedM
 
     let a = app.as_weak();
     app.global::<Callabler>()
-        .on_select_items_custom_columns(move |select_mode, case_sensitive, leave_one_in_group| {
+        .on_select_items_custom_columns(move |select_mode, case_sensitive, leave_one_in_group, save_restore| {
             let app = a.upgrade().expect("Failed to upgrade app :(");
             let active_tab = app.global::<GuiState>().get_active_tab();
             let current_model = active_tab.get_tool_model(&app);
             let columns: Vec<CustomSelectColumnModel> = app.global::<GuiState>().get_custom_select_columns().iter().collect();
 
             let leave_one_in_group = leave_one_in_group && (active_tab.get_is_header_mode() && !shared_models.lock().expect("Lock poisoned").get_use_reference_folders(active_tab));
+
+            if save_restore {
+                let tab_key = format!("{active_tab:?}");
+                let mut saved_states: BTreeMap<String, SavedCustomSelectTabState> =
+                    load_data_from_file(get_custom_select_state_file()).unwrap_or_default();
+                let saved_columns = columns
+                    .iter()
+                    .map(|c| SavedCustomSelectColumnState {
+                        enabled: c.enabled,
+                        filter_value: c.filter_value.to_string(),
+                    })
+                    .collect();
+                saved_states.insert(
+                    tab_key,
+                    SavedCustomSelectTabState {
+                        case_sensitive,
+                        leave_one_in_group,
+                        columns: saved_columns,
+                    },
+                );
+                if let Err(e) = save_data_to_file(get_custom_select_state_file(), &saved_states) {
+                    error!("Failed to save custom select state: {e}");
+                }
+            }
 
             let (checked_items, unchecked_items, new_model) =
                 custom_select::select_custom_columns(&current_model, active_tab, select_mode, &columns, case_sensitive, leave_one_in_group);

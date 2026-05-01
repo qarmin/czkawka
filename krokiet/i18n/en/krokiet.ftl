@@ -475,6 +475,7 @@ popup_custom_leave_one_in_group_text = Select all items except one, in each grou
 popup_custom_hint_str_text = Text columns: wildcards  *name*  /home/*  *.rs
 popup_custom_hint_int_text = Size [KB] / numeric columns: >= 2048  < 512  = 0  (operators: >=  <=  >  <  =)
 popup_custom_hint_date_text = Date columns: DD-MM-YYYY or YYYY-MM-DD, optional time HH:MM:SS  e.g.  >= 2020-01-01  or  < 31-12-2022 23:59:59
+popup_custom_save_restore_text = Save and restore filter data
 compare_button_text = Compare
 compare_back_text = Back
 compare_prev_group_text = Prev Group

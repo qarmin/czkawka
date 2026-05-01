@@ -251,6 +251,10 @@ pub(crate) fn get_config_file(number: i32) -> Option<PathBuf> {
     let config_file = config_folder.join(format!("config_preset_{number}.json"));
     Some(config_file)
 }
+pub(crate) fn get_custom_select_state_file() -> Option<PathBuf> {
+    let config_folder = get_config_cache_path()?.config_folder;
+    Some(config_folder.join("config_custom_select_state.json"))
+}
 
 pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings, preset_idx: i32) {
     let settings = app.global::<Settings>();
@@ -547,6 +551,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_popup_crop_video_overwrite_files(custom_settings.popup_crop_video_overwrite_files);
     settings.set_popup_crop_video_reencode(custom_settings.popup_crop_video_reencode);
     settings.set_popup_crop_video_quality(custom_settings.popup_crop_video_quality as f32);
+    settings.set_popup_custom_select_save_restore(custom_settings.popup_custom_select_save_restore);
 
     let sel_px = 35.0;
     let path_px = 350.0;
@@ -863,6 +868,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         popup_crop_video_overwrite_files: settings.get_popup_crop_video_overwrite_files(),
         popup_crop_video_reencode: settings.get_popup_crop_video_reencode(),
         popup_crop_video_quality: settings.get_popup_crop_video_quality().round() as u32,
+        popup_custom_select_save_restore: settings.get_popup_custom_select_save_restore(),
     }
 }
 

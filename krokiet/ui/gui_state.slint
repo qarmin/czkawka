@@ -32,6 +32,8 @@ export global GuiState {
     ];
 
     in-out property <[CustomSelectColumnModel]> custom_select_columns: [];
+    in-out property <bool> custom_select_restored_case_sensitive: false;
+    in-out property <bool> custom_select_restored_leave_one_in_group: true;
 
     in-out property <[SortModel]> sort_results_list: [
         { data: SortMode.FullName, name: Translations.sort_by_full_name_text },

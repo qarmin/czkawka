@@ -5,10 +5,11 @@ import { ColorPalette } from "color_palette.slint";
 import { FontSizes } from "fonts.slint";
 import { ColumnType } from "common.slint";
 import { GuiState } from "gui_state.slint";
+import { Settings } from "settings.slint";
 
 export component PopupCustomSelect inherits Rectangle {
     out property <length> popup_width: 620px;
-    out property <length> popup_height: 520px;
+    out property <length> popup_height: 540px;
     callback show_popup();
     private property <bool> case_sensitive: false;
     private property <bool> leave_one_in_group: true;
@@ -132,7 +133,7 @@ export component PopupCustomSelect inherits Rectangle {
                         }
                     }
                 }
-                // All in group and case sensitive options
+                // All in group, case sensitive, and save/restore options
                 HorizontalLayout {
                     height: 36px;
                     padding-left: 10px;
@@ -148,6 +149,17 @@ export component PopupCustomSelect inherits Rectangle {
                         checked <=> leave_one_in_group;
                     }
                 }
+                HorizontalLayout {
+                    height: 36px;
+                    padding-left: 10px;
+                    padding-right: 10px;
+                    spacing: 14px;
+                    alignment: start;
+                    CheckBox {
+                        text: Translations.popup_custom_save_restore_text;
+                        checked <=> Settings.popup_custom_select_save_restore;
+                    }
+                }
                 // Buttons
                 HorizontalLayout {
                     height: 46px;
@@ -157,14 +169,14 @@ export component PopupCustomSelect inherits Rectangle {
                         text: Translations.popup_custom_select_button_text;
                         primary: true;
                         clicked => {
-                            Callabler.select_items_custom_columns(true, case_sensitive, leave_one_in_group);
+                            Callabler.select_items_custom_columns(true, case_sensitive, leave_one_in_group, Settings.popup_custom_select_save_restore);
                             popup_window.close();
                         }
                     }
                     Button {
                         text: Translations.popup_custom_unselect_button_text;
                         clicked => {
-                            Callabler.select_items_custom_columns(false, case_sensitive, leave_one_in_group);
+                            Callabler.select_items_custom_columns(false, case_sensitive, leave_one_in_group, Settings.popup_custom_select_save_restore);
                             popup_window.close();
                         }
                     }
@@ -181,6 +193,10 @@ export component PopupCustomSelect inherits Rectangle {
         case_sensitive = false;
         leave_one_in_group = true;
         Callabler.populate_custom_select_columns();
+        if Settings.popup_custom_select_save_restore {
+            case_sensitive = GuiState.custom_select_restored_case_sensitive;
+            leave_one_in_group = GuiState.custom_select_restored_leave_one_in_group;
+        }
         popup_window.show();
     }
 }

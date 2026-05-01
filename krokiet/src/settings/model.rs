@@ -262,6 +262,9 @@ pub struct SettingsCustom {
     pub popup_crop_video_reencode: bool,
     #[serde(default = "default_video_optimizer_video_quality")]
     pub popup_crop_video_quality: u32,
+
+    #[serde(default)]
+    pub popup_custom_select_save_restore: bool,
 }
 
 impl Default for SettingsCustom {
@@ -538,4 +541,32 @@ pub(crate) fn default_temporary_files_extensions() -> String {
 }
 pub(crate) fn default_video_optimizer_hardware_encoder() -> String {
     "none".to_string()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct SavedCustomSelectColumnState {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default)]
+    pub filter_value: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SavedCustomSelectTabState {
+    #[serde(default)]
+    pub case_sensitive: bool,
+    #[serde(default = "ttrue")]
+    pub leave_one_in_group: bool,
+    #[serde(default)]
+    pub columns: Vec<SavedCustomSelectColumnState>,
+}
+
+impl Default for SavedCustomSelectTabState {
+    fn default() -> Self {
+        Self {
+            case_sensitive: false,
+            leave_one_in_group: true,
+            columns: Vec::new(),
+        }
+    }
 }

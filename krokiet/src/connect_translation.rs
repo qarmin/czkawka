@@ -453,6 +453,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_custom_hint_date_text(flk!("popup_custom_hint_date_text").into());
     translation.set_popup_custom_case_sensitive_text(flk!("popup_custom_case_sensitive_text").into());
     translation.set_popup_custom_leave_one_in_group_text(flk!("popup_custom_leave_one_in_group_text").into());
+    translation.set_popup_custom_save_restore_text(flk!("popup_custom_save_restore_text").into());
 
     translation.set_compare_button_text(flk!("compare_button_text").into());
     translation.set_compare_back_text(flk!("compare_back_text").into());
