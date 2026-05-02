@@ -13,7 +13,7 @@ use std::env;
 use log::info;
 use rayon::prelude::*;
 
-// ─── shared state ─────────────────────────────────────────────────────────────
+//  shared state 
 
 #[derive(Default, Clone, Debug)]
 pub(crate) struct CollectedFiles {
@@ -35,7 +35,7 @@ struct Failure {
     error: String,
 }
 
-// ─── entry point ──────────────────────────────────────────────────────────────
+//  entry point 
 
 // App runs - ./ci_tester PATH_TO_CZKAWKA
 fn main() {
@@ -153,7 +153,7 @@ fn test_args() {
     let _ = fs::remove_dir_all("RandomDirWithoutContent");
 }
 
-// ─── test runners ─────────────────────────────────────────────────────────────
+//  test runners 
 
 fn run_standard_test(tc: &TestCase) -> Result<(), String> {
     let dir = format!("TestFiles_{}", tc.name);
@@ -193,7 +193,7 @@ fn run_advanced_test(tc: &AdvancedTestCase) -> Result<(), String> {
     result
 }
 
-// ─── infrastructure (pub(crate) so advanced_tests.rs can use them) ────────────
+//  infrastructure (pub(crate) so advanced_tests.rs can use them) 
 
 /// Write the full test file tree to `dir` using the in-memory snapshot.
 /// Replaces the previous `unzip -qq -X TestFiles.zip -d <dir>` shell call.

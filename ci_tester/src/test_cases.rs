@@ -11,7 +11,7 @@ pub struct TestCase {
 
 pub fn all_test_cases() -> Vec<TestCase> {
     vec![
-        // ── Misc ──────────────────────────────────────────────────────────────
+        //  Misc 
         TestCase {
             name: "empty_files",
             args: &["empty-files", "-d", "TestFiles", "-D", "-W"],
@@ -74,7 +74,7 @@ pub fn all_test_cases() -> Vec<TestCase> {
             expected_folders: &[],
             expected_symlinks: &["Symlinks/EmptyFiles"],
         },
-        // ── Duplicates ────────────────────────────────────────────────────────
+        //  Duplicates 
         TestCase {
             name: "dup_one_oldest",
             args: &["dup", "-d", "TestFiles", "-D", "OO", "-W"],
@@ -159,7 +159,7 @@ pub fn all_test_cases() -> Vec<TestCase> {
             expected_folders: &[],
             expected_symlinks: &[],
         },
-        // ── Music by tags ─────────────────────────────────────────────────────
+        //  Music by tags 
         TestCase {
             name: "music_tags_one_oldest",
             args: &["music", "-d", "TestFiles", "-D", "OO", "-W"],
@@ -216,7 +216,7 @@ pub fn all_test_cases() -> Vec<TestCase> {
             expected_folders: &[],
             expected_symlinks: &[],
         },
-        // ── Music by content ──────────────────────────────────────────────────
+        //  Music by content 
         TestCase {
             name: "music_content_one_oldest",
             args: &["music", "-d", "TestFiles", "-s", "CONTENT", "-l", "2.0", "-D", "OO", "-W"],
@@ -273,7 +273,7 @@ pub fn all_test_cases() -> Vec<TestCase> {
             expected_folders: &[],
             expected_symlinks: &[],
         },
-        // ── Video ─────────────────────────────────────────────────────────────
+        //  Video 
         TestCase {
             name: "video_one_oldest",
             args: &["video", "-d", "TestFiles", "-D", "OO", "-W"],
@@ -330,7 +330,7 @@ pub fn all_test_cases() -> Vec<TestCase> {
             expected_folders: &[],
             expected_symlinks: &[],
         },
-        // ── Similar images ────────────────────────────────────────────────────
+        //  Similar images 
         // The perceptual-hash group contains A1.jpg, A2.jpg, A3.png and A5.jpg
         // (all visually identical; A4.jpg is a different image and is excluded).
         // -m 1 lowers the default 16 KiB size threshold so the 8 772 B JPEGs
@@ -408,7 +408,7 @@ pub fn all_test_cases() -> Vec<TestCase> {
             expected_folders: &[],
             expected_symlinks: &[],
         },
-        // ── Bad extensions ────────────────────────────────────────────────────
+        //  Bad extensions 
         // BadExtensions/BE.jpg is actually an MP4 (ftypisom magic bytes).
         // Running `ext -F` renames it to BE.mp4, so BE.jpg disappears.
         TestCase {
@@ -418,7 +418,7 @@ pub fn all_test_cases() -> Vec<TestCase> {
             expected_folders: &[],
             expected_symlinks: &[],
         },
-        // ── Bad names ─────────────────────────────────────────────────────────
+        //  Bad names 
         // The synthetic entry BadNames/photo.JPG has an all-uppercase extension.
         // Running `bad-names -u -F` renames it to photo.jpg, so it disappears.
         TestCase {
@@ -428,7 +428,7 @@ pub fn all_test_cases() -> Vec<TestCase> {
             expected_folders: &[],
             expected_symlinks: &[],
         },
-        // ── EXIF remover ──────────────────────────────────────────────────────
+        //  EXIF remover 
         // Scan only (no -F flag): no files are modified, so nothing disappears.
         // This verifies the tool runs cleanly against the real test data.
         TestCase {

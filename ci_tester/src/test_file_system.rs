@@ -45,7 +45,7 @@ use std::path::Path;
 
 use crate::CollectedFiles;
 
-// ─── data types ──────────────────────────────────────────────────────────────
+//  data types 
 
 pub(crate) enum EntryKind {
     Dir,
@@ -67,7 +67,7 @@ pub(crate) struct TestFileEntry {
     pub mtime_unix_secs: Option<u64>,
 }
 
-// ─── loading ─────────────────────────────────────────────────────────────────
+//  loading 
 
 /// Read every entry from the zip and append additional synthetic entries.
 /// Returns the complete list used by both `default_test_files` and
@@ -150,7 +150,7 @@ fn zip_dt_to_unix_secs(dt: zip::DateTime) -> Option<u64> {
 fn validate_known_file_sizes(entries: &[TestFileEntry]) {
     /// (relative path, expected size in bytes)
     const KNOWN_SIZES: &[(&str, usize)] = &[
-        // ── Images ───────────────────────────────────────────────────────────
+        //  Images 
         // A1 = A2 = A5 (identical bytes, 8 772 B each).
         // A3.png is perceptually similar to A1/A2/A5 (same visual content).
         ("Images/A1.jpg", 8772),
@@ -158,14 +158,14 @@ fn validate_known_file_sizes(entries: &[TestFileEntry]) {
         ("Images/A3.png", 20920),
         ("Images/A4.jpg", 25105),
         ("Images/A5.jpg", 8772),
-        // ── Music ─────────────────────────────────────────────────────────────
+        //  Music 
         // M1 = M2 = M5 (identical bytes, 43 730 B each).
         ("Music/M1.mp3", 43730),
         ("Music/M2.mp3", 43730),
         ("Music/M3.flac", 450079),
         ("Music/M4.mp3", 3754941),
         ("Music/M5.mp3", 43730),
-        // ── Videos ───────────────────────────────────────────────────────────
+        //  Videos 
         // V1 = V2 = V5 (identical bytes, 435 803 B each).
         // V3.webm is perceptually similar (same visual content, different format).
         ("Videos/V1.mp4", 435803),
@@ -173,10 +173,10 @@ fn validate_known_file_sizes(entries: &[TestFileEntry]) {
         ("Videos/V3.webm", 471868),
         ("Videos/V4.mp4", 323521),
         ("Videos/V5.mp4", 435803),
-        // ── Bad extension ────────────────────────────────────────────────────
+        //  Bad extension 
         // BE.jpg is actually an MP4 (ftypisom magic bytes).
         ("BadExtensions/BE.jpg", 126240),
-        // ── Broken files ─────────────────────────────────────────────────────
+        //  Broken files 
         ("Broken/Br.jpg", 6),
         ("Broken/Br.mp3", 7),
         ("Broken/Br.pdf", 7),
@@ -206,7 +206,7 @@ fn validate_known_file_sizes(entries: &[TestFileEntry]) {
 /// needed for specific test cases.  This is the preferred way to add small,
 /// purpose-built test assets without touching the zip.
 fn add_synthetic_entries(entries: &mut Vec<TestFileEntry>) {
-    // ── Bad-names test assets ─────────────────────────────────────────────────
+    //  Bad-names test assets 
     // A JPEG file whose extension is all-uppercase (.JPG).  The `bad-names -u`
     // flag will detect and rename it to photo.jpg, letting the test verify that
     // BadNames/photo.JPG disappears from the directory tree.
@@ -228,7 +228,7 @@ fn add_synthetic_entries(entries: &mut Vec<TestFileEntry>) {
     });
 }
 
-// ─── baseline ────────────────────────────────────────────────────────────────
+//  baseline 
 
 /// Derive the `CollectedFiles` baseline directly from the in-memory entry list.
 /// This avoids the write-then-scan cycle that was previously needed.
@@ -254,7 +254,7 @@ pub(crate) fn baseline_from_entries(entries: &[TestFileEntry]) -> CollectedFiles
     CollectedFiles { files, folders, symlinks }
 }
 
-// ─── writing to disk ─────────────────────────────────────────────────────────
+//  writing to disk 
 
 /// Recreate the full test directory tree under `dir`.
 ///

@@ -15,7 +15,7 @@ pub struct AdvancedTestCase {
 
 pub fn all_advanced_test_cases() -> Vec<AdvancedTestCase> {
     vec![
-        // ── Hardlink regressions ──────────────────────────────────────────────
+        //  Hardlink regressions 
         // Bug: "Would hardlink file to itself"
         AdvancedTestCase { name: "hardlink_two_dirs",          run: test_hardlink_two_dirs },
         AdvancedTestCase { name: "hardlink_two_dirs_size_only",run: test_hardlink_two_dirs_size_only },
@@ -24,10 +24,10 @@ pub fn all_advanced_test_cases() -> Vec<AdvancedTestCase> {
         AdvancedTestCase { name: "hardlink_same_dir",          run: test_hardlink_same_dir },
         AdvancedTestCase { name: "hardlink_already_linked",    run: test_hardlink_already_linked },
 
-        // ── Manual-copy detection ─────────────────────────────────────────────
+        //  Manual-copy detection 
         AdvancedTestCase { name: "dup_detect_manual_copy",     run: test_dup_detect_manual_copy },
 
-        // ── Reference directory edge-cases ────────────────────────────────────
+        //  Reference directory edge-cases 
         // Reference files must NEVER be deleted, regardless of -D method
         AdvancedTestCase { name: "ref_never_deleted_aeo",      run: test_ref_never_deleted_aeo },
         // When ALL duplicates live in reference dirs the scan dir is untouched
@@ -41,7 +41,7 @@ pub fn all_advanced_test_cases() -> Vec<AdvancedTestCase> {
         // Multiple -r dirs: non-ref files that match ANY reference are deleted
         AdvancedTestCase { name: "ref_multiple_ref_dirs",      run: test_ref_multiple_ref_dirs },
 
-        // ── Filtering ─────────────────────────────────────────────────────────
+        //  Filtering 
         // -e excludes a whole directory; files inside must survive
         AdvancedTestCase { name: "dup_excluded_dir",           run: test_dup_excluded_dir },
         // -E glob pattern keeps matching files out of results
@@ -49,13 +49,13 @@ pub fn all_advanced_test_cases() -> Vec<AdvancedTestCase> {
         // -R (non-recursive) must not descend into sub-directories
         AdvancedTestCase { name: "dup_non_recursive",          run: test_dup_non_recursive },
 
-        // ── Hash-mode correctness ─────────────────────────────────────────────
+        //  Hash-mode correctness 
         // Default HASH mode must not treat same-size, different-content files as duplicates
         AdvancedTestCase { name: "dup_hash_no_false_positive", run: test_dup_hash_no_false_positive },
         // -s NAME mode: same file name, different content → treated as "duplicates" by name
         AdvancedTestCase { name: "dup_name_mode_same_name",    run: test_dup_name_mode_same_name },
 
-        // ── broken-files detection ────────────────────────────────────────────
+        //  broken-files detection 
         // A file with a .zip extension but garbage content must be detected
         AdvancedTestCase { name: "broken_invalid_archive",     run: test_broken_invalid_archive },
         // A structurally valid image that is completely truncated must be detected
@@ -63,7 +63,7 @@ pub fn all_advanced_test_cases() -> Vec<AdvancedTestCase> {
     ]
 }
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
+//  helpers 
 
 /// Sets the modification time of a file using `touch -t <ts>`.
 /// `ts` format: `[[CC]YY]MMDDhhmm[.ss]`  (e.g. `"202001010000"` = 2020-01-01)
@@ -139,14 +139,14 @@ fn make_content(tag: u8) -> Vec<u8> {
     (0..16_384usize).map(|i| tag ^ ((i & 0xff) as u8)).collect()
 }
 
-// ─── individual tests ─────────────────────────────────────────────────────────
+//  individual tests 
 
 /// Regression test for: duplicates in two separate directories were
 /// "hardlinked to themselves" instead of to each other.
 ///
 /// Structure:
-///   dir/a/file1.bin  ─┐  (same content)
-///   dir/b/file2.bin  ─┘
+///   dir/a/file1.bin  ┐  (same content)
+///   dir/b/file2.bin  ┘
 ///
 /// Expected after `dup -D HARD -W`: both files exist and share the same inode.
 fn test_hardlink_two_dirs(dir: &str) -> Result<(), String> {
@@ -222,8 +222,8 @@ fn test_hardlink_reference_dir(dir: &str) -> Result<(), String> {
 /// Two copies of the same file in a single directory.
 ///
 /// Structure:
-///   dir/file1.bin  ─┐  (same content)
-///   dir/file2.bin  ─┘
+///   dir/file1.bin  ┐  (same content)
+///   dir/file2.bin  ┘
 fn test_hardlink_same_dir(dir: &str) -> Result<(), String> {
     let content = make_content(4);
     let file1 = format!("{dir}/file1.bin");
@@ -294,7 +294,7 @@ fn test_dup_detect_manual_copy(dir: &str) -> Result<(), String> {
     ensure_exists(&original)
 }
 
-// ─── reference directory edge-cases ──────────────────────────────────────────
+//  reference directory edge-cases 
 
 /// Reference files are NEVER subject to deletion, regardless of the -D strategy.
  /// Furthermore, when a reference directory is active, czkawka unconditionally
@@ -341,8 +341,8 @@ fn test_ref_never_deleted_aeo(dir: &str) -> Result<(), String> {
 /// no non-reference files to act on: the scan directory must be left intact.
 ///
 /// Layout:
-///   ref/copy_a.bin   ─┐  (same content, both reference)
-///   ref/copy_b.bin   ─┘
+///   ref/copy_a.bin   ┐  (same content, both reference)
+///   ref/copy_b.bin   ┘
 ///   scan/unique.bin      (different content – no duplicates outside ref)
 fn test_ref_all_dups_in_ref_no_scan_deletions(dir: &str) -> Result<(), String> {
     let dup_content    = make_content(7);
@@ -498,7 +498,7 @@ fn test_ref_multiple_ref_dirs(dir: &str) -> Result<(), String> {
     ensure_exists(&format!("{dir}/scan/unique.bin"))
 }
 
-// ─── filtering ────────────────────────────────────────────────────────────────
+//  filtering 
 
 /// -e (excluded directory): files inside the excluded subtree must never be
 /// processed, so they survive even when duplicates exist elsewhere.
@@ -593,7 +593,7 @@ fn test_dup_non_recursive(dir: &str) -> Result<(), String> {
     ensure_exists(&sub_file)
 }
 
-// ─── hash-mode correctness ────────────────────────────────────────────────────
+//  hash-mode correctness 
 
 /// The default HASH mode must not produce false positives for files that
 /// share the same size but have different content.
@@ -654,7 +654,7 @@ fn test_dup_name_mode_same_name(dir: &str) -> Result<(), String> {
     ensure_missing(&file_b)    // newer → deleted
 }
 
-// ─── broken-file detection ────────────────────────────────────────────────────
+//  broken-file detection 
 
 /// A file with a .zip extension but garbage content must be detected by
 /// `broken -c ARCHIVE` and deleted with `-D`.
