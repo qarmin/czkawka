@@ -16,3 +16,5 @@ state = "0.6.0"
 handsome_logger = "0.9.1"
 log = "0.4.20"
 rayon = "1"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+filetime = "0.2"

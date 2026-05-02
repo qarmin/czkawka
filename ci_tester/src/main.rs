@@ -1,8 +1,10 @@
 mod advanced_tests;
 mod test_cases;
+mod test_file_system;
 
 use advanced_tests::{AdvancedTestCase, all_advanced_test_cases};
 use test_cases::{TestCase, all_test_cases};
+use test_file_system::TestFileEntry;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
@@ -22,6 +24,9 @@ pub(crate) struct CollectedFiles {
 
 pub(crate) static CZKAWKA_PATH: state::InitCell<String> = state::InitCell::new();
 static COLLECTED_FILES: state::InitCell<CollectedFiles> = state::InitCell::new();
+/// All test file entries held in memory – both zip-derived and synthetic.
+/// `unzip_files()` reads from this to recreate the tree on disk.
+static ZIP_ENTRIES: state::InitCell<Vec<TestFileEntry>> = state::InitCell::new();
 
 const ATTEMPTS: u32 = 5;
 
@@ -41,12 +46,14 @@ fn main() {
 
     test_args();
 
-    // Collect baseline from a fresh unzip, then remove the directory
-    let _ = fs::remove_dir_all("TestFiles");
-    unzip_files("TestFiles").expect("Initial unzip failed");
-    let baseline = collect_all_files_and_dirs("TestFiles").expect("Should not fail in tests");
+    // Load the zip into memory once, add any synthetic entries, then derive
+    // the baseline from the in-memory list – no on-disk extraction needed here.
+    let mut entries = test_file_system::load_all_test_entries("TestFiles.zip");
+    // Sort for deterministic baseline ordering.
+    entries.sort_by(|a, b| a.path.cmp(&b.path));
+    let baseline = test_file_system::baseline_from_entries(&entries);
     COLLECTED_FILES.set(baseline);
-    let _ = fs::remove_dir_all("TestFiles");
+    ZIP_ENTRIES.set(entries);
 
     let test_cases     = all_test_cases();
     let advanced_cases = all_advanced_test_cases();
@@ -188,9 +195,10 @@ fn run_advanced_test(tc: &AdvancedTestCase) -> Result<(), String> {
 
 // ─── infrastructure (pub(crate) so advanced_tests.rs can use them) ────────────
 
+/// Write the full test file tree to `dir` using the in-memory snapshot.
+/// Replaces the previous `unzip -qq -X TestFiles.zip -d <dir>` shell call.
 pub(crate) fn unzip_files(dir: &str) -> Result<(), String> {
-    run_with_good_status(&["unzip", "-qq", "-X", "TestFiles.zip", "-d", dir], false)
-        .map_err(|e| format!("unzip → {dir}: {e}"))
+    test_file_system::default_test_files(dir, ZIP_ENTRIES.get())
 }
 
 pub(crate) fn run_with_good_status(str_command: &[&str], print_output: bool) -> Result<(), String> {
