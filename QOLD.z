@@ -1,0 +1,206 @@
+Czkawka/Krokiet 11.0 — blamaż GTK, czyszczenie EXIF, optymalizacja wideo, przycinanie czarnych pasów i nowe logo
+Qarmin
+Qarmin
+17 min read
+·
+Feb 14, 2026
+
+Press enter or click to view image in full size
+
+Czkawka i Krokiet już dawno przestały być prostymi aplikacjami do wyszukiwania duplikatów. Z czasem potrzebowałem coraz więcej funkcjonalności, więc je dodawałem bez większego przemyślenia, przez co projekt rozrastał się dość chaotycznie. Potrzebowałem chwili przerwy, żeby poukładać pewne rzeczy w głowie i w kodzie. Udało się to częściowo zrobić, więc w tej wersji zacząłem od nowa dodawać kolejne narzędzia. W efekcie obecne wydanie jest największe do tej pory i jednocześnie najciekawsze.
+
+Zazwyczaj po wydaniu nowej wersji, pojawia się wiele komentarzy, że znowu popsułem działanie niektórych trybów, aplikacja przestała się włączać czy masę pytań, czemu ciągle nie ma dodanych bazowych funkcjonalności(tj. filtrowania wyników po skanowaniu czy nowego przycisku do zaznaczania plików, stworzonych po 23:00 w 11 niedzielę roku nieparzystego).
+
+Po wydaniu poprzedniej wersji, nie było inaczej. Wśród morza regresji tj. niewyświetlanie wyników w CLI, moją uwagę przykuły freezy i mikroskopijny podgląd plików w aplikacji gtk, a działo się to w miejscach w kodzie, których nie tykałem ostatnio. Po dłuższej chwili poszukiwań i konsternacji z tym związanej, okazało się że błąd nie został stworzony przeze mnie, ale jest powiązany z jedną biblioteką którą używam. A tą biblioteką jest…
+GTK — stabilność i błędy
+
+Ponad 5 lat temu, gdy zaczynałem tworzyć ten program, jednym z głównych wyzwań, było wybranie frontendu, jaki Czkawka będzie używać. W tamtym czasie rustowe biblioteki graficzne dopiero raczkowały, próbując znaleźć swoją niszę. Zatem całkiem rozsądnym rozwiązaniem wydawał mi się wybór QT lub GTK. Ostatecznie wybór padł na GTK 3, głównie przez to że uważałem, że na linuxie(mojej głównej platformie do programowania, jak i na początku jedynym wspieranym systemie) będzie działało to najstabilniej.
+
+Oprócz głównie moich błędów i błędów bindingów, na linuxie aplikacja działała całkiem stabilnie. W między czasie GTK 4 wyszło, co wymusiło przepisanie znacznej części aplikacji a również po wielu trudach udało mi się skompilować aplikację na windowsa i macos. I tutaj właśnie zaczęły się niejako problemy. Problemy z kompilacją, losowe crashe niewystępujące na linuxie czy problemy z ikonami i renderowaniem, powodowały że zacząłem kwestionować słuszność wyboru tej biblioteki.
+Press enter or click to view image in full size
+Mikroskopijny podgląd obrazu 12MP
+
+Jednak wraz z merge requestem — https://gitlab.gnome.org/GNOME/gtk/-/merge_requests/8627 — dotychczasowa sielanka minęła. Zmiana związana z GtkImage, którego używałem od czasów GTK 3, spowodowała, że w absolutnie każdej wersji programu używającej GTK 4, aż do poprzednio aktualnej10.0 — podgląd obrazów którego ich używał, zmniejszył się do rozmiarów pojedynczych pikseli. Zgodnie z opisem zmian, ta poprawka to breaking change i jej autorzy oczekiwali że niektóre z projektów będą mieli problemy przy aktualizacji. Na moje nieszczęście problem dotyczył, właśnie Czkawki. GTK 4.20 jest obecne we wszystkich nowszych systemach, przez co ich użytkownicy, niemal nie mogą korzystać z obecnej aplikacji.
+
+Obecna wersja(11.0) zawiera poprawkę podmieniającą GtkImage na GtkPicture, naprawiająca prosto problem. Jednak ta zmiana oprócz pewnej niedogodności, spowodowała nieco większy problem — problem z moją wiarą w stabilność GTK. W przeciwieństwie do Krokieta, gdzie w plik binarny jest wbudowywana biblioteka Slint tworząca i zarządzająca całym interfejsem, Czkawka używa dynamicznie linkowanego GTK, który aż się prosi ażeby losowo z powodu błędu lub naprawy błędu(jak to miało miejsce w moim przypadku) zmienić swoje działanie, pozostawiając użytkowników jak i twórców z ręką w nocniku. Domyślam się, że ta zmiana dotknęła raczej nieduży procent aplikacji, jednak akurat dla mnie i tych co używaja Czawki, było to bolesne.
+Czyszczenie plików z danych EXIF — nowe narzędzie
+
+Pod wpływem chwili lub nie do końca uchwytnego impulsu postanowiłem dodać do programu nowe narzędzie do usuwania danych EXIF. Sam korzystałem z tej funkcjonalności raczej rzadko i do tej pory wyłącznie z https://github.com/szTheory/exifcleaner, który nie jest już rozwijany i dodatkowo używa Electrona(straszne, czyż nie?). Przeszkadzało mi też to, że narzędzie nie pozwalało podejrzeć zmian przed konwersją.
+
+Od kilku wersji liczba narzędzi w programie pozostawała stała, 11, a ja skupiałem się głównie na ich ulepszaniu oraz na zmianach upraszczających logikę późniejszego dodawania i zarządzania nimi. W końcu uznałem więc, że to dobry moment, aby rozszerzyć ich pulę.
+
+Wiedziałem, że po stronie Rusta istnieją create do obsługi danych EXIF, jednak okazało się, że w porównaniu z popularnym exiftool wciąż sporo im brakuje. Po wstępnej analizie brałem pod uwagę jedynie trzy biblioteki, które były ostatnio aktualizowane:
+
+    nom_exif
+    little_exif
+    guf_exif
+
+Guf_exif odrzuciłem, ponieważ z tego, co zauważyłem, brakowało mu generycznego interfejsu do zarządzania wszystkimi tagami. Nom_exif już obecnie wykorzystuję do odczytywania rotacji z obrazów, aby móc je poprawnie obracać do podglądu. W przeszłości, przy użyciu fuzzera, zgłosiłem w nim wiele błędów, dzięki czemu stał się bardzo rock-solid i nie powoduje crashy ani freezów(przynajmniej w moich zastosowaniach). Problemem okazał się jednak brak możliwości modyfikacji danych, a zgłoszenie dotyczące tej kwestii nie było aktualizowane od 2024 roku.
+
+W efekcie na placu boju pozostała jedynie biblioteka little_exif. Równolegle z próbą zrozumienia, jak działa sam EXIF, uczyłem się korzystać z little_exif. Samo doprowadzenie biblioteki do działania nie było trudne. Potrzebowałem jedynie wyciągać z pliku informacje o obecnych tagach, ich nazwę, id oraz grupę, a następnie umożliwić ich usuwanie.
+Press enter or click to view image in full size
+Przykład wyszukiwanych tagów EXIF
+
+Zgodnie ze swoim zwyczajem do testów podszedłem dość dokładnie, co zaowocowało kilkoma utworzonymi issue, dziesiątkami crashy oraz uświadomieniem sobie, że na EXIF świat się nie kończy, bo istnieją również inne formaty, takie jak XMP czy iTXt. Bez dogłębnej znajomości formatu EXIF byłem w stanie naprawiać crashe jedynie do momentu, aż fuzzer przestał je wykrywać podczas testów obejmujących około 1 miliona inputów, oraz zmodyfikować kilka API, które były dla mnie mało wygodne w użyciu.
+
+W obecnym kształcie narzędzie pozwala na usuwanie danych EXIF z kilku popularnych formatów obrazów. Obsługuje mniejszą liczbę formatów plików oraz rozpoznawanych tagów niż exiftool, jednak do moich zastosowań na razie to wystarcza(bardzo chętnie widziałbym tutaj wsparcie dla innych formatów metadanych, więc wypatruję bibliotek oferujących takie funkcjonalności by rozszerzyć funkcjonalność narzędzia w przyszłości).
+
+To narzędzie, jak i większość niżej opisanych funkcjonalności, jest dostępna jedynie w Krokiecie i CLI. Czkawka Gui, będąca w trybie maintenance, nie otrzyma tego trybu, ani żadnej innej większej funkcjonalności(no chyba, że ktoś to zaimplementuje samemu, do czego szczerze zachęcam).
+Gtk4-rs i nowe tajemnicze błędy
+
+Od pierwszych wersji Czkawka korzysta z GTK, do budowania swojego gui. GTK jak powszechnie wiadomo, jest napisane w C i przy używaniu go w Rust, trzeba albo samemu tworzyć kod łączący te dwa języki albo korzystać z gotowej biblioteki. Jako początkujący próba budowania od zera interoperacyjności C <-> Rust byłaby proszeniem się o problemy, więc jedynym sensownym rozwiązaniem było użycie wtedy raczkującego gtk-rs. Biblioteka ta dawała całkiem dobre możliwości wywoływania funkcji napisanych w C z poziomu Rusta, jednak połączenie moich ówczesnych umiejętności z wczesną wersją samej biblioteki sprawiało, że musiałem mierzyć się z wieloma dziwnymi błędami.
+
+Z czasem kod, mimo niezbyt dobrego stylu w jakim był zapisany, to stawał się “rock-solid” i coraz trudniej było go popsuć(*na typowym linuxowym systemie). Ze względu na problemy występujące na innych systemach oraz trudności w dalszym rozwijaniu projektu przeniosłem większość wysiłków na Krokieta, a samą aplikację GTK uznałem za deprecated, co oznaczało, że nie zamierzam implementować w niej nowych funkcji, narzędzi ani trybów. Jednak obecnie większość użytkowników Czkawki nadal korzysta z frontendu GTK, więc nie mogłem ich pozostawić samych sobie i postanowiłem, na ile to możliwe, naprawiać pojawiające się błędy.
+
+Zacząłem nieco poprawiać kod, by łatwiej byłoby naprawiać problemy, działało to wszystko do czasu gdy nie stworzyłem jednego testu, który podobnie jak inne testy, weryfikował wynik funkcji usuwania z listy, elementów, które nie były powiązane z innymi elementami. Zasada działania była prosta:
+
+    Iteruj po modelu
+    Jeśli iter wskazuje na zwykły element to zapisz go do wektora
+    Jeśli iter wskazuje na nagłówek lub model się skończył, to jeśli wektor elementów ma tylko 1 element to usuń zarówno poprzedni nagłówek jak i ten element(np. gdy mamy dwa podobne obrazy, jeden usuniemy z dysku, to z listy trzeba usunąć ten drugi, bo to bezsensowne trzymać w gui element bez podczepionego do niego podobnego obiektu)
+
+Ten test po prostu się zawieszał. Zacząłem więc analizować, dlaczego niemal identyczne testy przechodzą poprawnie, a ten jeden nie. Najbardziej problematyczne było to, że test zazwyczaj działał bez zarzutu, gdy kompilowałem go osobno, natomiast przestawał działać, gdy był kompilowany w grupie z innymi. W międzyczasie, na starszej wersji Czkawki kompilowanej ręcznie, zacząłem zauważać sporadyczne zwisy po usuwaniu plików, jednak wtedy uznałem to za regresję spowodowaną innymi zmianami w kodzie.
+
+Pierwszą hipotezą było niepoprawne użycie API, na przykład operowanie na zwolnionej pamięci lub błędnym iteratorze. Ani AddressSanitizer, ani Valgrind nie wykazały jednak żadnych nieprawidłowości. W trakcie przygotowywania minimalnego przykładu do zgłoszenia błędu w gtk4-rs zauważyłem, że problem występuje głównie w trybie release i przy większej liczbie testów. Po zgłoszeniu błędu w repozytorium gtk4-rs utworzyłem również zgłoszenie w repozytorium Rusta, ponieważ problem zaczął pojawiać się od wersji 1.86.0. Użytkownik yvt, a następnie ds84182, ustalili, że kod w gtk4-rs jest unsound, ponieważ w funkcji iter_next parametr iter jest niemutowalną referencją bez wewnętrznej zmienności, mimo że w praktyce jej stan ulega zmianie.
+
+#[doc(alias = "gtk_tree_model_iter_next")]
+fn iter_next(&self, iter: &TreeIter) -> bool {
+    unsafe {
+        from_glib(ffi::gtk_tree_model_iter_next(
+            self.as_ref().to_glib_none().0,
+            mut_override(iter.to_glib_none().0),
+        ))
+    }
+}
+
+Poprawka zmieniająca iter na typ &mut TreeIter trafiła do nowej wersji, gtk4-rs 0.11.0, której wydanie było jednym z blokerów wydania nowej wersji aplikacji.
+Optymalizator wideo — nowe narzędzie
+Zmiana kodeka
+
+Będąc pod ciągłą presją posiadania na dysku wystarczającej ilości wolnego miejsca, aby mieć możliwość zapisywania losowych głupich memów i filmików, postanowiłem skupić się na zmniejszeniu zajętości już istniejącej przestrzeni dyskowej. Mając kilka dużych plików wideo w formacie MJPEG, uznałem, że najprościej będzie je przekonwertować do bardziej efektywnego formatu, co pozwoliłoby kilkukrotnie zmniejszyć ich rozmiar i zaoszczędzić kilkanaście GB miejsca. Mógłbym używać do tego ffmpega ręcznie dla każdego pliku, ale wyszukiwanie takich filmów i konwersja byłyby żmudne i tak narodził się pomysł na nowe narzędzie.
+
+Podobnie jak w przypadku pozostałych narzędzi, logika tego jest prosta:
+
+    zbierana jest lista plików, wyglądających od strony rozszerzenia jak wideo
+    przy użyciu ffprobe, pobierane są metadane tegoż oto wideo
+    wyświetlana jest lista plików w gui
+    użytkownik może wybrać pliki i je “zoptymalizować” — zmieniając kodek, opcjonalnie ograniczając rozdzielczość wideo, przy pomocy ffmpeg i jego specyficznych opcji
+
+równie dobrze zapewne działałby zwykły prosty skrypt pythonowy, jednak ja lubię mieć wszystko w jednym miejscu, z możliwościa ręcznej selekcji wyników.
+Przycinanie czarnych pasów i statycznej zawartości
+
+Nieco bardziej zaawansowaną logikę ma inny tryb w tym narzędziu — przycinania wideo.
+
+Przeglądając moją kolekcję zabawnych filmików, zauważyłem, że wiele z nich ma losowe czarne pasy po bokach lub kolorowe, nieruchome obramówki. Taka czarna ramka nie tylko zajmuje cenne kilobajty, ale też utrudnia komfortowe oglądanie materiału.
+
+Jednym ze znienawidzonych przeze mnie rzeczy, jest oglądanie poziomego filmiku, który ma czarne pasy u góry i u dołu na zwykłym monitorze — taki filmik na pełnym ekranie zajmuje ułamek dostępnego miejsca — no tragedia.
+Press enter or click to view image in full size
+Przykład filmiku z czarnymi pasami u góry i na dole, uruchomionego na pełnym ekranie
+
+Istnieją programy, w których wystarczy zaznaczyć obszar, do którego chcemy przyciąć wideo, jednak zazwyczaj dodają one do materiału swoje logo i/lub działają tylko dla jednego pliku naraz, przez co takie operacje są bardzo czasochłonne dla użytkownika. Dlatego postanowiłem na początek dodać prosty tryb, który automatycznie usuwa czarne pasy i to bez dodawania czegokolwiek do wideo. Starając się utrzymać wszystko w prostocie, logika wygląda następująco:
+
+    Wideo są wyszukiwane, a z nich pobierane są metadane przy użyciu ffprobe, takie jak rozmiar, bitrate, kodek itp.
+    Następnie przy użyciu ffmpeg pobierana jest pierwsza klatka wideo, która nadpisuje wymiary obrazu z metadanych (ffprobe nie uwzględnia rotacji wideo, a czasem zwraca wymiary różniące się od rzeczywistych).
+    Dla każdego wideo pobierane jest maksymalnie 60 klatek w odstępach co minimum 0,25 s (dla 15-sekundowego wideo klatka co 0,25 s, dla 60-minutowego wideo co około 1 minutę).
+    Na każdej klatce tworzony jest obrys zawartości, tak aby wszystko poza zaznaczonym prostokątem było traktowane jako czarne pasy. Proces przebiega z czterech kierunków (góra, dół, lewo, prawo). Od przeciwnej krawędzi sprawdzane są linie, w których co najmniej określony procent pikseli (domyślnie 90%) ma wszystkie trzy składowe RGB poniżej zadanej wartości (domyślnie 20). Jeśli warunek jest spełniony, sprawdzana jest kolejna linia; jeśli nie, przerywa się analizę z danego kierunku i ustala miejsce krawędzi prostokąta.
+
+Press enter or click to view image in full size
+Przykład w jaki sposób jest robione zwężanie
+
+    Następnie kolejne kroki powtarzają tę samą procedurę dla kolejnych klatek, przy czym prostokąt z zawartością może tylko się rozszerzać, czyli zmniejszać powierzchnię przyciętą. Wynika to z zasady, że jeśli na jednej klatce pojawia się element w miejscu, które na innych klatkach jest ciemne, nie można go usunąć.
+    Jeżeli prostokąt ma rozmiar równy ramce wideo, oznacza to, że przycinanie nie jest potrzebne, bo nie ma czego przyciąć. W przeciwnym wypadku ffmpeg wykonuje operację przycięcia obszaru do określonego rozmiaru.
+
+Niektóre filmiki są jednak bardziej problematyczne — mają białe napisy lub tło w innych kolorach. Początkowo myślałem o rozszerzeniu algorytmu tak, aby wykrywał również kolory inne niż czarny, np. biały, ale problemem stało się to, że liczba analizowanych kolorów/możliwości szybko by rosła i rozwiązanie przestałoby być w miarę proste do implementacji i nie działałoby dla wszystkich oczekiwanych przez użytkowników sytuacji.
+Download the Medium App
+
+Początkowo myślałem o bardziej złożonym podejściu: pobieraniu 60 klatek i analizowaniu każdej kolumny oraz wiersza względem poprzedniej klatki, co jednak znacznie komplikowało porównania. Wpadłem więc na pomysł, by porównywać wszystkie wyciągnięte klatki z pierwszą klatką, stosując prostą funkcję obliczającą różnice między pikselami w dwóch klatkach — dla każdej składowej RGB danego piksela wyznaczana jest różnica bezwzględna względem piksela o tych samych współrzędnych w pierwszej ramce. Na przykład: RGB(50, 0, 50) — RGB(75, 50, 25) = RGB(25, 50, 25). W ten sposób powstaje nowy obraz, którego wartości pikseli odzwierciedlają zmiany względem pierwszej klatki.
+
+Korzystając z tego, że obszary mało różniące się od pierwszej klatki, w takim obrazie były bardzo ciemne, nic nie stało na przeszkodzie by użyć poprzedniej techniki do przycinania obszarów. Zatem niezmienione fragmenty obrazu, bez względu na oryginalny kolor, ostatecznie stawały się czarne i zaczynały nadawać się do ich prostego przycinania
+
+Początkowo niezbyt byłem do tej funkcjonalności przekonany, jednak efekt przerósł moje oczekiwania i działa to bardzo dobrze w mojej kolekcji głupich filmików.
+Press enter or click to view image in full size
+Widoczne filmiki i ich automatycznie przycięte wersje
+
+Oczywiście nie jest narzędzie idealne i posiada trochę wad i ograniczeń:
+
+    czasem pozostawia cienkie czarne linie — spowodowane zapewne tym, że utrata jakości spowodowała rozmycie obrazu, przez co te czarne linie, nie są już takie do końca czarne, bo nachodzi na nie czasem obraz, więc algorytm ich nie usuwa
+    tryb podobnej zawartości może przycinać również zawartość wideo — algorytm nie rozróżnia czy nieruchoma część wideo jest ważna czy też nie (zauważyłem, że np. ruchome wideo plaży, gdzie górna część ciągle wskazuje na 0niemal nieruchome niebo, często jest przycinane do obszaru samej plaży, gdzie algorytm wykrywa jakiś ruch)
+    konieczne jest transkodowanie — to powoduje utratę jakości i czasem nawet zwiększenie rozmiaru — można przy tym skorzystać z konwersji do h265, by ten rozmiar zmniejszyć, skoro i tak trzeba video transkodować do jakiegoś formatu
+    jeśli zmiany obrazu w określonych miejscach są widoczne jedynie bardzo rzadko, to 60 wyciąganych w równych odstępach klatek, może je ominąć i algorytm może niepoprawnie uznać że jest to dobre miejsce do odcięcia — niestety ale to kompromis pomiędzy prędkością przetwarzania a w miarę dobrymi wynikami — testowanie każdej klatki wideo, dawałoby niemal pewność, że nic ważnego nie zostanie przycięte, ale wraz z dłuższym filmem liniowo zwiększał by się czas jego przetwarzania(obstawiam, że film 1h, by się przetwarzał ~5h w programie, zamiast kilku/kilkunastu sekund obecnie).
+
+Złe nazwy — nowy tryb
+
+Kolejnym nowym trybem o który nikt nie prosił i który pewnie mało kto będzie używał, jest wyszukiwanie potencjalnie niepożądanych nazw.
+Press enter or click to view image in full size
+
+Rozszerzenia z dużych liter, emoji w nazwie, spacje na początku końcu, znaki non ascii, limitowana ilość znaków, czy ich zduplikowane sekwencje, to wszystkie dostępne możliwe tryby wyszukiwania.
+
+By zapewnić w miarę sensowne nazwy, kroki są wykonywane w ścisłej i niemożliwej do zmiany kolejności, dzięki czemu “ 🚀 świstak .txt” przy usuwaniu emoji, znaków non-ascii i pustych miejsc, nie stanie się nagle “rocket swistak.txt” tylko “swistak.txt”.
+
+Te tryby przyszły mi do głowy jako pierwsze, patrząc na dość dziwne nazewnictwo plików, jakie to posiadam na komputerze, więc nie wykluczam że w kolejnych wersjach rozszerzę listę wyszukiwanych/zmienianych elementów/zmodyfikuję obecne.
+Podgląd parametrów wideo i jego klatek
+
+Ciekawszą rzeczą w tej wersji, jest dodana możliwość wyświetlania parametrów wyszukanych plików wideo. Oprócz samej ścieżki do wideo, jak i jego rozmiaru i czasu , teraz w gui(dodałem to zarówno do krokieta, jak i wersji GTK, która jak przypominam jest w trybie maintenance) wyświetlają się również takie informacje jak długość wideo, bitrate, kodek, framerate oraz jego rozmiar w pikselach.
+
+Przy użyciu zewnętrznego crate, wszystkie te informacje są sczytywane przez ffprobe — więc by mieć dostęp do nich, musi to być zainstalowane obok ffmpeg. Najstarsze issue dotyczące tej funkcjonalności były sprzed 3 lat, a przez ten czas nikt się tym zgłoszeniem nie zajął ani ja nie czułem jakiejś specjalnej chęci by tym się zajmować.
+
+Problem się zaczął, gdy moja kolekcja głupich filmików się rozrosła i przestałem nadążać z usuwaniem duplikatów. Bez parametrów widocznych bezpośrednio przy filmiku, konieczne było ciągła ciągła ręczna weryfikacja, przez ich odpalanie, tak by usunąć te gorszej jakości/mniejszego rozmiaru.
+Press enter or click to view image in full size
+Przykład dodanych parametrów wideo, wraz z klatką z obecnie zaznaczonego video(Lobster 2015)
+
+Kolejnym usprawnieniem w widoku wideo, było dodanie podglądu do rezultatów. Mimo że wydaje się to proste, to takie nie było. Do tworzenia podglądu zaprzęgnąłem ffmpeg, podobnie jak to obecnie działa przy hashowaniu i porównywaniu plików wideo. Jest to operacja czasochłonna(nawet setki ms), więc przy tworzeniu ich ad-hock widoczne byłoby znaczne opóźnienie, co opóźniałoby klikanie. Dodatkowo trzeba by albo albo gubić te obrazy i przy każdym klikaniu je na nowo generować albo wrzucać to do jakiegoś cache, który komplikowałby logikę.Problematyczne byłoby też to, że przy klikaniu albo całe gui by freezowało i dopiero wtedy by obrazek po całkowitym przetworzeniu się wyświetlał(tak obecnie dzieje się dla zwykłych obrazów, wyłączając operacje przy użyciu ffmpeg) albo trzeba byłoby to ładować w osobnym wątku, co komplikowałoby logikę.
+
+Uznałem, że obsługa tego w całości po stronie gui w taki sposób jest niepotrzebne trudne, więc postanowiłem przerzucić to do core. Obecnie został dodany nowy krok do skanowania, po którym(jeśli tylko użytkownik zaznaczył, że chce generować podgląd), dla każdego pliku który jest podobny do innych plików, jest generowany podgląd. Nazwa pliku, czas modyfikacji, jego rozmiar jak i miejsce z którego pobierana jest ramka, są hashowane, tak by dla tych samych parametrów tworzyć zawsze tą samą ścieżkę, by w przy kolejnych skanach nie trzeba było ponownie ich generować — alternatywnie możnaby zapisywać to info do cache, ale wtedy stracilibyśmy możliwość wyboru miejsca wyciąganej klatki. Alternatywnie jest możliwość podglądu wideo, jako obraz składający się z 9 obrazów podglądowych wyciąganych z wnętrza filmu — z racji na konieczność generacji aż 9 zamiast 1 części, jest to dużo wolniejsze.
+Press enter or click to view image in full size
+Alternatywny podgląd wideo w formie siatki 3x3 (1670 2023)
+
+Podgląd obrazów jest dostępny jako opcja tylko z poziomu Krokieta. Wersja CLI ma zahardkodowane nie tworzenie podglądu(bo tak szczerze mówiąc, to tam nie ma sensu) a wersja GTK, to już sami wiecie.
+Press enter or click to view image in full size
+W trybie przycinania, widoczne są prostokąty wskazujące miejsce przycięcia wideo
+
+By uniknąć nadmiernego zużycia pamięci i procesora — wyciąganie podglądu z pliku przy użyciu ffmpeg, ma udostępniony tylko 1 wątek na wideo(domyślnie ffmpeg pozwala na stworzenie tylu wątków ile jest dostępne w systemie), co skutecznie zapobiega błędom braku pamięci(podczas testów kilkukrotnie program mi się wysypywał, im tego nie zaimplementowałem),
+Inne zmiany
+Okno dialogowe w Czkawce GTK, z informacją o Krokiecie
+
+Zdziwiło mnie, że tak mało osób o tym wie, że Krokiet jest nową i ulepszoną wersją Czkawki — mimo, że próbowałem to na wiele różnych sposobów przekazać. Zatem kierując się zasadą “bo ja wiem lepiej”, postanowiłem dodać nowe okno dialogowe, wprost mówiące o tym wszystkim użytkownikom. Jego wyświetlanie jest zależne od tego czy istnieje magiczny plik mówiący że już to okno zostało wyświetlone(powinno się wyświetlić tylko raz) lub czy użytkownik ustawił magiczną zmienną CZKAWKA_DONT_ANNOY_ME
+Press enter or click to view image in full size
+Nowe Logo Krokieta
+
+Poprzednie logo, było na szybko i ręcznie narysowanym jednorożcem, w formie zwykłego obrazka rastrowego. Taki obrazek pasował gdy określał aplikację, która była eksperymentalna. Dziś jak powszechnie Krokiet to aplikacja niemal idealna i takiego niemal idealnego loga mi trzeba było. Obecnie przedstawia jednorożca z tarczą, hełmem i sztandarem z krokietem — czemu akurat takie? — a ja odpowiem, a dlaczego nie(choć zapewne ma to związek z audiobookiem Trylogii Husyckiej , którą słuchałem w między czasie)? Dodatkowo jest w formacie svg, no i ładnie się teraz skaluje.
+Press enter or click to view image in full size
+Nowa maskotka programu
+Czyszczenie przestarzałych rekordów z opóźnieniem w cache
+
+Zwykły flow aplikacyjny to:
+
+    zbieranie listy plików
+    ładowanie cache
+    przetwarzanie plików
+    zapisywanie cache
+    wyświetlanie rezultatów
+
+zazwyczaj najdłużej trwającym zadaniem jest przetwarzanie plików, a następnie zbieranie listy plików, ponieważ operują na dysku, weryfikując wiele małych plików. Ładowanie i zapisywanie cache operuje na pojedynczych plikach, co powinno być szybkie, prawda? No nie do końca — istnieje domyślnie włączona opcja usuwania przestarzałych rekordów, tak by trzymać rozmiar cache w ryzach, minimalizując czasy ładowania i zapisywania. Przy każdej operacji ładowania, wszystkie rekordy są weryfikowane czy istnieją i czy czas modyfikacji i rozmiar się zgadzają. Zwykle trwa to w miarę szybko, jednak w przypadku np. zewnętrznych dysków łączonych przez sambę lub hdd, operacje na wielu małych plikach, mogą trwać niepotrzebnie długo. Z tego też powodu te operacje postanowiłem opóźnić, tak by wykonywały się tak rzadko jak tylko to możliwe. Zatem postanowiłem przy ładowaniu cache, jedynie raz na tydzień, wykonywać te operacje. Dodatkowo oddałem do użytku użytkownikom, możliwość ręcznego czyszczenia cache, po to by w razie konieczności można było w dowolnej chwili wyczyścić.
+Dodanie możliwości skanowania pojedynczych plików
+
+Od zarania dziejów, jedyną możliwością skanowania, było wybranie wpierw folderu jaki będzie skanowany. Takie coś oczywiście ma sens, bo obejmuje 100% przypadków użycia i pozawala na przeskanowania plików w każdej kombinacji plików. W niektórych sytuacjach wymaga to tworzenia nowych folderów i przenoszenia tam plików, by móc je przeskanować. Niektórzy z użytkowników, chcieli mieć możliwość porównywania tylko jednego rezultatu obrazu/pliku/wideo czy nie ma on podobnych plików na dysku. Obecnie by do tego poziomu przejść trzeba stworzyć nowy folder, wrzucić tam ręcznie plik, dodać w aplikacji i ustawić go jako referencyjny folder. Obecnie dodałem możliwość dodawania pojedynczych plików, dzięki czemu po dodaniu ich do aplikacji i ustawieniu jako ścieżki referencyjnej, możnasprawdzać teraz pojedyncze pliki bez konieczności ich przenoszenia. Muszę powiedzieć, że akurat mi to niezbyt przeszkadzało i przez te wszystkie lata po prostu nauczyłem się testować pliki, bawiąc się nimi po dysku.
+Dźwięki
+
+Cichą nowością w tej wersji jest dodanie dźwięków do Krokieta po zakończeniu skanowania. W przypadku dłuższych skanowań, łatwo było się rozproszyć innymi działaniami i nie zauważyć jego końca. Zrobiłem to na próbę dodając jedynie jeden dźwięk by zobaczyć czy warto i być może w przyszłości zostanie to rozszerzone o kolejne. Dźwięk końca skanowania to stworzony przez moją szczękę dźwięk, który zapewne nie będzie zbyt przyjemny, więc istnieje możliwość ustawienia dowolnego innego dźwięku przez odpowiednią zmienną środowiskową
+Tłumaczenia SI
+
+Niemal cały kod rustowy w projekcie, systemy budowania czy skrypty są rozwijane głównie przeze mnie, bo sam większość tego kodu napisałem i ją całkiem nieźle rozumiem. Jedynym wyjątkiem są tłumaczenia, w których to odpowiadam za większość teksów, jedynie dla języka angielskiego i polskiego. Inne języki takie jak włoski czy francuski, w przeszłości były aktywnie uzupełniane, część obecnie jest aktualizowana np. portugalsko-brazylijski a część była uzupełniana od zera przy pomocy tłumacza internetowego, z powodu zapytań o akurat ten język. Obecnie wspieranych języków jest kilkadziesiąt języków do daje dziesiątki tysięcy słów do przetłumaczenia, i co wersję kilkadziesiąt/kilkaset nowych fraz wymaga aktualizacji. Skala tego może nie jest jakaś ogromna dla niektórych projektów, ale dla mnie jest i przy kolejnych zmienionych stanąłem więc przed wyborem:
+
+    zostawić tłumaczenia na wpół przetłumaczone
+    usunąć/ukryć tłumaczenia niekompletne
+    ręcznie tłumaczyć brakujące teksty
+
+By zapobiec kolejnym zapytaniom o dodanie już wcześniej istniejącego języka do aplikacji, oraz by nie straszyć użytkowników niepełnymi tekstami, postanowiłem(nie posiadając w zanadrzu kilku setek lub tysięcy dolarów na zlecenie tłumaczenia, ani własnej ekipy tłumaczy) najpierw ręcznie tłumaczyć określone zwroty przy pomocy ogólnodostępnych stron do tłumaczenia a następnie używać do tego skryptu, który pobiera model zongwei/gemma3-translator:4b, który to działa niezbyt szybko(max kilka słów na sekundę na moim sprzęcie) jednak wygląda, że daje lepsze rezultaty niż inne metody.
+Refaktory kodu w Czkawce Gtk
+
+Powiedzieć, że kod w Czkawkce Gtk nie jest zbytnio ładny, to jakby nic nie powiedzieć. Tworzyłem go głównie jak moja znajomość rusta była dość prymitywna — z biegiem czasu projekt się rozrósł, przez co ze względu na rozmiar całkowitego przepisania projektu Gtk w lepszym stylu nigdy się nie podjąłem, jedynie łatając na ślinę to co można było połatać. W obecnej wersji zrobiłem nieco więcej tego samego, wydzielając np. operacje działania na operatorach do wspólnych funkcji czy grupowania powiązanych ze sobą elementów(tj. scrollview, treeview i gestureclick), dzięki czemu kod powinien być obecnie nieco bardziej przystępny. W głowie miałem przygotowanie kodu pod potencjalne wsparcie dla GTK 5, jednak z uwagi na rozległość wymaganych zmian(np. konieczność przejścia z TreeView który jest bazą pod wszystkie modele na coś innego) nie mam zamiaru dalej się tym zajmować — ale jeśli ktokolwiek ma wystarczająco wiele odwagi może się tego podjąć(nie mam problemu nawet z szerokim użyciem AI do tego zadania, o ile kod będzie w miarę dobrej jakości, zgodny stylistycznie z resztą programu i przejdzie szereg moich recenzji)
+Koniec
+
+Repozytorium — github.com/qarmin/czkawka
+
+Pliki do pobrania wraz z listą zmian — https://github.com/qarmin/czkawka/releases
+
+Licencja — MIT/GPL w zależności od programu (czyli w skrócie za darmo)
