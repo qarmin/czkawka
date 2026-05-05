@@ -6,7 +6,7 @@ use std::sync::atomic::AtomicBool;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use indexmap::{IndexMap, IndexSet};
-use log::debug;
+use log::{debug, error};
 use rayon::prelude::*;
 use rusty_chromaprint::{Configuration, match_fingerprints};
 use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
@@ -409,7 +409,10 @@ impl SimilarVideos {
                 progress_handler.increase_items(1);
 
                 match res {
-                    Err(_) => Some(None),
+                    Err(_e) => {
+                        // error!("Can't calculate audio fingerprint: {}", e);
+                        Some(None)
+                    },
                     Ok(None) => None,
                     Ok(Some((fingerprint, duration_seconds))) => {
                         audio_entry.fingerprint = fingerprint;
@@ -540,8 +543,6 @@ impl SimilarVideos {
     }
 }
 
-/// Convert a `VideoAudioEntry` (audio cache) into a `VideosEntry` (UI/result type).
-/// Only path, size, and modified_date are meaningful; video-specific fields are left empty.
 fn audio_entry_to_videos_entry(ae: &VideoAudioEntry) -> VideosEntry {
     VideosEntry {
         path: ae.path.clone(),
@@ -559,12 +560,6 @@ fn audio_entry_to_videos_entry(ae: &VideoAudioEntry) -> VideosEntry {
     }
 }
 
-/// Group entries by audio duration using a greedy sorted sweep.
-///
-/// Entries are sorted by duration, then a sliding window is applied: a new group
-/// starts whenever the next entry's duration exceeds
-/// `anchor_duration * (1 + max_ratio)`. Groups with fewer than two entries are
-/// discarded.  When `max_ratio >= 1.0`, all entries land in a single group.
 fn group_entries_by_duration(mut entries: Vec<VideoAudioEntry>, max_ratio: f64) -> Vec<Vec<VideoAudioEntry>> {
     entries.sort_by_key(|e| e.audio_duration_seconds);
 
