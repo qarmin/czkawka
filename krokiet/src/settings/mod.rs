@@ -9,7 +9,7 @@ use czkawka_core::TOOLS_NUMBER;
 use czkawka_core::common::basic_gui_cli::CliResult;
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
-use czkawka_core::tools::similar_videos::{ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
+use czkawka_core::tools::similar_videos::{ALLOWED_AUDIO_LENGTH_RATIO, ALLOWED_AUDIO_SIMILARITY_PERCENT, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize};
@@ -466,14 +466,22 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
 
     settings.set_similar_videos_audio_check_content(custom_settings.similar_videos_audio_check_content);
-    settings.set_similar_videos_audio_max_duration_diff_ratio(custom_settings.similar_videos_audio_max_duration_diff_ratio.clamp(
-        *ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.start() as f32,
-        *ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.end() as f32,
-    ));
-    settings.set_similar_videos_audio_max_duration_diff_ratio_min(*ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.start() as f32);
-    settings.set_similar_videos_audio_max_duration_diff_ratio_max(*ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.end() as f32);
-    settings.set_similar_videos_audio_minimum_segment_duration(custom_settings.similar_videos_audio_minimum_segment_duration.max(0.0));
-    settings.set_similar_videos_audio_minimum_segment_duration_max(180.0);
+    settings.set_similar_videos_audio_similarity_percent(
+        custom_settings
+            .similar_videos_audio_similarity_percent
+            .clamp(*ALLOWED_AUDIO_SIMILARITY_PERCENT.start() as f32, *ALLOWED_AUDIO_SIMILARITY_PERCENT.end() as f32),
+    );
+    settings.set_similar_videos_audio_similarity_percent_min(*ALLOWED_AUDIO_SIMILARITY_PERCENT.start() as f32);
+    settings.set_similar_videos_audio_similarity_percent_max(*ALLOWED_AUDIO_SIMILARITY_PERCENT.end() as f32);
+    settings.set_similar_videos_audio_length_ratio(
+        custom_settings
+            .similar_videos_audio_length_ratio
+            .clamp(*ALLOWED_AUDIO_LENGTH_RATIO.start() as f32, *ALLOWED_AUDIO_LENGTH_RATIO.end() as f32),
+    );
+    settings.set_similar_videos_audio_length_ratio_min(*ALLOWED_AUDIO_LENGTH_RATIO.start() as f32);
+    settings.set_similar_videos_audio_length_ratio_max(*ALLOWED_AUDIO_LENGTH_RATIO.end() as f32);
+    settings.set_similar_videos_audio_min_duration_seconds(custom_settings.similar_videos_audio_min_duration_seconds as f32);
+    settings.set_similar_videos_audio_min_duration_seconds_max(600.0);
     settings.set_similar_videos_audio_maximum_difference(custom_settings.similar_videos_audio_maximum_difference.max(0.0));
     settings.set_similar_videos_audio_maximum_difference_max(10.0);
 
@@ -656,8 +664,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
     let similar_videos_audio_check_content = settings.get_similar_videos_audio_check_content();
-    let similar_videos_audio_max_duration_diff_ratio = settings.get_similar_videos_audio_max_duration_diff_ratio();
-    let similar_videos_audio_minimum_segment_duration = settings.get_similar_videos_audio_minimum_segment_duration();
+    let similar_videos_audio_similarity_percent = settings.get_similar_videos_audio_similarity_percent();
+    let similar_videos_audio_length_ratio = settings.get_similar_videos_audio_length_ratio();
+    let similar_videos_audio_min_duration_seconds = settings.get_similar_videos_audio_min_duration_seconds().round() as u32;
     let similar_videos_audio_maximum_difference = settings.get_similar_videos_audio_maximum_difference();
 
     let video_thumbnails_generate = settings.get_video_thumbnails_generate();
@@ -795,8 +804,9 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_sub_ignore_same_resolution,
         similar_videos_sub_similarity,
         similar_videos_audio_check_content,
-        similar_videos_audio_max_duration_diff_ratio,
-        similar_videos_audio_minimum_segment_duration,
+        similar_videos_audio_similarity_percent,
+        similar_videos_audio_length_ratio,
+        similar_videos_audio_min_duration_seconds,
         similar_videos_audio_maximum_difference,
         similar_music_sub_audio_check_type,
         similar_music_sub_approximate_comparison,

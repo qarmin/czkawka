@@ -7,7 +7,7 @@ use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_videos::{
-    DEFAULT_AUDIO_MAX_DURATION_DIFFERENCE_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MINIMUM_SEGMENT_DURATION, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION,
+    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION,
     DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL,
 };
 use czkawka_core::tools::temporary::DEFAULT_TEMP_EXTENSIONS_STR;
@@ -177,10 +177,12 @@ pub struct SettingsCustom {
     pub similar_videos_crop_detect: String,
     #[serde(default)]
     pub similar_videos_audio_check_content: bool,
-    #[serde(default = "default_similar_videos_audio_max_duration_diff_ratio")]
-    pub similar_videos_audio_max_duration_diff_ratio: f32,
-    #[serde(default = "default_similar_videos_audio_minimum_segment_duration")]
-    pub similar_videos_audio_minimum_segment_duration: f32,
+    #[serde(default = "default_similar_videos_audio_similarity_percent")]
+    pub similar_videos_audio_similarity_percent: f32,
+    #[serde(default = "default_similar_videos_audio_length_ratio")]
+    pub similar_videos_audio_length_ratio: f32,
+    #[serde(default = "default_similar_videos_audio_min_duration_seconds")]
+    pub similar_videos_audio_min_duration_seconds: u32,
     #[serde(default = "default_similar_videos_audio_maximum_difference")]
     pub similar_videos_audio_maximum_difference: f32,
     #[serde(default)]
@@ -396,11 +398,14 @@ fn default_similar_videos_vid_hash_duration() -> u32 {
 fn default_similar_videos_crop_detect() -> String {
     "letterbox".to_string()
 }
-fn default_similar_videos_audio_max_duration_diff_ratio() -> f32 {
-    DEFAULT_AUDIO_MAX_DURATION_DIFFERENCE_RATIO as f32
+fn default_similar_videos_audio_similarity_percent() -> f32 {
+    DEFAULT_AUDIO_SIMILARITY_PERCENT as f32
 }
-fn default_similar_videos_audio_minimum_segment_duration() -> f32 {
-    DEFAULT_AUDIO_MINIMUM_SEGMENT_DURATION
+fn default_similar_videos_audio_length_ratio() -> f32 {
+    DEFAULT_AUDIO_LENGTH_RATIO as f32
+}
+fn default_similar_videos_audio_min_duration_seconds() -> u32 {
+    DEFAULT_AUDIO_MIN_DURATION_SECONDS
 }
 fn default_similar_videos_audio_maximum_difference() -> f32 {
     DEFAULT_AUDIO_MAXIMUM_DIFFERENCE as f32

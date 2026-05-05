@@ -30,9 +30,11 @@ pub const DEFAULT_VID_HASH_DURATION: u32 = 10;
 pub const DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL: u8 = 10;
 
 // Audio fingerprint mode constants
-pub const ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO: RangeInclusive<f64> = 0.0..=1.0;
-pub const DEFAULT_AUDIO_MAX_DURATION_DIFFERENCE_RATIO: f64 = 0.20;
-pub const DEFAULT_AUDIO_MINIMUM_SEGMENT_DURATION: f32 = 5.0;
+pub const ALLOWED_AUDIO_SIMILARITY_PERCENT: RangeInclusive<f64> = 0.0..=100.0;
+pub const DEFAULT_AUDIO_SIMILARITY_PERCENT: f64 = 80.0;
+pub const ALLOWED_AUDIO_LENGTH_RATIO: RangeInclusive<f64> = 0.0..=1.0;
+pub const DEFAULT_AUDIO_LENGTH_RATIO: f64 = 0.1;
+pub const DEFAULT_AUDIO_MIN_DURATION_SECONDS: u32 = 10;
 pub const DEFAULT_AUDIO_MAXIMUM_DIFFERENCE: f64 = 3.0;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -133,15 +135,11 @@ pub struct SimilarVideosParameters {
     pub generate_thumbnail_grid_instead_of_single: bool,
     pub thumbnail_grid_tiles_per_side: u8,
 
-    /// When true, compare videos by audio fingerprint instead of visual hash.
     pub check_audio_content: bool,
-    /// Chromaprint: minimum matching segment duration in seconds.
-    pub minimum_segment_duration: f32,
-    /// Chromaprint: maximum allowed score difference for a segment to be considered a match.
+    pub audio_similarity_percent: f64,
     pub maximum_difference: f64,
-    /// Only compare audio between videos whose durations differ by at most this fraction.
-    /// E.g. 0.20 means at most 20% difference. Range: 0.0–1.0.
-    pub max_duration_difference_ratio: f64,
+    pub audio_length_ratio: f64,
+    pub audio_min_duration_seconds: u32,
 }
 
 pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
@@ -166,14 +164,16 @@ impl SimilarVideosParameters {
         generate_thumbnail_grid_instead_of_single: bool,
         thumbnail_grid_tiles_per_side: u8,
         check_audio_content: bool,
-        minimum_segment_duration: f32,
+        audio_similarity_percent: f64,
         maximum_difference: f64,
-        max_duration_difference_ratio: f64,
+        audio_length_ratio: f64,
+        audio_min_duration_seconds: u32,
     ) -> Self {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
         assert!(ALLOWED_VID_HASH_DURATION.contains(&duration));
-        assert!(ALLOWED_AUDIO_MAX_DURATION_DIFFERENCE_RATIO.contains(&max_duration_difference_ratio));
+        assert!(ALLOWED_AUDIO_SIMILARITY_PERCENT.contains(&audio_similarity_percent));
+        assert!(ALLOWED_AUDIO_LENGTH_RATIO.contains(&audio_length_ratio));
         Self {
             tolerance,
             exclude_videos_with_same_size,
@@ -186,9 +186,10 @@ impl SimilarVideosParameters {
             generate_thumbnail_grid_instead_of_single,
             thumbnail_grid_tiles_per_side,
             check_audio_content,
-            minimum_segment_duration,
+            audio_similarity_percent,
             maximum_difference,
-            max_duration_difference_ratio,
+            audio_length_ratio,
+            audio_min_duration_seconds,
         }
     }
 }

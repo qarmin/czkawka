@@ -6,7 +6,7 @@ use std::sync::atomic::AtomicBool;
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 use indexmap::{IndexMap, IndexSet};
-use log::{debug, error};
+use log::debug;
 use rayon::prelude::*;
 use rusty_chromaprint::{Configuration, match_fingerprints};
 use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
@@ -448,76 +448,87 @@ impl SimilarVideos {
             return WorkContinueStatus::Continue;
         }
 
-        let all_entries: Vec<VideoAudioEntry> = mem::take(&mut self.audio_to_check).into_values().collect();
-
-        let groups = group_entries_by_duration(all_entries, self.params.max_duration_difference_ratio);
-        let total_entries: usize = groups.iter().map(|g| g.len()).sum();
+        let audio_min_duration_seconds = self.params.audio_min_duration_seconds;
+        let entries: Vec<VideoAudioEntry> = mem::take(&mut self.audio_to_check)
+            .into_values()
+            .filter(|e| e.audio_duration_seconds >= audio_min_duration_seconds)
+            .collect();
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
             CurrentStage::SimilarVideosAudioComparingFingerprints,
-            total_entries,
+            entries.len(),
             self.get_test_type(),
             0,
         );
 
-        let minimum_segment_duration = self.params.minimum_segment_duration;
+        let audio_similarity_percent = self.params.audio_similarity_percent;
+        let audio_length_ratio = self.params.audio_length_ratio;
         let maximum_difference = self.params.maximum_difference;
         let configuration = &self.audio_config;
 
         let mut similar_vectors: Vec<Vec<VideosEntry>> = Vec::new();
+        let mut used_paths: IndexSet<String> = Default::default();
 
-        for group in groups {
+        for f_entry in &entries {
             if check_if_stop_received(stop_flag) {
                 progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
-            let mut used_paths: IndexSet<String> = Default::default();
+            progress_handler.increase_items(1);
+            let f_string = f_entry.path.to_string_lossy().to_string();
+            if used_paths.contains(&f_string) {
+                continue;
+            }
 
-            for f_entry in &group {
-                progress_handler.increase_items(1);
-                let f_string = f_entry.path.to_string_lossy().to_string();
-                if used_paths.contains(&f_string) {
-                    continue;
-                }
+            let f_duration = f64::from(f_entry.audio_duration_seconds);
 
-                let (mut similar_entries, errors): (Vec<_>, Vec<_>) = group
-                    .par_iter()
-                    .map(|e_entry| {
-                        let e_string = e_entry.path.to_string_lossy().to_string();
-                        if used_paths.contains(&e_string) || e_string == f_string {
-                            return None;
-                        }
-                        let mut segments = match match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration) {
-                            Ok(s) => s,
-                            Err(e) => return Some(Err(flc!("core_error_comparing_fingerprints", reason = e.to_string()))),
-                        };
-                        segments.retain(|s| s.duration(configuration) > minimum_segment_duration && s.score < maximum_difference);
-                        if segments.is_empty() { None } else { Some(Ok(e_string)) }
+            let (mut similar_entries, errors): (Vec<_>, Vec<_>) = entries
+                .par_iter()
+                .map(|e_entry| {
+                    let e_string = e_entry.path.to_string_lossy().to_string();
+                    if used_paths.contains(&e_string) || e_string == f_string {
+                        return None;
+                    }
+
+                    let e_duration = f64::from(e_entry.audio_duration_seconds);
+                    let shorter = f_duration.min(e_duration);
+                    let longer = f_duration.max(e_duration);
+                    if longer == 0.0 || shorter / longer < audio_length_ratio {
+                        return None;
+                    }
+
+                    let mut segments = match match_fingerprints(&f_entry.fingerprint, &e_entry.fingerprint, configuration) {
+                        Ok(s) => s,
+                        Err(e) => return Some(Err(flc!("core_error_comparing_fingerprints", reason = e.to_string()))),
+                    };
+                    segments.retain(|s| s.score < maximum_difference);
+                    let matched_duration: f32 = segments.iter().map(|s| s.duration(configuration)).sum();
+                    let threshold = shorter as f32 * (audio_similarity_percent / 100.0) as f32;
+                    if matched_duration >= threshold { Some(Ok(e_string)) } else { None }
+                })
+                .flatten()
+                .partition_map(|res| match res {
+                    Ok(path) => itertools::Either::Left(path),
+                    Err(err) => itertools::Either::Right(err),
+                });
+
+            self.common_data.text_messages.errors.extend(errors);
+
+            similar_entries.retain(|path| !used_paths.contains(path));
+            if !similar_entries.is_empty() {
+                let lookup: BTreeMap<String, &VideoAudioEntry> = entries.iter().map(|e| (e.path.to_string_lossy().to_string(), e)).collect();
+                let mut result_group: Vec<VideosEntry> = similar_entries
+                    .iter()
+                    .filter_map(|path| {
+                        used_paths.insert(path.clone());
+                        lookup.get(path).map(|ae| audio_entry_to_videos_entry(ae))
                     })
-                    .flatten()
-                    .partition_map(|res| match res {
-                        Ok(path) => itertools::Either::Left(path),
-                        Err(err) => itertools::Either::Right(err),
-                    });
-
-                self.common_data.text_messages.errors.extend(errors);
-
-                similar_entries.retain(|path| !used_paths.contains(path));
-                if !similar_entries.is_empty() {
-                    let lookup: BTreeMap<String, &VideoAudioEntry> = group.iter().map(|e| (e.path.to_string_lossy().to_string(), e)).collect();
-                    let mut result_group: Vec<VideosEntry> = similar_entries
-                        .iter()
-                        .filter_map(|path| {
-                            used_paths.insert(path.clone());
-                            lookup.get(path).map(|ae| audio_entry_to_videos_entry(ae))
-                        })
-                        .collect();
-                    used_paths.insert(f_string);
-                    result_group.push(audio_entry_to_videos_entry(f_entry));
-                    similar_vectors.push(result_group);
-                }
+                    .collect();
+                used_paths.insert(f_string);
+                result_group.push(audio_entry_to_videos_entry(f_entry));
+                similar_vectors.push(result_group);
             }
         }
 
@@ -560,32 +571,6 @@ fn audio_entry_to_videos_entry(ae: &VideoAudioEntry) -> VideosEntry {
     }
 }
 
-fn group_entries_by_duration(mut entries: Vec<VideoAudioEntry>, max_ratio: f64) -> Vec<Vec<VideoAudioEntry>> {
-    entries.sort_by_key(|e| e.audio_duration_seconds);
-
-    let mut groups: Vec<Vec<VideoAudioEntry>> = Vec::new();
-    let mut current_group: Vec<VideoAudioEntry> = Vec::new();
-
-    for entry in entries {
-        if !current_group.is_empty() {
-            #[expect(clippy::indexing_slicing)]
-            let anchor = f64::from(current_group[0].audio_duration_seconds);
-            let this = f64::from(entry.audio_duration_seconds);
-            if !(anchor == 0.0 || this <= anchor * (1.0 + max_ratio)) {
-                if current_group.len() >= 2 {
-                    groups.push(mem::take(&mut current_group));
-                } else {
-                    current_group.clear();
-                }
-            }
-        }
-        current_group.push(entry);
-    }
-    if current_group.len() >= 2 {
-        groups.push(current_group);
-    }
-    groups
-}
 
 pub fn get_similar_videos_audio_cache_file() -> String {
     format!("cache_similar_videos_audio_{CACHE_VERSION}.bin")

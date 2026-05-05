@@ -363,9 +363,10 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         false, // creating thumbnails in CLI, makes almost no sense
         2,     // creating thumbnails in CLI, makes almost no sense
         false, // check_audio_content - TODO expose via CLI flag
-        czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MINIMUM_SEGMENT_DURATION,
+        czkawka_core::tools::similar_videos::DEFAULT_AUDIO_SIMILARITY_PERCENT,
         czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MAXIMUM_DIFFERENCE,
-        czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MAX_DURATION_DIFFERENCE_RATIO,
+        czkawka_core::tools::similar_videos::DEFAULT_AUDIO_LENGTH_RATIO,
+        czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MIN_DURATION_SECONDS,
     );
     let mut tool = SimilarVideos::new(params);
 
