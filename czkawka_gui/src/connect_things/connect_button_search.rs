@@ -650,9 +650,10 @@ fn similar_video_search(
                 false, // Not implemented in gtk gui
                 2,     // Not implemented in gtk gui
                 false, // check_audio_content - not implemented in gtk gui
-                czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MINIMUM_SEGMENT_DURATION,
+                czkawka_core::tools::similar_videos::DEFAULT_AUDIO_SIMILARITY_PERCENT,
                 czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MAXIMUM_DIFFERENCE,
-                czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MAX_DURATION_DIFFERENCE_RATIO,
+                czkawka_core::tools::similar_videos::DEFAULT_AUDIO_LENGTH_RATIO,
+                czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MIN_DURATION_SECONDS,
             );
             let mut tool = SimilarVideos::new(params);
 

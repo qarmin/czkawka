@@ -371,7 +371,7 @@ fn stage_label(stage: CurrentStage) -> String {
         }
         CurrentStage::SameMusicComparingFingerprints => flc!("stage_comparing_fingerprints"),
         CurrentStage::ExifRemoverExtractingTags => flc!("stage_extracting_exif"),
-        CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails => flc!("stage_creating_video_thumbnails"),
+        CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails | CurrentStage::SimilarVideosAudioCreatingThumbnails => flc!("stage_creating_video_thumbnails"),
         CurrentStage::VideoOptimizerProcessingVideos => flc!("stage_processing_videos"),
         CurrentStage::DeletingFiles => flc!("stage_deleting"),
         CurrentStage::RenamingFiles => flc!("stage_renaming"),

@@ -349,7 +349,12 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         skip_forward_amount,
         crop_detect,
         scan_duration,
+        check_audio_content,
     } = similar_videos;
+
+    if check_audio_content {
+        eprintln!("WARNING: Audio content comparison is very resource-intensive and may significantly slow down scanning.");
+    }
 
     let params = SimilarVideosParameters::new(
         tolerance,
@@ -362,7 +367,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         10,    // creating thumbnails in CLI, makes almost no sense
         false, // creating thumbnails in CLI, makes almost no sense
         2,     // creating thumbnails in CLI, makes almost no sense
-        false, // check_audio_content - TODO expose via CLI flag
+        check_audio_content,
         czkawka_core::tools::similar_videos::DEFAULT_AUDIO_SIMILARITY_PERCENT,
         czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MAXIMUM_DIFFERENCE,
         czkawka_core::tools::similar_videos::DEFAULT_AUDIO_LENGTH_RATIO,

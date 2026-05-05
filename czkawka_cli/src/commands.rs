@@ -527,6 +527,12 @@ pub struct SimilarVideosArgs {
         long_help = "Duration of video scanning in seconds. Longer duration provides more accurate results but takes more time. Allowed values are predefined in the application."
     )]
     pub scan_duration: u32,
+    #[clap(
+        long,
+        help = "Compare videos by audio fingerprint (WARNING: very resource-intensive)",
+        long_help = "When enabled, videos are also compared by their audio fingerprint. This is very resource-intensive and significantly slows down scanning."
+    )]
+    pub check_audio_content: bool,
 }
 
 #[derive(Debug, clap::Args)]
