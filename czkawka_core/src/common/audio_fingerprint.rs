@@ -3,7 +3,7 @@ use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use log::error;
+use log::{error, warn};
 use rusty_chromaprint::{Configuration, Fingerprinter};
 use symphonia::core::audio::SampleBuffer;
 use symphonia::core::codecs::{CODEC_TYPE_NULL, DecoderOptions};
@@ -73,6 +73,8 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
         let mut total_interleaved_samples: u64 = 0;
         let mut audio_channels: u32 = 0;
         let mut audio_sample_rate: u32 = 0;
+        let mut sum_sq: f64 = 0.0;
+        let mut max_amp: f64 = 0.0;
 
         while let Ok(packet) = format.next_packet() {
             if check_if_stop_received(stop_flag) {
@@ -103,6 +105,14 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
                         buf.copy_interleaved_ref(audio_buf);
                         let samples = buf.samples();
                         total_interleaved_samples += samples.len() as u64;
+                        for &s in samples {
+                            let v = f64::from(s) / f64::from(i16::MAX);
+                            sum_sq += v * v;
+                            let a = v.abs();
+                            if a > max_amp {
+                                max_amp = a;
+                            }
+                        }
                         printer.consume(samples);
                     }
                 }
@@ -118,9 +128,12 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
         printer.finish();
         let fingerprint = printer.fingerprint().to_vec();
 
-        if fingerprint.is_empty() {
-            return Err("no audio content detected".to_string());
+        let rms = if total_interleaved_samples > 0 { (sum_sq / total_interleaved_samples as f64).sqrt() } else { 0.0 };
+        if rms < 0.001 && max_amp < 0.01 {
+            error!("Audio in file {:?} is silent or near-silent (RMS: {rms:.6}, Max Amp: {max_amp:.6}), skipping fingerprint", path);
+            return Err("silent audio".to_string());
         }
+        warn!("Audio in file {:?} has low volume (RMS: {rms:.6}, Max Amp: {max_amp:.6}), fingerprint may be unreliable", path);
 
         // Derive duration from the count of decoded samples
         let duration_seconds = if audio_channels > 0 && audio_sample_rate > 0 {
