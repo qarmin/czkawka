@@ -44,6 +44,7 @@ use crate::common::model::{CheckingMethod, ToolType};
 // 3 - Calculating audio fingerprints
 // 4 - Saving audio cache
 // 5 - Comparing audio fingerprints
+// 6 - Creating thumbnails
 
 // Temporary files
 // 0 - Collecting files
@@ -151,6 +152,7 @@ pub enum CurrentStage {
     SimilarVideosAudioCalculatingFingerprints,
     SimilarVideosAudioCacheSaving,
     SimilarVideosAudioComparingFingerprints,
+    SimilarVideosAudioCreatingThumbnails,
     BrokenFilesChecking,
     BadExtensionsChecking,
     BadNamesChecking,
@@ -240,7 +242,8 @@ impl ProgressData {
             | CurrentStage::SimilarVideosAudioCacheLoading
             | CurrentStage::SimilarVideosAudioCalculatingFingerprints
             | CurrentStage::SimilarVideosAudioCacheSaving
-            | CurrentStage::SimilarVideosAudioComparingFingerprints => Some(ToolType::SimilarVideos),
+            | CurrentStage::SimilarVideosAudioComparingFingerprints
+            | CurrentStage::SimilarVideosAudioCreatingThumbnails => Some(ToolType::SimilarVideos),
             CurrentStage::BrokenFilesChecking => Some(ToolType::BrokenFiles),
             CurrentStage::BadExtensionsChecking => Some(ToolType::BadExtensions),
             CurrentStage::BadNamesChecking => Some(ToolType::BadNames),
@@ -266,7 +269,7 @@ impl ToolType {
             Self::BrokenFiles | Self::BadExtensions | Self::BadNames => 1,
             Self::SimilarImages | Self::ExifRemover => 3,
             Self::SimilarVideos => match checking_method {
-                CheckingMethod::VideoAudioContent => 5,
+                CheckingMethod::VideoAudioContent => 6,
                 _ => 3,
             },
             Self::VideoOptimizer => 2,
@@ -319,6 +322,7 @@ impl CurrentStage {
             Self::SimilarVideosAudioCalculatingFingerprints => 3,
             Self::SimilarVideosAudioCacheSaving => 4,
             Self::SimilarVideosAudioComparingFingerprints => 5,
+            Self::SimilarVideosAudioCreatingThumbnails => 6,
             Self::BrokenFilesChecking => 1,
             Self::BadExtensionsChecking => 1,
             Self::BadNamesChecking => 1,

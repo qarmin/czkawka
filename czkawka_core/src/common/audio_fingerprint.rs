@@ -3,7 +3,7 @@ use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use log::{error, warn};
+use log::error;
 use rusty_chromaprint::{Configuration, Fingerprinter};
 use symphonia::core::audio::SampleBuffer;
 use symphonia::core::codecs::{CODEC_TYPE_NULL, DecoderOptions};
@@ -128,19 +128,19 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
         printer.finish();
         let fingerprint = printer.fingerprint().to_vec();
 
-        let rms = if total_interleaved_samples > 0 { (sum_sq / total_interleaved_samples as f64).sqrt() } else { 0.0 };
-        if rms < 0.001 && max_amp < 0.01 {
-            error!("Audio in file {:?} is silent or near-silent (RMS: {rms:.6}, Max Amp: {max_amp:.6}), skipping fingerprint", path);
-            return Err("silent audio".to_string());
-        }
-        warn!("Audio in file {:?} has low volume (RMS: {rms:.6}, Max Amp: {max_amp:.6}), fingerprint may be unreliable", path);
-
         // Derive duration from the count of decoded samples
         let duration_seconds = if audio_channels > 0 && audio_sample_rate > 0 {
             (total_interleaved_samples / u64::from(audio_channels) / u64::from(audio_sample_rate)) as u32
         } else {
             0
         };
+
+        let rms = if total_interleaved_samples > 0 { (sum_sq / total_interleaved_samples as f64).sqrt() } else { 0.0 };
+        if rms < 0.001 && max_amp < 0.01 {
+            // Cache with an empty fingerprint so this file is not re-decoded on the next run
+            // but is still excluded from comparisons via the `!fingerprint.is_empty()` filter.
+            return Ok(Some((vec![], duration_seconds)));
+        }
 
         Ok(Some((fingerprint, duration_seconds)))
     })

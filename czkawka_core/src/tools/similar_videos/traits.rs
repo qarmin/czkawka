@@ -43,6 +43,10 @@ impl Search for SimilarVideos {
                     self.common_data.stopped_search = true;
                     return;
                 }
+                if self.create_thumbnails(progress_sender, stop_flag) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
             } else {
                 // Visual similarity mode (existing behaviour, requires ffmpeg)
                 if !check_if_ffprobe_ffmpeg_exists() {

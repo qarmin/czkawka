@@ -226,10 +226,15 @@ impl SimilarVideos {
     }
 
     #[fun_time(message = "create_thumbnails", level = "debug")]
-    fn create_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
+    pub(crate) fn create_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
+        let stage = if self.params.check_audio_content {
+            CurrentStage::SimilarVideosAudioCreatingThumbnails
+        } else {
+            CurrentStage::SimilarVideosCreatingThumbnails
+        };
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SimilarVideosCreatingThumbnails,
+            stage,
             self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(),
             self.get_test_type(),
             0,
