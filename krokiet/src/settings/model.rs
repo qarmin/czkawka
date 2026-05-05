@@ -177,6 +177,8 @@ pub struct SettingsCustom {
     pub similar_videos_crop_detect: String,
     #[serde(default)]
     pub similar_videos_audio_check_content: bool,
+    #[serde(default)]
+    pub similar_videos_audio_preset_index: i32,
     #[serde(default = "default_similar_videos_audio_similarity_percent")]
     pub similar_videos_audio_similarity_percent: f32,
     #[serde(default = "default_similar_videos_audio_length_ratio")]

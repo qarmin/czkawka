@@ -466,7 +466,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
 
     settings.set_similar_videos_audio_check_content(custom_settings.similar_videos_audio_check_content);
-    settings.set_similar_videos_audio_similarity_percent(
+    settings.set_similar_videos_audio_preset_index(custom_settings.similar_videos_audio_preset_index);    settings.set_similar_videos_audio_similarity_percent(
         custom_settings
             .similar_videos_audio_similarity_percent
             .clamp(*ALLOWED_AUDIO_SIMILARITY_PERCENT.start() as f32, *ALLOWED_AUDIO_SIMILARITY_PERCENT.end() as f32),
@@ -664,6 +664,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
     let similar_videos_audio_check_content = settings.get_similar_videos_audio_check_content();
+    let similar_videos_audio_preset_index = settings.get_similar_videos_audio_preset_index();
     let similar_videos_audio_similarity_percent = settings.get_similar_videos_audio_similarity_percent();
     let similar_videos_audio_length_ratio = settings.get_similar_videos_audio_length_ratio();
     let similar_videos_audio_min_duration_seconds = settings.get_similar_videos_audio_min_duration_seconds().round() as u32;
@@ -804,6 +805,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_sub_ignore_same_resolution,
         similar_videos_sub_similarity,
         similar_videos_audio_check_content,
+        similar_videos_audio_preset_index,
         similar_videos_audio_similarity_percent,
         similar_videos_audio_length_ratio,
         similar_videos_audio_min_duration_seconds,

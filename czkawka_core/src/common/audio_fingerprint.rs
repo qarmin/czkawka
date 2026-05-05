@@ -118,6 +118,10 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
         printer.finish();
         let fingerprint = printer.fingerprint().to_vec();
 
+        if fingerprint.is_empty() {
+            return Err("no audio content detected".to_string());
+        }
+
         // Derive duration from the count of decoded samples
         let duration_seconds = if audio_channels > 0 && audio_sample_rate > 0 {
             (total_interleaved_samples / u64::from(audio_channels) / u64::from(audio_sample_rate)) as u32

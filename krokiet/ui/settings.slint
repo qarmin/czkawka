@@ -105,6 +105,9 @@ export global Settings {
 
     // Audio fingerprint sub-mode
     in-out property <bool> similar_videos_audio_check_content: false;
+    in-out property <[string]> similar_videos_audio_preset_names: ["Custom", "Identical videos", "Clip in longer video", "Similar content"];
+    in-out property <string> similar_videos_audio_preset_value: "Custom";
+    in-out property <int> similar_videos_audio_preset_index: 0;
     in-out property <float> similar_videos_audio_similarity_percent: 80.0;
     in-out property <float> similar_videos_audio_similarity_percent_min: 0.0;
     in-out property <float> similar_videos_audio_similarity_percent_max: 100.0;
