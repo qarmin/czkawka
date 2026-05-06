@@ -291,7 +291,9 @@ pub fn save_settings(settings: &CediniaSettings) {
 
 use slint::ComponentHandle;
 
-use crate::{BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings};
+use crate::{
+    BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings,
+};
 
 pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     let items = StringComboBoxItems::new();
@@ -465,10 +467,6 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         bad_names_space_at_start_or_end: bn.get_space_at_start_or_end(),
         bad_names_non_ascii_graphical: bn.get_non_ascii_graphical(),
         bad_names_remove_duplicated_non_alpha: bn.get_remove_duplicated_non_alpha(),
-        similar_videos_audio_preset: StringComboBoxItems::config_name_from_idx(
-            &items.similar_videos_audio_preset,
-            sv.get_audio_preset_idx(),
-            "clip_in_longer",
-        ),
+        similar_videos_audio_preset: StringComboBoxItems::config_name_from_idx(&items.similar_videos_audio_preset, sv.get_audio_preset_idx(), "clip_in_longer"),
     }
 }

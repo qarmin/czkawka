@@ -274,7 +274,12 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
             let preset = StringComboBoxItems::value_from_idx(
                 &items.similar_videos_audio_preset,
                 sv.get_audio_preset_idx(),
-                AudioPresetParams { similarity_percent: 80.0, maximum_difference: 3.0, length_ratio: 0.05, min_duration_seconds: 10 },
+                AudioPresetParams {
+                    similarity_percent: 80.0,
+                    maximum_difference: 3.0,
+                    length_ratio: 0.05,
+                    min_duration_seconds: 10,
+                },
             );
             ScanRequest::SimilarVideos {
                 dirs,

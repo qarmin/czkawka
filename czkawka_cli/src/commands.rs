@@ -1127,7 +1127,7 @@ fn parse_audio_similarity_percent(src: &str) -> Result<f64, String> {
             if ALLOWED_AUDIO_SIMILARITY_PERCENT.contains(&v) {
                 Ok(v)
             } else {
-                Err(format!("Audio similarity percent must be in range {:?}", ALLOWED_AUDIO_SIMILARITY_PERCENT))
+                Err(format!("Audio similarity percent must be in range {ALLOWED_AUDIO_SIMILARITY_PERCENT:?}"))
             }
         }
         Err(e) => Err(e.to_string()),
@@ -1153,7 +1153,7 @@ fn parse_audio_length_ratio(src: &str) -> Result<f64, String> {
             if ALLOWED_AUDIO_LENGTH_RATIO.contains(&v) {
                 Ok(v)
             } else {
-                Err(format!("Audio length ratio must be in range {:?}", ALLOWED_AUDIO_LENGTH_RATIO))
+                Err(format!("Audio length ratio must be in range {ALLOWED_AUDIO_LENGTH_RATIO:?}"))
             }
         }
         Err(e) => Err(e.to_string()),

@@ -180,17 +180,32 @@ impl StringComboBoxItems {
         let similar_videos_audio_preset = Self::convert_i18n(&[
             (
                 "identical",
-                AudioPresetParams { similarity_percent: 90.0, maximum_difference: 2.0, length_ratio: 0.85, min_duration_seconds: 5 },
+                AudioPresetParams {
+                    similarity_percent: 90.0,
+                    maximum_difference: 2.0,
+                    length_ratio: 0.85,
+                    min_duration_seconds: 5,
+                },
                 DisplaySpec::Translatable("option_audio_preset_identical"),
             ),
             (
                 "clip_in_longer",
-                AudioPresetParams { similarity_percent: 80.0, maximum_difference: 3.0, length_ratio: 0.05, min_duration_seconds: 10 },
+                AudioPresetParams {
+                    similarity_percent: 90.0,
+                    maximum_difference: 4.0,
+                    length_ratio: 0.05,
+                    min_duration_seconds: 10,
+                },
                 DisplaySpec::Translatable("option_audio_preset_clip"),
             ),
             (
                 "similar",
-                AudioPresetParams { similarity_percent: 25.0, maximum_difference: 6.0, length_ratio: 0.4, min_duration_seconds: 10 },
+                AudioPresetParams {
+                    similarity_percent: 25.0,
+                    maximum_difference: 6.0,
+                    length_ratio: 0.4,
+                    min_duration_seconds: 10,
+                },
                 DisplaySpec::Translatable("option_audio_preset_similar"),
             ),
         ]);
