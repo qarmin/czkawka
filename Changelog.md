@@ -27,6 +27,8 @@ The project will remain available in the repository. For some time I will ensure
 - Added support for detecting corruption in Fonts (TTF, OTF, TTC), Markup (JSON, XML, TOML, YAML, SVG), and Archives (7z, gz/tgz, tar, zst, bz2, xz) - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 - Fixed a bug where relative symlinks were resolved without considering the parent directory - [#1900](https://github.com/qarmin/czkawka/pull/1900)
 - Fixed a prehash cache bypass that caused full hash computation on some files during a second scan - [#1907](https://github.com/qarmin/czkawka/pull/1907)
+- Extended integration tests, to prevent regressions in the future - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Fixed reference folder mode, not deleting duplicates in certain cases - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 
 ### CLI
 
