@@ -96,6 +96,13 @@ export global BadNamesSettings {
 }
 
 
+export global SimilarVideosSettings {
+    in-out property <int>      audio_preset_idx:     1;
+    in-out property <string>   audio_preset_value:   "clip_in_longer";
+    in-out property <[string]> audio_preset_options: ["Identical", "Clip in longer", "Similar"];
+}
+
+
 export global BigFilesSettings {
     in-out property <int>    search_mode_idx:   0;
     in-out property <string> search_mode_value: "biggest";

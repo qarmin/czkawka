@@ -154,6 +154,9 @@ settings_broken_archive = Archive
 settings_broken_image = Image
 settings_broken_font = Font
 settings_broken_markup = Markup (JSON/XML/TOML)
+settings_similar_videos_header = SIMILAR VIDEOS (AUDIO)
+settings_similar_videos_audio_preset = Audio similarity preset
+settings_similar_videos_audio_preset_desc = Controls how strictly audio must match
 settings_bad_names_header = BAD NAMES
 settings_bad_names_checks_label = CHECKS
 settings_bad_names_uppercase_ext = Uppercase extension
@@ -320,6 +323,9 @@ option_music_method_tags = Tags
 option_music_method_audio = Audio
 option_min_size_none = None
 option_max_size_unlimited = Unlimited
+option_audio_preset_identical = Identical
+option_audio_preset_clip = Clip in longer
+option_audio_preset_similar = Similar
 
 # Volume labels (shown in the directories screen)
 volume_internal_storage = Internal Storage

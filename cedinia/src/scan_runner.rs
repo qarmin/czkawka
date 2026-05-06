@@ -131,6 +131,10 @@ pub enum ScanRequest {
     SimilarVideos {
         dirs: Vec<PathBuf>,
         filters: CommonFilters,
+        audio_similarity_percent: f64,
+        audio_maximum_difference: f64,
+        audio_length_ratio: f64,
+        audio_min_duration_seconds: u32,
     },
     Stop,
 }
@@ -332,8 +336,25 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 handler.on_result(ScanResult::ExifRemover(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
-            ScanRequest::SimilarVideos { dirs, filters } => {
-                let items = scan_similar_videos(dirs, &filters, stop_flag, &handler, scan_id);
+            ScanRequest::SimilarVideos {
+                dirs,
+                filters,
+                audio_similarity_percent,
+                audio_maximum_difference,
+                audio_length_ratio,
+                audio_min_duration_seconds,
+            } => {
+                let items = scan_similar_videos(
+                    dirs,
+                    &filters,
+                    audio_similarity_percent,
+                    audio_maximum_difference,
+                    audio_length_ratio,
+                    audio_min_duration_seconds,
+                    stop_flag,
+                    &handler,
+                    scan_id,
+                );
                 handler.on_result(ScanResult::SimilarVideos(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }

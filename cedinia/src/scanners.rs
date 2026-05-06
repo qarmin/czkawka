@@ -583,11 +583,18 @@ pub(crate) fn scan_same_music<H: ScanResultHandler>(
     items
 }
 
-pub(crate) fn scan_similar_videos<H: ScanResultHandler>(dirs: Vec<PathBuf>, filters: &CommonFilters, stop: &Arc<AtomicBool>, handler: &Arc<H>, scan_id: u32) -> Vec<FileItem> {
-    use czkawka_core::tools::similar_videos::{
-        DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_CROP_DETECT,
-        DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, SimilarVideos, SimilarVideosParameters, VideosEntry,
-    };
+pub(crate) fn scan_similar_videos<H: ScanResultHandler>(
+    dirs: Vec<PathBuf>,
+    filters: &CommonFilters,
+    audio_similarity_percent: f64,
+    audio_maximum_difference: f64,
+    audio_length_ratio: f64,
+    audio_min_duration_seconds: u32,
+    stop: &Arc<AtomicBool>,
+    handler: &Arc<H>,
+    scan_id: u32,
+) -> Vec<FileItem> {
+    use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, SimilarVideos, SimilarVideosParameters, VideosEntry};
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
     let params = SimilarVideosParameters::new(
         10,    // tolerance (not used in audio mode)
@@ -601,10 +608,10 @@ pub(crate) fn scan_similar_videos<H: ScanResultHandler>(dirs: Vec<PathBuf>, filt
         false, // generate_thumbnail_grid_instead_of_single
         2,     // thumbnail_grid_tiles_per_side
         true,  // check_audio_content – audio-only mode, no FFmpeg needed
-        DEFAULT_AUDIO_SIMILARITY_PERCENT,
-        DEFAULT_AUDIO_MAXIMUM_DIFFERENCE,
-        DEFAULT_AUDIO_LENGTH_RATIO,
-        DEFAULT_AUDIO_MIN_DURATION_SECONDS,
+        audio_similarity_percent,
+        audio_maximum_difference,
+        audio_length_ratio,
+        audio_min_duration_seconds,
     );
     let mut tool = SimilarVideos::new(params);
     tool.set_included_paths(dirs);

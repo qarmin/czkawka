@@ -1,7 +1,7 @@
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::settings::gui_settings_values::StringComboBoxItems;
-use crate::{BigFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings, Translations, flc};
+use crate::{BigFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, Translations, flc};
 
 pub(crate) fn translate_items(app: &MainWindow) {
     let t = app.global::<Translations>();
@@ -147,6 +147,9 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_broken_image_text(flc!("settings_broken_image").into());
     t.set_settings_broken_font_text(flc!("settings_broken_font").into());
     t.set_settings_broken_markup_text(flc!("settings_broken_markup").into());
+    t.set_settings_similar_videos_header_text(flc!("settings_similar_videos_header").into());
+    t.set_settings_similar_videos_audio_preset_text(flc!("settings_similar_videos_audio_preset").into());
+    t.set_settings_similar_videos_audio_preset_desc_text(flc!("settings_similar_videos_audio_preset_desc").into());
     t.set_settings_bad_names_header_text(flc!("settings_bad_names_header").into());
     t.set_settings_bad_names_checks_label_text(flc!("settings_bad_names_checks_label").into());
     t.set_settings_bad_names_uppercase_ext_text(flc!("settings_bad_names_uppercase_ext").into());
@@ -296,4 +299,7 @@ pub(crate) fn translate_items(app: &MainWindow) {
 
     let sm = app.global::<SameMusicSettings>();
     sm.set_check_method_options(make_options(&combo_items.same_music_check_method));
+
+    let sv = app.global::<SimilarVideosSettings>();
+    sv.set_audio_preset_options(make_options(&combo_items.similar_videos_audio_preset));
 }

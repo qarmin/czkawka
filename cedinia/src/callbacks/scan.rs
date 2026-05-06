@@ -12,10 +12,10 @@ use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::model::count_checked;
 use crate::scan_runner::{CommonFilters, ScanRequest};
-use crate::settings::gui_settings_values::StringComboBoxItems;
+use crate::settings::gui_settings_values::{AudioPresetParams, StringComboBoxItems};
 use crate::{
     ActiveTool, AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, FileEntry, GeneralSettings, MainWindow, SameMusicSettings, ScanState,
-    SimilarGroupCard, SimilarImagesSettings, TemporaryFilesSettings, flc,
+    SimilarGroupCard, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings, flc,
 };
 
 pub(crate) fn wire_scan(
@@ -269,7 +269,22 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
             }
         }
         ActiveTool::ExifRemover => ScanRequest::ExifRemover { dirs, filters },
-        ActiveTool::SimilarVideos => ScanRequest::SimilarVideos { dirs, filters },
+        ActiveTool::SimilarVideos => {
+            let sv = win.global::<SimilarVideosSettings>();
+            let preset = StringComboBoxItems::value_from_idx(
+                &items.similar_videos_audio_preset,
+                sv.get_audio_preset_idx(),
+                AudioPresetParams { similarity_percent: 80.0, maximum_difference: 3.0, length_ratio: 0.05, min_duration_seconds: 10 },
+            );
+            ScanRequest::SimilarVideos {
+                dirs,
+                filters,
+                audio_similarity_percent: preset.similarity_percent,
+                audio_maximum_difference: preset.maximum_difference,
+                audio_length_ratio: preset.length_ratio,
+                audio_min_duration_seconds: preset.min_duration_seconds,
+            }
+        }
         ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {
             unreachable!("scan cannot be triggered from Home/Directories/Settings tab")
         }

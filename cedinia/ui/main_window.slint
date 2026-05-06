@@ -1,6 +1,6 @@
 import { CediniaColors } from "colors.slint";
 import { ActiveTool, DirectoryEntry, FileEntry, ScanState, SimilarGroupCard } from "common.slint";
-import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, TemporaryFilesSettings } from "app_state.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "app_state.slint";
 import { TopAppBar } from "top_bar.slint";
 import { BottomNavBar } from "bottom_nav.slint";
 import { ScanProgressBar } from "scan_progress.slint";
@@ -13,7 +13,7 @@ import { DirectoriesScreen } from "directories_screen.slint";
 import { TouchButton } from "components.slint";
 import { Translations } from "translations.slint";
 
-export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, TemporaryFilesSettings, Translations }
+export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, TemporaryFilesSettings, SimilarVideosSettings, Translations }
 export component MainWindow inherits Window {
     title: "Cedinia";
     background: CediniaColors.bg_primary;
