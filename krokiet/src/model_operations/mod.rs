@@ -16,8 +16,8 @@ impl SingleMainListModel {
         let val_int: Vec<i32> = self.val_int.iter().collect();
         let val_str: Vec<String> = self.val_str.iter().map(|e| e.to_string()).collect();
         println!(
-            "SingleMainListModel: checked: {}, filled_header_row: {}, header_row: {}, selected_row: {}, val_int: {:?}, val_str: {:?}",
-            self.checked, self.filled_header_row, self.header_row, self.selected_row, val_int, val_str
+            "SingleMainListModel: checked: {}, filled_header_row: {}, header_row: {}, focused_row: {}, val_int: {:?}, val_str: {:?}",
+            self.checked, self.filled_header_row, self.header_row, self.focused_row, val_int, val_str
         );
     }
 }
@@ -48,7 +48,7 @@ pub(crate) fn remove_single_items_in_groups(mut items: Vec<SingleMainListModel>,
         // or that we somehow removed header row, which cannot happen without serious bug
         assert!(items[0].header_row);
         assert!(!items[0].checked);
-        assert!(!items[0].selected_row);
+        assert!(!items[0].focused_row);
         let is_filled_header = items[0].filled_header_row;
 
         if is_filled_header && items.len() <= 2 {
@@ -279,7 +279,7 @@ mod tests {
     fn panics_when_first_row_is_selected_but_have_header() {
         let mut items = get_model_vec(2);
         items[0].header_row = true;
-        items[0].selected_row = true;
+        items[0].focused_row = true;
         remove_single_items_in_groups(items, true);
     }
 

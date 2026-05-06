@@ -127,8 +127,14 @@ pub(crate) fn connect_translations(app: &MainWindow) {
 
     let a = app.as_weak();
     app.global::<Callabler>().on_changed_language(move || {
-        let app = a.upgrade().unwrap();
+        let app = a.upgrade().expect("MainWindow dropped");
         change_language(&app);
+    });
+
+    let a = app.as_weak();
+    app.global::<Callabler>().on_similar_videos_audio_preset_changed(move || {
+        let app = a.upgrade().expect("MainWindow dropped");
+        apply_similar_videos_audio_preset(&app);
     });
 }
 
@@ -215,7 +221,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_video_optimizer_text(flk!("tool_video_optimizer").into());
     translation.set_tool_bad_names_text(flk!("tool_bad_names").into());
     translation.set_sort_by_full_name_text(flk!("sort_by_full_name").into());
-    translation.set_sort_by_selection_text(flk!("sort_by_selection").into());
+    translation.set_sort_by_focus_text(flk!("sort_by_focus").into());
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
     translation.set_settings_dark_theme_text(flk!("settings_dark_theme").into());
     translation.set_settings_show_only_icons_text(flk!("settings_show_only_icons").into());
@@ -238,6 +244,26 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_videos_max_difference_text(flk!("subsettings_videos_max_difference").into());
     translation.set_subsettings_videos_ignore_same_size_text(flk!("subsettings_videos_ignore_same_size").into());
     translation.set_subsettings_videos_ignore_same_resolution_text(flk!("subsettings_videos_ignore_same_resolution").into());
+    translation.set_subsettings_videos_audio_check_content_text(flk!("subsettings_videos_audio_check_content").into());
+    translation.set_subsettings_videos_audio_preset_text(flk!("subsettings_videos_audio_preset").into());
+    translation.set_subsettings_videos_audio_preset_custom(flk!("subsettings_videos_audio_preset_custom").into());
+    translation.set_subsettings_videos_audio_preset_identical(flk!("subsettings_videos_audio_preset_identical").into());
+    translation.set_subsettings_videos_audio_preset_clip(flk!("subsettings_videos_audio_preset_clip").into());
+    translation.set_subsettings_videos_audio_preset_similar(flk!("subsettings_videos_audio_preset_similar").into());
+
+    let preset_names: [SharedString; 4] = [
+        flk!("subsettings_videos_audio_preset_custom").into(),
+        flk!("subsettings_videos_audio_preset_identical").into(),
+        flk!("subsettings_videos_audio_preset_clip").into(),
+        flk!("subsettings_videos_audio_preset_similar").into(),
+    ];
+    let idx = settings.get_similar_videos_audio_preset_index().clamp(0, 3) as usize;
+    settings.set_similar_videos_audio_preset_value(preset_names[idx].clone());
+    settings.set_similar_videos_audio_preset_names(ModelRc::new(VecModel::from(preset_names.to_vec())));
+    translation.set_subsettings_videos_audio_similarity_percent_text(flk!("subsettings_videos_audio_similarity_percent").into());
+    translation.set_subsettings_videos_audio_length_ratio_text(flk!("subsettings_videos_audio_length_ratio").into());
+    translation.set_subsettings_videos_audio_min_duration_seconds_text(flk!("subsettings_videos_audio_min_duration_seconds").into());
+    translation.set_subsettings_videos_audio_maximum_difference_text(flk!("subsettings_videos_audio_maximum_difference").into());
     translation.set_subsettings_music_audio_check_type_text(flk!("subsettings_music_audio_check_type").into());
     translation.set_subsettings_music_approximate_comparison_text(flk!("subsettings_music_approximate_comparison").into());
     translation.set_subsettings_music_compared_tags_text(flk!("subsettings_music_compared_tags").into());
@@ -251,6 +277,11 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_music_minimal_fragment_duration_text(flk!("subsettings_music_minimal_fragment_duration").into());
     translation.set_subsettings_music_compare_fingerprints_only_with_similar_titles_text(flk!("subsettings_music_compare_fingerprints_only_with_similar_titles").into());
     translation.set_subsettings_broken_files_type_text(flk!("subsettings_broken_files_type").into());
+    translation.set_subsettings_empty_files_type_text(flk!("subsettings_empty_files_type").into());
+    translation.set_subsettings_empty_files_zero_byte_content_text(flk!("subsettings_empty_files_zero_byte_content").into());
+    translation.set_subsettings_empty_files_zero_byte_content_hint_text(flk!("subsettings_empty_files_zero_byte_content_hint").into());
+    translation.set_subsettings_empty_files_non_printable_content_text(flk!("subsettings_empty_files_non_printable_content").into());
+    translation.set_subsettings_empty_files_non_printable_content_hint_text(flk!("subsettings_empty_files_non_printable_content_hint").into());
     translation.set_subsettings_broken_files_audio_text(flk!("subsettings_broken_files_audio").into());
     translation.set_subsettings_broken_files_pdf_text(flk!("subsettings_broken_files_pdf").into());
     translation.set_subsettings_broken_files_archive_text(flk!("subsettings_broken_files_archive").into());
@@ -259,6 +290,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_broken_files_video_ffprobe_info_text(flk!("subsettings_broken_files_video_ffprobe_info").into());
     translation.set_subsettings_broken_files_video_ffmpeg_text(flk!("subsettings_broken_files_video_ffmpeg").into());
     translation.set_subsettings_broken_files_video_ffmpeg_info_text(flk!("subsettings_broken_files_video_ffmpeg_info").into());
+    translation.set_subsettings_broken_files_font_text(flk!("subsettings_broken_files_font").into());
+    translation.set_subsettings_broken_files_markup_text(flk!("subsettings_broken_files_markup").into());
     translation.set_subsettings_bad_names_issues_text(flk!("subsettings_bad_names_issues").into());
     translation.set_subsettings_bad_names_uppercase_extension_text(flk!("subsettings_bad_names_uppercase_extension").into());
     translation.set_subsettings_bad_names_uppercase_extension_hint_text(flk!("subsettings_bad_names_uppercase_extension_hint").into());
@@ -442,6 +475,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_custom_hint_date_text(flk!("popup_custom_hint_date_text").into());
     translation.set_popup_custom_case_sensitive_text(flk!("popup_custom_case_sensitive_text").into());
     translation.set_popup_custom_leave_one_in_group_text(flk!("popup_custom_leave_one_in_group_text").into());
+    translation.set_popup_custom_save_restore_text(flk!("popup_custom_save_restore_text").into());
 
     translation.set_compare_button_text(flk!("compare_button_text").into());
     translation.set_compare_back_text(flk!("compare_back_text").into());
@@ -502,8 +536,8 @@ fn translate_items(app: &MainWindow) {
             name: flk!("sort_by_full_name").into(),
         },
         SortModel {
-            data: SortMode::Selection,
-            name: flk!("sort_by_selection").into(),
+            data: SortMode::Focus,
+            name: flk!("sort_by_focus").into(),
         },
         SortModel {
             data: SortMode::Reverse,
@@ -546,7 +580,7 @@ fn translate_items(app: &MainWindow) {
 
     settings.set_duplicates_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_empty_folders_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
-    settings.set_empty_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
+    settings.set_empty_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_temporary_files_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
     settings.set_big_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_similar_images_column_name(fnm(&[&selection, &similarity, &size, &dimensions, &file_name, &path, &mod_date]));
@@ -589,7 +623,32 @@ pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
 pub(crate) fn translate_sort_mode(sort_mode: SortMode) -> SharedString {
     match sort_mode {
         SortMode::FullName => flk!("sort_by_full_name").into(),
-        SortMode::Selection => flk!("sort_by_selection").into(),
+        SortMode::Focus => flk!("sort_by_focus").into(),
         SortMode::Reverse => flk!("sort_reverse").into(),
+    }
+}
+
+fn apply_similar_videos_audio_preset(app: &MainWindow) {
+    let settings = app.global::<Settings>();
+    match settings.get_similar_videos_audio_preset_index() {
+        1 => {
+            settings.set_similar_videos_audio_similarity_percent(90.0);
+            settings.set_similar_videos_audio_length_ratio(0.85);
+            settings.set_similar_videos_audio_min_duration_seconds(5.0);
+            settings.set_similar_videos_audio_maximum_difference(2.0);
+        }
+        2 => {
+            settings.set_similar_videos_audio_similarity_percent(80.0);
+            settings.set_similar_videos_audio_length_ratio(0.05);
+            settings.set_similar_videos_audio_min_duration_seconds(10.0);
+            settings.set_similar_videos_audio_maximum_difference(3.0);
+        }
+        3 => {
+            settings.set_similar_videos_audio_similarity_percent(25.0);
+            settings.set_similar_videos_audio_length_ratio(0.4);
+            settings.set_similar_videos_audio_min_duration_seconds(10.0);
+            settings.set_similar_videos_audio_maximum_difference(6.0);
+        }
+        _ => {}
     }
 }

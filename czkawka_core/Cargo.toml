@@ -3,7 +3,7 @@ name = "czkawka_core"
 version = "11.0.1"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
-rust-version = "1.92.0"
+rust-version = "1.94.1"
 description = "Core of Czkawka app"
 license = "MIT"
 homepage = "https://github.com/qarmin/czkawka"
@@ -35,6 +35,17 @@ lofty = "0.24"
 # Needed by broken files
 zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 lopdf = "0.40.0"
+sevenz-rust2 = { version = "0.20.2" }
+flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
+tar = { version = "0.4", default-features = false }
+ruzstd = "0.8"
+ttf-parser = "0.25"
+quick-xml = "0.39"
+toml = { version = "1.1", default-features = false, features = ["parse", "serde"] }
+yaml-rust2 = "0.11"
+usvg = { version = "0.47", default-features = false }
+bzip2-rs = "0.1"
+lzma-rs = "0.3"
 
 # Needed by audio similarity feature
 rusty-chromaprint = "0.3"

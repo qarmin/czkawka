@@ -3,7 +3,7 @@ name = "cedinia"
 version = "11.0.1"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
-rust-version = "1.92.0"
+rust-version = "1.94.1"
 description = "Android touch-friendly GUI for Czkawka Core - named after the Battle of Cedynia (972 AD)"
 license = "GPL-3.0-only"
 homepage = "https://github.com/qarmin/czkawka"
@@ -127,6 +127,10 @@ name = "android.permission.WRITE_EXTERNAL_STORAGE"
 # Required on Android 13+ (API 33) to post system notifications
 [[package.metadata.android.uses_permission]]
 name = "android.permission.POST_NOTIFICATIONS"
+
+# Keeps CPU alive during background scanning so Android does not throttle the app
+[[package.metadata.android.uses_permission]]
+name = "android.permission.WAKE_LOCK"
 
 [package.metadata.android.signing.dev]
 path = "android/keystore/debug.keystore"

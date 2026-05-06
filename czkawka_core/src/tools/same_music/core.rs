@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 use std::fs::File;
-use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::{mem, panic};
@@ -13,14 +12,9 @@ use lofty::prelude::*;
 use lofty::read_from;
 use log::{debug, error};
 use rayon::prelude::*;
-use rusty_chromaprint::{Configuration, Fingerprinter, match_fingerprints};
-use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{CODEC_TYPE_NULL, DecoderOptions};
-use symphonia::core::formats::FormatOptions;
-use symphonia::core::io::MediaSourceStream;
-use symphonia::core::meta::MetadataOptions;
-use symphonia::core::probe::Hint;
+use rusty_chromaprint::{Configuration, match_fingerprints};
 
+use crate::common::audio_fingerprint::calc_fingerprint_and_duration;
 use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
@@ -133,17 +127,18 @@ impl SameMusic {
                     return None;
                 }
 
-                let res = calc_fingerprint_helper(path, configuration);
+                let res = calc_fingerprint_and_duration(path, configuration, stop_flag);
                 progress_handler.increase_size(music_entry.size);
                 progress_handler.increase_items(1);
 
-                let Ok(fingerprint) = res else {
-                    return Some(None);
-                };
-
-                music_entry.fingerprint = fingerprint;
-
-                Some(Some(music_entry))
+                match res {
+                    Err(_) => Some(None), // processing error, skip this entry
+                    Ok(None) => None,     // stop flag was set
+                    Ok(Some((fingerprint, _duration))) => {
+                        music_entry.fingerprint = fingerprint;
+                        Some(Some(music_entry))
+                    }
+                }
             })
             .while_some()
             .flatten()
@@ -529,83 +524,6 @@ impl SameMusic {
 
         new_duplicates
     }
-}
-
-// TODO this should be taken from rusty-chromaprint repo, not reimplemented here
-fn calc_fingerprint_helper<P: AsRef<Path>>(path: P, config: &Configuration) -> Result<Vec<u32>, String> {
-    let path = path.as_ref().to_path_buf();
-    panic::catch_unwind(|| {
-        let path = &path;
-
-        let src = File::open(path).map_err(|_| "failed to open file".to_string())?;
-        let mss = MediaSourceStream::new(Box::new(src), Default::default());
-
-        let mut hint = Hint::new();
-        if let Some(ext) = path.extension().and_then(std::ffi::OsStr::to_str) {
-            hint.with_extension(ext);
-        }
-
-        let meta_opts: MetadataOptions = Default::default();
-        let fmt_opts: FormatOptions = Default::default();
-
-        let probed = symphonia::default::get_probe()
-            .format(&hint, mss, &fmt_opts, &meta_opts)
-            .map_err(|_| "unsupported format".to_string())?;
-
-        let mut format = probed.format;
-
-        let track = format
-            .tracks()
-            .iter()
-            .find(|t| t.codec_params.codec != CODEC_TYPE_NULL)
-            .ok_or_else(|| "no supported audio tracks".to_string())?;
-
-        let dec_opts: DecoderOptions = Default::default();
-
-        let mut decoder = symphonia::default::get_codecs()
-            .make(&track.codec_params, &dec_opts)
-            .map_err(|_| "unsupported codec".to_string())?;
-
-        let track_id = track.id;
-
-        let mut printer = Fingerprinter::new(config);
-        let sample_rate = track.codec_params.sample_rate.ok_or_else(|| "missing sample rate".to_string())?;
-        let channels = track.codec_params.channels.ok_or_else(|| "missing audio channels".to_string())?.count() as u32;
-        printer.start(sample_rate, channels).map_err(|_| "initializing fingerprinter".to_string())?;
-
-        let mut sample_buf = None;
-
-        while let Ok(packet) = format.next_packet() {
-            if packet.track_id() != track_id {
-                continue;
-            }
-
-            match decoder.decode(&packet) {
-                Ok(audio_buf) => {
-                    if sample_buf.is_none() {
-                        let spec = *audio_buf.spec();
-                        let duration = audio_buf.capacity() as u64;
-                        sample_buf = Some(SampleBuffer::<i16>::new(duration, spec));
-                    }
-
-                    if let Some(buf) = &mut sample_buf {
-                        buf.copy_interleaved_ref(audio_buf);
-                        printer.consume(buf.samples());
-                    }
-                }
-                Err(symphonia::core::errors::Error::DecodeError(_)) => (),
-                Err(_) => break,
-            }
-        }
-
-        printer.finish();
-        Ok(printer.fingerprint().to_vec())
-    })
-    .unwrap_or_else(|_| {
-        let message = create_crash_message("Symphonia", &path.to_string_lossy(), "https://github.com/pdeljanov/Symphonia");
-        error!("{message}");
-        Err(message)
-    })
 }
 
 fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<MusicEntry> {

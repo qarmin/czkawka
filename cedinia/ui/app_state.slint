@@ -82,6 +82,8 @@ export global BrokenFilesSettings {
     in-out property <bool> check_pdf:     true;
     in-out property <bool> check_archive: true;
     in-out property <bool> check_image:   true;
+    in-out property <bool> check_font:    true;
+    in-out property <bool> check_markup:  true;
 }
 
 
@@ -91,6 +93,13 @@ export global BadNamesSettings {
     in-out property <bool> space_at_start_or_end:       true;
     in-out property <bool> non_ascii_graphical:         true;
     in-out property <bool> remove_duplicated_non_alpha: true;
+}
+
+
+export global SimilarVideosSettings {
+    in-out property <int>      audio_preset_idx:     1;
+    in-out property <string>   audio_preset_value:   "clip_in_longer";
+    in-out property <[string]> audio_preset_options: ["Identical", "Clip in longer", "Similar"];
 }
 
 

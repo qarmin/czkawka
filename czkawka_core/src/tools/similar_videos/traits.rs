@@ -9,7 +9,7 @@ use humansize::{BINARY, format_size};
 
 use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
-use crate::common::model::WorkContinueStatus;
+use crate::common::model::{CheckingMethod, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
@@ -25,24 +25,49 @@ impl Search for SimilarVideos {
         let start_time = Instant::now();
 
         let () = (|| {
-            if !check_if_ffprobe_ffmpeg_exists() {
-                self.common_data.text_messages.critical = Some(flc!("core_ffmpeg_not_found"));
-                #[cfg(target_os = "windows")]
-                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
-                return;
-            }
+            if self.params.check_audio_content {
+                // Audio fingerprint mode – no need for ffmpeg
+                if self.prepare_items(Some(VIDEO_FILES_EXTENSIONS)).is_err() {
+                    return;
+                }
+                self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();
+                if self.check_for_similar_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+                if self.calculate_audio_fingerprints(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+                if self.compare_audio_fingerprints(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+                if self.create_thumbnails(progress_sender, stop_flag) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+            } else {
+                // Visual similarity mode (existing behaviour, requires ffmpeg)
+                if !check_if_ffprobe_ffmpeg_exists() {
+                    self.common_data.text_messages.critical = Some(flc!("core_ffmpeg_not_found"));
+                    #[cfg(target_os = "windows")]
+                    self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
+                    return;
+                }
 
-            if self.prepare_items(Some(VIDEO_FILES_EXTENSIONS)).is_err() {
-                return;
-            }
-            self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();
-            if self.check_for_similar_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                self.common_data.stopped_search = true;
-                return;
-            }
-            if self.sort_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                self.common_data.stopped_search = true;
-                return;
+                if self.prepare_items(Some(VIDEO_FILES_EXTENSIONS)).is_err() {
+                    return;
+                }
+                self.common_data.use_reference_folders = !self.common_data.directories.reference_directories.is_empty() || !self.common_data.directories.reference_files.is_empty();
+                if self.check_for_similar_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
+                if self.sort_videos(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    self.common_data.stopped_search = true;
+                    return;
+                }
             }
             if self.delete_files(stop_flag, progress_sender) == WorkContinueStatus::Stop {
                 self.common_data.stopped_search = true;
@@ -170,6 +195,13 @@ impl CommonData for SimilarVideos {
     }
     fn get_cd_mut(&mut self) -> &mut CommonToolData {
         &mut self.common_data
+    }
+    fn get_check_method(&self) -> CheckingMethod {
+        if self.params.check_audio_content {
+            CheckingMethod::VideoAudioContent
+        } else {
+            CheckingMethod::None
+        }
     }
     fn found_any_items(&self) -> bool {
         self.information.number_of_duplicates > 0

@@ -13,6 +13,7 @@ tool_bad_extensions = Bad Extensions
 tool_same_music = Music Duplicates
 tool_bad_names = Bad Names
 tool_exif_remover = EXIF Data
+tool_similar_videos = Similar Videos (Audio)
 tool_directories = Directories
 tool_settings = Settings
 
@@ -28,6 +29,7 @@ home_bad_extensions_description = Files with invalid extension
 home_same_music_description = Similar audio files by tags
 home_bad_names_description = Files with problematic characters in name
 home_exif_description = Images with EXIF metadata
+home_similar_videos_description = Find videos with similar audio (no FFmpeg needed)
 
 # Results list
 scanning = Scanning in progress...
@@ -150,6 +152,11 @@ settings_broken_audio = Audio
 settings_broken_pdf = PDF
 settings_broken_archive = Archive
 settings_broken_image = Image
+settings_broken_font = Font
+settings_broken_markup = Markup (JSON/XML/TOML)
+settings_similar_videos_header = SIMILAR VIDEOS (AUDIO)
+settings_similar_videos_audio_preset = Audio similarity preset
+settings_similar_videos_audio_preset_desc = Controls how strictly audio must match
 settings_bad_names_header = BAD NAMES
 settings_bad_names_checks_label = CHECKS
 settings_bad_names_uppercase_ext = Uppercase extension
@@ -288,11 +295,13 @@ stage_symlinking = Creating symlinks
 stage_optimizing_videos = Optimizing videos
 stage_cleaning_exif = Cleaning EXIF
 stage_all_hiding_links = Hiding hard links
+stage_empty_files_checking_content = Checking file content
 
 # Group headers in scan results
 duplicates_group_header = { $count } files  x  { $per_file } / file  =  { $total } total
 similar_images_group_header = { $count } similar images
 same_music_group_header = { $count } similar tracks
+similar_videos_group_header = { $count } similar videos
 
 # Rename confirmation
 confirm_rename_items = Are you sure you want to rename { $n } selected files?
@@ -314,6 +323,9 @@ option_music_method_tags = Tags
 option_music_method_audio = Audio
 option_min_size_none = None
 option_max_size_unlimited = Unlimited
+option_audio_preset_identical = Identical
+option_audio_preset_clip = Clip in longer
+option_audio_preset_similar = Similar
 
 # Volume labels (shown in the directories screen)
 volume_internal_storage = Internal Storage

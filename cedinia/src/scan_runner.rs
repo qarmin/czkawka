@@ -14,7 +14,7 @@ use czkawka_core::tools::similar_images::SimilarityPreset;
 use crate::flc;
 use crate::scanners::{
     scan_bad_extensions, scan_bad_names, scan_big_files, scan_broken_files, scan_duplicate_files, scan_empty_files, scan_empty_folders, scan_exif_remover, scan_same_music,
-    scan_similar_images, scan_temporary_files,
+    scan_similar_images, scan_similar_videos, scan_temporary_files,
 };
 
 #[derive(Debug, Clone)]
@@ -128,6 +128,14 @@ pub enum ScanRequest {
         dirs: Vec<PathBuf>,
         filters: CommonFilters,
     },
+    SimilarVideos {
+        dirs: Vec<PathBuf>,
+        filters: CommonFilters,
+        audio_similarity_percent: f64,
+        audio_maximum_difference: f64,
+        audio_length_ratio: f64,
+        audio_min_duration_seconds: u32,
+    },
     Stop,
 }
 
@@ -154,11 +162,33 @@ pub enum ScanResult {
     SameMusic(Vec<FileItem>),
     BadNames(Vec<FileItem>),
     ExifRemover(Vec<FileItem>),
+    SimilarVideos(Vec<FileItem>),
     Finished(u32),
 }
 
 pub trait ScanResultHandler: Send + Sync + 'static {
     fn on_result(&self, result: ScanResult);
+}
+
+/// RAII guard that acquires a WakeLock on construction and releases it on drop.
+/// Keeps the CPU running while a scan executes in the background so Android
+/// does not throttle the worker thread.
+#[cfg(target_os = "android")]
+struct ScanWakeLock;
+
+#[cfg(target_os = "android")]
+impl ScanWakeLock {
+    fn acquire() -> Self {
+        crate::file_picker_android::acquire_wakelock();
+        ScanWakeLock
+    }
+}
+
+#[cfg(target_os = "android")]
+impl Drop for ScanWakeLock {
+    fn drop(&mut self) {
+        crate::file_picker_android::release_wakelock();
+    }
 }
 
 pub fn start_worker<H: ScanResultHandler>(handler: H) -> (Sender<ScanRequest>, Arc<AtomicBool>) {
@@ -181,23 +211,31 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
     let handler = Arc::new(handler);
 
     while let Ok(req) = req_rx.recv() {
+        if matches!(req, ScanRequest::Stop) {
+            stop_flag.store(true, Ordering::Relaxed);
+            continue;
+        }
+
+        scan_id += 1;
+        // Acquire a CPU WakeLock for the duration of the scan so Android does
+        // not throttle this worker thread when the app is in the background.
+        // The guard is automatically released via Drop at the end of the block.
+        #[cfg(target_os = "android")]
+        let _wakelock = ScanWakeLock::acquire();
+
         match req {
-            ScanRequest::Stop => {
-                stop_flag.store(true, Ordering::Relaxed);
-            }
+            ScanRequest::Stop => unreachable!(),
             ScanRequest::DuplicateFiles {
                 dirs,
                 check_method,
                 hash_type,
                 filters,
             } => {
-                scan_id += 1;
                 let items = scan_duplicate_files(dirs, check_method, hash_type, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::DuplicateFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::EmptyFolders { dirs, filters } => {
-                scan_id += 1;
                 let items = scan_empty_folders(dirs, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::EmptyFolders(items));
                 handler.on_result(ScanResult::Finished(scan_id));
@@ -212,7 +250,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 ignore_same_resolution,
                 filters,
             } => {
-                scan_id += 1;
                 let items = scan_similar_images(
                     dirs,
                     similarity_preset,
@@ -230,13 +267,11 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::EmptyFiles { dirs, filters } => {
-                scan_id += 1;
                 let items = scan_empty_files(dirs, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::EmptyFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::TemporaryFiles { dirs, extensions, filters } => {
-                scan_id += 1;
                 let items = scan_temporary_files(dirs, extensions, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::TemporaryFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
@@ -247,19 +282,16 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 count,
                 filters,
             } => {
-                scan_id += 1;
                 let items = scan_big_files(dirs, search_mode, count, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::BigFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::BrokenFiles { dirs, checked_types, filters } => {
-                scan_id += 1;
                 let items = scan_broken_files(dirs, checked_types, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::BrokenFiles(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::BadExtensions { dirs, filters } => {
-                scan_id += 1;
                 let items = scan_bad_extensions(dirs, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::BadExtensions(items));
                 handler.on_result(ScanResult::Finished(scan_id));
@@ -271,7 +303,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 check_method,
                 filters,
             } => {
-                scan_id += 1;
                 let items = scan_same_music(dirs, music_similarity, approximate, check_method, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::SameMusic(items));
                 handler.on_result(ScanResult::Finished(scan_id));
@@ -285,7 +316,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 non_ascii_graphical,
                 remove_duplicated_non_alpha,
             } => {
-                scan_id += 1;
                 let items = scan_bad_names(
                     dirs,
                     &filters,
@@ -302,9 +332,30 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 handler.on_result(ScanResult::Finished(scan_id));
             }
             ScanRequest::ExifRemover { dirs, filters } => {
-                scan_id += 1;
                 let items = scan_exif_remover(dirs, &filters, stop_flag, &handler, scan_id);
                 handler.on_result(ScanResult::ExifRemover(items));
+                handler.on_result(ScanResult::Finished(scan_id));
+            }
+            ScanRequest::SimilarVideos {
+                dirs,
+                filters,
+                audio_similarity_percent,
+                audio_maximum_difference,
+                audio_length_ratio,
+                audio_min_duration_seconds,
+            } => {
+                let items = scan_similar_videos(
+                    dirs,
+                    &filters,
+                    audio_similarity_percent,
+                    audio_maximum_difference,
+                    audio_length_ratio,
+                    audio_min_duration_seconds,
+                    stop_flag,
+                    &handler,
+                    scan_id,
+                );
+                handler.on_result(ScanResult::SimilarVideos(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
         }
@@ -330,12 +381,14 @@ fn stage_label(stage: CurrentStage) -> String {
         | CurrentStage::DuplicatePreHashCacheLoading
         | CurrentStage::SameMusicCacheLoadingTags
         | CurrentStage::SameMusicCacheLoadingFingerprints
-        | CurrentStage::ExifRemoverCacheLoading => flc!("stage_loading_cache"),
+        | CurrentStage::ExifRemoverCacheLoading
+        | CurrentStage::SimilarVideosAudioCacheLoading => flc!("stage_loading_cache"),
         CurrentStage::DuplicateCacheSaving
         | CurrentStage::DuplicatePreHashCacheSaving
         | CurrentStage::SameMusicCacheSavingTags
         | CurrentStage::SameMusicCacheSavingFingerprints
-        | CurrentStage::ExifRemoverCacheSaving => flc!("stage_saving_cache"),
+        | CurrentStage::ExifRemoverCacheSaving
+        | CurrentStage::SimilarVideosAudioCacheSaving => flc!("stage_saving_cache"),
         CurrentStage::SimilarImagesCalculatingHashes => flc!("stage_calculating_image_hashes"),
         CurrentStage::SimilarImagesComparingHashes => flc!("stage_comparing_images"),
         CurrentStage::SimilarVideosCalculatingHashes => flc!("stage_calculating_video_hashes"),
@@ -344,10 +397,14 @@ fn stage_label(stage: CurrentStage) -> String {
         CurrentStage::BadNamesChecking => flc!("stage_checking_names"),
         CurrentStage::SameMusicReadingTags => flc!("stage_reading_music_tags"),
         CurrentStage::SameMusicComparingTags => flc!("stage_comparing_tags"),
-        CurrentStage::SameMusicCalculatingFingerprints => flc!("stage_calculating_music_fingerprints"),
+        CurrentStage::SimilarVideosAudioCalculatingFingerprints | CurrentStage::SimilarVideosAudioComparingFingerprints | CurrentStage::SameMusicCalculatingFingerprints => {
+            flc!("stage_calculating_music_fingerprints")
+        }
         CurrentStage::SameMusicComparingFingerprints => flc!("stage_comparing_fingerprints"),
         CurrentStage::ExifRemoverExtractingTags => flc!("stage_extracting_exif"),
-        CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails => flc!("stage_creating_video_thumbnails"),
+        CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails | CurrentStage::SimilarVideosAudioCreatingThumbnails => {
+            flc!("stage_creating_video_thumbnails")
+        }
         CurrentStage::VideoOptimizerProcessingVideos => flc!("stage_processing_videos"),
         CurrentStage::DeletingFiles => flc!("stage_deleting"),
         CurrentStage::RenamingFiles => flc!("stage_renaming"),
@@ -357,6 +414,7 @@ fn stage_label(stage: CurrentStage) -> String {
         CurrentStage::OptimizingVideos => flc!("stage_optimizing_videos"),
         CurrentStage::CleaningExif => flc!("stage_cleaning_exif"),
         CurrentStage::DuplicateHidingHardLinks | CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarVideosHidingHardLinks => flc!("stage_all_hiding_links"),
+        CurrentStage::EmptyFilesCheckingContent => flc!("stage_empty_files_checking_content"),
     }
 }
 

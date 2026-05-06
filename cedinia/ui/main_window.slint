@@ -1,6 +1,6 @@
 import { CediniaColors } from "colors.slint";
 import { ActiveTool, DirectoryEntry, FileEntry, ScanState, SimilarGroupCard } from "common.slint";
-import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, TemporaryFilesSettings } from "app_state.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "app_state.slint";
 import { TopAppBar } from "top_bar.slint";
 import { BottomNavBar } from "bottom_nav.slint";
 import { ScanProgressBar } from "scan_progress.slint";
@@ -13,7 +13,7 @@ import { DirectoriesScreen } from "directories_screen.slint";
 import { TouchButton } from "components.slint";
 import { Translations } from "translations.slint";
 
-export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, TemporaryFilesSettings, Translations }
+export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, TemporaryFilesSettings, SimilarVideosSettings, Translations }
 export component MainWindow inherits Window {
     title: "Cedinia";
     background: CediniaColors.bg_primary;
@@ -35,6 +35,7 @@ export component MainWindow inherits Window {
     in-out property <[FileEntry]>        same_music_model:         [];
     in-out property <[FileEntry]>        bad_names_model:          [];
     in-out property <[FileEntry]>        exif_remover_model:       [];
+    in-out property <[FileEntry]>        similar_videos_model:     [];
     in-out property <[DirectoryEntry]>   included_dirs_model:      [];
     in-out property <[DirectoryEntry]>   excluded_dirs_model:      [];
 
@@ -57,6 +58,7 @@ export component MainWindow inherits Window {
                  : AppState.active_tool == ActiveTool.SameMusic        ? Translations.tool_same_music_text
                  : AppState.active_tool == ActiveTool.BadNames         ? Translations.tool_bad_names_text
                  : AppState.active_tool == ActiveTool.ExifRemover      ? Translations.tool_exif_remover_text
+                 : AppState.active_tool == ActiveTool.SimilarVideos    ? Translations.tool_similar_videos_text
                  : AppState.active_tool == ActiveTool.Directories      ? Translations.tool_directories_text
                  : AppState.active_tool == ActiveTool.Settings         ? Translations.tool_settings_text
                  : Translations.app_name_text;
@@ -193,6 +195,17 @@ export component MainWindow inherits Window {
                 tool_emoji: "📷";
                 can_delete: false;
                 can_clean_exif: true;
+            }
+
+            if AppState.active_tool == ActiveTool.SimilarVideos : ResultsList {
+                height: parent.height;
+                width: parent.width;
+                entries: similar_videos_model;
+                tool_title: Translations.tool_similar_videos_text;
+                tool_emoji: "🎬";
+                is_grouped: true;
+                has_size_select: true;
+                extra_as_line2: true;
             }
         }
 

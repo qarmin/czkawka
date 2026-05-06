@@ -64,14 +64,14 @@ pub(crate) fn recalculate_small_selection_if_needed(model: &ModelRc<SingleMainLi
         let model_data = model
             .row_data(*e)
             .unwrap_or_else(|| panic!("Failed to get row data with id {}, with model {} items", e, model.row_count()));
-        model_data.selected_row
+        model_data.focused_row
     });
 
     if selection_not_changed {
         return;
     }
 
-    selection.selected_rows = model.iter().enumerate().filter_map(|(idx, e)| if e.selected_row { Some(idx) } else { None }).collect();
+    selection.selected_rows = model.iter().enumerate().filter_map(|(idx, e)| if e.focused_row { Some(idx) } else { None }).collect();
 }
 
 pub(crate) fn initialize_selection_struct() {
@@ -527,8 +527,8 @@ fn rows_deselect_all_selected_one_by_one(model: &ModelRc<SingleMainListModel>, s
         let mut model_data = model
             .row_data(*id)
             .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
-        assert!(model_data.selected_row);
-        model_data.selected_row = false;
+        assert!(model_data.focused_row);
+        model_data.focused_row = false;
         model.set_row_data(*id, model_data);
     }
 }
@@ -537,7 +537,7 @@ fn rows_deselect_all_selected_by_replacing_models(model: &ModelRc<SingleMainList
     let new_model = model
         .iter()
         .map(|mut row| {
-            row.selected_row = false;
+            row.focused_row = false;
             row
         })
         .collect::<Vec<_>>();
@@ -564,14 +564,14 @@ fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<Single
     if model.row_count() > SELECTED_ROWS_LIMIT || selection.exceeded_limit {
         selection.exceeded_limit = true;
         selection.selected_rows.clear();
-        selection.number_of_selected_rows = new_model.as_ref().unwrap_or(model).iter().filter(|e| e.selected_row).count();
+        selection.number_of_selected_rows = new_model.as_ref().unwrap_or(model).iter().filter(|e| e.focused_row).count();
     } else {
         selection.selected_rows = new_model
             .as_ref()
             .unwrap_or(model)
             .iter()
             .enumerate()
-            .filter_map(|(idx, item)| if item.selected_row { Some(idx) } else { None })
+            .filter_map(|(idx, item)| if item.focused_row { Some(idx) } else { None })
             .collect();
         selection.number_of_selected_rows = selection.selected_rows.len();
     }
@@ -580,7 +580,7 @@ fn rows_select_all_by_mode(selection: &mut SelectionData, model: &ModelRc<Single
 }
 
 fn rows_select_all_one_by_one(model: &ModelRc<SingleMainListModel>) {
-    let items_to_update = model.iter().filter(|e| !e.selected_row && !e.header_row).count();
+    let items_to_update = model.iter().filter(|e| !e.focused_row && !e.header_row).count();
     trace!("[FAST][ONE_BY_ONE] select all {}/{} items", items_to_update, model.row_count());
     for id in 0..model.row_count() {
         let mut model_data = model
@@ -591,11 +591,11 @@ fn rows_select_all_one_by_one(model: &ModelRc<SingleMainListModel>) {
             continue;
         }
 
-        if model_data.selected_row {
+        if model_data.focused_row {
             continue;
         }
 
-        model_data.selected_row = true;
+        model_data.focused_row = true;
         model.set_row_data(id, model_data);
     }
 }
@@ -614,7 +614,7 @@ fn rows_select_all_by_replacing_models(selection: &SelectionData, model: &ModelR
     let new_model = model
         .iter()
         .map(|mut row| {
-            row.selected_row = !row.header_row;
+            row.focused_row = !row.header_row;
             row
         })
         .collect::<Vec<_>>();
@@ -630,12 +630,12 @@ fn reverse_selection_of_item_with_id(selection: &mut SelectionData, model: &Mode
         .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
 
     if model_data.header_row {
-        assert!(!model_data.selected_row);
+        assert!(!model_data.focused_row);
         return;
     }
 
-    let was_selected = model_data.selected_row;
-    model_data.selected_row = !model_data.selected_row;
+    let was_selected = model_data.focused_row;
+    model_data.focused_row = !model_data.focused_row;
     model.set_row_data(id, model_data);
 
     if was_selected {
@@ -669,8 +669,8 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Si
             .iter()
             .enumerate()
             .map(|(idx, mut row)| {
-                row.selected_row = !row.header_row && (smaller_idx..=bigger_idx).contains(&idx);
-                if row.selected_row {
+                row.focused_row = !row.header_row && (smaller_idx..=bigger_idx).contains(&idx);
+                if row.focused_row {
                     selection.number_of_selected_rows += 1;
                     if !selection.exceeded_limit {
                         selection.selected_rows.push(idx);
@@ -694,8 +694,8 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Si
                 let mut model_data = model
                     .row_data(*idx)
                     .unwrap_or_else(|| panic!("Failed to get row data with id {idx}, with model {} items", model.row_count()));
-                assert!(model_data.selected_row); // Probably can be removed in future
-                model_data.selected_row = false;
+                assert!(model_data.focused_row); // Probably can be removed in future
+                model_data.focused_row = false;
                 model.set_row_data(*idx, model_data);
             }
         }
@@ -718,8 +718,8 @@ fn row_select_items_with_shift(selection: &mut SelectionData, model: &ModelRc<Si
                 selection.number_of_selected_rows += 1;
             }
 
-            if !model_data.selected_row && !model_data.header_row {
-                model_data.selected_row = true;
+            if !model_data.focused_row && !model_data.header_row {
+                model_data.focused_row = true;
                 model.set_row_data(idx, model_data);
             }
         }
@@ -736,7 +736,7 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Sin
         let new_model = model
             .iter()
             .map(|mut row| {
-                if row.selected_row {
+                if row.focused_row {
                     assert!(!row.header_row); // Header row should not be selected
                     row.checked = !row.checked;
                     if row.checked {
@@ -755,7 +755,7 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Sin
             let mut model_data = model
                 .row_data(*id)
                 .unwrap_or_else(|| panic!("Failed to get row data with id {id}, with model {} items", model.row_count()));
-            assert!(model_data.selected_row);
+            assert!(model_data.focused_row);
             assert!(!model_data.header_row);
             model_data.checked = !model_data.checked;
             if model_data.checked {
@@ -836,7 +836,7 @@ mod context_menu {
             return;
         }
         let target_path = clicked_row.val_str.iter().nth(path_idx).map(|s| s.to_string()).unwrap_or_default();
-        let target_prefix = format!("{target_path}/");
+        let target_prefix = format!("{target_path}{}", std::path::MAIN_SEPARATOR);
 
         let mut in_reference_group = false;
         let new_items: Vec<SingleMainListModel> = model
@@ -887,7 +887,7 @@ mod context_menu {
             return;
         }
         let target_path = clicked_row.val_str.iter().nth(path_idx).map(|s| s.to_string()).unwrap_or_default();
-        let target_prefix = format!("{target_path}/");
+        let target_prefix = format!("{target_path}{}", std::path::MAIN_SEPARATOR);
 
         let items: Vec<SingleMainListModel> = model.iter().collect();
         let n = items.len();
@@ -975,7 +975,7 @@ mod context_menu {
                 if should_check[i] {
                     row.checked = true;
                 }
-                row.selected_row = false; // keep in sync with TOOLS_SELECTION reset below
+                row.focused_row = false; // keep in sync with TOOLS_SELECTION reset below
                 row
             })
             .collect();
@@ -1069,15 +1069,25 @@ mod context_menu {
     }
 
     fn set_clipboard(text: String) {
-        use copypasta::{ClipboardContext, ClipboardProvider};
-        match ClipboardContext::new() {
-            Ok(mut ctx) => {
-                if let Err(e) = ctx.set_contents(text) {
-                    warn!("Failed to set clipboard contents: {e}");
+        // X11/Wayland clipboard ownership must be held until another app reads the content.
+        // SetExtLinux::wait() blocks the thread until that happens, so we run it in the background.
+        std::thread::spawn(move || {
+            use arboard::Clipboard;
+            #[cfg(target_os = "linux")]
+            use arboard::SetExtLinux as _;
+            match Clipboard::new() {
+                Ok(mut ctx) => {
+                    #[cfg(target_os = "linux")]
+                    let result = ctx.set().wait().text(text);
+                    #[cfg(not(target_os = "linux"))]
+                    let result = ctx.set_text(text);
+                    if let Err(e) = result {
+                        warn!("Failed to set clipboard contents: {e}");
+                    }
                 }
+                Err(e) => warn!("Failed to create clipboard context: {e}"),
             }
-            Err(e) => warn!("Failed to create clipboard context: {e}"),
-        }
+        });
     }
 
     fn connect_copy_file_name(app: &MainWindow) {
@@ -1170,8 +1180,8 @@ mod tests {
     #[test]
     fn rows_deselect_all_by_mode_with_exceeded_limit() {
         let mut model = get_model_vec(3);
-        model[0].selected_row = true;
-        model[1].selected_row = true;
+        model[0].focused_row = true;
+        model[1].focused_row = true;
         let model = create_model_from_model_vec(&model);
 
         let mut selection = SelectionData {
@@ -1184,9 +1194,9 @@ mod tests {
 
         assert!(new_model.is_some());
         let new_model = new_model.unwrap();
-        assert!(!new_model.row_data(0).unwrap().selected_row);
-        assert!(!new_model.row_data(1).unwrap().selected_row);
-        assert!(!new_model.row_data(2).unwrap().selected_row);
+        assert!(!new_model.row_data(0).unwrap().focused_row);
+        assert!(!new_model.row_data(1).unwrap().focused_row);
+        assert!(!new_model.row_data(2).unwrap().focused_row);
         assert!(selection.selected_rows.is_empty());
         assert!(!selection.exceeded_limit);
         assert_eq!(selection.number_of_selected_rows, 0);
@@ -1195,8 +1205,8 @@ mod tests {
     #[test]
     fn rows_deselect_all_by_mode_with_selected_rows() {
         let mut model = get_model_vec(3);
-        model[0].selected_row = true;
-        model[1].selected_row = true;
+        model[0].focused_row = true;
+        model[1].focused_row = true;
         let model = create_model_from_model_vec(&model);
 
         let mut selection = SelectionData {
@@ -1208,9 +1218,9 @@ mod tests {
         let new_model = rows_deselect_all_by_mode(&mut selection, &model);
 
         assert!(new_model.is_none());
-        assert!(!model.row_data(0).unwrap().selected_row);
-        assert!(!model.row_data(1).unwrap().selected_row);
-        assert!(!model.row_data(2).unwrap().selected_row);
+        assert!(!model.row_data(0).unwrap().focused_row);
+        assert!(!model.row_data(1).unwrap().focused_row);
+        assert!(!model.row_data(2).unwrap().focused_row);
         assert!(selection.selected_rows.is_empty());
         assert!(!selection.exceeded_limit);
         assert_eq!(selection.number_of_selected_rows, 0);
@@ -1230,9 +1240,9 @@ mod tests {
         let new_model = rows_deselect_all_by_mode(&mut selection, &model);
 
         assert!(new_model.is_none());
-        assert!(!model.row_data(0).unwrap().selected_row);
-        assert!(!model.row_data(1).unwrap().selected_row);
-        assert!(!model.row_data(2).unwrap().selected_row);
+        assert!(!model.row_data(0).unwrap().focused_row);
+        assert!(!model.row_data(1).unwrap().focused_row);
+        assert!(!model.row_data(2).unwrap().focused_row);
         assert!(selection.selected_rows.is_empty());
         assert!(!selection.exceeded_limit);
         assert_eq!(selection.number_of_selected_rows, 0);
@@ -1241,7 +1251,7 @@ mod tests {
     #[test]
     fn rows_select_all_by_mode_with_few_selected_rows() {
         let mut model = get_model_vec(3);
-        model[0].selected_row = true;
+        model[0].focused_row = true;
 
         let model = create_model_from_model_vec(&model);
 
@@ -1254,9 +1264,9 @@ mod tests {
         let new_model = rows_select_all_by_mode(&mut selection, &model);
 
         assert!(new_model.is_none());
-        assert!(model.row_data(0).unwrap().selected_row);
-        assert!(model.row_data(1).unwrap().selected_row);
-        assert!(model.row_data(2).unwrap().selected_row);
+        assert!(model.row_data(0).unwrap().focused_row);
+        assert!(model.row_data(1).unwrap().focused_row);
+        assert!(model.row_data(2).unwrap().focused_row);
         assert_eq!(selection.selected_rows, vec![0, 1, 2]);
         assert!(!selection.exceeded_limit);
         assert_eq!(selection.number_of_selected_rows, 3);
@@ -1278,11 +1288,11 @@ mod tests {
         let new_model = rows_select_all_by_mode(&mut selection, &model);
 
         assert!(new_model.is_none());
-        assert!(!model.row_data(0).unwrap().selected_row); // header row
-        assert!(model.row_data(1).unwrap().selected_row);
-        assert!(model.row_data(2).unwrap().selected_row);
-        assert!(!model.row_data(3).unwrap().selected_row); // header row
-        assert!(model.row_data(4).unwrap().selected_row);
+        assert!(!model.row_data(0).unwrap().focused_row); // header row
+        assert!(model.row_data(1).unwrap().focused_row);
+        assert!(model.row_data(2).unwrap().focused_row);
+        assert!(!model.row_data(3).unwrap().focused_row); // header row
+        assert!(model.row_data(4).unwrap().focused_row);
         assert_eq!(selection.selected_rows, vec![1, 2, 4]);
         assert!(!selection.exceeded_limit);
         assert_eq!(selection.number_of_selected_rows, 3);
@@ -1306,9 +1316,9 @@ mod tests {
         let new_model = new_model.unwrap();
         for idx in 0..new_model.row_count() {
             if idx == 11 {
-                assert!(!new_model.row_data(idx).unwrap().selected_row, "idx: {idx}");
+                assert!(!new_model.row_data(idx).unwrap().focused_row, "idx: {idx}");
             } else {
-                assert!(new_model.row_data(idx).unwrap().selected_row, "idx: {idx}");
+                assert!(new_model.row_data(idx).unwrap().focused_row, "idx: {idx}");
             }
         }
 
@@ -1330,9 +1340,9 @@ mod tests {
 
         reverse_selection_of_item_with_id(&mut selection, &model, 1);
 
-        assert!(!model.row_data(0).unwrap().selected_row);
-        assert!(model.row_data(1).unwrap().selected_row);
-        assert!(!model.row_data(2).unwrap().selected_row);
+        assert!(!model.row_data(0).unwrap().focused_row);
+        assert!(model.row_data(1).unwrap().focused_row);
+        assert!(!model.row_data(2).unwrap().focused_row);
         assert_eq!(selection.selected_rows, vec![1]);
         assert_eq!(selection.number_of_selected_rows, 1);
     }
@@ -1351,7 +1361,7 @@ mod tests {
 
         reverse_selection_of_item_with_id(&mut selection, &model, 1);
 
-        assert!(!model.row_data(1).unwrap().selected_row);
+        assert!(!model.row_data(1).unwrap().focused_row);
         assert_eq!(selection.selected_rows, vec![2]);
         assert_eq!(selection.number_of_selected_rows, 1);
     }
@@ -1369,11 +1379,11 @@ mod tests {
         let new_model = row_select_items_with_shift(&mut selection, &model, (1, 3));
 
         assert!(new_model.is_none());
-        assert!(!model.row_data(0).unwrap().selected_row);
-        assert!(model.row_data(1).unwrap().selected_row);
-        assert!(model.row_data(2).unwrap().selected_row);
-        assert!(model.row_data(3).unwrap().selected_row);
-        assert!(!model.row_data(4).unwrap().selected_row);
+        assert!(!model.row_data(0).unwrap().focused_row);
+        assert!(model.row_data(1).unwrap().focused_row);
+        assert!(model.row_data(2).unwrap().focused_row);
+        assert!(model.row_data(3).unwrap().focused_row);
+        assert!(!model.row_data(4).unwrap().focused_row);
         assert_eq!(selection.selected_rows, vec![1, 2, 3]);
         assert_eq!(selection.number_of_selected_rows, 3);
     }
@@ -1394,11 +1404,11 @@ mod tests {
         let new_model = row_select_items_with_shift(&mut selection, &model, (0, 4));
 
         assert!(new_model.is_none());
-        assert!(model.row_data(0).unwrap().selected_row);
-        assert!(!model.row_data(1).unwrap().selected_row); // header row
-        assert!(model.row_data(2).unwrap().selected_row);
-        assert!(!model.row_data(3).unwrap().selected_row); // header row
-        assert!(model.row_data(4).unwrap().selected_row);
+        assert!(model.row_data(0).unwrap().focused_row);
+        assert!(!model.row_data(1).unwrap().focused_row); // header row
+        assert!(model.row_data(2).unwrap().focused_row);
+        assert!(!model.row_data(3).unwrap().focused_row); // header row
+        assert!(model.row_data(4).unwrap().focused_row);
         assert_eq!(selection.selected_rows, vec![0, 2, 4]);
         assert_eq!(selection.number_of_selected_rows, 3);
     }
@@ -1406,9 +1416,9 @@ mod tests {
     #[test]
     fn rows_reverse_checked_selection_with_selected_rows() {
         let mut model = get_model_vec(4);
-        model[0].selected_row = true;
-        model[1].selected_row = true;
-        model[2].selected_row = true;
+        model[0].focused_row = true;
+        model[1].focused_row = true;
+        model[2].focused_row = true;
         model[2].checked = true;
         let model = create_model_from_model_vec(&model);
 
@@ -1431,8 +1441,8 @@ mod tests {
     #[test]
     fn rows_reverse_checked_selection_with_exceeded_limit() {
         let mut model = get_model_vec(3);
-        model[0].selected_row = true;
-        model[1].selected_row = true;
+        model[0].focused_row = true;
+        model[1].focused_row = true;
         let model = create_model_from_model_vec(&model);
 
         let selection = SelectionData {

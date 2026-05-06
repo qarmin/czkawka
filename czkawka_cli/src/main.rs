@@ -19,7 +19,7 @@ use czkawka_core::tools::bad_names::{BadNames, BadNamesParameters, NameFixerPara
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
 use czkawka_core::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters};
-use czkawka_core::tools::empty_files::EmptyFiles;
+use czkawka_core::tools::empty_files::{EmptyFiles, EmptyFilesParameters};
 use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::exif_remover::{ExifRemover, ExifRemoverParameters, ExifTagsFixerParams};
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
@@ -186,9 +186,18 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
 }
 
 fn empty_files(empty_files: EmptyFilesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
-    let EmptyFilesArgs { common_cli_items, delete_method } = empty_files;
+    let EmptyFilesArgs {
+        common_cli_items,
+        delete_method,
+        zero_byte_content,
+        non_printable_content,
+    } = empty_files;
 
-    let mut tool = EmptyFiles::new();
+    let params = EmptyFilesParameters {
+        search_zero_byte_content_files: zero_byte_content || non_printable_content,
+        search_non_printable_content_files: non_printable_content,
+    };
+    let mut tool = EmptyFiles::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, None);
     set_simple_delete(&mut tool, delete_method);
@@ -340,6 +349,11 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         skip_forward_amount,
         crop_detect,
         scan_duration,
+        check_audio_content,
+        audio_similarity_percent,
+        audio_maximum_difference,
+        audio_length_ratio,
+        audio_min_duration_seconds,
     } = similar_videos;
 
     let params = SimilarVideosParameters::new(
@@ -353,6 +367,11 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         10,    // creating thumbnails in CLI, makes almost no sense
         false, // creating thumbnails in CLI, makes almost no sense
         2,     // creating thumbnails in CLI, makes almost no sense
+        check_audio_content,
+        audio_similarity_percent,
+        audio_maximum_difference,
+        audio_length_ratio,
+        audio_min_duration_seconds,
     );
     let mut tool = SimilarVideos::new(params);
 

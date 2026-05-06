@@ -1,6 +1,6 @@
 import { CediniaColors } from "colors.slint";
 import { Divider, TouchButton } from "components.slint";
-import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, TemporaryFilesSettings } from "app_state.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "app_state.slint";
 import { CategoryLabel, DropdownRow, SegmentRow, TextInputRow, ToggleRow, ToolGroupHeader } from "settings_components.slint";
 import { SettingsTab } from "common.slint";
 import { Translations } from "translations.slint";
@@ -467,16 +467,21 @@ export component SettingsScreen {
                     Divider {}
 
                     Rectangle {
-                        height: reset_btn.preferred-height + 16px;
+                        height: reset_btn_hl.preferred-height;
                         background: CediniaColors.bg_surface;
-                        reset_btn := TouchButton {
-                            x: 16px;
-                            y: 8px;
-                            label: Translations.settings_temporary_files_reset_text;
-                            bg: CediniaColors.bg_elevated;
-                            fg: CediniaColors.text_secondary;
-                            clicked => {
-                                TemporaryFilesSettings.extensions = "#,thumbs.db,.bak,~,.tmp,.temp,.ds_store,.crdownload,.part,.cache,.dmp,.download,.partial";
+                        reset_btn_hl := HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 8px;
+                            padding-bottom: 8px;
+                            alignment: LayoutAlignment.start;
+                            TouchButton {
+                                label: Translations.settings_temporary_files_reset_text;
+                                bg: CediniaColors.bg_elevated;
+                                fg: CediniaColors.text_secondary;
+                                clicked => {
+                                    TemporaryFilesSettings.extensions = "#,thumbs.db,.bak,~,.tmp,.temp,.ds_store,.crdownload,.part,.cache,.dmp,.download,.partial";
+                                }
                             }
                         }
                     }
@@ -507,6 +512,21 @@ export component SettingsScreen {
                     ToggleRow { label: Translations.settings_broken_pdf_text;     value <=> BrokenFilesSettings.check_pdf; }
                     Divider {}
                     ToggleRow { label: Translations.settings_broken_archive_text; value <=> BrokenFilesSettings.check_archive; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_broken_font_text;    value <=> BrokenFilesSettings.check_font; }
+                    Divider {}
+                    ToggleRow { label: Translations.settings_broken_markup_text;  value <=> BrokenFilesSettings.check_markup; }
+                    Divider {}
+
+
+                    ToolGroupHeader { label: Translations.settings_similar_videos_header_text; emoji: "🎬"; }
+
+                    SegmentRow {
+                        label: Translations.settings_similar_videos_audio_preset_text;
+                        description: Translations.settings_similar_videos_audio_preset_desc_text;
+                        options: SimilarVideosSettings.audio_preset_options;
+                        selected <=> SimilarVideosSettings.audio_preset_idx;
+                    }
                     Divider {}
 
 

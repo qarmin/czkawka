@@ -1,0 +1,127 @@
+Krokiet 12.0 —Nowa aplikacja na Androida, porównywarka obrazów, menu kontekstowe i ostatnia wersja Czkawki
+
+
+Cedinia — nowa aplikacja do czyszczenia na Androida
+
+Pewnego dnia zachciało mi się stworzyć port na Androida Kokieta. W przeszłości miałem kilka interakcji od osób, które chciały stworzyć aplikację andoidową, przy użyciu biblioteki czkawka_core, jednak nie wiem czy takie aplikacje ostatecznie powstały.
+
+Jedną z przyczyn czemu ją napisałem, była chęć zobaczenia, czy da się stworzyć aplikację graficzną na Androida w czystym rust. Miałem duże nadzieje, że tak się da, jednak rzeczywistość szybko zrewidowała mój pogląd — obecnie przy użyciu slinta nie jestem w stanie tego zrobić, choć ilość kodu javy/jni nie jest tak duża jak mogłaby być. Ale skoro aplikacja powstała, to jednak jakoś udało mi się to obejść. Z racji że moje doświadczenie w Androidzie jest raczej mizerne, to postanowiłem spróbować użyć AI do tworzenia kodu łączącego Androida z aplikacją. Wiedziałem że potrzebuje kodu:
+
+    ogarniającego uprawnienia
+    zarządzającego przywracaniem stanu aplikacji/wymuszaniem jedno instancyjności
+    obsługą file pickera
+    zarządzaniem katalogami z cache/config
+    zarządzanie notyfikacjami
+
+Mając jasno określone cele, postanowiłem powierzyć zadanie pisania kodu AI, samemu stając się recenzentem i testerem(wiem, że to niezbyt mądre używać AI do tworzenia kodu w dziedzinie o której mam małe pojęcie, lecz niestety szkolenie w zakresie androida trwałoby dziesiątki godzin, a poza tym projektem tej wiedzy raczej bym nigdzie indziej nie użył, bo nie jestem zbytnio zainteresowany tą platformą).
+
+Kilkanaście godzin testów, poprawek i łamania sobie głowy na losowo crashującej się aplikacji, wywalającej się bez żadnego błędu do “pulpitu” i udało się doprowadzić ją do jako takiego stanu użytkownania. Zapewne w przyszłości powstaną wyżej poziomowe integracje z Androidem, którenie będą wymagały pisania tego boilerplate.
+
+Wracając do kwestii aplikacji, to oferuje większość narzędzi jakie oferuje krokiet — oprócz takich rzeczy jak optymilizator wideo, sprawdzanie podobnych i popsutych wideo, jak wyszukiwanie uszkodzonych symlinków. Jest to spowodowane brakiem możliwości użycia ffmpega, tak jak to i ograniczeniami w tworzeniu/zarządzaniu symlinków na tym systemie
+
+Same ui, na tyle ile to możliwe starałem się zrobić na tyle intuicyjne i używalne na ekranie telefonu, na ile to możliwe. Podpatrywałem rozwiązania u konkurencji, jednak w znacznej większości ich rozwiązania, nie pozwalały na obsługę/wyświetlanie dziesiątek tysięcy rekodrów a dodatkowo wersje darmowe były okrojone do absolutnego minimum, rzadko pozwalając na cokolwiek więcej niż tylko przeglądanie rekordów po skanowaniu — ciekawiło mnie to ja
+
+Aplikacja jest podzielona na 4 zakładki:
+
+    Ekran wyboru narzędzia(ekran główny)
+    Ekran wybranego narzędzia(domyślnie duplikaty)
+    Ekran wyboru ścieżek do skanowania
+    Ekran settingsów, informacji o aplikacji etc.
+
+Wygląd przeszedł kilka modyfikacji
+
+Etymologia nazwy — Cedynia to miejscowość w której polskie wojska w czasach tworzenia państwa polskiego, pokonały wojska możnowładców niemieckich, z racji że interesuję się średniowiecznymi czasami, uznałem to za dobrą nazwę(kontynuując tradycję nadawania nazw, w żaden sposób nie pomagających rozwikłać do czego aplikacji się używa). W nazwie jednak zmieniłem y na i, ponieważ czasem szukam sobie na internecie materiałów o aplikacji, a w przypadku czkawki czy krokieta, zamiast moich alpikacji wyskakiwały porady medyczne lub przepisy kulinarne.
+
+
+Ostateczna Deprekacja Czkawki Gtk
+
+Czkawka Gtk jest obecna w repo od samego początku — od wersji 1.0(a w zasadzie to nawet dłużej) stanowiła przez większość czasu jedyną wersję graficzną wersją aplikacji. Patrząc wstecz, uważam że raczej to był dobry wybór gtk, mimo problemów jakie z nim miałem(i z samym sobą, nieudolnie próbującym coś sensownego w nim zrobić).
+
+Przez dłuższy czas użytkownicy zgłaszali różnorakie problemy z programem, znaczną część zapewne udało mi się naprawić, lecz pozostawały takie problemy jak np. niemal 100% przeźroczyste gui, czy crashowanie przy wklejaniu ze schowka na niektórych windowsowych systemach. Ich za żadne skarby, nie byłem w stanie naprawić — zatem przy tak niesprzyjających okolicznościach zrobiłem to co każdy mężczyzna w mojej sytuacji by zrobił — skapitulowałem. Uznałem, że nie warto się kopać z koniem, gdy w między czasie na horyzoncie zaczęły wyrastać czysto rustowe alternatywy np. Iced, Egui czy Slint, jako jedno z założeń miały dużą multiplatformowość w przeciwieństwie do gtk, gdzie sstemy inne niż linux były systemami drugiej kategorii
+Po lewej wersja 1.0 Czkawki bazująca na gtk3 a po prawej bazująca na gtk4 wersja 11.0.1(około 5 lat różnicy)
+
+Z początku Krokietowi — aplikacji używającej Slint, brakowało wiele opji obecnych w backndzie gtk, jednak z wersji na wersję ten gap coraz mniejszy i w obecnej chwili to Krokiet dysponuje większoą ilością narzędzi jak i bardziej rozbudowanymi opcjami
+
+W wersji 11 zrobiłem przymiarki do przeportowania Czkawki do Gtk 5, mając nadzieję, że to naprawi problemy które mam z Gtk 4, jednak ilośc rzeczy jaką trzeba by przeportować, wraz z bazowymi elementami tj TreeView była zbyt wielka i wymagała ona dużych nakładów pracy, przez co ograniczyłem się jedynie do usprawnień w części kodu.
+
+Z racji, że od czasu ogłoszenia Krokieta, prace nad wersją gtk z mojej strony drastycznie się zmniejszyły, jak i tego, że jak do tej pory nikt nie starał się spróbować wziąć ciężar rozwoju tego projektu, postawnowiłem porzucić rozwijanie tej wersji aplikacji jednocześnie namawiając(z w ersji na wersję coraz agresywnije) użytkowników do przejścia na Krokiieta. Dodatkowym impulsem do działania, było to, że przeglądając różne fora i strony, widziałem, że raz za razem to właśnie Czkawka jest oferowana użytkownikom jako ten główyn program, a gdy z różnych powodów nie działa, wylewana jest na niego frustracja, mimo że istnieje alternatywa któ©a większości z tych problemów nie ma. 
+
+Ogólnie to nie widziałbym żadnego problemu w tym, by ciągle dystrybuować pliki binarne z wersją gtk — ale z doświadczenia wiem, że byłaby ona linkowana a nie powinna być jako ta pierwsza, prosta i dostępna opcja — zwłaszcza że lista problemów, z którymi się borykała, była naprawdę długa, a wszystkie możliwe poprawki były już wyczerpane.
+
+Zatem zamiast trwać przy projekcie i udawać, że wszystko jest w porządku, postanowiłem podjąć trudną, ale moim zdaniem słuszną decyzję: finalna wersja czkawki Gtk(11.0.1 z poprawką sortu w 12.0) to jedyna wersja która będzie dystrybuowana w plikach binarnych. Kod oczywiście pozostanie w repozytorium i nadal będzie kompilował się razem z czkawka_core, jednak wszelkie nowe issue i prośby o nowe funkcje, specyficzne dla wersji GTK, będą zamykane.
+
+
+Porównywarka obrazów — nowe narzędzie
+
+Przy wyszukiwaniu podobnych obrazów, problem często nie polega na tym żeby je znaleźć — program robi to całkiem sprawnie. Problem pojawia się chwilę później, gdy siedzę i patrzę na dwa obrazy wyglądające niemal identycznie i próbuję stwierdzić, który jest lepszej jakości. Dotychczas jedynym wyjściem było otwieranie ich kolejno w przeglądarce obrazów lub ciągnięcie ich obok siebie w jakimś edytorze — i tak kilkadziesiąt razy z rzędu.
+
+Nowe okno porównywania rozwiązuje dokładnie ten problem. Wyświetla oba obrazy obok siebie, a obok nich — ich różnicę pikselową. Algorytm wylicza wartość bezwzględną różnicy dla każdego piksela i wyświetla wynik jako trzeci obraz, dzięki czemu od razu widać, czy te dwa zdjęcia różnią się tylko artefaktami kompresji, czy może mają faktycznie inną zawartość. Wystarczy zaznaczyć dwa obrazy w widoku podobnych obrazów i kliknąć odpowiedni przycisk.
+
+
+Menu kontekstowe
+
+Prawym przyciskiem myszy klikam w Krokiecie od pierwszej jego wersji i za każdym razem, gdy nic się nie dzieje, lekko mi drgnie powieka. To jeden z tych elementów, których brak jest szczególnie odczuwalny właśnie dlatego, że w każdej innej aplikacji działa.
+
+Implementacja w Slincie nie jest trywialnym zadaniem — każdy kto próbował, wie o czym mówię — ale w końcu udało się to sensownie ograć. Menu pojawia się po kliknięciu prawym przyciskiem na element listy i oferuje to czego użytkownicy oczekują najczęściej: otwarcie pliku, otwarcie folderu z plikiem, przeniesienie do kosza, trwałe usunięcie.
+
+Przy okazji tej zmiany wydzieliłem też przenoszenie do kosza i trwałe usuwanie na dwa osobne przyciski — wcześniej było to jedno "usuń" zmieniające zachowanie w zależności od ustawień, co było trochę pułapką dla roztargnionych.
+
+
+Nowe opcje zaznaczania
+
+Z wersji na wersję dorzucam kolejne opcje zaznaczania, bo to jeden z tych obszarów gdzie użytkownicy mają bardzo różne nawyki i oczekiwania.
+
+Największa zmiana dotyczy domyślnego zachowania — zamiast zaznaczać jeden plik z grupy, teraz domyślnie zaznaczane są wszystkie oprócz jednego. Logika jest prosta: jeśli mam grupę 5 duplikatów, to zazwyczaj chcę usunąć 4 i zostawić 1, więc po co zmuszać do klikania 4 razy? Oczywiście to zachowanie można zmienić w ustawieniach, bo wiem że część osób działa odwrotnie.
+
+Doszła też możliwość skonfigurowania które przyciski zaznaczania w ogóle są widoczne w interfejsie — ktoś kto nigdy nie używa zaznaczania według ścieżki, może ten przycisk po prostu ukryć. Nowe odwracanie zaznaczenia w obrębie grupy uzupełnia to wszystko — przydatne gdy chcę zaznaczyć "wszystko oprócz tego konkretnego pliku".
+
+Pojawiło się również nowe okienko selekcji z bardziej zaawansowanymi regułami — np. zaznaczanie według wzorca nazwy. Dane z okienka są zapamiętywane między sesjami. Przy okazji naprawiono też błąd w trybach najkrótszej/najdłuższej ścieżki, gdzie poprzednio porównywano ścieżki bez nazwy pliku, przez co zaznaczanie w pewnych przypadkach działało totalnie losowo.
+
+
+Ulepszenia optymalizatora wideo
+
+Optymalizator wideo z poprzedniej wersji działał, ale miał jedną poważną wadę: koder AV1 którego używałem — libaom — jest znany z doskonałej jakości, ale też z ekstremalnie długiego czasu kodowania. Godzinny film potrafił się kodować wiele godzin, co w praktyce sprawiało, że narzędzie nadawało się głównie do krótkich materiałów.
+
+Przejście na libsvtav1 rozwiązuje ten problem. SVT-AV1 jest wielokrotnie szybszy przy zbliżonej jakości — różnica jest naprawdę odczuwalna i to nie jest zmiana do której trzeba przekonywać.
+
+Doszła opcja redukcji szumów, przydatna zwłaszcza przy starszych nagraniach i materiałach z gorszych kamer. Redukcja szumów może znacząco zmniejszyć rozmiar pliku, bo koder ma po prostu mniej "chaosu" do zakodowania. Dla osób chcących pełnej kontroli dodałem też możliwość wpisania własnych opcji ffmpeg — interfejs programu nie musi wtedy stać na drodze.
+
+Eksperymentalnie pojawiło się też sprzętowe kodowanie wideo dla kart obsługujących NVENC, VAAPI czy VideoToolbox. Zaznaczam "eksperymentalnie", bo jakość i stabilność tego rozwiązania bardzo zależy od sprzętu i sterowników — na jednych maszynach działa świetnie, na innych może w ogóle nie działać.
+
+
+Ulepszone wykrywanie popsutych plików
+
+Tryb popsutych plików od dawna zajmował się głównie obrazami i kilkoma innymi formatami. Postanowiłem go porządnie rozbudować.
+
+Teraz można wybrać kilka typów checkerów jednocześnie i uruchomić jedno skanowanie, które sprawdzi je wszystkie — koniec z uruchamianiem skanowania oddzielnie dla każdego typu. Sprawdzanie popsutych wideo zostało też podzielone na dwa tryby: szybki, korzystający z ffprobe i sprawdzający tylko nagłówki, oraz wolny — uruchamiający ffmpeg do pełnego dekodowania. Tryb szybki wystarczy do wykrycia większości typowych uszkodzeń i działa znacznie szybciej, wolny jest dla tych którzy chcą mieć pewność.
+
+Do listy obsługiwanych formatów doszły czcionki (TTF, OTF, TTC), pliki znacznikowe (JSON, XML, TOML, YAML, SVG) i archiwa (7z, gz/tgz, tar, zst, bz2, xz). Zepsute archiwum czy uszkodzony JSON do tej pory przechodziły przez skanowanie zupełnie niewidocznie.
+
+
+Podobne wideo po audio
+
+Porównywanie wideo po klatkach działa dobrze dla oczywistych duplikatów, ale ma ślepą plamkę: nie wykryje dwóch plików które wyglądają zupełnie inaczej, a mają identyczną ścieżkę dźwiękową. Ten sam podcast z różnym intro, film w różnych rozdzielczościach — wzrokowe porównanie klatek tutaj po prostu zawodzi.
+
+Nowy tryb wyciąga fingerprint audio i porównuje go z innymi plikami. Podobnie jak przy haszowaniu obrazów, nie jest to porównanie bajt po bajcie, więc drobne różnice w kodowaniu nie powinny stanowić problemu. Przydatne głównie dla osób z większymi kolekcjami nagrań czy podcastów.
+
+
+Inne zmiany
+
+Prehash — wstępne hashowanie stosowane przed właściwym obliczaniem sumy kontrolnej — teraz hashuje nie tylko początek pliku, ale też jego koniec. Dzięki temu pliki różniące się jedynie w ostatnich bajtach mogą być szybciej odrzucane bez pełnego hashowania.
+
+Backend femtovg w Krokiecie przez długi czas generował rozmyte czcionki — w końcu udało się to naprawić. Krokiet zyskał też wsparcie dla powiadomień systemowych po zakończeniu skanowania, bo przy dłuższych operacjach łatwo oderwać wzrok od okna i przegapić moment gdy program skończy pracę.
+
+Doszła możliwość wykluczenia z wyników par obrazów lub wideo o identycznej rozdzielczości — przydatne gdy zależy nam na znalezieniu wersji w różnych jakościach, a nie duplikatów jeden do jednego. Tryb pustych plików rozszerzono o wykrywanie plików zawierających wyłącznie bajty zerowe lub znaki niedrukowalne — technicznie niepuste, praktycznie bezużyteczne. Tryb plików tymczasowych dostał możliwość konfigurowania szukanych rozszerzeń.
+
+Dodano możliwość zatrzymania sprawdzania twardych linków wraz ze śledzeniem postępu — poprzednio operacja działała bez żadnego feedbacku i bez możliwości przerwania. Naprawiono też błąd w rozwiązywaniu względnych symlinków, które w pewnych przypadkach ignorowały katalog nadrzędny i wskazywały na nieistniejące ścieżki.
+
+Binaria dla Mac Intel nie będą już dostarczane — czasy budowania na GitHub CI były po prostu za długie. Doszły za to skrypty instalacyjne dla Linuxa (apt/dnf/pacman/zypper), macOS (Homebrew) i Windowsa (winget).
+
+
+Koniec
+
+Repozytorium — github.com/qarmin/czkawka
+
+Pliki do pobrania wraz z listą zmian — https://github.com/qarmin/czkawka/releases
+
+Licencja — MIT/GPL w zależności od programu (czyli w skrócie za darmo)

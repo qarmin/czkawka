@@ -54,7 +54,7 @@ export global Translations {
 
     // Sorting
     in-out property <string> sort_by_full_name_text: "Sort by full name";
-    in-out property <string> sort_by_selection_text: "Sort by selection";
+    in-out property <string> sort_by_focus_text: "Sort by focus";
     in-out property <string> sort_reverse_text: "Reverse sort";
 
     // Selection
@@ -70,6 +70,7 @@ export global Translations {
     in-out property <string> popup_custom_hint_str_text: "Text columns: wildcards  *name*  /home/*  *.rs";
     in-out property <string> popup_custom_hint_int_text: "Size [KB] / numeric columns: >= 2048  < 512  = 0  (operators: >=  <=  >  <  =)";
     in-out property <string> popup_custom_hint_date_text: "Date columns: DD-MM-YYYY or YYYY-MM-DD, optional time HH:MM:SS  e.g.  >= 2020-01-01  or  < 31-12-2022 23:59:59";
+    in-out property <string> popup_custom_save_restore_text: "Save and restore filter data";
 
     // Progress
     in-out property <string> stage_current_text: "Current Stage:";
@@ -97,6 +98,16 @@ export global Translations {
     in-out property <string> subsettings_videos_skip_forward_amount_text: "Skip duration [s]";
     in-out property <string> subsettings_videos_vid_hash_duration_text: "Video hash duration";
     in-out property <string> subsettings_videos_crop_detect_text: "Crop detect method";
+    in-out property <string> subsettings_videos_audio_check_content_text: "Compare by audio fingerprint";
+    in-out property <string> subsettings_videos_audio_preset_text: "Quick preset";
+    in-out property <string> subsettings_videos_audio_preset_custom: "Custom";
+    in-out property <string> subsettings_videos_audio_preset_identical: "Identical videos";
+    in-out property <string> subsettings_videos_audio_preset_clip: "Clip in longer video";
+    in-out property <string> subsettings_videos_audio_preset_similar: "Similar content";
+    in-out property <string> subsettings_videos_audio_similarity_percent_text: "Similarity [%]";
+    in-out property <string> subsettings_videos_audio_length_ratio_text: "Min length ratio (shorter/longer)";
+    in-out property <string> subsettings_videos_audio_min_duration_seconds_text: "Min file duration [s]";
+    in-out property <string> subsettings_videos_audio_maximum_difference_text: "Max audio difference";
 
     in-out property <string> subsettings_music_audio_check_type_text: "Audio check type";
     in-out property <string> subsettings_music_approximate_comparison_text: "Approximate Tag Comparison";
@@ -111,6 +122,11 @@ export global Translations {
     in-out property <string> subsettings_music_minimal_fragment_duration_text: "Minimal fragment duration";
     in-out property <string> subsettings_music_compare_fingerprints_only_with_similar_titles_text: "Compare within groups of similar titles";
     in-out property <string> subsettings_broken_files_type_text: "Type of files to check";
+    in-out property <string> subsettings_empty_files_type_text: "Additional file types to find";
+    in-out property <string> subsettings_empty_files_zero_byte_content_text: "Files filled with null bytes";
+    in-out property <string> subsettings_empty_files_zero_byte_content_hint_text: "Also find non-empty files whose entire content consists of null bytes (0x00).";
+    in-out property <string> subsettings_empty_files_non_printable_content_text: "Files filled with non-printable characters";
+    in-out property <string> subsettings_empty_files_non_printable_content_hint_text: "Also find non-empty files consisting only of non-printable ASCII characters: null, space, tab, CR, LF, VT, FF.";
     in-out property <string> subsettings_broken_files_audio_text: "Audio";
     in-out property <string> subsettings_broken_files_pdf_text: "Pdf";
     in-out property <string> subsettings_broken_files_archive_text: "Archive";
@@ -119,6 +135,8 @@ export global Translations {
     in-out property <string> subsettings_broken_files_video_ffprobe_info_text: "Quick video check using ffprobe (header validation).";
     in-out property <string> subsettings_broken_files_video_ffmpeg_text: "Video (ffmpeg)";
     in-out property <string> subsettings_broken_files_video_ffmpeg_info_text: "Deep video check using ffmpeg (full decode). Very slow and may detect pedantic errors even if file plays fine.";
+    in-out property <string> subsettings_broken_files_font_text: "Font";
+    in-out property <string> subsettings_broken_files_markup_text: "Markup (JSON/XML/TOML)";
 
     in-out property <string> subsettings_bad_names_issues_text: "Filename checks";
     in-out property <string> subsettings_bad_names_uppercase_extension_text: "Uppercase extension";

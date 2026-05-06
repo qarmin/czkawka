@@ -11,15 +11,11 @@ general_close_button = Close
 # Krokiet info dialog
 krokiet_info_title = Introducing Krokiet - New version of Czkawka
 krokiet_info_message =
-        Krokiet is the new, improved, faster and more reliable version of the Czkawka GTK GUI!
+        Czkawka GTK 12.0 is the final release. No further releases, features, or bug fixes are planned.
 
-        It’s easier to run and more resilient to system changes, as it depends only on core libraries available on most systems by default.
+        Almost all features available in Czkawka GTK can be found in Krokiet, typically in a more refined, better-performing, and more stable form. Krokiet also introduces new functionality and improvements that were not feasible in the GTK version.
 
-        Krokiet also brings features that Czkawka lacks, including thumbnails in video comparison mode, an EXIF cleaner, file move/copy/delete progress or extended sorting options.
-
-        Give it a try and see the difference!
-
-        Czkawka will continue to receive bug fixes and minor updates from me, but all new features will be developed exclusively for Krokiet, and anyone is free to contribute new features add missing modes or extend Czkawka further.
+        If you are still using Czkawka GTK, switching to Krokiet should be seamless, as it has a similar user interface while relying on fewer dependencies and offering better cross-platform support.
 
         PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 

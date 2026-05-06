@@ -1,3 +1,4 @@
+pub mod audio_fingerprint;
 pub mod basic_gui_cli;
 pub mod cache;
 pub mod config_cache_path;
@@ -276,6 +277,19 @@ pub(crate) fn create_crash_message(library_name: &str, file_path: &str, home_lib
     format!(
         "{library_name} library crashed when opening \"{file_path}\", please check if this is fixed with the latest version of {library_name} and if it is not fixed, please report bug here - {home_library_url}"
     )
+}
+
+pub(crate) fn create_crash_message_generic(file_path: &str) -> String {
+    format!("A panic/crash occurred while processing \"{file_path}\"")
+}
+
+pub(crate) fn normalize_error_string(s: &str) -> String {
+    s.chars()
+        .map(|c| if c.is_control() { ' ' } else { c })
+        .collect::<String>()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 #[expect(clippy::string_slice)]

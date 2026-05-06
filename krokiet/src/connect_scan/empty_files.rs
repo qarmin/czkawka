@@ -7,7 +7,8 @@ use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path, split_path_compare};
 use czkawka_core::tools::empty_files;
-use czkawka_core::tools::empty_files::EmptyFiles;
+use czkawka_core::tools::empty_files::{EmptyFiles, EmptyFilesParameters};
+use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
@@ -19,7 +20,11 @@ pub(crate) fn scan_empty_files(a: Weak<MainWindow>, sd: ScanData) {
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut tool = EmptyFiles::new();
+            let params = EmptyFilesParameters {
+                search_zero_byte_content_files: sd.custom_settings.empty_files_sub_zero_byte_content || sd.custom_settings.empty_files_sub_non_printable_content,
+                search_non_printable_content_files: sd.custom_settings.empty_files_sub_non_printable_content,
+            };
+            let mut tool = EmptyFiles::new(params);
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
@@ -68,7 +73,12 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages_
 
 fn prepare_data_model_empty_files(fe: FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(fe.get_path());
-    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FILES] = [file.into(), directory.into(), get_dt_timestamp_string(fe.get_modified_date()).into()];
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FILES] = [
+        format_size(fe.size, BINARY).into(),
+        file.into(),
+        directory.into(),
+        get_dt_timestamp_string(fe.get_modified_date()).into(),
+    ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);

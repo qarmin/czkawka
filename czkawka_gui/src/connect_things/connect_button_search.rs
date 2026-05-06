@@ -292,7 +292,7 @@ fn empty_files_search(
     thread::Builder::new()
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
-            let mut tool = EmptyFiles::new();
+            let mut tool = EmptyFiles::default();
 
             set_common_settings(&mut tool, &loaded_commons);
             tool.search(&stop_flag, Some(&progress_data_sender));
@@ -649,6 +649,11 @@ fn similar_video_search(
                 10,    // Not implemented in gtk gui
                 false, // Not implemented in gtk gui
                 2,     // Not implemented in gtk gui
+                false, // check_audio_content - not implemented in gtk gui
+                czkawka_core::tools::similar_videos::DEFAULT_AUDIO_SIMILARITY_PERCENT,
+                czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MAXIMUM_DIFFERENCE,
+                czkawka_core::tools::similar_videos::DEFAULT_AUDIO_LENGTH_RATIO,
+                czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MIN_DURATION_SECONDS,
             );
             let mut tool = SimilarVideos::new(params);
 

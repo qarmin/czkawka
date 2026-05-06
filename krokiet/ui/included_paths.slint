@@ -37,7 +37,7 @@ export component IncludedPaths {
                 border_radius: 5px;
                 width: parent.width;
 
-                background: ColorPalette.get_listview_color(r.selected_row, touch-area.has-hover);
+                background: ColorPalette.get_listview_color(r.focused_row, touch-area.has-hover);
                 touch_area := TouchArea {
                     clicked => {
                         handle_click(true);
@@ -55,14 +55,14 @@ export component IncludedPaths {
                     function handle_click(can_unselect: bool) {
                         if (current_index != -1) {
                             if (current_index != idx) {
-                                model[current_index].selected_row = false;
+                                model[current_index].focused_row = false;
                             } else if (can_unselect) {
-                                r.selected_row = false;
+                                r.focused_row = false;
                                 current_index = -1;
                                 return;
                             }
                         }
-                        r.selected_row = true;
+                        r.focused_row = true;
                         current_index = idx;
                     }
                 }
@@ -136,7 +136,7 @@ export component ExcludedPaths {
                 border_radius: 5px;
                 width: parent.width;
 
-                background: ColorPalette.get_listview_color(r.selected_row, touch-area.has-hover);
+                background: ColorPalette.get_listview_color(r.focused_row, touch-area.has-hover);
                 touch_area := TouchArea {
                     clicked => {
                         handle_click(true);
@@ -154,14 +154,14 @@ export component ExcludedPaths {
                     function handle_click(can_unselect: bool) {
                         if (current_index != -1) {
                             if (current_index != idx) {
-                                model[current_index].selected_row = false;
+                                model[current_index].focused_row = false;
                             } else if (can_unselect) {
-                                r.selected_row = false;
+                                r.focused_row = false;
                                 current_index = -1;
                                 return;
                             }
                         }
-                        r.selected_row = true;
+                        r.focused_row = true;
                         current_index = idx;
                     }
                 }

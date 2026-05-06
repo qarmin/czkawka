@@ -8,10 +8,10 @@ import { PopupContextMenu } from "popup_context_menu.slint";
 export component SelectableTableView inherits Rectangle {
     in property <[string]> columns;
     in-out property <[SingleMainListModel]> values: [
-        {checked: false, selected_row: false, header_row: true, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: false, selected_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
-        {checked: true, selected_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
+        {checked: false, focused_row: false, header_row: true, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
+        {checked: false, focused_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
+        {checked: false, focused_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []} ,
+        {checked: true, focused_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
     ];
     in-out property <[length]> column_sizes: [30px, 80px, 150px, 160px];
     private property <int> column_number: column_sizes.length + 1;
@@ -32,7 +32,7 @@ export component SelectableTableView inherits Rectangle {
     in-out property <bool> sort_available: true;
 
 
-    out property <length> list_view_width: max(self.width - 20px, column_sizes[0] + column_sizes[1] + column_sizes[2] + column_sizes[3] + column_sizes[4] + column_sizes[5] + column_sizes[6] + column_sizes[7] + column_sizes[8] + column_sizes[9] + column_sizes[10] + column_sizes[11] + column_sizes[12]);
+    out property <length> list_view_width: max(self.width - 25px, column_sizes[0] + column_sizes[1] + column_sizes[2] + column_sizes[3] + column_sizes[4] + column_sizes[5] + column_sizes[6] + column_sizes[7] + column_sizes[8] + column_sizes[9] + column_sizes[10] + column_sizes[11] + column_sizes[12]);
 
     VerticalBox {
         padding: 0px;
@@ -95,8 +95,8 @@ export component SelectableTableView inherits Rectangle {
                             moved => {
                                 if (self.pressed) {
                                     root.column_sizes[idx] += (self.mouse-x - self.pressed-x);
-                                    if (root.column_sizes[idx] < 20px) {
-                                        root.column_sizes[idx] = 20px;
+                                    if (root.column_sizes[idx] < 25px) {
+                                        root.column_sizes[idx] = 25px;
                                     }
                                 }
                             }
@@ -113,7 +113,7 @@ export component SelectableTableView inherits Rectangle {
                 width: list_view_width;
                 border-radius: 5px;
                 height: item_height;
-                background: ColorPalette.get_listview_color_with_header(r.selected_row, touch-area.has-hover, r.header_row);
+                background: ColorPalette.get_listview_color_with_header(r.focused_row, touch-area.has-hover, r.header_row);
                 touch_area := TouchArea {
                     forward-focus: focus_item;
                     double-clicked => {
@@ -158,13 +158,16 @@ export component SelectableTableView inherits Rectangle {
                 }
 
                 HorizontalLayout {
+                    Rectangle {
+                        width: 5px;
+                    }
                     // Workaround for https://github.com/slint-ui/slint/issues/602
                     // Alternative solution is to use TouchArea above, to steal clicks from checkbox, but it is more fishy solution
                     CheckBox {
                         property <bool> from_model: r.checked;
                         visible: !r.header_row;
                         checked: r.checked && !r.header_row;
-                        width: root.column_sizes[0];
+                        width: root.column_sizes[0] - 5px;
                         changed from-model => { self.checked = from-model; }
                         toggled => {
                             Callabler.change_number_of_checked_items(r.checked ? -1 : 1);

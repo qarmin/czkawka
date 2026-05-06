@@ -1,7 +1,7 @@
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::settings::gui_settings_values::StringComboBoxItems;
-use crate::{BigFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings, Translations, flc};
+use crate::{BigFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, Translations, flc};
 
 pub(crate) fn translate_items(app: &MainWindow) {
     let t = app.global::<Translations>();
@@ -18,6 +18,7 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_tool_same_music_text(flc!("tool_same_music").into());
     t.set_tool_bad_names_text(flc!("tool_bad_names").into());
     t.set_tool_exif_remover_text(flc!("tool_exif_remover").into());
+    t.set_tool_similar_videos_text(flc!("tool_similar_videos").into());
     t.set_tool_directories_text(flc!("tool_directories").into());
     t.set_tool_settings_text(flc!("tool_settings").into());
 
@@ -32,6 +33,7 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_home_same_music_description_text(flc!("home_same_music_description").into());
     t.set_home_bad_names_description_text(flc!("home_bad_names_description").into());
     t.set_home_exif_description_text(flc!("home_exif_description").into());
+    t.set_home_similar_videos_description_text(flc!("home_similar_videos_description").into());
 
     t.set_scanning_text(flc!("scanning").into());
     t.set_stopping_text(flc!("stopping").into());
@@ -143,6 +145,11 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_broken_pdf_text(flc!("settings_broken_pdf").into());
     t.set_settings_broken_archive_text(flc!("settings_broken_archive").into());
     t.set_settings_broken_image_text(flc!("settings_broken_image").into());
+    t.set_settings_broken_font_text(flc!("settings_broken_font").into());
+    t.set_settings_broken_markup_text(flc!("settings_broken_markup").into());
+    t.set_settings_similar_videos_header_text(flc!("settings_similar_videos_header").into());
+    t.set_settings_similar_videos_audio_preset_text(flc!("settings_similar_videos_audio_preset").into());
+    t.set_settings_similar_videos_audio_preset_desc_text(flc!("settings_similar_videos_audio_preset_desc").into());
     t.set_settings_bad_names_header_text(flc!("settings_bad_names_header").into());
     t.set_settings_bad_names_checks_label_text(flc!("settings_bad_names_checks_label").into());
     t.set_settings_bad_names_uppercase_ext_text(flc!("settings_bad_names_uppercase_ext").into());
@@ -292,4 +299,7 @@ pub(crate) fn translate_items(app: &MainWindow) {
 
     let sm = app.global::<SameMusicSettings>();
     sm.set_check_method_options(make_options(&combo_items.same_music_check_method));
+
+    let sv = app.global::<SimilarVideosSettings>();
+    sv.set_audio_preset_options(make_options(&combo_items.similar_videos_audio_preset));
 }

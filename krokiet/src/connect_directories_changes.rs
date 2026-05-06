@@ -123,13 +123,13 @@ fn add_included_paths(settings: &Settings, folders: &[String]) {
     let filtered_folders = folders.iter().filter(|x| !old_folders_path.contains(x)).collect::<Vec<_>>();
 
     for x in &mut new_folders {
-        x.selected_row = false;
+        x.focused_row = false;
     }
 
     new_folders.extend(filtered_folders.iter().map(|path| IncludedPathsModel {
         path: (*path).into(),
         referenced_path: false,
-        selected_row: false,
+        focused_row: false,
     }));
 
     new_folders.sort_by_key(|x| x.path.clone());
@@ -146,12 +146,12 @@ pub(crate) fn add_excluded_paths(settings: &Settings, folders: &[String]) {
     let filtered_folders = folders.iter().filter(|x| !old_folders_path.contains(x)).collect::<Vec<_>>();
 
     for x in &mut new_folders {
-        x.selected_row = false;
+        x.focused_row = false;
     }
 
     new_folders.extend(filtered_folders.iter().map(|path| ExcludedPathsModel {
         path: (*path).into(),
-        selected_row: false,
+        focused_row: false,
     }));
 
     new_folders.sort_by_key(|x| x.path.clone());

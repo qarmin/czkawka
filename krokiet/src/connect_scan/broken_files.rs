@@ -38,6 +38,12 @@ pub(crate) fn scan_broken_files(a: Weak<MainWindow>, sd: ScanData) {
             if sd.custom_settings.broken_files_sub_video_ffmpeg {
                 checked_types |= CheckedTypes::VIDEO_FFMPEG;
             }
+            if sd.custom_settings.broken_files_sub_font {
+                checked_types |= CheckedTypes::FONT;
+            }
+            if sd.custom_settings.broken_files_sub_markup {
+                checked_types |= CheckedTypes::MARKUP;
+            }
 
             if checked_types == CheckedTypes::NONE {
                 a.upgrade_in_event_loop(move |app| {

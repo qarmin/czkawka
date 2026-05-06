@@ -8,7 +8,7 @@ use czkawka_core::common::traits::Search;
 
 use crate::common::{
     INT_BASE_COUNT, INT_IDX_SIZE_HI, INT_IDX_SIZE_LO, MAX_INT_DATA_EXIF_REMOVER, MAX_INT_DATA_SIMILAR_IMAGES, MAX_STR_DATA_BAD_EXTENSIONS, MAX_STR_DATA_BAD_NAMES,
-    MAX_STR_DATA_BROKEN_FILES, MAX_STR_DATA_SAME_MUSIC, MAX_STR_DATA_SIMILAR_IMAGES, STR_BASE_COUNT, STR_IDX_NAME, STR_IDX_PATH,
+    MAX_STR_DATA_BROKEN_FILES, MAX_STR_DATA_SAME_MUSIC, MAX_STR_DATA_SIMILAR_IMAGES, MAX_STR_DATA_SIMILAR_VIDEOS, STR_BASE_COUNT, STR_IDX_NAME, STR_IDX_PATH,
 };
 use crate::scan_runner::{CommonFilters, FileItem, ScanResultHandler, apply_filters, file_name, fmt_date, fmt_size, parent_str, size_to_hi_lo, spawn_progress_forwarder};
 
@@ -251,7 +251,7 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
 pub(crate) fn scan_empty_files<H: ScanResultHandler>(dirs: Vec<PathBuf>, filters: &CommonFilters, stop: &Arc<AtomicBool>, handler: &Arc<H>, scan_id: u32) -> Vec<FileItem> {
     use czkawka_core::tools::empty_files::EmptyFiles;
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
-    let mut tool = EmptyFiles::new();
+    let mut tool = EmptyFiles::default();
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);
     tool.search(stop, Some(&ptx));
@@ -578,6 +578,103 @@ pub(crate) fn scan_same_music<H: ScanResultHandler>(
         }
         for me in dup_mes {
             items.push(make_music_item(me, false));
+        }
+    }
+    items
+}
+
+pub(crate) fn scan_similar_videos<H: ScanResultHandler>(
+    dirs: Vec<PathBuf>,
+    filters: &CommonFilters,
+    audio_similarity_percent: f64,
+    audio_maximum_difference: f64,
+    audio_length_ratio: f64,
+    audio_min_duration_seconds: u32,
+    stop: &Arc<AtomicBool>,
+    handler: &Arc<H>,
+    scan_id: u32,
+) -> Vec<FileItem> {
+    use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, SimilarVideos, SimilarVideosParameters, VideosEntry};
+    let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
+    let params = SimilarVideosParameters::new(
+        10,    // tolerance (not used in audio mode)
+        false, // exclude_videos_with_same_size
+        false, // exclude_videos_with_same_resolution
+        DEFAULT_SKIP_FORWARD_AMOUNT,
+        DEFAULT_VID_HASH_DURATION,
+        DEFAULT_CROP_DETECT,
+        false, // generate_thumbnails
+        10,    // thumbnail_video_percentage_from_start
+        false, // generate_thumbnail_grid_instead_of_single
+        2,     // thumbnail_grid_tiles_per_side
+        true,  // check_audio_content – audio-only mode, no FFmpeg needed
+        audio_similarity_percent,
+        audio_maximum_difference,
+        audio_length_ratio,
+        audio_min_duration_seconds,
+    );
+    let mut tool = SimilarVideos::new(params);
+    tool.set_included_paths(dirs);
+    apply_filters(&mut tool, filters);
+    tool.search(stop, Some(&ptx));
+    drop(ptx);
+    fwd.join().expect("Failed to join progress forwarder thread");
+
+    let use_ref = tool.get_use_reference();
+    let mut groups: Vec<(Option<VideosEntry>, Vec<VideosEntry>)> = if use_ref {
+        tool.get_similar_videos_referenced().iter().cloned().map(|(orig, others)| (Some(orig), others)).collect()
+    } else {
+        tool.get_similar_videos().iter().cloned().map(|g| (None, g)).collect()
+    };
+
+    groups.sort_by_key(|(ref_v, vs)| {
+        let total: u64 = vs.iter().map(|v| v.size).sum::<u64>() + ref_v.as_ref().map_or(0, |v| v.size);
+        Reverse(total)
+    });
+
+    fn fmt_duration(secs: Option<f64>) -> String {
+        match secs {
+            Some(s) if s >= 60.0 => {
+                let mins = (s / 60.0) as u64;
+                let rem = s as u64 % 60;
+                format!("{mins}:{rem:02}")
+            }
+            Some(s) => format!("{s:.0} s"),
+            None => String::new(),
+        }
+    }
+
+    let make_video_item = |v: &VideosEntry, is_reference: bool| {
+        let (mod_hi, mod_lo) = size_to_hi_lo(v.modified_date);
+        let (size_hi, size_lo) = size_to_hi_lo(v.size);
+        let val_str: [String; MAX_STR_DATA_SIMILAR_VIDEOS] = [
+            file_name(&v.path),
+            parent_str(&v.path),
+            fmt_size(v.size),
+            fmt_date(v.modified_date),
+            fmt_duration(v.duration),
+        ];
+        let val_int: [i32; INT_BASE_COUNT] = [mod_hi, mod_lo, size_hi, size_lo];
+        FileItem {
+            is_header: false,
+            is_reference,
+            val_str: val_str.into(),
+            val_int: val_int.into(),
+        }
+    };
+
+    let mut items: Vec<FileItem> = Vec::new();
+    for (ref_v, dup_vs) in groups {
+        let group_len = dup_vs.len() + usize::from(ref_v.is_some());
+        if group_len < 2 {
+            continue;
+        }
+        items.push(header_item(crate::flc!("similar_videos_group_header", count = group_len)));
+        if let Some(ref_video) = ref_v.as_ref() {
+            items.push(make_video_item(ref_video, true));
+        }
+        for v in &dup_vs {
+            items.push(make_video_item(v, false));
         }
     }
     items

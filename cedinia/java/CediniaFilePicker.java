@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
 import android.util.Log;
@@ -27,6 +28,43 @@ public class CediniaFilePicker {
     // Request codes used with startActivityForResult (CediniaActivity path)
     static final int REQ_INCLUDE = 0x4345_0001;
     static final int REQ_EXCLUDE = 0x4345_0002;
+
+    // WakeLock held during scanning so Android does not throttle the process
+    private static PowerManager.WakeLock sWakeLock = null;
+
+    /**
+     * Acquire a PARTIAL_WAKE_LOCK so the CPU keeps running while Czkawka
+     * scans files in the background.  Safe to call from any thread.
+     * A 60-minute safety timeout is set in case releaseWakeLock is never called.
+     */
+    public static void acquireWakeLock(Activity activity) {
+        if (sWakeLock != null && sWakeLock.isHeld()) {
+            Log.d(TAG, "acquireWakeLock: already held, skipping");
+            return;
+        }
+        PowerManager pm = (PowerManager) activity.getSystemService(Activity.POWER_SERVICE);
+        if (pm == null) {
+            Log.e(TAG, "acquireWakeLock: PowerManager not available");
+            return;
+        }
+        sWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Cedinia:ScanWakeLock");
+        sWakeLock.acquire(60 * 60 * 1000L /* 60 minutes timeout */);
+        Log.i(TAG, "acquireWakeLock: acquired");
+    }
+
+    /**
+     * Release the WakeLock acquired by {@link #acquireWakeLock}.
+     * Silently ignored if no lock is currently held.
+     */
+    public static void releaseWakeLock(Activity activity) {
+        if (sWakeLock != null && sWakeLock.isHeld()) {
+            sWakeLock.release();
+            sWakeLock = null;
+            Log.i(TAG, "releaseWakeLock: released");
+        } else {
+            Log.d(TAG, "releaseWakeLock: not held, skipping");
+        }
+    }
 
     // permission helpers
 

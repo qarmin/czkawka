@@ -23,6 +23,8 @@ pub enum CheckedTypesSingle {
     Archive,
     VideoFfprobe,
     VideoFfmpeg,
+    Font,
+    Markup,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -30,16 +32,16 @@ pub struct BrokenEntry {
     pub path: PathBuf,
     pub modified_date: u64,
     pub size: u64,
-    pub errors: BTreeMap<CheckedTypesSingle, String>,
+    pub errors: BTreeMap<CheckedTypesSingle, Option<String>>,
 }
 
 impl BrokenEntry {
     pub fn has_errors(&self) -> bool {
-        self.errors.values().any(|e| !e.is_empty())
+        self.errors.values().any(Option::is_some)
     }
 
     pub fn get_error_string(&self) -> String {
-        self.errors.values().filter(|e| !e.is_empty()).cloned().collect::<Vec<_>>().join(", ")
+        self.errors.values().filter_map(Option::as_deref).collect::<Vec<_>>().join(", ")
     }
 }
 
@@ -68,12 +70,23 @@ impl FileEntry {
 
 #[derive(Copy, Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum TypeOfFile {
-    Unknown = -1,
     Image = 0,
     ArchiveZip,
     Audio,
     Pdf,
     Video,
+    Archive7z,
+    ArchiveGz,
+    ArchiveTar,
+    ArchiveZst,
+    Font,
+    Json,
+    Xml,
+    Toml,
+    Yaml,
+    ArchiveBz2,
+    ArchiveXz,
+    Svg,
 }
 
 bitflags! {
@@ -87,6 +100,8 @@ bitflags! {
         const ARCHIVE = 0b1000;
         const VIDEO_FFPROBE = 0b10000;
         const VIDEO_FFMPEG = 0b100000;
+        const FONT = 0b1000000;
+        const MARKUP = 0b10000000;
     }
 }
 

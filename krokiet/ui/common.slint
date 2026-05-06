@@ -52,7 +52,7 @@ export struct SingleMainListModel {
     checked: bool,
     header_row: bool,
     filled_header_row: bool,
-    selected_row: bool,
+    focused_row: bool,
     val_str: [string],
     val_int: [int]
 }
@@ -66,12 +66,12 @@ export enum BottomPanelVisibility {
 export struct IncludedPathsModel {
     path: string,
     referenced_path: bool,
-    selected_row: bool,
+    focused_row: bool,
 }
 
 export struct ExcludedPathsModel {
     path: string,
-    selected_row: bool,
+    focused_row: bool,
 }
 
 export enum SelectMode {
@@ -123,7 +123,7 @@ export struct CustomSelectColumnModel {
 
 export enum SortMode {
     FullName,
-    Selection,
+    Focus,
     Reverse
 }
 

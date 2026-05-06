@@ -6,7 +6,10 @@ use czkawka_core::common::items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::similar_videos::{DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL};
+use czkawka_core::tools::similar_videos::{
+    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_SKIP_FORWARD_AMOUNT,
+    DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL,
+};
 use czkawka_core::tools::temporary::DEFAULT_TEMP_EXTENSIONS_STR;
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use home::home_dir;
@@ -132,6 +135,10 @@ pub struct SettingsCustom {
     pub similar_music_sub_maximum_difference_value: f32,
     #[serde(default = "default_minimal_fragment_duration_value")]
     pub similar_music_sub_minimal_fragment_duration_value: f32,
+    #[serde(default)]
+    pub empty_files_sub_zero_byte_content: bool,
+    #[serde(default)]
+    pub empty_files_sub_non_printable_content: bool,
     #[serde(default = "ttrue")]
     pub broken_files_sub_audio: bool,
     #[serde(default = "ttrue")]
@@ -144,6 +151,10 @@ pub struct SettingsCustom {
     pub broken_files_sub_video_ffprobe: bool,
     #[serde(default)]
     pub broken_files_sub_video_ffmpeg: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_sub_font: bool,
+    #[serde(default = "ttrue")]
+    pub broken_files_sub_markup: bool,
     #[serde(default = "ttrue")]
     pub bad_names_sub_uppercase_extension: bool,
     #[serde(default = "ttrue")]
@@ -164,6 +175,18 @@ pub struct SettingsCustom {
     pub similar_videos_vid_hash_duration: u32,
     #[serde(default = "default_similar_videos_crop_detect")]
     pub similar_videos_crop_detect: String,
+    #[serde(default)]
+    pub similar_videos_audio_check_content: bool,
+    #[serde(default)]
+    pub similar_videos_audio_preset_index: i32,
+    #[serde(default = "default_similar_videos_audio_similarity_percent")]
+    pub similar_videos_audio_similarity_percent: f32,
+    #[serde(default = "default_similar_videos_audio_length_ratio")]
+    pub similar_videos_audio_length_ratio: f32,
+    #[serde(default = "default_similar_videos_audio_min_duration_seconds")]
+    pub similar_videos_audio_min_duration_seconds: u32,
+    #[serde(default = "default_similar_videos_audio_maximum_difference")]
+    pub similar_videos_audio_maximum_difference: f32,
     #[serde(default)]
     pub video_thumbnails_generate: bool,
     #[serde(default = "default_similar_videos_thumbnail_percentage")]
@@ -243,6 +266,9 @@ pub struct SettingsCustom {
     pub popup_crop_video_reencode: bool,
     #[serde(default = "default_video_optimizer_video_quality")]
     pub popup_crop_video_quality: u32,
+
+    #[serde(default)]
+    pub popup_custom_select_save_restore: bool,
 }
 
 impl Default for SettingsCustom {
@@ -373,6 +399,18 @@ fn default_similar_videos_vid_hash_duration() -> u32 {
 }
 fn default_similar_videos_crop_detect() -> String {
     "letterbox".to_string()
+}
+fn default_similar_videos_audio_similarity_percent() -> f32 {
+    DEFAULT_AUDIO_SIMILARITY_PERCENT as f32
+}
+fn default_similar_videos_audio_length_ratio() -> f32 {
+    DEFAULT_AUDIO_LENGTH_RATIO as f32
+}
+fn default_similar_videos_audio_min_duration_seconds() -> u32 {
+    DEFAULT_AUDIO_MIN_DURATION_SECONDS
+}
+fn default_similar_videos_audio_maximum_difference() -> f32 {
+    DEFAULT_AUDIO_MAXIMUM_DIFFERENCE as f32
 }
 fn default_similar_videos_thumbnail_percentage() -> u8 {
     DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL
@@ -510,4 +548,32 @@ pub(crate) fn default_temporary_files_extensions() -> String {
 }
 pub(crate) fn default_video_optimizer_hardware_encoder() -> String {
     "none".to_string()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct SavedCustomSelectColumnState {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default)]
+    pub filter_value: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SavedCustomSelectTabState {
+    #[serde(default)]
+    pub case_sensitive: bool,
+    #[serde(default = "ttrue")]
+    pub leave_one_in_group: bool,
+    #[serde(default)]
+    pub columns: Vec<SavedCustomSelectColumnState>,
+}
+
+impl Default for SavedCustomSelectTabState {
+    fn default() -> Self {
+        Self {
+            case_sensitive: false,
+            leave_one_in_group: true,
+            columns: Vec::new(),
+        }
+    }
 }

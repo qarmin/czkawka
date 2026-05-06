@@ -31,6 +31,11 @@ pub(crate) fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
                 sd.custom_settings.video_thumbnails_percentage,
                 sd.custom_settings.video_thumbnails_generate_grid,
                 sd.custom_settings.video_thumbnails_grid_tiles_per_side,
+                sd.custom_settings.similar_videos_audio_check_content,
+                sd.custom_settings.similar_videos_audio_similarity_percent as f64,
+                sd.custom_settings.similar_videos_audio_maximum_difference as f64,
+                sd.custom_settings.similar_videos_audio_length_ratio as f64,
+                sd.custom_settings.similar_videos_audio_min_duration_seconds,
             );
             let mut tool = SimilarVideos::new(params);
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);

@@ -9,7 +9,7 @@ use czkawka_core::TOOLS_NUMBER;
 use czkawka_core::common::basic_gui_cli::CliResult;
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
-use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
+use czkawka_core::tools::similar_videos::{ALLOWED_AUDIO_LENGTH_RATIO, ALLOWED_AUDIO_SIMILARITY_PERCENT, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION};
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
 use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize};
@@ -251,6 +251,10 @@ pub(crate) fn get_config_file(number: i32) -> Option<PathBuf> {
     let config_file = config_folder.join(format!("config_preset_{number}.json"));
     Some(config_file)
 }
+pub(crate) fn get_custom_select_state_file() -> Option<PathBuf> {
+    let config_folder = get_config_cache_path()?.config_folder;
+    Some(config_folder.join("config_custom_select_state.json"))
+}
 
 pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicSettings, preset_idx: i32) {
     let settings = app.global::<Settings>();
@@ -461,6 +465,27 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_vid_hash_duration_min(*ALLOWED_VID_HASH_DURATION.start() as f32);
     settings.set_similar_videos_vid_hash_duration_max(*ALLOWED_VID_HASH_DURATION.end() as f32);
 
+    settings.set_similar_videos_audio_check_content(custom_settings.similar_videos_audio_check_content);
+    settings.set_similar_videos_audio_preset_index(custom_settings.similar_videos_audio_preset_index);
+    settings.set_similar_videos_audio_similarity_percent(
+        custom_settings
+            .similar_videos_audio_similarity_percent
+            .clamp(*ALLOWED_AUDIO_SIMILARITY_PERCENT.start() as f32, *ALLOWED_AUDIO_SIMILARITY_PERCENT.end() as f32),
+    );
+    settings.set_similar_videos_audio_similarity_percent_min(*ALLOWED_AUDIO_SIMILARITY_PERCENT.start() as f32);
+    settings.set_similar_videos_audio_similarity_percent_max(*ALLOWED_AUDIO_SIMILARITY_PERCENT.end() as f32);
+    settings.set_similar_videos_audio_length_ratio(
+        custom_settings
+            .similar_videos_audio_length_ratio
+            .clamp(*ALLOWED_AUDIO_LENGTH_RATIO.start() as f32, *ALLOWED_AUDIO_LENGTH_RATIO.end() as f32),
+    );
+    settings.set_similar_videos_audio_length_ratio_min(*ALLOWED_AUDIO_LENGTH_RATIO.start() as f32);
+    settings.set_similar_videos_audio_length_ratio_max(*ALLOWED_AUDIO_LENGTH_RATIO.end() as f32);
+    settings.set_similar_videos_audio_min_duration_seconds(custom_settings.similar_videos_audio_min_duration_seconds as f32);
+    settings.set_similar_videos_audio_min_duration_seconds_max(600.0);
+    settings.set_similar_videos_audio_maximum_difference(custom_settings.similar_videos_audio_maximum_difference.max(0.0));
+    settings.set_similar_videos_audio_maximum_difference_max(10.0);
+
     settings.set_video_thumbnails_generate(custom_settings.video_thumbnails_generate);
     settings.set_video_thumbnails_percentage(
         custom_settings
@@ -484,12 +509,16 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_music_sub_maximum_difference_value(custom_settings.similar_music_sub_maximum_difference_value);
     settings.set_similar_music_sub_minimal_fragment_duration_value(custom_settings.similar_music_sub_minimal_fragment_duration_value);
 
+    settings.set_empty_files_sub_zero_byte_content(custom_settings.empty_files_sub_zero_byte_content);
+    settings.set_empty_files_sub_non_printable_content(custom_settings.empty_files_sub_non_printable_content);
     settings.set_broken_files_sub_audio(custom_settings.broken_files_sub_audio);
     settings.set_broken_files_sub_pdf(custom_settings.broken_files_sub_pdf);
     settings.set_broken_files_sub_archive(custom_settings.broken_files_sub_archive);
     settings.set_broken_files_sub_image(custom_settings.broken_files_sub_image);
     settings.set_broken_files_sub_video_ffprobe(custom_settings.broken_files_sub_video_ffprobe);
     settings.set_broken_files_sub_video_ffmpeg(custom_settings.broken_files_sub_video_ffmpeg);
+    settings.set_broken_files_sub_font(custom_settings.broken_files_sub_font);
+    settings.set_broken_files_sub_markup(custom_settings.broken_files_sub_markup);
 
     settings.set_bad_names_sub_uppercase_extension(custom_settings.bad_names_sub_uppercase_extension);
     settings.set_bad_names_sub_emoji_used(custom_settings.bad_names_sub_emoji_used);
@@ -531,6 +560,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_popup_crop_video_overwrite_files(custom_settings.popup_crop_video_overwrite_files);
     settings.set_popup_crop_video_reencode(custom_settings.popup_crop_video_reencode);
     settings.set_popup_crop_video_quality(custom_settings.popup_crop_video_quality as f32);
+    settings.set_popup_custom_select_save_restore(custom_settings.popup_custom_select_save_restore);
 
     let sel_px = 35.0;
     let path_px = 350.0;
@@ -552,7 +582,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     if base_settings.settings_load_tabs_sizes_at_startup {
         settings.set_duplicates_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "duplicates"));
         settings.set_empty_folders_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_folders"));
-        settings.set_empty_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_files"));
+        settings.set_empty_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "empty_files"));
         settings.set_temporary_files_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "temporary_files"));
         settings.set_big_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "big_files"));
         settings.set_similar_images_column_size(fnm(&[sel_px, 80.0, 80.0, 80.0, name_px, path_px, mod_px], "similar_images"));
@@ -634,6 +664,12 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_crop_detect = combo_box_items.videos_crop_detect.config_name.clone();
     let similar_videos_skip_forward_amount = settings.get_similar_videos_skip_forward_amount() as u32;
     let similar_videos_vid_hash_duration = settings.get_similar_videos_vid_hash_duration() as u32;
+    let similar_videos_audio_check_content = settings.get_similar_videos_audio_check_content();
+    let similar_videos_audio_preset_index = settings.get_similar_videos_audio_preset_index();
+    let similar_videos_audio_similarity_percent = settings.get_similar_videos_audio_similarity_percent();
+    let similar_videos_audio_length_ratio = settings.get_similar_videos_audio_length_ratio();
+    let similar_videos_audio_min_duration_seconds = settings.get_similar_videos_audio_min_duration_seconds().round() as u32;
+    let similar_videos_audio_maximum_difference = settings.get_similar_videos_audio_maximum_difference();
 
     let video_thumbnails_generate = settings.get_video_thumbnails_generate();
     let video_thumbnails_percentage = settings.get_video_thumbnails_percentage().round() as u8;
@@ -651,12 +687,16 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_music_sub_maximum_difference_value = settings.get_similar_music_sub_maximum_difference_value();
     let similar_music_sub_minimal_fragment_duration_value = settings.get_similar_music_sub_minimal_fragment_duration_value();
 
+    let empty_files_sub_zero_byte_content = settings.get_empty_files_sub_zero_byte_content();
+    let empty_files_sub_non_printable_content = settings.get_empty_files_sub_non_printable_content();
     let broken_files_sub_audio = settings.get_broken_files_sub_audio();
     let broken_files_sub_pdf = settings.get_broken_files_sub_pdf();
     let broken_files_sub_archive = settings.get_broken_files_sub_archive();
     let broken_files_sub_image = settings.get_broken_files_sub_image();
     let broken_files_sub_video_ffprobe = settings.get_broken_files_sub_video_ffprobe();
     let broken_files_sub_video_ffmpeg = settings.get_broken_files_sub_video_ffmpeg();
+    let broken_files_sub_font = settings.get_broken_files_sub_font();
+    let broken_files_sub_markup = settings.get_broken_files_sub_markup();
 
     let bad_names_sub_uppercase_extension = settings.get_bad_names_sub_uppercase_extension();
     let bad_names_sub_emoji_used = settings.get_bad_names_sub_emoji_used();
@@ -765,6 +805,12 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_sub_ignore_same_size,
         similar_videos_sub_ignore_same_resolution,
         similar_videos_sub_similarity,
+        similar_videos_audio_check_content,
+        similar_videos_audio_preset_index,
+        similar_videos_audio_similarity_percent,
+        similar_videos_audio_length_ratio,
+        similar_videos_audio_min_duration_seconds,
+        similar_videos_audio_maximum_difference,
         similar_music_sub_audio_check_type,
         similar_music_sub_approximate_comparison,
         similar_music_compare_fingerprints_only_with_similar_titles,
@@ -776,12 +822,16 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_music_sub_length,
         similar_music_sub_maximum_difference_value,
         similar_music_sub_minimal_fragment_duration_value,
+        empty_files_sub_zero_byte_content,
+        empty_files_sub_non_printable_content,
         broken_files_sub_audio,
         broken_files_sub_pdf,
         broken_files_sub_archive,
         broken_files_sub_image,
         broken_files_sub_video_ffprobe,
         broken_files_sub_video_ffmpeg,
+        broken_files_sub_font,
+        broken_files_sub_markup,
         bad_names_sub_uppercase_extension,
         bad_names_sub_emoji_used,
         bad_names_sub_space_at_start_end,
@@ -831,6 +881,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         popup_crop_video_overwrite_files: settings.get_popup_crop_video_overwrite_files(),
         popup_crop_video_reencode: settings.get_popup_crop_video_reencode(),
         popup_crop_video_quality: settings.get_popup_crop_video_quality().round() as u32,
+        popup_custom_select_save_restore: settings.get_popup_custom_select_save_restore(),
     }
 }
 

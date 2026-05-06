@@ -162,7 +162,7 @@ export struct SingleMainListModel {
     checked: bool,           // row selected by user
     header_row: bool,        // group header
     filled_header_row: bool, // header with formatted summary
-    selected_row: bool,      // UI highlight
+    focused_row: bool,      // UI highlight
     val_str: [string],       // text columns
     val_int: [int],          // numeric columns (raw values for sorting)
 }

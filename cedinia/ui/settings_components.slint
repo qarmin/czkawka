@@ -282,12 +282,13 @@ export component TextInputRow {
     in property <string> placeholder: "";
     in-out property <string> value;
 
-    height: 68px;
+    // Height driven by content so long extension lists wrap naturally.
+    height: content_vl.preferred-height;
 
     Rectangle {
         background: CediniaColors.bg_surface;
 
-        VerticalLayout {
+        content_vl := VerticalLayout {
             padding-left: 16px;
             padding-right: 16px;
             padding-top: 8px;
@@ -299,10 +300,12 @@ export component TextInputRow {
                 color: CediniaColors.text_secondary;
                 font-size: 11px;
                 font-weight: 600;
+                wrap: word-wrap;
             }
 
-            Rectangle {
-                height: 36px;
+            inp_box := Rectangle {
+                // Grows with content; minimum keeps single-line fields tidy.
+                height: max(36px, inp.preferred-height + 16px);
                 border-radius: 6px;
                 background: CediniaColors.bg_elevated;
                 border-width: 1px;
@@ -312,27 +315,29 @@ export component TextInputRow {
                 HorizontalLayout {
                     padding-left: 10px;
                     padding-right: 10px;
+                    padding-top: 8px;
+                    padding-bottom: 8px;
 
                     inp := TextInput {
                         text <=> root.value;
                         color: CediniaColors.text_primary;
                         font-size: 13px;
-                        vertical-alignment: TextVerticalAlignment.center;
-                        single-line: true;
+                        vertical-alignment: TextVerticalAlignment.top;
+                        single-line: false;
+                        wrap: word-wrap;
                         accepted => { AppState.save_settings_now(); }
                     }
                 }
 
-
                 if inp.text == "" && !inp.has-focus : Text {
                     x: 10px;
-                    y: 0px;
-                    height: parent.height;
+                    y: 8px;
                     width: parent.width - 20px;
                     text: root.placeholder;
                     color: CediniaColors.text_disabled;
                     font-size: 13px;
-                    vertical-alignment: TextVerticalAlignment.center;
+                    vertical-alignment: TextVerticalAlignment.top;
+                    wrap: word-wrap;
                 }
             }
         }

@@ -79,7 +79,7 @@ czkawka/
 └── misc/           # Scripts: AI translation, validation, benchmarks, CI helpers
 ```
 
-Cargo workspace resolver v3, minimum Rust 1.92.0, edition 2024 throughout.
+Cargo workspace resolver v3, minimum Rust 1.94.1, edition 2024 throughout.
 
 ---
 

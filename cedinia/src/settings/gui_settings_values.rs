@@ -75,6 +75,15 @@ impl MaxFileSize {
     }
 }
 
+/// Parameters corresponding to one of the audio-similarity presets for Similar Videos.
+#[derive(Debug, Clone)]
+pub struct AudioPresetParams {
+    pub similarity_percent: f64,
+    pub maximum_difference: f64,
+    pub length_ratio: f64,
+    pub min_duration_seconds: u32,
+}
+
 pub struct StringComboBoxItems {
     pub min_file_size: Vec<StringComboBoxItem<MinFileSize>>,
     pub max_file_size: Vec<StringComboBoxItem<MaxFileSize>>,
@@ -87,6 +96,7 @@ pub struct StringComboBoxItems {
     pub hash_alg: Vec<StringComboBoxItem<HashAlg>>,
     pub image_filter: Vec<StringComboBoxItem<FilterType>>,
     pub same_music_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
+    pub similar_videos_audio_preset: Vec<StringComboBoxItem<AudioPresetParams>>,
 }
 
 impl Default for StringComboBoxItems {
@@ -166,6 +176,40 @@ impl StringComboBoxItems {
             ("audio", CheckingMethod::AudioContent, DisplaySpec::Translatable("option_music_method_audio")),
         ]);
 
+        // Preset values match krokiet's apply_similar_videos_audio_preset().
+        let similar_videos_audio_preset = Self::convert_i18n(&[
+            (
+                "identical",
+                AudioPresetParams {
+                    similarity_percent: 90.0,
+                    maximum_difference: 2.0,
+                    length_ratio: 0.85,
+                    min_duration_seconds: 5,
+                },
+                DisplaySpec::Translatable("option_audio_preset_identical"),
+            ),
+            (
+                "clip_in_longer",
+                AudioPresetParams {
+                    similarity_percent: 90.0,
+                    maximum_difference: 4.0,
+                    length_ratio: 0.05,
+                    min_duration_seconds: 10,
+                },
+                DisplaySpec::Translatable("option_audio_preset_clip"),
+            ),
+            (
+                "similar",
+                AudioPresetParams {
+                    similarity_percent: 25.0,
+                    maximum_difference: 6.0,
+                    length_ratio: 0.4,
+                    min_duration_seconds: 10,
+                },
+                DisplaySpec::Translatable("option_audio_preset_similar"),
+            ),
+        ]);
+
         Self {
             min_file_size,
             max_file_size,
@@ -178,6 +222,7 @@ impl StringComboBoxItems {
             hash_alg,
             image_filter,
             same_music_check_method,
+            similar_videos_audio_preset,
         }
     }
 
@@ -350,5 +395,13 @@ mod tests {
         assert!(!items.hash_alg.is_empty());
         assert!(!items.image_filter.is_empty());
         assert!(!items.same_music_check_method.is_empty());
+        assert!(!items.similar_videos_audio_preset.is_empty());
+    }
+
+    #[test]
+    fn similar_videos_audio_preset_config_names_are_stable() {
+        let items = StringComboBoxItems::new();
+        let names: Vec<&str> = items.similar_videos_audio_preset.iter().map(|e| e.config_name.as_str()).collect();
+        assert_eq!(names, &["identical", "clip_in_longer", "similar"]);
     }
 }
