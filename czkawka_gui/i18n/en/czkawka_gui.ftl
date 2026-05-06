@@ -9,13 +9,13 @@ general_ok_button = Ok
 general_close_button = Close
 
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - New version of Czkawka
+krokiet_info_title = Deprecation Notice
 krokiet_info_message =
-        Czkawka GTK 12.0 is the final release. No further releases, features, or bug fixes are planned.
+        Czkawka GTK 12.0 is the final release. No further updates, features, or bug fixes are planned.
 
-        Almost all features available in Czkawka GTK can be found in Krokiet, typically in a more refined, better-performing, and more stable form. Krokiet also introduces new functionality and improvements that were not feasible in the GTK version.
+        Most features from Czkawka GTK are available in Krokiet, usually in a simpler, faster, and more stable form. Krokiet also adds new features and improvements that were not possible in the GTK version.
 
-        If you are still using Czkawka GTK, switching to Krokiet should be seamless, as it has a similar user interface while relying on fewer dependencies and offering better cross-platform support.
+        If you are still using Czkawka GTK, switching to Krokiet should be easy, since it has a similar interface, fewer dependencies, and better cross-platform support.
 
         PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 
