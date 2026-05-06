@@ -1,13 +1,13 @@
 ## Version ? - ??.??.????
 
-## Czkawka GTK Deprecation Notice
+### Czkawka GTK Deprecation Notice
 This is the latest version of Czkawka GTK. From now on, I will no longer provide binaries for it, and users are encouraged to switch to Krokiet.
 
-The project will remain available in the repository. I will ensure it continues to compile with `czkawka_core` library, so it can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds, such as Debian or Docker packages.
+The project will remain available in the repository. For some time I will ensure it continues to compile with `czkawka_core` library, so it can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds, such as Debian or Docker packages.
 
-## Breaking changes
+### Breaking changes
 
-### Users
+#### Users
 - Due to changes in the broken files mode, which now supports multiple checkers and includes additional checks, the file type is no longer stored in the cache. Existing cache files are incompatible with this version and will be automatically regenerated
 - The prehash method has been updated, so cached hash is no longer valid, so it will be automatically regenerated
 
