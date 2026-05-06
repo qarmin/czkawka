@@ -18,6 +18,7 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_tool_same_music_text(flc!("tool_same_music").into());
     t.set_tool_bad_names_text(flc!("tool_bad_names").into());
     t.set_tool_exif_remover_text(flc!("tool_exif_remover").into());
+    t.set_tool_similar_videos_text(flc!("tool_similar_videos").into());
     t.set_tool_directories_text(flc!("tool_directories").into());
     t.set_tool_settings_text(flc!("tool_settings").into());
 
@@ -32,6 +33,7 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_home_same_music_description_text(flc!("home_same_music_description").into());
     t.set_home_bad_names_description_text(flc!("home_bad_names_description").into());
     t.set_home_exif_description_text(flc!("home_exif_description").into());
+    t.set_home_similar_videos_description_text(flc!("home_similar_videos_description").into());
 
     t.set_scanning_text(flc!("scanning").into());
     t.set_stopping_text(flc!("stopping").into());

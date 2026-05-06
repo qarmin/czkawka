@@ -101,6 +101,7 @@ fn clear_tool_results(win: &MainWindow, tool: ActiveTool) {
         ActiveTool::SameMusic => win.set_same_music_model(empty_entries()),
         ActiveTool::BadNames => win.set_bad_names_model(empty_entries()),
         ActiveTool::ExifRemover => win.set_exif_remover_model(empty_entries()),
+        ActiveTool::SimilarVideos => win.set_similar_videos_model(empty_entries()),
         ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {}
     }
     win.global::<AppState>().set_selected_count(0);
@@ -268,6 +269,7 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
             }
         }
         ActiveTool::ExifRemover => ScanRequest::ExifRemover { dirs, filters },
+        ActiveTool::SimilarVideos => ScanRequest::SimilarVideos { dirs, filters },
         ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {
             unreachable!("scan cannot be triggered from Home/Directories/Settings tab")
         }

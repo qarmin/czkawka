@@ -130,7 +130,9 @@ fn progress_default(item: &ProgressData) -> ProgressToSend {
         CurrentStage::BadExtensionsChecking => flk!("rust_checked_files_bad_extensions", items_stats = items_stats),
         CurrentStage::BadNamesChecking => flk!("rust_checked_files_bad_names", items_stats = items_stats),
         CurrentStage::EmptyFilesCheckingContent => flk!("rust_checking_empty_files_content", items_stats = items_stats, size_stats = size_stats),
-        CurrentStage::SimilarVideosCreatingThumbnails | CurrentStage::SimilarVideosAudioCreatingThumbnails | CurrentStage::VideoOptimizerCreatingThumbnails => flk!("rust_created_thumbnails", items_stats = items_stats),
+        CurrentStage::SimilarVideosCreatingThumbnails | CurrentStage::SimilarVideosAudioCreatingThumbnails | CurrentStage::VideoOptimizerCreatingThumbnails => {
+            flk!("rust_created_thumbnails", items_stats = items_stats)
+        }
         CurrentStage::VideoOptimizerProcessingVideos => flk!("rust_checked_videos", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicatePreHashing => flk!("rust_analyzed_partial_hash", items_stats = items_stats, size_stats = size_stats),
         CurrentStage::DuplicateFullHashing => flk!("rust_analyzed_full_hash", items_stats = items_stats, size_stats = size_stats),

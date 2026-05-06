@@ -135,7 +135,11 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
             0
         };
 
-        let rms = if total_interleaved_samples > 0 { (sum_sq / total_interleaved_samples as f64).sqrt() } else { 0.0 };
+        let rms = if total_interleaved_samples > 0 {
+            (sum_sq / total_interleaved_samples as f64).sqrt()
+        } else {
+            0.0
+        };
         if rms < 0.001 && max_amp < 0.01 {
             // Cache with an empty fingerprint so this file is not re-decoded on the next run
             // but is still excluded from comparisons via the `!fingerprint.is_empty()` filter.

@@ -304,6 +304,13 @@ impl ScanResultHandler for GuiHandler {
                 })
                 .expect("Failed to invoke progress update in event loop");
             }
+            ScanResult::SimilarVideos(items) => {
+                slint::invoke_from_event_loop(move || {
+                    let win = weak.upgrade().expect("Failed to upgrade app :(");
+                    win.set_similar_videos_model(make_file_model(items));
+                })
+                .expect("Failed to invoke progress update in event loop");
+            }
             ScanResult::Finished(id) => {
                 slint::invoke_from_event_loop(move || {
                     let win = weak.upgrade().expect("Failed to upgrade app :(");

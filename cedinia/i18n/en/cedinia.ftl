@@ -13,6 +13,7 @@ tool_bad_extensions = Bad Extensions
 tool_same_music = Music Duplicates
 tool_bad_names = Bad Names
 tool_exif_remover = EXIF Data
+tool_similar_videos = Similar Videos (Audio)
 tool_directories = Directories
 tool_settings = Settings
 
@@ -28,6 +29,7 @@ home_bad_extensions_description = Files with invalid extension
 home_same_music_description = Similar audio files by tags
 home_bad_names_description = Files with problematic characters in name
 home_exif_description = Images with EXIF metadata
+home_similar_videos_description = Find videos with similar audio (no FFmpeg needed)
 
 # Results list
 scanning = Scanning in progress...
@@ -296,6 +298,7 @@ stage_empty_files_checking_content = Checking file content
 duplicates_group_header = { $count } files  x  { $per_file } / file  =  { $total } total
 similar_images_group_header = { $count } similar images
 same_music_group_header = { $count } similar tracks
+similar_videos_group_header = { $count } similar videos
 
 # Rename confirmation
 confirm_rename_items = Are you sure you want to rename { $n } selected files?

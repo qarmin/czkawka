@@ -90,12 +90,11 @@ fn resolve_folder(env_var: &str, default_folder: Option<PathBuf>, name: &'static
 }
 #[cfg(test)]
 pub fn set_config_cache_path_test(cache_path: PathBuf, config_path: PathBuf) {
-    CONFIG_CACHE_PATH
-        .set(Some(ConfigCachePath {
-            cache_folder: cache_path,
-            config_folder: config_path,
-        }))
-        .expect("Cannot set config cache path");
+    // Silently ignore if already initialised (happens when multiple test modules share the OnceCell)
+    let _ = CONFIG_CACHE_PATH.set(Some(ConfigCachePath {
+        cache_folder: cache_path,
+        config_folder: config_path,
+    }));
 }
 
 pub struct ConfigCachePathSetResult {

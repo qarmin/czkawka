@@ -7,8 +7,8 @@ use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{Cropdetect, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_videos::{
-    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION,
-    DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL,
+    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_SKIP_FORWARD_AMOUNT,
+    DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL,
 };
 use czkawka_core::tools::temporary::DEFAULT_TEMP_EXTENSIONS_STR;
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};

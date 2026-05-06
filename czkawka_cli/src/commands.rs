@@ -10,7 +10,10 @@ use czkawka_core::common::tool_data::DeleteMethod;
 use czkawka_core::re_exported::{Cropdetect, FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::same_music::MusicSimilarity;
-use czkawka_core::tools::similar_videos::{ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_SKIP_FORWARD_AMOUNT, crop_detect_from_str_opt};
+use czkawka_core::tools::similar_videos::{
+    ALLOWED_AUDIO_LENGTH_RATIO, ALLOWED_AUDIO_SIMILARITY_PERCENT, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_AUDIO_LENGTH_RATIO,
+    DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_SKIP_FORWARD_AMOUNT, crop_detect_from_str_opt,
+};
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec};
 
 #[cfg(not(feature = "no_colors"))]
@@ -533,6 +536,37 @@ pub struct SimilarVideosArgs {
         long_help = "When enabled, videos are also compared by their audio fingerprint. This is very resource-intensive and significantly slows down scanning."
     )]
     pub check_audio_content: bool,
+    #[clap(
+        long,
+        default_value_t = DEFAULT_AUDIO_SIMILARITY_PERCENT,
+        value_parser = parse_audio_similarity_percent,
+        help = "Minimum percentage of matching audio content (0.0-100.0)",
+        long_help = "Minimum percentage of audio duration that must match between two videos to consider them similar. Allowed range: 0.0-100.0."
+    )]
+    pub audio_similarity_percent: f64,
+    #[clap(
+        long,
+        default_value_t = DEFAULT_AUDIO_MAXIMUM_DIFFERENCE,
+        value_parser = parse_audio_maximum_difference,
+        help = "Maximum allowed audio fingerprint segment difference (0.0-10.0)",
+        long_help = "Maximum score difference allowed for matched audio segments. Lower values mean stricter matching. Allowed range: 0.0-10.0."
+    )]
+    pub audio_maximum_difference: f64,
+    #[clap(
+        long,
+        default_value_t = DEFAULT_AUDIO_LENGTH_RATIO,
+        value_parser = parse_audio_length_ratio,
+        help = "Minimum ratio of shorter to longer audio duration (0.0-1.0)",
+        long_help = "Minimum ratio between the shorter and longer audio duration. Videos where the shorter is less than this fraction of the longer are skipped. Allowed range: 0.0-1.0."
+    )]
+    pub audio_length_ratio: f64,
+    #[clap(
+        long,
+        default_value_t = DEFAULT_AUDIO_MIN_DURATION_SECONDS,
+        help = "Minimum audio duration in seconds for comparison",
+        long_help = "Videos with audio duration shorter than this value are excluded from audio comparison."
+    )]
+    pub audio_min_duration_seconds: u32,
 }
 
 #[derive(Debug, clap::Args)]
@@ -1084,6 +1118,45 @@ impl JsonPrettyFileToSave {
         }
 
         None
+    }
+}
+
+fn parse_audio_similarity_percent(src: &str) -> Result<f64, String> {
+    match src.parse::<f64>() {
+        Ok(v) => {
+            if ALLOWED_AUDIO_SIMILARITY_PERCENT.contains(&v) {
+                Ok(v)
+            } else {
+                Err(format!("Audio similarity percent must be in range {:?}", ALLOWED_AUDIO_SIMILARITY_PERCENT))
+            }
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+fn parse_audio_maximum_difference(src: &str) -> Result<f64, String> {
+    match src.parse::<f64>() {
+        Ok(v) => {
+            if v >= 0.0 {
+                Ok(v)
+            } else {
+                Err("Audio maximum difference must be >= 0.0".to_string())
+            }
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+fn parse_audio_length_ratio(src: &str) -> Result<f64, String> {
+    match src.parse::<f64>() {
+        Ok(v) => {
+            if ALLOWED_AUDIO_LENGTH_RATIO.contains(&v) {
+                Ok(v)
+            } else {
+                Err(format!("Audio length ratio must be in range {:?}", ALLOWED_AUDIO_LENGTH_RATIO))
+            }
+        }
+        Err(e) => Err(e.to_string()),
     }
 }
 

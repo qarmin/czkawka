@@ -350,11 +350,11 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         crop_detect,
         scan_duration,
         check_audio_content,
+        audio_similarity_percent,
+        audio_maximum_difference,
+        audio_length_ratio,
+        audio_min_duration_seconds,
     } = similar_videos;
-
-    if check_audio_content {
-        eprintln!("WARNING: Audio content comparison is very resource-intensive and may significantly slow down scanning.");
-    }
 
     let params = SimilarVideosParameters::new(
         tolerance,
@@ -368,10 +368,10 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         false, // creating thumbnails in CLI, makes almost no sense
         2,     // creating thumbnails in CLI, makes almost no sense
         check_audio_content,
-        czkawka_core::tools::similar_videos::DEFAULT_AUDIO_SIMILARITY_PERCENT,
-        czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MAXIMUM_DIFFERENCE,
-        czkawka_core::tools::similar_videos::DEFAULT_AUDIO_LENGTH_RATIO,
-        czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MIN_DURATION_SECONDS,
+        audio_similarity_percent,
+        audio_maximum_difference,
+        audio_length_ratio,
+        audio_min_duration_seconds,
     );
     let mut tool = SimilarVideos::new(params);
 

@@ -14,7 +14,7 @@ use czkawka_core::tools::similar_images::SimilarityPreset;
 use crate::flc;
 use crate::scanners::{
     scan_bad_extensions, scan_bad_names, scan_big_files, scan_broken_files, scan_duplicate_files, scan_empty_files, scan_empty_folders, scan_exif_remover, scan_same_music,
-    scan_similar_images, scan_temporary_files,
+    scan_similar_images, scan_similar_videos, scan_temporary_files,
 };
 
 #[derive(Debug, Clone)]
@@ -128,6 +128,10 @@ pub enum ScanRequest {
         dirs: Vec<PathBuf>,
         filters: CommonFilters,
     },
+    SimilarVideos {
+        dirs: Vec<PathBuf>,
+        filters: CommonFilters,
+    },
     Stop,
 }
 
@@ -154,6 +158,7 @@ pub enum ScanResult {
     SameMusic(Vec<FileItem>),
     BadNames(Vec<FileItem>),
     ExifRemover(Vec<FileItem>),
+    SimilarVideos(Vec<FileItem>),
     Finished(u32),
 }
 
@@ -327,6 +332,11 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 handler.on_result(ScanResult::ExifRemover(items));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
+            ScanRequest::SimilarVideos { dirs, filters } => {
+                let items = scan_similar_videos(dirs, &filters, stop_flag, &handler, scan_id);
+                handler.on_result(ScanResult::SimilarVideos(items));
+                handler.on_result(ScanResult::Finished(scan_id));
+            }
         }
     }
 }
@@ -371,7 +381,9 @@ fn stage_label(stage: CurrentStage) -> String {
         }
         CurrentStage::SameMusicComparingFingerprints => flc!("stage_comparing_fingerprints"),
         CurrentStage::ExifRemoverExtractingTags => flc!("stage_extracting_exif"),
-        CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails | CurrentStage::SimilarVideosAudioCreatingThumbnails => flc!("stage_creating_video_thumbnails"),
+        CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails | CurrentStage::SimilarVideosAudioCreatingThumbnails => {
+            flc!("stage_creating_video_thumbnails")
+        }
         CurrentStage::VideoOptimizerProcessingVideos => flc!("stage_processing_videos"),
         CurrentStage::DeletingFiles => flc!("stage_deleting"),
         CurrentStage::RenamingFiles => flc!("stage_renaming"),

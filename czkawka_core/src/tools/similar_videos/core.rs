@@ -232,13 +232,7 @@ impl SimilarVideos {
         } else {
             CurrentStage::SimilarVideosCreatingThumbnails
         };
-        let progress_handler = prepare_thread_handler_common(
-            progress_sender,
-            stage,
-            self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(),
-            self.get_test_type(),
-            0,
-        );
+        let progress_handler = prepare_thread_handler_common(progress_sender, stage, self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(), self.get_test_type(), 0);
 
         let Some(config_cache_path) = get_config_cache_path() else {
             return WorkContinueStatus::Continue;
@@ -417,7 +411,7 @@ impl SimilarVideos {
                     Err(_e) => {
                         // error!("Can't calculate audio fingerprint: {}", e);
                         Some(None)
-                    },
+                    }
                     Ok(None) => None,
                     Ok(Some((fingerprint, duration_seconds))) => {
                         audio_entry.fingerprint = fingerprint;
@@ -575,7 +569,6 @@ fn audio_entry_to_videos_entry(ae: &VideoAudioEntry) -> VideosEntry {
         thumbnail_path: None,
     }
 }
-
 
 pub fn get_similar_videos_audio_cache_file() -> String {
     format!("cache_similar_videos_audio_{CACHE_VERSION}.bin")

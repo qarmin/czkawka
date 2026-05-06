@@ -62,3 +62,10 @@ pub enum IntDataExifRemover {
     ExifTagCount = INT_BASE_COUNT,
 }
 pub const MAX_INT_DATA_EXIF_REMOVER: usize = IntDataExifRemover::ExifTagCount as usize + 1;
+
+#[repr(usize)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum StrDataSimilarVideos {
+    Duration = STR_BASE_COUNT,
+}
+pub const MAX_STR_DATA_SIMILAR_VIDEOS: usize = StrDataSimilarVideos::Duration as usize + 1;
