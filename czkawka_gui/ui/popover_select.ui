@@ -87,6 +87,62 @@
           </object>
         </child>
         <child>
+          <object class="GtkButton" id="buttons_popover_select_one_oldest_same_size">
+            <property name="focusable">1</property>
+            <property name="label" translatable="yes">Select one oldest (same size)</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_one_newest_same_size">
+            <property name="focusable">1</property>
+            <property name="label" translatable="yes">Select one newest (same size)</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_one_oldest_same_path">
+            <property name="focusable">1</property>
+            <property name="label" translatable="yes">Select one oldest (same path)</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_one_newest_same_path">
+            <property name="focusable">1</property>
+            <property name="label" translatable="yes">Select one newest (same path)</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_one_oldest_longest_path">
+            <property name="focusable">1</property>
+            <property name="label" translatable="yes">Select one oldest (longest path)</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_one_newest_longest_path">
+            <property name="focusable">1</property>
+            <property name="label" translatable="yes">Select one newest (longest path)</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_one_oldest_shortest_path">
+            <property name="focusable">1</property>
+            <property name="label" translatable="yes">Select one oldest (shortest path)</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="buttons_popover_select_one_newest_shortest_path">
+            <property name="focusable">1</property>
+            <property name="label" translatable="yes">Select one newest (shortest path)</property>
+            <property name="receives-default">1</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkSeparator" id="separator_select_date"/>
         </child>
         <child>

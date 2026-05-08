@@ -286,6 +286,263 @@ fn popover_one_oldest_newest(
     popover.popdown();
 }
 
+fn popover_one_oldest_newest_same_size(
+    popover: &gtk4::Popover,
+    sv: &SubView,
+    check_oldest: bool,
+) {
+    let model = sv.get_model();
+    let column_header = sv.nb_object.column_header.expect("OO/ON same size can't be used without headers");
+    let column_modification_as_secs = sv.nb_object.column_modification_as_secs.expect("OO/ON same size needs modification as secs column");
+    let column_size_as_bytes = sv.nb_object.column_size_as_bytes.expect("OO/ON same size needs size column");
+
+    if let Some(mut iter) = model.iter_first() {
+        let mut end: bool = false;
+        loop {
+            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+            let mut used_index: Option<usize> = None;
+            let mut current_index: usize = 0;
+            let mut modification_time_min_max: u64 = if check_oldest { u64::MAX } else { 0 };
+            let mut file_length: usize = 0;
+            let mut first_size: Option<u64> = None;
+            let mut sizes_match = true;
+
+            loop {
+                if model.get::<bool>(&iter, column_header) {
+                    if !model.iter_next(&mut iter) {
+                        end = true;
+                    }
+                    break;
+                }
+                tree_iter_array.push(iter);
+
+                let size = model.get::<u64>(&iter, column_size_as_bytes);
+                match first_size {
+                    None => first_size = Some(size),
+                    Some(s) if s != size => sizes_match = false,
+                    _ => {}
+                }
+
+                let modification = model.get::<u64>(&iter, column_modification_as_secs);
+                let current_file_length = model.get::<String>(&iter, sv.nb_object.column_name).len();
+                if check_oldest {
+                    if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
+                        file_length = current_file_length;
+                        modification_time_min_max = modification;
+                        used_index = Some(current_index);
+                    }
+                } else if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
+                    file_length = current_file_length;
+                    modification_time_min_max = modification;
+                    used_index = Some(current_index);
+                }
+                current_index += 1;
+
+                if !model.iter_next(&mut iter) {
+                    end = true;
+                    break;
+                }
+            }
+
+            if sizes_match {
+                let Some(used_index) = used_index else {
+                    if end {
+                        break;
+                    }
+                    continue;
+                };
+                for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                    if index == used_index {
+                        model.set_value(tree_iter, sv.nb_object.column_selection as u32, &true.to_value());
+                    } else {
+                        model.set_value(tree_iter, sv.nb_object.column_selection as u32, &false.to_value());
+                    }
+                }
+            }
+
+            if end {
+                break;
+            }
+        }
+    }
+
+    popover.popdown();
+}
+
+fn popover_one_oldest_newest_same_path(
+    popover: &gtk4::Popover,
+    sv: &SubView,
+    check_oldest: bool,
+) {
+    let model = sv.get_model();
+    let column_header = sv.nb_object.column_header.expect("OO/ON same path can't be used without headers");
+    let column_modification_as_secs = sv.nb_object.column_modification_as_secs.expect("OO/ON same path needs modification as secs column");
+
+    if let Some(mut iter) = model.iter_first() {
+        let mut end: bool = false;
+        loop {
+            let mut tree_iter_array: Vec<TreeIter> = Vec::new();
+            let mut used_index: Option<usize> = None;
+            let mut current_index: usize = 0;
+            let mut modification_time_min_max: u64 = if check_oldest { u64::MAX } else { 0 };
+            let mut file_length: usize = 0;
+            let mut first_path: Option<String> = None;
+            let mut paths_match = true;
+
+            loop {
+                if model.get::<bool>(&iter, column_header) {
+                    if !model.iter_next(&mut iter) {
+                        end = true;
+                    }
+                    break;
+                }
+                tree_iter_array.push(iter);
+
+                let path = model.get::<String>(&iter, sv.nb_object.column_path);
+                match &first_path {
+                    None => first_path = Some(path.clone()),
+                    Some(p) if *p != path => paths_match = false,
+                    _ => {}
+                }
+
+                let modification = model.get::<u64>(&iter, column_modification_as_secs);
+                let current_file_length = model.get::<String>(&iter, sv.nb_object.column_name).len();
+                if check_oldest {
+                    if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
+                        file_length = current_file_length;
+                        modification_time_min_max = modification;
+                        used_index = Some(current_index);
+                    }
+                } else if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
+                    file_length = current_file_length;
+                    modification_time_min_max = modification;
+                    used_index = Some(current_index);
+                }
+                current_index += 1;
+
+                if !model.iter_next(&mut iter) {
+                    end = true;
+                    break;
+                }
+            }
+
+            if paths_match {
+                let Some(used_index) = used_index else {
+                    if end {
+                        break;
+                    }
+                    continue;
+                };
+                for (index, tree_iter) in tree_iter_array.iter().enumerate() {
+                    if index == used_index {
+                        model.set_value(tree_iter, sv.nb_object.column_selection as u32, &true.to_value());
+                    } else {
+                        model.set_value(tree_iter, sv.nb_object.column_selection as u32, &false.to_value());
+                    }
+                }
+            }
+
+            if end {
+                break;
+            }
+        }
+    }
+
+    popover.popdown();
+}
+
+fn popover_one_longest_shortest_path_oldest_newest(
+    popover: &gtk4::Popover,
+    sv: &SubView,
+    check_longest: bool,
+    check_oldest: bool,
+) {
+    let model = sv.get_model();
+    let column_header = sv.nb_object.column_header.expect("path+date select can't be used without headers");
+    let column_modification_as_secs = sv.nb_object.column_modification_as_secs.expect("path+date select needs modification as secs column");
+
+    if let Some(mut iter) = model.iter_first() {
+        let mut end: bool = false;
+        loop {
+            let mut entries: Vec<(TreeIter, usize, u64, usize)> = Vec::new();
+
+            loop {
+                if model.get::<bool>(&iter, column_header) {
+                    if !model.iter_next(&mut iter) {
+                        end = true;
+                    }
+                    break;
+                }
+
+                let path_len = model.get::<String>(&iter, sv.nb_object.column_path).len();
+                let modification = model.get::<u64>(&iter, column_modification_as_secs);
+                let name_len = model.get::<String>(&iter, sv.nb_object.column_name).len();
+                entries.push((iter, path_len, modification, name_len));
+
+                if !model.iter_next(&mut iter) {
+                    end = true;
+                    break;
+                }
+            }
+
+            if entries.is_empty() {
+                if end {
+                    break;
+                }
+                continue;
+            }
+
+            let extreme_path_len = if check_longest {
+                entries.iter().map(|e| e.1).max().unwrap_or(0)
+            } else {
+                entries.iter().map(|e| e.1).min().unwrap_or(usize::MAX)
+            };
+
+            let mut best_index: Option<usize> = None;
+            let mut best_modification: u64 = if check_oldest { u64::MAX } else { 0 };
+            let mut best_name_len: usize = 0;
+
+            for (idx, (_, path_len, modification, name_len)) in entries.iter().enumerate() {
+                if *path_len != extreme_path_len {
+                    continue;
+                }
+                if check_oldest {
+                    if *modification < best_modification || (*modification == best_modification && *name_len > best_name_len) {
+                        best_modification = *modification;
+                        best_name_len = *name_len;
+                        best_index = Some(idx);
+                    }
+                } else if *modification > best_modification || (*modification == best_modification && *name_len > best_name_len) {
+                    best_modification = *modification;
+                    best_name_len = *name_len;
+                    best_index = Some(idx);
+                }
+            }
+
+            let Some(best_index) = best_index else {
+                if end {
+                    break;
+                }
+                continue;
+            };
+
+            for (idx, (tree_iter, _, _, _)) in entries.iter().enumerate() {
+                if idx == best_index {
+                    model.set_value(tree_iter, sv.nb_object.column_selection as u32, &true.to_value());
+                } else {
+                    model.set_value(tree_iter, sv.nb_object.column_selection as u32, &false.to_value());
+                }
+            }
+
+            if end {
+                break;
+            }
+        }
+    }
+
+    popover.popdown();
+}
+
 fn popover_custom_select_unselect(
     popover: &gtk4::Popover,
     window_main: &Window,
@@ -772,6 +1029,82 @@ pub(crate) fn connect_popover_select(gui_data: &GuiData) {
         let sv = common_tree_views.get_current_subview();
 
         popover_one_oldest_newest(&popover_select, sv, false);
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_oldest_longest_path = gui_data.popovers_select.buttons_popover_select_one_oldest_longest_path.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_oldest_longest_path.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+        popover_one_longest_shortest_path_oldest_newest(&popover_select, sv, true, true);
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_newest_longest_path = gui_data.popovers_select.buttons_popover_select_one_newest_longest_path.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_newest_longest_path.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+        popover_one_longest_shortest_path_oldest_newest(&popover_select, sv, true, false);
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_oldest_shortest_path = gui_data.popovers_select.buttons_popover_select_one_oldest_shortest_path.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_oldest_shortest_path.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+        popover_one_longest_shortest_path_oldest_newest(&popover_select, sv, false, true);
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_newest_shortest_path = gui_data.popovers_select.buttons_popover_select_one_newest_shortest_path.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_newest_shortest_path.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+        popover_one_longest_shortest_path_oldest_newest(&popover_select, sv, false, false);
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_oldest_same_path = gui_data.popovers_select.buttons_popover_select_one_oldest_same_path.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_oldest_same_path.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_one_oldest_newest_same_path(&popover_select, sv, true);
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_newest_same_path = gui_data.popovers_select.buttons_popover_select_one_newest_same_path.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_newest_same_path.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_one_oldest_newest_same_path(&popover_select, sv, false);
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_oldest_same_size = gui_data.popovers_select.buttons_popover_select_one_oldest_same_size.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_oldest_same_size.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_one_oldest_newest_same_size(&popover_select, sv, true);
+    });
+
+    let popover_select = gui_data.popovers_select.popover_select.clone();
+    let buttons_popover_select_one_newest_same_size = gui_data.popovers_select.buttons_popover_select_one_newest_same_size.clone();
+
+    let common_tree_views = gui_data.main_notebook.common_tree_views.clone();
+    buttons_popover_select_one_newest_same_size.connect_clicked(move |_| {
+        let sv = common_tree_views.get_current_subview();
+
+        popover_one_oldest_newest_same_size(&popover_select, sv, false);
     });
 
     let popover_select = gui_data.popovers_select.popover_select.clone();

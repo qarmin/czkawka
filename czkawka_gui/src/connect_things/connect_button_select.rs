@@ -25,6 +25,14 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, sv: &SubView) {
     let buttons_popover_select_all_except_newest = popovers_select.buttons_popover_select_all_except_newest.clone();
     let buttons_popover_select_one_oldest = popovers_select.buttons_popover_select_one_oldest.clone();
     let buttons_popover_select_one_newest = popovers_select.buttons_popover_select_one_newest.clone();
+    let buttons_popover_select_one_oldest_same_size = popovers_select.buttons_popover_select_one_oldest_same_size.clone();
+    let buttons_popover_select_one_newest_same_size = popovers_select.buttons_popover_select_one_newest_same_size.clone();
+    let buttons_popover_select_one_oldest_same_path = popovers_select.buttons_popover_select_one_oldest_same_path.clone();
+    let buttons_popover_select_one_newest_same_path = popovers_select.buttons_popover_select_one_newest_same_path.clone();
+    let buttons_popover_select_one_oldest_longest_path = popovers_select.buttons_popover_select_one_oldest_longest_path.clone();
+    let buttons_popover_select_one_newest_longest_path = popovers_select.buttons_popover_select_one_newest_longest_path.clone();
+    let buttons_popover_select_one_oldest_shortest_path = popovers_select.buttons_popover_select_one_oldest_shortest_path.clone();
+    let buttons_popover_select_one_newest_shortest_path = popovers_select.buttons_popover_select_one_newest_shortest_path.clone();
     let buttons_popover_select_custom = popovers_select.buttons_popover_select_custom.clone();
     let buttons_popover_unselect_custom = popovers_select.buttons_popover_unselect_custom.clone();
     let buttons_popover_select_all_images_except_biggest = popovers_select.buttons_popover_select_all_images_except_biggest.clone();
@@ -79,12 +87,28 @@ fn show_required_popovers(popovers_select: &GuiSelectPopovers, sv: &SubView) {
         buttons_popover_select_all_except_newest.set_visible(true);
         buttons_popover_select_one_oldest.set_visible(true);
         buttons_popover_select_one_newest.set_visible(true);
+        buttons_popover_select_one_oldest_same_size.set_visible(true);
+        buttons_popover_select_one_newest_same_size.set_visible(true);
+        buttons_popover_select_one_oldest_same_path.set_visible(true);
+        buttons_popover_select_one_newest_same_path.set_visible(true);
+        buttons_popover_select_one_oldest_longest_path.set_visible(true);
+        buttons_popover_select_one_newest_longest_path.set_visible(true);
+        buttons_popover_select_one_oldest_shortest_path.set_visible(true);
+        buttons_popover_select_one_newest_shortest_path.set_visible(true);
         separator_select_date.set_visible(true);
     } else {
         buttons_popover_select_all_except_oldest.set_visible(false);
         buttons_popover_select_all_except_newest.set_visible(false);
         buttons_popover_select_one_oldest.set_visible(false);
         buttons_popover_select_one_newest.set_visible(false);
+        buttons_popover_select_one_oldest_same_size.set_visible(false);
+        buttons_popover_select_one_newest_same_size.set_visible(false);
+        buttons_popover_select_one_oldest_same_path.set_visible(false);
+        buttons_popover_select_one_newest_same_path.set_visible(false);
+        buttons_popover_select_one_oldest_longest_path.set_visible(false);
+        buttons_popover_select_one_newest_longest_path.set_visible(false);
+        buttons_popover_select_one_oldest_shortest_path.set_visible(false);
+        buttons_popover_select_one_newest_shortest_path.set_visible(false);
         separator_select_date.set_visible(false);
     }
 

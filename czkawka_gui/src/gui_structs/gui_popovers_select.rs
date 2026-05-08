@@ -14,6 +14,14 @@ pub struct GuiSelectPopovers {
     pub buttons_popover_select_all_except_newest: gtk4::Button,
     pub buttons_popover_select_one_oldest: gtk4::Button,
     pub buttons_popover_select_one_newest: gtk4::Button,
+    pub buttons_popover_select_one_oldest_same_size: gtk4::Button,
+    pub buttons_popover_select_one_newest_same_size: gtk4::Button,
+    pub buttons_popover_select_one_oldest_same_path: gtk4::Button,
+    pub buttons_popover_select_one_newest_same_path: gtk4::Button,
+    pub buttons_popover_select_one_oldest_longest_path: gtk4::Button,
+    pub buttons_popover_select_one_newest_longest_path: gtk4::Button,
+    pub buttons_popover_select_one_oldest_shortest_path: gtk4::Button,
+    pub buttons_popover_select_one_newest_shortest_path: gtk4::Button,
     pub buttons_popover_select_custom: gtk4::Button,
     pub buttons_popover_unselect_custom: gtk4::Button,
     pub buttons_popover_select_all_images_except_biggest: gtk4::Button,
@@ -49,6 +57,14 @@ impl GuiSelectPopovers {
         let buttons_popover_select_all_except_newest: gtk4::Button = builder.object("buttons_popover_select_all_except_newest").expect("Cambalache");
         let buttons_popover_select_one_oldest: gtk4::Button = builder.object("buttons_popover_select_one_oldest").expect("Cambalache");
         let buttons_popover_select_one_newest: gtk4::Button = builder.object("buttons_popover_select_one_newest").expect("Cambalache");
+        let buttons_popover_select_one_oldest_same_size: gtk4::Button = builder.object("buttons_popover_select_one_oldest_same_size").expect("Cambalache");
+        let buttons_popover_select_one_newest_same_size: gtk4::Button = builder.object("buttons_popover_select_one_newest_same_size").expect("Cambalache");
+        let buttons_popover_select_one_oldest_same_path: gtk4::Button = builder.object("buttons_popover_select_one_oldest_same_path").expect("Cambalache");
+        let buttons_popover_select_one_newest_same_path: gtk4::Button = builder.object("buttons_popover_select_one_newest_same_path").expect("Cambalache");
+        let buttons_popover_select_one_oldest_longest_path: gtk4::Button = builder.object("buttons_popover_select_one_oldest_longest_path").expect("Cambalache");
+        let buttons_popover_select_one_newest_longest_path: gtk4::Button = builder.object("buttons_popover_select_one_newest_longest_path").expect("Cambalache");
+        let buttons_popover_select_one_oldest_shortest_path: gtk4::Button = builder.object("buttons_popover_select_one_oldest_shortest_path").expect("Cambalache");
+        let buttons_popover_select_one_newest_shortest_path: gtk4::Button = builder.object("buttons_popover_select_one_newest_shortest_path").expect("Cambalache");
         let buttons_popover_select_custom: gtk4::Button = builder.object("buttons_popover_select_custom").expect("Cambalache");
         let buttons_popover_unselect_custom: gtk4::Button = builder.object("buttons_popover_unselect_custom").expect("Cambalache");
         let buttons_popover_select_all_images_except_biggest: gtk4::Button = builder.object("buttons_popover_select_all_images_except_biggest").expect("Cambalache");
@@ -81,6 +97,14 @@ impl GuiSelectPopovers {
             buttons_popover_select_all_except_newest,
             buttons_popover_select_one_oldest,
             buttons_popover_select_one_newest,
+            buttons_popover_select_one_oldest_same_size,
+            buttons_popover_select_one_newest_same_size,
+            buttons_popover_select_one_oldest_same_path,
+            buttons_popover_select_one_newest_same_path,
+            buttons_popover_select_one_oldest_longest_path,
+            buttons_popover_select_one_newest_longest_path,
+            buttons_popover_select_one_oldest_shortest_path,
+            buttons_popover_select_one_newest_shortest_path,
             buttons_popover_select_custom,
             buttons_popover_unselect_custom,
             buttons_popover_select_all_images_except_biggest,
@@ -108,6 +132,14 @@ impl GuiSelectPopovers {
         self.buttons_popover_select_all_except_newest.set_label(&flg!("popover_select_all_except_newest"));
         self.buttons_popover_select_one_oldest.set_label(&flg!("popover_select_one_oldest"));
         self.buttons_popover_select_one_newest.set_label(&flg!("popover_select_one_newest"));
+        self.buttons_popover_select_one_oldest_same_size.set_label(&flg!("popover_select_one_oldest_same_size"));
+        self.buttons_popover_select_one_newest_same_size.set_label(&flg!("popover_select_one_newest_same_size"));
+        self.buttons_popover_select_one_oldest_same_path.set_label(&flg!("popover_select_one_oldest_same_path"));
+        self.buttons_popover_select_one_newest_same_path.set_label(&flg!("popover_select_one_newest_same_path"));
+        self.buttons_popover_select_one_oldest_longest_path.set_label(&flg!("popover_select_one_oldest_longest_path"));
+        self.buttons_popover_select_one_newest_longest_path.set_label(&flg!("popover_select_one_newest_longest_path"));
+        self.buttons_popover_select_one_oldest_shortest_path.set_label(&flg!("popover_select_one_oldest_shortest_path"));
+        self.buttons_popover_select_one_newest_shortest_path.set_label(&flg!("popover_select_one_newest_shortest_path"));
         self.buttons_popover_select_custom.set_label(&flg!("popover_select_custom"));
         self.buttons_popover_unselect_custom.set_label(&flg!("popover_unselect_custom"));
         self.buttons_popover_select_all_images_except_biggest
