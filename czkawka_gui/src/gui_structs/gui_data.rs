@@ -16,6 +16,7 @@ use crate::gui_structs::gui_compare_images::GuiCompareImages;
 use crate::gui_structs::gui_header::GuiHeader;
 use crate::gui_structs::gui_main_notebook::GuiMainNotebook;
 use crate::gui_structs::gui_popovers_select::GuiSelectPopovers;
+use crate::gui_structs::gui_select_dialog::GuiSelectDialog;
 use crate::gui_structs::gui_popovers_sort::GuiSortPopovers;
 use crate::gui_structs::gui_progress_dialog::GuiProgressDialog;
 use crate::gui_structs::gui_settings::GuiSettings;
@@ -54,6 +55,7 @@ pub struct GuiData {
     pub main_notebook: GuiMainNotebook,
     pub upper_notebook: GuiUpperNotebook,
     pub popovers_select: GuiSelectPopovers,
+    pub select_dialog: GuiSelectDialog,
     pub popovers_sort: GuiSortPopovers,
     pub bottom_buttons: GuiBottomButtons,
     pub progress_window: GuiProgressDialog,
@@ -101,7 +103,8 @@ impl GuiData {
         let upper_notebook = GuiUpperNotebook::create_from_builder(&builder);
         let popovers_select = GuiSelectPopovers::create_from_builder();
         let popovers_sort = GuiSortPopovers::create_from_builder();
-        let bottom_buttons = GuiBottomButtons::create_from_builder(&builder, &popovers_select.popover_select, &popovers_sort.popover_sort);
+        let bottom_buttons = GuiBottomButtons::create_from_builder(&builder, &popovers_sort.popover_sort);
+        let select_dialog = GuiSelectDialog::create(&window_main);
         let progress_window = GuiProgressDialog::create_from_builder(&window_main);
         let about = GuiAbout::create_from_builder(&window_main, &pixbuf);
         let header = GuiHeader::create_from_builder(&builder);
@@ -162,6 +165,7 @@ impl GuiData {
             main_notebook,
             upper_notebook,
             popovers_select,
+            select_dialog,
             popovers_sort,
             bottom_buttons,
             progress_window,
@@ -191,6 +195,7 @@ impl GuiData {
         self.main_notebook.update_language();
         self.upper_notebook.update_language();
         self.popovers_select.update_language();
+        self.select_dialog.update_language();
         self.popovers_sort.update_language();
         self.bottom_buttons.update_language();
         self.progress_window.update_language();

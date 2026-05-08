@@ -23,6 +23,7 @@ pub struct NotebookObject {
     pub column_size: Option<i32>,
     pub column_size_as_bytes: Option<i32>,
     pub column_modification_as_secs: Option<i32>,
+    pub column_color: Option<i32>,
     pub columns_types: &'static [Type],
     pub bottom_buttons: &'static [BottomButtonsEnum],
     pub tree_view_name: &'static str,
@@ -50,6 +51,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: Some(ColumnsDuplicates::Size as i32), // Useless with duplicates by hash or size, but needed by sorting by name
         column_size_as_bytes: Some(ColumnsDuplicates::SizeAsBytes as i32),
         column_modification_as_secs: Some(ColumnsDuplicates::ModificationAsSecs as i32),
+        column_color: Some(ColumnsDuplicates::Color as i32),
         columns_types: &[
             Type::BOOL,   // ActivatableSelectButton
             Type::BOOL,   // SelectionButton
@@ -87,6 +89,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: None,
         column_size_as_bytes: None,
         column_modification_as_secs: None,
+        column_color: None,
         columns_types: &[
             Type::BOOL,   // SelectionButton
             Type::STRING, // Name
@@ -110,6 +113,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: None,
         column_size_as_bytes: None,
         column_modification_as_secs: None,
+        column_color: None,
         columns_types: &[
             Type::BOOL,   // SelectionButton
             Type::STRING, // Size
@@ -135,6 +139,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: None,
         column_size_as_bytes: None,
         column_modification_as_secs: None,
+        column_color: None,
         columns_types: &[
             Type::BOOL,   // SelectionButton
             Type::STRING, // Name
@@ -158,6 +163,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: None,
         column_size_as_bytes: None,
         column_modification_as_secs: None,
+        column_color: None,
         columns_types: &[
             Type::BOOL,   // SelectionButton
             Type::STRING, // Name
@@ -188,6 +194,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: Some(ColumnsSimilarImages::Size as i32),
         column_size_as_bytes: Some(ColumnsSimilarImages::SizeAsBytes as i32),
         column_modification_as_secs: Some(ColumnsSimilarImages::ModificationAsSecs as i32),
+        column_color: Some(ColumnsSimilarImages::Color as i32),
         columns_types: &[
             Type::BOOL,   // ActivatableSelectButton
             Type::BOOL,   // SelectionButton
@@ -235,6 +242,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: Some(ColumnsSimilarVideos::Size as i32),
         column_size_as_bytes: Some(ColumnsSimilarVideos::SizeAsBytes as i32),
         column_modification_as_secs: Some(ColumnsSimilarVideos::ModificationAsSecs as i32),
+        column_color: Some(ColumnsSimilarVideos::Color as i32),
         columns_types: &[
             Type::BOOL,   // ActivatableSelectButton
             Type::BOOL,   // SelectionButton
@@ -284,6 +292,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: None,
         column_size_as_bytes: Some(ColumnsSameMusic::SizeAsBytes as i32),
         column_modification_as_secs: Some(ColumnsSameMusic::ModificationAsSecs as i32),
+        column_color: Some(ColumnsSameMusic::Color as i32),
         columns_types: &[
             Type::BOOL,   // ActivatableSelectButton
             Type::BOOL,   // SelectionButton
@@ -328,6 +337,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: None,
         column_size_as_bytes: None,
         column_modification_as_secs: None,
+        column_color: None,
         columns_types: &[
             Type::BOOL,   // SelectionButton
             Type::STRING, // Name
@@ -353,6 +363,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: None,
         column_size_as_bytes: None,
         column_modification_as_secs: None,
+        column_color: None,
         columns_types: &[
             Type::BOOL,   // SelectionButton
             Type::STRING, // Name
@@ -377,6 +388,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         column_size: None,
         column_size_as_bytes: None,
         column_modification_as_secs: None,
+        column_color: None,
         columns_types: &[
             Type::BOOL,   // SelectionButton
             Type::STRING, // Name

@@ -13,7 +13,7 @@ use crate::{
 #[derive(Clone)]
 pub struct GuiBottomButtons {
     pub buttons_search: gtk4::Button,
-    pub buttons_select: gtk4::MenuButton,
+    pub buttons_select: gtk4::Button,
     pub buttons_delete: gtk4::Button,
     pub buttons_save: gtk4::Button,
     pub buttons_symlink: gtk4::Button,
@@ -30,14 +30,13 @@ pub struct GuiBottomButtons {
     pub buttons_names: [BottomButtonsEnum; 9],
     pub buttons_array: [Widget; 9],
 
-    pub gc_buttons_select: GestureClick,
     pub gc_buttons_sort: GestureClick,
 }
 
 impl GuiBottomButtons {
-    pub(crate) fn create_from_builder(builder: &gtk4::Builder, popover_select: &gtk4::Popover, popover_sort: &gtk4::Popover) -> Self {
+    pub(crate) fn create_from_builder(builder: &gtk4::Builder, popover_sort: &gtk4::Popover) -> Self {
         let buttons_search: gtk4::Button = builder.object("buttons_search").expect("Cambalache");
-        let buttons_select: gtk4::MenuButton = builder.object("buttons_select").expect("Cambalache");
+        let buttons_select: gtk4::Button = builder.object("buttons_select").expect("Cambalache");
         let buttons_delete: gtk4::Button = builder.object("buttons_delete").expect("Cambalache");
         let buttons_save: gtk4::Button = builder.object("buttons_save").expect("Cambalache");
         let buttons_symlink: gtk4::Button = builder.object("buttons_symlink").expect("Cambalache");
@@ -52,10 +51,8 @@ impl GuiBottomButtons {
         let label_buttons_select: gtk4::Label = builder.object("label_buttons_select").expect("Cambalache");
         let label_buttons_sort: gtk4::Label = builder.object("label_buttons_sort").expect("Cambalache");
 
-        let gc_buttons_select: GestureClick = GestureClick::new();
         let gc_buttons_sort: GestureClick = GestureClick::new();
 
-        buttons_select.add_controller(gc_buttons_select.clone());
         buttons_sort.add_controller(gc_buttons_sort.clone());
 
         set_icon_of_button(&buttons_search, CZK_ICON_SEARCH);
@@ -93,7 +90,6 @@ impl GuiBottomButtons {
             buttons_sort.clone().upcast::<Widget>(),
         ];
 
-        buttons_select.set_popover(Some(popover_select));
         buttons_sort.set_popover(Some(popover_sort));
 
         #[cfg(target_family = "windows")]
@@ -115,7 +111,6 @@ impl GuiBottomButtons {
             label_buttons_sort,
             buttons_names,
             buttons_array,
-            gc_buttons_select,
             gc_buttons_sort,
         }
     }

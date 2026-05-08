@@ -21,6 +21,7 @@ pub type SharedState<T> = Rc<RefCell<Option<T>>>;
 pub const MAIN_ROW_COLOR: &str = "#222222";
 pub const HEADER_ROW_COLOR: &str = "#111111";
 pub const TEXT_COLOR: &str = "#ffffff";
+pub const SAME_SIZE_ROW_COLOR: &str = "#1e3a1e";
 
 pub(crate) fn get_path_buf_from_vector_of_strings(vec_string: &[String]) -> Vec<PathBuf> {
     vec_string.iter().map(PathBuf::from).collect()

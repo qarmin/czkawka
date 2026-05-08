@@ -43,7 +43,7 @@ use log::info;
 
 use crate::compute_results::connect_compute_results;
 use crate::connect_things::connect_button_sort::connect_button_sort;
-use crate::connect_things::connect_popovers_select::connect_popover_select;
+use crate::connect_things::connect_select_dialog::connect_select_dialog;
 use crate::connect_things::connect_popovers_sort::connect_popover_sort;
 use crate::connect_things::connect_same_music_mode_changed::connect_same_music_change_mode;
 use crate::initialize_gui::initialize_gui;
@@ -153,7 +153,7 @@ fn build_ui(application: &Application, cli_args: Option<&CliResult>, needs_to_op
     connect_duplicate_combo_box(&gui_data);
     connect_notebook_tabs(&gui_data);
     connect_selection_of_directories(&gui_data);
-    connect_popover_select(&gui_data);
+    connect_select_dialog(&gui_data);
     connect_popover_sort(&gui_data);
     connect_compute_results(&gui_data, result_receiver);
     connect_progress_window(&gui_data, progress_receiver);

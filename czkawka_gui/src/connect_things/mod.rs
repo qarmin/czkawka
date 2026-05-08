@@ -14,6 +14,7 @@ pub mod connect_header_buttons;
 pub mod connect_krokiet_info_dialog;
 pub mod connect_notebook_tabs;
 pub mod connect_popovers_select;
+pub mod connect_select_dialog;
 pub mod connect_popovers_sort;
 pub mod connect_progress_window;
 pub mod connect_same_music_mode_changed;

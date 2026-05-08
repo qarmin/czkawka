@@ -7,6 +7,7 @@ pub mod gui_data;
 mod gui_header;
 pub mod gui_main_notebook;
 pub mod gui_popovers_select;
+pub mod gui_select_dialog;
 pub mod gui_popovers_sort;
 mod gui_progress_dialog;
 pub mod gui_settings;
