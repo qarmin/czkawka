@@ -287,6 +287,55 @@ where
     (text_messages, None)
 }
 
+pub(crate) fn load_and_split_cache_generalized_by_size<C: CommonData, K>(
+    cache_file_name: &str,
+    use_cache: bool,
+    items_to_check: BTreeMap<u64, Vec<K>>,
+    common_data: &mut C,
+) -> (BTreeMap<u64, Vec<K>>, BTreeMap<u64, Vec<K>>, BTreeMap<u64, Vec<K>>)
+where
+    for<'a> K: Deserialize<'a> + ResultEntry + Sized + Send + Sync + Clone,
+{
+    if !use_cache {
+        return (Default::default(), Default::default(), items_to_check);
+    }
+
+    let (messages, loaded_items) = load_cache_from_file_generalized_by_size::<K>(cache_file_name, common_data.get_delete_outdated_cache(), &items_to_check);
+    common_data.get_text_messages_mut().extend_with_another_messages(messages);
+    let loaded_hash_map = loaded_items.unwrap_or_default();
+
+    let mut records_already_cached: BTreeMap<u64, Vec<K>> = Default::default();
+    let mut non_cached_files_to_check: BTreeMap<u64, Vec<K>> = Default::default();
+
+    for (size, vec_file_entry) in items_to_check {
+        if let Some(cached_vec_file_entry) = loaded_hash_map.get(&size) {
+            let mut cached_path_entries: IndexMap<&Path, K> = IndexMap::new();
+            for file_entry in cached_vec_file_entry {
+                cached_path_entries.insert(file_entry.get_path(), file_entry.clone());
+            }
+            for file_entry in vec_file_entry {
+                if let Some(cached_file_entry) = cached_path_entries.swap_remove(file_entry.get_path()) {
+                    records_already_cached.entry(size).or_default().push(cached_file_entry);
+                } else {
+                    non_cached_files_to_check.entry(size).or_default().push(file_entry);
+                }
+            }
+        } else {
+            non_cached_files_to_check.entry(size).or_default().extend(vec_file_entry);
+        }
+    }
+
+    debug!(
+        "load_and_split_cache_generalized_by_size - {}({}) non cached, {}({}) already cached",
+        non_cached_files_to_check.len(),
+        format_size(non_cached_files_to_check.values().map(|v| v.iter().map(|e| e.get_size()).sum::<u64>()).sum::<u64>(), BINARY),
+        records_already_cached.len(),
+        format_size(records_already_cached.values().map(|v| v.iter().map(|e| e.get_size()).sum::<u64>()).sum::<u64>(), BINARY),
+    );
+
+    (loaded_hash_map, records_already_cached, non_cached_files_to_check)
+}
+
 pub(crate) fn load_and_split_cache_generalized_by_path<C: CommonData, K>(
     cache_file_name: &str,
     mut items_to_check: BTreeMap<String, K>,
