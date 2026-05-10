@@ -244,8 +244,6 @@ impl Directories {
     }
 
     pub(crate) fn is_in_referenced_directory(&self, path: &Path) -> bool {
-        self.reference_directories.iter().any(|e| path.starts_with(e));
-        self.reference_files.iter().any(|e| e.as_path() == path);
         self.reference_directories.iter().any(|e| path.starts_with(e)) || self.reference_files.iter().any(|e| e.as_path() == path)
     }
 
