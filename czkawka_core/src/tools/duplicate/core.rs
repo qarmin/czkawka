@@ -87,20 +87,8 @@ impl DuplicateFinder {
 
                 // Reference - only use in size, because later hash will be counted differently
                 if self.common_data.use_reference_folders {
-                    let vec = mem::take(&mut self.files_with_identical_names)
-                        .into_values()
-                        .filter_map(|vec_file_entry| {
-                            let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry
-                                .into_iter()
-                                .partition(|e| self.common_data.directories.is_in_referenced_directory(e.get_path()));
-
-                            if normal_files.is_empty() {
-                                None
-                            } else {
-                                files_from_referenced_folders.pop().map(|file| (file, normal_files))
-                            }
-                        })
-                        .collect::<Vec<(DuplicateEntry, Vec<DuplicateEntry>)>>();
+                    let vec = self.common_data.directories
+                        .filter_reference_folders(mem::take(&mut self.files_with_identical_names).into_values().collect());
                     for (fe, vec_fe) in vec {
                         self.files_with_identical_names_referenced.insert(fe.path.to_string_lossy().to_string(), (fe, vec_fe));
                     }
@@ -179,20 +167,8 @@ impl DuplicateFinder {
 
                 // Reference - only use in size, because later hash will be counted differently
                 if self.common_data.use_reference_folders {
-                    let vec = mem::take(&mut self.files_with_identical_size_names)
-                        .into_values()
-                        .filter_map(|vec_file_entry| {
-                            let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry
-                                .into_iter()
-                                .partition(|e| self.common_data.directories.is_in_referenced_directory(e.get_path()));
-
-                            if normal_files.is_empty() {
-                                None
-                            } else {
-                                files_from_referenced_folders.pop().map(|file| (file, normal_files))
-                            }
-                        })
-                        .collect::<Vec<(DuplicateEntry, Vec<DuplicateEntry>)>>();
+                    let vec = self.common_data.directories
+                        .filter_reference_folders(mem::take(&mut self.files_with_identical_size_names).into_values().collect());
                     for (fe, vec_fe) in vec {
                         self.files_with_identical_size_names_referenced
                             .insert((fe.size, fe.path.to_string_lossy().to_string()), (fe, vec_fe));
@@ -327,20 +303,8 @@ impl DuplicateFinder {
     #[fun_time(message = "filter_reference_folders_by_size", level = "debug")]
     fn filter_reference_folders_by_size(&mut self) {
         if self.common_data.use_reference_folders && self.get_params().check_method == CheckingMethod::Size {
-            let vec = mem::take(&mut self.files_with_identical_size)
-                .into_values()
-                .filter_map(|vec_file_entry| {
-                    let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry
-                        .into_iter()
-                        .partition(|e| self.common_data.directories.is_in_referenced_directory(e.get_path()));
-
-                    if normal_files.is_empty() {
-                        None
-                    } else {
-                        files_from_referenced_folders.pop().map(|file| (file, normal_files))
-                    }
-                })
-                .collect::<Vec<(DuplicateEntry, Vec<DuplicateEntry>)>>();
+            let vec = self.common_data.directories
+                .filter_reference_folders(mem::take(&mut self.files_with_identical_size).into_values().collect());
             for (fe, vec_fe) in vec {
                 self.files_with_identical_size_referenced.insert(fe.size, (fe, vec_fe));
             }

@@ -19,7 +19,6 @@ use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
-use crate::common::traits::ResultEntry;
 use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, VideoMetadata, generate_thumbnail};
 use crate::flc;
 use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideoAudioEntry, VideosEntry};
@@ -352,20 +351,8 @@ impl SimilarVideos {
     #[fun_time(message = "remove_from_reference_folders", level = "debug")]
     fn remove_from_reference_folders(&mut self) {
         if self.common_data.use_reference_folders {
-            self.similar_referenced_vectors = mem::take(&mut self.similar_vectors)
-                .into_iter()
-                .filter_map(|vec_file_entry| {
-                    let (mut files_from_referenced_folders, normal_files): (Vec<_>, Vec<_>) = vec_file_entry
-                        .into_iter()
-                        .partition(|e| self.common_data.directories.is_in_referenced_directory(e.get_path()));
-
-                    if normal_files.is_empty() {
-                        None
-                    } else {
-                        files_from_referenced_folders.pop().map(|file| (file, normal_files))
-                    }
-                })
-                .collect::<Vec<(VideosEntry, Vec<VideosEntry>)>>();
+            self.similar_referenced_vectors = self.common_data.directories
+                .filter_reference_folders(mem::take(&mut self.similar_vectors));
         }
     }
     #[fun_time(message = "calculate_audio_fingerprints", level = "debug")]
