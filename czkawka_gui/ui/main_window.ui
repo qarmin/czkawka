@@ -1201,6 +1201,17 @@
           <object class="GtkBox">
             <property name="spacing">5</property>
             <child>
+              <object class="GtkButton" id="button_krokiet">
+                <property name="focusable">1</property>
+                <property name="receives-default">1</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">image-missing</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
               <object class="GtkButton" id="button_settings">
                 <property name="focusable">1</property>
                 <property name="receives-default">1</property>

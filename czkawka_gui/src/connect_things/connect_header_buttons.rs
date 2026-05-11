@@ -1,5 +1,6 @@
 use gtk4::prelude::*;
 
+use crate::connect_things::connect_krokiet_promo_dialog::show_krokiet_promo_dialog;
 use crate::gui_structs::gui_data::GuiData;
 
 pub(crate) fn connect_button_about(gui_data: &GuiData) {
@@ -13,5 +14,11 @@ pub(crate) fn connect_button_about(gui_data: &GuiData) {
             dialog.set_visible(false);
             glib::Propagation::Stop
         });
+    });
+
+    let window_main = gui_data.window_main.clone();
+    let button_krokiet = gui_data.header.button_krokiet.clone();
+    button_krokiet.connect_clicked(move |_| {
+        show_krokiet_promo_dialog(&window_main);
     });
 }
