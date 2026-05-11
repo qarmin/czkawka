@@ -55,7 +55,19 @@ pub fn all_advanced_test_cases() -> Vec<AdvancedTestCase> {
         // -s NAME mode: same file name, different content → treated as "duplicates" by name
         AdvancedTestCase { name: "dup_name_mode_same_name",    run: test_dup_name_mode_same_name },
 
-        //  broken-files detection 
+        //  Reference + hardlink per checking method
+        AdvancedTestCase { name: "ref_hardlink_hash",      run: test_ref_hardlink_hash },
+        AdvancedTestCase { name: "ref_hardlink_size",      run: test_ref_hardlink_size },
+        AdvancedTestCase { name: "ref_hardlink_name",      run: test_ref_hardlink_name },
+        AdvancedTestCase { name: "ref_hardlink_size_name", run: test_ref_hardlink_size_name },
+
+        //  Reference + delete per checking method
+        AdvancedTestCase { name: "ref_delete_hash",      run: test_ref_delete_hash },
+        AdvancedTestCase { name: "ref_delete_size",      run: test_ref_delete_size },
+        AdvancedTestCase { name: "ref_delete_name",      run: test_ref_delete_name },
+        AdvancedTestCase { name: "ref_delete_size_name", run: test_ref_delete_size_name },
+
+        //  broken-files detection
         // A file with a .zip extension but garbage content must be detected
         AdvancedTestCase { name: "broken_invalid_archive",     run: test_broken_invalid_archive },
         // A structurally valid image that is completely truncated must be detected
@@ -654,7 +666,203 @@ fn test_dup_name_mode_same_name(dir: &str) -> Result<(), String> {
     ensure_missing(&file_b)    // newer → deleted
 }
 
-//  broken-file detection 
+//  Reference + hardlink per checking method
+//
+// Each test creates ref/file + scan/copy with the same content and verifies
+// that `-D HARD` replaces the scan copy with a hardlink to the reference file.
+
+/// HASH mode (default): same content → same hash → hardlink
+fn test_ref_hardlink_hash(dir: &str) -> Result<(), String> {
+    let content = make_content(30);
+    let ref_file = format!("{dir}/ref/file.bin");
+    let scan_dup = format!("{dir}/scan/dup.bin");
+    write_file(&ref_file, &content)?;
+    write_file(&scan_dup, &content)?;
+
+    let ref_dir  = format!("{dir}/ref");
+    let scan_dir = format!("{dir}/scan");
+    let czkawka  = crate::CZKAWKA_PATH.get().as_str();
+    crate::run_with_good_status(
+        &[czkawka, "dup", "-s", "HASH", "-r", &ref_dir, "-d", &scan_dir, "-H", "-D", "HARD", "-W"],
+        false,
+    )?;
+
+    ensure_exists(&ref_file)?;
+    ensure_exists(&scan_dup)?;
+    check_same_inode(&ref_file, &scan_dup)?;
+    check_nlink(&ref_file, 2)
+}
+
+/// SIZE mode: same size → hardlink (content may differ but we use identical content
+/// to also ensure hardlink actually works)
+fn test_ref_hardlink_size(dir: &str) -> Result<(), String> {
+    let content = make_content(31);
+    let ref_file = format!("{dir}/ref/file.bin");
+    let scan_dup = format!("{dir}/scan/dup.bin");
+    write_file(&ref_file, &content)?;
+    write_file(&scan_dup, &content)?;
+
+    let ref_dir  = format!("{dir}/ref");
+    let scan_dir = format!("{dir}/scan");
+    let czkawka  = crate::CZKAWKA_PATH.get().as_str();
+    crate::run_with_good_status(
+        &[czkawka, "dup", "-s", "SIZE", "-r", &ref_dir, "-d", &scan_dir, "-H", "-D", "HARD", "-W"],
+        false,
+    )?;
+
+    ensure_exists(&ref_file)?;
+    ensure_exists(&scan_dup)?;
+    check_same_inode(&ref_file, &scan_dup)?;
+    check_nlink(&ref_file, 2)
+}
+
+/// NAME mode: same filename → hardlink.  Files live in different directories
+/// so they can share a name.  Content differs (NAME doesn't care about content).
+fn test_ref_hardlink_name(dir: &str) -> Result<(), String> {
+    let content_a = make_content(32);
+    let content_b = make_content(33);
+    let ref_file = format!("{dir}/ref/shared.bin");
+    let scan_dup = format!("{dir}/scan/shared.bin");
+    write_file(&ref_file, &content_a)?;
+    write_file(&scan_dup, &content_b)?;
+
+    let ref_dir  = format!("{dir}/ref");
+    let scan_dir = format!("{dir}/scan");
+    let czkawka  = crate::CZKAWKA_PATH.get().as_str();
+    crate::run_with_good_status(
+        &[czkawka, "dup", "-s", "NAME", "-r", &ref_dir, "-d", &scan_dir, "-H", "-D", "HARD", "-W"],
+        false,
+    )?;
+
+    ensure_exists(&ref_file)?;
+    ensure_exists(&scan_dup)?;
+    check_same_inode(&ref_file, &scan_dup)?;
+    check_nlink(&ref_file, 2)
+}
+
+/// SIZE_NAME mode: same size + same filename → hardlink
+fn test_ref_hardlink_size_name(dir: &str) -> Result<(), String> {
+    let content = make_content(34);
+    let ref_file = format!("{dir}/ref/shared.bin");
+    let scan_dup = format!("{dir}/scan/shared.bin");
+    write_file(&ref_file, &content)?;
+    write_file(&scan_dup, &content)?;
+
+    let ref_dir  = format!("{dir}/ref");
+    let scan_dir = format!("{dir}/scan");
+    let czkawka  = crate::CZKAWKA_PATH.get().as_str();
+    crate::run_with_good_status(
+        &[czkawka, "dup", "-s", "SIZE_NAME", "-r", &ref_dir, "-d", &scan_dir, "-H", "-D", "HARD", "-W"],
+        false,
+    )?;
+
+    ensure_exists(&ref_file)?;
+    ensure_exists(&scan_dup)?;
+    check_same_inode(&ref_file, &scan_dup)?;
+    check_nlink(&ref_file, 2)
+}
+
+//  Reference + delete per checking method
+//
+// Each test creates ref/master + scan/copy1 + scan/copy2 and verifies that
+// `-D AEO` with a reference directory deletes ALL non-reference copies
+// while keeping the reference file.
+
+fn test_ref_delete_hash(dir: &str) -> Result<(), String> {
+    let content  = make_content(35);
+    let ref_file = format!("{dir}/ref/master.bin");
+    let scan_c1  = format!("{dir}/scan/copy1.bin");
+    let scan_c2  = format!("{dir}/scan/copy2.bin");
+    write_file(&ref_file, &content)?;
+    write_file(&scan_c1,  &content)?;
+    write_file(&scan_c2,  &content)?;
+
+    let ref_dir  = format!("{dir}/ref");
+    let scan_dir = format!("{dir}/scan");
+    let czkawka  = crate::CZKAWKA_PATH.get().as_str();
+    crate::run_with_good_status(
+        &[czkawka, "dup", "-s", "HASH", "-r", &ref_dir, "-d", &scan_dir, "-H", "-D", "AEO", "-W"],
+        false,
+    )?;
+
+    ensure_exists(&ref_file)?;
+    ensure_missing(&scan_c1)?;
+    ensure_missing(&scan_c2)
+}
+
+fn test_ref_delete_size(dir: &str) -> Result<(), String> {
+    let content  = make_content(36);
+    let ref_file = format!("{dir}/ref/master.bin");
+    let scan_c1  = format!("{dir}/scan/copy1.bin");
+    let scan_c2  = format!("{dir}/scan/copy2.bin");
+    write_file(&ref_file, &content)?;
+    write_file(&scan_c1,  &content)?;
+    write_file(&scan_c2,  &content)?;
+
+    let ref_dir  = format!("{dir}/ref");
+    let scan_dir = format!("{dir}/scan");
+    let czkawka  = crate::CZKAWKA_PATH.get().as_str();
+    crate::run_with_good_status(
+        &[czkawka, "dup", "-s", "SIZE", "-r", &ref_dir, "-d", &scan_dir, "-H", "-D", "AEO", "-W"],
+        false,
+    )?;
+
+    ensure_exists(&ref_file)?;
+    ensure_missing(&scan_c1)?;
+    ensure_missing(&scan_c2)
+}
+
+fn test_ref_delete_name(dir: &str) -> Result<(), String> {
+    let content_a = make_content(37);
+    let content_b = make_content(38);
+    let content_c = make_content(39);
+    // NAME mode groups by filename; all three share the name "shared.bin"
+    let ref_file = format!("{dir}/ref/shared.bin");
+    let scan_c1  = format!("{dir}/scan1/shared.bin");
+    let scan_c2  = format!("{dir}/scan2/shared.bin");
+    write_file(&ref_file, &content_a)?;
+    write_file(&scan_c1,  &content_b)?;
+    write_file(&scan_c2,  &content_c)?;
+
+    let ref_dir  = format!("{dir}/ref");
+    let scan1    = format!("{dir}/scan1");
+    let scan2    = format!("{dir}/scan2");
+    let czkawka  = crate::CZKAWKA_PATH.get().as_str();
+    crate::run_with_good_status(
+        &[czkawka, "dup", "-s", "NAME", "-r", &ref_dir, "-d", &scan1, "-d", &scan2, "-H", "-D", "AEO", "-W"],
+        false,
+    )?;
+
+    ensure_exists(&ref_file)?;
+    ensure_missing(&scan_c1)?;
+    ensure_missing(&scan_c2)
+}
+
+fn test_ref_delete_size_name(dir: &str) -> Result<(), String> {
+    let content  = make_content(40);
+    // SIZE_NAME groups by (size, name); all three share the same size+name
+    let ref_file = format!("{dir}/ref/shared.bin");
+    let scan_c1  = format!("{dir}/scan1/shared.bin");
+    let scan_c2  = format!("{dir}/scan2/shared.bin");
+    write_file(&ref_file, &content)?;
+    write_file(&scan_c1,  &content)?;
+    write_file(&scan_c2,  &content)?;
+
+    let ref_dir  = format!("{dir}/ref");
+    let scan1    = format!("{dir}/scan1");
+    let scan2    = format!("{dir}/scan2");
+    let czkawka  = crate::CZKAWKA_PATH.get().as_str();
+    crate::run_with_good_status(
+        &[czkawka, "dup", "-s", "SIZE_NAME", "-r", &ref_dir, "-d", &scan1, "-d", &scan2, "-H", "-D", "AEO", "-W"],
+        false,
+    )?;
+
+    ensure_exists(&ref_file)?;
+    ensure_missing(&scan_c1)?;
+    ensure_missing(&scan_c2)
+}
+
+//  broken-file detection
 
 /// A file with a .zip extension but garbage content must be detected by
 /// `broken -c ARCHIVE` and deleted with `-D`.

@@ -356,15 +356,15 @@ header_krokiet_button_tooltip = Try Krokiet - the new and improved version!
 # Krokiet promo dialog
 krokiet_promo_title = Meet Krokiet!
 krokiet_promo_message =
-        Hey there, brave Czkawka user! 🦄
+        Hello there, brave Czkawka user!
 
-        Did you know there's a shiny new version of this app? Meet Krokiet — faster, lighter, and way more handsome (if apps can be handsome).
+        The Force is clearly with you, but Krokiet is not - a newer, faster, lighter, and significantly more handsome (assuming apps can actually be handsome) duplicate cleaner.
 
-        Krokiet has everything you love about Czkawka, plus a bunch of cool new features, fewer dependencies, and works on more platforms (yes, even mobile!).
+        Krokiet includes everything people liked about Czkawka. It is completely free, open source, has a unique and simple UI (both praised and hated by many), introduces a lot of new features, uses fewer dependencies, and works far more reliably across different platforms.
 
-        Czkawka GTK served us well, but it's time for a fresh start. Think of it like upgrading from a bicycle to a unicorn — same direction, but a LOT more magical.
+        And if you somehow missed it, there is already an even newer app than Krokiet - Cedinia, designed primarily for Android devices and touchscreen usage.
 
-        Give it a try — your duplicate files won't know what hit them!
+        Czkawka GTK served us well, but its watch has ended.
 
 # Settings
 ## General

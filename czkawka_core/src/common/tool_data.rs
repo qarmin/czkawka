@@ -493,7 +493,7 @@ pub trait CommonData {
                     let res = files
                         .iter()
                         .map(|file| {
-                            let err = match make_hard_link(file.get_path(), original.get_path()) {
+                            let err = match make_hard_link(original.get_path(), file.get_path()) {
                                 Ok(()) => None,
                                 Err(err) => Some(format!(
                                     "Failed to hardlink \"{}\" to \"{}\": {err}",
