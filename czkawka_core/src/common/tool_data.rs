@@ -337,8 +337,16 @@ pub trait CommonData {
             let res = files_to_process
                 .into_iter()
                 .map(|values| {
-                    let mut all_values = sort_items(values);
-                    let original = all_values.remove(0);
+                    let mut all_values = values;
+                    let original;
+                    if self.get_use_reference_folders() {
+                        // The reference should be the first item.
+                        original = all_values.remove(0);
+                        all_values = sort_items(all_values);
+                    } else {
+                        all_values = sort_items(all_values);
+                        original = all_values.remove(0);
+                    }
                     (original, all_values)
                 })
                 .collect::<Vec<_>>();
@@ -347,8 +355,25 @@ pub trait CommonData {
             let res = files_to_process
                 .into_iter()
                 .flat_map(|values| {
-                    let len = values.len();
-                    let mut all_values = sort_items(values);
+                    let mut all_values = values;
+                    if self.get_use_reference_folders() {
+                        match all_values.len() {
+                            0 | 1 => unreachable!("Using reference folders you should not get less than 2 items"),
+                            2 => {
+                                // The reference should be the first item, and should not be deleted.
+                                all_values.remove(0);
+                                return all_values;
+                            }
+                            _ => {
+                                // The reference should be the first item, and should not be deleted.
+                                all_values.remove(0);
+                                all_values = sort_items(all_values);
+                            }
+                        }
+                    } else {
+                        all_values = sort_items(all_values);
+                    }
+                    let len = all_values.len();
                     match delete_method {
                         DeleteMethod::Delete => all_values,
                         DeleteMethod::AllExceptNewest | DeleteMethod::AllExceptBiggest => {
@@ -429,7 +454,7 @@ pub trait CommonData {
                     }
 
                     if dry_run {
-                        return Some(vec![(e, None)]);
+                        return Some(vec![(e, None, None)]);
                     }
 
                     let delete_res = if matches!(delete_item_type, DeleteItemType::DeletingFiles(_)) {
@@ -439,8 +464,8 @@ pub trait CommonData {
                     };
 
                     match delete_res {
-                        Ok(()) => Some(vec![(e, None)]),
-                        Err(err) => Some(vec![(e, Some(err))]),
+                        Ok(()) => Some(vec![(e, None, None)]),
+                        Err(err) => Some(vec![(e, None, Some(err))]),
                     }
                 })
                 .while_some()
@@ -462,35 +487,21 @@ pub trait CommonData {
                     }
 
                     if dry_run {
-                        return Some(
-                            files
-                                .iter()
-                                .map(|e| {
-                                    (
-                                        e,
-                                        Some(format!(
-                                            "Would hardlink: \"{}\" to \"{}\"",
-                                            original.get_path().to_string_lossy(),
-                                            e.get_path().to_string_lossy()
-                                        )),
-                                    )
-                                })
-                                .collect::<Vec<_>>(),
-                        );
+                        return Some(files.iter().map(|e| (e, Some(original.get_path()), None)).collect::<Vec<_>>());
                     }
 
                     let res = files
                         .iter()
                         .map(|file| {
-                            let err = match make_hard_link(original.get_path(), file.get_path()) {
+                            let err = match make_hard_link(file.get_path(), original.get_path()) {
                                 Ok(()) => None,
                                 Err(err) => Some(format!(
                                     "Failed to hardlink \"{}\" to \"{}\": {err}",
+                                    file.get_path().to_string_lossy(),
                                     original.get_path().to_string_lossy(),
-                                    file.get_path().to_string_lossy()
                                 )),
                             };
-                            (file, err)
+                            (file, Some(original.get_path()), err)
                         })
                         .collect::<Vec<_>>();
 
@@ -503,21 +514,22 @@ pub trait CommonData {
 
         let mut delete_result = DeleteResult::default();
 
-        for (file_entry, delete_err) in res {
-            if let Some(msg) = delete_err {
-                if dry_run && is_hardlinking {
-                    // In dry-run hardlink mode the message field holds the pre-formatted
-                    // "Would hardlink: A to B" string rather than an actual error.
-                    delete_result.infos.push(msg);
-                    delete_result.deleted_files += 1;
-                    delete_result.gained_bytes += file_entry.get_size();
-                } else {
-                    delete_result.errors.push(msg);
-                    delete_result.failed_to_delete_files += 1;
-                }
+        for (file_entry, maybe_original, delete_err) in res {
+            if let Some(err) = delete_err {
+                delete_result.errors.push(err);
+                delete_result.failed_to_delete_files += 1;
             } else {
                 if dry_run {
-                    delete_result.infos.push(format!("Would delete: \"{}\"", file_entry.get_path().to_string_lossy()));
+                    if is_hardlinking {
+                        let original = maybe_original.expect("Should be defined");
+                        delete_result.infos.push(format!(
+                            "Would hardlink: \"{}\" to \"{}\"",
+                            file_entry.get_path().to_string_lossy(),
+                            original.to_string_lossy()
+                        ));
+                    } else {
+                        delete_result.infos.push(format!("Would delete: \"{}\"", file_entry.get_path().to_string_lossy()));
+                    }
                 }
                 delete_result.deleted_files += 1;
                 delete_result.gained_bytes += file_entry.get_size();
