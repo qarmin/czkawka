@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 #![allow(clippy::unused_self)]
 use std::io::{BufReader, Cursor};
+use std::sync::Arc;
 
 #[cfg(feature = "audio")]
 use rodio::{Decoder, DeviceSinkBuilder, Player};
@@ -10,14 +11,14 @@ const DEFAULT_STOP_AUDIO: &[u8] = include_bytes!("../audio/stop_bit.mp3");
 
 pub struct AudioPlayer {
     #[cfg(feature = "audio")]
-    audio_data: Vec<u8>,
+    audio_data: Arc<Vec<u8>>,
 }
 
 impl AudioPlayer {
     pub fn new() -> Self {
         #[cfg(feature = "audio")]
         {
-            let audio_data = Self::load_audio_data();
+            let audio_data = Arc::new(Self::load_audio_data());
             Self { audio_data }
         }
         #[cfg(not(feature = "audio"))]
@@ -55,7 +56,7 @@ impl AudioPlayer {
     pub fn play_scan_completed(&self) {
         #[cfg(feature = "audio")]
         {
-            let audio_data = self.audio_data.clone();
+            let audio_data = Arc::clone(&self.audio_data);
             std::thread::spawn(move || {
                 if let Err(e) = Self::play_audio_blocking(&audio_data) {
                     log::error!("Failed to play scan completion audio: {e}");

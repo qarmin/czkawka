@@ -482,41 +482,9 @@ pub(crate) fn fmt_size(bytes: u64) -> String {
 }
 
 pub(crate) fn fmt_date(unix_secs: u64) -> String {
-    let secs = unix_secs;
-    let mins = secs / 60;
-    let hours = mins / 60;
-    let days = hours / 24;
-
-    let min = mins % 60;
-    let hour = hours % 24;
-
-    let mut remaining_days = days;
-    let mut year = 1970u64;
-    loop {
-        let days_in_year = if year.is_multiple_of(4) && (!year.is_multiple_of(100) || year.is_multiple_of(400)) {
-            366
-        } else {
-            365
-        };
-        if remaining_days < days_in_year {
-            break;
-        }
-        remaining_days -= days_in_year;
-        year += 1;
-    }
-    let leap = year.is_multiple_of(4) && (!year.is_multiple_of(100) || year.is_multiple_of(400));
-    let months_days: [u64; 12] = [31, if leap { 29 } else { 28 }, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    let mut month = 1u64;
-    for &md in &months_days {
-        if remaining_days < md {
-            break;
-        }
-        remaining_days -= md;
-        month += 1;
-    }
-    let day = remaining_days + 1;
-
-    format!("{year}-{month:02}-{day:02} {hour:02}:{min:02}")
+    use chrono::{Local, TimeZone, Utc};
+    let dt_local = Utc.timestamp_opt(unix_secs as i64, 0).single().unwrap_or_default().with_timezone(&Local);
+    dt_local.format("%Y-%m-%d %H:%M").to_string()
 }
 
 pub(crate) fn size_to_hi_lo(size: u64) -> (i32, i32) {

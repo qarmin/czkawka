@@ -1059,6 +1059,7 @@ dependencies = [
  "android-activity 0.6.1",
  "android-build",
  "android_logger",
+ "chrono",
  "crossbeam-channel",
  "czkawka_core",
  "filetime",
@@ -1076,6 +1077,7 @@ dependencies = [
  "slint",
  "slint-build",
  "trash",
+ "xxhash-rust",
 ]
 
 [[package]]

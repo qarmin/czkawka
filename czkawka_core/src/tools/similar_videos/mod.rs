@@ -28,6 +28,7 @@ pub const ALLOWED_VID_HASH_DURATION: RangeInclusive<u32> = 2..=60;
 pub const DEFAULT_VID_HASH_DURATION: u32 = 10;
 
 pub const DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL: u8 = 10;
+pub const DEFAULT_THUMBNAIL_GRID_TILES_PER_SIDE: u8 = 2;
 
 // Audio fingerprint mode constants
 pub const ALLOWED_AUDIO_SIMILARITY_PERCENT: RangeInclusive<f64> = 0.0..=100.0;

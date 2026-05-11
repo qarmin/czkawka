@@ -1,4 +1,3 @@
-use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -65,7 +64,7 @@ pub fn thumbnail_cache_dir() -> PathBuf {
 }
 
 fn cache_key(path: &str, mtime_secs: u64, file_size: u64) -> String {
-    let mut h = DefaultHasher::new();
+    let mut h = xxhash_rust::xxh3::Xxh3::new();
     path.hash(&mut h);
     mtime_secs.hash(&mut h);
     file_size.hash(&mut h);
