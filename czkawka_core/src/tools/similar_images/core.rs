@@ -522,8 +522,7 @@ impl SimilarImages {
     #[fun_time(message = "remove_multiple_records_from_reference_folders", level = "debug")]
     fn remove_multiple_records_from_reference_folders(&mut self) {
         if self.common_data.use_reference_folders {
-            self.similar_referenced_vectors = self.common_data.directories
-                .filter_reference_folders(mem::take(&mut self.similar_vectors));
+            self.similar_referenced_vectors = self.common_data.directories.filter_reference_folders(mem::take(&mut self.similar_vectors));
         }
     }
 

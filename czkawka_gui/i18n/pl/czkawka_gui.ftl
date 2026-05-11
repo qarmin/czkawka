@@ -321,6 +321,8 @@ krokiet_promo_message =
         Czkawka GTK służyła nam wiernie, ale czas na nowy początek. Pomyśl o tym jak o przesiadce z roweru na jednorożca — ten sam kierunek, ale DUŻO więcej magii.
 
         Daj mu szansę — Twoje zduplikowane pliki nie będą wiedzieć, co je trafiło!
+krokiet_promo_link_download = Pobierz Krokieta/Cedynię
+krokiet_promo_link_project = Strona projektu
 
 # Settings
 

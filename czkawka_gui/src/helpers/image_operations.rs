@@ -61,6 +61,15 @@ pub(crate) fn set_icon_of_button<P: IsA<Widget>>(button: &P, data: &'static [u8]
     image.set_from_pixbuf(Some(&pixbuf));
 }
 
+pub(crate) fn svg_to_pixbuf(svg_data: &[u8], size: i32) -> Option<Pixbuf> {
+    let dynamic_image = svg_to_dynamic_image(svg_data)?;
+    let (width, height) = dynamic_image.dimensions();
+    let rgba = dynamic_image.into_rgba8();
+    let bytes = Bytes::from(&rgba.into_raw());
+    let pixbuf = Pixbuf::from_bytes(&bytes, Colorspace::Rgb, true, 8, width as i32, height as i32, (4 * width) as i32);
+    pixbuf.scale_simple(size, size, TYPE_OF_INTERPOLATION)
+}
+
 pub(crate) fn get_pixbuf_from_dynamic_image(dynamic_image: DynamicImage) -> Result<Pixbuf, String> {
     let mut output = Vec::new();
     let width = dynamic_image.width();

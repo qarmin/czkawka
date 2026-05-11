@@ -84,7 +84,9 @@ impl DuplicateFinder {
 
                 // Reference - only use in size, because later hash will be counted differently
                 if self.common_data.use_reference_folders {
-                    let vec = self.common_data.directories
+                    let vec = self
+                        .common_data
+                        .directories
                         .filter_reference_folders(mem::take(&mut self.files_with_identical_names).into_values().collect());
                     for (fe, vec_fe) in vec {
                         self.files_with_identical_names_referenced.insert(fe.path.to_string_lossy().to_string(), (fe, vec_fe));
@@ -164,7 +166,9 @@ impl DuplicateFinder {
 
                 // Reference - only use in size, because later hash will be counted differently
                 if self.common_data.use_reference_folders {
-                    let vec = self.common_data.directories
+                    let vec = self
+                        .common_data
+                        .directories
                         .filter_reference_folders(mem::take(&mut self.files_with_identical_size_names).into_values().collect());
                     for (fe, vec_fe) in vec {
                         self.files_with_identical_size_names_referenced
@@ -300,7 +304,9 @@ impl DuplicateFinder {
     #[fun_time(message = "filter_reference_folders_by_size", level = "debug")]
     fn filter_reference_folders_by_size(&mut self) {
         if self.common_data.use_reference_folders && self.get_params().check_method == CheckingMethod::Size {
-            let vec = self.common_data.directories
+            let vec = self
+                .common_data
+                .directories
                 .filter_reference_folders(mem::take(&mut self.files_with_identical_size).into_values().collect());
             for (fe, vec_fe) in vec {
                 self.files_with_identical_size_referenced.insert(fe.size, (fe, vec_fe));

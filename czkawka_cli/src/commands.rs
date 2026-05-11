@@ -16,6 +16,7 @@ use czkawka_core::tools::similar_videos::{
     DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, crop_detect_from_str_opt,
 };
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec};
+use log::error;
 
 #[cfg(not(feature = "no_colors"))]
 pub const CLAP_STYLING: Styles = Styles::styled()
@@ -1348,7 +1349,7 @@ fn parse_maximal_file_size(src: &str) -> Result<u64, String> {
 
 pub fn validate_file_sizes(minimal: u64, maximal: u64) {
     if maximal < minimal {
-        eprintln!("WARNING: Maximum file size ({maximal}) is smaller than minimum file size ({minimal}), no files will match.");
+        error!("WARNING: Maximum file size ({maximal}) is smaller than minimum file size ({minimal}), no files will match.");
     }
 }
 

@@ -20,7 +20,11 @@ impl GuiHeader {
         set_icon_of_button(&button_app_info, CZK_ICON_INFO);
         set_icon_of_button(&button_krokiet, CZK_ICON_KROKIET);
 
-        Self { button_settings, button_app_info, button_krokiet }
+        Self {
+            button_settings,
+            button_app_info,
+            button_krokiet,
+        }
     }
 
     pub(crate) fn update_language(&self) {

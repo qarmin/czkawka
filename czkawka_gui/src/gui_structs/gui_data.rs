@@ -46,7 +46,6 @@ pub const CZK_ICON_SYMLINK: &[u8] = include_bytes!("../../icons/czk_symlink.svg"
 pub const CZK_ICON_TRASH: &[u8] = include_bytes!("../../icons/czk_trash.svg");
 pub const CZK_ICON_REPLACE: &[u8] = include_bytes!("../../icons/czk_replace.svg");
 pub const CZK_ICON_KROKIET: &[u8] = include_bytes!("../../icons/czk_krokiet.svg");
-pub const KROKIET_LOGO_PNG: &[u8] = include_bytes!("../../icons/krokiet_logo.png");
 
 #[derive(Clone)]
 pub struct GuiData {
