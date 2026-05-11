@@ -1,6 +1,5 @@
 use std::path::Path;
 
-use fs_extra::dir::CopyOptions;
 use gtk4::prelude::*;
 use gtk4::{ResponseType, TreePath};
 use log::debug;
@@ -140,16 +139,15 @@ fn move_files_common(
 
         let thing = get_full_name_from_path_name(&path, &file_name);
         let destination_file = destination_folder.join(&file_name);
-        if Path::new(&thing).is_dir() {
-            if let Err(e) = fs_extra::dir::move_dir(&thing, &destination_file, &CopyOptions::new()) {
-                messages += flg!("move_folder_failed", name = thing, reason = e.to_string()).as_str();
-                messages += "\n";
-                continue 'next_result;
-            }
-        } else if let Err(e) = fs_extra::file::move_file(&thing, &destination_file, &fs_extra::file::CopyOptions::new()) {
-            messages += flg!("move_file_failed", name = thing, reason = e.to_string()).as_str();
+        let thing_path = Path::new(&thing);
+        if let Err(e) = move_item_preserving_attrs(thing_path, &destination_file) {
+            let msg = if thing_path.is_dir() {
+                flg!("move_folder_failed", name = thing, reason = e.to_string())
+            } else {
+                flg!("move_file_failed", name = thing, reason = e.to_string())
+            };
+            messages += msg.as_str();
             messages += "\n";
-
             continue 'next_result;
         }
         model.remove(&iter);
@@ -161,4 +159,29 @@ fn move_files_common(
     entry_info.set_text(flg!("move_stats", num_files = moved_files, all_files = selected_rows.len()).as_str());
 
     text_view_errors.buffer().set_text(messages.as_str());
+}
+
+fn move_item_preserving_attrs(src: &Path, dst: &Path) -> std::io::Result<()> {
+    if std::fs::rename(src, dst).is_ok() {
+        return Ok(());
+    }
+    copy_item_preserving_attrs(src, dst)?;
+    if src.is_dir() { std::fs::remove_dir_all(src) } else { std::fs::remove_file(src) }
+}
+
+fn copy_item_preserving_attrs(src: &Path, dst: &Path) -> std::io::Result<()> {
+    let metadata = src.metadata()?;
+    if metadata.is_dir() {
+        std::fs::create_dir_all(dst)?;
+        for entry in std::fs::read_dir(src)? {
+            let entry = entry?;
+            copy_item_preserving_attrs(&entry.path(), &dst.join(entry.file_name()))?;
+        }
+    } else {
+        std::fs::copy(src, dst)?;
+        let times = std::fs::FileTimes::new().set_accessed(metadata.accessed()?).set_modified(metadata.modified()?);
+        std::fs::OpenOptions::new().write(true).open(dst)?.set_times(times)?;
+    }
+    std::fs::set_permissions(dst, metadata.permissions())?;
+    Ok(())
 }
