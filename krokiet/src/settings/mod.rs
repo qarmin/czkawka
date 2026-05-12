@@ -151,7 +151,7 @@ pub(crate) fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i
     save_base_settings_to_file(app, original_preset_idx);
     save_custom_settings_to_file(app);
 
-    info!("Saved settings to file");
+    debug!("Saved settings to file");
 }
 
 pub(crate) fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
