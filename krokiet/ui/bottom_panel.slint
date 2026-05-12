@@ -148,7 +148,7 @@ export component BottomPanel {
     callback folder_choose_requested(bool);
     callback file_choose_requested(bool);
     callback show_manual_add_dialog(bool);
-    min-height: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
+    min-height: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 60px;
     min-width: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
     if bottom_panel_visibility == BottomPanelVisibility.Directories: DirectoriesPanel {
         width: parent.width;
