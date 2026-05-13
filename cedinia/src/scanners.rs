@@ -193,10 +193,18 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     handler: &Arc<H>,
     scan_id: u32,
 ) -> Vec<FileItem> {
-    use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
+    use czkawka_core::tools::similar_images::{GeometricInvariance, ImagesEntry, SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
     let max_diff = return_similarity_from_similarity_preset(similarity_preset, hash_size);
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
-    let params = SimilarImagesParameters::new(max_diff, hash_size, hash_alg, image_filter, ignore_same_size, ignore_same_resolution);
+    let params = SimilarImagesParameters::new(
+        max_diff,
+        hash_size,
+        hash_alg,
+        image_filter,
+        ignore_same_size,
+        ignore_same_resolution,
+        GeometricInvariance::Off,
+    );
     let mut tool = SimilarImages::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);

@@ -12,7 +12,7 @@ pub fn send_scan_completed_notification(tool: &str, body: &str) {
     #[cfg(all(unix, not(target_os = "macos")))]
     notif.urgency(notify_rust::Urgency::Normal);
     match notif.show() {
-        Ok(_) => log::info!("Desktop notification sent"),
+        Ok(_handle) => log::info!("Desktop notification sent"),
         Err(e) => error!("Failed to send desktop notification: {e}"),
     }
 }

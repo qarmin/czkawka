@@ -46,10 +46,12 @@ pub struct GuiMainNotebook {
     pub label_image_resize_algorithm: Label,
     pub label_image_hash_type: Label,
     pub label_image_hash_size: Label,
+    pub label_image_geometric_invariance: Label,
 
     pub combo_box_image_resize_algorithm: ComboBoxText,
     pub combo_box_image_hash_algorithm: ComboBoxText,
     pub combo_box_image_hash_size: ComboBoxText,
+    pub combo_box_image_geometric_invariance: ComboBoxText,
 
     pub check_button_image_ignore_same_size: CheckButton,
     pub check_button_video_ignore_same_size: CheckButton,
@@ -126,6 +128,7 @@ impl GuiMainNotebook {
         let combo_box_image_resize_algorithm: ComboBoxText = builder.object("combo_box_image_resize_algorithm").expect("Cambalache");
         let combo_box_image_hash_algorithm: ComboBoxText = builder.object("combo_box_image_hash_algorithm").expect("Cambalache");
         let combo_box_image_hash_size: ComboBoxText = builder.object("combo_box_image_hash_size").expect("Cambalache");
+        let combo_box_image_geometric_invariance: ComboBoxText = builder.object("combo_box_image_geometric_invariance").expect("Cambalache");
         let combo_box_big_files_mode: ComboBoxText = builder.object("combo_box_big_files_mode").expect("Cambalache");
 
         let check_button_image_ignore_same_size: CheckButton = builder.object("check_button_image_ignore_same_size").expect("Cambalache");
@@ -139,6 +142,7 @@ impl GuiMainNotebook {
         let label_image_resize_algorithm: Label = builder.object("label_image_resize_algorithm").expect("Cambalache");
         let label_image_hash_type: Label = builder.object("label_image_hash_type").expect("Cambalache");
         let label_image_hash_size: Label = builder.object("label_image_hash_size").expect("Cambalache");
+        let label_image_geometric_invariance: Label = builder.object("label_image_geometric_invariance").expect("Cambalache");
         let label_image_similarity: Label = builder.object("label_image_similarity").expect("Cambalache");
         let label_image_similarity_max: Label = builder.object("label_image_similarity_max").expect("Cambalache");
         let label_video_similarity: Label = builder.object("label_video_similarity").expect("Cambalache");
@@ -195,9 +199,11 @@ impl GuiMainNotebook {
             label_image_resize_algorithm,
             label_image_hash_type,
             label_image_hash_size,
+            label_image_geometric_invariance,
             combo_box_image_resize_algorithm,
             combo_box_image_hash_algorithm,
             combo_box_image_hash_size,
+            combo_box_image_geometric_invariance,
             check_button_image_ignore_same_size,
             check_button_video_ignore_same_size,
             label_image_similarity,
@@ -256,6 +262,7 @@ impl GuiMainNotebook {
         self.label_image_resize_algorithm.set_label(&flg!("main_label_resize_algorithm"));
         self.label_image_hash_type.set_label(&flg!("main_label_hash_type"));
         self.label_image_hash_size.set_label(&flg!("main_label_hash_size"));
+        self.label_image_geometric_invariance.set_label(&flg!("main_label_geometric_invariance"));
         self.label_image_similarity.set_label(&flg!("main_label_similarity"));
         self.label_image_similarity_max.set_label(&fnc_get_similarity_very_high());
         self.label_video_similarity.set_label(&flg!("main_label_similarity"));
@@ -279,6 +286,10 @@ impl GuiMainNotebook {
 
         self.combo_box_image_hash_algorithm.set_tooltip_text(Some(&flg!("image_hash_alg_tooltip")));
         self.label_image_hash_type.set_tooltip_text(Some(&flg!("image_hash_alg_tooltip")));
+
+        self.combo_box_image_geometric_invariance
+            .set_tooltip_text(Some(&flg!("image_geometric_invariance_tooltip")));
+        self.label_image_geometric_invariance.set_tooltip_text(Some(&flg!("image_geometric_invariance_tooltip")));
 
         self.combo_box_big_files_mode.set_tooltip_text(Some(&flg!("big_files_mode_combobox_tooltip")));
         self.label_big_files_mode.set_tooltip_text(Some(&flg!("big_files_mode_combobox_tooltip")));

@@ -14,6 +14,7 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
         languages,
         hash_size,
         resize_algorithm,
+        image_geometric_invariance,
         image_hash_alg,
         duplicates_hash_type,
         biggest_files_method,
@@ -29,6 +30,7 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
     let languages_display_names = StringComboBoxItems::get_display_names(languages);
     let hash_size_display_names = StringComboBoxItems::get_display_names(hash_size);
     let resize_algorithm_display_names = StringComboBoxItems::get_display_names(resize_algorithm);
+    let geometric_invariance_display_names = StringComboBoxItems::get_display_names(image_geometric_invariance);
     let image_hash_alg_display_names = StringComboBoxItems::get_display_names(image_hash_alg);
     let duplicates_hash_type_display_names = StringComboBoxItems::get_display_names(duplicates_hash_type);
     let biggest_files_method_display_names = StringComboBoxItems::get_display_names(biggest_files_method);
@@ -68,6 +70,10 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
     assert_eq!(
         settings.get_similar_images_sub_available_hash_type().iter().collect::<Vec<SharedString>>(),
         image_hash_alg_display_names
+    );
+    assert_eq!(
+        settings.get_similar_images_sub_available_geometric_invariance().iter().collect::<Vec<SharedString>>(),
+        geometric_invariance_display_names
     );
     assert_eq!(
         settings.get_biggest_files_sub_method().iter().collect::<Vec<SharedString>>(),

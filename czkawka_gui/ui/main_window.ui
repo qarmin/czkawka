@@ -547,6 +547,16 @@
                                 <child>
                                   <object class="GtkComboBoxText" id="combo_box_image_hash_algorithm"/>
                                 </child>
+                                <child>
+                                  <object class="GtkLabel" id="label_image_geometric_invariance">
+                                    <property name="label" translatable="yes">Geometric invariance</property>
+                                    <property name="margin-end">2</property>
+                                    <property name="margin-start">5</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBoxText" id="combo_box_image_geometric_invariance"/>
+                                </child>
                               </object>
                             </child>
                             <child>

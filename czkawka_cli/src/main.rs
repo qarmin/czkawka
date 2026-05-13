@@ -24,7 +24,7 @@ use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::exif_remover::{ExifRemover, ExifRemoverParameters, ExifTagsFixerParams};
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
-use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
+use czkawka_core::tools::similar_images::{GeometricInvariance, SimilarImages, SimilarImagesParameters};
 use czkawka_core::tools::similar_videos::{SimilarVideos, SimilarVideosParameters};
 use czkawka_core::tools::temporary::{Temporary, TemporaryParameters};
 use czkawka_core::tools::video_optimizer::{
@@ -256,6 +256,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         image_filter,
         ignore_same_size.ignore_same_size,
         ignore_same_resolution.ignore_same_resolution,
+        GeometricInvariance::Off,
     );
     let mut tool = SimilarImages::new(params);
 

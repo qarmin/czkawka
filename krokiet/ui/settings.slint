@@ -65,6 +65,9 @@ export global Settings {
     in-out property <[string]> similar_images_sub_available_hash_type: ["Mean", "Gradient", "BlockHash", "VertGradient", "DoubleGradient", "Median"];
     in-out property <int> similar_images_sub_hash_alg_index: 0;
     in-out property <string> similar_images_sub_hash_alg_value: "Mean";
+    in-out property <[string]> similar_images_sub_available_geometric_invariance: ["Off", "Mirror + Flip", "Mirror + Flip + Rotate 90"];
+    in-out property <int> similar_images_sub_geometric_invariance_index: 0;
+    in-out property <string> similar_images_sub_geometric_invariance_value: "Off";
     in-out property <float> similar_images_sub_max_similarity: 40;
     in-out property <float> similar_images_sub_current_similarity: 20;
     in-out property <bool> similar_images_sub_ignore_same_size: false;
