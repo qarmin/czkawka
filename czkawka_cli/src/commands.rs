@@ -10,6 +10,7 @@ use czkawka_core::common::tool_data::DeleteMethod;
 use czkawka_core::re_exported::{Cropdetect, FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::same_music::MusicSimilarity;
+use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_videos::{
     ALLOWED_AUDIO_LENGTH_RATIO, ALLOWED_AUDIO_SIMILARITY_PERCENT, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_AUDIO_LENGTH_RATIO,
     DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_THUMBNAIL_GRID_TILES_PER_SIDE,
@@ -332,6 +333,14 @@ pub struct SimilarImagesArgs {
         long_help = "Size of the perceptual hash. Larger values provide more detailed comparison but require higher max_difference values. 8 is fastest and least detailed, 64 is slowest but most detailed. Recommended: 8 or 16 for typical use."
     )]
     pub hash_size: u8,
+    #[clap(
+        long,
+        default_value = "off",
+        value_parser = parse_geometric_invariance,
+        help = "Geometric invariance mode (off, mirror-flip, mirror-flip-rotate90)",
+        long_help = "Geometric invariance mode for similar image matching. off compares images as-is, mirror-flip also compares mirrored/flipped variants, mirror-flip-rotate90 also compares 90-degree rotations."
+    )]
+    pub geometric_invariance: GeometricInvariance,
 }
 
 #[derive(Debug, clap::Args)]
@@ -1387,6 +1396,28 @@ fn parse_image_hash_size(src: &str) -> Result<u8, String> {
         _ => return Err("Couldn't parse the image hash size (allowed: 8, 16, 32, 64)".to_string()),
     };
     Ok(hash_size)
+}
+
+fn parse_geometric_invariance(src: &str) -> Result<GeometricInvariance, String> {
+    let geometric_invariance = match src.to_lowercase().replace('_', "-").as_str() {
+        "off" => GeometricInvariance::Off,
+        "mirror-flip" => GeometricInvariance::MirrorFlip,
+        "mirror-flip-rotate90" => GeometricInvariance::MirrorFlipRotate90,
+        _ => return Err("Couldn't parse geometric invariance (allowed: off, mirror-flip, mirror-flip-rotate90)".to_string()),
+    };
+    Ok(geometric_invariance)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_geometric_invariance() {
+        assert_eq!(parse_geometric_invariance("off"), Ok(GeometricInvariance::Off));
+        assert_eq!(parse_geometric_invariance("mirror-flip"), Ok(GeometricInvariance::MirrorFlip));
+        assert_eq!(parse_geometric_invariance("mirror-flip-rotate90"), Ok(GeometricInvariance::MirrorFlipRotate90));
+    }
 }
 
 fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {

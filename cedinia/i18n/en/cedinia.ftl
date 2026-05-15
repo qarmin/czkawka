@@ -125,6 +125,7 @@ settings_hash_size = Hash size
 settings_hash_size_desc = Larger sizes, have less false positives, but also finds less similar images
 settings_hash_alg = Hash algorithm
 settings_image_filter = Resize filter
+settings_geometric_invariance = Geometric invariance
 settings_ignore_same_size = Ignore images with the same dimensions
 settings_gallery_image_fit_cover = Gallery: crop to square
 settings_gallery_image_fit_cover_desc = Fill the tile; disable to keep original aspect ratio

@@ -55,6 +55,11 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
         display_names(&items.image_filter),
         "SimilarImagesSettings.image_filter_options out of sync with Rust"
     );
+    assert_eq!(
+        slint_vec(si.get_geometric_invariance_options()),
+        display_names(&items.image_geometric_invariance),
+        "SimilarImagesSettings.geometric_invariance_options out of sync with Rust"
+    );
 
     assert_eq!(
         slint_vec(bf.get_search_mode_options()),

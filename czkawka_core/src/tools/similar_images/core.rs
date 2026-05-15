@@ -515,13 +515,10 @@ impl SimilarImages {
             return WorkContinueStatus::Stop;
         }
 
-        if self.get_params().geometric_invariance == GeometricInvariance::Off {
-            Self::verify_duplicated_items(&collected_similar_images);
-        }
-
         // Info about hashes is not needed anymore, so we drop this info
         self.similar_vectors = collected_similar_images.into_values().collect();
         self.merge_overlapping_groups();
+        Self::verify_duplicated_items(&self.similar_vectors);
 
         self.exclude_items_with_same_size();
         self.exclude_items_with_same_resolution();
@@ -629,8 +626,9 @@ impl SimilarImages {
 
         let mut merged: HashMap<usize, Vec<ImagesEntry>> = HashMap::new();
         for (id, entry) in entries_by_id.into_iter().enumerate() {
-            let root = dsu.find(id);
-            merged.entry(root).or_default().push(entry);
+            if let Some(root) = dsu.find(id) {
+                merged.entry(root).or_default().push(entry);
+            }
         }
 
         self.similar_vectors = merged.into_values().filter(|group| group.len() > 1).collect();
@@ -643,8 +641,7 @@ impl SimilarImages {
         }
     }
 
-    // TODO this probably not works good when reference folders are used
-    pub(crate) fn verify_duplicated_items(collected_similar_images: &IndexMap<ImHash, Vec<ImagesEntry>>) {
+    pub(crate) fn verify_duplicated_items(similar_vectors: &[Vec<ImagesEntry>]) {
         if !cfg!(debug_assertions) {
             return;
         }
@@ -652,7 +649,7 @@ impl SimilarImages {
         let mut result_hashset: IndexSet<String> = Default::default();
         let mut found = false;
 
-        for vec_file_entry in collected_similar_images.values() {
+        for vec_file_entry in similar_vectors {
             if vec_file_entry.is_empty() {
                 error!("Found empty group");
                 found = true;
@@ -690,30 +687,53 @@ impl DisjointSet {
         }
     }
 
-    fn find(&mut self, x: usize) -> usize {
-        let parent = *self.parent.get(x).expect("disjoint set parent index should be valid");
-        if parent != x {
-            let root = self.find(parent);
-            *self.parent.get_mut(x).expect("disjoint set parent index should be valid") = root;
-            return root;
+    fn find(&mut self, x: usize) -> Option<usize> {
+        let mut root = x;
+        loop {
+            let parent = self.parent.get(root).copied()?;
+            if parent == root {
+                break;
+            }
+            root = parent;
         }
-        x
+
+        let mut current = x;
+        while current != root {
+            let parent = self.parent.get(current).copied()?;
+            *self.parent.get_mut(current)? = root;
+            current = parent;
+        }
+
+        Some(root)
     }
 
     fn union(&mut self, a: usize, b: usize) {
-        let mut root_a = self.find(a);
-        let mut root_b = self.find(b);
+        let Some(mut root_a) = self.find(a) else {
+            return;
+        };
+        let Some(mut root_b) = self.find(b) else {
+            return;
+        };
         if root_a == root_b {
             return;
         }
-        let rank_a = *self.rank.get(root_a).expect("disjoint set rank index should be valid");
-        let rank_b = *self.rank.get(root_b).expect("disjoint set rank index should be valid");
+        let Some(rank_a) = self.rank.get(root_a).copied() else {
+            return;
+        };
+        let Some(rank_b) = self.rank.get(root_b).copied() else {
+            return;
+        };
         if rank_a < rank_b {
             std::mem::swap(&mut root_a, &mut root_b);
         }
-        *self.parent.get_mut(root_b).expect("disjoint set parent index should be valid") = root_a;
+        let Some(parent_b) = self.parent.get_mut(root_b) else {
+            return;
+        };
+        *parent_b = root_a;
         if rank_a == rank_b {
-            *self.rank.get_mut(root_a).expect("disjoint set rank index should be valid") = rank_a.saturating_add(1);
+            if let Some(rank_a_mut) = self.rank.get_mut(root_a) {
+                *rank_a_mut = rank_a.saturating_add(1);
+            }
         }
     }
 }
@@ -960,6 +980,64 @@ mod tests {
                 assert_eq!(second_group, vec![&fe1.path, &fe2.path]);
             }
         }
+    }
+
+    #[test]
+    fn test_merge_overlapping_groups_merges_transitive_matches_and_keeps_min_difference() {
+        let mut similar_images = SimilarImages::new(get_default_parameters());
+
+        let mut fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
+        let mut fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "bcd.txt");
+        let mut fe2_again = fe2.clone();
+        let mut fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 3], "cde.txt");
+        fe1.difference = 0;
+        fe2.difference = 7;
+        fe2_again.difference = 3;
+        fe3.difference = 4;
+
+        similar_images.similar_vectors = vec![vec![fe1, fe2], vec![fe2_again, fe3]];
+
+        similar_images.merge_overlapping_groups();
+
+        assert_eq!(similar_images.similar_vectors.len(), 1);
+        assert_eq!(similar_images.similar_vectors[0].len(), 3);
+
+        let mut paths = similar_images.similar_vectors[0]
+            .iter()
+            .map(|entry| entry.path.to_string_lossy().to_string())
+            .collect::<Vec<_>>();
+        paths.sort();
+        assert_eq!(paths, vec!["abc.txt", "bcd.txt", "cde.txt"]);
+
+        let bcd = similar_images.similar_vectors[0]
+            .iter()
+            .find(|entry| entry.path == PathBuf::from("bcd.txt"))
+            .expect("bcd.txt should be present in merged group");
+        assert_eq!(bcd.difference, 3);
+    }
+
+    #[test]
+    fn test_verify_duplicated_items_accepts_valid_merged_overlaps() {
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
+        let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "bcd.txt");
+
+        SimilarImages::verify_duplicated_items(&[vec![fe1, fe2]]);
+    }
+
+    #[test]
+    #[should_panic(expected = "Found Invalid entries")]
+    fn test_verify_duplicated_items_rejects_duplicate_result_paths() {
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
+        let fe1_again = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "abc.txt");
+
+        SimilarImages::verify_duplicated_items(&[vec![fe1], vec![fe1_again]]);
+    }
+
+    #[test]
+    fn test_similar_images_cache_file_uses_new_cache_version() {
+        let cache_file = get_similar_images_cache_file(8, HashAlg::Gradient, FilterType::Lanczos3, GeometricInvariance::Off);
+
+        assert!(cache_file.ends_with("_101.bin"));
     }
 
     #[test]
