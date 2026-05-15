@@ -987,12 +987,12 @@ mod tests {
     #[test]
     fn test_traversal_group_by_inode() -> io::Result<()> {
         let dir = tempfile::Builder::new().tempdir()?;
-        let dir_path = normalize_path(&dir.path());
+        let dir_path = normalize_path(dir.path());
         let (src, hard, other) = create_files(&dir_path)?;
         let secs = NOW.duration_since(SystemTime::UNIX_EPOCH).expect("Cannot fail duration from epoch").as_secs();
 
         let mut common_data = CommonToolData::new(ToolType::SimilarImages);
-        common_data.directories.set_included_paths([dir_path.to_owned()].to_vec());
+        common_data.directories.set_included_paths(vec![dir_path]);
         common_data.set_minimal_file_size(0);
 
         match DirTraversalBuilder::new()
@@ -1028,10 +1028,10 @@ mod tests {
                     actual
                 );
             }
-            _ => {
+            DirTraversalResult::Stopped => {
                 panic!("Expect SuccessFiles.");
             }
-        };
+        }
         Ok(())
     }
 }

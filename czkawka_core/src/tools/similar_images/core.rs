@@ -1011,7 +1011,7 @@ mod tests {
 
         let bcd = similar_images.similar_vectors[0]
             .iter()
-            .find(|entry| entry.path == PathBuf::from("bcd.txt"))
+            .find(|entry| entry.path.as_path() == Path::new("bcd.txt"))
             .expect("bcd.txt should be present in merged group");
         assert_eq!(bcd.difference, 3);
     }
