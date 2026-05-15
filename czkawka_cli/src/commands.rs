@@ -1408,18 +1408,6 @@ fn parse_geometric_invariance(src: &str) -> Result<GeometricInvariance, String> 
     Ok(geometric_invariance)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_parse_geometric_invariance() {
-        assert_eq!(parse_geometric_invariance("off"), Ok(GeometricInvariance::Off));
-        assert_eq!(parse_geometric_invariance("mirror-flip"), Ok(GeometricInvariance::MirrorFlip));
-        assert_eq!(parse_geometric_invariance("mirror-flip-rotate90"), Ok(GeometricInvariance::MirrorFlipRotate90));
-    }
-}
-
 fn parse_music_duplicate_type(src: &str) -> Result<MusicSimilarity, String> {
     if src.trim().is_empty() {
         return Ok(MusicSimilarity::NONE);
@@ -1495,3 +1483,15 @@ EXAMPLES:
     {bin} video-optimizer -d /home/rafal transcode -c h264 -f results.txt
     {bin} video-optimizer -d /home/rafal crop -m blackbars -f results.txt
     {bin} exif-remover -d /home/rafal -x IMAGE -f results.txt"#;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_geometric_invariance() {
+        assert_eq!(parse_geometric_invariance("off"), Ok(GeometricInvariance::Off));
+        assert_eq!(parse_geometric_invariance("mirror-flip"), Ok(GeometricInvariance::MirrorFlip));
+        assert_eq!(parse_geometric_invariance("mirror-flip-rotate90"), Ok(GeometricInvariance::MirrorFlipRotate90));
+    }
+}
