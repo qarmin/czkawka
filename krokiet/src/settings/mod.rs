@@ -331,6 +331,11 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
     settings.set_similar_images_sub_resize_algorithm_index(idx as i32);
     settings.set_similar_images_sub_resize_algorithm_value(display_names[idx].clone());
 
+    let (idx, display_names) =
+        StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.similar_images_sub_geometric_invariance, &collected_items.image_geometric_invariance);
+    settings.set_similar_images_sub_geometric_invariance_index(idx as i32);
+    settings.set_similar_images_sub_geometric_invariance_value(display_names[idx].clone());
+
     // Duplicates check method
     let (idx, display_names) = StringComboBoxItems::get_item_and_idx_from_config_name(&custom_settings.duplicates_sub_check_method, &collected_items.duplicates_check_method);
     // settings.set_duplicates_sub_check_method_model(display_names);
@@ -649,6 +654,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_images_sub_hash_size = combo_box_items.hash_size.config_name.clone();
     let similar_images_sub_hash_alg = combo_box_items.image_hash_alg.config_name.clone();
     let similar_images_sub_resize_algorithm = combo_box_items.resize_algorithm.config_name.clone();
+    let similar_images_sub_geometric_invariance = combo_box_items.image_geometric_invariance.config_name.clone();
     let similar_images_sub_ignore_same_size = settings.get_similar_images_sub_ignore_same_size();
     let similar_images_sub_ignore_same_resolution = settings.get_similar_images_sub_ignore_same_resolution();
     let similar_images_sub_similarity = settings.get_similar_images_sub_current_similarity().round() as i32;
@@ -794,6 +800,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_images_sub_hash_size,
         similar_images_sub_hash_alg,
         similar_images_sub_resize_algorithm,
+        similar_images_sub_geometric_invariance,
         similar_images_sub_ignore_same_size,
         similar_images_sub_ignore_same_resolution,
         similar_images_sub_similarity,
@@ -893,6 +900,7 @@ pub(crate) fn collect_combo_box_settings(app: &MainWindow) -> ComboBoxItems {
     let hash_size_idx = settings.get_similar_images_sub_hash_size_index() as usize;
     let resize_algorithm_idx = settings.get_similar_images_sub_resize_algorithm_index() as usize;
     let image_hash_alg_idx = settings.get_similar_images_sub_hash_alg_index() as usize;
+    let image_geometric_invariance_idx = settings.get_similar_images_sub_geometric_invariance_index() as usize;
     let duplicates_hash_type_idx = settings.get_duplicates_sub_available_hash_type_index() as usize;
     let biggest_files_method_idx = settings.get_biggest_files_sub_method_index() as usize;
     let audio_check_type_idx = settings.get_similar_music_sub_audio_check_type_index() as usize;
@@ -908,6 +916,7 @@ pub(crate) fn collect_combo_box_settings(app: &MainWindow) -> ComboBoxItems {
         hash_size: collected_combo_boxes.hash_size[hash_size_idx].clone(),
         resize_algorithm: collected_combo_boxes.resize_algorithm[resize_algorithm_idx].clone(),
         image_hash_alg: collected_combo_boxes.image_hash_alg[image_hash_alg_idx].clone(),
+        image_geometric_invariance: collected_combo_boxes.image_geometric_invariance[image_geometric_invariance_idx].clone(),
         duplicates_hash_type: collected_combo_boxes.duplicates_hash_type[duplicates_hash_type_idx].clone(),
         biggest_files_method: collected_combo_boxes.biggest_files_method[biggest_files_method_idx].clone(),
         audio_check_type: collected_combo_boxes.audio_check_type[audio_check_type_idx].clone(),

@@ -444,7 +444,7 @@ Results show groups of files with matching tags or similar audio content.
 
 A tool for detecting similar images that may differ in aspects such as watermarks, size, or compression artifacts.
 
-Currently, it works well for images that have not been rotated.
+By default it works best for images that have not been rotated or mirrored. Enable **Geometric invariance** to match flipped/mirrored images, and optionally 90-degree rotations, at the cost of slower hashing.
 
 #### **Process Overview**
 

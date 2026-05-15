@@ -10,6 +10,7 @@ The project will remain available in the repository. For some time I will ensure
 #### Users
 - Due to changes in the broken files mode, which now supports multiple checkers and includes additional checks, the file type is no longer stored in the cache. Existing cache files are incompatible with this version and will be automatically regenerated
 - The prehash method has been updated, so cached hash is no longer valid, so it will be automatically regenerated
+- Similar images cache files are incompatible with this version due to geometric invariance support and will be automatically regenerated
 
 ### Core
 - Switched AV1 encoding from the very slow `libaom-av1` to `libsvtav1` - [#1888](https://github.com/qarmin/czkawka/pull/1888)
@@ -25,11 +26,13 @@ The project will remain available in the repository. For some time I will ensure
 - Temporary files mode now allows customization of searched file extensions - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 - Prehash now also hashes the end of files to detect differences earlier - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 - Added support for detecting corruption in Fonts (TTF, OTF, TTC), Markup (JSON, XML, TOML, YAML, SVG), and Archives (7z, gz/tgz, tar, zst, bz2, xz) - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Added geometric invariance support for similar images mode, allowing mirrored, flipped, and rotated images to be matched - [#1944](https://github.com/qarmin/czkawka/pull/1944)
 - Fixed a bug where relative symlinks were resolved without considering the parent directory - [#1900](https://github.com/qarmin/czkawka/pull/1900)
 - Fixed a prehash cache bypass that caused full hash computation on some files during a second scan - [#1907](https://github.com/qarmin/czkawka/pull/1907)
 - Extended integration tests, to prevent regressions in the future - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 
 ### CLI
+- Added `--geometric-invariance` option to similar images mode - [#1944](https://github.com/qarmin/czkawka/pull/1944)
 
 ### GTK GUI
 - Fixed a crash when using the sort button - [#1837](https://github.com/qarmin/czkawka/pull/1837)
@@ -48,9 +51,11 @@ The project will remain available in the repository. For some time I will ensure
 - Added invert selection within groups - [#1915](https://github.com/qarmin/czkawka/pull/1915)
 - Fixed shortest/longest path selection modes, which previously compared only paths without file names - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 - Ability to restore save/restore data in custom popup - [#1919](https://github.com/qarmin/czkawka/pull/1919)
+- Added a geometric invariance setting to similar images mode - [#1944](https://github.com/qarmin/czkawka/pull/1944)
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)
+- Added a geometric invariance setting to similar images mode - [#1944](https://github.com/qarmin/czkawka/pull/1944)
 
 ### Prebuilt binaries
 - Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d`)

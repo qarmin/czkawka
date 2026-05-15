@@ -37,7 +37,7 @@ pub struct ImagesEntry {
     pub width: u32,
     pub height: u32,
     pub modified_date: u64,
-    pub hash: ImHash,
+    pub hashes: Vec<ImHash>,
     pub difference: u32,
 }
 
@@ -61,8 +61,25 @@ impl FileEntry {
 
             width: 0,
             height: 0,
-            hash: Vec::new(),
+            hashes: Vec::new(),
             difference: 0,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum GeometricInvariance {
+    Off,
+    MirrorFlip,
+    MirrorFlipRotate90,
+}
+
+impl GeometricInvariance {
+    pub const fn as_cache_tag(self) -> &'static str {
+        match self {
+            Self::Off => "off",
+            Self::MirrorFlip => "mirror_flip",
+            Self::MirrorFlipRotate90 => "mirror_flip_rotate90",
         }
     }
 }
@@ -99,6 +116,7 @@ pub struct SimilarImagesParameters {
     pub image_filter: FilterType,
     pub exclude_images_with_same_size: bool,
     pub exclude_images_with_same_resolution: bool,
+    pub geometric_invariance: GeometricInvariance,
 }
 
 impl SimilarImagesParameters {
@@ -109,6 +127,7 @@ impl SimilarImagesParameters {
         image_filter: FilterType,
         exclude_images_with_same_size: bool,
         exclude_images_with_same_resolution: bool,
+        geometric_invariance: GeometricInvariance,
     ) -> Self {
         assert!([8, 16, 32, 64].contains(&hash_size));
         Self {
@@ -118,6 +137,7 @@ impl SimilarImagesParameters {
             image_filter,
             exclude_images_with_same_size,
             exclude_images_with_same_resolution,
+            geometric_invariance,
         }
     }
 }

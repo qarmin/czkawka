@@ -5,7 +5,8 @@ use gtk4::prelude::*;
 use crate::gtk_traits::ComboBoxTraits;
 use crate::gui_structs::gui_data::GuiData;
 use crate::help_combo_box::{
-    DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX, IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
+    DUPLICATES_CHECK_METHOD_COMBO_BOX, DUPLICATES_HASH_TYPE_COMBO_BOX, IMAGES_GEOMETRIC_INVARIANCE_COMBO_BOX, IMAGES_HASH_SIZE_COMBO_BOX, IMAGES_HASH_TYPE_COMBO_BOX,
+    IMAGES_RESIZE_ALGORITHM_COMBO_BOX,
 };
 use crate::help_functions::scale_set_min_max_values;
 use crate::language_functions::LANGUAGES_ALL;
@@ -46,6 +47,10 @@ pub(crate) fn initialize_gui(gui_data: &GuiData) {
         .main_notebook
         .combo_box_image_resize_algorithm
         .set_model_and_first(IMAGES_RESIZE_ALGORITHM_COMBO_BOX.iter().map(|e| &e.eng_name));
+    gui_data
+        .main_notebook
+        .combo_box_image_geometric_invariance
+        .set_model_and_first(IMAGES_GEOMETRIC_INVARIANCE_COMBO_BOX.iter().map(|e| &e.eng_name));
 
     //// Initialize main scrolled view with notebook
     {
