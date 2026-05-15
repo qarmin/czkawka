@@ -464,6 +464,7 @@ fn process_file_in_file_mode_path_check(
     }
 }
 
+#[cfg_attr(target_family = "windows", expect(clippy::needless_pass_by_ref_mut))]
 fn process_dir_in_file_symlink_mode(
     recursive_search: bool,
     entry_data: &DirEntry,

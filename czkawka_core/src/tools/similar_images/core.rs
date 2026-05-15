@@ -730,10 +730,10 @@ impl DisjointSet {
             return;
         };
         *parent_b = root_a;
-        if rank_a == rank_b {
-            if let Some(rank_a_mut) = self.rank.get_mut(root_a) {
-                *rank_a_mut = rank_a.saturating_add(1);
-            }
+        if rank_a == rank_b
+            && let Some(rank_a_mut) = self.rank.get_mut(root_a)
+        {
+            *rank_a_mut = rank_a.saturating_add(1);
         }
     }
 }

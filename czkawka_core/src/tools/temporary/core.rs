@@ -129,6 +129,7 @@ impl Temporary {
     }
 }
 
+#[cfg_attr(target_family = "windows", expect(clippy::needless_pass_by_ref_mut))]
 pub(crate) fn check_folder_children(
     dir_result: &mut Vec<PathBuf>,
     warnings: &mut Vec<String>,
