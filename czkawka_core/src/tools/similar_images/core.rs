@@ -527,17 +527,6 @@ impl SimilarImages {
         }
     }
 
-    // Verifies internal consistency of the collected similar images map.
-    //
-    // Invariants:
-    // 1. No group is empty (every hash key maps to at least one entry).
-    // 2. Every group has at least two entries – a lone entry cannot form a "similar" pair.
-    // 3. No entry has an empty path (would indicate a broken ImagesEntry).
-    // 4. No path appears more than once within the same group.
-    // 5. No path appears in more than one group across the whole result set.
-    // 6. No hash key is empty (would indicate a hashing bug).
-    //
-    // Only active in debug builds (no-op otherwise).
     pub(crate) fn verify_duplicated_items(collected_similar_images: &IndexMap<ImHash, Vec<ImagesEntry>>) {
         if !cfg!(debug_assertions) {
             return;
@@ -547,20 +536,17 @@ impl SimilarImages {
         let mut found = false;
 
         for (hash, vec_file_entry) in collected_similar_images {
-            // Invariant 6
             if hash.is_empty() {
                 error!("Found group with empty hash key");
                 found = true;
             }
 
-            // Invariant 1
             if vec_file_entry.is_empty() {
                 error!("Found empty group (hash: {hash:?})");
                 found = true;
                 continue;
             }
 
-            // Invariant 2
             if vec_file_entry.len() == 1 {
                 error!("Found singleton group {vec_file_entry:?}");
                 found = true;
@@ -571,20 +557,17 @@ impl SimilarImages {
             for entry in vec_file_entry {
                 let path_str = entry.path.to_string_lossy().to_string();
 
-                // Invariant 3
                 if path_str.is_empty() {
                     error!("Found entry with empty path in group (hash: {hash:?})");
                     found = true;
                     continue;
                 }
 
-                // Invariant 4
                 if !group_paths.insert(path_str.clone()) {
                     error!("Duplicated path within same group: {path_str}");
                     found = true;
                 }
 
-                // Invariant 5
                 if !all_paths.insert(path_str.clone()) {
                     error!("Path appears in multiple groups: {path_str}");
                     found = true;
@@ -673,11 +656,6 @@ pub(crate) fn convert_algorithm_to_string(hash_alg: HashAlg) -> String {
     .to_string()
 }
 
-// Validates that after hash comparison there are no duplicated entries across
-// hashes_parents and hashes_similarity – i.e. no hash or file path appears in
-// both maps simultaneously. A path appearing in both would risk accidental
-// deletion of more images than the user intended.
-// Not checked when reference folders are active (different grouping semantics).
 #[cfg(debug_assertions)]
 fn debug_check_for_duplicated_things(
     use_reference_folders: bool,
@@ -686,7 +664,6 @@ fn debug_check_for_duplicated_things(
     all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
     numm: &str,
 ) {
-
     if use_reference_folders {
         return;
     }
@@ -766,14 +743,6 @@ mod tests {
         }
     }
 
-    // ── Fuzz / stress tests ───────────────────────────────────────────────────
-    // Marked #[ignore] so they are skipped in normal `cargo test` runs.
-    // Run explicitly with:  cargo test -p czkawka_core -- --ignored
-    // Or via justfile:  just ignored
-
-    /// Basic fuzz: random hashes, random tolerance, random entry count.
-    /// Verifies that find_similar_hashes never panics and always leaves the
-    /// result in a consistent state (verify_duplicated_items passes).
     #[test]
     #[ignore]
     fn test_fuzzer_basic() {
@@ -796,14 +765,11 @@ mod tests {
             }
 
             similar_images.find_similar_hashes(&Arc::default(), None);
-            // No panic is the primary invariant; also ensure the result is self-consistent
             let collected: IndexMap<ImHash, Vec<ImagesEntry>> = similar_images.similar_vectors.iter().cloned().map(|v| (v[0].hash.clone(), v)).collect();
             SimilarImages::verify_duplicated_items(&collected);
         }
     }
 
-    /// Stress test with large hash sets (up to 5 000 entries).
-    /// Ensures performance stays acceptable and results stay consistent.
     #[test]
     #[ignore]
     fn test_fuzzer_large() {
@@ -824,8 +790,6 @@ mod tests {
         }
     }
 
-    /// Tolerance-0 fuzz: only files with identical hashes should group together.
-    /// The resulting groups must all have identical hashes across every member.
     #[test]
     #[ignore]
     fn test_fuzzer_tolerance_zero_invariant() {
@@ -838,14 +802,12 @@ mod tests {
 
             let count = rng.random::<u32>() % 500;
             for i in 0..count {
-                // Use only a few distinct hashes so collisions (groups) are common
                 let hash = vec![rng.random::<u8>() % 4, 0, 0, 0, 0, 0, 0, 0];
                 add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(hash, &format!("t0_{i}.jpg"))]);
             }
 
             similar_images.find_similar_hashes(&Arc::default(), None);
 
-            // Every member in every group must share the same hash
             for group in similar_images.get_similar_images() {
                 let first_hash = &group[0].hash;
                 for entry in group {
@@ -856,8 +818,6 @@ mod tests {
         }
     }
 
-    /// Reference-folder fuzz: after the split every "master" must come from the
-    /// reference directory and all "similar" entries must come from outside it.
     #[test]
     #[ignore]
     fn test_fuzzer_reference_folders_invariant() {
@@ -875,8 +835,7 @@ mod tests {
             let count = rng.random::<u32>() % 300;
             for i in 0..count {
                 let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>() % 8).collect();
-                let in_ref = rng.random::<bool>();
-                let dir = if in_ref { &ref_dir } else { &non_ref_dir };
+                let dir = if rng.random::<bool>() { &ref_dir } else { &non_ref_dir };
                 let path = dir.join(format!("img_{i}.jpg")).to_string_lossy().into_owned();
                 add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(hash, &path)]);
             }
@@ -884,23 +843,14 @@ mod tests {
             similar_images.find_similar_hashes(&Arc::default(), None);
 
             for (master, similars) in similar_images.get_similar_images_referenced() {
-                assert!(
-                    master.path.starts_with(&ref_dir),
-                    "master {:?} is not in reference dir",
-                    master.path
-                );
+                assert!(master.path.starts_with(&ref_dir), "master {:?} is not in reference dir", master.path);
                 for s in similars {
-                    assert!(
-                        !s.path.starts_with(&ref_dir),
-                        "similar entry {:?} must not be in reference dir",
-                        s.path
-                    );
+                    assert!(!s.path.starts_with(&ref_dir), "similar {:?} must not be in reference dir", s.path);
                 }
             }
         }
     }
 
-    /// Determinism fuzz: the same input must always produce the same output.
     #[test]
     #[ignore]
     fn test_fuzzer_determinism() {
@@ -910,7 +860,6 @@ mod tests {
             let tolerance = rng.random::<u32>() % 15;
             let count = rng.random::<u32>() % 300;
 
-            // Build a fixed set of entries
             let entries: Vec<ImagesEntry> = (0..count)
                 .map(|i| {
                     let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>() % 16).collect();
@@ -945,8 +894,6 @@ mod tests {
         }
     }
 
-    /// No-false-negatives fuzz: two entries with the exact same hash at tolerance 0
-    /// must always end up in a group together.
     #[test]
     #[ignore]
     fn test_fuzzer_no_false_negatives_tolerance_zero() {
