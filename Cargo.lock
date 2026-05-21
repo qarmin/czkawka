@@ -1815,7 +1815,7 @@ dependencies = [
  "sevenz-rust2",
  "similario_core",
  "static_assertions",
- "symphonia 0.5.5",
+ "symphonia 0.6.0",
  "tar",
  "tempfile",
  "tokio",
