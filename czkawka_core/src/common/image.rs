@@ -5,10 +5,10 @@ use std::path::Path;
 
 use fast_image_resize::{FilterType as FirFilterType, ResizeAlg, ResizeOptions as FirResizeOptions, Resizer};
 use image::{DynamicImage, ImageReader};
-use log::{error, trace};
 use little_exif::exif_tag::ExifTag;
 use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
+use log::{error, trace};
 
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::create_crash_message;

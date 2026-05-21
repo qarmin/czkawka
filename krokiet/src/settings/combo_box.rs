@@ -203,11 +203,7 @@ impl StringComboBoxItems {
                 SimilarVideosAudioPreset::Identical,
                 DisplaySpec::Translatable("subsettings_videos_audio_preset_identical"),
             ),
-            (
-                "clip",
-                SimilarVideosAudioPreset::Clip,
-                DisplaySpec::Translatable("subsettings_videos_audio_preset_clip"),
-            ),
+            ("clip", SimilarVideosAudioPreset::Clip, DisplaySpec::Translatable("subsettings_videos_audio_preset_clip")),
             (
                 "similar",
                 SimilarVideosAudioPreset::Similar,

@@ -314,7 +314,6 @@ pub fn string_to_file_extension(s: &str) -> FileExtension {
     }
 }
 
-
 pub fn string_to_exif_tag_group(tag: &str) -> Result<ExifTagGroup, String> {
     match tag {
         "EXIF" => Ok(ExifTagGroup::EXIF),
