@@ -340,6 +340,7 @@ impl SimilarImages {
 
         progress_handler.join_thread();
 
+        #[cfg(debug_assertions)]
         debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
@@ -526,37 +527,72 @@ impl SimilarImages {
         }
     }
 
-    // TODO this probably not works good when reference folders are used
+    // Verifies internal consistency of the collected similar images map.
+    //
+    // Invariants:
+    // 1. No group is empty (every hash key maps to at least one entry).
+    // 2. Every group has at least two entries – a lone entry cannot form a "similar" pair.
+    // 3. No entry has an empty path (would indicate a broken ImagesEntry).
+    // 4. No path appears more than once within the same group.
+    // 5. No path appears in more than one group across the whole result set.
+    // 6. No hash key is empty (would indicate a hashing bug).
+    //
+    // Only active in debug builds (no-op otherwise).
     pub(crate) fn verify_duplicated_items(collected_similar_images: &IndexMap<ImHash, Vec<ImagesEntry>>) {
         if !cfg!(debug_assertions) {
             return;
         }
-        // Validating if group contains duplicated results
-        let mut result_hashset: IndexSet<String> = Default::default();
+
+        let mut all_paths: IndexSet<String> = Default::default();
         let mut found = false;
 
-        for vec_file_entry in collected_similar_images.values() {
+        for (hash, vec_file_entry) in collected_similar_images {
+            // Invariant 6
+            if hash.is_empty() {
+                error!("Found group with empty hash key");
+                found = true;
+            }
+
+            // Invariant 1
             if vec_file_entry.is_empty() {
-                error!("Found empty group");
+                error!("Found empty group (hash: {hash:?})");
                 found = true;
                 continue;
             }
+
+            // Invariant 2
             if vec_file_entry.len() == 1 {
-                error!("Found simple element {vec_file_entry:?}");
+                error!("Found singleton group {vec_file_entry:?}");
                 found = true;
                 continue;
             }
-            for file_entry in vec_file_entry {
-                let st = file_entry.path.to_string_lossy().to_string();
-                if result_hashset.contains(&st) {
+
+            let mut group_paths: IndexSet<String> = Default::default();
+            for entry in vec_file_entry {
+                let path_str = entry.path.to_string_lossy().to_string();
+
+                // Invariant 3
+                if path_str.is_empty() {
+                    error!("Found entry with empty path in group (hash: {hash:?})");
                     found = true;
-                    error!("Duplicated Element {st}");
-                } else {
-                    result_hashset.insert(st);
+                    continue;
+                }
+
+                // Invariant 4
+                if !group_paths.insert(path_str.clone()) {
+                    error!("Duplicated path within same group: {path_str}");
+                    found = true;
+                }
+
+                // Invariant 5
+                if !all_paths.insert(path_str.clone()) {
+                    error!("Path appears in multiple groups: {path_str}");
+                    found = true;
                 }
             }
         }
-        assert!(!found, "Found Invalid entries, verify errors before");
+
+        assert!(!found, "verify_duplicated_items: invariant violations detected – check error log above");
     }
 }
 
@@ -637,14 +673,12 @@ pub(crate) fn convert_algorithm_to_string(hash_alg: HashAlg) -> String {
     .to_string()
 }
 
-#[allow(clippy::allow_attributes)]
-#[allow(unfulfilled_lint_expectations)] // Happens only on release build
-#[expect(dead_code)]
-#[expect(unreachable_code)]
-#[expect(unused_variables)]
-// Function to validate if after first check there are any duplicated entries
-// E.g. /a.jpg is used also as master and similar image which is forbidden, because may
-// cause accidentally delete more pictures that user wanted
+// Validates that after hash comparison there are no duplicated entries across
+// hashes_parents and hashes_similarity – i.e. no hash or file path appears in
+// both maps simultaneously. A path appearing in both would risk accidental
+// deletion of more images than the user intended.
+// Not checked when reference folders are active (different grouping semantics).
+#[cfg(debug_assertions)]
 fn debug_check_for_duplicated_things(
     use_reference_folders: bool,
     hashes_parents: &IndexMap<ImHash, u32>,
@@ -652,9 +686,6 @@ fn debug_check_for_duplicated_things(
     all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
     numm: &str,
 ) {
-    if !cfg!(debug_assertions) {
-        return;
-    }
 
     if use_reference_folders {
         return;
