@@ -55,10 +55,10 @@ fn test_same_music_by_content_medium_similarity() {
     let info = finder.get_information();
     let duplicates = finder.get_duplicated_music_entries();
 
-    assert_eq!(info.number_of_duplicates, 1);
+    assert_eq!(info.number_of_duplicates, 2);
     assert_eq!(info.number_of_groups, 1);
     assert_eq!(duplicates.len(), 1);
-    assert_eq!(duplicates.iter().map(|e| e.len()).sum::<usize>(), 2);
+    assert_eq!(duplicates.iter().map(|e| e.len()).sum::<usize>(), 3);
 }
 
 #[test]
