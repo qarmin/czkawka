@@ -41,7 +41,7 @@ export global Settings {
     in-out property <bool> similar_images_show_image_preview;
 
     in-out property <bool> video_thumbnails_preview;
-    in-out property <bool> video_thumbnails_unused_thumbnails;
+    in-out property <bool> clear_unused_video_thumbnails;
 
 
     // Video Thumbnails Global Settings
@@ -99,9 +99,27 @@ export global Settings {
     in-out property <float> similar_videos_vid_hash_duration_max: 60;
     in-out property <float> similar_videos_vid_hash_duration_min: 1;
 
-    in-out property <[string]> similar_videos_crop_detect: ["LetterBox", "Motion", "None"];
-    in-out property <string> similar_videos_crop_detect_value: "letterbox";
-    in-out property <int> similar_videos_crop_detect_index: 0;
+    in-out property <float> similar_videos_window_count: 5;
+    in-out property <float> similar_videos_window_count_max: 20;
+    in-out property <float> similar_videos_window_count_min: 1;
+
+    in-out property <bool> similar_videos_crop_detect: true;
+
+    in-out property <float> similar_videos_duration_tolerance_pct: 20;
+    in-out property <float> similar_videos_duration_tolerance_pct_max: 100;
+    in-out property <float> similar_videos_duration_tolerance_pct_min: 0;
+
+    in-out property <float> similar_videos_min_matching_windows: 0.6;
+    in-out property <float> similar_videos_min_matching_windows_max: 1;
+    in-out property <float> similar_videos_min_matching_windows_min: 0.2;
+
+    in-out property <float> similar_videos_subclip_min_match: 0.5;
+    in-out property <float> similar_videos_subclip_min_match_max: 1;
+    in-out property <float> similar_videos_subclip_min_match_min: 0.2;
+
+    in-out property <[string]> similar_videos_visual_preset_names: ["Custom", "Near-identical", "Similar", "Movies (long skip)"];
+    in-out property <string> similar_videos_visual_preset_value: "Custom";
+    in-out property <int> similar_videos_visual_preset_index: 0;
 
     // Audio fingerprint sub-mode
     in-out property <bool> similar_videos_audio_check_content: false;
@@ -277,8 +295,8 @@ export global Settings {
     in-out property <[length]> big_files_column_size: [35px, size_px, name_px, path_px, mod_px];
     in-out property <[string]> empty_files_column_name: ["Selection", "File Name", "Path", "Modification Date"];
     in-out property <[length]> empty_files_column_size: [35px, name_px, path_px, mod_px];
-    in-out property <[string]> temporary_files_column_name: ["Selection", "File Name", "Path", "Modification Date"];
-    in-out property <[length]> temporary_files_column_size: [35px, name_px, path_px, mod_px];
+    in-out property <[string]> temporary_files_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> temporary_files_column_size: [35px, size_px, name_px, path_px, mod_px];
     in-out property <[string]> similar_images_column_name: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];
     in-out property <[length]> similar_images_column_size: [35px, 80px, 80px, 80px, name_px, path_px, mod_px];
     in-out property <[string]> similar_videos_column_name: ["Selection", "Size", "File Name", "Path", "Dimensions", "Duration", "Bitrate", "Fps", "Codec", "Modification Date"];

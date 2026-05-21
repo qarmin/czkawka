@@ -130,7 +130,6 @@ fn main() {
     // Create audio player for scan completion notifications
     let audio_player = Arc::new(crate::audio_player::AudioPlayer::new());
 
-    // Disabled for now, due invalid settings model at start
     set_initial_gui_infos(&app);
 
     set_initial_scroll_list_data_indexes(&app);

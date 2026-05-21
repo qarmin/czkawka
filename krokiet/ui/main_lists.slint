@@ -7,6 +7,7 @@ import { Settings } from "settings.slint";
 
 export component MainList {
     callback show_clean_cache_popup();
+    callback show_other_apps_popup();
 
     in-out property <bool> working: false;
 
@@ -274,6 +275,9 @@ export component MainList {
 
     about_app := About {
         visible: GuiState.active_tab == ActiveTab.About;
+        other_apps_clicked => {
+            root.show_other_apps_popup();
+        }
     }
 
     public function reset_selection(active_tab: ActiveTab) {

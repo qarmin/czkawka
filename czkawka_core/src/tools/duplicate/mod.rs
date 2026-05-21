@@ -244,7 +244,7 @@ pub(crate) fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEn
 
     // Read first `limit` bytes from the start of the file
     #[expect(clippy::indexing_slicing)] // Safe: limit <= PREHASHING_BUFFER_SIZE <= buffer size / 2
-    let n = match file_handler.read(&mut buffer[..limit as usize]) {
+    let n = match read_filling(&mut file_handler, &mut buffer[..limit as usize]) {
         Ok(t) => t,
         Err(e) => return Err(flc!("core_error_checking_hash_of_file", file = file_entry.path.to_string_lossy(), reason = e.to_string())),
     };
@@ -259,7 +259,7 @@ pub(crate) fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEn
             return Err(flc!("core_error_checking_hash_of_file", file = file_entry.path.to_string_lossy(), reason = e.to_string()));
         }
         #[expect(clippy::indexing_slicing)] // Safe: limit * 2 <= THREAD_BUFFER_SIZE <= buffer size
-        let n2 = match file_handler.read(&mut buffer[limit as usize..limit as usize * 2]) {
+        let n2 = match read_filling(&mut file_handler, &mut buffer[limit as usize..limit as usize * 2]) {
             Ok(t) => t,
             Err(e) => return Err(flc!("core_error_checking_hash_of_file", file = file_entry.path.to_string_lossy(), reason = e.to_string())),
         };
@@ -269,6 +269,24 @@ pub(crate) fn hash_calculation_limit(buffer: &mut [u8], file_entry: &DuplicateEn
     }
 
     Ok(hasher.finalize())
+}
+
+// Repeatedly calls Read::read until `buf` is full or EOF is reached.
+// `Read::read` is allowed to return short reads, so a single call can
+// hash fewer bytes than expected and produce a different hash on the
+// next run for the same file. This wrapper guarantees a stable prehash.
+fn read_filling(reader: &mut impl Read, buf: &mut [u8]) -> std::io::Result<usize> {
+    let mut total = 0;
+    while total < buf.len() {
+        #[expect(clippy::indexing_slicing)] // Safe: total < buf.len()
+        match reader.read(&mut buf[total..]) {
+            Ok(0) => break,
+            Ok(n) => total += n,
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(e) => return Err(e),
+        }
+    }
+    Ok(total)
 }
 
 pub fn hash_calculation(

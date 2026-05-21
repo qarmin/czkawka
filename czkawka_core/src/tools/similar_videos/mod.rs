@@ -11,7 +11,7 @@ use std::time::Duration;
 
 use rusty_chromaprint::Configuration;
 use serde::{Deserialize, Serialize};
-use vid_dup_finder_lib::{Cropdetect, VideoHash};
+use similario_core::VideoSignature;
 
 use crate::common::model::FileEntry;
 use crate::common::tool_data::CommonToolData;
@@ -19,13 +19,23 @@ use crate::common::traits::ResultEntry;
 
 pub const MAX_TOLERANCE: i32 = 20;
 
-pub const DEFAULT_CROP_DETECT: Cropdetect = Cropdetect::Letterbox;
+pub const DEFAULT_CROP_DETECT: bool = true;
 
 pub const ALLOWED_SKIP_FORWARD_AMOUNT: RangeInclusive<u32> = 0..=300;
 pub const DEFAULT_SKIP_FORWARD_AMOUNT: u32 = 15;
 
 pub const ALLOWED_VID_HASH_DURATION: RangeInclusive<u32> = 2..=60;
 pub const DEFAULT_VID_HASH_DURATION: u32 = 10;
+
+pub const ALLOWED_WINDOW_COUNT: RangeInclusive<u32> = 1..=20;
+pub const DEFAULT_WINDOW_COUNT: u32 = 5;
+
+pub const ALLOWED_DURATION_TOLERANCE_PCT: RangeInclusive<f64> = 0.0..=100.0;
+pub const DEFAULT_DURATION_TOLERANCE_PCT: f64 = 20.0;
+
+pub const ALLOWED_MATCH_FRACTION: RangeInclusive<f64> = 0.0..=1.0;
+pub const DEFAULT_MIN_MATCHING_WINDOWS: f64 = 0.6;
+pub const DEFAULT_SUBCLIP_MIN_MATCH: f64 = 0.5;
 
 pub const DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL: u8 = 10;
 pub const DEFAULT_THUMBNAIL_GRID_TILES_PER_SIDE: u8 = 2;
@@ -43,7 +53,7 @@ pub struct VideosEntry {
     pub path: PathBuf,
     pub size: u64,
     pub modified_date: u64,
-    pub vhash: VideoHash,
+    pub signature: Option<VideoSignature>,
     pub error: String,
 
     // Properties extracted from video
@@ -100,7 +110,7 @@ impl FileEntry {
             path: self.path,
             modified_date: self.modified_date,
 
-            vhash: Default::default(),
+            signature: None,
             error: String::new(),
             fps: None,
             codec: None,
@@ -130,7 +140,11 @@ pub struct SimilarVideosParameters {
     pub exclude_videos_with_same_resolution: bool,
     pub skip_forward_amount: u32,
     pub duration: u32,
-    pub crop_detect: Cropdetect,
+    pub crop_detect: bool,
+    pub window_count: u32,
+    pub duration_tolerance_pct: f64,
+    pub min_matching_windows: f64,
+    pub subclip_min_match: f64,
     pub generate_thumbnails: bool,
     pub thumbnail_video_percentage_from_start: u8,
     pub generate_thumbnail_grid_instead_of_single: bool,
@@ -143,15 +157,6 @@ pub struct SimilarVideosParameters {
     pub audio_min_duration_seconds: u32,
 }
 
-pub fn crop_detect_from_str_opt(s: &str) -> Option<Cropdetect> {
-    match s.to_lowercase().as_str() {
-        "none" => Some(Cropdetect::None),
-        "letterbox" => Some(Cropdetect::Letterbox),
-        "motion" => Some(Cropdetect::Motion),
-        _ => None,
-    }
-}
-
 impl SimilarVideosParameters {
     pub fn new(
         tolerance: i32,
@@ -159,7 +164,11 @@ impl SimilarVideosParameters {
         exclude_videos_with_same_resolution: bool,
         skip_forward_amount: u32,
         duration: u32,
-        crop_detect: Cropdetect,
+        crop_detect: bool,
+        window_count: u32,
+        duration_tolerance_pct: f64,
+        min_matching_windows: f64,
+        subclip_min_match: f64,
         generate_thumbnails: bool,
         thumbnail_video_percentage_from_start: u8,
         generate_thumbnail_grid_instead_of_single: bool,
@@ -173,6 +182,10 @@ impl SimilarVideosParameters {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
         assert!(ALLOWED_VID_HASH_DURATION.contains(&duration));
+        assert!(ALLOWED_WINDOW_COUNT.contains(&window_count));
+        assert!(ALLOWED_DURATION_TOLERANCE_PCT.contains(&duration_tolerance_pct));
+        assert!(ALLOWED_MATCH_FRACTION.contains(&min_matching_windows));
+        assert!(ALLOWED_MATCH_FRACTION.contains(&subclip_min_match));
         assert!(ALLOWED_AUDIO_SIMILARITY_PERCENT.contains(&audio_similarity_percent));
         assert!(ALLOWED_AUDIO_LENGTH_RATIO.contains(&audio_length_ratio));
         Self {
@@ -182,6 +195,10 @@ impl SimilarVideosParameters {
             skip_forward_amount,
             duration,
             crop_detect,
+            window_count,
+            duration_tolerance_pct,
+            min_matching_windows,
+            subclip_min_match,
             generate_thumbnails,
             thumbnail_video_percentage_from_start,
             generate_thumbnail_grid_instead_of_single,
@@ -200,7 +217,6 @@ pub struct SimilarVideos {
     pub(crate) information: Info,
     pub(crate) similar_vectors: Vec<Vec<VideosEntry>>,
     pub(crate) similar_referenced_vectors: Vec<(VideosEntry, Vec<VideosEntry>)>,
-    pub(crate) videos_hashes: BTreeMap<Vec<u8>, Vec<VideosEntry>>,
     pub(crate) videos_to_check: BTreeMap<String, VideosEntry>,
     /// Entries for the audio fingerprint pass, keyed by path string.
     pub(crate) audio_to_check: BTreeMap<String, VideoAudioEntry>,

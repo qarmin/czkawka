@@ -25,6 +25,7 @@ import { PopupCropVideo } from "popup_crop_video.slint";
 import { PopupReencodeVideo } from "popup_optimize.slint";
 import { PopupCleanExif } from "popup_clean_exif.slint";
 import { PopupCleanCache } from "popup_clean_cache.slint";
+import { PopupOtherApps } from "popup_other_apps.slint";
 import { ToolSettings } from "tool_settings.slint";
 import { Translations } from "translations.slint";
 import { ImageCompareOverlay } from "image_compare.slint";
@@ -118,6 +119,10 @@ export component MainWindow inherits Window {
 
                         show_clean_cache_popup() => {
                             clean_cache_popup_window.show_popup();
+                        }
+
+                        show_other_apps_popup() => {
+                            other_apps_popup_window.show_popup();
                         }
                     }
 
@@ -336,6 +341,14 @@ export component MainWindow inherits Window {
         stop_cleaning() => {
             Callabler.stop_cache_cleaning();
         }
+    }
+
+    other_apps_popup_window := PopupOtherApps {
+        height: root.height;
+        width: root.width;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
     }
 
     crop_video_popup_window := PopupCropVideo {

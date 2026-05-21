@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use czkawka_core::common::model::{CheckingMethod, HashType};
-use czkawka_core::re_exported::{Cropdetect, HashAlg};
+use czkawka_core::re_exported::HashAlg;
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use image::imageops::FilterType;
@@ -18,6 +18,22 @@ pub enum DisplaySpec {
     Translatable(&'static str),
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SimilarVideosVisualPreset {
+    Custom,
+    NearIdentical,
+    Similar,
+    Movies,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SimilarVideosAudioPreset {
+    Custom,
+    Identical,
+    Clip,
+    Similar,
+}
+
 #[derive(Debug, Clone)]
 pub struct StringComboBoxItem<T>
 where
@@ -28,6 +44,11 @@ where
     pub value: T,
 }
 
+// When item is not a number(like hash_size), but it is e.g. Language - pl, en etc.
+// It cannot be set as:
+// pub language: Vec<StringComboBoxItem<u8>>
+// Where u8 is index in array - because this makes everything harder to work, than with enums
+// and additionally it isn't safe to
 pub struct StringComboBoxItems {
     pub languages: Vec<StringComboBoxItem<String>>,
     pub hash_size: Vec<StringComboBoxItem<u8>>,
@@ -37,11 +58,12 @@ pub struct StringComboBoxItems {
     pub biggest_files_method: Vec<StringComboBoxItem<SearchMode>>,
     pub audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
     pub duplicates_check_method: Vec<StringComboBoxItem<CheckingMethod>>,
-    pub videos_crop_detect: Vec<StringComboBoxItem<Cropdetect>>,
     pub video_optimizer_crop_type: Vec<StringComboBoxItem<VideoCroppingMechanism>>,
     pub video_optimizer_mode: Vec<StringComboBoxItem<VideoOptimizerMode>>,
     pub video_optimizer_video_codec: Vec<StringComboBoxItem<VideoCodec>>,
     pub video_optimizer_noise_reduction: Vec<StringComboBoxItem<NoiseReductionMethod>>,
+    pub similar_videos_visual_preset: Vec<StringComboBoxItem<SimilarVideosVisualPreset>>,
+    pub similar_videos_audio_preset: Vec<StringComboBoxItem<SimilarVideosAudioPreset>>,
 }
 
 pub static STRING_COMBO_BOX_ITEMS: std::sync::LazyLock<Arc<Mutex<StringComboBoxItems>>> = std::sync::LazyLock::new(|| {
@@ -113,12 +135,6 @@ impl StringComboBoxItems {
             ("size_and_name", CheckingMethod::SizeName, DisplaySpec::Translatable("option_check_method_size_and_name")),
         ]);
 
-        let videos_crop_detect = Self::convert_to_combobox_items_i18n(&[
-            ("letterbox", Cropdetect::Letterbox, DisplaySpec::Translatable("option_crop_detect_letterbox")),
-            ("motion", Cropdetect::Motion, DisplaySpec::Translatable("option_crop_detect_motion")),
-            ("none", Cropdetect::None, DisplaySpec::Translatable("option_crop_detect_none")),
-        ]);
-
         let video_optimizer_crop_type = Self::convert_to_combobox_items_i18n(&[
             (
                 "blackbars",
@@ -153,6 +169,52 @@ impl StringComboBoxItems {
             ("hqdn3d", NoiseReductionMethod::Hqdn3d, DisplaySpec::Translatable("option_noise_reduction_hqdn3d")),
         ]);
 
+        let similar_videos_visual_preset = Self::convert_to_combobox_items_i18n(&[
+            (
+                "custom",
+                SimilarVideosVisualPreset::Custom,
+                DisplaySpec::Translatable("subsettings_videos_visual_preset_custom"),
+            ),
+            (
+                "near_identical",
+                SimilarVideosVisualPreset::NearIdentical,
+                DisplaySpec::Translatable("subsettings_videos_visual_preset_near_identical"),
+            ),
+            (
+                "similar",
+                SimilarVideosVisualPreset::Similar,
+                DisplaySpec::Translatable("subsettings_videos_visual_preset_similar"),
+            ),
+            (
+                "movies",
+                SimilarVideosVisualPreset::Movies,
+                DisplaySpec::Translatable("subsettings_videos_visual_preset_movies"),
+            ),
+        ]);
+
+        let similar_videos_audio_preset = Self::convert_to_combobox_items_i18n(&[
+            (
+                "custom",
+                SimilarVideosAudioPreset::Custom,
+                DisplaySpec::Translatable("subsettings_videos_audio_preset_custom"),
+            ),
+            (
+                "identical",
+                SimilarVideosAudioPreset::Identical,
+                DisplaySpec::Translatable("subsettings_videos_audio_preset_identical"),
+            ),
+            (
+                "clip",
+                SimilarVideosAudioPreset::Clip,
+                DisplaySpec::Translatable("subsettings_videos_audio_preset_clip"),
+            ),
+            (
+                "similar",
+                SimilarVideosAudioPreset::Similar,
+                DisplaySpec::Translatable("subsettings_videos_audio_preset_similar"),
+            ),
+        ]);
+
         Self {
             languages,
             hash_size,
@@ -162,11 +224,12 @@ impl StringComboBoxItems {
             biggest_files_method,
             audio_check_type,
             duplicates_check_method,
-            videos_crop_detect,
             video_optimizer_crop_type,
             video_optimizer_mode,
             video_optimizer_video_codec,
             video_optimizer_noise_reduction,
+            similar_videos_visual_preset,
+            similar_videos_audio_preset,
         }
     }
 

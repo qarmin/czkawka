@@ -217,7 +217,7 @@ impl PrintResults for DuplicateFinder {
                 }
             }
             CheckingMethod::SizeName => {
-                if !self.files_with_identical_names.is_empty() {
+                if !self.files_with_identical_size_names.is_empty() {
                     writeln!(
                         writer,
                         "-------------------------------------------------Files with same size and names-------------------------------------------------"
@@ -234,7 +234,7 @@ impl PrintResults for DuplicateFinder {
                         }
                         writeln!(writer)?;
                     }
-                } else if !self.files_with_identical_names_referenced.is_empty() {
+                } else if !self.files_with_identical_size_names_referenced.is_empty() {
                     writeln!(
                         writer,
                         "-------------------------------------------------Files with same size and names in referenced folders-------------------------------------------------"

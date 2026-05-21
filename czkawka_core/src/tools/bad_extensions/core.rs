@@ -192,13 +192,7 @@ impl BadExtensions {
         let valid_extensions = if all_available_extensions.is_empty() {
             String::new()
         } else {
-            let mut guessed_multiple_extensions = format!("({proper_extension}) - ");
-            for ext in &all_available_extensions {
-                guessed_multiple_extensions.push_str(ext);
-                guessed_multiple_extensions.push(',');
-            }
-            guessed_multiple_extensions.pop();
-            guessed_multiple_extensions
+            format!("({proper_extension}) - {}", all_available_extensions.iter().cloned().collect::<Vec<_>>().join(","))
         };
 
         (all_available_extensions, valid_extensions)

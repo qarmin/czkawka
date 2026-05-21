@@ -42,8 +42,8 @@ pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedM
             SelectMode::InvertSelectionInGroup => invert_selection_in_group(&current_model),
             SelectMode::SelectTheBiggestSize => select_by_property(&current_model, active_tab, Property::Size, true),
             SelectMode::SelectTheSmallestSize => select_by_property(&current_model, active_tab, Property::Size, false),
-            SelectMode::SelectTheBiggestResolution => select_by_property(&current_model, active_tab, Property::Resolution, false),
-            SelectMode::SelectTheSmallestResolution => select_by_property(&current_model, active_tab, Property::Resolution, true),
+            SelectMode::SelectTheBiggestResolution => select_by_property(&current_model, active_tab, Property::Resolution, true),
+            SelectMode::SelectTheSmallestResolution => select_by_property(&current_model, active_tab, Property::Resolution, false),
             SelectMode::SelectNewest => select_by_property(&current_model, active_tab, Property::Date, true),
             SelectMode::SelectOldest => select_by_property(&current_model, active_tab, Property::Date, false),
             SelectMode::SelectShortestPath => select_by_property(&current_model, active_tab, Property::PathLength, false),
@@ -249,7 +249,7 @@ fn extract_comparable_field(model: &SingleMainListModel, property: Property, act
     }
 }
 
-fn select_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab, property: Property, increasing_order: bool) -> SelectionResult {
+fn select_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab, property: Property, select_max: bool) -> SelectionResult {
     let mut checked_items = 0;
 
     let is_header_mode = active_tab.get_is_header_mode();
@@ -257,7 +257,7 @@ fn select_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTa
 
     let mut old_data = model.iter().collect::<Vec<_>>();
     let headers_idx = find_header_idx_and_deselect_all(&mut old_data);
-    if increasing_order {
+    if select_max {
         for i in 0..(headers_idx.len() - 1) {
             let mut max_item = 0;
             let mut max_item_idx = 1;
@@ -297,9 +297,9 @@ fn select_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTa
 }
 
 // Selects all items in each group EXCEPT the one with the extreme property value.
-// `increasing_order: true`  → spares the biggest/newest/longest item (selects all others).
-// `increasing_order: false` → spares the smallest/oldest/shortest item (selects all others).
-fn select_all_except_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab, property: Property, increasing_order: bool) -> SelectionResult {
+// `spare_max: true`  → spares the biggest/newest/longest item (selects all others).
+// `spare_max: false` → spares the smallest/oldest/shortest item (selects all others).
+fn select_all_except_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTab, property: Property, spare_max: bool) -> SelectionResult {
     let mut checked_items = 0;
     let mut unchecked_items = 0;
 
@@ -317,11 +317,11 @@ fn select_all_except_by_property(model: &ModelRc<SingleMainListModel>, active_ta
         let group_end = headers_idx[i + 1];
 
         // Find the extreme item to spare.
-        let mut extreme_val = if increasing_order { 0u64 } else { u64::MAX };
+        let mut extreme_val = if spare_max { 0u64 } else { u64::MAX };
         let mut extreme_idx = group_start;
         for j in group_start..group_end {
             let val = extract_comparable_field(&old_data[j], property, active_tab);
-            if increasing_order && val > extreme_val || !increasing_order && val < extreme_val {
+            if spare_max && val > extreme_val || !spare_max && val < extreme_val {
                 extreme_val = val;
                 extreme_idx = j;
             }

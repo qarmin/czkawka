@@ -228,7 +228,7 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], overri
         let metadata = Metadata::new_from_vec(&file_data, ext).map_err(|e| format!("Failed to read EXIF: {e}"))?;
 
         let mut new_metadata = metadata;
-        let mut tags_removed: u32 = 0;
+        let tags_before = (&new_metadata).into_iter().count();
         for (tag_u16, tag_group) in tags_to_remove {
             let Ok(tag_group) = string_to_exif_tag_group(tag_group) else {
                 error!("Unknown EXIF tag group string: {tag_group}, skipping tag removal.");
@@ -236,8 +236,9 @@ pub fn clean_exif_tags(file_path: &str, tags_to_remove: &[(u16, String)], overri
             };
 
             new_metadata.remove_tag_by_hex_group(*tag_u16, tag_group);
-            tags_removed += 1;
         }
+        let tags_after = (&new_metadata).into_iter().count();
+        let tags_removed = tags_before.saturating_sub(tags_after) as u32;
 
         new_metadata.write_to_vec(&mut file_data, ext).map_err(|e| e.to_string())?;
         if override_file {

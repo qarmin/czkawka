@@ -61,7 +61,12 @@ impl ExcludedItems {
             let expression = expression.replace("/", "\\");
 
             if expression == "DEFAULT" {
-                checked_expressions.push(DEFAULT_EXCLUDED_ITEMS.to_string());
+                for item in DEFAULT_EXCLUDED_ITEMS.split(',') {
+                    let item = item.trim();
+                    if !item.is_empty() {
+                        checked_expressions.push(item.to_string());
+                    }
+                }
                 continue;
             }
             if !expression.contains('*') {
@@ -140,8 +145,10 @@ mod tests {
         let mut items = ExcludedItems::new();
         let msgs = items.set_excluded_items(vec!["DEFAULT".to_string()]);
         assert!(msgs.warnings.is_empty());
-        assert_eq!(items.expressions.len(), 1);
-        assert!(items.expressions[0].contains(".git") || items.expressions[0].contains("node_modules"));
+        let expected = DEFAULT_EXCLUDED_ITEMS.split(',').filter(|s| !s.trim().is_empty()).count();
+        assert_eq!(items.expressions.len(), expected);
+        assert!(items.expressions.iter().any(|e| e.contains(".git")));
+        assert!(items.expressions.iter().any(|e| e.contains("node_modules")));
     }
 
     #[test]

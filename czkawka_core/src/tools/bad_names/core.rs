@@ -148,7 +148,7 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
     }
 
     if checked_issues.non_ascii_graphical {
-        stem = deunicode::deunicode(&stem);
+        stem = deunicode::deunicode(&stem).chars().filter(|c| c.is_ascii_graphic() || *c == ' ').collect();
 
         if let Some(ref mut ext) = extension {
             *ext = deunicode::deunicode(ext).chars().filter(|e| e.is_ascii_graphic() || *e == ' ').collect();

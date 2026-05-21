@@ -1,0 +1,141 @@
+import { Button, ScrollView } from "std-widgets.slint";
+import { ColorPalette } from "color_palette.slint";
+import { Callabler } from "callabler.slint";
+import { Translations } from "translations.slint";
+import { FontSizes } from "fonts.slint";
+
+struct OtherApp {
+    name: string,
+    description: string,
+    url: string,
+}
+
+component AppRow inherits Rectangle {
+    in property <OtherApp> app;
+
+    height: layout.preferred-height;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: ColorPalette.popup_border_color;
+    background: transparent;
+
+    layout := HorizontalLayout {
+        padding: 10px;
+        spacing: 10px;
+
+        VerticalLayout {
+            horizontal-stretch: 1.0;
+            spacing: 2px;
+
+            Text {
+                text: root.app.name;
+                font-size: FontSizes.normal;
+                font-weight: FontSizes.bold_weight;
+            }
+
+            Text {
+                text: root.app.description;
+                font-size: FontSizes.small;
+                wrap: word-wrap;
+            }
+        }
+
+        Button {
+            text <=> Translations.other_apps_open_button_text;
+            clicked => {
+                Callabler.open_link(root.app.url);
+            }
+        }
+    }
+}
+
+export component PopupOtherApps inherits Rectangle {
+    callback show_popup();
+
+    out property <length> popup_width: 520px;
+    out property <length> popup_height: 420px;
+
+    property <[OtherApp]> apps: [
+        {
+            name: "Szyszka",
+            description: "Fast and powerful file renamer.",
+            url: "https://github.com/qarmin/szyszka",
+        },
+        {
+            name: "dcmki_viewer",
+            description: "Simple DICOM viewer.",
+            url: "https://github.com/qarmin/dcmki_viewer",
+        },
+        {
+            name: "video_thumbnailer",
+            description: "Wrapper around the video thumbnail generator used in Czkawka.",
+            url: "https://github.com/qarmin/video_thumbnailer",
+        },
+        {
+            name: "space_finder",
+            description: "Simple finder of the biggest files on your system.",
+            url: "https://github.com/qarmin/space_finder",
+        },
+        {
+            name: "system-info-collector",
+            description: "Collects RAM/CPU usage from the OS and shows it as graphs.",
+            url: "https://github.com/qarmin/system-info-collector",
+        },
+    ];
+
+    popup_window := PopupWindow {
+        width: popup_width;
+        height: popup_height;
+        close-policy: PopupClosePolicy.no-auto-close;
+
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            border-radius: 10px;
+            border-color: ColorPalette.popup_border_color;
+            border-width: 2px;
+            background: ColorPalette.popup_background;
+            clip: true;
+
+            VerticalLayout {
+                Rectangle {
+                    background: ColorPalette.popup_background_title_line;
+                    Text {
+                        vertical-stretch: 0.0;
+                        min-height: 30px;
+                        text <=> Translations.other_apps_title_text;
+                        vertical-alignment: center;
+                        horizontal-alignment: center;
+                        font-size: FontSizes.normal;
+                    }
+                }
+
+                ScrollView {
+                    VerticalLayout {
+                        padding: 12px;
+                        spacing: 8px;
+
+                        for app in root.apps: AppRow {
+                            app: app;
+                        }
+
+                        Rectangle { }
+                    }
+                }
+
+                HorizontalLayout {
+                    padding: 10px;
+                    Rectangle { }
+                    Button {
+                        text <=> Translations.cancel_button_text;
+                        clicked => {
+                            popup_window.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    show_popup() => { popup_window.show(); }
+}

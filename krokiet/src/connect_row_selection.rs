@@ -770,6 +770,8 @@ fn rows_reverse_checked_selection(selection: &SelectionData, model: &ModelRc<Sin
 }
 
 mod context_menu {
+    use std::path::MAIN_SEPARATOR;
+
     use log::warn;
     use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
@@ -1165,7 +1167,7 @@ mod context_menu {
                 .nth(path_idx)
                 .unwrap_or_else(|| panic!("path_idx={path_idx} out of bounds, full val_str={:?}", row.val_str.iter().collect::<Vec<_>>()))
                 .to_string();
-            let full_path = if path.is_empty() { name } else { format!("{path}/{name}") };
+            let full_path = if path.is_empty() { name } else { format!("{path}{MAIN_SEPARATOR}{name}") };
             set_clipboard(full_path);
         });
     }

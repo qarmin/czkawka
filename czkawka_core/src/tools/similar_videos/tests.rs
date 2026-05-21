@@ -3,13 +3,13 @@ use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Once};
 
 use tempfile::TempDir;
-use vid_dup_finder_lib::Cropdetect;
 
 use crate::common::config_cache_path::set_config_cache_path_test;
 use crate::common::tool_data::CommonData;
 use crate::common::traits::Search;
 use crate::tools::similar_videos::{
-    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, SimilarVideos, SimilarVideosParameters,
+    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_CROP_DETECT,
+    DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_WINDOW_COUNT, SimilarVideos, SimilarVideosParameters,
 };
 
 static INIT: Once = Once::new();
@@ -33,7 +33,11 @@ fn make_params_visual() -> SimilarVideosParameters {
         false,
         15,
         10,
-        Cropdetect::Letterbox,
+        DEFAULT_CROP_DETECT,
+        DEFAULT_WINDOW_COUNT,
+        DEFAULT_DURATION_TOLERANCE_PCT,
+        DEFAULT_MIN_MATCHING_WINDOWS,
+        DEFAULT_SUBCLIP_MIN_MATCH,
         false,
         0,
         false,
@@ -53,7 +57,11 @@ fn make_params_audio() -> SimilarVideosParameters {
         false,
         15,
         10,
-        Cropdetect::Letterbox,
+        DEFAULT_CROP_DETECT,
+        DEFAULT_WINDOW_COUNT,
+        DEFAULT_DURATION_TOLERANCE_PCT,
+        DEFAULT_MIN_MATCHING_WINDOWS,
+        DEFAULT_SUBCLIP_MIN_MATCH,
         false,
         0,
         false,

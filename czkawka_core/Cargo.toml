@@ -35,12 +35,12 @@ lofty = "0.24"
 # Needed by broken files
 zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 lopdf = "0.40.0"
-sevenz-rust2 = { version = "0.20.2" }
+sevenz-rust2 = "0.21.0"
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 tar = { version = "0.4", default-features = false }
 ruzstd = "0.8"
 ttf-parser = "0.25"
-quick-xml = "0.39"
+quick-xml = "0.40"
 toml = { version = "1.1", default-features = false, features = ["parse", "serde"] }
 yaml-rust2 = "0.11"
 usvg = { version = "0.47", default-features = false }
@@ -59,7 +59,7 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.13"
 
 # Video Duplicates
-vid_dup_finder_lib = "0.4"
+similario_core = { path = "../../similario3/similario_core" }
 filetime = "0.2.26"
 
 # For extracting video properties using ffprobe CLI

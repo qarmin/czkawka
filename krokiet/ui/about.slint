@@ -40,6 +40,8 @@ export component About inherits VerticalLayout {
         }
     }
 
+    callback other_apps_clicked();
+
     HorizontalLayout {
         spacing: 5px;
         Button {
@@ -67,6 +69,13 @@ export component About inherits VerticalLayout {
             text <=> Translations.translation_text;
             clicked => {
                 Callabler.open_link("https://crowdin.com/project/czkawka");
+            }
+        }
+
+        Button {
+            text <=> Translations.other_apps_text;
+            clicked => {
+                root.other_apps_clicked();
             }
         }
     }

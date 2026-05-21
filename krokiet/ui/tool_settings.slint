@@ -14,6 +14,7 @@ component ComboBoxWrapper inherits HorizontalLayout {
     in-out property <int> current_index;
     in-out property <string> current_value;
     spacing: 5px;
+    vertical-stretch: 0;
     Text {
         text <=> root.text;
         vertical_alignment: TextVerticalAlignment.center;
@@ -27,7 +28,9 @@ component ComboBoxWrapper inherits HorizontalLayout {
     }
 }
 
-component CheckBoxWrapper inherits CheckBox { }
+component CheckBoxWrapper inherits CheckBox {
+    vertical-stretch: 0;
+}
 
 component SubsettingsHeader inherits Text {
     text: Translations.subsettings_text;
@@ -52,11 +55,13 @@ component SliderWrapper inherits HorizontalLayout {
     in-out property <float> value;
     in-out property <string> text;
     in-out property <string> end_text;
-    in-out property <length> end_text_size;
+    in-out property <string> max_end_text;
     spacing: 5px;
+    vertical-stretch: 0;
     Text {
         text: root.text;
         font-size: FontSizes.normal;
+        vertical-alignment: center;
     }
 
     Slider {
@@ -66,10 +71,21 @@ component SliderWrapper inherits HorizontalLayout {
         value <=> root.value;
     }
 
-    Text {
-        text: root.end_text;
-        width: root.end_text_size;
-        font-size: FontSizes.normal;
+    Rectangle {
+        width: end_text_sizer.preferred-width;
+        end_text_sizer := Text {
+            text: root.max_end_text;
+            font-size: FontSizes.normal;
+            visible: false;
+        }
+        Text {
+            text: root.end_text;
+            font-size: FontSizes.normal;
+            vertical-alignment: center;
+            horizontal-alignment: right;
+            width: 100%;
+            height: 100%;
+        }
     }
 }
 
@@ -79,6 +95,7 @@ component HintText inherits Text {
     color: ColorPalette.hint_color;
     text: root.hint_text;
     wrap: TextWrap.word-wrap;
+    vertical-stretch: 0;
 }
 
 export component ToolSettings {
@@ -131,7 +148,7 @@ export component ToolSettings {
             SliderWrapper {
                 text: Translations.subsettings_images_max_difference_text;
                 end_text: "(" + round(Settings.similar_images_sub_current_similarity) + "/" + round(Settings.similar_images_sub_max_similarity) + ")";
-                end_text_size: 45px;
+                max_end_text: "(" + round(Settings.similar_images_sub_max_similarity) + "/" + round(Settings.similar_images_sub_max_similarity) + ")";
                 maximum <=> Settings.similar_images_sub_max_similarity;
                 value <=> Settings.similar_images_sub_current_similarity;
             }
@@ -203,45 +220,97 @@ export component ToolSettings {
             if !Settings.similar_videos_audio_check_content: VerticalLayout {
                 spacing: 5px;
 
-                ComboBoxWrapper {
-                    text: Translations.subsettings_videos_crop_detect_text;
-                    model: Settings.similar_videos_crop_detect;
-                    current_index <=> Settings.similar_videos_crop_detect_index;
-                    current_value <=> Settings.similar_videos_crop_detect_value;
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_videos_visual_preset_text;
+                        font-size: FontSizes.normal;
+                        vertical-alignment: TextVerticalAlignment.center;
+                    }
+
+                    ComboBox {
+                        model <=> Settings.similar_videos_visual_preset_names;
+                        current-index <=> Settings.similar_videos_visual_preset_index;
+                        current-value <=> Settings.similar_videos_visual_preset_value;
+                        selected(value) => {
+                            Callabler.similar_videos_visual_preset_changed();
+                        }
+                    }
                 }
 
-                Rectangle {
-                    height: 0px;
-                }
+                if Settings.similar_videos_visual_preset_index == 0: VerticalLayout {
+                    spacing: 5px;
 
-                SliderWrapper {
-                    text: Translations.subsettings_videos_max_difference_text;
-                    end_text: "(" + round(Settings.similar_videos_sub_current_similarity) + "/" + round(Settings.similar_videos_sub_max_similarity) + ")";
-                    end_text_size: 45px;
-                    maximum <=> Settings.similar_videos_sub_max_similarity;
-                    value <=> Settings.similar_videos_sub_current_similarity;
-                }
+                    SliderWrapper {
+                        text: Translations.subsettings_videos_max_difference_text;
+                        end_text: "(" + round(Settings.similar_videos_sub_current_similarity) + "/" + round(Settings.similar_videos_sub_max_similarity) + ")";
+                        max_end_text: "(" + round(Settings.similar_videos_sub_max_similarity) + "/" + round(Settings.similar_videos_sub_max_similarity) + ")";
+                        maximum <=> Settings.similar_videos_sub_max_similarity;
+                        value <=> Settings.similar_videos_sub_current_similarity;
+                    }
 
-                SliderWrapper {
-                    text: Translations.subsettings_videos_skip_forward_amount_text;
-                    end_text: "(" + round(Settings.similar_videos_skip_forward_amount) + "/" + round(Settings.similar_videos_skip_forward_amount_max) + ")";
-                    end_text_size: 60px;
-                    maximum <=> Settings.similar_videos_skip_forward_amount_max;
-                    minimum <=> Settings.similar_videos_skip_forward_amount_min;
-                    value <=> Settings.similar_videos_skip_forward_amount;
-                }
+                    SliderWrapper {
+                        text: Translations.subsettings_videos_skip_forward_amount_text;
+                        end_text: "(" + round(Settings.similar_videos_skip_forward_amount) + "/" + round(Settings.similar_videos_skip_forward_amount_max) + ")";
+                        max_end_text: "(" + round(Settings.similar_videos_skip_forward_amount_max) + "/" + round(Settings.similar_videos_skip_forward_amount_max) + ")";
+                        maximum <=> Settings.similar_videos_skip_forward_amount_max;
+                        minimum <=> Settings.similar_videos_skip_forward_amount_min;
+                        value <=> Settings.similar_videos_skip_forward_amount;
+                    }
 
-                SliderWrapper {
-                    text: Translations.subsettings_videos_vid_hash_duration_text;
-                    end_text: "(" + round(Settings.similar_videos_vid_hash_duration) + "/" + round(Settings.similar_videos_vid_hash_duration_max) + ")";
-                    end_text_size: 45px;
-                    maximum <=> Settings.similar_videos_vid_hash_duration_max;
-                    minimum <=> Settings.similar_videos_vid_hash_duration_min;
-                    value <=> Settings.similar_videos_vid_hash_duration;
+                    SliderWrapper {
+                        text: Translations.subsettings_videos_vid_hash_duration_text;
+                        end_text: "(" + round(Settings.similar_videos_vid_hash_duration) + "/" + round(Settings.similar_videos_vid_hash_duration_max) + ")";
+                        max_end_text: "(" + round(Settings.similar_videos_vid_hash_duration_max) + "/" + round(Settings.similar_videos_vid_hash_duration_max) + ")";
+                        maximum <=> Settings.similar_videos_vid_hash_duration_max;
+                        minimum <=> Settings.similar_videos_vid_hash_duration_min;
+                        value <=> Settings.similar_videos_vid_hash_duration;
+                    }
+
+                    SliderWrapper {
+                        text: Translations.subsettings_videos_window_count_text;
+                        end_text: "(" + round(Settings.similar_videos_window_count) + "/" + round(Settings.similar_videos_window_count_max) + ")";
+                        max_end_text: "(" + round(Settings.similar_videos_window_count_max) + "/" + round(Settings.similar_videos_window_count_max) + ")";
+                        maximum <=> Settings.similar_videos_window_count_max;
+                        minimum <=> Settings.similar_videos_window_count_min;
+                        value <=> Settings.similar_videos_window_count;
+                    }
+
+                    SliderWrapper {
+                        text: Translations.subsettings_videos_duration_tolerance_pct_text;
+                        end_text: "(" + round(Settings.similar_videos_duration_tolerance_pct) + "%)";
+                        max_end_text: "(" + round(Settings.similar_videos_duration_tolerance_pct_max) + "%)";
+                        maximum <=> Settings.similar_videos_duration_tolerance_pct_max;
+                        minimum <=> Settings.similar_videos_duration_tolerance_pct_min;
+                        value <=> Settings.similar_videos_duration_tolerance_pct;
+                    }
+
+                    SliderWrapper {
+                        text: Translations.subsettings_videos_min_matching_windows_text;
+                        end_text: "(" + Math.round(Settings.similar_videos_min_matching_windows * 100) + "%)";
+                        max_end_text: "(" + Math.round(Settings.similar_videos_min_matching_windows_max * 100) + "%)";
+                        maximum <=> Settings.similar_videos_min_matching_windows_max;
+                        minimum <=> Settings.similar_videos_min_matching_windows_min;
+                        value <=> Settings.similar_videos_min_matching_windows;
+                    }
+
+                    SliderWrapper {
+                        text: Translations.subsettings_videos_subclip_min_match_text;
+                        end_text: "(" + Math.round(Settings.similar_videos_subclip_min_match * 100) + "%)";
+                        max_end_text: "(" + Math.round(Settings.similar_videos_subclip_min_match_max * 100) + "%)";
+                        maximum <=> Settings.similar_videos_subclip_min_match_max;
+                        minimum <=> Settings.similar_videos_subclip_min_match_min;
+                        value <=> Settings.similar_videos_subclip_min_match;
+                    }
                 }
 
                 Rectangle {
                     height: 4px;
+                }
+
+                if Settings.similar_videos_visual_preset_index == 0: CheckBoxWrapper {
+                    text: Translations.subsettings_videos_crop_detect_text;
+                    checked <=> Settings.similar_videos_crop_detect;
                 }
 
                 CheckBoxWrapper {
@@ -284,7 +353,7 @@ export component ToolSettings {
                     SliderWrapper {
                         text: Translations.subsettings_videos_audio_similarity_percent_text;
                         end_text: "(" + Math.round(Settings.similar_videos_audio_similarity_percent) + "%)";
-                        end_text_size: 55px;
+                        max_end_text: "(" + Math.round(Settings.similar_videos_audio_similarity_percent_max) + "%)";
                         maximum <=> Settings.similar_videos_audio_similarity_percent_max;
                         minimum <=> Settings.similar_videos_audio_similarity_percent_min;
                         value <=> Settings.similar_videos_audio_similarity_percent;
@@ -293,7 +362,7 @@ export component ToolSettings {
                     SliderWrapper {
                         text: Translations.subsettings_videos_audio_length_ratio_text;
                         end_text: "(" + Math.round(Settings.similar_videos_audio_length_ratio * 100) / 100 + ")";
-                        end_text_size: 50px;
+                        max_end_text: "(" + Math.round(Settings.similar_videos_audio_length_ratio_max * 100) / 100 + ")";
                         maximum <=> Settings.similar_videos_audio_length_ratio_max;
                         minimum <=> Settings.similar_videos_audio_length_ratio_min;
                         value <=> Settings.similar_videos_audio_length_ratio;
@@ -302,7 +371,7 @@ export component ToolSettings {
                     SliderWrapper {
                         text: Translations.subsettings_videos_audio_min_duration_seconds_text;
                         end_text: "(" + Math.round(Settings.similar_videos_audio_min_duration_seconds) + "s)";
-                        end_text_size: 50px;
+                        max_end_text: "(" + Math.round(Settings.similar_videos_audio_min_duration_seconds_max) + "s)";
                         maximum <=> Settings.similar_videos_audio_min_duration_seconds_max;
                         value <=> Settings.similar_videos_audio_min_duration_seconds;
                     }
@@ -310,10 +379,24 @@ export component ToolSettings {
                     SliderWrapper {
                         text: Translations.subsettings_videos_audio_maximum_difference_text;
                         end_text: "(" + Math.round(Settings.similar_videos_audio_maximum_difference) + ")";
-                        end_text_size: 45px;
+                        max_end_text: "(" + Math.round(Settings.similar_videos_audio_maximum_difference_max) + ")";
                         maximum <=> Settings.similar_videos_audio_maximum_difference_max;
                         value <=> Settings.similar_videos_audio_maximum_difference;
                     }
+                }
+
+                Rectangle {
+                    height: 4px;
+                }
+
+                CheckBoxWrapper {
+                    text: Translations.subsettings_videos_ignore_same_size_text;
+                    checked <=> Settings.similar_videos_sub_ignore_same_size;
+                }
+
+                CheckBoxWrapper {
+                    text: Translations.subsettings_videos_ignore_same_resolution_text;
+                    checked <=> Settings.similar_videos_sub_ignore_same_resolution;
                 }
 
                 Rectangle { }
@@ -385,7 +468,7 @@ export component ToolSettings {
                 SliderWrapper {
                     text: Translations.subsettings_music_max_difference_text;
                     end_text: "(" + round(Settings.similar_music_sub_maximum_difference_value) + "/" + round(Settings.similar_music_sub_maximum_difference_max) + ")";
-                    end_text_size: 45px;
+                    max_end_text: "(" + round(Settings.similar_music_sub_maximum_difference_max) + "/" + round(Settings.similar_music_sub_maximum_difference_max) + ")";
                     maximum <=> Settings.similar_music_sub_maximum_difference_max;
                     value <=> Settings.similar_music_sub_maximum_difference_value;
                 }
@@ -393,7 +476,7 @@ export component ToolSettings {
                 SliderWrapper {
                     text: Translations.subsettings_music_minimal_fragment_duration_text;
                     end_text: round(Settings.similar_music_sub_minimal_fragment_duration_value);
-                    end_text_size: 45px;
+                    max_end_text: round(Settings.similar_music_sub_minimal_fragment_duration_max);
                     maximum <=> Settings.similar_music_sub_minimal_fragment_duration_max;
                     value <=> Settings.similar_music_sub_minimal_fragment_duration_value;
                 }
