@@ -282,7 +282,7 @@ fn read_filling(reader: &mut impl Read, buf: &mut [u8]) -> std::io::Result<usize
         match reader.read(&mut buf[total..]) {
             Ok(0) => break,
             Ok(n) => total += n,
-            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => {}
             Err(e) => return Err(e),
         }
     }

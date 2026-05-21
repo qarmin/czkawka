@@ -329,10 +329,7 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
     let first_pos = directory_name.find(first).expect("Cannot fail, because is checked earlier");
     let mut cursor = first_pos + first.len();
     for spl in &expression_item.expression_splits[1..] {
-        let rel = match directory_name[cursor..].find(spl) {
-            Some(t) => t,
-            None => return false,
-        };
+        let Some(rel) = directory_name[cursor..].find(spl) else { return false };
         cursor += rel + spl.len();
     }
     true

@@ -44,9 +44,10 @@ pub fn parse_audio_file(file_handler: File, stop_flag: &Arc<AtomicBool>) -> Resu
             }
             Err(err) => {
                 if let IoError(ref er) = err
-                    && er.kind() == io::ErrorKind::UnexpectedEof {
-                        return Ok(Some(()));
-                    }
+                    && er.kind() == io::ErrorKind::UnexpectedEof
+                {
+                    return Ok(Some(()));
+                }
                 return Err(err);
             }
         };

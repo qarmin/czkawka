@@ -80,12 +80,7 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
                 return Ok(None);
             }
 
-            let packet = match format.next_packet() {
-                Ok(Some(p)) => p,
-                Ok(None) => break,
-                Err(symphonia::core::errors::Error::IoError(_)) => break,
-                Err(_) => break,
-            };
+            let Ok(Some(packet)) = format.next_packet() else { break };
 
             if packet.track_id != track_id {
                 continue;
