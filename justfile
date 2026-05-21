@@ -105,6 +105,14 @@ fixn:
 test_resize arg:
     cd misc/test_image_perf; cargo build --release; sudo ./target/release/test_image_perf "{{arg}}"
 
+# Run all normal (non-ignored) tests across the workspace
+test:
+    cargo test --workspace
+
+# Run only #[ignore]-marked tests (fuzzers, stress tests, slow tests)
+ignored:
+    cargo test --workspace -- --ignored
+
 # Not works, due of edition 2024 and workspaces
 unused_features:
     unused-features analyze

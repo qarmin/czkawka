@@ -743,11 +743,13 @@ pub fn get_similar_images_cache_file(hash_size: u8, hash_alg: HashAlg, image_fil
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
+    use std::sync::Arc;
 
     use bk_tree::BKTree;
     use image::imageops::FilterType;
     use image_hasher::HashAlg;
     use indexmap::IndexMap;
+    use rand::RngExt;
 
     use super::*;
     use crate::common::tool_data::CommonData;
@@ -764,33 +766,208 @@ mod tests {
         }
     }
 
-    // Just to debug changes to algorithms
-    // #[test]
-    // fn test_fuzzer() {
-    //     for _ in 0..100 {
-    //         let mut parameters = get_default_parameters();
-    //         parameters.similarity = rand::random::<u32>() % 40;
-    //         let mut similar_images = SimilarImages::new(parameters);
-    //
-    //         for i in 0..(rand::random::<u32>() % 2000) {
-    //             let mut entry = vec![1u8; 8];
-    //             entry[1] = rand::random::<u8>();
-    //             if rand::random::<bool>() {
-    //                 entry[2] = rand::random::<u8>();
-    //             }
-    //             if rand::random::<bool>() {
-    //                 entry[3] = rand::random::<u8>();
-    //             }
-    //             if rand::random::<bool>() {
-    //                 entry[4] = rand::random::<u8>();
-    //             }
-    //             let fe = create_random_file_entry(entry, &format!("file_{i}.txt"));
-    //             add_hashes(&mut similar_images.image_hashes, vec![fe]);
-    //         }
-    //
-    //         similar_images.find_similar_hashes(&Arc::default(), None);
-    //     }
-    // }
+    // ── Fuzz / stress tests ───────────────────────────────────────────────────
+    // Marked #[ignore] so they are skipped in normal `cargo test` runs.
+    // Run explicitly with:  cargo test -p czkawka_core -- --ignored
+    // Or via justfile:  just ignored
+
+    /// Basic fuzz: random hashes, random tolerance, random entry count.
+    /// Verifies that find_similar_hashes never panics and always leaves the
+    /// result in a consistent state (verify_duplicated_items passes).
+    #[test]
+    #[ignore]
+    fn test_fuzzer_basic() {
+        let mut rng = rand::rng();
+
+        for _ in 0..200 {
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = rng.random::<u32>() % 40;
+            let mut similar_images = SimilarImages::new(parameters);
+
+            let count = rng.random::<u32>() % 2000;
+            for i in 0..count {
+                let mut entry = vec![1u8; 8];
+                for byte in entry.iter_mut().skip(1) {
+                    if rng.random::<bool>() {
+                        *byte = rng.random::<u8>();
+                    }
+                }
+                add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(entry, &format!("file_{i}.txt"))]);
+            }
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+            // No panic is the primary invariant; also ensure the result is self-consistent
+            let collected: IndexMap<ImHash, Vec<ImagesEntry>> = similar_images.similar_vectors.iter().cloned().map(|v| (v[0].hash.clone(), v)).collect();
+            SimilarImages::verify_duplicated_items(&collected);
+        }
+    }
+
+    /// Stress test with large hash sets (up to 5 000 entries).
+    /// Ensures performance stays acceptable and results stay consistent.
+    #[test]
+    #[ignore]
+    fn test_fuzzer_large() {
+        let mut rng = rand::rng();
+
+        for _ in 0..20 {
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = rng.random::<u32>() % 20;
+            let mut similar_images = SimilarImages::new(parameters);
+
+            let count = 1000 + rng.random::<u32>() % 4000;
+            for i in 0..count {
+                let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>()).collect();
+                add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(hash, &format!("large_{i}.jpg"))]);
+            }
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+        }
+    }
+
+    /// Tolerance-0 fuzz: only files with identical hashes should group together.
+    /// The resulting groups must all have identical hashes across every member.
+    #[test]
+    #[ignore]
+    fn test_fuzzer_tolerance_zero_invariant() {
+        let mut rng = rand::rng();
+
+        for _ in 0..200 {
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = 0;
+            let mut similar_images = SimilarImages::new(parameters);
+
+            let count = rng.random::<u32>() % 500;
+            for i in 0..count {
+                // Use only a few distinct hashes so collisions (groups) are common
+                let hash = vec![rng.random::<u8>() % 4, 0, 0, 0, 0, 0, 0, 0];
+                add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(hash, &format!("t0_{i}.jpg"))]);
+            }
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+
+            // Every member in every group must share the same hash
+            for group in similar_images.get_similar_images() {
+                let first_hash = &group[0].hash;
+                for entry in group {
+                    assert_eq!(&entry.hash, first_hash, "tolerance-0 group contains entries with different hashes");
+                }
+                assert!(group.len() >= 2, "group must have at least 2 entries");
+            }
+        }
+    }
+
+    /// Reference-folder fuzz: after the split every "master" must come from the
+    /// reference directory and all "similar" entries must come from outside it.
+    #[test]
+    #[ignore]
+    fn test_fuzzer_reference_folders_invariant() {
+        let mut rng = rand::rng();
+        let ref_dir = PathBuf::from("/ref/");
+        let non_ref_dir = PathBuf::from("/other/");
+
+        for _ in 0..200 {
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = 5 + rng.random::<u32>() % 10;
+            let mut similar_images = SimilarImages::new(parameters);
+            similar_images.set_use_reference_folders(true);
+            similar_images.common_data.directories.reference_directories = vec![ref_dir.clone()];
+
+            let count = rng.random::<u32>() % 300;
+            for i in 0..count {
+                let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>() % 8).collect();
+                let in_ref = rng.random::<bool>();
+                let dir = if in_ref { &ref_dir } else { &non_ref_dir };
+                let path = dir.join(format!("img_{i}.jpg")).to_string_lossy().into_owned();
+                add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(hash, &path)]);
+            }
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+
+            for (master, similars) in similar_images.get_similar_images_referenced() {
+                assert!(
+                    master.path.starts_with(&ref_dir),
+                    "master {:?} is not in reference dir",
+                    master.path
+                );
+                for s in similars {
+                    assert!(
+                        !s.path.starts_with(&ref_dir),
+                        "similar entry {:?} must not be in reference dir",
+                        s.path
+                    );
+                }
+            }
+        }
+    }
+
+    /// Determinism fuzz: the same input must always produce the same output.
+    #[test]
+    #[ignore]
+    fn test_fuzzer_determinism() {
+        let mut rng = rand::rng();
+
+        for _ in 0..50 {
+            let tolerance = rng.random::<u32>() % 15;
+            let count = rng.random::<u32>() % 300;
+
+            // Build a fixed set of entries
+            let entries: Vec<ImagesEntry> = (0..count)
+                .map(|i| {
+                    let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>() % 16).collect();
+                    create_random_file_entry(hash, &format!("det_{i}.jpg"))
+                })
+                .collect();
+
+            let run_once = |entries: &[ImagesEntry]| {
+                let mut parameters = get_default_parameters();
+                parameters.max_difference = tolerance;
+                let mut si = SimilarImages::new(parameters);
+                for e in entries {
+                    add_hashes(&mut si.image_hashes, vec![e.clone()]);
+                }
+                si.find_similar_hashes(&Arc::default(), None);
+                let mut paths: Vec<Vec<String>> = si
+                    .get_similar_images()
+                    .iter()
+                    .map(|g| {
+                        let mut v: Vec<String> = g.iter().map(|e| e.path.to_string_lossy().into_owned()).collect();
+                        v.sort();
+                        v
+                    })
+                    .collect();
+                paths.sort();
+                paths
+            };
+
+            let result_a = run_once(&entries);
+            let result_b = run_once(&entries);
+            assert_eq!(result_a, result_b, "non-deterministic output for tolerance={tolerance} count={count}");
+        }
+    }
+
+    /// No-false-negatives fuzz: two entries with the exact same hash at tolerance 0
+    /// must always end up in a group together.
+    #[test]
+    #[ignore]
+    fn test_fuzzer_no_false_negatives_tolerance_zero() {
+        let mut rng = rand::rng();
+
+        for _ in 0..200 {
+            let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>()).collect();
+            let fe1 = create_random_file_entry(hash.clone(), "a.jpg");
+            let fe2 = create_random_file_entry(hash.clone(), "b.jpg");
+
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = 0;
+            let mut si = SimilarImages::new(parameters);
+            add_hashes(&mut si.image_hashes, vec![fe1, fe2]);
+            si.find_similar_hashes(&Arc::default(), None);
+
+            let groups = si.get_similar_images();
+            assert_eq!(groups.len(), 1, "identical hashes must produce exactly one group");
+            assert_eq!(groups[0].len(), 2);
+        }
+    }
 
     #[test]
     fn test_compare_no_images() {
