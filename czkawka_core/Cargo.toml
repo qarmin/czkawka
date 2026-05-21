@@ -89,7 +89,6 @@ infer = "0.19"
 # Newer version of libheif-rs, which is not compatible with Ubuntu 22.04, and works only o
 libheif-rs = { version = "2", optional = true, default-features = false, features = ["v1_17", "image"] }
 
-nom-exif = "2.1.0"
 
 # EXIF data cleaning
 little_exif = "0.6.20"
