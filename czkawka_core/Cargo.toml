@@ -59,7 +59,7 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.13"
 
 # Video Duplicates
-similario_core = { path = "../../similario3/similario_core" }
+similario_core = "0.1.0"
 filetime = "0.2.26"
 
 # For extracting video properties using ffprobe CLI
