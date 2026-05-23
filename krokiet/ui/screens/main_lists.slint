@@ -1,0 +1,357 @@
+import { SelectableTableView } from "../components/selectable_tree_view.slint";
+import { ActiveTab, SingleMainListModel } from "../globals/common.slint";
+import { SettingsList } from "settings_list.slint";
+import { GuiState } from "../globals/gui_state.slint";
+import { About } from "about.slint";
+import { Settings } from "../globals/settings.slint";
+
+export component MainList {
+    callback show_clean_cache_popup();
+    callback show_other_apps_popup();
+
+    in-out property <bool> working: false;
+
+    in-out property <[SingleMainListModel]> duplicate_files_model: [];
+    in-out property <[SingleMainListModel]> empty_folder_model: [
+        {checked: false, focused_row: false, header_row: false, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
+        {checked: false, focused_row: false, header_row: false, filled_header_row: false, val_str: ["witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
+        {checked: true, focused_row: false, header_row: false, filled_header_row: false, val_str: ["lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
+    ];
+    in-out property <[SingleMainListModel]> big_files_model: [];
+    in-out property <[SingleMainListModel]> empty_files_model: [
+        {checked: false, focused_row: false, header_row: false, filled_header_row: false, val_str: ["0 B", "kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
+        {checked: false, focused_row: false, header_row: false, filled_header_row: false, val_str: ["128 B", "witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
+        {checked: true, focused_row: false, header_row: false, filled_header_row: false, val_str: ["1 KiB", "lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
+    ];
+    in-out property <[SingleMainListModel]> temporary_files_model: [];
+    in-out property <[SingleMainListModel]> similar_images_model: [
+        {checked: false, focused_row: false, header_row: true, filled_header_row: false, val_str: ["Original", "500KB", "100x100", "kropkarz", "/Xd1", "24.10.2023"], val_int: []},
+        {checked: false, focused_row: false, header_row: false, filled_header_row: false, val_str: ["Similar", "500KB", "100x100", "witasphere", "/Xd1/Imagerren2", "25.11.1991"], val_int: []},
+        {checked: true, focused_row: false, header_row: false, filled_header_row: false, val_str: ["Similar", "500KB", "100x100", "lokkaler", "/Xd1/Vide2", "01.23.1911"], val_int: []}
+    ];
+    in-out property <[SingleMainListModel]> similar_videos_model: [];
+    in-out property <[SingleMainListModel]> similar_music_model: [];
+    in-out property <[SingleMainListModel]> invalid_symlinks_model: [];
+    in-out property <[SingleMainListModel]> broken_files_model: [];
+    in-out property <[SingleMainListModel]> bad_extensions_model: [];
+    in-out property <[SingleMainListModel]> bad_names_model: [];
+    in-out property <[SingleMainListModel]> exif_remover_model: [];
+    in-out property <[SingleMainListModel]> video_optimizer_model: [];
+
+    callback changed_active_tab();
+
+    duplicates := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.DuplicateFiles;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.duplicates_column_name;
+        column_sizes <=> Settings.duplicates_column_size;
+        values <=> duplicate_files_model;
+        parentPathIdx: GuiState.duplicate_data_idx[0];
+        fileNameIdx: GuiState.duplicate_data_idx[1];
+        previewImageIdx: GuiState.duplicate_data_idx[2];
+        topLeftCropIdx: GuiState.duplicate_data_idx[3];
+        originalWidthIdx: GuiState.duplicate_data_idx[4];
+        originalHeightIdx: GuiState.duplicate_data_idx[5];
+        sort_available: !working;
+    }
+
+    empty_folders := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.EmptyFolders;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.empty_folders_column_name;
+        column_sizes <=> Settings.empty_folders_column_size;
+        values <=> empty_folder_model;
+        parentPathIdx: GuiState.empty_folders_data_idx[0];
+        fileNameIdx: GuiState.empty_folders_data_idx[1];
+        previewImageIdx: GuiState.empty_folders_data_idx[2];
+        topLeftCropIdx: GuiState.empty_folders_data_idx[3];
+        originalWidthIdx: GuiState.empty_folders_data_idx[4];
+        originalHeightIdx: GuiState.empty_folders_data_idx[5];
+        sort_available: !working;
+    }
+
+    big_files := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.BigFiles;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.big_files_column_name;
+        column_sizes <=> Settings.big_files_column_size;
+        values <=> big_files_model;
+        parentPathIdx: GuiState.big_files_data_idx[0];
+        fileNameIdx: GuiState.big_files_data_idx[1];
+        previewImageIdx: GuiState.big_files_data_idx[2];
+        topLeftCropIdx: GuiState.big_files_data_idx[3];
+        originalWidthIdx: GuiState.big_files_data_idx[4];
+        originalHeightIdx: GuiState.big_files_data_idx[5];
+        sort_available: !working;
+    }
+
+    empty_files := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.EmptyFiles;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.empty_files_column_name;
+        column_sizes <=> Settings.empty_files_column_size;
+        values <=> empty_files_model;
+        parentPathIdx: GuiState.empty_files_data_idx[0];
+        fileNameIdx: GuiState.empty_files_data_idx[1];
+        previewImageIdx: GuiState.empty_files_data_idx[2];
+        topLeftCropIdx: GuiState.empty_files_data_idx[3];
+        originalWidthIdx: GuiState.empty_files_data_idx[4];
+        originalHeightIdx: GuiState.empty_files_data_idx[5];
+        sort_available: !working;
+    }
+
+    temporary_files := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.TemporaryFiles;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.temporary_files_column_name;
+        column_sizes <=> Settings.temporary_files_column_size;
+        values <=> temporary_files_model;
+        parentPathIdx: GuiState.temporary_files_data_idx[0];
+        fileNameIdx: GuiState.temporary_files_data_idx[1];
+        previewImageIdx: GuiState.temporary_files_data_idx[2];
+        topLeftCropIdx: GuiState.temporary_files_data_idx[3];
+        originalWidthIdx: GuiState.temporary_files_data_idx[4];
+        originalHeightIdx: GuiState.temporary_files_data_idx[5];
+        sort_available: !working;
+    }
+
+    similar_images := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.SimilarImages;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.similar_images_column_name;
+        column_sizes <=> Settings.similar_images_column_size;
+        values <=> similar_images_model;
+        parentPathIdx: GuiState.similar_images_data_idx[0];
+        fileNameIdx: GuiState.similar_images_data_idx[1];
+        previewImageIdx: GuiState.similar_images_data_idx[2];
+        topLeftCropIdx: GuiState.similar_images_data_idx[3];
+        originalWidthIdx: GuiState.similar_images_data_idx[4];
+        originalHeightIdx: GuiState.similar_images_data_idx[5];
+        sort_available: !working;
+    }
+
+    similar_videos := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.SimilarVideos;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.similar_videos_column_name;
+        column_sizes <=> Settings.similar_videos_column_size;
+        values <=> similar_videos_model;
+        parentPathIdx: GuiState.similar_videos_data_idx[0];
+        fileNameIdx: GuiState.similar_videos_data_idx[1];
+        previewImageIdx: GuiState.similar_videos_data_idx[2];
+        topLeftCropIdx: GuiState.similar_videos_data_idx[3];
+        originalWidthIdx: GuiState.similar_videos_data_idx[4];
+        originalHeightIdx: GuiState.similar_videos_data_idx[5];
+        sort_available: !working;
+    }
+
+    similar_music := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.SimilarMusic;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.similar_music_column_name;
+        column_sizes <=> Settings.similar_music_column_size;
+        values <=> similar_music_model;
+        parentPathIdx: GuiState.similar_music_data_idx[0];
+        fileNameIdx: GuiState.similar_music_data_idx[1];
+        previewImageIdx: GuiState.similar_music_data_idx[2];
+        topLeftCropIdx: GuiState.similar_music_data_idx[3];
+        originalWidthIdx: GuiState.similar_music_data_idx[4];
+        originalHeightIdx: GuiState.similar_music_data_idx[5];
+        sort_available: !working;
+    }
+
+    invalid_symlink := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.InvalidSymlinks;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.invalid_symlink_column_name;
+        column_sizes <=> Settings.invalid_symlink_column_size;
+        values <=> invalid_symlinks_model;
+        parentPathIdx: GuiState.invalid_symlink_data_idx[0];
+        fileNameIdx: GuiState.invalid_symlink_data_idx[1];
+        previewImageIdx: GuiState.invalid_symlink_data_idx[2];
+        topLeftCropIdx: GuiState.invalid_symlink_data_idx[3];
+        originalWidthIdx: GuiState.invalid_symlink_data_idx[4];
+        originalHeightIdx: GuiState.invalid_symlink_data_idx[5];
+        sort_available: !working;
+    }
+
+    broken_files := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.BrokenFiles;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.broken_files_column_name;
+        column_sizes <=> Settings.broken_files_column_size;
+        values <=> broken_files_model;
+        parentPathIdx: GuiState.broken_files_data_idx[0];
+        fileNameIdx: GuiState.broken_files_data_idx[1];
+        previewImageIdx: GuiState.broken_files_data_idx[2];
+        topLeftCropIdx: GuiState.broken_files_data_idx[3];
+        originalWidthIdx: GuiState.broken_files_data_idx[4];
+        originalHeightIdx: GuiState.broken_files_data_idx[5];
+        sort_available: !working;
+    }
+
+    bad_extensions := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.BadExtensions;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.bad_extensions_column_name;
+        column_sizes <=> Settings.bad_extensions_column_size;
+        values <=> bad_extensions_model;
+        parentPathIdx: GuiState.bad_extensions_data_idx[0];
+        fileNameIdx: GuiState.bad_extensions_data_idx[1];
+        previewImageIdx: GuiState.bad_extensions_data_idx[2];
+        topLeftCropIdx: GuiState.bad_extensions_data_idx[3];
+        originalWidthIdx: GuiState.bad_extensions_data_idx[4];
+        originalHeightIdx: GuiState.bad_extensions_data_idx[5];
+        sort_available: !working;
+    }
+
+    exif_remover := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.ExifRemover;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.exif_remover_column_name;
+        column_sizes <=> Settings.exif_remover_column_size;
+        values <=> exif_remover_model;
+        parentPathIdx: GuiState.exif_remover_data_idx[0];
+        fileNameIdx: GuiState.exif_remover_data_idx[1];
+        previewImageIdx: GuiState.exif_remover_data_idx[2];
+        topLeftCropIdx: GuiState.exif_remover_data_idx[3];
+        originalWidthIdx: GuiState.exif_remover_data_idx[4];
+        originalHeightIdx: GuiState.exif_remover_data_idx[5];
+        sort_available: !working;
+    }
+
+    video_optimizer := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.VideoOptimizer;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.video_optimizer_column_name;
+        column_sizes <=> Settings.video_optimizer_column_size;
+        values <=> video_optimizer_model;
+        parentPathIdx: GuiState.video_optimizer_data_idx[0];
+        fileNameIdx: GuiState.video_optimizer_data_idx[1];
+        previewImageIdx: GuiState.video_optimizer_data_idx[2];
+        topLeftCropIdx: GuiState.video_optimizer_data_idx[3];
+        originalWidthIdx: GuiState.video_optimizer_data_idx[4];
+        originalHeightIdx: GuiState.video_optimizer_data_idx[5];
+        sort_available: !working;
+    }
+
+    bad_names := SelectableTableView {
+        visible: GuiState.active_tab == ActiveTab.BadNames;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.bad_names_column_name;
+        column_sizes <=> Settings.bad_names_column_size;
+        values <=> bad_names_model;
+        parentPathIdx: GuiState.bad_names_data_idx[0];
+        fileNameIdx: GuiState.bad_names_data_idx[1];
+        previewImageIdx: GuiState.bad_names_data_idx[2];
+        topLeftCropIdx: GuiState.bad_names_data_idx[3];
+        originalWidthIdx: GuiState.bad_names_data_idx[4];
+        originalHeightIdx: GuiState.bad_names_data_idx[5];
+        sort_available: !working;
+    }
+
+
+    settings_list := SettingsList {
+        visible: GuiState.active_tab == ActiveTab.Settings;
+
+        show_clean_cache_popup() => {
+            root.show_clean_cache_popup();
+        }
+    }
+
+    about_app := About {
+        visible: GuiState.active_tab == ActiveTab.About;
+        other_apps_clicked => {
+            root.show_other_apps_popup();
+        }
+    }
+
+    public function reset_selection(active_tab: ActiveTab) {
+        if (active_tab == ActiveTab.EmptyFiles) {
+            empty_files.reset_selection();
+        } else if (active_tab == ActiveTab.EmptyFolders) {
+            empty_folders.reset_selection();
+        } else if (active_tab == ActiveTab.SimilarImages) {
+            similar_images.reset_selection();
+        } else if (active_tab == ActiveTab.BadExtensions) {
+            bad_extensions.reset_selection();
+        } else if (active_tab == ActiveTab.BigFiles) {
+            big_files.reset_selection();
+        } else if (active_tab == ActiveTab.DuplicateFiles) {
+            duplicates.reset_selection();
+        } else if (active_tab == ActiveTab.TemporaryFiles) {
+            temporary_files.reset_selection();
+        } else if (active_tab == ActiveTab.SimilarVideos) {
+            similar_videos.reset_selection();
+        } else if (active_tab == ActiveTab.SimilarMusic) {
+            similar_music.reset_selection();
+        } else if (active_tab == ActiveTab.InvalidSymlinks) {
+            invalid_symlink.reset_selection();
+        } else if (active_tab == ActiveTab.BrokenFiles) {
+            broken_files.reset_selection();
+        } else if (active_tab == ActiveTab.ExifRemover) {
+            exif_remover.reset_selection();
+        } else if (active_tab == ActiveTab.VideoOptimizer) {
+            video_optimizer.reset_selection();
+        } else if (active_tab == ActiveTab.BadNames) {
+            bad_names.reset_selection();
+        } else {
+             debug("Non handled reset selection in main_lists.slint");
+        }
+    }
+
+    public function scan_started() {
+        if (GuiState.active_tab == ActiveTab.EmptyFiles) {
+            empty_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.EmptyFolders) {
+            empty_folders.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.SimilarImages) {
+            similar_images.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.BadExtensions) {
+            bad_extensions.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.BigFiles) {
+            big_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.DuplicateFiles) {
+            duplicates.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.TemporaryFiles) {
+            temporary_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.SimilarVideos) {
+            similar_videos.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.SimilarMusic) {
+            similar_music.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.InvalidSymlinks) {
+            invalid_symlink.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.BrokenFiles) {
+            broken_files.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.ExifRemover) {
+            exif_remover.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.VideoOptimizer) {
+            video_optimizer.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.BadNames) {
+            bad_names.scan_started();
+        } else {
+             debug("Non handled reset selection in main_lists.slint");
+        }
+    }
+
+    changed_active_tab() => {
+        // TODO - not sure why this exists, but if needed it needs to be updated to use new functions
+        // empty_folders.deselect_selected_item();
+        // empty_files.deselect_selected_item();
+        // similar_images.deselect_selected_item();
+    }
+}

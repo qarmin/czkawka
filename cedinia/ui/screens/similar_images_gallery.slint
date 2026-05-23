@@ -1,0 +1,884 @@
+import { CediniaColors } from "../globals/colors.slint";
+import { ScanState, SimilarGroupCard } from "../globals/common.slint";
+import { AppState, SimilarImagesSettings } from "../globals/app_state.slint";
+import { StatusChip, TouchButton } from "../components/components.slint";
+import { Translations } from "../globals/translations.slint";
+import { ListView } from "std-widgets.slint";
+
+// Index of the group within similar_images_groups – passed in by the repeater.
+// Used so the Compare button can open the right group.
+component GroupCompareBtn inherits Rectangle {
+    in property <int> group_idx;
+
+    height: 28px;
+    width: lbl.preferred-width + 20px;
+    border-radius: 6px;
+    background: ta.has-hover ? CediniaColors.accent.brighter(0.12) : CediniaColors.accent.with-alpha(0.75);
+    animate background { duration: 80ms; }
+
+    ta := TouchArea {
+        clicked => { AppState.compare_open(root.group_idx); }
+    }
+
+    lbl := Text {
+        text: Translations.compare_label_text;
+        color: CediniaColors.fg_on_accent;
+        font-size: 11px;
+        font-weight: 700;
+        horizontal-alignment: TextHorizontalAlignment.center;
+        vertical-alignment:   TextVerticalAlignment.center;
+    }
+}
+
+component GalleryImageCell {
+    in property <image>  thumbnail;
+    in property <string> img_name;
+    in property <string> img_size;
+    in property <[string]> img_val_str: [];
+    in property <string> img_full_path: "";
+    in property <int>    flat_idx;
+    in property <bool>   checked: false;
+    in property <bool>   is_reference: false;
+
+    // Set to true when the horizontal or vertical SwipeGestureHandler claims
+    // the pointer gesture.  Once either SGR is swiping it stops forwarding
+    // pointer events to child elements, so the dead-zone check in pointer-event
+    // never fires again.  Watching this directly is the only reliable way to
+    // cancel the long-press timer during a gallery scroll.
+    in property <bool> any_sgr_swiping: false;
+
+    // Fired on long-press: (full_file_path, parent_folder_path, item_name)
+    callback cell_long_pressed(string, string, string);
+
+    // Suppresses the clicked event that fires right after the long-press timer.
+    property <bool> lp_fired: false;
+
+    // Explicit armed flag – set to true only while a genuine long-press is in
+    // progress.  Cleared imperatively by every cancellation path so that even
+    // if the timer callback runs just after a cancel/up/move event it will not
+    // open the popup.  This is more reliable than checking `ta.pressed` because
+    // Slint may not clear pressed before the timer callback runs.
+    property <bool> _lp_active: false;
+
+    // Stored press coordinates for the 30 px dead-zone check.
+    property <length> _lp_start_x: 0px;
+    property <length> _lp_start_y: 0px;
+
+    // Watch ta.pressed: the moment it goes false (up, cancel, gesture-steal)
+    // disarm the long-press even if the event callback hasn't run yet.
+    property <bool> _ta_pressed_watch: ta.pressed;
+    changed _ta_pressed_watch => {
+        if (!_ta_pressed_watch) {
+            root._lp_active = false;
+            cell_lp_timer.running = false;
+        }
+    }
+
+    // Cancel immediately when the horizontal SwipeGestureHandler takes over.
+    changed any_sgr_swiping => {
+        if (root.any_sgr_swiping) {
+            root._lp_active = false;
+            cell_lp_timer.running = false;
+        }
+    }
+
+    width: 170px;
+
+    ta := TouchArea {
+        clicked => {
+            if (root.lp_fired) {
+                root.lp_fired = false;
+            } else {
+                AppState.toggle_file_checked(root.flat_idx);
+            }
+        }
+        pointer-event(e) => {
+            if (e.kind == PointerEventKind.down) {
+                root._lp_start_x = self.mouse-x;
+                root._lp_start_y = self.mouse-y;
+                root._lp_active  = true;
+                cell_lp_timer.running = true;
+                cell_lp_timer.restart();
+            } else if (e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel) {
+                root._lp_active = false;
+                cell_lp_timer.running = false;
+            }
+        }
+        // Fires while finger is held and moving – cancel on dead-zone breach.
+        moved => {
+            // Well - this rarely works, because faster cancel event is gathered
+            if (self.mouse-x - root._lp_start_x > 30px
+                    || root._lp_start_x - self.mouse-x > 30px
+                    || self.mouse-y - root._lp_start_y > 30px
+                    || root._lp_start_y - self.mouse-y > 30px) {
+                root._lp_active = false;
+                cell_lp_timer.running = false;
+            }
+        }
+    }
+
+    cell_lp_timer := Timer {
+        interval: 500ms;
+        running: false;
+        triggered => {
+            self.running = false;
+            if (!root._lp_active) { return; }
+            root._lp_active = false;
+            root.lp_fired = true;
+            root.cell_long_pressed(
+                root.img_full_path,
+                root.img_val_str.length > 1 ? root.img_val_str[1] : "",
+                root.img_name
+            );
+        }
+    }
+
+    VerticalLayout {
+        padding: 4px;
+        spacing: 4px;
+
+
+        Rectangle {
+            height: 140px;
+            border-radius: 8px;
+            clip: true;
+            background: CediniaColors.bg_elevated;
+
+            Image {
+                width: parent.width;
+                height: parent.height;
+                source: root.thumbnail;
+                image-fit: SimilarImagesSettings.gallery_image_fit_cover ? ImageFit.cover : ImageFit.contain;
+            }
+
+            Rectangle {
+                border-radius: 8px;
+                background: ta.pressed ? CediniaColors.tile_press : transparent;
+            }
+
+            // Border drawn after the image so it is not covered by it.
+            Rectangle {
+                border-radius: 8px;
+                border-width: (root.checked || root.is_reference) ? 3px : 0px;
+                border-color: root.is_reference ? CediniaColors.reference_border : CediniaColors.accent;
+                background: transparent;
+                animate border-width { duration: 100ms; }
+            }
+
+            if root.checked : Rectangle {
+                x: parent.width - 30px;
+                y: 6px;
+                width: 24px;
+                height: 24px;
+                border-radius: 12px;
+                background: CediniaColors.accent;
+                z: 5;
+                Text {
+                    text: Translations.ok_text;
+                    color: CediniaColors.fg_on_accent;
+                    font-size: 11px;
+                    font-weight: 700;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    vertical-alignment: TextVerticalAlignment.center;
+                }
+            }
+        }
+
+        Rectangle {
+            clip: true;
+            height: min(name_text.preferred-height, 27px);
+            name_text := Text {
+                width: parent.width;
+                text: root.img_name;
+                font-size: 11px;
+                color: root.checked ? CediniaColors.accent_light : CediniaColors.text_primary;
+                wrap: word-wrap;
+                horizontal-alignment: TextHorizontalAlignment.center;
+            }
+        }
+        // Size and path grouped together with tight spacing so there is no
+        // visible gap between the file-size line and the directory line.
+        VerticalLayout {
+            spacing: 0px;
+
+            Text {
+                text: root.img_val_str.length > 4 && root.img_val_str[4] != ""
+                    ? root.img_size + "  " + root.img_val_str[4]
+                    : root.img_size;
+                font-size: 10px;
+                color: CediniaColors.text_secondary;
+                horizontal-alignment: TextHorizontalAlignment.center;
+                wrap: no-wrap;
+                overflow: TextOverflow.elide;
+            }
+            if root.img_val_str.length > 1 && root.img_val_str[1] != "" : Rectangle {
+                clip: true;
+                // Cap at ~3 lines (≈ 40 px at 10 px font + line spacing).
+                height: min(path_text.preferred-height, 40px);
+                path_text := Text {
+                    width: parent.width;
+                    text: root.img_val_str[1];
+                    font-size: 10px;
+                    color: CediniaColors.text_disabled;
+                    wrap: word-wrap;
+                    // top: always show the beginning of the path, never the middle.
+                    vertical-alignment: TextVerticalAlignment.top;
+                    // left: paths read naturally left-to-right.
+                    horizontal-alignment: TextHorizontalAlignment.left;
+                }
+            }
+        }
+    }
+}
+
+
+component GalleryToggleBar {
+    height: 52px;
+
+    in-out property <int> menu_state: 0;
+
+    Rectangle {
+        background: CediniaColors.bg_elevated;
+        border-width: 1px;
+        border-color: CediniaColors.divider;
+
+        HorizontalLayout {
+            padding-left: 12px;
+            padding-right: 12px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            spacing: 8px;
+
+            if AppState.selected_count > 0 : TouchButton {
+                label: "X";
+                min_h: 36px;
+                bg: CediniaColors.danger;
+                fg: CediniaColors.fg_on_danger;
+                clicked => { AppState.request_gallery_delete(); }
+            }
+
+            if AppState.selected_count > 0 : StatusChip {
+                label: AppState.selected_count;
+                chip_color: CediniaColors.accent_muted;
+                text_color: CediniaColors.accent_light;
+                vertical-stretch: 0.0;
+            }
+
+            Rectangle { horizontal-stretch: 1.0; }
+
+            TouchButton {
+                label: Translations.select_label_text;
+                min_h: 36px;
+                bg: CediniaColors.bg_elevated;
+                fg: CediniaColors.text_secondary;
+                clicked => { root.menu_state = 1; }
+            }
+
+            TouchButton {
+                label: Translations.deselect_label_text;
+                min_h: 36px;
+                bg: CediniaColors.bg_elevated;
+                fg: CediniaColors.text_secondary;
+                clicked => { root.menu_state = 2; }
+            }
+
+            TouchButton {
+                label: Translations.list_label_text;
+                min_h: 36px;
+                bg: CediniaColors.bg_elevated;
+                fg: CediniaColors.text_secondary;
+                clicked => { AppState.similar_images_gallery_mode = false; }
+            }
+        }
+    }
+}
+
+
+export component SimilarImagesGallery {
+    in property <[SimilarGroupCard]> groups: [];
+
+    // Context menu state
+    property <bool>   ctx_open_visible: false;
+    property <string> ctx_open_file:    "";
+    property <string> ctx_open_folder:  "";
+    property <string> ctx_item_name:    "";
+
+    property <bool> _h_locked: false;
+
+
+    VerticalLayout {
+        spacing: 0px;
+
+        toggle_bar := GalleryToggleBar {}
+
+        if groups.length == 0 : Rectangle {
+            vertical-stretch: 1.0;
+            background: CediniaColors.bg_primary;
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                spacing: 12px;
+
+                Text {
+                    text: AppState.scan_state == ScanState.Scanning
+                        ? Translations.scanning_fallback_text
+                        : Translations.no_results_text;
+                    color: CediniaColors.text_disabled;
+                    font-size: 15px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+            }
+        }
+
+        // Inline the scroller directly (like ResultsList does) so that
+        // vertical-stretch: 1.0 is applied to a real element in the layout,
+        // not wrapped inside an intermediate component.
+        if groups.length > 0 : gallery_scroll := ListView {
+            vertical-stretch: 1.0;
+
+            for group[group_idx] in root.groups : VerticalLayout {
+                padding-left: 8px;
+                padding-right: 8px;
+                padding-top: 8px;
+                padding-bottom: 4px;
+                spacing: 6px;
+
+                Rectangle {
+                    height: 34px;
+                    border-radius: 8px;
+                    background: CediniaColors.accent.with-alpha(0.85);
+
+                    // Group label (leaves room for the Compare button on the right)
+                    Text {
+                        x: 12px;
+                        y: 0px;
+                        height: parent.height;
+                        width: parent.width - 24px - compare_btn.width - 8px;
+                        text: group.label;
+                        color: CediniaColors.fg_on_accent;
+                        font-size: 13px;
+                        font-weight: 700;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        overflow: TextOverflow.elide;
+                    }
+
+                    // Compare button (right-aligned inside the header)
+                    compare_btn := GroupCompareBtn {
+                        group_idx: group_idx;
+                        x: parent.width - self.width - 6px;
+                        y: (parent.height - self.height) / 2;
+                    }
+                }
+
+                sgr := SwipeGestureHandler {
+                    property <length> committed_x: 0px;
+                    handle-swipe-left: true;
+                    handle-swipe-right: true;
+                    height: 244px;
+                    swiped => {
+                        // Horizontal gesture finished — release the lock so the
+                        // outer ListView can handle verticals again.
+                        root._h_locked = false;
+                        self.committed_x = self.committed_x + self.current-position.x - self.pressed-position.x;
+                        if self.committed_x > 0px { self.committed_x = 0px; }
+                        if hl.preferred-width <= sgr.width {
+                            self.committed_x = 0px;
+                        } else if self.committed_x < -(hl.preferred-width - sgr.width) {
+                            self.committed_x = -(hl.preferred-width - sgr.width);
+                        }
+                    }
+                    Rectangle {
+                        clip: true;
+                        hl := HorizontalLayout {
+                            property <length> live_offset: 0px;
+                            x: sgr.committed_x + live_offset;
+                            alignment: LayoutAlignment.start;
+                            spacing: 6px;
+                            states [
+                                swiping when sgr.swiping : {
+                                    live_offset: sgr.current-position.x - sgr.pressed-position.x;
+                                }
+                            ]
+                            for img in group.items : GalleryImageCell {
+                                thumbnail:       img.thumbnail;
+                                img_name:        img.name;
+                                img_size:        img.size;
+                                img_val_str:     img.val_str;
+                                img_full_path:   img.full_path;
+                                flat_idx:        img.flat_idx;
+                                checked:         img.checked;
+                                is_reference:    img.is_reference;
+                                // Cancel long-press when either the horizontal or the
+                                any_sgr_swiping: sgr.swiping;
+                                cell_long_pressed(f, d, n) => {
+                                    root.ctx_open_file   = f;
+                                    root.ctx_open_folder = d;
+                                    root.ctx_item_name   = n;
+                                    root.ctx_open_visible = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Track horizontal swipe state.
+                // Safe: depends only on sgr.swiping — no layout properties.
+                property <bool> _row_swiping: sgr.swiping;
+                changed _row_swiping => {
+                    if _row_swiping { root._h_locked = true; }
+                    // Do NOT clear on false — only swiped() clears the lock.
+                }
+
+                Rectangle { height: 1px; background: CediniaColors.divider; }
+            }
+        }
+    }
+
+
+
+    if root.ctx_open_visible : Rectangle {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 55;
+        background: CediniaColors.scrim;
+        TouchArea { clicked => { root.ctx_open_visible = false; } }
+
+        Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - ctx_open_vl.preferred-height - 24px) / 2;
+            width: min(parent.width - 48px, 300px);
+            height: ctx_open_vl.preferred-height + 24px;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: CediniaColors.shadow_lg;
+            clip: true;
+
+            ctx_open_vl := VerticalLayout {
+                padding: 12px;
+                spacing: 6px;
+
+                // Item name — lets the user see exactly what will be opened.
+                Text {
+                    text: root.ctx_item_name != "" ? root.ctx_item_name : Translations.ctx_menu_title_text;
+                    color: CediniaColors.text_primary;
+                    font-size: 13px;
+                    font-weight: 700;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    wrap: word-wrap;
+                }
+
+                // Parent folder path — shown in a smaller, muted colour.
+                if root.ctx_open_folder != "" : Text {
+                    text: root.ctx_open_folder;
+                    color: CediniaColors.text_disabled;
+                    font-size: 10px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    wrap: word-wrap;
+                }
+
+                TouchButton {
+                    label: Translations.ctx_open_file_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.text_primary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.open_path(root.ctx_open_file); root.ctx_open_visible = false; }
+                }
+
+                TouchButton {
+                    label: Translations.ctx_open_folder_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.open_parent_folder(root.ctx_open_folder); root.ctx_open_visible = false; }
+                }
+
+                TouchButton {
+                    label: Translations.close_text;
+                    min_h: 40px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_disabled;
+                    horizontal-stretch: 1.0;
+                    clicked => { root.ctx_open_visible = false; }
+                }
+            }
+        }
+    }
+
+
+    if toggle_bar.menu_state == 1 : Rectangle {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 50;
+        background: CediniaColors.scrim;
+        TouchArea {}
+
+        Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - popup_sel_vl.preferred-height - 24px) / 2;
+            width: min(parent.width - 48px, 300px);
+            height: popup_sel_vl.preferred-height + 24px;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: CediniaColors.shadow_lg;
+            clip: true;
+
+            popup_sel_vl := VerticalLayout {
+                padding: 12px;
+                spacing: 6px;
+
+                Text {
+                    text: Translations.selection_popup_title_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                TouchButton {
+                    label: Translations.select_all_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.text_primary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.select_except_one_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_one(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.select_except_largest_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_largest(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.select_except_smallest_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_smallest(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.select_largest_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_largest_per_group(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.select_smallest_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_smallest_per_group(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.select_except_highest_res_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_highest_resolution(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.select_except_lowest_res_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_all_except_lowest_resolution(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.select_highest_res_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_highest_resolution_per_group(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.select_lowest_res_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.select_lowest_resolution_per_group(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.invert_selection_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.text_secondary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.invert_selection(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.close_text;
+                    min_h: 40px; bg: CediniaColors.bg_elevated; fg: CediniaColors.text_disabled;
+                    horizontal-stretch: 1.0;
+                    clicked => { toggle_bar.menu_state = 0; }
+                }
+            }
+        }
+    }
+
+
+    if toggle_bar.menu_state == 2 : Rectangle {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 50;
+        background: CediniaColors.scrim;
+        TouchArea {}
+
+        Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - popup_desel_vl.preferred-height - 24px) / 2;
+            width: min(parent.width - 48px, 300px);
+            height: popup_desel_vl.preferred-height + 24px;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: CediniaColors.shadow_lg;
+            clip: true;
+
+            popup_desel_vl := VerticalLayout {
+                padding: 12px;
+                spacing: 6px;
+
+                Text {
+                    text: Translations.deselection_popup_title_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+                TouchButton {
+                    label: Translations.deselect_all_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.text_primary;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.deselect_all(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.deselect_except_one_text;
+                    min_h: 44px; bg: CediniaColors.bg_surface; fg: CediniaColors.accent_light;
+                    horizontal-stretch: 1.0;
+                    clicked => { AppState.deselect_all_except_one(); toggle_bar.menu_state = 0; }
+                }
+                TouchButton {
+                    label: Translations.close_text;
+                    min_h: 40px; bg: CediniaColors.bg_elevated; fg: CediniaColors.text_disabled;
+                    horizontal-stretch: 1.0;
+                    clicked => { toggle_bar.menu_state = 0; }
+                }
+            }
+        }
+    }
+
+
+    if AppState.gallery_delete_popup_visible : Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        z: 25;
+        background: CediniaColors.scrim_strong;
+
+
+        TouchArea {}
+
+
+        Rectangle {
+            x: parent.width / 2 - self.width / 2;
+            y: parent.height / 2 - self.height / 2;
+            width: min(parent.width - 32px, 380px);
+            height: card.preferred-height;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 28px;
+            drop-shadow-color: CediniaColors.shadow_xl;
+
+            card := VerticalLayout {
+                padding: 24px;
+                spacing: 14px;
+
+                Text {
+                    text: AppState.gallery_delete_message;
+                    color: CediniaColors.text_primary;
+                    font-size: 16px;
+                    font-weight: 600;
+                    wrap: TextWrap.word-wrap;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                if AppState.gallery_delete_warning != "" : Text {
+                    text: "⚠ " + AppState.gallery_delete_warning;
+                    color: CediniaColors.warning;
+                    font-size: 13px;
+                    wrap: TextWrap.word-wrap;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                HorizontalLayout {
+                    spacing: 10px;
+
+                    TouchButton {
+                        label: Translations.gallery_back_text;
+                        horizontal-stretch: 1.0;
+                        min_h: 48px;
+                        bg: CediniaColors.bg_surface;
+                        fg: CediniaColors.text_secondary;
+                        clicked => { AppState.gallery_delete_popup_visible = false; }
+                    }
+
+                    TouchButton {
+                        label: Translations.gallery_confirm_delete_text;
+                        horizontal-stretch: 1.0;
+                        min_h: 48px;
+                        bg: CediniaColors.danger;
+                        fg: CediniaColors.fg_on_danger;
+                        clicked => { AppState.confirm_gallery_delete(); }
+                    }
+                }
+            }
+        }
+    }
+
+
+    if AppState.delete_running : Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        z: 26;
+        background: CediniaColors.scrim_strong;
+
+        TouchArea {} 
+        Rectangle {
+            x: parent.width / 2 - self.width / 2;
+            y: parent.height / 2 - self.height / 2;
+            width: min(parent.width - 32px, 340px);
+            height: prog-card.preferred-height;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: CediniaColors.shadow_xl;
+
+            prog-card := VerticalLayout {
+                padding: 24px;
+                spacing: 14px;
+
+                Text {
+                    text: Translations.deleting_files_text;
+                    color: CediniaColors.text_primary;
+                    font-size: 16px;
+                    font-weight: 600;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                Text {
+                    text: AppState.delete_progress_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 13px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                TouchButton {
+                    label: Translations.stop_text;
+                    min_h: 44px;
+                    bg: CediniaColors.warning;
+                    fg: CediniaColors.fg_on_accent;
+                    clicked => { AppState.delete_stop_requested(); }
+                }
+            }
+        }
+    }
+
+
+    if AppState.delete_errors_visible : Rectangle {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        z: 27;
+        background: CediniaColors.scrim_strong;
+
+        TouchArea {}
+
+        Rectangle {
+            x: parent.width / 2 - self.width / 2;
+            y: parent.height / 2 - self.height / 2;
+            width: min(parent.width - 32px, 400px);
+            height: err-card.preferred-height;
+            border-radius: 14px;
+            background: CediniaColors.bg_elevated;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: CediniaColors.shadow_xl;
+
+            err-card := VerticalLayout {
+                padding: 20px;
+                spacing: 12px;
+
+                Text {
+                    text: Translations.delete_errors_title_text;
+                    color: CediniaColors.warning;
+                    font-size: 15px;
+                    font-weight: 600;
+                    wrap: TextWrap.word-wrap;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                }
+
+                Text {
+                    text: AppState.delete_errors_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                    wrap: TextWrap.word-wrap;
+                }
+
+                TouchButton {
+                    label: Translations.ok_text;
+                    min_h: 44px;
+                    bg: CediniaColors.bg_surface;
+                    fg: CediniaColors.text_secondary;
+                    clicked => { AppState.delete_errors_visible = false; }
+                }
+            }
+        }
+    }
+
+
+    Rectangle {
+        x: root.width - self.width - 16px;
+        y: root.height - self.height - 16px;
+        z: 20;
+        width: 56px;
+        height: 56px;
+        border-radius: 28px;
+        background: !AppState.storage_permission_granted
+            ? CediniaColors.text_disabled
+            : AppState.scan_state == ScanState.Scanning
+                ? CediniaColors.warning
+                : AppState.scan_state == ScanState.Stopping
+                    ? CediniaColors.warning.with-alpha(0.5)
+                    : CediniaColors.accent;
+        drop-shadow-blur: 12px;
+        drop-shadow-color: CediniaColors.shadow_md;
+        animate background { duration: 200ms; }
+
+        TouchArea {
+            enabled: AppState.storage_permission_granted && AppState.scan_state != ScanState.Stopping;
+            clicked => {
+                if (AppState.scan_state == ScanState.Scanning) {
+                    AppState.stop_requested();
+                } else {
+                    AppState.scan_requested();
+                }
+            }
+        }
+
+        Text {
+            text: AppState.scan_state == ScanState.Scanning
+                || AppState.scan_state == ScanState.Stopping ? "⏹" : "▶";
+            font-size: 22px;
+            color: (!AppState.storage_permission_granted || AppState.scan_state == ScanState.Stopping) ? CediniaColors.fg_on_accent_disabled : CediniaColors.fg_on_accent;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            vertical-alignment: TextVerticalAlignment.center;
+        }
+    }
+}

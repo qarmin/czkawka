@@ -1,0 +1,365 @@
+import { CediniaColors } from "../globals/colors.slint";
+import { FileEntryIdx } from "../globals/common.slint";
+
+export component TouchButton {
+    in property <string>  label;
+    in property <color>   bg:       CediniaColors.accent;
+    in property <color>   fg:       CediniaColors.fg_on_accent;
+    in property <bool>    enabled:  true;
+    in property <length>  min_h:    52px;
+    callback clicked;
+
+    height: max(min_h, txt.preferred-height + 24px);
+    min-width: txt.preferred-width + 32px;
+
+    Rectangle {
+        border-radius: 8px;
+        background: ta.has-hover && root.enabled ? root.bg.brighter(0.15) : root.enabled ? root.bg : CediniaColors.bg_elevated;
+        animate background { duration: 120ms; }
+
+        ta := TouchArea {
+            enabled: root.enabled;
+            clicked => { root.clicked(); }
+        }
+
+        txt := Text {
+            text: root.label;
+            color: root.enabled ? root.fg : CediniaColors.text_disabled;
+            font-size: 16px;
+            font-weight: 600;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+}
+
+
+
+
+export component IconButton {
+    in property <image>  icon;
+    in property <string> tooltip;
+    in property <bool>   enabled: true;
+    in property <color>  tint: CediniaColors.text_primary;
+    callback clicked;
+
+    width: 48px;
+    height: 48px;
+
+    Rectangle {
+        border-radius: 24px;
+        background: ta.has-hover && root.enabled ? CediniaColors.ripple : transparent;
+        animate background { duration: 120ms; }
+
+        ta := TouchArea {
+            enabled: root.enabled;
+            clicked => { root.clicked(); }
+        }
+
+        Image {
+            source: root.icon;
+            colorize: root.enabled ? root.tint : CediniaColors.text_disabled;
+            width: 24px;
+            height: 24px;
+            horizontal-alignment: ImageHorizontalAlignment.center;
+            vertical-alignment: ImageVerticalAlignment.center;
+        }
+    }
+}
+
+
+
+
+export component SectionHeader {
+    in property <string> title;
+    in property <string> subtitle: "";
+
+    height: subtitle == "" ? 44px : 60px;
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: CediniaColors.bg_elevated;
+        border-width: 1px;
+        border-color: CediniaColors.divider;
+
+        VerticalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            alignment: LayoutAlignment.center;
+            spacing: 2px;
+
+            Text {
+                text: root.title;
+                color: CediniaColors.accent_light;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.8px;
+            }
+
+            if root.subtitle != "" : Text {
+                text: root.subtitle;
+                color: CediniaColors.text_secondary;
+                font-size: 12px;
+            }
+        }
+    }
+}
+
+export component FileRow {
+    in property <string>  name;
+    in property <string>  path;
+    in property <string>  size;
+    in property <[string]> val_str: [];
+    in property <bool>    checked: false;
+    in property <bool>    is_header: false;
+    in property <bool>    is_reference: false;
+    in property <bool>    is_even: false;
+    in property <bool>    extra_as_line2: false;
+    callback toggle_checked();
+    callback long_pressed();
+    callback open_item();
+    callback open_parent();
+
+    // Suppresses the clicked event that fires right after the long-press timer.
+    property <bool> lp_fired: false;
+
+    // Prevents clicked from toggling selection after a drag/scroll release.
+    property <bool> _moved: false;
+
+    // Explicit armed flag – only true while a valid long-press is in progress.
+    // Cleared by every cancellation path before the timer callback can read it.
+    property <bool> _lp_active: false;
+
+    // Stored press coordinates for the 8 px dead-zone check.
+    property <length> _lp_start_x: 0px;
+    property <length> _lp_start_y: 0px;
+
+    // Watch ta.pressed directly: fires synchronously when the TouchArea loses
+    // its pressed state (up, cancel, gesture-steal by ListView/SGR).
+    property <bool> _ta_pressed_watch: ta.pressed;
+    changed _ta_pressed_watch => {
+        if (!_ta_pressed_watch) {
+            root._lp_active = false;
+            lp_timer.running = false;
+        }
+    }
+
+    height: root.is_header ? 36px : 80px;
+
+    Rectangle {
+        background: root.is_header
+            ? CediniaColors.row_header
+            : root.is_reference
+                ? CediniaColors.row_header.brighter(0.35)
+                : root.checked
+                    ? CediniaColors.row_selected
+                    : root.is_even ? CediniaColors.row_alt : CediniaColors.row_normal;
+        animate background { duration: 80ms; }
+
+        // Left accent bar – muted for reference, coloured for selected, hidden otherwise
+        if !root.is_header : Rectangle {
+            x: 0;
+            y: 0;
+            width: 4px;
+            height: parent.height;
+            background: root.is_reference
+                ? CediniaColors.text_secondary.with-alpha(0.4)
+                : root.checked ? CediniaColors.accent : transparent;
+        }
+
+        ta := TouchArea {
+            clicked => {
+                if (root.lp_fired) {
+                    root.lp_fired = false;
+                } else if (!root._moved && !root.is_header && !root.is_reference) {
+                    root.toggle_checked();
+                }
+                root._moved = false;
+            }
+            pointer-event(e) => {
+                if (!root.is_header) {
+                    if (e.kind == PointerEventKind.down) {
+                        root._lp_start_x = self.mouse-x;
+                        root._lp_start_y = self.mouse-y;
+                        root._moved    = false;
+                        root._lp_active = true;
+                        lp_timer.running = true;
+                        lp_timer.restart();
+                    } else if (e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel) {
+                        root._lp_active = false;
+                        lp_timer.running = false;
+                        if (e.kind == PointerEventKind.cancel) { root._moved = true; }
+                    }
+                    if (e.button == PointerEventButton.middle && e.kind == PointerEventKind.up) {
+                        root.open_item();
+                    }
+                    if (e.button == PointerEventButton.right && e.kind == PointerEventKind.up) {
+                        root.open_parent();
+                    }
+                }
+            }
+            // Fires while finger is held and moving.
+            moved => {
+                if (!root.is_header) {
+                    // Well - this rarely works, because faster cancel event is gathered
+                    if (self.mouse-x - root._lp_start_x > 8px
+                            || root._lp_start_x - self.mouse-x > 8px
+                            || self.mouse-y - root._lp_start_y > 8px
+                            || root._lp_start_y - self.mouse-y > 8px) {
+                        root._lp_active = false;
+                        lp_timer.running = false;
+                        root._moved = true;
+                    }
+                }
+            }
+        }
+
+        lp_timer := Timer {
+            interval: 500ms;
+            running: false;
+            triggered => {
+                self.running = false;
+                if (!root._lp_active) { return; }
+                root._lp_active = false;
+                root.lp_fired = true;
+                root.long_pressed();
+            }
+        }
+        if root.is_header : HorizontalLayout {
+            padding-left: 12px;
+            padding-right: 12px;
+            alignment: LayoutAlignment.start;
+            spacing: 4px;
+            Text {
+                text: root.name;
+                color: CediniaColors.text_secondary;
+                font-size: 12px;
+                font-weight: 700;
+                vertical-alignment: TextVerticalAlignment.center;
+                overflow: elide;
+            }
+        }
+
+        if !root.is_header : HorizontalLayout {
+            padding-left: 12px;
+            padding-right: 8px;
+            spacing: 8px;
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+
+                // Reference items show a star instead of a checkbox
+                if !root.is_reference : Rectangle {
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 12px;
+                    border-width: 2px;
+                    border-color: root.checked ? CediniaColors.accent : CediniaColors.border;
+                    background: root.checked ? CediniaColors.accent : transparent;
+                    vertical-stretch: 0.0;
+                    animate background { duration: 80ms; }
+                }
+                if root.is_reference : Text {
+                    text: "R";
+                    color: CediniaColors.text_secondary;
+                    font-size: 14px;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    width: 24px;
+                    height: 24px;
+                }
+            }
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                spacing: 2px;
+                horizontal-stretch: 1.0;
+
+                Text {
+                    text: root.name;
+                    color: root.is_reference ? CediniaColors.text_secondary : CediniaColors.text_primary;
+                    font-size: 14px;
+                    font-weight: 600;
+                    overflow: elide;
+                    wrap: no-wrap;
+                }
+
+                if !root.extra_as_line2 : Text {
+                    text: root.path;
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                    wrap: word-wrap;
+                }
+
+                if root.extra_as_line2 && root.path != "" : Text {
+                    text: root.path;
+                    color: CediniaColors.text_secondary;
+                    font-size: 11px;
+                    overflow: elide;
+                    wrap: no-wrap;
+                }
+
+                if !root.extra_as_line2 && root.val_str.length > FileEntryIdx.extra_idx && root.val_str[FileEntryIdx.extra_idx] != "" : Text {
+                    text: root.val_str[FileEntryIdx.extra_idx];
+                    color: CediniaColors.text_disabled;
+                    font-size: 11px;
+                    overflow: elide;
+                    wrap: no-wrap;
+                }
+
+                if root.extra_as_line2 && root.val_str[FileEntryIdx.extra_idx] != "" : Text {
+                    text: root.val_str[FileEntryIdx.extra_idx];
+                    color: CediniaColors.text_disabled;
+                    font-size: 11px;
+                    wrap: word-wrap;
+                }
+            }
+
+            Text {
+                text: root.size;
+                color: root.is_reference ? CediniaColors.text_secondary : CediniaColors.accent_light;
+                font-size: 12px;
+                font-weight: 700;
+                vertical-alignment: TextVerticalAlignment.center;
+                horizontal-alignment: TextHorizontalAlignment.right;
+                min-width: 60px;
+            }
+        }
+    }
+}
+
+
+
+
+export component Divider {
+    height: 1px;
+    Rectangle {
+        background: CediniaColors.divider;
+    }
+}
+
+
+
+
+export component StatusChip {
+    in property <string> label;
+    in property <color>  chip_color: CediniaColors.accent_muted;
+    in property <color>  text_color: CediniaColors.accent_light;
+
+    height: 24px;
+    min-width: txt.preferred-width + 16px;
+
+    Rectangle {
+        border-radius: 12px;
+        background: root.chip_color;
+        txt := Text {
+            text: root.label;
+            color: root.text_color;
+            font-size: 11px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+}

@@ -1,0 +1,170 @@
+import { CediniaColors } from "../globals/colors.slint";
+import { ActiveTool } from "../globals/common.slint";
+import { AppState } from "../globals/app_state.slint";
+import { Translations } from "../globals/translations.slint";
+
+component ToolCard {
+    in property <string>  emoji;
+    in property <string>  title;
+    in property <string>  description;
+    in property <ActiveTool> tool;
+    in property <color>   accent: CediniaColors.accent;
+    height: 88px;
+    horizontal-stretch: 1.0;
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        border-radius: 10px;
+        background: CediniaColors.bg_card;
+        border-width: 1px;
+        border-color: ta.has-hover ? root.accent : CediniaColors.border;
+        animate border-color { duration: 120ms; }
+        ta := TouchArea {
+            clicked => {
+                AppState.active_tool    = root.tool;
+                AppState.last_scan_tool = root.tool;
+                AppState.tool_changed(root.tool);
+            }
+        }
+        HorizontalLayout {
+            padding: 12px;
+            spacing: 12px;
+            alignment: LayoutAlignment.start;
+
+            Rectangle {
+                width: 48px;
+                height: 48px;
+                border-radius: 24px;
+                background: root.accent.with-alpha(CediniaColors.tool_icon_circle_alpha);
+                vertical-stretch: 0.0;
+                Text {
+                    text: root.emoji;
+                    font-size: 24px;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                spacing: 4px;
+                horizontal-stretch: 1.0;
+                Text {
+                    text: root.title;
+                    color: CediniaColors.text_primary;
+                    font-size: 15px;
+                    font-weight: 700;
+                }
+                Text {
+                    text: root.description;
+                    color: CediniaColors.text_secondary;
+                    font-size: 12px;
+                    overflow: elide;
+                }
+            }
+
+            Text {
+                text: "›";
+                color: root.accent;
+                font-size: 22px;
+                vertical-alignment: TextVerticalAlignment.center;
+            }
+        }
+    }
+}
+export component HomeScreen {
+    VerticalLayout {
+        horizontal-stretch: 1.0;
+        Flickable {
+            horizontal-stretch: 1.0;
+            vertical-stretch: 1.0;
+            cards := VerticalLayout {
+                width: parent.width;
+                padding: 12px;
+                spacing: 10px;
+                ToolCard {
+                    emoji: "📂";
+                    title: Translations.tool_duplicate_files_text;
+                    description: Translations.home_dup_description_text;
+                    tool: ActiveTool.DuplicateFiles;
+                }
+                ToolCard {
+                    emoji: "📁";
+                    title: Translations.tool_empty_folders_text;
+                    description: Translations.home_empty_folders_description_text;
+                    tool: ActiveTool.EmptyFolders;
+                    accent: CediniaColors.tool_empty_folders;
+                }
+                ToolCard {
+                    emoji: "🖼";
+                    title: Translations.tool_similar_images_text;
+                    description: Translations.home_similar_images_description_text;
+                    tool: ActiveTool.SimilarImages;
+                    accent: CediniaColors.tool_similar_imgs;
+                }
+                ToolCard {
+                    emoji: "📄";
+                    title: Translations.tool_empty_files_text;
+                    description: Translations.home_empty_files_description_text;
+                    tool: ActiveTool.EmptyFiles;
+                    accent: CediniaColors.tool_empty_files;
+                }
+                ToolCard {
+                    emoji: "🗑";
+                    title: Translations.tool_temporary_files_text;
+                    description: Translations.home_temp_files_description_text;
+                    tool: ActiveTool.TemporaryFiles;
+                    accent: CediniaColors.tool_temp_files;
+                }
+                ToolCard {
+                    emoji: "📦";
+                    title: Translations.tool_big_files_text;
+                    description: Translations.home_big_files_description_text;
+                    tool: ActiveTool.BigFiles;
+                    accent: CediniaColors.tool_big_files;
+                }
+                ToolCard {
+                    emoji: "⚠";
+                    title: Translations.tool_broken_files_text;
+                    description: Translations.home_broken_files_description_text;
+                    tool: ActiveTool.BrokenFiles;
+                    accent: CediniaColors.tool_broken_files;
+                }
+                ToolCard {
+                    emoji: "🏷";
+                    title: Translations.tool_bad_extensions_text;
+                    description: Translations.home_bad_extensions_description_text;
+                    tool: ActiveTool.BadExtensions;
+                    accent: CediniaColors.tool_bad_ext;
+                }
+                ToolCard {
+                    emoji: "🎵";
+                    title: Translations.tool_same_music_text;
+                    description: Translations.home_same_music_description_text;
+                    tool: ActiveTool.SameMusic;
+                    accent: CediniaColors.tool_same_music;
+                }
+                ToolCard {
+                    emoji: "✏";
+                    title: Translations.tool_bad_names_text;
+                    description: Translations.home_bad_names_description_text;
+                    tool: ActiveTool.BadNames;
+                    accent: CediniaColors.tool_bad_names;
+                }
+                ToolCard {
+                    emoji: "📷";
+                    title: Translations.tool_exif_remover_text;
+                    description: Translations.home_exif_description_text;
+                    tool: ActiveTool.ExifRemover;
+                    accent: CediniaColors.tool_exif;
+                }
+                ToolCard {
+                    emoji: "🎬";
+                    title: Translations.tool_similar_videos_text;
+                    description: Translations.home_similar_videos_description_text;
+                    tool: ActiveTool.SimilarVideos;
+                    accent: CediniaColors.tool_similar_videos;
+                }
+            }
+        }
+    }
+}

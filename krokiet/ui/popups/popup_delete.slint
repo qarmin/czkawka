@@ -1,0 +1,30 @@
+import { Callabler } from "../globals/callabler.slint";
+import { Translations } from "../globals/translations.slint";
+import { PopupBase } from "../components/popup_base.slint";
+import { PopupCenteredText } from "../components/popup_centered_text.slint";
+
+export component PopupDelete inherits Rectangle {
+    out property <length> popup_width: 350px;
+    out property <length> popup_height: 150px;
+    callback show_popup();
+
+    popup_window := PopupBase {
+        width: popup_width;
+        height: popup_height;
+        title_text <=> Translations.delete_text;
+
+        VerticalLayout {
+            PopupCenteredText {
+                text <=> Translations.delete_confirmation_text;
+            }
+        }
+
+        ok_clicked => {
+            Callabler.delete_selected_items();
+        }
+    }
+
+    show_popup() => {
+        popup_window.show();
+    }
+}
