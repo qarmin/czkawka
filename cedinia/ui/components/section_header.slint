@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 
 export component SectionHeader {
@@ -22,15 +23,15 @@ export component SectionHeader {
             Text {
                 text: root.title;
                 color: CediniaColors.accent_light;
-                font-size: 13px;
-                font-weight: 700;
+                font-size: Fonts.body_lg;
+                font-weight: Fonts.bold;
                 letter-spacing: 0.8px;
             }
 
             if root.subtitle != "" : Text {
                 text: root.subtitle;
                 color: CediniaColors.text_secondary;
-                font-size: 12px;
+                font-size: Fonts.body;
             }
         }
     }

@@ -1,3 +1,4 @@
+import { Fonts } from "../../globals/fonts.slint";
 import { CediniaColors } from "../../globals/colors.slint";
 
 export component TouchButton {
@@ -24,8 +25,8 @@ export component TouchButton {
         txt := Text {
             text: root.label;
             color: root.enabled ? root.fg : CediniaColors.text_disabled;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: Fonts.title;
+            font-weight: Fonts.semibold;
             horizontal-alignment: center;
             vertical-alignment: center;
         }

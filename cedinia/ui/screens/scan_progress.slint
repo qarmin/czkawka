@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { AppState } from "../globals/app_state.slint";
 import { ScanState } from "../globals/common.slint";
@@ -24,7 +25,7 @@ export component ScanProgressBar {
                 Text {
                     text: AppState.progress.step_name != "" ? AppState.progress.step_name : Translations.scanning_fallback_text;
                     color: CediniaColors.text_secondary;
-                    font-size: 12px;
+                    font-size: Fonts.body;
                     horizontal-stretch: 1.0;
                     overflow: elide;
                 }
@@ -34,14 +35,14 @@ export component ScanProgressBar {
                         ? (AppState.progress.current_progress + " / " + AppState.progress.all_progress)
                         : (AppState.progress.current_progress + " " + Translations.files_suffix_text);
                     color: CediniaColors.accent_light;
-                    font-size: 12px;
-                    font-weight: 700;
+                    font-size: Fonts.body;
+                    font-weight: Fonts.bold;
                 }
                 if AppState.progress.is_indeterminate : Text {
                     text: "…";
                     color: CediniaColors.text_disabled;
-                    font-size: 12px;
-                    font-weight: 700;
+                    font-size: Fonts.body;
+                    font-weight: Fonts.bold;
                 }
             }
 

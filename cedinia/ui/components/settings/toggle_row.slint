@@ -1,3 +1,4 @@
+import { Fonts } from "../../globals/fonts.slint";
 import { CediniaColors } from "../../globals/colors.slint";
 import { AppState } from "../../globals/app_state.slint";
 
@@ -34,12 +35,12 @@ export component ToggleRow {
                 Text {
                     text: root.label;
                     color: CediniaColors.text_primary;
-                    font-size: 15px;
+                    font-size: Fonts.label_lg;
                 }
                 if root.description != "" : Text {
                     text: root.description;
                     color: CediniaColors.text_secondary;
-                    font-size: 12px;
+                    font-size: Fonts.body;
                     wrap: word-wrap;
                 }
             }

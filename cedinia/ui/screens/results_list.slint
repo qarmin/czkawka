@@ -1,5 +1,6 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
-import { ConfirmPopupAction, FileEntry, FileEntryIdx, ScanState } from "../globals/common.slint";
+import { ConfirmPopupAction, FileEntry, FileEntryIdx, ScanState, SelectionSheet } from "../globals/common.slint";
 import { AppState } from "../globals/app_state.slint";
 import { Translations } from "../globals/translations.slint";
 import { FileRow } from "../components/file_row.slint";
@@ -28,7 +29,7 @@ export component ResultsList {
     in property <bool>        has_resolution_select: false;
     in property <bool>        extra_as_line2: false;
 
-    property <int> menu_state: 0;
+    property <SelectionSheet> menu_state: SelectionSheet.None;
 
     // Context menu (long-press)
     property <bool>   ctx_open_visible: false;
@@ -92,7 +93,7 @@ export component ResultsList {
                     min_h: 36px;
                     bg: CediniaColors.bg_elevated;
                     fg: CediniaColors.text_secondary;
-                    clicked => { root.menu_state = 1; }
+                    clicked => { root.menu_state = SelectionSheet.Selection; }
                 }
 
                 TouchButton {
@@ -100,7 +101,7 @@ export component ResultsList {
                     min_h: 36px;
                     bg: CediniaColors.bg_elevated;
                     fg: CediniaColors.text_secondary;
-                    clicked => { root.menu_state = 2; }
+                    clicked => { root.menu_state = SelectionSheet.Deselection; }
                 }
 
                 if root.has_gallery_mode : TouchButton {
@@ -179,7 +180,7 @@ export component ResultsList {
                         Text {
                             text: Translations.no_permission_scan_warning_text;
                             color: CediniaColors.warning;
-                            font-size: 13px;
+                            font-size: Fonts.body_lg;
                             wrap: TextWrap.word-wrap;
                             horizontal-alignment: TextHorizontalAlignment.center;
                         }
@@ -195,8 +196,8 @@ export component ResultsList {
                                 Text {
                                     text: Translations.grant_text;
                                     color: CediniaColors.accent_light;
-                                    font-size: 14px;
-                                    font-weight: 600;
+                                    font-size: Fonts.subtitle;
+                                    font-weight: Fonts.semibold;
                                     horizontal-alignment: TextHorizontalAlignment.center;
                                     vertical-alignment: TextVerticalAlignment.center;
                                 }
@@ -221,7 +222,7 @@ export component ResultsList {
     }
 
 
-    if root.menu_state == 1 : SelectionMenuSheet {
+    if root.menu_state == SelectionSheet.Selection : SelectionMenuSheet {
         x: 0; y: 0;
         width: root.width;
         height: root.height;
@@ -229,18 +230,18 @@ export component ResultsList {
         is_grouped: root.is_grouped;
         has_size_select: root.has_size_select;
         has_resolution_select: root.has_resolution_select;
-        closed => { root.menu_state = 0; }
+        closed => { root.menu_state = SelectionSheet.None; }
     }
 
 
 
-    if root.menu_state == 2 : DeselectionMenuSheet {
+    if root.menu_state == SelectionSheet.Deselection : DeselectionMenuSheet {
         x: 0; y: 0;
         width: root.width;
         height: root.height;
         z: 50;
         is_grouped: root.is_grouped;
-        closed => { root.menu_state = 0; }
+        closed => { root.menu_state = SelectionSheet.None; }
     }
 
 
@@ -262,8 +263,8 @@ export component ResultsList {
         Text {
             text: AppState.confirm_popup_message;
             color: CediniaColors.text_primary;
-            font-size: 15px;
-            font-weight: 600;
+            font-size: Fonts.label_lg;
+            font-weight: Fonts.semibold;
             wrap: TextWrap.word-wrap;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
@@ -310,8 +311,8 @@ export component ResultsList {
         Text {
             text: Translations.delete_errors_title_text;
             color: CediniaColors.warning;
-            font-size: 15px;
-            font-weight: 600;
+            font-size: Fonts.label_lg;
+            font-weight: Fonts.semibold;
             wrap: TextWrap.word-wrap;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
@@ -319,7 +320,7 @@ export component ResultsList {
         Text {
             text: AppState.delete_errors_text;
             color: CediniaColors.text_secondary;
-            font-size: 11px;
+            font-size: Fonts.caption;
             wrap: TextWrap.word-wrap;
         }
 

@@ -1,3 +1,4 @@
+import { Fonts } from "../../globals/fonts.slint";
 import { CediniaColors } from "../../globals/colors.slint";
 
 export component CategoryLabel inherits Rectangle {
@@ -13,8 +14,8 @@ export component CategoryLabel inherits Rectangle {
         Text {
             text: label;
             color: CediniaColors.text_disabled;
-            font-size: 10px;
-            font-weight: 700;
+            font-size: Fonts.micro;
+            font-weight: Fonts.bold;
             vertical-alignment: TextVerticalAlignment.center;
             letter-spacing: 1px;
         }

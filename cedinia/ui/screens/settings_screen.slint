@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { Divider } from "../components/divider.slint";
 import { TouchButton } from "../components/buttons/touch_button.slint";
@@ -10,26 +11,26 @@ import { SegmentRow } from "../components/settings/segment_row.slint";
 import { TextInputRow } from "../components/settings/text_input_row.slint";
 import { ToggleRow } from "../components/settings/toggle_row.slint";
 import { ToolGroupHeader } from "../components/settings/tool_group_header.slint";
-import { SettingsTab } from "../globals/common.slint";
+import { DiagConfirm, SettingsTab } from "../globals/common.slint";
 import { Translations } from "../globals/translations.slint";
 
 export component SettingsScreen {
 
-    if diag_confirm_action != "" : ScrimDialog {
+    if diag_confirm_action != DiagConfirm.None : ScrimDialog {
         x: 0; y: 0;
         width: root.width;
         height: root.height;
         z: 100;
         bordered: true;
-        dismissed => { diag_confirm_action = ""; }
+        dismissed => { diag_confirm_action = DiagConfirm.None; }
 
         Text {
-            text: diag_confirm_action == "thumbnails"
+            text: diag_confirm_action == DiagConfirm.Thumbnails
                 ? Translations.diag_confirm_clear_thumbnails_text
                 : Translations.diag_confirm_clear_cache_text;
             color: CediniaColors.text_primary;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: Fonts.title;
+            font-weight: Fonts.semibold;
             horizontal-alignment: TextHorizontalAlignment.center;
             wrap: word-wrap;
         }
@@ -42,7 +43,7 @@ export component SettingsScreen {
                 horizontal-stretch: 1.0;
                 bg: CediniaColors.bg_elevated;
                 fg: CediniaColors.text_secondary;
-                clicked => { diag_confirm_action = ""; }
+                clicked => { diag_confirm_action = DiagConfirm.None; }
             }
 
             TouchButton {
@@ -51,12 +52,12 @@ export component SettingsScreen {
                 bg: CediniaColors.danger;
                 fg: CediniaColors.fg_on_danger;
                 clicked => {
-                    if (diag_confirm_action == "thumbnails") {
+                    if (diag_confirm_action == DiagConfirm.Thumbnails) {
                         AppState.clear_thumbnails_cache();
                     } else {
                         AppState.clear_app_cache();
                     }
-                    diag_confirm_action = "";
+                    diag_confirm_action = DiagConfirm.None;
                 }
             }
         }
@@ -73,8 +74,8 @@ export component SettingsScreen {
         Text {
             text: Translations.collect_test_title_text;
             color: CediniaColors.accent_light;
-            font-size: 18px;
-            font-weight: 700;
+            font-size: Fonts.title_lg;
+            font-weight: Fonts.bold;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
 
@@ -83,20 +84,20 @@ export component SettingsScreen {
         GridLayout {
             spacing: 8px;
             Row {
-                Text { text: Translations.collect_test_volumes_text; color: CediniaColors.text_secondary; font-size: 14px; }
-                Text { text: AppState.collect_test_result.volumes; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                Text { text: Translations.collect_test_volumes_text; color: CediniaColors.text_secondary; font-size: Fonts.subtitle; }
+                Text { text: AppState.collect_test_result.volumes; color: CediniaColors.text_primary; font-size: Fonts.subtitle; font-weight: Fonts.bold; horizontal-alignment: TextHorizontalAlignment.right; }
             }
             Row {
-                Text { text: Translations.collect_test_folders_text; color: CediniaColors.text_secondary; font-size: 14px; }
-                Text { text: AppState.collect_test_result.folders; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                Text { text: Translations.collect_test_folders_text; color: CediniaColors.text_secondary; font-size: Fonts.subtitle; }
+                Text { text: AppState.collect_test_result.folders; color: CediniaColors.text_primary; font-size: Fonts.subtitle; font-weight: Fonts.bold; horizontal-alignment: TextHorizontalAlignment.right; }
             }
             Row {
-                Text { text: Translations.collect_test_files_text; color: CediniaColors.text_secondary; font-size: 14px; }
-                Text { text: AppState.collect_test_result.files; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                Text { text: Translations.collect_test_files_text; color: CediniaColors.text_secondary; font-size: Fonts.subtitle; }
+                Text { text: AppState.collect_test_result.files; color: CediniaColors.text_primary; font-size: Fonts.subtitle; font-weight: Fonts.bold; horizontal-alignment: TextHorizontalAlignment.right; }
             }
             Row {
-                Text { text: Translations.collect_test_time_text; color: CediniaColors.text_secondary; font-size: 14px; }
-                Text { text: AppState.collect_test_result.elapsed_time; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+                Text { text: Translations.collect_test_time_text; color: CediniaColors.text_secondary; font-size: Fonts.subtitle; }
+                Text { text: AppState.collect_test_result.elapsed_time; color: CediniaColors.text_primary; font-size: Fonts.subtitle; font-weight: Fonts.bold; horizontal-alignment: TextHorizontalAlignment.right; }
             }
         }
 
@@ -110,7 +111,7 @@ export component SettingsScreen {
 
 
     property <SettingsTab> active_tab: SettingsTab.General;
-    property <string> diag_confirm_action: "";
+    property <DiagConfirm> diag_confirm_action: DiagConfirm.None;
 
 
     changed active_tab => {
@@ -157,8 +158,8 @@ export component SettingsScreen {
                     Text {
                         text: tab_info.label;
                         color: active_tab == tab_info.tab ? CediniaColors.accent_light : CediniaColors.text_secondary;
-                        font-size: 13px;
-                        font-weight: active_tab == tab_info.tab ? 700 : 400;
+                        font-size: Fonts.body_lg;
+                        font-weight: active_tab == tab_info.tab ? Fonts.bold : Fonts.regular;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment: TextVerticalAlignment.center;
                         animate color { duration: 150ms; }
@@ -182,8 +183,8 @@ export component SettingsScreen {
                 Text {
                     text: "🔔 " + Translations.notifications_disabled_banner_text;
                     color: CediniaColors.warning;
-                    font-size: 13px;
-                    font-weight: 600;
+                    font-size: Fonts.body_lg;
+                    font-weight: Fonts.semibold;
                     vertical-alignment: TextVerticalAlignment.center;
                     horizontal-stretch: 1.0;
                 }
@@ -418,7 +419,7 @@ export component SettingsScreen {
                             y: (parent.height - self.preferred-height) / 2;
                             text: "⚠";
                             color: CediniaColors.warning;
-                            font-size: 14px;
+                            font-size: Fonts.subtitle;
                         }
                         fp_text := Text {
                             x: 32px;
@@ -426,7 +427,7 @@ export component SettingsScreen {
                             width: parent.width - 44px;
                             text: Translations.same_music_fingerprint_warning_text;
                             color: CediniaColors.warning;
-                            font-size: 12px;
+                            font-size: Fonts.body;
                             wrap: word-wrap;
                         }
                     }
@@ -477,7 +478,7 @@ export component SettingsScreen {
                             width: parent.width - 32px;
                             text: Translations.settings_broken_files_note_text;
                             color: CediniaColors.text_secondary;
-                            font-size: 12px;
+                            font-size: Fonts.body;
                             wrap: word-wrap;
                         }
                     }
@@ -557,20 +558,20 @@ export component SettingsScreen {
                             Text {
                                 text: "Cedinia 11.0.1";
                                 color: CediniaColors.text_primary;
-                                font-size: 18px;
-                                font-weight: 700;
+                                font-size: Fonts.title_lg;
+                                font-weight: Fonts.bold;
                                 horizontal-alignment: TextHorizontalAlignment.center;
                             }
                             Text {
                                 text: Translations.app_subtitle_text;
                                 color: CediniaColors.text_secondary;
-                                font-size: 13px;
+                                font-size: Fonts.body_lg;
                                 horizontal-alignment: TextHorizontalAlignment.center;
                             }
                             Text {
                                 text: Translations.app_license_text;
                                 color: CediniaColors.text_disabled;
-                                font-size: 11px;
+                                font-size: Fonts.caption;
                                 horizontal-alignment: TextHorizontalAlignment.center;
                             }
                         }
@@ -637,7 +638,7 @@ export component SettingsScreen {
                                 Text {
                                     text: "🔒 " + Translations.permission_title_text;
                                     color: CediniaColors.text_primary;
-                                    font-size: 15px;
+                                    font-size: Fonts.label_lg;
                                 }
                                 Text {
                                     text: AppState.storage_permission_granted
@@ -646,7 +647,7 @@ export component SettingsScreen {
                                     color: AppState.storage_permission_granted
                                         ? CediniaColors.success
                                         : CediniaColors.danger;
-                                    font-size: 12px;
+                                    font-size: Fonts.body;
                                 }
                             }
 
@@ -679,18 +680,18 @@ export component SettingsScreen {
                                 Text {
                                     text: Translations.diagnostics_collect_test_text;
                                     color: CediniaColors.text_primary;
-                                    font-size: 15px;
+                                    font-size: Fonts.label_lg;
                                 }
                                 Text {
                                     text: Translations.diagnostics_collect_test_desc_text;
                                     color: CediniaColors.text_secondary;
-                                    font-size: 12px;
+                                    font-size: Fonts.body;
                                 }
                                 if AppState.collect_test_cancelled : Text {
                                     text: Translations.collect_test_cancelled_text;
                                     color: CediniaColors.warning;
-                                    font-size: 11px;
-                                    font-weight: 600;
+                                    font-size: Fonts.caption;
+                                    font-weight: Fonts.semibold;
                                 }
                             }
                             VerticalLayout {
@@ -727,12 +728,12 @@ export component SettingsScreen {
                             Text {
                                 text: Translations.diagnostics_thumbnails_text + ": " + AppState.diag_thumbnails_size;
                                 color: CediniaColors.text_primary;
-                                font-size: 14px;
+                                font-size: Fonts.subtitle;
                             }
                             Text {
                                 text: Translations.diagnostics_app_cache_text + ": " + AppState.diag_app_cache_size;
                                 color: CediniaColors.text_secondary;
-                                font-size: 12px;
+                                font-size: Fonts.body;
                             }
                         }
                     }
@@ -755,7 +756,7 @@ export component SettingsScreen {
                                 min_h: 40px;
                                 bg: CediniaColors.danger.with-alpha(0.7);
                                 fg: CediniaColors.fg_on_danger;
-                                clicked => { diag_confirm_action = "thumbnails"; }
+                                clicked => { diag_confirm_action = DiagConfirm.Thumbnails; }
                             }
 
                             TouchButton {
@@ -764,7 +765,7 @@ export component SettingsScreen {
                                 min_h: 40px;
                                 bg: CediniaColors.danger.with-alpha(0.5);
                                 fg: CediniaColors.fg_on_danger;
-                                clicked => { diag_confirm_action = "cache"; }
+                                clicked => { diag_confirm_action = DiagConfirm.Cache; }
                             }
                         }
                     }
@@ -789,14 +790,14 @@ export component SettingsScreen {
                                 Text {
                                     text: "Cedinia";
                                     color: CediniaColors.text_primary;
-                                    font-size: 14px;
-                                    font-weight: 600;
+                                    font-size: Fonts.subtitle;
+                                    font-weight: Fonts.semibold;
                                 }
                                 Text {
                                     text: "GPL-3.0-or-later";
                                     color: CediniaColors.success;
-                                    font-size: 12px;
-                                    font-weight: 600;
+                                    font-size: Fonts.body;
+                                    font-weight: Fonts.semibold;
                                 }
                             }
 
@@ -856,7 +857,7 @@ export component SettingsScreen {
                         width: parent.width - 24px;
                         text: AppState.licenses_text;
                         color: CediniaColors.text_secondary;
-                        font-size: 11px;
+                        font-size: Fonts.caption;
                         wrap: word-wrap;
                     }
                 }

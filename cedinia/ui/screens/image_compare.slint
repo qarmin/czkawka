@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { AppState } from "../globals/app_state.slint";
 import { Translations } from "../globals/translations.slint";
@@ -155,7 +156,7 @@ export component ImageCompareOverlay inherits Rectangle {
             Text {
                 text: Translations.compare_res_mismatch_text;
                 color: CediniaColors.warning;
-                font-size: 10px;
+                font-size: Fonts.micro;
                 horizontal-alignment: TextHorizontalAlignment.center;
                 vertical-alignment:   TextVerticalAlignment.center;
                 overflow: TextOverflow.elide;
@@ -206,7 +207,7 @@ export component ImageCompareOverlay inherits Rectangle {
                         Text {
                             text: AppState.compare_images[AppState.compare_left_idx].checked ? Translations.ok_text : "";
                             color: CediniaColors.fg_on_accent;
-                            font-size: 13px; font-weight: 700;
+                            font-size: Fonts.body_lg; font-weight: Fonts.bold;
                             horizontal-alignment: TextHorizontalAlignment.center;
                             vertical-alignment:   TextVerticalAlignment.center;
                         }
@@ -254,7 +255,7 @@ export component ImageCompareOverlay inherits Rectangle {
                         Text {
                             text: AppState.compare_images[AppState.compare_right_idx].checked ? Translations.ok_text : "";
                             color: CediniaColors.fg_on_accent;
-                            font-size: 13px; font-weight: 700;
+                            font-size: Fonts.body_lg; font-weight: Fonts.bold;
                             horizontal-alignment: TextHorizontalAlignment.center;
                             vertical-alignment:   TextVerticalAlignment.center;
                         }
@@ -333,7 +334,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 if AppState.compare_diff_image.width == 0: Text {
                     text: Translations.compare_computing_text;
                     color: CediniaColors.text_disabled;
-                    font-size: 14px;
+                    font-size: Fonts.subtitle;
                     horizontal-alignment: TextHorizontalAlignment.center;
                     vertical-alignment:   TextVerticalAlignment.center;
                 }
@@ -387,23 +388,23 @@ export component ImageCompareOverlay inherits Rectangle {
                     Text {
                         text: left_valid ? AppState.compare_images[AppState.compare_left_idx].name : "";
                         color: CediniaColors.accent_light;
-                        font-size: 11px; font-weight: 700;
+                        font-size: Fonts.caption; font-weight: Fonts.bold;
                         overflow: TextOverflow.elide; wrap: no-wrap;
                     }
                     Text {
                         text: left_valid ? AppState.compare_images[AppState.compare_left_idx].size : "";
                         color: CediniaColors.text_secondary;
-                        font-size: 10px;
+                        font-size: Fonts.micro;
                     }
                     Text {
                         text: left_valid ? AppState.compare_images[AppState.compare_left_idx].dims : "";
                         color: CediniaColors.text_disabled;
-                        font-size: 10px;
+                        font-size: Fonts.micro;
                     }
                     Text {
                         text: left_valid ? AppState.compare_images[AppState.compare_left_idx].dir : "";
                         color: CediniaColors.text_disabled;
-                        font-size: 9px;
+                        font-size: Fonts.micro;
                         overflow: TextOverflow.elide; wrap: no-wrap;
                     }
                 }
@@ -418,23 +419,23 @@ export component ImageCompareOverlay inherits Rectangle {
                     Text {
                         text: right_valid ? AppState.compare_images[AppState.compare_right_idx].name : "";
                         color: CediniaColors.accent_light;
-                        font-size: 11px; font-weight: 700;
+                        font-size: Fonts.caption; font-weight: Fonts.bold;
                         overflow: TextOverflow.elide; wrap: no-wrap;
                     }
                     Text {
                         text: right_valid ? AppState.compare_images[AppState.compare_right_idx].size : "";
                         color: CediniaColors.text_secondary;
-                        font-size: 10px;
+                        font-size: Fonts.micro;
                     }
                     Text {
                         text: right_valid ? AppState.compare_images[AppState.compare_right_idx].dims : "";
                         color: CediniaColors.text_disabled;
-                        font-size: 10px;
+                        font-size: Fonts.micro;
                     }
                     Text {
                         text: right_valid ? AppState.compare_images[AppState.compare_right_idx].dir : "";
                         color: CediniaColors.text_disabled;
-                        font-size: 9px;
+                        font-size: Fonts.micro;
                         overflow: TextOverflow.elide; wrap: no-wrap;
                     }
                 }
@@ -467,7 +468,7 @@ export component ImageCompareOverlay inherits Rectangle {
                     mode_normal_txt := Text {
                         text: Translations.compare_mode_normal_text;
                         color: compare_mode == CompareMode.Normal ? CediniaColors.accent_light : CediniaColors.text_secondary;
-                        font-size: 12px; font-weight: 600;
+                        font-size: Fonts.body; font-weight: Fonts.semibold;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment:   TextVerticalAlignment.center;
                     }
@@ -483,7 +484,7 @@ export component ImageCompareOverlay inherits Rectangle {
                     mode_split_txt := Text {
                         text: Translations.compare_mode_split_text;
                         color: compare_mode == CompareMode.Split ? CediniaColors.accent_light : CediniaColors.text_secondary;
-                        font-size: 12px; font-weight: 600;
+                        font-size: Fonts.body; font-weight: Fonts.semibold;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment:   TextVerticalAlignment.center;
                     }
@@ -499,7 +500,7 @@ export component ImageCompareOverlay inherits Rectangle {
                     mode_overlay_txt := Text {
                         text: Translations.compare_mode_overlay_text;
                         color: compare_mode == CompareMode.Overlay ? CediniaColors.accent_light : CediniaColors.text_secondary;
-                        font-size: 12px; font-weight: 600;
+                        font-size: Fonts.body; font-weight: Fonts.semibold;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment:   TextVerticalAlignment.center;
                     }
@@ -520,7 +521,7 @@ export component ImageCompareOverlay inherits Rectangle {
                     mode_diff_txt := Text {
                         text: Translations.compare_mode_diff_text;
                         color: compare_mode == CompareMode.Diff ? CediniaColors.accent_light : CediniaColors.text_secondary;
-                        font-size: 12px; font-weight: 600;
+                        font-size: Fonts.body; font-weight: Fonts.semibold;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment:   TextVerticalAlignment.center;
                     }
@@ -599,7 +600,7 @@ export component ImageCompareOverlay inherits Rectangle {
                                 Text {
                                     text: "L";
                                     color: idx == AppState.compare_left_idx ? CediniaColors.fg_on_accent : CediniaColors.text_secondary;
-                                    font-size: 12px; font-weight: 700;
+                                    font-size: Fonts.body; font-weight: Fonts.bold;
                                     horizontal-alignment: TextHorizontalAlignment.center;
                                     vertical-alignment:   TextVerticalAlignment.center;
                                 }
@@ -618,7 +619,7 @@ export component ImageCompareOverlay inherits Rectangle {
                                 Text {
                                     text: "R";
                                     color: idx == AppState.compare_right_idx ? CediniaColors.fg_on_accent : CediniaColors.text_secondary;
-                                    font-size: 12px; font-weight: 700;
+                                    font-size: Fonts.body; font-weight: Fonts.bold;
                                     horizontal-alignment: TextHorizontalAlignment.center;
                                     vertical-alignment:   TextVerticalAlignment.center;
                                 }
@@ -648,13 +649,13 @@ export component ImageCompareOverlay inherits Rectangle {
                 ? Translations.compare_cancelling_text
                 : Translations.compare_loading_text;
             color: CediniaColors.text_primary;
-            font-size: 15px; font-weight: 600;
+            font-size: Fonts.label_lg; font-weight: Fonts.semibold;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
         Text {
             text: AppState.compare_loading_current + " / " + AppState.compare_loading_total;
             color: CediniaColors.text_secondary;
-            font-size: 13px;
+            font-size: Fonts.body_lg;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
         Rectangle {
@@ -668,7 +669,7 @@ export component ImageCompareOverlay inherits Rectangle {
             Text {
                 text: Translations.cancel_text;
                 color: AppState.compare_cancelling ? CediniaColors.text_disabled : CediniaColors.text_secondary;
-                font-size: 14px;
+                font-size: Fonts.subtitle;
                 horizontal-alignment: TextHorizontalAlignment.center;
                 vertical-alignment:   TextVerticalAlignment.center;
             }

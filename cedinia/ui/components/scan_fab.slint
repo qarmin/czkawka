@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { ScanState } from "../globals/common.slint";
 import { AppState } from "../globals/app_state.slint";
@@ -31,7 +32,7 @@ export component ScanFab inherits Rectangle {
     Text {
         text: AppState.scan_state == ScanState.Scanning || AppState.scan_state == ScanState.Stopping
             ? "⏹" : "▶";
-        font-size: 22px;
+        font-size: Fonts.display_sm;
         color: (!AppState.storage_permission_granted || AppState.scan_state == ScanState.Stopping) ? CediniaColors.fg_on_accent_disabled : CediniaColors.fg_on_accent;
         horizontal-alignment: TextHorizontalAlignment.center;
         vertical-alignment: TextVerticalAlignment.center;

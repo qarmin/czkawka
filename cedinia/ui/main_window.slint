@@ -1,3 +1,4 @@
+import { Fonts } from "globals/fonts.slint";
 import { CediniaColors } from "globals/colors.slint";
 import { ActiveTool, DirectoryEntry, FileEntry, ScanState, SimilarGroupCard } from "globals/common.slint";
 import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "globals/app_state.slint";
@@ -249,14 +250,14 @@ export component MainWindow inherits Window {
 
                 Text {
                     text: Translations.stopping_overlay_title_text;
-                    font-size: 17px;
-                    font-weight: 700;
+                    font-size: Fonts.title_lg;
+                    font-weight: Fonts.bold;
                     color: CediniaColors.warning;
                     horizontal-alignment: TextHorizontalAlignment.center;
                 }
                 Text {
                     text: Translations.stopping_overlay_body_text;
-                    font-size: 13px;
+                    font-size: Fonts.body_lg;
                     color: CediniaColors.text_secondary;
                     horizontal-alignment: TextHorizontalAlignment.center;
                     wrap: word-wrap;
@@ -290,15 +291,15 @@ export component MainWindow inherits Window {
                 Text {
                     text: Translations.permission_title_text;
                     color: CediniaColors.warning;
-                    font-size: 18px;
-                    font-weight: 700;
+                    font-size: Fonts.title_lg;
+                    font-weight: Fonts.bold;
                     horizontal-alignment: TextHorizontalAlignment.center;
                 }
 
                 Text {
                     text: Translations.permission_body_text;
                     color: CediniaColors.text_secondary;
-                    font-size: 13px;
+                    font-size: Fonts.body_lg;
                     wrap: word-wrap;
                     horizontal-alignment: TextHorizontalAlignment.center;
                 }

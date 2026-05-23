@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { FileEntryIdx } from "../globals/common.slint";
 
@@ -129,8 +130,8 @@ export component FileRow {
             Text {
                 text: root.name;
                 color: CediniaColors.text_secondary;
-                font-size: 12px;
-                font-weight: 700;
+                font-size: Fonts.body;
+                font-weight: Fonts.bold;
                 vertical-alignment: TextVerticalAlignment.center;
                 overflow: elide;
             }
@@ -158,7 +159,7 @@ export component FileRow {
                 if root.is_reference : Text {
                     text: "R";
                     color: CediniaColors.text_secondary;
-                    font-size: 14px;
+                    font-size: Fonts.subtitle;
                     horizontal-alignment: TextHorizontalAlignment.center;
                     vertical-alignment: TextVerticalAlignment.center;
                     width: 24px;
@@ -174,8 +175,8 @@ export component FileRow {
                 Text {
                     text: root.name;
                     color: root.is_reference ? CediniaColors.text_secondary : CediniaColors.text_primary;
-                    font-size: 14px;
-                    font-weight: 600;
+                    font-size: Fonts.subtitle;
+                    font-weight: Fonts.semibold;
                     overflow: elide;
                     wrap: no-wrap;
                 }
@@ -183,14 +184,14 @@ export component FileRow {
                 if !root.extra_as_line2 : Text {
                     text: root.path;
                     color: CediniaColors.text_secondary;
-                    font-size: 11px;
+                    font-size: Fonts.caption;
                     wrap: word-wrap;
                 }
 
                 if root.extra_as_line2 && root.path != "" : Text {
                     text: root.path;
                     color: CediniaColors.text_secondary;
-                    font-size: 11px;
+                    font-size: Fonts.caption;
                     overflow: elide;
                     wrap: no-wrap;
                 }
@@ -198,7 +199,7 @@ export component FileRow {
                 if !root.extra_as_line2 && root.val_str.length > FileEntryIdx.extra_idx && root.val_str[FileEntryIdx.extra_idx] != "" : Text {
                     text: root.val_str[FileEntryIdx.extra_idx];
                     color: CediniaColors.text_disabled;
-                    font-size: 11px;
+                    font-size: Fonts.caption;
                     overflow: elide;
                     wrap: no-wrap;
                 }
@@ -206,7 +207,7 @@ export component FileRow {
                 if root.extra_as_line2 && root.val_str[FileEntryIdx.extra_idx] != "" : Text {
                     text: root.val_str[FileEntryIdx.extra_idx];
                     color: CediniaColors.text_disabled;
-                    font-size: 11px;
+                    font-size: Fonts.caption;
                     wrap: word-wrap;
                 }
             }
@@ -214,8 +215,8 @@ export component FileRow {
             Text {
                 text: root.size;
                 color: root.is_reference ? CediniaColors.text_secondary : CediniaColors.accent_light;
-                font-size: 12px;
-                font-weight: 700;
+                font-size: Fonts.body;
+                font-weight: Fonts.bold;
                 vertical-alignment: TextVerticalAlignment.center;
                 horizontal-alignment: TextHorizontalAlignment.right;
                 min-width: 60px;

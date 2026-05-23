@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { DirectoryEntry } from "../globals/common.slint";
 import { AppState } from "../globals/app_state.slint";
@@ -22,8 +23,8 @@ component SectionHeader {
             Text {
                 text: root.title;
                 color: CediniaColors.text_secondary;
-                font-size: 11px;
-                font-weight: 700;
+                font-size: Fonts.caption;
+                font-weight: Fonts.bold;
                 letter-spacing: 0.5px;
                 vertical-alignment: TextVerticalAlignment.center;
             }
@@ -92,8 +93,8 @@ component DirRow {
                     if root.is_referenced : Text {
                         text: "R";
                         color: CediniaColors.accent_light;
-                        font-size: 11px;
-                        font-weight: 700;
+                        font-size: Fonts.caption;
+                        font-weight: Fonts.bold;
                         horizontal-alignment: TextHorizontalAlignment.center;
                         vertical-alignment: TextVerticalAlignment.center;
                     }
@@ -108,20 +109,20 @@ component DirRow {
                 Text {
                     text: root.path;
                     color: root.exists ? CediniaColors.text_primary : CediniaColors.text_secondary;
-                    font-size: 13px;
+                    font-size: Fonts.body_lg;
                     wrap: word-wrap;
                     min-width: 0;
                 }
                 if !root.exists : Text {
                     text: "⚠ " + Translations.path_edit_not_exists_text;
                     color: CediniaColors.warning;
-                    font-size: 10px;
+                    font-size: Fonts.micro;
                     min-width: 0;
                 }
                 if root.is_referenced : Text {
                     text: Translations.directories_referenced_tooltip_text;
                     color: CediniaColors.accent_light;
-                    font-size: 10px;
+                    font-size: Fonts.micro;
                     min-width: 0;
                 }
             }
@@ -154,7 +155,7 @@ component StatRow {
         Text {
             text: root.label;
             color: CediniaColors.text_secondary;
-            font-size: 13px;
+            font-size: Fonts.body_lg;
             min-width: 160px;
             horizontal-stretch: 0.0;
             vertical-alignment: center;
@@ -162,8 +163,8 @@ component StatRow {
         Text {
             text: root.value;
             color: root.fg;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: Fonts.body_lg;
+            font-weight: Fonts.semibold;
             horizontal-stretch: 1.0;
             vertical-alignment: center;
             overflow: elide;
@@ -367,14 +368,14 @@ export component DirectoriesScreen {
                                     Text {
                                         text: vol.label != "" ? vol.label : vol.path;
                                         color: CediniaColors.text_primary;
-                                        font-size: 13px;
-                                        font-weight: 600;
+                                        font-size: Fonts.body_lg;
+                                        font-weight: Fonts.semibold;
                                         overflow: elide;
                                     }
                                     Text {
                                         text: vol.path;
                                         color: CediniaColors.text_secondary;
-                                        font-size: 11px;
+                                        font-size: Fonts.caption;
                                         overflow: elide;
                                     }
                                 }
@@ -477,15 +478,15 @@ export component DirectoriesScreen {
                                     Text {
                                         text: vol.label != "" ? vol.label : vol.path;
                                         color: CediniaColors.text_primary;
-                                        font-size: 13px;
-                                        font-weight: 600;
+                                        font-size: Fonts.body_lg;
+                                        font-weight: Fonts.semibold;
                                         overflow: elide;
                                         min-width: 0;
                                     }
                                     Text {
                                         text: vol.path;
                                         color: CediniaColors.text_secondary;
-                                        font-size: 11px;
+                                        font-size: Fonts.caption;
                                         overflow: elide;
                                         min-width: 0;
                                     }
@@ -505,7 +506,7 @@ export component DirectoriesScreen {
                                     }
                                     Text {
                                         text: "📁";
-                                        font-size: 17px;
+                                        font-size: Fonts.title_lg;
                                         color: CediniaColors.success;
                                         horizontal-alignment: center;
                                         vertical-alignment: center;
@@ -532,7 +533,7 @@ export component DirectoriesScreen {
                                     }
                                     Text {
                                         text: "📝";
-                                        font-size: 17px;
+                                        font-size: Fonts.title_lg;
                                         color: CediniaColors.success;
                                         horizontal-alignment: center;
                                         vertical-alignment: center;
@@ -553,7 +554,7 @@ export component DirectoriesScreen {
                                     }
                                     Text {
                                         text: "📁";
-                                        font-size: 17px;
+                                        font-size: Fonts.title_lg;
                                         color: CediniaColors.danger;
                                         horizontal-alignment: center;
                                         vertical-alignment: center;
@@ -580,7 +581,7 @@ export component DirectoriesScreen {
                                     }
                                     Text {
                                         text: "📝";
-                                        font-size: 17px;
+                                        font-size: Fonts.title_lg;
                                         color: CediniaColors.danger;
                                         horizontal-alignment: center;
                                         vertical-alignment: center;
@@ -625,8 +626,8 @@ export component DirectoriesScreen {
                         ? Translations.path_edit_title_include_text
                         : Translations.path_edit_title_exclude_text;
                     color: AppState.path_edit_is_include ? CediniaColors.success : CediniaColors.danger;
-                    font-size: 15px;
-                    font-weight: 700;
+                    font-size: Fonts.label_lg;
+                    font-weight: Fonts.bold;
                 }
 
                 Rectangle {
@@ -642,7 +643,7 @@ export component DirectoriesScreen {
                         width: parent.width - 20px;
                         text: AppState.path_edit_value;
                         color: CediniaColors.text_primary;
-                        font-size: 13px;
+                        font-size: Fonts.body_lg;
                         single-line: false;
                         wrap: word-wrap;
                         accepted => {
@@ -659,7 +660,7 @@ export component DirectoriesScreen {
                 if path_enter_error : Text {
                     text: "E " + Translations.path_edit_no_newlines_text;
                     color: CediniaColors.danger;
-                    font-size: 12px;
+                    font-size: Fonts.body;
                 }
 
                 // Path existence status
@@ -670,7 +671,7 @@ export component DirectoriesScreen {
                             : "📄 " + Translations.path_edit_is_file_text)
                         : "X " + Translations.path_edit_not_exists_text;
                     color: AppState.path_edit_path_exists ? CediniaColors.success : CediniaColors.danger;
-                    font-size: 12px;
+                    font-size: Fonts.body;
                 }
 
                 HorizontalLayout {
@@ -730,8 +731,8 @@ export component DirectoriesScreen {
                     Text {
                         text: Translations.directories_check_popup_title_text;
                         color: CediniaColors.text_primary;
-                        font-size: 16px;
-                        font-weight: 700;
+                        font-size: Fonts.title;
+                        font-weight: Fonts.bold;
                         horizontal-stretch: 1.0;
                         vertical-alignment: center;
                     }
@@ -790,7 +791,7 @@ export component DirectoriesScreen {
                         spacing: 6px;
                         Text {
                             text: "⚠";
-                            font-size: 14px;
+                            font-size: Fonts.subtitle;
                             color: CediniaColors.danger;
                             horizontal-stretch: 0.0;
                             vertical-alignment: center;
@@ -798,7 +799,7 @@ export component DirectoriesScreen {
                         Text {
                             text: Translations.directories_check_warning_no_processable_text;
                             color: CediniaColors.danger;
-                            font-size: 12px;
+                            font-size: Fonts.body;
                             horizontal-stretch: 1.0;
                             vertical-alignment: center;
                             wrap: word-wrap;
@@ -810,7 +811,7 @@ export component DirectoriesScreen {
                     text: Translations.directories_check_scanning_text
                         + (AppState.dirs_check_progress_text != "" ? " " + AppState.dirs_check_progress_text : "");
                     color: CediniaColors.text_secondary;
-                    font-size: 12px;
+                    font-size: Fonts.body;
                     horizontal-alignment: center;
                 }
 

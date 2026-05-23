@@ -1,5 +1,6 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
-import { ScanState, SimilarGroupCard } from "../globals/common.slint";
+import { ScanState, SelectionSheet, SimilarGroupCard } from "../globals/common.slint";
 import { AppState, SimilarImagesSettings } from "../globals/app_state.slint";
 import { StatusChip } from "../components/status_chip.slint";
 import { TouchButton } from "../components/buttons/touch_button.slint";
@@ -30,8 +31,8 @@ component GroupCompareBtn inherits Rectangle {
     lbl := Text {
         text: Translations.compare_label_text;
         color: CediniaColors.fg_on_accent;
-        font-size: 11px;
-        font-weight: 700;
+        font-size: Fonts.caption;
+        font-weight: Fonts.bold;
         horizontal-alignment: TextHorizontalAlignment.center;
         vertical-alignment:   TextVerticalAlignment.center;
     }
@@ -183,8 +184,8 @@ component GalleryImageCell {
                 Text {
                     text: Translations.ok_text;
                     color: CediniaColors.fg_on_accent;
-                    font-size: 11px;
-                    font-weight: 700;
+                    font-size: Fonts.caption;
+                    font-weight: Fonts.bold;
                     horizontal-alignment: TextHorizontalAlignment.center;
                     vertical-alignment: TextVerticalAlignment.center;
                 }
@@ -197,7 +198,7 @@ component GalleryImageCell {
             name_text := Text {
                 width: parent.width;
                 text: root.img_name;
-                font-size: 11px;
+                font-size: Fonts.caption;
                 color: root.checked ? CediniaColors.accent_light : CediniaColors.text_primary;
                 wrap: word-wrap;
                 horizontal-alignment: TextHorizontalAlignment.center;
@@ -212,7 +213,7 @@ component GalleryImageCell {
                 text: root.img_val_str.length > 4 && root.img_val_str[4] != ""
                     ? root.img_size + "  " + root.img_val_str[4]
                     : root.img_size;
-                font-size: 10px;
+                font-size: Fonts.micro;
                 color: CediniaColors.text_secondary;
                 horizontal-alignment: TextHorizontalAlignment.center;
                 wrap: no-wrap;
@@ -225,7 +226,7 @@ component GalleryImageCell {
                 path_text := Text {
                     width: parent.width;
                     text: root.img_val_str[1];
-                    font-size: 10px;
+                    font-size: Fonts.micro;
                     color: CediniaColors.text_disabled;
                     wrap: word-wrap;
                     // top: always show the beginning of the path, never the middle.
@@ -242,7 +243,7 @@ component GalleryImageCell {
 component GalleryToggleBar {
     height: 52px;
 
-    in-out property <int> menu_state: 0;
+    in-out property <SelectionSheet> menu_state: SelectionSheet.None;
 
     Rectangle {
         background: CediniaColors.bg_elevated;
@@ -278,7 +279,7 @@ component GalleryToggleBar {
                 min_h: 36px;
                 bg: CediniaColors.bg_elevated;
                 fg: CediniaColors.text_secondary;
-                clicked => { root.menu_state = 1; }
+                clicked => { root.menu_state = SelectionSheet.Selection; }
             }
 
             TouchButton {
@@ -286,7 +287,7 @@ component GalleryToggleBar {
                 min_h: 36px;
                 bg: CediniaColors.bg_elevated;
                 fg: CediniaColors.text_secondary;
-                clicked => { root.menu_state = 2; }
+                clicked => { root.menu_state = SelectionSheet.Deselection; }
             }
 
             TouchButton {
@@ -356,8 +357,8 @@ export component SimilarImagesGallery {
                         width: parent.width - 24px - compare_btn.width - 8px;
                         text: group.label;
                         color: CediniaColors.fg_on_accent;
-                        font-size: 13px;
-                        font-weight: 700;
+                        font-size: Fonts.body_lg;
+                        font-weight: Fonts.bold;
                         vertical-alignment: TextVerticalAlignment.center;
                         overflow: TextOverflow.elide;
                     }
@@ -447,21 +448,21 @@ export component SimilarImagesGallery {
     }
 
 
-    if toggle_bar.menu_state == 1 : SelectionMenuSheet {
+    if toggle_bar.menu_state == SelectionSheet.Selection : SelectionMenuSheet {
         x: 0; y: 0;
         width: root.width;
         height: root.height;
         z: 50;
-        closed => { toggle_bar.menu_state = 0; }
+        closed => { toggle_bar.menu_state = SelectionSheet.None; }
     }
 
 
-    if toggle_bar.menu_state == 2 : DeselectionMenuSheet {
+    if toggle_bar.menu_state == SelectionSheet.Deselection : DeselectionMenuSheet {
         x: 0; y: 0;
         width: root.width;
         height: root.height;
         z: 50;
-        closed => { toggle_bar.menu_state = 0; }
+        closed => { toggle_bar.menu_state = SelectionSheet.None; }
     }
 
 
@@ -482,8 +483,8 @@ export component SimilarImagesGallery {
         Text {
             text: AppState.gallery_delete_message;
             color: CediniaColors.text_primary;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: Fonts.title;
+            font-weight: Fonts.semibold;
             wrap: TextWrap.word-wrap;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
@@ -491,7 +492,7 @@ export component SimilarImagesGallery {
         if AppState.gallery_delete_warning != "" : Text {
             text: "⚠ " + AppState.gallery_delete_warning;
             color: CediniaColors.warning;
-            font-size: 13px;
+            font-size: Fonts.body_lg;
             wrap: TextWrap.word-wrap;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
@@ -536,15 +537,15 @@ export component SimilarImagesGallery {
         Text {
             text: Translations.deleting_files_text;
             color: CediniaColors.text_primary;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: Fonts.title;
+            font-weight: Fonts.semibold;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
 
         Text {
             text: AppState.delete_progress_text;
             color: CediniaColors.text_secondary;
-            font-size: 13px;
+            font-size: Fonts.body_lg;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
 
@@ -575,8 +576,8 @@ export component SimilarImagesGallery {
         Text {
             text: Translations.delete_errors_title_text;
             color: CediniaColors.warning;
-            font-size: 15px;
-            font-weight: 600;
+            font-size: Fonts.label_lg;
+            font-weight: Fonts.semibold;
             wrap: TextWrap.word-wrap;
             horizontal-alignment: TextHorizontalAlignment.center;
         }
@@ -584,7 +585,7 @@ export component SimilarImagesGallery {
         Text {
             text: AppState.delete_errors_text;
             color: CediniaColors.text_secondary;
-            font-size: 11px;
+            font-size: Fonts.caption;
             wrap: TextWrap.word-wrap;
         }
 

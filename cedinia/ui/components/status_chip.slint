@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 
 export component StatusChip {
@@ -14,8 +15,8 @@ export component StatusChip {
         txt := Text {
             text: root.label;
             color: root.text_color;
-            font-size: 11px;
-            font-weight: 700;
+            font-size: Fonts.caption;
+            font-weight: Fonts.bold;
             horizontal-alignment: center;
             vertical-alignment: center;
         }

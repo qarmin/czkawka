@@ -1,3 +1,4 @@
+import { Fonts } from "../../globals/fonts.slint";
 import { CediniaColors } from "../../globals/colors.slint";
 import { AppState } from "../../globals/app_state.slint";
 
@@ -22,13 +23,13 @@ export component SegmentRow {
                     text: root.label;
                     color: CediniaColors.text_primary;
                     wrap: TextWrap.word-wrap;
-                    font-size: 14px;
+                    font-size: Fonts.subtitle;
                 }
                 if root.description != "" : Text {
                     text: root.description;
                     color: CediniaColors.text_secondary;
                     wrap: TextWrap.word-wrap;
-                    font-size: 11px;
+                    font-size: Fonts.caption;
                 }
             }
         }
@@ -54,8 +55,8 @@ export component SegmentRow {
                 Text {
                     text: opt;
                     color: root.selected == i ? CediniaColors.accent_light : CediniaColors.text_secondary;
-                    font-size: 11px;
-                    font-weight: root.selected == i ? 700 : 400;
+                    font-size: Fonts.caption;
+                    font-weight: root.selected == i ? Fonts.bold : Fonts.regular;
                     horizontal-alignment: TextHorizontalAlignment.center;
                     vertical-alignment: TextVerticalAlignment.center;
                     overflow: elide;

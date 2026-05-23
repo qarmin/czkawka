@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { AppState } from "../globals/app_state.slint";
 import { ScanState } from "../globals/common.slint";
@@ -39,8 +40,8 @@ export component TopAppBar {
                     Text {
                         text: root.title;
                         color: CediniaColors.accent_light;
-                        font-size: 18px;
-                        font-weight: 700;
+                        font-size: Fonts.title_lg;
+                        font-weight: Fonts.bold;
                     }
                     if AppState.scan_state == ScanState.Scanning : Rectangle {
                         width: 10px;
@@ -58,7 +59,7 @@ export component TopAppBar {
                 Text {
                     text: AppState.status_message;
                     color: CediniaColors.text_secondary;
-                    font-size: 11px;
+                    font-size: Fonts.caption;
                     overflow: elide;
                 }
             }

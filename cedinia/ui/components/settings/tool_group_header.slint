@@ -1,3 +1,4 @@
+import { Fonts } from "../../globals/fonts.slint";
 import { CediniaColors } from "../../globals/colors.slint";
 
 export component ToolGroupHeader inherits Rectangle {
@@ -14,8 +15,8 @@ export component ToolGroupHeader inherits Rectangle {
         Text {
             text: (root.emoji != "" ? root.emoji + "  " : "") + root.label;
             color: CediniaColors.accent_light;
-            font-size: 12px;
-            font-weight: 700;
+            font-size: Fonts.body;
+            font-weight: Fonts.bold;
             vertical-alignment: TextVerticalAlignment.center;
             letter-spacing: 0.8px;
         }

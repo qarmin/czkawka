@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { AppState } from "../globals/app_state.slint";
 import { Translations } from "../globals/translations.slint";
@@ -34,8 +35,8 @@ export component ContextMenuSheet inherits Rectangle {
             Text {
                 text: root.item_name != "" ? root.item_name : Translations.ctx_menu_title_text;
                 color: CediniaColors.text_primary;
-                font-size: 13px;
-                font-weight: 700;
+                font-size: Fonts.body_lg;
+                font-weight: Fonts.bold;
                 horizontal-alignment: TextHorizontalAlignment.center;
                 wrap: word-wrap;
             }
@@ -44,7 +45,7 @@ export component ContextMenuSheet inherits Rectangle {
             if root.folder != "" : Text {
                 text: root.folder;
                 color: CediniaColors.text_disabled;
-                font-size: 10px;
+                font-size: Fonts.micro;
                 horizontal-alignment: TextHorizontalAlignment.center;
                 wrap: word-wrap;
             }

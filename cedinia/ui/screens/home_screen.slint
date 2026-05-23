@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { ActiveTool } from "../globals/common.slint";
 import { AppState } from "../globals/app_state.slint";
@@ -39,7 +40,7 @@ component ToolCard {
                 vertical-stretch: 0.0;
                 Text {
                     text: root.emoji;
-                    font-size: 24px;
+                    font-size: Fonts.display;
                     horizontal-alignment: center;
                     vertical-alignment: center;
                 }
@@ -51,13 +52,13 @@ component ToolCard {
                 Text {
                     text: root.title;
                     color: CediniaColors.text_primary;
-                    font-size: 15px;
-                    font-weight: 700;
+                    font-size: Fonts.label_lg;
+                    font-weight: Fonts.bold;
                 }
                 Text {
                     text: root.description;
                     color: CediniaColors.text_secondary;
-                    font-size: 12px;
+                    font-size: Fonts.body;
                     overflow: elide;
                 }
             }
@@ -65,7 +66,7 @@ component ToolCard {
             Text {
                 text: "›";
                 color: root.accent;
-                font-size: 22px;
+                font-size: Fonts.display_sm;
                 vertical-alignment: TextVerticalAlignment.center;
             }
         }

@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { AppState } from "../globals/app_state.slint";
 import { Translations } from "../globals/translations.slint";
@@ -20,8 +21,8 @@ export component SelectionMenuSheet inherits ScrimDialog {
     Text {
         text: Translations.selection_popup_title_text;
         color: CediniaColors.text_secondary;
-        font-size: 12px;
-        font-weight: 700;
+        font-size: Fonts.body;
+        font-weight: Fonts.bold;
         letter-spacing: 0.5px;
         horizontal-alignment: TextHorizontalAlignment.center;
     }

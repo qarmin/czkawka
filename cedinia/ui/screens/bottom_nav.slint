@@ -1,3 +1,4 @@
+import { Fonts } from "../globals/fonts.slint";
 import { CediniaColors } from "../globals/colors.slint";
 import { ActiveTool } from "../globals/common.slint";
 import { AppState } from "../globals/app_state.slint";
@@ -50,8 +51,8 @@ component NavItem {
             Text {
                 text: root.label;
                 color: root.is_active ? CediniaColors.nav_active : CediniaColors.nav_inactive;
-                font-size: 10px;
-                font-weight: root.is_active ? 700 : 400;
+                font-size: Fonts.micro;
+                font-weight: root.is_active ? Fonts.bold : Fonts.regular;
                 horizontal-alignment: TextHorizontalAlignment.center;
                 overflow: elide;
                 animate color { duration: 150ms; }
@@ -127,8 +128,8 @@ component DynamicToolItem {
             Text {
                 text: root.t_label;
                 color: root.is_active ? CediniaColors.nav_active : CediniaColors.nav_inactive;
-                font-size: 10px;
-                font-weight: root.is_active ? 700 : 400;
+                font-size: Fonts.micro;
+                font-weight: root.is_active ? Fonts.bold : Fonts.regular;
                 horizontal-alignment: TextHorizontalAlignment.center;
                 overflow: elide;
                 animate color { duration: 250ms; }
