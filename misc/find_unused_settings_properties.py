@@ -73,11 +73,11 @@ def main() -> None:
         sys.exit(1)
 
     folder = sys.argv[1]
-    settings_file = project_root / folder / "ui" / "settings.slint"
-
-    if not settings_file.exists():
-        print(f"Error: Settings file not found at {settings_file}")
+    candidates = list((project_root / folder / "ui").rglob("settings.slint"))
+    if not candidates:
+        print(f"Error: settings.slint not found under {project_root / folder / 'ui'}")
         return
+    settings_file = candidates[0]
 
     print(f"Reading properties from: {settings_file}")
     properties = extract_settings_properties(settings_file)

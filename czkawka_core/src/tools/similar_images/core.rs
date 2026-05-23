@@ -744,7 +744,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
+    #[ignore = "Fuzzer tests"]
     fn test_fuzzer_basic() {
         let mut rng = rand::rng();
 
@@ -771,7 +771,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
+    #[ignore = "Fuzzer tests"]
     fn test_fuzzer_large() {
         let mut rng = rand::rng();
 
@@ -791,7 +791,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
+    #[ignore = "Fuzzer tests"]
     fn test_fuzzer_tolerance_zero_invariant() {
         let mut rng = rand::rng();
 
@@ -819,7 +819,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
+    #[ignore = "Fuzzer tests"]
     fn test_fuzzer_reference_folders_invariant() {
         let mut rng = rand::rng();
         let ref_dir = PathBuf::from("/ref/");
@@ -852,7 +852,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
+    #[ignore = "Fuzzer tests"]
     fn test_fuzzer_determinism() {
         let mut rng = rand::rng();
 
@@ -895,7 +895,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
+    #[ignore = "Fuzzer tests"]
     fn test_fuzzer_no_false_negatives_tolerance_zero() {
         let mut rng = rand::rng();
 

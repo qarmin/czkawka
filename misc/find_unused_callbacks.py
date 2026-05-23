@@ -53,7 +53,21 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 folder = sys.argv[1]
-callabler_path = sys.argv[2] if len(sys.argv) >= 3 else f"{folder}/ui/callabler.slint"
+
+
+def find_callabler(folder_root: str) -> str | None:
+    for dirpath, _, filenames in os.walk(f"{folder_root}/ui"):
+        for f in filenames:
+            if f == "callabler.slint":
+                return os.path.join(dirpath, f)
+    return None
+
+
+if len(sys.argv) >= 3:
+    callabler_path = sys.argv[2]
+else:
+    found = find_callabler(folder)
+    callabler_path = found if found is not None else f"{folder}/ui/callabler.slint"
 
 if not os.path.exists(callabler_path):
     print(f"Error: {callabler_path} not found")
