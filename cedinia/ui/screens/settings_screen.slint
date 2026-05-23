@@ -1,6 +1,8 @@
 import { CediniaColors } from "../globals/colors.slint";
 import { Divider } from "../components/divider.slint";
 import { TouchButton } from "../components/buttons/touch_button.slint";
+import { PopupTitleBar } from "../components/popup_title_bar.slint";
+import { ScrimDialog } from "../components/scrim_dialog.slint";
 import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "../globals/app_state.slint";
 import { CategoryLabel } from "../components/settings/category_label.slint";
 import { DropdownRow } from "../components/settings/dropdown_row.slint";
@@ -13,126 +15,96 @@ import { Translations } from "../globals/translations.slint";
 
 export component SettingsScreen {
 
-    if diag_confirm_action != "" : Rectangle {
+    if diag_confirm_action != "" : ScrimDialog {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
         z: 100;
-        background: CediniaColors.scrim;
-        TouchArea { clicked => { diag_confirm_action = ""; } }
+        bordered: true;
+        dismissed => { diag_confirm_action = ""; }
 
-        Rectangle {
-            width: min(parent.width - 48px, 360px);
-            height: diag_confirm_content.preferred-height + 32px;
-            x: (parent.width - self.width) / 2;
-            y: (parent.height - self.height) / 2;
-            border-radius: 16px;
-            background: CediniaColors.bg_elevated;
-            border-width: 1px;
-            border-color: CediniaColors.divider;
-            drop-shadow-blur: 24px;
-            drop-shadow-color: CediniaColors.shadow_md;
+        Text {
+            text: diag_confirm_action == "thumbnails"
+                ? Translations.diag_confirm_clear_thumbnails_text
+                : Translations.diag_confirm_clear_cache_text;
+            color: CediniaColors.text_primary;
+            font-size: 16px;
+            font-weight: 600;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            wrap: word-wrap;
+        }
 
-            diag_confirm_content := VerticalLayout {
-                padding: 24px;
-                spacing: 16px;
+        HorizontalLayout {
+            spacing: 12px;
 
-                Text {
-                    text: diag_confirm_action == "thumbnails"
-                        ? Translations.diag_confirm_clear_thumbnails_text
-                        : Translations.diag_confirm_clear_cache_text;
-                    color: CediniaColors.text_primary;
-                    font-size: 16px;
-                    font-weight: 600;
-                    horizontal-alignment: TextHorizontalAlignment.center;
-                    wrap: word-wrap;
-                }
+            TouchButton {
+                label: Translations.cancel_text;
+                horizontal-stretch: 1.0;
+                bg: CediniaColors.bg_elevated;
+                fg: CediniaColors.text_secondary;
+                clicked => { diag_confirm_action = ""; }
+            }
 
-                HorizontalLayout {
-                    spacing: 12px;
-
-                    TouchButton {
-                        label: Translations.cancel_text;
-                        horizontal-stretch: 1.0;
-                        bg: CediniaColors.bg_elevated;
-                        fg: CediniaColors.text_secondary;
-                        clicked => { diag_confirm_action = ""; }
+            TouchButton {
+                label: Translations.ok_text;
+                horizontal-stretch: 1.0;
+                bg: CediniaColors.danger;
+                fg: CediniaColors.fg_on_danger;
+                clicked => {
+                    if (diag_confirm_action == "thumbnails") {
+                        AppState.clear_thumbnails_cache();
+                    } else {
+                        AppState.clear_app_cache();
                     }
-
-                    TouchButton {
-                        label: Translations.ok_text;
-                        horizontal-stretch: 1.0;
-                        bg: CediniaColors.danger;
-                        fg: CediniaColors.fg_on_danger;
-                        clicked => {
-                            if (diag_confirm_action == "thumbnails") {
-                                AppState.clear_thumbnails_cache();
-                            } else {
-                                AppState.clear_app_cache();
-                            }
-                            diag_confirm_action = "";
-                        }
-                    }
+                    diag_confirm_action = "";
                 }
             }
         }
     }
 
-    if AppState.collect_test_done : Rectangle {
+    if AppState.collect_test_done : ScrimDialog {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
         z: 100;
-        background: CediniaColors.scrim;
-        TouchArea { clicked => { AppState.collect_test_done = false; } }
+        bordered: true;
+        dismissed => { AppState.collect_test_done = false; }
 
-        Rectangle {
-            width: min(parent.width - 48px, 360px);
-            height: popup_content.preferred-height + 32px;
-            x: (parent.width - self.width) / 2;
-            y: (parent.height - self.height) / 2;
-            border-radius: 16px;
-            background: CediniaColors.bg_elevated;
-            border-width: 1px;
-            border-color: CediniaColors.divider;
-            drop-shadow-blur: 24px;
-            drop-shadow-color: CediniaColors.shadow_md;
+        Text {
+            text: Translations.collect_test_title_text;
+            color: CediniaColors.accent_light;
+            font-size: 18px;
+            font-weight: 700;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
 
-            popup_content := VerticalLayout {
-                padding: 24px;
-                spacing: 16px;
+        Rectangle { height: 1px; background: CediniaColors.divider; }
 
-                Text {
-                    text: Translations.collect_test_title_text;
-                    color: CediniaColors.accent_light;
-                    font-size: 18px;
-                    font-weight: 700;
-                    horizontal-alignment: TextHorizontalAlignment.center;
-                }
-
-                Rectangle { height: 1px; background: CediniaColors.divider; }
-
-                GridLayout {
-                    spacing: 8px;
-                    Row {
-                        Text { text: Translations.collect_test_volumes_text; color: CediniaColors.text_secondary; font-size: 14px; }
-                        Text { text: AppState.collect_test_result.volumes; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
-                    }
-                    Row {
-                        Text { text: Translations.collect_test_folders_text; color: CediniaColors.text_secondary; font-size: 14px; }
-                        Text { text: AppState.collect_test_result.folders; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
-                    }
-                    Row {
-                        Text { text: Translations.collect_test_files_text; color: CediniaColors.text_secondary; font-size: 14px; }
-                        Text { text: AppState.collect_test_result.files; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
-                    }
-                    Row {
-                        Text { text: Translations.collect_test_time_text; color: CediniaColors.text_secondary; font-size: 14px; }
-                        Text { text: AppState.collect_test_result.elapsed_time; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
-                    }
-                }
-
-                TouchButton {
-                    label: Translations.ok_text;
-                    bg: CediniaColors.accent;
-                    fg: CediniaColors.fg_on_accent;
-                    clicked => { AppState.collect_test_done = false; }
-                }
+        GridLayout {
+            spacing: 8px;
+            Row {
+                Text { text: Translations.collect_test_volumes_text; color: CediniaColors.text_secondary; font-size: 14px; }
+                Text { text: AppState.collect_test_result.volumes; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
             }
+            Row {
+                Text { text: Translations.collect_test_folders_text; color: CediniaColors.text_secondary; font-size: 14px; }
+                Text { text: AppState.collect_test_result.folders; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+            }
+            Row {
+                Text { text: Translations.collect_test_files_text; color: CediniaColors.text_secondary; font-size: 14px; }
+                Text { text: AppState.collect_test_result.files; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+            }
+            Row {
+                Text { text: Translations.collect_test_time_text; color: CediniaColors.text_secondary; font-size: 14px; }
+                Text { text: AppState.collect_test_result.elapsed_time; color: CediniaColors.text_primary; font-size: 14px; font-weight: 700; horizontal-alignment: TextHorizontalAlignment.right; }
+            }
+        }
+
+        TouchButton {
+            label: Translations.ok_text;
+            bg: CediniaColors.accent;
+            fg: CediniaColors.fg_on_accent;
+            clicked => { AppState.collect_test_done = false; }
         }
     }
 
@@ -866,42 +838,10 @@ export component SettingsScreen {
             VerticalLayout {
                 spacing: 0px;
 
-                Rectangle {
-                    height: 52px;
-                    background: CediniaColors.bg_surface;
-                    HorizontalLayout {
-                        padding-left: 16px;
-                        padding-right: 8px;
-                        spacing: 8px;
-                        Text {
-                            text: Translations.licenses_popup_title_text;
-                            color: CediniaColors.accent_light;
-                            font-size: 15px;
-                            font-weight: 700;
-                            vertical-alignment: TextVerticalAlignment.center;
-                            horizontal-stretch: 1.0;
-                        }
-                        VerticalLayout {
-                            alignment: LayoutAlignment.center;
-                            Rectangle {
-                                width: 36px;
-                                height: 36px;
-                                border-radius: 18px;
-                                vertical-stretch: 0.0;
-                                background: lic_close_ta.has-hover ? CediniaColors.ripple : transparent;
-                                lic_close_ta := TouchArea {
-                                    clicked => { AppState.licenses_popup_visible = false; }
-                                }
-                                Text {
-                                    text: "X";
-                                    color: CediniaColors.text_secondary;
-                                    font-size: 16px;
-                                    horizontal-alignment: center;
-                                    vertical-alignment: center;
-                                }
-                            }
-                        }
-                    }
+                PopupTitleBar {
+                    title: Translations.licenses_popup_title_text;
+                    bar_height: 52px;
+                    close => { AppState.licenses_popup_visible = false; }
                 }
 
                 Rectangle { height: 1px; background: CediniaColors.divider; }

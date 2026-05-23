@@ -1,0 +1,37 @@
+import { CediniaColors } from "../globals/colors.slint";
+import { CircleIconButton } from "buttons/circle_icon_button.slint";
+
+export component PopupTitleBar inherits Rectangle {
+    in property <string> title;
+    in property <length> bar_height: 44px;
+    callback close();
+
+    height: root.bar_height;
+    background: CediniaColors.bg_surface;
+
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 8px;
+        spacing: 8px;
+
+        Text {
+            text: root.title;
+            color: CediniaColors.accent_light;
+            font-size: 15px;
+            font-weight: 700;
+            vertical-alignment: TextVerticalAlignment.center;
+            horizontal-stretch: 1.0;
+        }
+
+        VerticalLayout {
+            alignment: LayoutAlignment.center;
+            CircleIconButton {
+                size: 36px;
+                emoji: "X";
+                emoji_font_size: 16px;
+                hover_bg: CediniaColors.ripple;
+                clicked => { root.close(); }
+            }
+        }
+    }
+}

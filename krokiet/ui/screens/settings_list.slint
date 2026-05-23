@@ -6,6 +6,7 @@ import { Translations } from "../globals/translations.slint";
 import { ColorPalette } from "../globals/color_palette.slint";
 import { FontSizes } from "../globals/fonts.slint";
 import { MaxTextMeasure } from "../globals/text_size.slint";
+import { HintText } from "../components/hint_text.slint";
 
 // TODO use Spinbox instead LineEdit {} to be able to set only numbers
 
@@ -348,14 +349,6 @@ component Presets inherits Rectangle {
             }
         }
     }
-}
-
-component HintText inherits Text {
-    in-out property <string> hint_text;
-    font-size: FontSizes.small;
-    color: ColorPalette.hint_color;
-    text: root.hint_text;
-    wrap: word-wrap;
 }
 
 component HeaderText inherits Text {

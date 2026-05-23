@@ -1,0 +1,27 @@
+import { CediniaColors } from "../globals/colors.slint";
+
+export component EmptyState {
+    in property <string> emoji;
+    in property <length> emoji_size: 28px;
+    in property <string> message;
+    in property <length> message_font_size: 12px;
+    in property <color>  color: CediniaColors.text_disabled;
+
+    VerticalLayout {
+        alignment: LayoutAlignment.center;
+        spacing: 4px;
+
+        if root.emoji != "" : Text {
+            text: root.emoji;
+            font-size: root.emoji_size;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            color: root.color;
+        }
+        Text {
+            text: root.message;
+            color: root.color;
+            font-size: root.message_font_size;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
+    }
+}

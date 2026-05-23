@@ -1,6 +1,7 @@
 import { CediniaColors } from "../globals/colors.slint";
 import { AppState } from "../globals/app_state.slint";
 import { Translations } from "../globals/translations.slint";
+import { ScrimDialog } from "../components/scrim_dialog.slint";
 import { ScrollView, Slider } from "std-widgets.slint";
 
 enum CompareMode { Normal, Split, Overlay, Diff }
@@ -630,57 +631,46 @@ export component ImageCompareOverlay inherits Rectangle {
     }
 
     // Loading overlay
-    if AppState.compare_loading: Rectangle {
+    if AppState.compare_loading: ScrimDialog {
+        x: 0; y: 0;
+        width: parent.width;
+        height: parent.height;
         z: 100;
-        width: parent.width; height: parent.height;
-        background: CediniaColors.scrim_strong;
+        strong_scrim: true;
+        dismissible: false;
+        card_max_width: 280px;
+        card_spacing: 12px;
+        shadow_blur: 20px;
+        shadow_color: CediniaColors.shadow_lg;
 
-        // Consume all pointer events
-        TouchArea {}
-
+        Text {
+            text: AppState.compare_cancelling
+                ? Translations.compare_cancelling_text
+                : Translations.compare_loading_text;
+            color: CediniaColors.text_primary;
+            font-size: 15px; font-weight: 600;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
+        Text {
+            text: AppState.compare_loading_current + " / " + AppState.compare_loading_total;
+            color: CediniaColors.text_secondary;
+            font-size: 13px;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
         Rectangle {
-            x: (parent.width  - 280px) / 2;
-            y: (parent.height - 170px) / 2;
-            width: 280px; height: 170px;
-            border-radius: 16px;
-            background: CediniaColors.bg_elevated;
-            drop-shadow-blur: 20px;
-            drop-shadow-color: CediniaColors.shadow_lg;
-
-            VerticalLayout {
-                padding: 24px; spacing: 12px;
-                alignment: LayoutAlignment.center;
-
-                Text {
-                    text: AppState.compare_cancelling
-                        ? Translations.compare_cancelling_text
-                        : Translations.compare_loading_text;
-                    color: CediniaColors.text_primary;
-                    font-size: 15px; font-weight: 600;
-                    horizontal-alignment: TextHorizontalAlignment.center;
-                }
-                Text {
-                    text: AppState.compare_loading_current + " / " + AppState.compare_loading_total;
-                    color: CediniaColors.text_secondary;
-                    font-size: 13px;
-                    horizontal-alignment: TextHorizontalAlignment.center;
-                }
-                Rectangle {
-                    height: 40px;
-                    border-radius: 8px;
-                    background: cancel_ta.has-hover ? CediniaColors.bg_surface.brighter(0.1) : CediniaColors.bg_surface;
-                    cancel_ta := TouchArea {
-                        enabled: !AppState.compare_cancelling;
-                        clicked => { AppState.compare_cancel_load(); }
-                    }
-                    Text {
-                        text: Translations.cancel_text;
-                        color: AppState.compare_cancelling ? CediniaColors.text_disabled : CediniaColors.text_secondary;
-                        font-size: 14px;
-                        horizontal-alignment: TextHorizontalAlignment.center;
-                        vertical-alignment:   TextVerticalAlignment.center;
-                    }
-                }
+            height: 40px;
+            border-radius: 8px;
+            background: cancel_ta.has-hover ? CediniaColors.bg_surface.brighter(0.1) : CediniaColors.bg_surface;
+            cancel_ta := TouchArea {
+                enabled: !AppState.compare_cancelling;
+                clicked => { AppState.compare_cancel_load(); }
+            }
+            Text {
+                text: Translations.cancel_text;
+                color: AppState.compare_cancelling ? CediniaColors.text_disabled : CediniaColors.text_secondary;
+                font-size: 14px;
+                horizontal-alignment: TextHorizontalAlignment.center;
+                vertical-alignment:   TextVerticalAlignment.center;
             }
         }
     }

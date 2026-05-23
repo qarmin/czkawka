@@ -6,12 +6,93 @@ import { Settings } from "../globals/settings.slint";
 import { Translations } from "../globals/translations.slint";
 import { FontSizes } from "../globals/fonts.slint";
 
+component PathRow inherits Rectangle {
+    in property <string> path;
+    in property <bool> focused_row;
+    in property <bool> show_ref_col;
+    in property <bool> referenced_path;
+    in property <length> ref_col_width: 33px;
+    callback row_clicked(bool /*can_unselect*/);
+    callback ref_toggled(bool);
+    callback delete_clicked();
+
+    height: 30px;
+    border_radius: 5px;
+    background: ColorPalette.get_listview_color(root.focused_row, touch_area.has-hover);
+
+    touch_area := TouchArea {
+        clicked => { root.row_clicked(true); }
+        double-clicked => {
+            Callabler.open_item(root.path);
+            root.row_clicked(false);
+        }
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
+                Callabler.open_parent(root.path);
+            }
+        }
+    }
+
+    HorizontalLayout {
+        padding-left: root.show_ref_col ? 7.5px : 5px;
+        spacing: 0px;
+        width: parent.width;
+
+        if root.show_ref_col : CheckBox {
+            checked: root.referenced_path;
+            toggled => { root.ref_toggled(self.checked); }
+            width: root.ref_col_width;
+        }
+
+        Text {
+            font-size: FontSizes.normal;
+            horizontal-stretch: 1.0;
+            height: parent.height;
+            text: root.path;
+            vertical-alignment: center;
+            horizontal-alignment: left;
+        }
+    }
+
+    HorizontalLayout {
+        width: parent.width;
+        padding-left: 5px;
+        Rectangle { }
+        Rectangle {
+            width: 50px;
+            background: ColorPalette.remove_item_color_button;
+            horizontal-stretch: 1.0;
+            Button {
+                width: 50px;
+                icon: @image-url("../../icons/krokiet_delete.svg");
+                colorize-icon: true;
+                clicked => { root.delete_clicked(); }
+            }
+        }
+    }
+}
+
 export component IncludedPaths {
     in-out property <[IncludedPathsModel]> model <=> Settings.included_paths_model;
     in-out property <int> current_index <=> Settings.included_paths_model_selected_idx;
 
     in-out property <length> size_referenced_path: 33px;
     min-width: 50px;
+
+    function handle_click(idx: int, can_unselect: bool) {
+        if (current_index != -1) {
+            if (current_index != idx) {
+                model[current_index].focused_row = false;
+            } else if (can_unselect) {
+                model[idx].focused_row = false;
+                current_index = -1;
+                return;
+            }
+        }
+        model[idx].focused_row = true;
+        current_index = idx;
+    }
+
     VerticalLayout {
         HorizontalLayout {
             spacing: 5px;
@@ -32,83 +113,15 @@ export component IncludedPaths {
         }
 
         ListView {
-            for r[idx] in model: Rectangle {
-                height: 30px;
-                border_radius: 5px;
-                width: parent.width;
-
-                background: ColorPalette.get_listview_color(r.focused_row, touch-area.has-hover);
-                touch_area := TouchArea {
-                    clicked => {
-                        handle_click(true);
-                    }
-                    double-clicked => {
-                        Callabler.open_item(r.path);
-                        handle_click(false);
-                    }
-                    pointer-event(event) => {
-                        if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
-                            Callabler.open_parent(r.path);
-                        }
-                    }
-
-                    function handle_click(can_unselect: bool) {
-                        if (current_index != -1) {
-                            if (current_index != idx) {
-                                model[current_index].focused_row = false;
-                            } else if (can_unselect) {
-                                r.focused_row = false;
-                                current_index = -1;
-                                return;
-                            }
-                        }
-                        r.focused_row = true;
-                        current_index = idx;
-                    }
-                }
-
-                HorizontalLayout {
-                    padding-left: 7.5px;
-                    spacing: 0px;
-                    width: parent.width;
-
-                    CheckBox {
-                        checked: r.referenced_path;
-                        toggled => {
-                            model[idx].referenced_path = self.checked;
-                        }
-                        width: size_referenced_path;
-                    }
-
-                    Text {
-                        font-size: FontSizes.normal;
-                        horizontal-stretch: 1.0;
-                        height: parent.height;
-                        text: r.path;
-                        vertical-alignment: center;
-                        horizontal-alignment: left;
-            
-                    }
-                }
-                    
-                HorizontalLayout {
-                    width: parent.width;
-                    padding-left: 5px;
-                    Rectangle { }
-                    Rectangle {
-                        width: 50px;
-                        background: ColorPalette.remove_item_color_button;
-                        horizontal-stretch: 1.0;
-                        Button {
-                            width: 50px;
-                            icon: @image-url("../../icons/krokiet_delete.svg");
-                            colorize-icon: true;
-                            clicked => {
-                                Callabler.remove_item_paths(true, idx);
-                            }
-                        }
-                    }
-                }
+            for r[idx] in model: PathRow {
+                path: r.path;
+                focused_row: r.focused_row;
+                referenced_path: r.referenced_path;
+                show_ref_col: true;
+                ref_col_width: size_referenced_path;
+                row_clicked(can_unselect) => { handle_click(idx, can_unselect); }
+                ref_toggled(checked) => { model[idx].referenced_path = checked; }
+                delete_clicked => { Callabler.remove_item_paths(true, idx); }
             }
         }
     }
@@ -119,6 +132,21 @@ export component ExcludedPaths {
     in-out property <int> current_index <=> Settings.excluded_paths_model_selected_idx;
 
     min-width: 50px;
+
+    function handle_click(idx: int, can_unselect: bool) {
+        if (current_index != -1) {
+            if (current_index != idx) {
+                model[current_index].focused_row = false;
+            } else if (can_unselect) {
+                model[idx].focused_row = false;
+                current_index = -1;
+                return;
+            }
+        }
+        model[idx].focused_row = true;
+        current_index = idx;
+    }
+
     VerticalLayout {
         HorizontalLayout {
             spacing: 5px;
@@ -131,69 +159,12 @@ export component ExcludedPaths {
         }
 
         ListView {
-            for r[idx] in model: Rectangle {
-                height: 30px;
-                border_radius: 5px;
-                width: parent.width;
-
-                background: ColorPalette.get_listview_color(r.focused_row, touch-area.has-hover);
-                touch_area := TouchArea {
-                    clicked => {
-                        handle_click(true);
-                    }
-                    double-clicked => {
-                        Callabler.open_item(r.path);
-                        handle_click(false);
-                    }
-                    pointer-event(event) => {
-                        if (event.button == PointerEventButton.right && event.kind == PointerEventKind.up) {
-                            Callabler.open_parent(r.path);
-                        }
-                    }
-
-                    function handle_click(can_unselect: bool) {
-                        if (current_index != -1) {
-                            if (current_index != idx) {
-                                model[current_index].focused_row = false;
-                            } else if (can_unselect) {
-                                r.focused_row = false;
-                                current_index = -1;
-                                return;
-                            }
-                        }
-                        r.focused_row = true;
-                        current_index = idx;
-                    }
-                }
-
-                Text {
-                    font-size: FontSizes.normal;
-                    width: parent.width;
-                    horizontal-stretch: 1.0;
-                    height: parent.height;
-                    text: r.path;
-                    vertical-alignment: center;
-                    horizontal-alignment: left;
-                    x: 5px;
-                }
-                
-                HorizontalLayout {
-                    width: parent.width;
-                    Rectangle { }
-                    Rectangle {
-                        width: 50px;
-                        background: ColorPalette.remove_item_color_button;
-                        horizontal-stretch: 1.0;
-                        Button {
-                            width: 50px;
-                            icon: @image-url("../../icons/krokiet_delete.svg");
-                            colorize-icon: true;
-                            clicked => {
-                                Callabler.remove_item_paths(false, idx);
-                            }
-                        }
-                    }
-                }
+            for r[idx] in model: PathRow {
+                path: r.path;
+                focused_row: r.focused_row;
+                show_ref_col: false;
+                row_clicked(can_unselect) => { handle_click(idx, can_unselect); }
+                delete_clicked => { Callabler.remove_item_paths(false, idx); }
             }
         }
     }

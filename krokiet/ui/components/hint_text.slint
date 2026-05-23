@@ -1,0 +1,11 @@
+import { ColorPalette } from "../globals/color_palette.slint";
+import { FontSizes } from "../globals/fonts.slint";
+
+export component HintText inherits Text {
+    in-out property <string> hint_text;
+    font-size: FontSizes.small;
+    color: ColorPalette.hint_color;
+    text: root.hint_text;
+    wrap: TextWrap.word-wrap;
+    vertical-stretch: 0;
+}

@@ -1,0 +1,80 @@
+import { CediniaColors } from "../globals/colors.slint";
+import { AppState } from "../globals/app_state.slint";
+import { Translations } from "../globals/translations.slint";
+import { TouchButton } from "buttons/touch_button.slint";
+
+export component ContextMenuSheet inherits Rectangle {
+    in-out property <bool>   visible_: false;
+    in property <string>     item_name;
+    in property <string>     folder;
+    in property <string>     file_path;
+
+    visible: visible_;
+    z: 55;
+    background: CediniaColors.scrim;
+
+    TouchArea { clicked => { root.visible_ = false; } }
+
+    Rectangle {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - vl.preferred-height - 24px) / 2;
+        width: min(parent.width - 48px, 300px);
+        height: vl.preferred-height + 24px;
+        border-radius: 14px;
+        background: CediniaColors.bg_elevated;
+        drop-shadow-blur: 24px;
+        drop-shadow-color: CediniaColors.shadow_lg;
+        clip: true;
+
+        vl := VerticalLayout {
+            padding: 12px;
+            spacing: 6px;
+
+            // Item name — lets the user see exactly what will be opened.
+            Text {
+                text: root.item_name != "" ? root.item_name : Translations.ctx_menu_title_text;
+                color: CediniaColors.text_primary;
+                font-size: 13px;
+                font-weight: 700;
+                horizontal-alignment: TextHorizontalAlignment.center;
+                wrap: word-wrap;
+            }
+
+            // Parent folder path — shown in a smaller, muted colour.
+            if root.folder != "" : Text {
+                text: root.folder;
+                color: CediniaColors.text_disabled;
+                font-size: 10px;
+                horizontal-alignment: TextHorizontalAlignment.center;
+                wrap: word-wrap;
+            }
+
+            TouchButton {
+                label: Translations.ctx_open_file_text;
+                min_h: 44px;
+                bg: CediniaColors.bg_surface;
+                fg: CediniaColors.text_primary;
+                horizontal-stretch: 1.0;
+                clicked => { AppState.open_path(root.file_path); root.visible_ = false; }
+            }
+
+            TouchButton {
+                label: Translations.ctx_open_folder_text;
+                min_h: 44px;
+                bg: CediniaColors.bg_surface;
+                fg: CediniaColors.accent_light;
+                horizontal-stretch: 1.0;
+                clicked => { AppState.open_parent_folder(root.folder); root.visible_ = false; }
+            }
+
+            TouchButton {
+                label: Translations.close_text;
+                min_h: 40px;
+                bg: CediniaColors.bg_elevated;
+                fg: CediniaColors.text_disabled;
+                horizontal-stretch: 1.0;
+                clicked => { root.visible_ = false; }
+            }
+        }
+    }
+}
