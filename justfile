@@ -84,6 +84,7 @@ clip:
 
 fix:
     grep -rlZ --include="*.rs" "─" . | xargs -0 sed -i 's/─//g' || true
+    grep -rlZ --include="*.slint" "─" . | xargs -0 sed -i 's/─//g' || true
     cp misc/pyproject.toml .
     uv sync
 
