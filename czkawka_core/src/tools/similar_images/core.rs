@@ -340,8 +340,7 @@ impl SimilarImages {
 
         progress_handler.join_thread();
 
-        #[cfg(debug_assertions)]
-        debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
+        check_for_duplicated_things(&hashes_parents, &hashes_similarity, all_hashed_images, "post-grouping");
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
         WorkContinueStatus::Continue
@@ -656,25 +655,28 @@ pub(crate) fn convert_algorithm_to_string(hash_alg: HashAlg) -> String {
     .to_string()
 }
 
-#[cfg(debug_assertions)]
-fn debug_check_for_duplicated_things(
-    use_reference_folders: bool,
+// Verifies internal invariants on the parent/similarity maps:
+//   - no hash is a key in both `hashes_parents` and `hashes_similarity`
+//   - no file path appears under more than one parent group, nor in both maps
+// Holds in both normal and reference-folder modes — in ref-folders mode the
+// parent keys are ref-folder hashes and similarity keys are normal-folder hashes,
+// so the same invariant applies.
+fn check_for_duplicated_things(
     hashes_parents: &IndexMap<ImHash, u32>,
     hashes_similarity: &IndexMap<ImHash, (ImHash, u32)>,
     all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
-    numm: &str,
+    phase: &str,
 ) {
-    if use_reference_folders {
-        return;
-    }
-
     let mut found_broken_thing = false;
     let mut hashmap_hashes: IndexSet<_> = Default::default();
     let mut hashmap_names: IndexSet<_> = Default::default();
     for (hash, number_of_children) in hashes_parents {
         if *number_of_children > 0 {
             if hashmap_hashes.contains(hash) {
-                debug!("------1--HASH--{}  {:?}", numm, all_hashed_images[hash]);
+                error!(
+                    "[{phase}] parent-group hash appears more than once in hashes_parents; images: {:?}",
+                    all_hashed_images[hash]
+                );
                 found_broken_thing = true;
             }
             hashmap_hashes.insert((*hash).clone());
@@ -682,7 +684,7 @@ fn debug_check_for_duplicated_things(
             for i in &all_hashed_images[hash] {
                 let name = i.path.to_string_lossy().to_string();
                 if hashmap_names.contains(&name) {
-                    debug!("------1--NAME--{numm}  {name:?}");
+                    error!("[{phase}] file path appears in more than one parent group: {name:?}");
                     found_broken_thing = true;
                 }
                 hashmap_names.insert(name);
@@ -691,7 +693,10 @@ fn debug_check_for_duplicated_things(
     }
     for hash in hashes_similarity.keys() {
         if hashmap_hashes.contains(hash) {
-            debug!("------2--HASH--{}  {:?}", numm, all_hashed_images[hash]);
+            error!(
+                "[{phase}] hash appears in both hashes_parents and hashes_similarity (should be one or the other); images: {:?}",
+                all_hashed_images[hash]
+            );
             found_broken_thing = true;
         }
         hashmap_hashes.insert((*hash).clone());
@@ -699,7 +704,7 @@ fn debug_check_for_duplicated_things(
         for i in &all_hashed_images[hash] {
             let name = i.path.to_string_lossy().to_string();
             if hashmap_names.contains(&name) {
-                debug!("------2--NAME--{numm}  {name:?}");
+                error!("[{phase}] file path appears under both a parent group and the similarity map: {name:?}");
                 found_broken_thing = true;
             }
             hashmap_names.insert(name);
