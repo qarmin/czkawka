@@ -1,0 +1,33 @@
+import { CediniaColors } from "../../globals/colors.slint";
+
+export component TouchButton {
+    in property <string>  label;
+    in property <color>   bg:       CediniaColors.accent;
+    in property <color>   fg:       CediniaColors.fg_on_accent;
+    in property <bool>    enabled:  true;
+    in property <length>  min_h:    52px;
+    callback clicked;
+
+    height: max(min_h, txt.preferred-height + 24px);
+    min-width: txt.preferred-width + 32px;
+
+    Rectangle {
+        border-radius: 8px;
+        background: ta.has-hover && root.enabled ? root.bg.brighter(0.15) : root.enabled ? root.bg : CediniaColors.bg_elevated;
+        animate background { duration: 120ms; }
+
+        ta := TouchArea {
+            enabled: root.enabled;
+            clicked => { root.clicked(); }
+        }
+
+        txt := Text {
+            text: root.label;
+            color: root.enabled ? root.fg : CediniaColors.text_disabled;
+            font-size: 16px;
+            font-weight: 600;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+}

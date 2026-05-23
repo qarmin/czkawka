@@ -1,0 +1,66 @@
+import { CediniaColors } from "../../globals/colors.slint";
+import { AppState } from "../../globals/app_state.slint";
+
+export component SegmentRow {
+    in property <string>   label;
+    in property <string>   description: "";
+    in property <[string]> options;
+    in-out property <int>  selected;
+
+    VerticalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        spacing: 6px;
+
+        HorizontalLayout {
+            VerticalLayout {
+                horizontal-stretch: 1.0;
+                alignment: LayoutAlignment.center;
+                Text {
+                    text: root.label;
+                    color: CediniaColors.text_primary;
+                    wrap: TextWrap.word-wrap;
+                    font-size: 14px;
+                }
+                if root.description != "" : Text {
+                    text: root.description;
+                    color: CediniaColors.text_secondary;
+                    wrap: TextWrap.word-wrap;
+                    font-size: 11px;
+                }
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 4px;
+            for opt[i] in root.options : Rectangle {
+                horizontal-stretch: 1.0;
+                height: 30px;
+                border-radius: 6px;
+                background: root.selected == i ? CediniaColors.accent_muted : CediniaColors.bg_elevated;
+                border-width: 1px;
+                border-color: root.selected == i ? CediniaColors.accent_light : CediniaColors.divider;
+                animate background { duration: 100ms; }
+
+                TouchArea {
+                    clicked => {
+                        root.selected = i;
+                        AppState.save_settings_now();
+                    }
+                }
+
+                Text {
+                    text: opt;
+                    color: root.selected == i ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                    font-size: 11px;
+                    font-weight: root.selected == i ? 700 : 400;
+                    horizontal-alignment: TextHorizontalAlignment.center;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    overflow: elide;
+                }
+            }
+        }
+    }
+}

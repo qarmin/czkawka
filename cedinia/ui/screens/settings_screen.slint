@@ -1,7 +1,13 @@
 import { CediniaColors } from "../globals/colors.slint";
-import { Divider, TouchButton } from "../components/components.slint";
+import { Divider } from "../components/divider.slint";
+import { TouchButton } from "../components/buttons/touch_button.slint";
 import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "../globals/app_state.slint";
-import { CategoryLabel, DropdownRow, SegmentRow, TextInputRow, ToggleRow, ToolGroupHeader } from "../components/settings_components.slint";
+import { CategoryLabel } from "../components/settings/category_label.slint";
+import { DropdownRow } from "../components/settings/dropdown_row.slint";
+import { SegmentRow } from "../components/settings/segment_row.slint";
+import { TextInputRow } from "../components/settings/text_input_row.slint";
+import { ToggleRow } from "../components/settings/toggle_row.slint";
+import { ToolGroupHeader } from "../components/settings/tool_group_header.slint";
 import { SettingsTab } from "../globals/common.slint";
 import { Translations } from "../globals/translations.slint";
 

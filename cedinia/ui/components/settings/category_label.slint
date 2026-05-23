@@ -1,0 +1,22 @@
+import { CediniaColors } from "../../globals/colors.slint";
+
+export component CategoryLabel inherits Rectangle {
+    in property <string> label;
+
+    height: 28px;
+    background: CediniaColors.bg_primary;
+
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+
+        Text {
+            text: label;
+            color: CediniaColors.text_disabled;
+            font-size: 10px;
+            font-weight: 700;
+            vertical-alignment: TextVerticalAlignment.center;
+            letter-spacing: 1px;
+        }
+    }
+}

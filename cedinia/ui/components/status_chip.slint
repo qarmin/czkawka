@@ -1,0 +1,23 @@
+import { CediniaColors } from "../globals/colors.slint";
+
+export component StatusChip {
+    in property <string> label;
+    in property <color>  chip_color: CediniaColors.accent_muted;
+    in property <color>  text_color: CediniaColors.accent_light;
+
+    height: 24px;
+    min-width: txt.preferred-width + 16px;
+
+    Rectangle {
+        border-radius: 12px;
+        background: root.chip_color;
+        txt := Text {
+            text: root.label;
+            color: root.text_color;
+            font-size: 11px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+}

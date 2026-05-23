@@ -1,0 +1,37 @@
+import { CediniaColors } from "../globals/colors.slint";
+
+export component SectionHeader {
+    in property <string> title;
+    in property <string> subtitle: "";
+
+    height: subtitle == "" ? 44px : 60px;
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: CediniaColors.bg_elevated;
+        border-width: 1px;
+        border-color: CediniaColors.divider;
+
+        VerticalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            alignment: LayoutAlignment.center;
+            spacing: 2px;
+
+            Text {
+                text: root.title;
+                color: CediniaColors.accent_light;
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.8px;
+            }
+
+            if root.subtitle != "" : Text {
+                text: root.subtitle;
+                color: CediniaColors.text_secondary;
+                font-size: 12px;
+            }
+        }
+    }
+}

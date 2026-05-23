@@ -1,0 +1,32 @@
+import { CediniaColors } from "../../globals/colors.slint";
+
+export component IconButton {
+    in property <image>  icon;
+    in property <string> tooltip;
+    in property <bool>   enabled: true;
+    in property <color>  tint: CediniaColors.text_primary;
+    callback clicked;
+
+    width: 48px;
+    height: 48px;
+
+    Rectangle {
+        border-radius: 24px;
+        background: ta.has-hover && root.enabled ? CediniaColors.ripple : transparent;
+        animate background { duration: 120ms; }
+
+        ta := TouchArea {
+            enabled: root.enabled;
+            clicked => { root.clicked(); }
+        }
+
+        Image {
+            source: root.icon;
+            colorize: root.enabled ? root.tint : CediniaColors.text_disabled;
+            width: 24px;
+            height: 24px;
+            horizontal-alignment: ImageHorizontalAlignment.center;
+            vertical-alignment: ImageVerticalAlignment.center;
+        }
+    }
+}
