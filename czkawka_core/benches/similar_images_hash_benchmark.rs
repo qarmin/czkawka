@@ -10,6 +10,7 @@
 use std::hint::black_box;
 use std::time::Duration;
 
+use bk_tree::metrics::Hamming as HammingSC;
 use bk_tree::{BKTree, Metric};
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use hamming_bitwise_fast::hamming_bitwise_fast;
@@ -27,6 +28,20 @@ impl Metric<Vec<u8>> for HammingVec {
     }
     fn threshold_distance(&self, a: &Vec<u8>, b: &Vec<u8>, _t: u32) -> Option<u32> {
         Some(self.distance(a, b))
+    }
+}
+
+// Hybrid: use hamming_bitwise_fast (fast SIMD popcount) but return None when
+// distance exceeds threshold — lets bk-tree skip entire subtrees without
+// paying for chunked-popcount impl.
+struct HammingHybrid;
+impl Metric<Vec<u8>> for HammingHybrid {
+    fn distance(&self, a: &Vec<u8>, b: &Vec<u8>) -> u32 {
+        hamming_bitwise_fast(a, b)
+    }
+    fn threshold_distance(&self, a: &Vec<u8>, b: &Vec<u8>, threshold: u32) -> Option<u32> {
+        let d = hamming_bitwise_fast(a, b);
+        if d > threshold { None } else { Some(d) }
     }
 }
 
@@ -60,11 +75,11 @@ fn random_arr<const N: usize>(n: usize, seed: u64) -> Vec<[u8; N]> {
         .collect()
 }
 
-// Fast criterion config so the whole suite runs in ~1-2 min.
+// Fast criterion config so the whole suite runs in ~1 min.
 fn fast_group<'a>(c: &'a mut Criterion, name: &str) -> criterion::BenchmarkGroup<'a, criterion::measurement::WallTime> {
     let mut g = c.benchmark_group(name);
-    g.warm_up_time(Duration::from_millis(500));
-    g.measurement_time(Duration::from_secs(2));
+    g.warm_up_time(Duration::from_millis(300));
+    g.measurement_time(Duration::from_millis(1200));
     g.sample_size(10);
     g
 }
@@ -73,9 +88,9 @@ fn fast_group<'a>(c: &'a mut Criterion, name: &str) -> criterion::BenchmarkGroup
 
 fn bench_hamming(c: &mut Criterion) {
     let mut group = c.benchmark_group("hamming_distance");
-    group.warm_up_time(Duration::from_millis(500));
-    group.measurement_time(Duration::from_secs(2));
-    group.sample_size(50);
+    group.warm_up_time(Duration::from_millis(300));
+    group.measurement_time(Duration::from_millis(1000));
+    group.sample_size(20);
 
     for byte_size in [8usize, 32, 128, 512] {
         let vec_data = random_vec(2, byte_size, 42);
@@ -122,6 +137,36 @@ fn bench_bktree_find(c: &mut Criterion) {
                 let mut total = 0u64;
                 for q in &queries {
                     total += tree.find(q, tolerance).count() as u64;
+                }
+                black_box(total);
+            });
+        });
+
+        // Short-circuit Hamming from bk_tree::metrics (matches new czkawka production code).
+        let mut tree_sc: BKTree<Vec<u8>, HammingSC> = BKTree::new(HammingSC);
+        for h in &dataset {
+            tree_sc.add(h.clone());
+        }
+        group.bench_function(BenchmarkId::new("vec_sc", byte_size), |b| {
+            b.iter(|| {
+                let mut total = 0u64;
+                for q in &queries {
+                    total += tree_sc.find(q, tolerance).count() as u64;
+                }
+                black_box(total);
+            });
+        });
+
+        // Hybrid: hamming_bitwise_fast + None-on-overflow.
+        let mut tree_h: BKTree<Vec<u8>, HammingHybrid> = BKTree::new(HammingHybrid);
+        for h in &dataset {
+            tree_h.add(h.clone());
+        }
+        group.bench_function(BenchmarkId::new("vec_hybrid", byte_size), |b| {
+            b.iter(|| {
+                let mut total = 0u64;
+                for q in &queries {
+                    total += tree_h.find(q, tolerance).count() as u64;
                 }
                 black_box(total);
             });
@@ -199,7 +244,7 @@ fn bench_bktree_build(c: &mut Criterion) {
 
 fn bench_clone(c: &mut Criterion) {
     let mut group = fast_group(c, "hash_clone");
-    group.sample_size(30);
+    group.sample_size(15);
 
     for byte_size in [8usize, 32, 128, 512] {
         let dataset = random_vec(1024, byte_size, 5);
