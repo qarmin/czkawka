@@ -120,6 +120,7 @@ fn test_similar_images_empty_directory() {
 #[test]
 fn test_similar_images_hide_hard_links() {
     use std::fs;
+
     use tempfile::TempDir;
 
     let temp_dir = TempDir::new().unwrap();
@@ -171,4 +172,3 @@ fn test_similar_images_hide_hard_links() {
         assert_eq!(info.number_of_groups, 1);
     }
 }
-

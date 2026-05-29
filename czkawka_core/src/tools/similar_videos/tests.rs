@@ -136,6 +136,7 @@ fn test_similar_videos_audio_mode_ignores_non_video_files() {
 #[test]
 fn test_similar_videos_hide_hard_links() {
     use std::fs;
+
     use tempfile::TempDir;
 
     let temp_dir = TempDir::new().unwrap();
@@ -180,4 +181,3 @@ fn test_similar_videos_hide_hard_links() {
         assert_eq!(finder.videos_to_check.len(), 2);
     }
 }
-
