@@ -132,3 +132,52 @@ fn test_similar_videos_audio_mode_ignores_non_video_files() {
     assert_eq!(info.number_of_duplicates, 0, "Should find no video duplicates when only audio (MP3) files are present");
     assert_eq!(info.number_of_groups, 0, "Should find no groups when only audio (MP3) files are present");
 }
+
+#[test]
+fn test_similar_videos_hide_hard_links() {
+    use std::fs;
+    use tempfile::TempDir;
+
+    let temp_dir = TempDir::new().unwrap();
+    let path = temp_dir.path();
+
+    let vid1_path = path.join("video1.mp4");
+    let vid2_path = path.join("video2.mp4");
+    fs::write(&vid1_path, b"dummy content").unwrap();
+
+    #[cfg(target_family = "unix")]
+    fs::hard_link(&vid1_path, &vid2_path).unwrap();
+    #[cfg(target_family = "windows")]
+    {
+        if fs::hard_link(&vid1_path, &vid2_path).is_err() {
+            return;
+        }
+    }
+
+    {
+        let mut finder = SimilarVideos::new(make_params_visual());
+        finder.set_hide_hard_links(true);
+        finder.set_included_paths(vec![path.to_path_buf()]);
+        finder.set_recursive_search(true);
+        finder.set_use_cache(false);
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        finder.check_for_similar_videos(&stop_flag, None);
+
+        assert_eq!(finder.videos_to_check.len(), 1);
+    }
+
+    {
+        let mut finder = SimilarVideos::new(make_params_visual());
+        finder.set_hide_hard_links(false);
+        finder.set_included_paths(vec![path.to_path_buf()]);
+        finder.set_recursive_search(true);
+        finder.set_use_cache(false);
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        finder.check_for_similar_videos(&stop_flag, None);
+
+        assert_eq!(finder.videos_to_check.len(), 2);
+    }
+}
+
