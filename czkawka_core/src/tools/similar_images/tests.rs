@@ -117,6 +117,7 @@ fn test_similar_images_empty_directory() {
     assert_eq!(similar_images.len(), 0);
 }
 
+#[cfg(target_family = "unix")]
 #[test]
 fn test_similar_images_hide_hard_links() {
     use std::fs;

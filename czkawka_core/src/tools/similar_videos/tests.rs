@@ -133,6 +133,7 @@ fn test_similar_videos_audio_mode_ignores_non_video_files() {
     assert_eq!(info.number_of_groups, 0, "Should find no groups when only audio (MP3) files are present");
 }
 
+#[cfg(target_family = "unix")]
 #[test]
 fn test_similar_videos_hide_hard_links() {
     use std::fs;
