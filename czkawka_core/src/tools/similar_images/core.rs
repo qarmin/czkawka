@@ -69,7 +69,7 @@ impl SimilarImages {
                         Some((inode, fes))
                     })
                     .while_some()
-                    .flat_map(if hide_hard_links { |(_, fes)| fes } else { take_1_per_inode })
+                    .flat_map(if hide_hard_links { take_1_per_inode } else { |(_, fes)| fes })
                     .map(|fe| {
                         let fe_str = fe.path.to_string_lossy().to_string();
                         let image_entry = fe.into_images_entry();
