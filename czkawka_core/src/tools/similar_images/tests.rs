@@ -116,3 +116,60 @@ fn test_similar_images_empty_directory() {
     assert_eq!(info.number_of_groups, 0);
     assert_eq!(similar_images.len(), 0);
 }
+
+#[cfg(target_family = "unix")]
+#[test]
+fn test_similar_images_hide_hard_links() {
+    use std::fs;
+
+    use tempfile::TempDir;
+
+    let temp_dir = TempDir::new().unwrap();
+    let path = temp_dir.path();
+
+    let test_image_src = get_test_resources_path().join("normal.jpg");
+    let img1_path = path.join("image1.jpg");
+    let img2_path = path.join("image2.jpg");
+    fs::copy(&test_image_src, &img1_path).unwrap();
+
+    #[cfg(target_family = "unix")]
+    fs::hard_link(&img1_path, &img2_path).unwrap();
+    #[cfg(target_family = "windows")]
+    {
+        if fs::hard_link(&img1_path, &img2_path).is_err() {
+            return;
+        }
+    }
+
+    {
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false);
+        let mut finder = SimilarImages::new(params);
+        finder.set_hide_hard_links(true);
+        finder.set_included_paths(vec![path.to_path_buf()]);
+        finder.set_recursive_search(true);
+        finder.set_use_cache(false);
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        finder.search(&stop_flag, None);
+
+        let info = finder.get_information();
+        assert_eq!(info.number_of_duplicates, 0);
+        assert_eq!(info.number_of_groups, 0);
+    }
+
+    {
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false);
+        let mut finder = SimilarImages::new(params);
+        finder.set_hide_hard_links(false);
+        finder.set_included_paths(vec![path.to_path_buf()]);
+        finder.set_recursive_search(true);
+        finder.set_use_cache(false);
+
+        let stop_flag = Arc::new(AtomicBool::new(false));
+        finder.search(&stop_flag, None);
+
+        let info = finder.get_information();
+        assert_eq!(info.number_of_duplicates, 1);
+        assert_eq!(info.number_of_groups, 1);
+    }
+}
