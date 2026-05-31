@@ -358,6 +358,7 @@ impl SimilarVideos {
                 temp_vector.push(file_entry.clone());
             }
             if temp_vector.len() > 1 {
+                temp_vector.sort_unstable_by(|a, b| a.modified_date.cmp(&b.modified_date).then(a.path.cmp(&b.path)));
                 collected_similar_videos.push(temp_vector);
             }
         }
