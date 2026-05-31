@@ -8,6 +8,7 @@ use czkawka_core::helpers::messages::{MessageLimit, Messages};
 use czkawka_core::re_exported::HashAlg;
 use czkawka_core::tools::duplicate::DuplicateEntry;
 use czkawka_core::tools::duplicate::core::get_duplicate_cache_file;
+use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_images::core::get_similar_images_cache_file;
 use czkawka_core::tools::similar_videos::core::get_similar_videos_cache_file;
 use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_WINDOW_COUNT};
@@ -183,13 +184,16 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
                                     HashAlg::Mean,
                                     HashAlg::Median,
                                 ] {
-                                    let file_name = get_similar_images_cache_file(hash_size, hash_alg, image_filter);
-                                    let (mut messages, loaded_items) =
-                                        load_cache_from_file_generalized_by_path::<czkawka_core::tools::similar_images::ImagesEntry>(&file_name, true, &Default::default());
+                                    for geometric_invariance in [GeometricInvariance::Off, GeometricInvariance::MirrorFlip, GeometricInvariance::MirrorFlipRotate90] {
+                                        let file_name = get_similar_images_cache_file(hash_size, hash_alg, image_filter, geometric_invariance);
+                                        let (mut cache_messages, loaded_items) =
+                                            load_cache_from_file_generalized_by_path::<czkawka_core::tools::similar_images::ImagesEntry>(&file_name, true, &Default::default());
 
-                                    if let Some(cache_entries) = loaded_items {
-                                        let save_messages = save_cache_to_file_generalized(&file_name, &cache_entries, false, 0);
-                                        messages.extend_with_another_messages(save_messages);
+                                        if let Some(cache_entries) = loaded_items {
+                                            let save_messages = save_cache_to_file_generalized(&file_name, &cache_entries, false, 0);
+                                            cache_messages.extend_with_another_messages(save_messages);
+                                        }
+                                        messages.extend_with_another_messages(cache_messages);
                                     }
                                 }
                             }

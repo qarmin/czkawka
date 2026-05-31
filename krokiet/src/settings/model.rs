@@ -6,6 +6,7 @@ use czkawka_core::common::items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::HashAlg;
 use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_videos::{
     DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_CROP_DETECT,
     DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_VID_HASH_DURATION,
@@ -92,6 +93,8 @@ pub struct SettingsCustom {
     pub similar_images_sub_hash_alg: String,
     #[serde(default = "default_resize_algorithm")]
     pub similar_images_sub_resize_algorithm: String,
+    #[serde(default = "default_geometric_invariance")]
+    pub similar_images_sub_geometric_invariance: String,
     #[serde(default)]
     pub similar_images_sub_ignore_same_size: bool,
     #[serde(default)]
@@ -293,6 +296,7 @@ pub struct ComboBoxItems {
     pub hash_size: StringComboBoxItem<u8>,
     pub resize_algorithm: StringComboBoxItem<FilterType>,
     pub image_hash_alg: StringComboBoxItem<HashAlg>,
+    pub image_geometric_invariance: StringComboBoxItem<GeometricInvariance>,
     pub duplicates_hash_type: StringComboBoxItem<HashType>,
     pub biggest_files_method: StringComboBoxItem<SearchMode>,
     pub audio_check_type: StringComboBoxItem<CheckingMethod>,
@@ -504,6 +508,9 @@ pub(crate) fn default_resize_algorithm() -> String {
 }
 pub(crate) fn default_hash_type() -> String {
     "mean".to_string()
+}
+pub(crate) fn default_geometric_invariance() -> String {
+    "off".to_string()
 }
 pub(crate) fn default_sub_hash_size() -> String {
     DEFAULT_HASH_SIZE.to_string()

@@ -9,7 +9,7 @@ use czkawka_core::common::progress_data::{CurrentStage, ProgressData as CoreProg
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::similar_images::SimilarityPreset;
+use czkawka_core::tools::similar_images::{GeometricInvariance, SimilarityPreset};
 
 use crate::flc;
 use crate::scanners::{
@@ -80,6 +80,7 @@ pub enum ScanRequest {
         hash_size: u8,
         hash_alg: HashAlg,
         image_filter: FilterType,
+        geometric_invariance: GeometricInvariance,
         ignore_same_size: bool,
         ignore_same_resolution: bool,
         filters: CommonFilters,
@@ -246,6 +247,7 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 hash_size,
                 hash_alg,
                 image_filter,
+                geometric_invariance,
                 ignore_same_size,
                 ignore_same_resolution,
                 filters,
@@ -256,6 +258,7 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                     hash_size,
                     hash_alg,
                     image_filter,
+                    geometric_invariance,
                     ignore_same_size,
                     ignore_same_resolution,
                     &filters,

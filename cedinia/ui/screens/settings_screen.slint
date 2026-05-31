@@ -353,6 +353,13 @@ export component SettingsScreen {
                     }
                     Divider {}
 
+                    SegmentRow {
+                        label: Translations.settings_geometric_invariance_text;
+                        options: SimilarImagesSettings.geometric_invariance_options;
+                        selected <=> SimilarImagesSettings.geometric_invariance_idx;
+                    }
+                    Divider {}
+
                     ToggleRow { label: Translations.settings_ignore_same_size_text; value <=> SimilarImagesSettings.ignore_same_size; }
                     Divider {}
 

@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::HashAlg;
 use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
 use image::imageops::FilterType;
 use log::warn;
@@ -54,6 +55,7 @@ pub struct StringComboBoxItems {
     pub hash_size: Vec<StringComboBoxItem<u8>>,
     pub resize_algorithm: Vec<StringComboBoxItem<FilterType>>,
     pub image_hash_alg: Vec<StringComboBoxItem<HashAlg>>,
+    pub image_geometric_invariance: Vec<StringComboBoxItem<GeometricInvariance>>,
     pub duplicates_hash_type: Vec<StringComboBoxItem<HashType>>,
     pub biggest_files_method: Vec<StringComboBoxItem<SearchMode>>,
     pub audio_check_type: Vec<StringComboBoxItem<CheckingMethod>>,
@@ -110,6 +112,12 @@ impl StringComboBoxItems {
             ("vertgradient", "VertGradient", HashAlg::VertGradient),
             ("doublegradient", "DoubleGradient", HashAlg::DoubleGradient),
             ("median", "Median", HashAlg::Median),
+        ]);
+
+        let image_geometric_invariance = Self::convert_to_combobox_items(&[
+            ("off", "Off", GeometricInvariance::Off),
+            ("mirror_flip", "Mirror + Flip", GeometricInvariance::MirrorFlip),
+            ("mirror_flip_rotate90", "Mirror + Flip + Rotate 90", GeometricInvariance::MirrorFlipRotate90),
         ]);
 
         let duplicates_hash_type = Self::convert_to_combobox_items(&[
@@ -216,6 +224,7 @@ impl StringComboBoxItems {
             hash_size,
             resize_algorithm,
             image_hash_alg,
+            image_geometric_invariance,
             duplicates_hash_type,
             biggest_files_method,
             audio_check_type,

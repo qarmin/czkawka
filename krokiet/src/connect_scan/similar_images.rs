@@ -22,6 +22,7 @@ pub(crate) fn scan_similar_images(a: Weak<MainWindow>, sd: ScanData) {
         .spawn(move || {
             let hash_alg = sd.combo_box_items.image_hash_alg.value;
             let resize_algorithm = sd.combo_box_items.resize_algorithm.value;
+            let geometric_invariance = sd.combo_box_items.image_geometric_invariance.value;
             let hash_size = sd
                 .custom_settings
                 .similar_images_sub_hash_size
@@ -35,6 +36,7 @@ pub(crate) fn scan_similar_images(a: Weak<MainWindow>, sd: ScanData) {
                 resize_algorithm,
                 sd.custom_settings.similar_images_sub_ignore_same_size,
                 sd.custom_settings.similar_images_sub_ignore_same_resolution,
+                geometric_invariance,
             );
             let mut tool = SimilarImages::new(params);
 

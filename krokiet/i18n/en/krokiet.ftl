@@ -241,6 +241,7 @@ subsettings_images_resize_algorithm = Resize Algorithm
 subsettings_images_ignore_same_size = Ignore images with same size
 subsettings_images_ignore_same_resolution = Ignore images with same resolution
 subsettings_images_max_difference = Max difference
+subsettings_images_geometric_invariance = Geometric invariance
 subsettings_images_duplicates_hash_type = Hash Type
 subsettings_duplicates_check_method = Check method
 subsettings_duplicates_name_case_sensitive = Case Sensitive(only name modes)
