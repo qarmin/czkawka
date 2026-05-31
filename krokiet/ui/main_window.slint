@@ -2,7 +2,7 @@ import { HorizontalBox, LineEdit, Palette, VerticalBox } from "std-widgets.slint
 import { FontSizes } from "fonts.slint";
 import { LeftSidePanel } from "left_side_panel.slint";
 import { MainList } from "main_lists.slint";
-import { ActiveTab, PopupRequest, ProgressToSend, SingleMainListModel } from "common.slint";
+import { ActiveTab, BottomPanelVisibility, PopupRequest, ProgressToSend, SingleMainListModel } from "common.slint";
 import { ActionButtons } from "action_buttons.slint";
 import { Progress } from "progress.slint";
 import { Settings } from "settings.slint";
@@ -209,9 +209,46 @@ export component MainWindow inherits Window {
             }
         }
 
+        // Draggable splitter handle for resizing the bottom panel.
+        //
+        // Uses the incremental Slint pattern from docs.slint.dev: each `moved`
+        // event adjusts the target by (mouse-y - pressed-y), using the LIVE
+        // panel height as the base. Capturing a press-time snapshot does NOT
+        // work here — the TouchArea itself moves vertically with the splitter
+        // as the panel grows, so mouse-y in the new TouchArea-local frame
+        // returns to pressed-y each frame, zeroing the delta and reverting
+        // the change. The "increment from current value" idiom is stable
+        // through that feedback because Δmouse-y equals the layout-induced
+        // Δ-TA-origin, so the same delta keeps applying each event.
+        Rectangle {
+            vertical-stretch: 0.0;
+            height: 6px;
+            background: splitter_ta.has-hover || splitter_ta.pressed
+                ? Palette.accent-background
+                : Palette.alternate-background;
+            splitter_ta := TouchArea {
+                mouse-cursor: MouseCursor.row-resize;
+                moved => {
+                    if (self.pressed) {
+                        Settings.bottom_panel_height = max(60px,
+                            min(root.height - 200px,
+                                Settings.bottom_panel_height - (self.mouse-y - self.pressed-y)));
+                    }
+                }
+            }
+        }
+
         bottom_panel := BottomPanel {
             bottom_panel_visibility <=> action_buttons.bottom_panel_visibility;
             vertical-stretch: 0.0;
+            // Per Slint docs (positioning-and-layouts), elements with an
+            // explicit height inside a VerticalBox are not resized by the
+            // layout. min-height/max-height pinning works for the size but
+            // contributes to the parent layout's min-height sum and can
+            // cause overflow that breaks sibling hit-testing — verified by
+            // the previous iteration breaking sidebar clicks.
+            height: self.bottom_panel_visibility == BottomPanelVisibility.NotVisible
+                ? 0px : Settings.bottom_panel_height;
             folder_choose_requested(included_paths) => {
                 root.folder_choose_requested(included_paths)
             }

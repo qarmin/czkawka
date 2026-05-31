@@ -33,6 +33,7 @@ pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
 pub const MAX_HASH_SIZE: f32 = 40.0;
 pub const DEFAULT_WINDOW_WIDTH: u32 = 800;
 pub const DEFAULT_WINDOW_HEIGHT: u32 = 600;
+pub const DEFAULT_BOTTOM_PANEL_HEIGHT: u32 = 150;
 pub const DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT: u8 = 1;
 pub const DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT: u8 = 99;
 
@@ -307,6 +308,8 @@ pub struct BasicSettings {
     pub window_width: u32,
     #[serde(default = "default_window_height")]
     pub window_height: u32,
+    #[serde(default = "default_bottom_panel_height")]
+    pub bottom_panel_height: u32,
     #[serde(default = "detect_language")]
     pub language: String,
     #[serde(default = "ttrue")]
@@ -499,6 +502,9 @@ pub(crate) fn default_window_width() -> u32 {
 pub(crate) fn default_window_height() -> u32 {
     DEFAULT_WINDOW_HEIGHT
 }
+pub(crate) fn default_bottom_panel_height() -> u32 {
+    DEFAULT_BOTTOM_PANEL_HEIGHT
+}
 pub(crate) fn default_video_optimizer_mode() -> String {
     "transcode".to_string()
 }
@@ -582,5 +588,42 @@ impl Default for SavedCustomSelectTabState {
             leave_one_in_group: true,
             columns: Vec::new(),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{BasicSettings, DEFAULT_BOTTOM_PANEL_HEIGHT, default_bottom_panel_height};
+
+    #[test]
+    fn test_default_bottom_panel_height_is_150() {
+        assert_eq!(default_bottom_panel_height(), 150);
+        assert_eq!(DEFAULT_BOTTOM_PANEL_HEIGHT, 150);
+    }
+
+    #[test]
+    fn test_basic_settings_default_has_bottom_panel_height_150() {
+        let settings = BasicSettings::default();
+        assert_eq!(settings.bottom_panel_height, 150);
+    }
+
+    #[test]
+    fn test_bottom_panel_height_missing_in_json_uses_default() {
+        // Older config files predate this field — they must deserialize
+        // cleanly and pick up the 150 default rather than failing.
+        let json = "{}";
+        let settings: BasicSettings = serde_json::from_str(json).expect("empty json should deserialize");
+        assert_eq!(settings.bottom_panel_height, 150);
+    }
+
+    #[test]
+    fn test_bottom_panel_height_round_trip() {
+        let settings = BasicSettings {
+            bottom_panel_height: 275,
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&settings).expect("serialize");
+        let restored: BasicSettings = serde_json::from_str(&json).expect("deserialize");
+        assert_eq!(restored.bottom_panel_height, 275);
     }
 }

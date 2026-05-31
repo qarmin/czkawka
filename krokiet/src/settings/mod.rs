@@ -265,10 +265,12 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
 
     let width = basic_settings.window_width.clamp(100, 1920 * 4);
     let height = basic_settings.window_height.clamp(100, 1080 * 4);
+    let bottom_panel_height = basic_settings.bottom_panel_height.clamp(60, 1080 * 4);
 
     if basic_settings.settings_load_windows_size_at_startup {
         app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
     }
+    settings.set_bottom_panel_height(bottom_panel_height as f32);
     settings.set_dark_theme(basic_settings.dark_theme);
     settings.set_show_only_icons(basic_settings.show_only_icons);
     app.global::<Callabler>().invoke_theme_changed();
@@ -937,6 +939,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
     let preset_names = settings.get_settings_presets().iter().map(|x| x.to_string()).collect::<Vec<_>>();
     let window_width = (app.window().size().width as f32 / app.window().scale_factor()) as u32;
     let window_height = (app.window().size().height as f32 / app.window().scale_factor()) as u32;
+    let bottom_panel_height = settings.get_bottom_panel_height() as u32;
 
     assert_eq!(preset_names.len(), PRESET_NUMBER);
     let language = combo_box_items.language.config_name;
@@ -957,6 +960,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         preset_names,
         window_width,
         window_height,
+        bottom_panel_height,
         dark_theme,
         show_only_icons,
         settings_load_tabs_sizes_at_startup,
