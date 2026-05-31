@@ -61,6 +61,7 @@ const DEFAULT_THREAD_NUMBER: u32 = 0;
 const DEFAULT_NUMBER_OF_BIGGEST_FILES: &str = "50";
 const DEFAULT_SIMILAR_IMAGES_SIMILARITY: f32 = 0.0;
 const DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE: bool = false;
+const DEFAULT_SIMILAR_IMAGES_GEOMETRIC_INVARIANCE: u32 = 0;
 const DEFAULT_SIMILAR_VIDEOS_SIMILARITY: f32 = 15.0;
 const DEFAULT_SIMILAR_VIDEOS_IGNORE_SAME_SIZE: bool = false;
 
@@ -289,6 +290,9 @@ pub struct SettingsJson {
     #[serde(default = "default_similar_images_ignore_same_size")]
     pub similar_images_ignore_same_size: bool,
 
+    #[serde(default = "default_similar_images_geometric_invariance")]
+    pub similar_images_geometric_invariance: u32,
+
     #[serde(default = "default_similar_videos_similarity")]
     pub similar_videos_similarity: f64,
 
@@ -421,6 +425,9 @@ fn default_similar_images_similarity() -> f64 {
 fn default_similar_images_ignore_same_size() -> bool {
     DEFAULT_SIMILAR_IMAGES_IGNORE_SAME_SIZE
 }
+fn default_similar_images_geometric_invariance() -> u32 {
+    DEFAULT_SIMILAR_IMAGES_GEOMETRIC_INVARIANCE
+}
 fn default_similar_videos_similarity() -> f64 {
     DEFAULT_SIMILAR_VIDEOS_SIMILARITY as f64
 }
@@ -551,6 +558,9 @@ fn set_configuration_to_gui_internal(upper_notebook: &GuiUpperNotebook, main_not
             .combo_box_image_resize_algorithm
             .set_active(Some(default_config.combo_box_image_resize_algorithm));
         main_notebook.combo_box_image_hash_size.set_active(Some(default_config.combo_box_image_hash_size));
+        main_notebook
+            .combo_box_image_geometric_invariance
+            .set_active(Some(default_config.similar_images_geometric_invariance));
         main_notebook.combo_box_big_files_mode.set_active(Some(default_config.combo_box_big_files_mode));
 
         main_notebook.check_button_broken_files_audio.set_active(default_config.broken_files_audio);
@@ -665,6 +675,7 @@ fn gui_to_settings(upper_notebook: &GuiUpperNotebook, main_notebook: &GuiMainNot
         combo_box_image_resize_algorithm: main_notebook.combo_box_image_resize_algorithm.active().unwrap_or(0),
         combo_box_image_hash_type: main_notebook.combo_box_image_hash_algorithm.active().unwrap_or(0),
         combo_box_image_hash_size: main_notebook.combo_box_image_hash_size.active().unwrap_or(1),
+        similar_images_geometric_invariance: main_notebook.combo_box_image_geometric_invariance.active().unwrap_or(0),
         number_of_biggest_files: main_notebook.entry_big_files_number.text().to_string(),
         similar_images_similarity: main_notebook.scale_similarity_similar_images.value(),
         similar_images_ignore_same_size: main_notebook.check_button_image_ignore_same_size.is_active(),

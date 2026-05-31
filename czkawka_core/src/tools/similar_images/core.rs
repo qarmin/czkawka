@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
@@ -21,7 +21,7 @@ use crate::common::progress_data::{CurrentStage, ProgressData};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::flc;
-use crate::tools::similar_images::{Hamming, ImHash, ImagesEntry, SIMILAR_VALUES, SimilarImages, SimilarImagesParameters, SimilarityPreset};
+use crate::tools::similar_images::{GeometricInvariance, Hamming, ImHash, ImagesEntry, SIMILAR_VALUES, SimilarImages, SimilarImagesParameters, SimilarityPreset};
 
 impl SimilarImages {
     pub fn new(params: SimilarImagesParameters) -> Self {
@@ -97,7 +97,12 @@ impl SimilarImages {
     #[fun_time(message = "hash_images_load_cache", level = "debug")]
     fn hash_images_load_cache(&mut self) -> (BTreeMap<String, ImagesEntry>, BTreeMap<String, ImagesEntry>, BTreeMap<String, ImagesEntry>) {
         load_and_split_cache_generalized_by_path(
-            &get_similar_images_cache_file(self.get_params().hash_size, self.get_params().hash_alg, self.get_params().image_filter),
+            &get_similar_images_cache_file(
+                self.get_params().hash_size,
+                self.get_params().hash_alg,
+                self.get_params().image_filter,
+                self.get_params().geometric_invariance,
+            ),
             mem::take(&mut self.images_to_check),
             self,
         )
@@ -106,7 +111,12 @@ impl SimilarImages {
     #[fun_time(message = "save_to_cache", level = "debug")]
     fn save_to_cache(&mut self, vec_file_entry: &[ImagesEntry], loaded_hash_map: BTreeMap<String, ImagesEntry>) {
         save_and_connect_cache_generalized_by_path(
-            &get_similar_images_cache_file(self.get_params().hash_size, self.get_params().hash_alg, self.get_params().image_filter),
+            &get_similar_images_cache_file(
+                self.get_params().hash_size,
+                self.get_params().hash_alg,
+                self.get_params().image_filter,
+                self.get_params().geometric_invariance,
+            ),
             vec_file_entry,
             loaded_hash_map,
             self,
@@ -160,10 +170,7 @@ impl SimilarImages {
 
         // All valid entries are used to create bktree used to check for hash similarity
         for file_entry in vec_file_entry {
-            // Only use to comparing, non broken hashes(all 0 or 255 hashes means that algorithm fails to decode them because e.g. contains a lot of alpha channel)
-            if !(file_entry.hash.is_empty() || file_entry.hash.iter().all(|e| *e == 0) || file_entry.hash.iter().all(|e| *e == 255)) {
-                self.image_hashes.entry(file_entry.hash.clone()).or_default().push(file_entry);
-            }
+            self.add_hashes_to_map(file_entry);
         }
 
         // Break if stop was clicked after saving to cache
@@ -187,10 +194,65 @@ impl SimilarImages {
             .hash_alg(self.get_params().hash_alg)
             .resize_filter(self.get_params().image_filter);
         let hasher = hasher_config.to_hasher();
-        let hash = hasher.hash_image(&img);
-        file_entry.hash = hash.as_bytes().to_vec();
+        file_entry.hashes = self.compute_hashes_for_image(&img, &hasher);
 
         Ok(file_entry)
+    }
+
+    fn add_hashes_to_map(&mut self, mut file_entry: ImagesEntry) {
+        let hashes = mem::take(&mut file_entry.hashes);
+        if hashes.is_empty() {
+            return;
+        }
+        let entry_for_map = ImagesEntry { hashes: Vec::new(), ..file_entry };
+
+        for hash in hashes {
+            if !Self::is_hash_valid(&hash) {
+                continue;
+            }
+            let vec_entry = self.image_hashes.entry(hash).or_default();
+            if vec_entry.iter().any(|entry| entry.path == entry_for_map.path) {
+                continue;
+            }
+            vec_entry.push(entry_for_map.clone());
+        }
+    }
+
+    fn compute_hashes_for_image(&self, image: &image::DynamicImage, hasher: &image_hasher::Hasher) -> Vec<ImHash> {
+        let mut hashes: BTreeSet<ImHash> = BTreeSet::new();
+        let mut push_hash = |img: &image::DynamicImage| {
+            let hash = hasher.hash_image(img);
+            hashes.insert(hash.as_bytes().to_vec());
+        };
+
+        push_hash(image);
+
+        match self.get_params().geometric_invariance {
+            GeometricInvariance::Off => {}
+            GeometricInvariance::MirrorFlip => {
+                push_hash(&image.fliph());
+                push_hash(&image.flipv());
+            }
+            GeometricInvariance::MirrorFlipRotate90 => {
+                let flipped = image.fliph();
+                let flipped_rotate90 = flipped.rotate90();
+                let flipped_rotate270 = flipped.rotate270();
+
+                push_hash(&flipped);
+                push_hash(&image.flipv());
+                push_hash(&image.rotate90());
+                push_hash(&image.rotate180());
+                push_hash(&image.rotate270());
+                push_hash(&flipped_rotate90);
+                push_hash(&flipped_rotate270);
+            }
+        }
+
+        hashes.into_iter().collect()
+    }
+
+    fn is_hash_valid(hash: &ImHash) -> bool {
+        !(hash.is_empty() || hash.iter().all(|e| *e == 0) || hash.iter().all(|e| *e == 255))
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
@@ -340,7 +402,9 @@ impl SimilarImages {
 
         progress_handler.join_thread();
 
-        debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
+        if self.get_params().geometric_invariance == GeometricInvariance::Off {
+            debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
+        }
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
         WorkContinueStatus::Continue
@@ -453,10 +517,10 @@ impl SimilarImages {
             return WorkContinueStatus::Stop;
         }
 
-        Self::verify_duplicated_items(&collected_similar_images);
-
         // Info about hashes is not needed anymore, so we drop this info
         self.similar_vectors = collected_similar_images.into_values().collect();
+        self.merge_overlapping_groups();
+        Self::verify_duplicated_items(&self.similar_vectors);
 
         self.exclude_items_with_same_size();
         self.exclude_items_with_same_resolution();
@@ -519,6 +583,59 @@ impl SimilarImages {
         }
     }
 
+    fn merge_overlapping_groups(&mut self) {
+        let groups = mem::take(&mut self.similar_vectors);
+        if groups.is_empty() {
+            return;
+        }
+
+        let mut path_to_id: HashMap<String, usize> = HashMap::new();
+        let mut entries_by_id: Vec<ImagesEntry> = Vec::new();
+
+        for group in &groups {
+            for entry in group {
+                let key = entry.path.to_string_lossy().to_string();
+                if let Some(id) = path_to_id.get(&key).copied() {
+                    if let Some(existing_entry) = entries_by_id.get_mut(id) {
+                        existing_entry.difference = existing_entry.difference.min(entry.difference);
+                    }
+                } else {
+                    let id = entries_by_id.len();
+                    path_to_id.insert(key, id);
+                    entries_by_id.push(entry.clone());
+                }
+            }
+        }
+
+        let mut dsu = DisjointSet::new(entries_by_id.len());
+        for group in groups {
+            let mut ids = group
+                .iter()
+                .filter_map(|entry| path_to_id.get(entry.path.to_string_lossy().as_ref()).copied())
+                .collect::<Vec<_>>();
+            ids.sort_unstable();
+            ids.dedup();
+            if ids.len() < 2 {
+                continue;
+            }
+            let Some((&base, remaining_ids)) = ids.split_first() else {
+                continue;
+            };
+            for id in remaining_ids {
+                dsu.union(base, *id);
+            }
+        }
+
+        let mut merged: HashMap<usize, Vec<ImagesEntry>> = HashMap::new();
+        for (id, entry) in entries_by_id.into_iter().enumerate() {
+            if let Some(root) = dsu.find(id) {
+                merged.entry(root).or_default().push(entry);
+            }
+        }
+
+        self.similar_vectors = merged.into_values().filter(|group| group.len() > 1).collect();
+    }
+
     #[fun_time(message = "remove_multiple_records_from_reference_folders", level = "debug")]
     fn remove_multiple_records_from_reference_folders(&mut self) {
         if self.common_data.use_reference_folders {
@@ -526,8 +643,7 @@ impl SimilarImages {
         }
     }
 
-    // TODO this probably not works good when reference folders are used
-    pub(crate) fn verify_duplicated_items(collected_similar_images: &IndexMap<ImHash, Vec<ImagesEntry>>) {
+    pub(crate) fn verify_duplicated_items(similar_vectors: &[Vec<ImagesEntry>]) {
         if !cfg!(debug_assertions) {
             return;
         }
@@ -535,7 +651,7 @@ impl SimilarImages {
         let mut result_hashset: IndexSet<String> = Default::default();
         let mut found = false;
 
-        for vec_file_entry in collected_similar_images.values() {
+        for vec_file_entry in similar_vectors {
             if vec_file_entry.is_empty() {
                 error!("Found empty group");
                 found = true;
@@ -557,6 +673,70 @@ impl SimilarImages {
             }
         }
         assert!(!found, "Found Invalid entries, verify errors before");
+    }
+}
+
+struct DisjointSet {
+    parent: Vec<usize>,
+    rank: Vec<u8>,
+}
+
+impl DisjointSet {
+    fn new(size: usize) -> Self {
+        Self {
+            parent: (0..size).collect(),
+            rank: vec![0; size],
+        }
+    }
+
+    fn find(&mut self, x: usize) -> Option<usize> {
+        let mut root = x;
+        loop {
+            let parent = self.parent.get(root).copied()?;
+            if parent == root {
+                break;
+            }
+            root = parent;
+        }
+
+        let mut current = x;
+        while current != root {
+            let parent = self.parent.get(current).copied()?;
+            *self.parent.get_mut(current)? = root;
+            current = parent;
+        }
+
+        Some(root)
+    }
+
+    fn union(&mut self, a: usize, b: usize) {
+        let Some(mut root_a) = self.find(a) else {
+            return;
+        };
+        let Some(mut root_b) = self.find(b) else {
+            return;
+        };
+        if root_a == root_b {
+            return;
+        }
+        let Some(rank_a) = self.rank.get(root_a).copied() else {
+            return;
+        };
+        let Some(rank_b) = self.rank.get(root_b).copied() else {
+            return;
+        };
+        if rank_a < rank_b {
+            std::mem::swap(&mut root_a, &mut root_b);
+        }
+        let Some(parent_b) = self.parent.get_mut(root_b) else {
+            return;
+        };
+        *parent_b = root_a;
+        if rank_a == rank_b
+            && let Some(rank_a_mut) = self.rank.get_mut(root_a)
+        {
+            *rank_a_mut = rank_a.saturating_add(1);
+        }
     }
 }
 
@@ -701,11 +881,13 @@ fn debug_check_for_duplicated_things(
     assert!(!found_broken_thing);
 }
 
-pub fn get_similar_images_cache_file(hash_size: u8, hash_alg: HashAlg, image_filter: FilterType) -> String {
+pub fn get_similar_images_cache_file(hash_size: u8, hash_alg: HashAlg, image_filter: FilterType, geometric_invariance: GeometricInvariance) -> String {
     format!(
-        "cache_similar_images_{hash_size}_{}_{}_{CACHE_IMAGE_VERSION}.bin",
+        "cache_similar_images_{hash_size}_{}_{}_{}_{}.bin",
         convert_algorithm_to_string(hash_alg),
         convert_filters_to_string(image_filter),
+        geometric_invariance.as_cache_tag(),
+        CACHE_IMAGE_VERSION,
     )
 }
 
@@ -720,7 +902,7 @@ mod tests {
 
     use super::*;
     use crate::common::tool_data::CommonData;
-    use crate::tools::similar_images::{Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
+    use crate::tools::similar_images::{GeometricInvariance, Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
 
     fn get_default_parameters() -> SimilarImagesParameters {
         SimilarImagesParameters {
@@ -730,6 +912,7 @@ mod tests {
             image_filter: FilterType::Lanczos3,
             exclude_images_with_same_size: false,
             exclude_images_with_same_resolution: false,
+            geometric_invariance: GeometricInvariance::Off,
         }
     }
 
@@ -791,7 +974,7 @@ mod tests {
             let first_group = similar_images.get_similar_images()[0].iter().map(|e| &e.path).collect::<Vec<_>>();
             let second_group = similar_images.get_similar_images()[1].iter().map(|e| &e.path).collect::<Vec<_>>();
             // Initial order is not guaranteed, so we need to check both options
-            if similar_images.get_similar_images()[0][0].hash == fe1.hash {
+            if first_group.contains(&&fe1.path) {
                 assert_eq!(first_group, vec![&fe1.path, &fe2.path]);
                 assert_eq!(second_group, vec![&fe3.path, &fe4.path, &fe5.path]);
             } else {
@@ -799,6 +982,64 @@ mod tests {
                 assert_eq!(second_group, vec![&fe1.path, &fe2.path]);
             }
         }
+    }
+
+    #[test]
+    fn test_merge_overlapping_groups_merges_transitive_matches_and_keeps_min_difference() {
+        let mut similar_images = SimilarImages::new(get_default_parameters());
+
+        let mut fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
+        let mut fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "bcd.txt");
+        let mut fe2_again = fe2.clone();
+        let mut fe3 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 3], "cde.txt");
+        fe1.difference = 0;
+        fe2.difference = 7;
+        fe2_again.difference = 3;
+        fe3.difference = 4;
+
+        similar_images.similar_vectors = vec![vec![fe1, fe2], vec![fe2_again, fe3]];
+
+        similar_images.merge_overlapping_groups();
+
+        assert_eq!(similar_images.similar_vectors.len(), 1);
+        assert_eq!(similar_images.similar_vectors[0].len(), 3);
+
+        let mut paths = similar_images.similar_vectors[0]
+            .iter()
+            .map(|entry| entry.path.to_string_lossy().to_string())
+            .collect::<Vec<_>>();
+        paths.sort();
+        assert_eq!(paths, vec!["abc.txt", "bcd.txt", "cde.txt"]);
+
+        let bcd = similar_images.similar_vectors[0]
+            .iter()
+            .find(|entry| entry.path.as_path() == Path::new("bcd.txt"))
+            .expect("bcd.txt should be present in merged group");
+        assert_eq!(bcd.difference, 3);
+    }
+
+    #[test]
+    fn test_verify_duplicated_items_accepts_valid_merged_overlaps() {
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
+        let fe2 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "bcd.txt");
+
+        SimilarImages::verify_duplicated_items(&[vec![fe1, fe2]]);
+    }
+
+    #[test]
+    #[should_panic(expected = "Found Invalid entries")]
+    fn test_verify_duplicated_items_rejects_duplicate_result_paths() {
+        let fe1 = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 1], "abc.txt");
+        let fe1_again = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "abc.txt");
+
+        SimilarImages::verify_duplicated_items(&[vec![fe1], vec![fe1_again]]);
+    }
+
+    #[test]
+    fn test_similar_images_cache_file_uses_new_cache_version() {
+        let cache_file = get_similar_images_cache_file(8, HashAlg::Gradient, FilterType::Lanczos3, GeometricInvariance::Off);
+
+        assert!(cache_file.ends_with("_101.bin"));
     }
 
     #[test]
@@ -1149,7 +1390,9 @@ mod tests {
 
     fn add_hashes(hashmap: &mut IndexMap<ImHash, Vec<ImagesEntry>>, file_entries: Vec<ImagesEntry>) {
         for fe in file_entries {
-            hashmap.entry(fe.hash.clone()).or_default().push(fe);
+            for hash in &fe.hashes {
+                hashmap.entry(hash.clone()).or_default().push(fe.clone());
+            }
         }
     }
 
@@ -1160,7 +1403,7 @@ mod tests {
             width: 100,
             height: 100,
             modified_date: 0,
-            hash,
+            hashes: vec![hash],
             difference: 0,
         }
     }
@@ -1175,7 +1418,7 @@ mod connect_results_tests {
 
     #[test]
     fn test_connect_results_real_case() {
-        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false);
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false, GeometricInvariance::Off);
         let _finder = SimilarImages::new(params);
 
         let hash1: ImHash = vec![59, 41, 53, 27, 19, 143, 228, 228];

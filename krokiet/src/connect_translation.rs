@@ -236,6 +236,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_images_ignore_same_size_text(flk!("subsettings_images_ignore_same_size").into());
     translation.set_subsettings_images_ignore_same_resolution_text(flk!("subsettings_images_ignore_same_resolution").into());
     translation.set_subsettings_images_max_difference_text(flk!("subsettings_images_max_difference").into());
+    translation.set_subsettings_images_geometric_invariance_text(flk!("subsettings_images_geometric_invariance").into());
     translation.set_subsettings_images_duplicates_hash_type_text(flk!("subsettings_images_duplicates_hash_type").into());
     translation.set_subsettings_duplicates_check_method_text(flk!("subsettings_duplicates_check_method").into());
     translation.set_subsettings_duplicates_name_case_sensitive_text(flk!("subsettings_duplicates_name_case_sensitive").into());

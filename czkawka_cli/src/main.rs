@@ -241,6 +241,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         hash_alg,
         image_filter,
         hash_size,
+        geometric_invariance,
         delete_method,
         allow_hard_links,
         ignore_same_size,
@@ -256,6 +257,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         image_filter,
         ignore_same_size.ignore_same_size,
         ignore_same_resolution.ignore_same_resolution,
+        geometric_invariance,
     );
     let mut tool = SimilarImages::new(params);
 

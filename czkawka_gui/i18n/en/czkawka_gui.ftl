@@ -110,6 +110,9 @@ image_hash_alg_tooltip =
 
         So, to determine the best one for you, manual testing is required.
 
+image_geometric_invariance_tooltip =
+        Also compare mirrored/flipped and optionally rotated variants of each image. This improves matching but increases hashing time.
+
 big_files_mode_combobox_tooltip = Allows to search for smallest/biggest files
 big_files_mode_label = Checked files
 big_files_mode_smallest_combo_box = The Smallest
@@ -152,6 +155,7 @@ main_tree_view_column_codec = Codec
 main_label_check_method = Check method
 main_label_hash_type = Hash type
 main_label_hash_size = Hash size
+main_label_geometric_invariance = Geometric invariance
 main_label_size_bytes = Size (bytes)
 main_label_min_size = Min
 main_label_max_size = Max

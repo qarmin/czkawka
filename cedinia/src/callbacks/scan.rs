@@ -7,7 +7,7 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
-use czkawka_core::tools::similar_images::SimilarityPreset;
+use czkawka_core::tools::similar_images::{GeometricInvariance, SimilarityPreset};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::model::count_checked;
@@ -163,6 +163,7 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
                 hash_size: StringComboBoxItems::value_from_idx(&items.hash_size, s.get_hash_size_idx(), 16),
                 hash_alg: StringComboBoxItems::value_from_idx(&items.hash_alg, s.get_hash_alg_idx(), HashAlg::Mean),
                 image_filter: StringComboBoxItems::value_from_idx(&items.image_filter, s.get_image_filter_idx(), FilterType::Triangle),
+                geometric_invariance: StringComboBoxItems::value_from_idx(&items.image_geometric_invariance, s.get_geometric_invariance_idx(), GeometricInvariance::Off),
                 ignore_same_size: s.get_ignore_same_size(),
                 ignore_same_resolution: s.get_ignore_same_resolution(),
                 filters,

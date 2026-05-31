@@ -8,7 +8,7 @@ use log::{error, warn};
 
 use crate::flc;
 
-#[expect(clippy::needless_pass_by_ref_mut)]
+#[cfg_attr(not(target_os = "windows"), expect(clippy::needless_pass_by_ref_mut))]
 pub fn disable_windows_console_window(command: &mut Command) {
     #[cfg(target_os = "windows")]
     {

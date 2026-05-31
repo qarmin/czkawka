@@ -118,6 +118,7 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_settings_hash_size_text(flc!("settings_hash_size").into());
     t.set_settings_hash_alg_text(flc!("settings_hash_alg").into());
     t.set_settings_image_filter_text(flc!("settings_image_filter").into());
+    t.set_settings_geometric_invariance_text(flc!("settings_geometric_invariance").into());
     t.set_settings_ignore_same_size_text(flc!("settings_ignore_same_size").into());
     t.set_settings_gallery_image_fit_cover_text(flc!("settings_gallery_image_fit_cover").into());
     t.set_settings_gallery_image_fit_cover_desc_text(flc!("settings_gallery_image_fit_cover_desc").into());

@@ -1,6 +1,7 @@
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::similar_images::GeometricInvariance;
 
 pub struct HashTypeStruct {
     pub eng_name: &'static str,
@@ -143,3 +144,23 @@ pub const IMAGES_HASH_TYPE_COMBO_BOX: &[ImageHashTypeStruct] = &[
 ];
 
 pub const IMAGES_HASH_SIZE_COMBO_BOX: [i32; 4] = [8, 16, 32, 64];
+
+pub struct ImageGeometricInvarianceStruct {
+    pub eng_name: &'static str,
+    pub invariance: GeometricInvariance,
+}
+
+pub const IMAGES_GEOMETRIC_INVARIANCE_COMBO_BOX: [ImageGeometricInvarianceStruct; 3] = [
+    ImageGeometricInvarianceStruct {
+        eng_name: "Off",
+        invariance: GeometricInvariance::Off,
+    },
+    ImageGeometricInvarianceStruct {
+        eng_name: "Mirror + Flip",
+        invariance: GeometricInvariance::MirrorFlip,
+    },
+    ImageGeometricInvarianceStruct {
+        eng_name: "Mirror + Flip + Rotate 90",
+        invariance: GeometricInvariance::MirrorFlipRotate90,
+    },
+];
