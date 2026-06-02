@@ -402,7 +402,13 @@ impl SimilarImages {
 
         progress_handler.join_thread();
 
-        check_for_duplicated_things(self.get_params().geometric_invariance, &hashes_parents, &hashes_similarity, all_hashed_images, "post-grouping");
+        check_for_duplicated_things(
+            self.get_params().geometric_invariance,
+            &hashes_parents,
+            &hashes_similarity,
+            all_hashed_images,
+            "post-grouping",
+        );
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
         WorkContinueStatus::Continue

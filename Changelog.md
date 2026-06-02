@@ -11,6 +11,8 @@ The project will remain available in the repository. For some time I will ensure
 - Due to changes in the broken files mode, which now supports multiple checkers and includes additional checks, the file type is no longer stored in the cache. Existing cache files are incompatible with this version and will be automatically regenerated
 - The prehash method has been updated, so cached hash is no longer valid, so it will be automatically regenerated
 - Similar images cache files are incompatible with this version due to geometric invariance support and will be automatically regenerated
+- Similar videos cache files are incompatible with this version due to the switch to a new visual matching engine and will be automatically regenerated
+- The `--crop-detect` CLI option for similar videos now accepts `true`/`false` instead of `none`/`letterbox`/`motion` - the `motion` mode has been removed
 
 ### Core
 - Switched AV1 encoding from the very slow `libaom-av1` to `libsvtav1` - [#1888](https://github.com/qarmin/czkawka/pull/1888)
@@ -30,10 +32,12 @@ The project will remain available in the repository. For some time I will ensure
 - Fixed a bug where relative symlinks were resolved without considering the parent directory - [#1900](https://github.com/qarmin/czkawka/pull/1900)
 - Fixed a prehash cache bypass that caused full hash computation on some files during a second scan - [#1907](https://github.com/qarmin/czkawka/pull/1907)
 - Extended integration tests, to prevent regressions in the future - [#1919](https://github.com/qarmin/czkawka/pull/1919)
-- Fix unstable prehash if `read` function returned less bytes than requested - [#]()
+- Fixed unstable prehash when the `read` syscall returned fewer bytes than requested - [#1948](https://github.com/qarmin/czkawka/pull/1948)
+- Switched visual video duplicate detection engine from `vid_dup_finder_lib` to `similario_core`, adding configurable window count, duration tolerance, and subclip detection - [#1948](https://github.com/qarmin/czkawka/pull/1948)
+- Fixed a bug where similar videos were not deleted when using reference-folder mode - [#1948](https://github.com/qarmin/czkawka/pull/1948)
+- Replaced `nom-exif` with `little_exif` for reading EXIF orientation data - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 
 ### CLI
-- Added `--geometric-invariance` option to similar images mode - [#1944](https://github.com/qarmin/czkawka/pull/1944)
 
 ### GTK GUI
 - Fixed a crash when using the sort button - [#1837](https://github.com/qarmin/czkawka/pull/1837)
@@ -52,11 +56,12 @@ The project will remain available in the repository. For some time I will ensure
 - Added invert selection within groups - [#1915](https://github.com/qarmin/czkawka/pull/1915)
 - Fixed shortest/longest path selection modes, which previously compared only paths without file names - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 - Ability to restore save/restore data in custom popup - [#1919](https://github.com/qarmin/czkawka/pull/1919)
-- Added a geometric invariance setting to similar images mode - [#1944](https://github.com/qarmin/czkawka/pull/1944)
+- Added "Rename on conflict" option to the move/copy popup to automatically rename files instead of skipping them - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)
 - Added a geometric invariance setting to similar images mode - [#1944](https://github.com/qarmin/czkawka/pull/1944)
+- Improved thumbnail loader cancellation to stop processing immediately after a scan is superseded - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 
 ### Prebuilt binaries
 - Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d`)
