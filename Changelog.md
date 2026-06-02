@@ -36,6 +36,7 @@ The project will remain available in the repository. For some time I will ensure
 - Switched visual video duplicate detection engine from `vid_dup_finder_lib` to `similario_core`, adding configurable window count, duration tolerance, and subclip detection - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 - Fixed a bug where similar videos were not deleted when using reference-folder mode - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 - Replaced `nom-exif` with `little_exif` for reading EXIF orientation data - [#1948](https://github.com/qarmin/czkawka/pull/1948)
+- Fixed reversed logic of hiding hardlinks in similar images/videos modes - [#1952](https://github.com/qarmin/czkawka/pull/1952)
 
 ### CLI
 
@@ -60,8 +61,6 @@ The project will remain available in the repository. For some time I will ensure
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)
-- Added a geometric invariance setting to similar images mode - [#1944](https://github.com/qarmin/czkawka/pull/1944)
-- Improved thumbnail loader cancellation to stop processing immediately after a scan is superseded - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 
 ### Prebuilt binaries
 - Linux prebuilt binaries now include AVIF support (requires `libavif` and `libdav1d`)

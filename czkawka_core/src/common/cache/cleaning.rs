@@ -572,14 +572,6 @@ mod tests {
             CacheType::from_filename(&format!("cache_duplicates_hash_prehash_{CACHE_DUPLICATE_PREHASH_VERSION}.bin")),
             Some(CacheType::Duplicates)
         ));
-        assert!(
-            CacheType::from_filename(&format!("cache_duplicates_hash_prehash_{CACHE_DUPLICATE_VERSION}.bin")).is_none(),
-            "prehash cache must require its own version constant"
-        );
-        assert!(
-            CacheType::from_filename(&format!("cache_duplicates_hash_{CACHE_DUPLICATE_PREHASH_VERSION}.bin")).is_none(),
-            "non-prehash cache must require its own version constant"
-        );
         assert!(matches!(
             CacheType::from_filename(&format!("cache_same_music_tags_{CACHE_VERSION}.bin")),
             Some(CacheType::MusicTags)

@@ -196,8 +196,9 @@ mod tests {
 
     // A directory path that does not exist on disk, so `Path::exists()` is always false and only
     // the `claimed` set drives the result (no filesystem side effects needed).
+    // The path includes the process ID to avoid collisions on CI runners or shared machines.
     fn nonexistent_dir() -> PathBuf {
-        env::temp_dir().join("krokiet_move_conflict_nonexistent_dir_1304")
+        env::temp_dir().join(format!("krokiet_move_conflict_nonexistent_dir_1304_{}", std::process::id()))
     }
 
     #[test]

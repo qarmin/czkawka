@@ -177,7 +177,7 @@ pub struct SettingsCustom {
     pub similar_videos_skip_forward_amount: u32,
     #[serde(default = "default_similar_videos_vid_hash_duration")]
     pub similar_videos_vid_hash_duration: u32,
-    #[serde(default = "default_similar_videos_crop_detect")]
+    #[serde(default = "default_similar_videos_crop_detect", deserialize_with = "deserialize_crop_detect_bool")]
     pub similar_videos_crop_detect: bool,
     #[serde(default = "default_similar_videos_window_count")]
     pub similar_videos_window_count: u32,
@@ -415,6 +415,23 @@ fn default_similar_videos_vid_hash_duration() -> u32 {
 }
 fn default_similar_videos_crop_detect() -> bool {
     DEFAULT_CROP_DETECT
+}
+fn deserialize_crop_detect_bool<'de, D: serde::Deserializer<'de>>(d: D) -> Result<bool, D::Error> {
+    struct BoolOrLegacyStr;
+    impl serde::de::Visitor<'_> for BoolOrLegacyStr {
+        type Value = bool;
+        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            write!(f, "bool or legacy crop-detect string (\"none\"/\"letterbox\"/\"motion\")")
+        }
+        fn visit_bool<E: serde::de::Error>(self, v: bool) -> Result<bool, E> {
+            Ok(v)
+        }
+        fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<bool, E> {
+            // Legacy values: "none" → false (no crop), anything else → true (crop enabled)
+            Ok(v != "none")
+        }
+    }
+    d.deserialize_any(BoolOrLegacyStr)
 }
 fn default_similar_videos_window_count() -> u32 {
     DEFAULT_WINDOW_COUNT

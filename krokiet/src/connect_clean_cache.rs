@@ -32,8 +32,10 @@ pub(crate) fn connect_clean_cache(app: &MainWindow, cache_size_task_sender: std:
                 while !stop_flag_progress.load(Ordering::Relaxed) {
                     // Block until the next message (or stop tick), then drain the channel
                     // so a producer running faster than the 200ms poll doesn't back up.
-                    let Ok(mut latest) = progress_receiver.recv_timeout(std::time::Duration::from_millis(200)) else {
-                        continue;
+                    let mut latest = match progress_receiver.recv_timeout(std::time::Duration::from_millis(200)) {
+                        Ok(msg) => msg,
+                        Err(crossbeam_channel::RecvTimeoutError::Disconnected) => break,
+                        Err(crossbeam_channel::RecvTimeoutError::Timeout) => continue,
                     };
                     while let Ok(next) = progress_receiver.try_recv() {
                         latest = next;
@@ -54,6 +56,8 @@ pub(crate) fn connect_clean_cache(app: &MainWindow, cache_size_task_sender: std:
             });
 
             let result = clean_all_cache_files(&stop_flag, Some(&progress_sender));
+            // Drop the sender so the progress thread sees Disconnected and exits its loop.
+            drop(progress_sender);
 
             progress_thread.join().expect("Failed to join progress thread");
 

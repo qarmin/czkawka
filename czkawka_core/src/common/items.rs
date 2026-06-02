@@ -64,7 +64,12 @@ impl ExcludedItems {
                 for item in DEFAULT_EXCLUDED_ITEMS.split(',') {
                     let item = item.trim();
                     if !item.is_empty() {
+                        #[cfg(not(target_family = "windows"))]
                         checked_expressions.push(item.to_string());
+                        // On Windows, scanned paths are lowercased before matching, so patterns
+                        // must be lowercased too — including those from the DEFAULT set.
+                        #[cfg(target_family = "windows")]
+                        checked_expressions.push(item.to_ascii_lowercase());
                     }
                 }
                 continue;

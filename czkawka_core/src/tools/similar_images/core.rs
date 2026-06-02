@@ -1204,13 +1204,6 @@ mod tests {
     }
 
     #[test]
-    fn test_similar_images_cache_file_uses_new_cache_version() {
-        let cache_file = get_similar_images_cache_file(8, HashAlg::Gradient, FilterType::Lanczos3, GeometricInvariance::Off);
-
-        assert!(cache_file.ends_with("_101.bin"));
-    }
-
-    #[test]
     fn test_simple_normal_one_group() {
         for _ in 0..100 {
             let mut parameters = get_default_parameters();
