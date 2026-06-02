@@ -132,9 +132,9 @@ rand = "0.10.0"
 name = "hash_calculation_benchmark"
 harness = false
 
-[[bench]]
-name = "similar_images_hash_benchmark"
-harness = false
+#[[bench]]
+#name = "similar_images_hash_benchmark"
+#harness = false
 
 [features]
 default = []

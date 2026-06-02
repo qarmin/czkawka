@@ -304,7 +304,7 @@ fn test_same_music_reference_mode_deletes_only_non_reference() {
     finder.duplicated_music_entries_referenced = vec![(mk(&reference), vec![mk(&duplicate)])];
 
     let stop_flag = Arc::new(AtomicBool::new(false));
-    finder.delete_files(&stop_flag, None);
+    let _ = finder.delete_files(&stop_flag, None);
 
     assert!(reference.exists(), "Reference track must be kept");
     assert!(!duplicate.exists(), "Non-reference duplicate must be deleted (#1643)");

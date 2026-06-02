@@ -68,7 +68,7 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
 
             if is_crop_mode {
                 let video_crop_entries = tool.get_video_crop_entries().clone();
-                sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
+                sd.shared_models.lock().expect("Mutex poisoned").shared_video_optimizer_state = Some(tool);
 
                 let messages_data = MessagesData { critical, messages };
 
@@ -77,7 +77,7 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
                 })
             } else {
                 let video_transcode_entries = tool.get_video_transcode_entries().clone();
-                sd.shared_models.lock().unwrap().shared_video_optimizer_state = Some(tool);
+                sd.shared_models.lock().expect("Mutex poisoned").shared_video_optimizer_state = Some(tool);
 
                 let messages_data = MessagesData { critical, messages };
 

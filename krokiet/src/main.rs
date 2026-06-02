@@ -1,5 +1,7 @@
 // Remove console window in Windows OS
 #![windows_subsystem = "windows"]
+#![allow(clippy::allow_attributes)]
+#![allow(clippy::indexing_slicing)]
 
 use std::rc::Rc;
 use std::sync::Arc;

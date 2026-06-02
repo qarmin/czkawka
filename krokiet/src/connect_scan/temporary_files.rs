@@ -43,7 +43,7 @@ pub(crate) fn scan_temporary_files(a: Weak<MainWindow>, sd: ScanData) {
 
             let info = tool.get_information();
             let stopped_search = tool.get_stopped_search();
-            sd.shared_models.lock().unwrap().shared_temporary_files_state = Some(tool);
+            sd.shared_models.lock().expect("Mutex poisoned").shared_temporary_files_state = Some(tool);
 
             let messages_data = MessagesData { critical, messages };
 

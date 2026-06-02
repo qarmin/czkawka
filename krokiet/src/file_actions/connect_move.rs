@@ -2,7 +2,6 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
-
 use std::{fs, path, thread};
 
 use crossbeam_channel::Sender;
@@ -58,8 +57,9 @@ impl ModelProcessor {
             let name_idx = self.active_tab.get_str_name_idx();
 
             let claimed_paths = Mutex::new(HashSet::new());
-            let mlt_fnc =
-                move |data: &SimplerSingleMainListModel| move_single_item(data, path_idx, name_idx, &output_folder, preserve_structure, copy_mode, rename_on_conflict, &claimed_paths);
+            let mlt_fnc = move |data: &SimplerSingleMainListModel| {
+                move_single_item(data, path_idx, name_idx, &output_folder, preserve_structure, copy_mode, rename_on_conflict, &claimed_paths)
+            };
 
             self.process_and_update_gui_state(
                 &weak_app,
@@ -74,7 +74,7 @@ impl ModelProcessor {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments)]
 fn move_single_item(
     data: &SimplerSingleMainListModel,
     path_idx: usize,

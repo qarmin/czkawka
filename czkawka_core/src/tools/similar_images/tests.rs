@@ -276,7 +276,7 @@ fn test_similar_images_reference_mode_deletes_only_non_reference() {
     finder.similar_referenced_vectors = vec![(mk(&reference), vec![mk(&duplicate)])];
 
     let stop_flag = Arc::new(AtomicBool::new(false));
-    finder.delete_files(&stop_flag, None);
+    let _ = finder.delete_files(&stop_flag, None);
 
     assert!(reference.exists(), "Reference image must be kept");
     assert!(!duplicate.exists(), "Non-reference duplicate must be deleted (#1643)");
