@@ -990,9 +990,9 @@ mod tests {
             similar_images.find_similar_hashes(&Arc::default(), None);
 
             for group in similar_images.get_similar_images() {
-                let first_hash = &group[0].hash;
+                let first_hash = &group[0].hashes;
                 for entry in group {
-                    assert_eq!(&entry.hash, first_hash, "tolerance-0 group contains entries with different hashes");
+                    assert_eq!(&entry.hashes, first_hash, "tolerance-0 group contains entries with different hashes");
                 }
                 assert!(group.len() >= 2, "group must have at least 2 entries");
             }

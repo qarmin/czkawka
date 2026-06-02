@@ -261,6 +261,8 @@ pub struct SettingsCustom {
     #[serde(default)]
     pub popup_move_copy_mode: bool,
     #[serde(default)]
+    pub popup_move_rename_on_conflict: bool,
+    #[serde(default)]
     pub popup_clean_exif_overwrite_files: bool,
     #[serde(default)]
     pub popup_reencode_video_overwrite_files: bool,

@@ -414,6 +414,7 @@ popup_new_paths_title = Please add paths one per line
 popup_move_title = Moving files
 popup_move_copy_checkbox = Copy files instead of moving
 popup_move_preserve_folder_checkbox = Preserve folder structure
+popup_move_rename_on_conflict_checkbox = Rename on conflict (instead of skipping)
 move_confirmation_text = Are you sure you want to move the selected items?
 rename_confirmation_text = Are you sure you want to rename the selected items?
 delete = Delete items

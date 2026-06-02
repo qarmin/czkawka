@@ -373,6 +373,11 @@ mod tests2 {
             ("Łukasz.txt", "Lukasz.txt"),
             ("Müller.doc", "Muller.doc"),
             ("pièces", "pieces"),
+            // (`•`->`*`, `¿`->`?`, unmapped->`[?]`); these must be stripped, not kept.
+            ("a•b.txt", "ab.txt"),
+            ("All Posts • Instagram(1).txt", "All Posts  Instagram(1).txt"),
+            ("¿que.txt", "que.txt"),
+            ("x\u{0378}y.txt", "xy.txt"),
         ];
 
         for (input, expected_output) in test_cases {

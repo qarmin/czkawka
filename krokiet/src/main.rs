@@ -82,14 +82,7 @@ mod test_common;
 
 // Slint's generated code triggers many clippy lints (unwrap_used, indexing_slicing, ...)
 // that we enforce ourselves but cannot influence in third-party generated code.
-#[allow(
-    clippy::all,
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::restriction,
-    clippy::cargo,
-    unused_qualifications,
-)]
+#[allow(clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction, clippy::cargo, unused_qualifications)]
 mod ui {
     slint::include_modules!();
 }

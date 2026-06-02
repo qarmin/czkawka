@@ -52,7 +52,8 @@ fn test_encoder_simple(encoder_name: &str) -> bool {
             "-f",
             "lavfi",
             "-i",
-            "color=size=64x64:rate=1",
+            // AMF rejects very small frames (Init() error 5 at 64x64); 128x128 matches the VAAPI probe and works for all encoders
+            "color=size=128x128:rate=1",
             "-frames:v",
             "1",
             "-c:v",

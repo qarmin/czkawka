@@ -10,7 +10,7 @@ use humansize::{BINARY, format_size};
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::tools::similar_images::core::get_string_from_similarity;
 use crate::tools::similar_images::{Info, SimilarImages, SimilarImagesParameters};
@@ -161,6 +161,10 @@ impl DeletingItems for SimilarImages {
     fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.get_cd().delete_method == DeleteMethod::None {
             return WorkContinueStatus::Continue;
+        }
+        if self.get_use_reference_folders() {
+            let files_to_delete: Vec<_> = self.similar_referenced_vectors.iter().flat_map(|(_, files)| files.iter().cloned()).collect();
+            return self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(files_to_delete));
         }
         let files_to_delete = self.similar_vectors.clone();
         self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete)

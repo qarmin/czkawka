@@ -450,6 +450,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_move_title_text(flk!("popup_move_title").into());
     translation.set_popup_move_copy_checkbox_text(flk!("popup_move_copy_checkbox").into());
     translation.set_popup_move_preserve_folder_checkbox_text(flk!("popup_move_preserve_folder_checkbox").into());
+    translation.set_popup_move_rename_on_conflict_checkbox_text(flk!("popup_move_rename_on_conflict_checkbox").into());
     translation.set_delete_text(flk!("delete").into());
     translation.set_delete_confirmation_text(flk!("rust_delete_confirmation").into());
     translation.set_trash_text(flk!("trash").into());

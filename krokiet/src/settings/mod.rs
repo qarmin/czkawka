@@ -580,6 +580,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     // Popup-specific settings
     settings.set_popup_move_preserve_folder_structure(custom_settings.popup_move_preserve_folder_structure);
     settings.set_popup_move_copy_mode(custom_settings.popup_move_copy_mode);
+    settings.set_popup_move_rename_on_conflict(custom_settings.popup_move_rename_on_conflict);
     settings.set_popup_clean_exif_overwrite_files(custom_settings.popup_clean_exif_overwrite_files);
     settings.set_popup_reencode_video_overwrite_files(custom_settings.popup_reencode_video_overwrite_files);
     settings.set_popup_reencode_video_quality(custom_settings.popup_reencode_video_quality as f32);
@@ -913,6 +914,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         column_sizes,
         popup_move_preserve_folder_structure: settings.get_popup_move_preserve_folder_structure(),
         popup_move_copy_mode: settings.get_popup_move_copy_mode(),
+        popup_move_rename_on_conflict: settings.get_popup_move_rename_on_conflict(),
         popup_clean_exif_overwrite_files: settings.get_popup_clean_exif_overwrite_files(),
         popup_reencode_video_overwrite_files: settings.get_popup_reencode_video_overwrite_files(),
         popup_reencode_video_quality: settings.get_popup_reencode_video_quality().round() as u32,

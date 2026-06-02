@@ -148,5 +148,6 @@ pub(crate) const WORKAROUNDS: &[(&str, &str)] = &[
     // Probably bug in external library
     ("msi", "ppt"), // Not sure why ppt is not recognized
     ("msi", "doc"), // Not sure why doc is not recognized
+    ("msi", "pub"), // Microsoft Publisher - shares OLE2/CFBF container with msi/doc/ppt/xls
     ("exe", "xls"), // Not sure why xls is not recognized
 ];

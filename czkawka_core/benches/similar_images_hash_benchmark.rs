@@ -15,9 +15,8 @@ use bk_tree::{BKTree, Metric};
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use hamming_bitwise_fast::hamming_bitwise_fast;
 use indexmap::IndexMap;
-use rand::SeedableRng;
-use rand::RngExt;
 use rand::rngs::StdRng;
+use rand::{RngExt, SeedableRng};
 
 // -------- Metric implementations --------
 

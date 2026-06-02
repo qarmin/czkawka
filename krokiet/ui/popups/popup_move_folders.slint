@@ -7,7 +7,7 @@ import { Settings } from "../globals/settings.slint";
 
 export component PopupMoveFolders inherits Rectangle {
     out property <length> popup_width: 500px;
-    out property <length> popup_height: 150px;
+    out property <length> popup_height: 190px;
     in-out property <string> folder_name: "";
     callback show_popup();
 
@@ -38,6 +38,15 @@ export component PopupMoveFolders inherits Rectangle {
                     CheckBox {
                         text <=> Translations.popup_move_preserve_folder_checkbox_text;
                         checked <=> Settings.popup_move_preserve_folder_structure;
+                    }
+                }
+                Rectangle {height: 5px;}
+
+                HorizontalLayout {
+                    alignment: center;
+                    CheckBox {
+                        text <=> Translations.popup_move_rename_on_conflict_checkbox_text;
+                        checked <=> Settings.popup_move_rename_on_conflict;
                     }
                 }
             }
