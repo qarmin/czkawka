@@ -61,13 +61,28 @@ impl ExcludedItems {
             let expression = expression.replace("/", "\\");
 
             if expression == "DEFAULT" {
-                checked_expressions.push(DEFAULT_EXCLUDED_ITEMS.to_string());
+                for item in DEFAULT_EXCLUDED_ITEMS.split(',') {
+                    let item = item.trim();
+                    if !item.is_empty() {
+                        #[cfg(not(target_family = "windows"))]
+                        checked_expressions.push(item.to_string());
+                        // On Windows, scanned paths are lowercased before matching, so patterns
+                        // must be lowercased too — including those from the DEFAULT set.
+                        #[cfg(target_family = "windows")]
+                        checked_expressions.push(item.to_ascii_lowercase());
+                    }
+                }
                 continue;
             }
             if !expression.contains('*') {
                 warnings.push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + expression.as_str());
                 continue;
             }
+
+            // On Windows the scanned path is lowercased before matching (see `normalize_windows_path`),
+            // so the expression must be lowercased too, otherwise patterns with uppercase letters never match.
+            #[cfg(target_family = "windows")]
+            let expression = expression.to_ascii_lowercase();
 
             checked_expressions.push(expression);
         }
@@ -140,8 +155,10 @@ mod tests {
         let mut items = ExcludedItems::new();
         let msgs = items.set_excluded_items(vec!["DEFAULT".to_string()]);
         assert!(msgs.warnings.is_empty());
-        assert_eq!(items.expressions.len(), 1);
-        assert!(items.expressions[0].contains(".git") || items.expressions[0].contains("node_modules"));
+        let expected = DEFAULT_EXCLUDED_ITEMS.split(',').filter(|s| !s.trim().is_empty()).count();
+        assert_eq!(items.expressions.len(), expected);
+        assert!(items.expressions.iter().any(|e| e.contains(".git")));
+        assert!(items.expressions.iter().any(|e| e.contains("node_modules")));
     }
 
     #[test]
@@ -166,6 +183,23 @@ mod tests {
         // Empty items - nothing excluded
         let items_empty = ExcludedItems::new();
         assert!(!items_empty.is_excluded(Path::new("/any/path")));
+    }
+
+    #[cfg(target_family = "windows")]
+    #[test]
+    fn test_is_excluded_windows_case_insensitive() {
+        // Regression test for issue #1957: on Windows the scanned path is lowercased before
+        // matching, so an uppercase pattern like `*\TEST\*` must still exclude `...\test\...`.
+        let items = ExcludedItems::new_from(vec!["*\\TEST\\*".to_string()]);
+
+        // Uppercase pattern matches the same-cased and differently-cased path segments.
+        assert!(items.is_excluded(Path::new("C:\\NOT_TEST\\TEST\\file.txt")));
+        assert!(items.is_excluded(Path::new("C:\\Some\\test\\file.txt")));
+        assert!(items.is_excluded(Path::new("C:\\Some\\TeSt\\file.txt")));
+
+        // A path without a `\TEST\` segment must not be excluded.
+        assert!(!items.is_excluded(Path::new("C:\\NOT_TEST\\TEST2\\file.txt")));
+        assert!(!items.is_excluded(Path::new("C:\\root\\file.txt")));
     }
 
     #[test]

@@ -3,7 +3,8 @@ use std::io;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use symphonia::core::codecs::CODEC_TYPE_NULL;
+use symphonia::core::codecs::CodecParameters;
+use symphonia::core::codecs::audio::AudioDecoderOptions;
 use symphonia::core::errors::Error;
 use symphonia::core::errors::Error::IoError;
 use symphonia::core::io::MediaSourceStream;
@@ -13,17 +14,20 @@ use crate::common::progress_stop_handler::check_if_stop_received;
 pub fn parse_audio_file(file_handler: File, stop_flag: &Arc<AtomicBool>) -> Result<Option<()>, Error> {
     let mss = MediaSourceStream::new(Box::new(file_handler), Default::default());
 
-    let Ok(probed) = symphonia::default::get_probe().format(&Default::default(), mss, &Default::default(), &Default::default()) else {
+    let Ok(mut format) = symphonia::default::get_probe().probe(&Default::default(), mss, Default::default(), Default::default()) else {
         return Err(Error::Unsupported("probe info not available/file not recognized"));
     };
 
-    let mut format = probed.format;
-
-    let Some(track) = format.tracks().iter().find(|t| t.codec_params.codec != CODEC_TYPE_NULL) else {
+    let Some(track) = format.tracks().iter().find(|t| matches!(t.codec_params.as_ref(), Some(CodecParameters::Audio(_)))) else {
         return Err(Error::Unsupported("not supported audio track"));
     };
 
-    let Ok(mut decoder) = symphonia::default::get_codecs().make(&track.codec_params, &Default::default()) else {
+    let audio_params = match track.codec_params.as_ref() {
+        Some(CodecParameters::Audio(p)) => p.clone(),
+        _ => unreachable!(),
+    };
+
+    let Ok(mut decoder) = symphonia::default::get_codecs().make_audio_decoder(&audio_params, &AudioDecoderOptions::default()) else {
         return Err(Error::Unsupported("not supported codec"));
     };
 
@@ -33,16 +37,16 @@ pub fn parse_audio_file(file_handler: File, stop_flag: &Arc<AtomicBool>) -> Resu
         }
 
         let packet = match format.next_packet() {
-            Ok(packet) => packet,
+            Ok(Some(p)) => p,
+            Ok(None) => return Ok(Some(())),
             Err(Error::ResetRequired) => {
                 return Err(Error::ResetRequired);
             }
             Err(err) => {
-                if let IoError(ref er) = err {
-                    // Catch eof, not sure how to do it properly
-                    if er.kind() == io::ErrorKind::UnexpectedEof {
-                        return Ok(Some(()));
-                    }
+                if let IoError(ref er) = err
+                    && er.kind() == io::ErrorKind::UnexpectedEof
+                {
+                    return Ok(Some(()));
                 }
                 return Err(err);
             }

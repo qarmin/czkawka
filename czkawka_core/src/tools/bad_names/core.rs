@@ -148,10 +148,16 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
     }
 
     if checked_issues.non_ascii_graphical {
-        stem = deunicode::deunicode(&stem);
+        stem = deunicode::deunicode(&stem)
+            .chars()
+            .filter(|c| (c.is_ascii_graphic() && !is_shell_glob_char(*c)) || *c == ' ')
+            .collect();
 
         if let Some(ref mut ext) = extension {
-            *ext = deunicode::deunicode(ext).chars().filter(|e| e.is_ascii_graphic() || *e == ' ').collect();
+            *ext = deunicode::deunicode(ext)
+                .chars()
+                .filter(|e| (e.is_ascii_graphic() && !is_shell_glob_char(*e)) || *e == ' ')
+                .collect();
         }
     }
 
@@ -190,6 +196,13 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
 
 fn is_alphanumeric(c: char) -> bool {
     c.is_ascii_alphanumeric()
+}
+
+// `deunicode` can transliterate symbols into shell glob metacharacters (e.g. `•` U+2022 -> `*`,
+// `¿` U+00BF -> `?`) and emits the `[?]` placeholder for unmapped code points. Keeping these would
+// turn an otherwise-cleaned name into one that breaks shell globbing, so drop them.
+fn is_shell_glob_char(c: char) -> bool {
+    matches!(c, '*' | '?' | '[' | ']')
 }
 
 fn remove_duplicated_non_alphanumeric(s: &str) -> String {

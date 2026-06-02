@@ -7,6 +7,7 @@ use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path, split_path_compare};
 use czkawka_core::tools::temporary;
 use czkawka_core::tools::temporary::{Temporary, TemporaryFileEntry, TemporaryParameters};
+use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
@@ -42,7 +43,7 @@ pub(crate) fn scan_temporary_files(a: Weak<MainWindow>, sd: ScanData) {
 
             let info = tool.get_information();
             let stopped_search = tool.get_stopped_search();
-            sd.shared_models.lock().unwrap().shared_temporary_files_state = Some(tool);
+            sd.shared_models.lock().expect("Mutex poisoned").shared_temporary_files_state = Some(tool);
 
             let messages_data = MessagesData { critical, messages };
 
@@ -80,7 +81,12 @@ fn write_temporary_files_results(app: &MainWindow, vector: Vec<TemporaryFileEntr
 
 fn prepare_data_model_temporary_files(fe: TemporaryFileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let (directory, file) = split_path(&fe.path);
-    let data_model_str_arr: [SharedString; MAX_STR_DATA_TEMPORARY_FILES] = [file.into(), directory.into(), get_dt_timestamp_string(fe.modified_date).into()];
+    let data_model_str_arr: [SharedString; MAX_STR_DATA_TEMPORARY_FILES] = [
+        format_size(fe.size, BINARY).into(),
+        file.into(),
+        directory.into(),
+        get_dt_timestamp_string(fe.modified_date).into(),
+    ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);

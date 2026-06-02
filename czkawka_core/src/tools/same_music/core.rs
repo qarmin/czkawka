@@ -227,7 +227,7 @@ impl SameMusic {
         }
         let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingTags, self.music_entries.len(), self.get_test_type(), 0);
 
-        let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![self.music_entries.clone()];
+        let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![mem::take(&mut self.music_entries)];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
 
         if (self.params.music_similarity & MusicSimilarity::TRACK_TITLE) == MusicSimilarity::TRACK_TITLE {
@@ -324,9 +324,6 @@ impl SameMusic {
                 self.information.number_of_groups += 1;
             }
         }
-
-        // Clear unused data
-        self.music_entries.clear();
 
         WorkContinueStatus::Continue
     }

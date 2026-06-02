@@ -43,11 +43,11 @@ pub const BZ2_FILES_EXTENSIONS: &[&str] = &["bz2", "tbz2", "tbz"];
 pub const XZ_FILES_EXTENSIONS: &[&str] = &["xz", "txz"];
 pub const PDF_FILES_EXTENSIONS: &[&str] = &["pdf"];
 pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
-    "mp3", "flac", "wav", "ogg", "m4a", "aac", "aiff", "pcm", "aif", "aiff", "aifc", "m3a", "mp2", "mp4a", "mp2a", "mpga", "wave", "weba", "wma", "oga",
+    "mp3", "flac", "wav", "ogg", "m4a", "aac", "aiff", "pcm", "aif", "aifc", "m3a", "mp2", "mp4a", "mp2a", "mpga", "wave", "weba", "wma", "oga",
 ];
 pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     "mp4", "m4v", "mkv", "avi", "mov", "webm", "flv", "wmv", // Popular
-    "mpeg", "mpg", "mp2", "mpe", "m2ts", "vob", "evo", // MPEG / broadcast, "ts"
+    "mpeg", "mpg", "mpe", "m2ts", "vob", "evo", // MPEG / broadcast, "ts"
     "3gp", "3g2", "f4v", "f4p", "f4a", "f4b", // Mobile / legacy
     "qt", "m4p", "mpv", // Apple / ISO BMFF
     "ogv", "rm", "rmvb", "asf", // Streaming / recording

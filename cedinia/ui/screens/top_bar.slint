@@ -1,0 +1,68 @@
+import { Fonts } from "../globals/fonts.slint";
+import { CediniaColors } from "../globals/colors.slint";
+import { AppState } from "../globals/app_state.slint";
+import { ScanState } from "../globals/common.slint";
+
+export component TopAppBar {
+    in property <string> title: "Cedinia";
+    height: 56px;
+
+    Rectangle {
+        background: CediniaColors.bg_elevated;
+        drop-shadow-color: CediniaColors.shadow_sm;
+        drop-shadow-blur: 6px;
+        drop-shadow-offset-y: 2px;
+
+        HorizontalLayout {
+            height: parent.height;
+            padding-left: 16px;
+            padding-right: 12px;
+            spacing: 10px;
+            alignment: LayoutAlignment.start;
+        
+            VerticalLayout {
+                Rectangle {}
+                Image {
+                    source: @image-url("../../icons/cedinia_logo.svg");
+                    width: 48px;
+                    height: 48px;
+                    horizontal-alignment: ImageHorizontalAlignment.center;
+                    vertical-alignment: ImageVerticalAlignment.center;
+                }
+                Rectangle {}
+            }
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                horizontal-stretch: 1.0;
+                spacing: 2px;
+                HorizontalLayout {
+                    Text {
+                        text: root.title;
+                        color: CediniaColors.accent_light;
+                        font-size: Fonts.title_lg;
+                        font-weight: Fonts.bold;
+                    }
+                    if AppState.scan_state == ScanState.Scanning : Rectangle {
+                        width: 10px;
+                        height: 10px;
+                        border-radius: 5px;
+                        background: CediniaColors.accent;
+                        vertical-stretch: 0.0;
+                        animate opacity {
+                            duration: 800ms;
+                            iteration-count: -1;
+                            easing: ease-in-out;
+                        }
+                    }
+                }
+                Text {
+                    text: AppState.status_message;
+                    color: CediniaColors.text_secondary;
+                    font-size: Fonts.caption;
+                    overflow: elide;
+                }
+            }
+        }
+    }
+}

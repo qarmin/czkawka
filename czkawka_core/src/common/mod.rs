@@ -322,17 +322,15 @@ pub fn regex_check(expression_item: &SingleExcludedItem, directory_name: &str) -
         return false;
     }
 
-    // At the end we check if parts between * are correctly positioned
-    let mut last_split_point = directory_name.find(&expression_item.expression_splits[0]).expect("Cannot fail, because is checked earlier");
-    let mut current_index: usize = 0;
-    let mut found_index: usize;
+    // At the end we check if parts between * are correctly positioned.
+    // Cursor tracks the byte position immediately after the previously matched split;
+    // each subsequent split must be found at or after that cursor.
+    let first = &expression_item.expression_splits[0];
+    let first_pos = directory_name.find(first).expect("Cannot fail, because is checked earlier");
+    let mut cursor = first_pos + first.len();
     for spl in &expression_item.expression_splits[1..] {
-        found_index = match directory_name[current_index..].find(spl) {
-            Some(t) => t,
-            None => return false,
-        };
-        current_index = last_split_point + spl.len();
-        last_split_point = found_index + current_index;
+        let Some(rel) = directory_name[cursor..].find(spl) else { return false };
+        cursor += rel + spl.len();
     }
     true
 }

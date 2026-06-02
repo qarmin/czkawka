@@ -38,7 +38,7 @@ while queue:
         if dep_id not in visited:
             queue.append(dep_id)
 
-# Exclude cedinia itself — we only want third-party deps
+# Exclude cedinia itself - we only want third-party deps
 visited.discard(cedinia_id)
 
 pkg_map = {pkg["id"]: pkg for pkg in data["packages"]}
@@ -56,7 +56,7 @@ for pkg_id in sorted(visited, key=lambda i: pkg_map[i]["name"].lower()):
 
     line = f"{name} {version}  [{spdx}]"
     if authors:
-        line += f"  — {authors}"
+        line += f"  - {authors}"
     if repo:
         line += f"\n    {repo}"
     out.append(line)

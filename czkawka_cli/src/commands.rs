@@ -7,14 +7,15 @@ use clap::builder::styling::AnsiColor;
 use czkawka_core::CZKAWKA_VERSION;
 use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::common::tool_data::DeleteMethod;
-use czkawka_core::re_exported::{Cropdetect, FilterType, HashAlg};
+use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::same_music::MusicSimilarity;
 use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_videos::{
-    ALLOWED_AUDIO_LENGTH_RATIO, ALLOWED_AUDIO_SIMILARITY_PERCENT, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, DEFAULT_AUDIO_LENGTH_RATIO,
-    DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_THUMBNAIL_GRID_TILES_PER_SIDE,
-    DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, crop_detect_from_str_opt,
+    ALLOWED_AUDIO_LENGTH_RATIO, ALLOWED_AUDIO_SIMILARITY_PERCENT, ALLOWED_DURATION_TOLERANCE_PCT, ALLOWED_MATCH_FRACTION, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION,
+    ALLOWED_WINDOW_COUNT, DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_CROP_DETECT,
+    DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_THUMBNAIL_GRID_TILES_PER_SIDE,
+    DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, DEFAULT_WINDOW_COUNT,
 };
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec};
 use log::error;
@@ -531,12 +532,44 @@ pub struct SimilarVideosArgs {
     #[clap(
         short = 'B',
         long,
-        default_value = "letterbox",
-        value_parser = parse_crop_detect,
-        help = "Crop detect method (none, letterbox, motion)",
-        long_help = "Method to detect and crop black bars from video frames before comparison. 'none' disables cropping, 'letterbox' removes static black bars, 'motion' uses motion detection to find content area."
+        default_value_t = DEFAULT_CROP_DETECT,
+        action = clap::ArgAction::Set,
+        help = "Enable letterbox crop detection (true/false)",
+        long_help = "Detect and crop letterbox (black bar) regions before computing the video signature. Disable if you want to keep the full frame."
     )]
-    pub crop_detect: Cropdetect,
+    pub crop_detect: bool,
+    #[clap(
+        long,
+        default_value_t = DEFAULT_WINDOW_COUNT,
+        value_parser = parse_window_count,
+        help = "Number of temporal windows per video (1-20)",
+        long_help = "How many temporal windows are sampled per video when building the signature. More windows = more accurate matches, but slower scans. Allowed range: 1-20."
+    )]
+    pub window_count: u32,
+    #[clap(
+        long,
+        default_value_t = DEFAULT_DURATION_TOLERANCE_PCT,
+        value_parser = parse_duration_tolerance_pct,
+        help = "Duration grouping tolerance in % (0.0-100.0)",
+        long_help = "Videos are pre-grouped by duration before being compared. Two videos are considered candidates if their durations differ by no more than this percentage. Lower values speed up scanning but may miss matches when duration metadata is imprecise."
+    )]
+    pub duration_tolerance_pct: f64,
+    #[clap(
+        long,
+        default_value_t = DEFAULT_MIN_MATCHING_WINDOWS,
+        value_parser = parse_match_fraction,
+        help = "Min matching windows fraction (0.0-1.0)",
+        long_help = "Minimum fraction of temporal windows that must match between two videos to classify them as 'same content'. Higher values require more agreement across the full timeline."
+    )]
+    pub min_matching_windows: f64,
+    #[clap(
+        long,
+        default_value_t = DEFAULT_SUBCLIP_MIN_MATCH,
+        value_parser = parse_match_fraction,
+        help = "Subclip match fraction (0.0-1.0)",
+        long_help = "Minimum fraction of clip windows that must align inside the source video to flag a sub-clip match (a shorter video contained inside a longer one)."
+    )]
+    pub subclip_min_match: f64,
     #[clap(
         short = 'A',
         long,
@@ -1215,10 +1248,42 @@ fn parse_scan_duration(s: &str) -> Result<u32, String> {
     }
 }
 
-fn parse_crop_detect(src: &str) -> Result<Cropdetect, String> {
-    match crop_detect_from_str_opt(src) {
-        Some(crop_detect) => Ok(crop_detect),
-        None => Err(format!("Crop detect \"{src}\" is not valid")),
+fn parse_window_count(src: &str) -> Result<u32, String> {
+    match src.parse::<u32>() {
+        Ok(wc) => {
+            if ALLOWED_WINDOW_COUNT.contains(&wc) {
+                Ok(wc)
+            } else {
+                Err(format!("Window count must be one of: {ALLOWED_WINDOW_COUNT:?}"))
+            }
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+fn parse_duration_tolerance_pct(src: &str) -> Result<f64, String> {
+    match src.parse::<f64>() {
+        Ok(v) => {
+            if ALLOWED_DURATION_TOLERANCE_PCT.contains(&v) {
+                Ok(v)
+            } else {
+                Err(format!("Duration tolerance must be in range {ALLOWED_DURATION_TOLERANCE_PCT:?}"))
+            }
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+fn parse_match_fraction(src: &str) -> Result<f64, String> {
+    match src.parse::<f64>() {
+        Ok(v) => {
+            if ALLOWED_MATCH_FRACTION.contains(&v) {
+                Ok(v)
+            } else {
+                Err(format!("Match fraction must be in range {ALLOWED_MATCH_FRACTION:?}"))
+            }
+        }
+        Err(e) => Err(e.to_string()),
     }
 }
 

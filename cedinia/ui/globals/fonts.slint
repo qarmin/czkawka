@@ -1,0 +1,22 @@
+// Centralized font tokens for cedinia. All `font-size`/`font-weight` literals
+// in screens/components should use these - never raw numbers.
+export global Fonts {
+    // Sizes - names map to design hierarchy, not raw pixels.
+    out property <length> micro: 10px;       // bottom-nav labels, tiny captions; absorbed values 9px+10px
+    out property <length> caption: 11px;     // file-row meta, secondary text
+    out property <length> body: 12px;        // default body text, hints
+    out property <length> body_lg: 13px;     // emphasized body, item titles
+    out property <length> subtitle: 14px;    // settings rows, list labels
+    out property <length> label_lg: 15px;    // popup body text, large labels
+    out property <length> title: 16px;       // popup titles, dialog headings
+    out property <length> title_lg: 18px;    // section titles; absorbed 17px+18px
+    out property <length> display_sm: 22px;  // FAB glyph, large icons
+    out property <length> display: 24px;     // primary display text
+    out property <length> display_lg: 28px;  // empty-state emoji default
+    out property <length> display_xl: 56px;  // empty-state hero emoji (results list)
+
+    // Weights
+    out property <int> regular: 400;
+    out property <int> semibold: 600;
+    out property <int> bold: 700;
+}

@@ -4,12 +4,13 @@ use std::path::PathBuf;
 
 use czkawka_core::common::items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 use czkawka_core::common::model::{CheckingMethod, HashType};
-use czkawka_core::re_exported::{Cropdetect, HashAlg};
+use czkawka_core::re_exported::HashAlg;
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_videos::{
-    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_SKIP_FORWARD_AMOUNT,
-    DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL,
+    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_CROP_DETECT,
+    DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_VID_HASH_DURATION,
+    DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, DEFAULT_WINDOW_COUNT,
 };
 use czkawka_core::tools::temporary::DEFAULT_TEMP_EXTENSIONS_STR;
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
@@ -84,8 +85,8 @@ pub struct SettingsCustom {
     pub similar_images_show_image_preview: bool,
     #[serde(default = "ttrue")]
     pub video_thumbnails_preview: bool,
-    #[serde(default = "ttrue")]
-    pub video_thumbnails_unused_thumbnails: bool,
+    #[serde(default = "ttrue", alias = "video_thumbnails_unused_thumbnails")]
+    pub clear_unused_video_thumbnails: bool,
     #[serde(default = "default_sub_hash_size")]
     pub similar_images_sub_hash_size: String,
     #[serde(default = "default_hash_type")]
@@ -176,8 +177,18 @@ pub struct SettingsCustom {
     pub similar_videos_skip_forward_amount: u32,
     #[serde(default = "default_similar_videos_vid_hash_duration")]
     pub similar_videos_vid_hash_duration: u32,
-    #[serde(default = "default_similar_videos_crop_detect")]
-    pub similar_videos_crop_detect: String,
+    #[serde(default = "default_similar_videos_crop_detect", deserialize_with = "deserialize_crop_detect_bool")]
+    pub similar_videos_crop_detect: bool,
+    #[serde(default = "default_similar_videos_window_count")]
+    pub similar_videos_window_count: u32,
+    #[serde(default)]
+    pub similar_videos_visual_preset_index: i32,
+    #[serde(default = "default_similar_videos_duration_tolerance_pct")]
+    pub similar_videos_duration_tolerance_pct: f32,
+    #[serde(default = "default_similar_videos_min_matching_windows")]
+    pub similar_videos_min_matching_windows: f32,
+    #[serde(default = "default_similar_videos_subclip_min_match")]
+    pub similar_videos_subclip_min_match: f32,
     #[serde(default)]
     pub similar_videos_audio_check_content: bool,
     #[serde(default)]
@@ -250,6 +261,8 @@ pub struct SettingsCustom {
     #[serde(default)]
     pub popup_move_copy_mode: bool,
     #[serde(default)]
+    pub popup_move_rename_on_conflict: bool,
+    #[serde(default)]
     pub popup_clean_exif_overwrite_files: bool,
     #[serde(default)]
     pub popup_reencode_video_overwrite_files: bool,
@@ -290,7 +303,6 @@ pub struct ComboBoxItems {
     pub biggest_files_method: StringComboBoxItem<SearchMode>,
     pub audio_check_type: StringComboBoxItem<CheckingMethod>,
     pub duplicates_check_method: StringComboBoxItem<CheckingMethod>,
-    pub videos_crop_detect: StringComboBoxItem<Cropdetect>,
     pub video_optimizer_crop_type: StringComboBoxItem<VideoCroppingMechanism>,
     pub video_optimizer_mode: StringComboBoxItem<VideoOptimizerMode>,
     pub video_optimizer_video_codec: StringComboBoxItem<VideoCodec>,
@@ -401,8 +413,37 @@ fn default_similar_videos_skip_forward_amount() -> u32 {
 fn default_similar_videos_vid_hash_duration() -> u32 {
     DEFAULT_VID_HASH_DURATION
 }
-fn default_similar_videos_crop_detect() -> String {
-    "letterbox".to_string()
+fn default_similar_videos_crop_detect() -> bool {
+    DEFAULT_CROP_DETECT
+}
+fn deserialize_crop_detect_bool<'de, D: serde::Deserializer<'de>>(d: D) -> Result<bool, D::Error> {
+    struct BoolOrLegacyStr;
+    impl serde::de::Visitor<'_> for BoolOrLegacyStr {
+        type Value = bool;
+        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            write!(f, "bool or legacy crop-detect string (\"none\"/\"letterbox\"/\"motion\")")
+        }
+        fn visit_bool<E: serde::de::Error>(self, v: bool) -> Result<bool, E> {
+            Ok(v)
+        }
+        fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<bool, E> {
+            // Legacy values: "none" → false (no crop), anything else → true (crop enabled)
+            Ok(v != "none")
+        }
+    }
+    d.deserialize_any(BoolOrLegacyStr)
+}
+fn default_similar_videos_window_count() -> u32 {
+    DEFAULT_WINDOW_COUNT
+}
+fn default_similar_videos_duration_tolerance_pct() -> f32 {
+    DEFAULT_DURATION_TOLERANCE_PCT as f32
+}
+fn default_similar_videos_min_matching_windows() -> f32 {
+    DEFAULT_MIN_MATCHING_WINDOWS as f32
+}
+fn default_similar_videos_subclip_min_match() -> f32 {
+    DEFAULT_SUBCLIP_MIN_MATCH as f32
 }
 fn default_similar_videos_audio_similarity_percent() -> f32 {
     DEFAULT_AUDIO_SIMILARITY_PERCENT as f32

@@ -5,12 +5,12 @@ use std::sync::atomic::AtomicBool;
 
 use log::error;
 use rusty_chromaprint::{Configuration, Fingerprinter};
-use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{CODEC_TYPE_NULL, DecoderOptions};
+use symphonia::core::codecs::CodecParameters;
+use symphonia::core::codecs::audio::AudioDecoderOptions;
 use symphonia::core::formats::FormatOptions;
+use symphonia::core::formats::probe::Hint;
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
-use symphonia::core::probe::Hint;
 
 use crate::common::create_crash_message;
 use crate::common::progress_stop_handler::check_if_stop_received;
@@ -38,83 +38,78 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
             hint.with_extension(ext);
         }
 
-        let meta_opts: MetadataOptions = Default::default();
-        let fmt_opts: FormatOptions = Default::default();
-
-        let probed = symphonia::default::get_probe()
-            .format(&hint, mss, &fmt_opts, &meta_opts)
+        let mut format = symphonia::default::get_probe()
+            .probe(&hint, mss, FormatOptions::default(), MetadataOptions::default())
             .map_err(|_| "unsupported format".to_string())?;
 
-        let mut format = probed.format;
-
-        // Select the first non-null track that has a sample rate – this covers both pure audio
-        // files and video containers where `channels` may not be populated in the header but
-        // becomes available after decoding the first packet.
         let track = format
             .tracks()
             .iter()
-            .find(|t| t.codec_params.codec != CODEC_TYPE_NULL && t.codec_params.sample_rate.is_some())
+            .find(|t| {
+                if let Some(CodecParameters::Audio(p)) = t.codec_params.as_ref() {
+                    p.sample_rate.is_some()
+                } else {
+                    false
+                }
+            })
             .ok_or_else(|| "no supported audio track".to_string())?;
 
-        let dec_opts: DecoderOptions = Default::default();
-        let mut decoder = symphonia::default::get_codecs()
-            .make(&track.codec_params, &dec_opts)
-            .map_err(|_| "unsupported codec".to_string())?;
-
+        let audio_params = match track.codec_params.as_ref() {
+            Some(CodecParameters::Audio(p)) => p.clone(),
+            _ => unreachable!(),
+        };
         let track_id = track.id;
 
+        let dec_opts = AudioDecoderOptions::default();
+        let mut decoder = symphonia::default::get_codecs()
+            .make_audio_decoder(&audio_params, &dec_opts)
+            .map_err(|_| "unsupported codec".to_string())?;
+
         let mut printer = Fingerprinter::new(config);
-        // `printer` is started lazily on the first decoded packet so we can read the real
-        // channel count from the audio buffer spec even when the container header omits it.
         let mut printer_started = false;
 
-        let mut sample_buf: Option<SampleBuffer<i16>> = None;
-        // total interleaved samples (all channels combined), used to derive duration
+        let mut samples_i16: Vec<i16> = Vec::new();
         let mut total_interleaved_samples: u64 = 0;
         let mut audio_channels: u32 = 0;
         let mut audio_sample_rate: u32 = 0;
         let mut sum_sq: f64 = 0.0;
         let mut max_amp: f64 = 0.0;
 
-        while let Ok(packet) = format.next_packet() {
+        loop {
             if check_if_stop_received(stop_flag) {
                 return Ok(None);
             }
 
-            if packet.track_id() != track_id {
+            let Ok(Some(packet)) = format.next_packet() else { break };
+
+            if packet.track_id != track_id {
                 continue;
             }
 
             match decoder.decode(&packet) {
                 Ok(audio_buf) => {
-                    let spec = *audio_buf.spec();
-
-                    if sample_buf.is_none() {
-                        let duration = audio_buf.capacity() as u64;
-                        sample_buf = Some(SampleBuffer::<i16>::new(duration, spec));
-                    }
+                    let spec = audio_buf.spec();
 
                     if !printer_started {
-                        audio_sample_rate = spec.rate;
-                        audio_channels = spec.channels.count() as u32;
+                        audio_sample_rate = spec.rate();
+                        audio_channels = spec.channels().count() as u32;
                         printer.start(audio_sample_rate, audio_channels).map_err(|_| "initializing fingerprinter".to_string())?;
                         printer_started = true;
                     }
 
-                    if let Some(buf) = &mut sample_buf {
-                        buf.copy_interleaved_ref(audio_buf);
-                        let samples = buf.samples();
-                        total_interleaved_samples += samples.len() as u64;
-                        for &s in samples {
-                            let v = f64::from(s) / f64::from(i16::MAX);
-                            sum_sq += v * v;
-                            let a = v.abs();
-                            if a > max_amp {
-                                max_amp = a;
-                            }
+                    samples_i16.clear();
+                    audio_buf.copy_to_vec_interleaved(&mut samples_i16);
+
+                    total_interleaved_samples += samples_i16.len() as u64;
+                    for &s in &samples_i16 {
+                        let v = f64::from(s) / f64::from(i16::MAX);
+                        sum_sq += v * v;
+                        let a = v.abs();
+                        if a > max_amp {
+                            max_amp = a;
                         }
-                        printer.consume(samples);
                     }
+                    printer.consume(&samples_i16);
                 }
                 Err(symphonia::core::errors::Error::DecodeError(_)) => (),
                 Err(_) => break,
@@ -128,7 +123,6 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
         printer.finish();
         let fingerprint = printer.fingerprint().to_vec();
 
-        // Derive duration from the count of decoded samples
         let duration_seconds = if audio_channels > 0 && audio_sample_rate > 0 {
             (total_interleaved_samples / u64::from(audio_channels) / u64::from(audio_sample_rate)) as u32
         } else {

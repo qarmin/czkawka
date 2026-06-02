@@ -30,24 +30,34 @@ pub(crate) fn connect_clean_cache(app: &MainWindow, cache_size_task_sender: std:
             let stop_flag_progress = stop_flag.clone();
             let progress_thread = thread::spawn(move || {
                 while !stop_flag_progress.load(Ordering::Relaxed) {
-                    if let Ok(progress) = progress_receiver.recv_timeout(std::time::Duration::from_millis(200)) {
-                        app_weak_progress
-                            .upgrade_in_event_loop(move |app| {
-                                let slint_progress = CacheCleaningProgress {
-                                    current_cache_file: progress.current_cache_file as i32,
-                                    total_cache_files: progress.total_cache_files as i32,
-                                    current_file_name: progress.current_file_name.into(),
-                                    checked_entries: progress.checked_entries as i32,
-                                    all_entries: progress.all_entries as i32,
-                                };
-                                app.global::<GuiState>().set_cache_cleaning_progress(slint_progress);
-                            })
-                            .expect("Failed to update progress in event loop");
+                    // Block until the next message (or stop tick), then drain the channel
+                    // so a producer running faster than the 200ms poll doesn't back up.
+                    let mut latest = match progress_receiver.recv_timeout(std::time::Duration::from_millis(200)) {
+                        Ok(msg) => msg,
+                        Err(crossbeam_channel::RecvTimeoutError::Disconnected) => break,
+                        Err(crossbeam_channel::RecvTimeoutError::Timeout) => continue,
+                    };
+                    while let Ok(next) = progress_receiver.try_recv() {
+                        latest = next;
                     }
+                    app_weak_progress
+                        .upgrade_in_event_loop(move |app| {
+                            let slint_progress = CacheCleaningProgress {
+                                current_cache_file: latest.current_cache_file as i32,
+                                total_cache_files: latest.total_cache_files as i32,
+                                current_file_name: latest.current_file_name.into(),
+                                checked_entries: latest.checked_entries as i32,
+                                all_entries: latest.all_entries as i32,
+                            };
+                            app.global::<GuiState>().set_cache_cleaning_progress(slint_progress);
+                        })
+                        .expect("Failed to update progress in event loop");
                 }
             });
 
             let result = clean_all_cache_files(&stop_flag, Some(&progress_sender));
+            // Drop the sender so the progress thread sees Disconnected and exits its loop.
+            drop(progress_sender);
 
             progress_thread.join().expect("Failed to join progress thread");
 

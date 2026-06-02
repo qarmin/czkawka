@@ -1,0 +1,99 @@
+import { Fonts } from "../../globals/fonts.slint";
+import { CediniaColors } from "../../globals/colors.slint";
+import { AppState } from "../../globals/app_state.slint";
+
+export component DropdownRow {
+    in property <string>   description: "";
+    in property <[string]> options;
+    in-out property <int>  selected;
+    callback changed_selection(int);
+
+    // Inline accordion – no PopupWindow, so the parent Flickable handles
+    // all scrolling through the options without "close on outside touch" issues.
+    property <bool> expanded: false;
+
+    VerticalLayout {
+        spacing: 0px;
+
+        Rectangle {
+            height: root.description == "" ? 56px : 72px;
+            background: row_ta.has-hover ? CediniaColors.bg_elevated : CediniaColors.bg_surface;
+            animate background { duration: 100ms; }
+
+            row_ta := TouchArea {
+                clicked => { root.expanded = !root.expanded; }
+            }
+
+            HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                spacing: 12px;
+                alignment: LayoutAlignment.center;
+
+                Text {
+                    text: root.options[root.selected];
+                    color: CediniaColors.accent_light;
+                    font-size: Fonts.body_lg;
+                    font-weight: Fonts.bold;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    overflow: TextOverflow.elide;
+                    horizontal-stretch: 1.0;
+                }
+            }
+        }
+
+        if root.expanded : VerticalLayout {
+            spacing: 0px;
+
+            for opt[i] in root.options : Rectangle {
+                height: 48px;
+                // Per-item drag tracking: prevents toggling selection on scroll release.
+                property <bool>   _opt_moved:   false;
+                property <length> _opt_start_y: 0px;
+
+                background: item_ta.has-hover
+                    ? CediniaColors.accent_muted
+                    : (i == root.selected ? CediniaColors.accent_muted.with-alpha(0.5) : transparent);
+                animate background { duration: 80ms; }
+
+                item_ta := TouchArea {
+                    pointer-event(e) => {
+                        if (e.kind == PointerEventKind.down) {
+                            parent._opt_start_y = item_ta.mouse-y;
+                            parent._opt_moved = false;
+                        } else if (e.kind == PointerEventKind.move) {
+                            if (item_ta.mouse-y - parent._opt_start_y > 8px
+                                    || parent._opt_start_y - item_ta.mouse-y > 8px) {
+                                parent._opt_moved = true;
+                            }
+                        }
+                    }
+                    clicked => {
+                        if (!parent._opt_moved) {
+                            root.selected = i;
+                            root.changed_selection(i);
+                            AppState.save_settings_now();
+                            root.expanded = false;
+                        }
+                        parent._opt_moved = false;
+                    }
+                }
+
+                HorizontalLayout {
+                    padding-left: 20px;
+                    padding-right: 16px;
+                    spacing: 8px;
+
+                    Text {
+                        text: opt;
+                        color: i == root.selected ? CediniaColors.accent_light : CediniaColors.text_primary;
+                        font-size: Fonts.label_lg;
+                        font-weight: i == root.selected ? Fonts.bold : Fonts.regular;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        horizontal-stretch: 1;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -91,7 +91,7 @@ pub(crate) fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
                 CheckingMethod::SizeName => (info.number_of_duplicated_files_by_size_name, info.number_of_groups_by_size_name, info.lost_space_by_size),
                 _ => unreachable!("invalid check method {:?}", tool.get_check_method()),
             };
-            sd.shared_models.lock().unwrap().shared_duplication_state = Some(tool);
+            sd.shared_models.lock().expect("Mutex poisoned").shared_duplication_state = Some(tool);
 
             let messages_data = MessagesData { critical, messages };
 

@@ -1,0 +1,102 @@
+import { SelectMode, SortColumnMode, SortMode } from "common.slint";
+import { Palette } from "std-widgets.slint";
+import { Settings } from "settings.slint";
+
+export global Callabler {
+    // Bottom panel operations
+    callback remove_item_paths(bool, int);
+    callback added_manual_paths(bool, string);
+
+    // Row selecting
+    callback change_number_of_checked_items(int);
+
+    callback row_select_all();
+    callback row_reverse_single_unique_item(int);
+    callback row_reverse_item_selection(int);
+    callback row_select_items_with_shift(int, int);
+
+    callback row_reverse_checked_selection();
+    callback row_open_item_with_index(int);
+    callback row_open_parent_item_with_index(int);
+
+    // Context menu actions
+    callback row_remove_from_results(int);
+    callback row_remove_all_from_folder(int);
+    callback row_remove_all_from_folder_recursive(int);
+    callback row_select_all_from_folder(int);
+    callback row_select_all_from_folder_recursive(int);
+    callback row_exclude_parent_folder(int);
+    callback row_exclude_item(int);
+    callback row_copy_file_name(int);
+    callback row_copy_parent_folder_path(int);
+    callback row_copy_full_path(int);
+
+    // Right click or middle click opener
+    callback open_item(string);
+    callback open_parent(string);
+
+    callback delete_selected_items();
+    callback trash_selected_items();
+    callback select_items(SelectMode);
+    callback update_select_buttons(); // rebuild select popup list after settings change
+    callback populate_custom_select_columns(); // Rust fills GuiState.custom_select_columns for active tab
+    callback update_custom_select_column(int, bool, string); // col_idx, enabled, filter_value
+    callback select_items_custom_columns(bool, bool, bool, bool); // select_mode, case_sensitive, leave_one_in_group, save_restore
+    callback validate_regex(string) -> bool;
+    callback sort_items(SortMode);
+
+    // Preview
+    // Parameters: path, crop_left, crop_top, crop_right, crop_bottom, original_width, original_height
+    callback load_image_preview(string, int, int, int, int, int, int);
+
+    // Settings
+    callback changed_settings_preset();
+    callback save_current_preset();
+    callback load_current_preset();
+    callback reset_current_preset();
+    callback changed_language();
+    callback similar_videos_audio_preset_changed();
+    callback similar_videos_visual_preset_changed();
+
+    callback tab_changed();
+
+    // Dialogs
+    callback save_results();
+    callback move_items(string);
+    callback rename_files();
+    callback crop_video_items();
+    callback reencode_video_items();
+    callback clean_exif_items();
+    callback hardlink_items();
+    callback softlink_items();
+
+    // Only Slint
+    callback open_config_folder();
+    callback open_cache_folder();
+
+    callback start_cache_cleaning();
+    callback stop_cache_cleaning();
+
+    callback open_link(string);
+
+    callback theme_changed();
+    theme_changed => {
+        Palette.color-scheme = Settings.dark_theme ? ColorScheme.dark : ColorScheme.light;
+    }
+
+    callback change_sort_column_mode(SortColumnMode, int);
+
+    // Image Compare mode
+    callback compare_open();
+    callback compare_set_left(int);
+    callback compare_set_right(int);
+    callback compare_toggle_checkbox(int);
+    callback compare_next_group();
+    callback compare_prev_group();
+    callback compare_swap();
+    callback compare_cancel_load();
+    callback compare_compute_diff();
+
+    // Video optimizer
+    callback generate_video_optimizer_template();
+}

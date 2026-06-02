@@ -79,19 +79,19 @@ rust_translation_content = open(rust_translation_file, "r", encoding="utf-8").re
 missing_in_slint = []
 
 slint_files = find_files(folder, ".slint", folder)
-assert any([file for file in slint_files if "translations.slint" in file]), (
-    "No translations.slint found in krokiet folder"
-)
-slint_files = [file for file in slint_files if "translations.slint" not in file]
+translation_matches = [file for file in slint_files if os.path.basename(file) == "translations.slint"]
+assert translation_matches, f"No translations.slint found under {folder}/"
+translations_path = translation_matches[0]
+slint_files = [file for file in slint_files if file != translations_path]
 slint_files_content = read_files(slint_files)
-arguments = extract_slint_properties(f"{folder}/ui/translations.slint")
-print(f"Found {len(arguments)} arguments in translations.slint")
+arguments = extract_slint_properties(translations_path)
+print(f"Found {len(arguments)} arguments in {translations_path}")
 
 # Check if all arguments are used in Slint files
 # Skip arguments that are intentionally set from Rust (set_xxx) and not needed in Slint directly
 for argument in arguments:
     if f"Translations.{argument}" not in slint_files_content:
-        # If the argument is set from Rust, it's intentionally Rust-side — don't flag it
+        # If the argument is set from Rust, it's intentionally Rust-side - don't flag it
         if f"set_{argument}(" not in rust_translation_content:
             missing_in_slint.append(argument)
 missing_in_slint.sort()

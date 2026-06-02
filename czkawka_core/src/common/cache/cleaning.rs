@@ -12,8 +12,8 @@ use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::common::cache::{
-    CACHE_BROKEN_FILES_VERSION, CACHE_CLEANING_INTERVAL_SECONDS, CACHE_DUPLICATE_VERSION, CACHE_IMAGE_VERSION, CACHE_VERSION, CACHE_VIDEO_OPTIMIZE_VERSION, CACHE_VIDEO_VERSION,
-    CLEANING_TIMESTAMPS_FILE, MEMORY_LIMIT,
+    CACHE_BROKEN_FILES_VERSION, CACHE_CLEANING_INTERVAL_SECONDS, CACHE_DUPLICATE_PREHASH_VERSION, CACHE_DUPLICATE_VERSION, CACHE_IMAGE_VERSION, CACHE_VERSION,
+    CACHE_VIDEO_OPTIMIZE_VERSION, CACHE_VIDEO_VERSION, CLEANING_TIMESTAMPS_FILE, MEMORY_LIMIT,
 };
 use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::traits::ResultEntry;
@@ -152,7 +152,10 @@ enum CacheType {
 
 impl CacheType {
     fn from_filename(filename: &str) -> Option<Self> {
-        if filename.starts_with("cache_duplicates_") && filename.ends_with(&format!("_{CACHE_DUPLICATE_VERSION}.bin")) {
+        if filename.starts_with("cache_duplicates_")
+            && ((filename.contains("_prehash_") && filename.ends_with(&format!("_{CACHE_DUPLICATE_PREHASH_VERSION}.bin")))
+                || (!filename.contains("_prehash_") && filename.ends_with(&format!("_{CACHE_DUPLICATE_VERSION}.bin"))))
+        {
             Some(Self::Duplicates)
         } else if filename == format!("cache_same_music_tags_{CACHE_VERSION}.bin") {
             Some(Self::MusicTags)
@@ -207,17 +210,19 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
     let current_file_name = Arc::new(std::sync::Mutex::new(String::new()));
     let checked_entries = Arc::new(std::sync::atomic::AtomicUsize::new(0));
     let all_entries = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let progress_stop_flag = Arc::new(AtomicBool::new(false));
 
     let progress_thread = cache_progress_sender.map(|sender| {
         let sender = sender.clone();
         let stop_flag = stop_flag.clone();
+        let progress_stop_flag = progress_stop_flag.clone();
         let current_file = current_file.clone();
         let current_file_name = current_file_name.clone();
         let checked_entries = checked_entries.clone();
         let all_entries = all_entries.clone();
 
         std::thread::spawn(move || {
-            while !stop_flag.load(Ordering::Relaxed) {
+            while !stop_flag.load(Ordering::Relaxed) && !progress_stop_flag.load(Ordering::Relaxed) {
                 std::thread::sleep(std::time::Duration::from_millis(100));
 
                 let current = current_file.load(Ordering::Relaxed);
@@ -284,7 +289,7 @@ pub fn clean_all_cache_files(stop_flag: &Arc<AtomicBool>, cache_progress_sender:
             }
         }
     }
-    stop_flag.store(true, Ordering::Relaxed);
+    progress_stop_flag.store(true, Ordering::Relaxed);
     if let Some(handle) = progress_thread {
         let _ = handle.join();
     }
@@ -561,6 +566,10 @@ mod tests {
         ));
         assert!(matches!(
             CacheType::from_filename(&format!("cache_duplicates_size_{CACHE_DUPLICATE_VERSION}.bin")),
+            Some(CacheType::Duplicates)
+        ));
+        assert!(matches!(
+            CacheType::from_filename(&format!("cache_duplicates_hash_prehash_{CACHE_DUPLICATE_PREHASH_VERSION}.bin")),
             Some(CacheType::Duplicates)
         ));
         assert!(matches!(

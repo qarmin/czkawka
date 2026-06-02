@@ -1,0 +1,171 @@
+import { Button, TextEdit } from "std-widgets.slint";
+import { BottomPanelVisibility } from "../globals/common.slint";
+import { GuiState } from "../globals/gui_state.slint";
+import { ExcludedPaths, IncludedPaths } from "included_paths.slint";
+import { Translations } from "../globals/translations.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+import { FontSizes } from "../globals/fonts.slint";
+
+component DirectoriesPanel inherits HorizontalLayout {
+    callback folder_choose_requested(bool);
+    callback file_choose_requested(bool);
+    callback show_manual_add_dialog(bool);
+
+    spacing: 5px;
+    // Included directories
+    VerticalLayout {
+        horizontal-stretch: 0.0;
+        spacing: 5px;
+        Rectangle {
+            vertical-stretch: 1.0;
+        }
+    }
+
+    // Included directories 
+    VerticalLayout {
+        horizontal-stretch: 1.0;
+        padding-top: 5px;
+        HorizontalLayout {
+            Button {
+                icon: @image-url("../../icons/krokiet_folder_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    folder_choose_requested(true);
+                }
+            }
+            Button {
+                icon: @image-url("../../icons/krokiet_file_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    file_choose_requested(true);
+                }
+            }
+
+            Rectangle {
+                width: 5px;
+            }
+            
+            Rectangle {
+                horizontal-stretch: 1.0;
+                Text {
+                    text <=> Translations.included_paths_text;
+                    font-size: FontSizes.normal;
+                    font-weight: FontSizes.bold_weight;
+                }
+            }
+            
+            Rectangle {
+                width: 5px;
+            }
+
+            Button {
+                icon: @image-url("../../icons/krokiet_manual_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    show_manual_add_dialog(true);
+                }
+            }
+        }
+
+        Rectangle {
+            height: 5px;
+        }
+
+        included_list := IncludedPaths { }
+    }
+
+    Rectangle {
+        width: 3px;
+        horizontal-stretch: 0.0;
+        background: ColorPalette.line_item_color;
+    }
+
+    // Excluded directories 
+    VerticalLayout {
+        horizontal-stretch: 1.0;
+        padding-top: 5px;
+        padding-right: 5px;
+        HorizontalLayout {
+            Button {
+                icon: @image-url("../../icons/krokiet_folder_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    folder_choose_requested(false);
+                }
+            }
+            Button {
+                icon: @image-url("../../icons/krokiet_file_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    file_choose_requested(false);
+                }
+            }
+
+            Rectangle {
+                width: 5px;
+            }
+
+            Rectangle {
+                horizontal-stretch: 1.0;
+                Text {
+                    text <=> Translations.excluded_paths_text;
+                    font-size: FontSizes.normal;
+                    font-weight: FontSizes.bold_weight;
+                }
+            }
+
+            Rectangle {
+                width: 5px;
+            }
+
+            Button {
+                icon: @image-url("../../icons/krokiet_manual_add.svg");
+                colorize-icon: true;
+                clicked => {
+                    show_manual_add_dialog(false);
+                }
+            }
+        }
+
+        Rectangle {
+            height: 5px;
+        }
+
+        excluded_list := ExcludedPaths { }
+    }
+}
+
+component TextErrorsPanel inherits TextEdit {
+    height: 20px;
+    read-only: true;
+    wrap: TextWrap.no-wrap;
+    text <=> GuiState.info_text;
+    font-size: FontSizes.normal;
+}
+
+export component BottomPanel {
+    in-out property <BottomPanelVisibility> bottom_panel_visibility: BottomPanelVisibility.Directories;
+    callback folder_choose_requested(bool);
+    callback file_choose_requested(bool);
+    callback show_manual_add_dialog(bool);
+    min-height: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 150px;
+    min-width: bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : 400px;
+    if bottom_panel_visibility == BottomPanelVisibility.Directories: DirectoriesPanel {
+        width: parent.width;
+        height: parent.height;
+        folder_choose_requested(included_paths) => {
+            root.folder_choose_requested(included_paths)
+        }
+        file_choose_requested(included_paths) => {
+            root.file_choose_requested(included_paths)
+        }
+        show_manual_add_dialog(included_paths) => {
+            root.show_manual_add_dialog(included_paths)
+        }
+    }
+
+    if bottom_panel_visibility == BottomPanelVisibility.TextErrors: TextErrorsPanel {
+        width: parent.width;
+        height: parent.height;
+    }
+}

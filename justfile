@@ -83,7 +83,12 @@ clip:
     cargo clippy --fix --allow-dirty --allow-staged --no-default-features --features winit_software --all-targets
 
 fix:
-    grep -rlZ --include="*.rs" "─" . | xargs -0 sed -i 's/─//g' || true
+    grep -rlZ --include='*.rs' \
+               --include='*.slint' \
+               --include='*.md' \
+               --include='*.ftl' \
+               --exclude='AGENTS.md' \
+               '─' . | xargs -0 sed -i 's/─//g' || true
     cp misc/pyproject.toml .
     uv sync
 
@@ -104,6 +109,14 @@ fixn:
 
 test_resize arg:
     cd misc/test_image_perf; cargo build --release; sudo ./target/release/test_image_perf "{{arg}}"
+
+# Run all normal (non-ignored) tests across the workspace
+test:
+    cargo test --workspace
+
+# Run only #[ignore]-marked tests (fuzzers, stress tests, slow tests)
+ignored:
+    cargo test --workspace -- --ignored
 
 # Not works, due of edition 2024 and workspaces
 unused_features:

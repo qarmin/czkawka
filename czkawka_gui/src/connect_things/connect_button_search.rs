@@ -18,7 +18,10 @@ use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{MusicSimilarity, SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
-use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, SimilarVideos, SimilarVideosParameters};
+use czkawka_core::tools::similar_videos::{
+    DEFAULT_CROP_DETECT, DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_VID_HASH_DURATION,
+    DEFAULT_WINDOW_COUNT, SimilarVideos, SimilarVideosParameters,
+};
 use czkawka_core::tools::temporary::Temporary;
 use fun_time::fun_time;
 use gtk4::Grid;
@@ -650,6 +653,10 @@ fn similar_video_search(
                 DEFAULT_SKIP_FORWARD_AMOUNT,
                 DEFAULT_VID_HASH_DURATION,
                 DEFAULT_CROP_DETECT,
+                DEFAULT_WINDOW_COUNT,
+                DEFAULT_DURATION_TOLERANCE_PCT,
+                DEFAULT_MIN_MATCHING_WINDOWS,
+                DEFAULT_SUBCLIP_MIN_MATCH,
                 false, // Not implemented in gtk gui
                 10,    // Not implemented in gtk gui
                 false, // Not implemented in gtk gui

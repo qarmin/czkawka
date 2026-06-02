@@ -73,7 +73,7 @@ pub(crate) fn scan_similar_music(a: Weak<MainWindow>, sd: ScanData) {
             let stopped_search = tool.get_stopped_search();
             let items_found = info.number_of_duplicates;
             let groups = info.number_of_groups;
-            sd.shared_models.lock().unwrap().shared_same_music_state = Some(tool);
+            sd.shared_models.lock().expect("Mutex poisoned").shared_same_music_state = Some(tool);
 
             let messages_data = MessagesData { critical, messages };
 

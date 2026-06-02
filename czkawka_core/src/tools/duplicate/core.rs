@@ -9,7 +9,7 @@ use fun_time::fun_time;
 use log::debug;
 use rayon::prelude::*;
 
-use crate::common::cache::{CACHE_DUPLICATE_VERSION, load_and_split_cache_generalized_by_size, save_cache_to_file_generalized};
+use crate::common::cache::{CACHE_DUPLICATE_PREHASH_VERSION, CACHE_DUPLICATE_VERSION, load_and_split_cache_generalized_by_size, save_cache_to_file_generalized};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
@@ -705,6 +705,9 @@ impl DuplicateFinder {
 }
 
 pub fn get_duplicate_cache_file(type_of_hash: HashType, is_prehash: bool) -> String {
-    let prehash_str = if is_prehash { "_prehash" } else { "" };
-    format!("cache_duplicates_{type_of_hash:?}{prehash_str}_{CACHE_DUPLICATE_VERSION}.bin")
+    if is_prehash {
+        format!("cache_duplicates_{type_of_hash:?}_prehash_{CACHE_DUPLICATE_PREHASH_VERSION}.bin")
+    } else {
+        format!("cache_duplicates_{type_of_hash:?}_{CACHE_DUPLICATE_VERSION}.bin")
+    }
 }

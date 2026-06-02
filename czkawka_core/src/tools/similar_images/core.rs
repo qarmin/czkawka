@@ -402,9 +402,13 @@ impl SimilarImages {
 
         progress_handler.join_thread();
 
-        if self.get_params().geometric_invariance == GeometricInvariance::Off {
-            debug_check_for_duplicated_things(self.common_data.use_reference_folders, &hashes_parents, &hashes_similarity, all_hashed_images, "LATTER");
-        }
+        check_for_duplicated_things(
+            self.get_params().geometric_invariance,
+            &hashes_parents,
+            &hashes_similarity,
+            all_hashed_images,
+            "post-grouping",
+        );
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
         WorkContinueStatus::Continue
@@ -647,32 +651,46 @@ impl SimilarImages {
         if !cfg!(debug_assertions) {
             return;
         }
-        // Validating if group contains duplicated results
-        let mut result_hashset: IndexSet<String> = Default::default();
+
+        let mut all_paths: IndexSet<String> = Default::default();
         let mut found = false;
 
         for vec_file_entry in similar_vectors {
             if vec_file_entry.is_empty() {
-                error!("Found empty group");
+                error!("Found Invalid entries - empty group");
                 found = true;
                 continue;
             }
+
             if vec_file_entry.len() == 1 {
-                error!("Found simple element {vec_file_entry:?}");
+                error!("Found singleton group {vec_file_entry:?}");
                 found = true;
                 continue;
             }
-            for file_entry in vec_file_entry {
-                let st = file_entry.path.to_string_lossy().to_string();
-                if result_hashset.contains(&st) {
+
+            let mut group_paths: IndexSet<String> = Default::default();
+            for entry in vec_file_entry {
+                let path_str = entry.path.to_string_lossy().to_string();
+
+                if path_str.is_empty() {
+                    error!("Found Invalid entries - entry with empty path in group");
                     found = true;
-                    error!("Duplicated Element {st}");
-                } else {
-                    result_hashset.insert(st);
+                    continue;
+                }
+
+                if !group_paths.insert(path_str.clone()) {
+                    error!("Duplicated path within same group: {path_str}");
+                    found = true;
+                }
+
+                if !all_paths.insert(path_str.clone()) {
+                    error!("Path appears in multiple groups: {path_str}");
+                    found = true;
                 }
             }
         }
-        assert!(!found, "Found Invalid entries, verify errors before");
+
+        assert!(!found, "Found Invalid entries - invariant violations detected – check error log above");
     }
 }
 
@@ -817,26 +835,24 @@ pub(crate) fn convert_algorithm_to_string(hash_alg: HashAlg) -> String {
     .to_string()
 }
 
-#[allow(clippy::allow_attributes)]
-#[allow(unfulfilled_lint_expectations)] // Happens only on release build
-#[expect(dead_code)]
-#[expect(unreachable_code)]
-#[expect(unused_variables)]
-// Function to validate if after first check there are any duplicated entries
-// E.g. /a.jpg is used also as master and similar image which is forbidden, because may
-// cause accidentally delete more pictures that user wanted
-fn debug_check_for_duplicated_things(
-    use_reference_folders: bool,
+// Verifies internal invariants on the parent/similarity maps:
+//   - no hash is a key in both `hashes_parents` and `hashes_similarity`
+//   - no file path appears under more than one parent group, nor in both maps
+// Holds in both normal and reference-folder modes - in ref-folders mode the
+// parent keys are ref-folder hashes and similarity keys are normal-folder hashes,
+// so the same invariant applies.
+//
+// Only valid when geometric invariance is `Off`. With geometric invariance enabled a single
+// image contributes multiple hashes (flips/rotations), so the same file path legitimately appears
+// under several hashes/groups - the invariant does not hold and the check would false-positive.
+fn check_for_duplicated_things(
+    geometric_invariance: GeometricInvariance,
     hashes_parents: &IndexMap<ImHash, u32>,
     hashes_similarity: &IndexMap<ImHash, (ImHash, u32)>,
     all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
-    numm: &str,
+    phase: &str,
 ) {
-    if !cfg!(debug_assertions) {
-        return;
-    }
-
-    if use_reference_folders {
+    if geometric_invariance != GeometricInvariance::Off {
         return;
     }
 
@@ -846,7 +862,10 @@ fn debug_check_for_duplicated_things(
     for (hash, number_of_children) in hashes_parents {
         if *number_of_children > 0 {
             if hashmap_hashes.contains(hash) {
-                debug!("------1--HASH--{}  {:?}", numm, all_hashed_images[hash]);
+                error!(
+                    "[{phase}] parent-group hash appears more than once in hashes_parents; images: {:?}",
+                    all_hashed_images[hash]
+                );
                 found_broken_thing = true;
             }
             hashmap_hashes.insert((*hash).clone());
@@ -854,7 +873,7 @@ fn debug_check_for_duplicated_things(
             for i in &all_hashed_images[hash] {
                 let name = i.path.to_string_lossy().to_string();
                 if hashmap_names.contains(&name) {
-                    debug!("------1--NAME--{numm}  {name:?}");
+                    error!("[{phase}] file path appears in more than one parent group: {name:?}");
                     found_broken_thing = true;
                 }
                 hashmap_names.insert(name);
@@ -863,7 +882,10 @@ fn debug_check_for_duplicated_things(
     }
     for hash in hashes_similarity.keys() {
         if hashmap_hashes.contains(hash) {
-            debug!("------2--HASH--{}  {:?}", numm, all_hashed_images[hash]);
+            error!(
+                "[{phase}] hash appears in both hashes_parents and hashes_similarity (should be one or the other); images: {:?}",
+                all_hashed_images[hash]
+            );
             found_broken_thing = true;
         }
         hashmap_hashes.insert((*hash).clone());
@@ -871,7 +893,7 @@ fn debug_check_for_duplicated_things(
         for i in &all_hashed_images[hash] {
             let name = i.path.to_string_lossy().to_string();
             if hashmap_names.contains(&name) {
-                debug!("------2--NAME--{numm}  {name:?}");
+                error!("[{phase}] file path appears under both a parent group and the similarity map: {name:?}");
                 found_broken_thing = true;
             }
             hashmap_names.insert(name);
@@ -894,11 +916,13 @@ pub fn get_similar_images_cache_file(hash_size: u8, hash_alg: HashAlg, image_fil
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
+    use std::sync::Arc;
 
     use bk_tree::BKTree;
     use image::imageops::FilterType;
     use image_hasher::HashAlg;
     use indexmap::IndexMap;
+    use rand::RngExt;
 
     use super::*;
     use crate::common::tool_data::CommonData;
@@ -916,33 +940,177 @@ mod tests {
         }
     }
 
-    // Just to debug changes to algorithms
-    // #[test]
-    // fn test_fuzzer() {
-    //     for _ in 0..100 {
-    //         let mut parameters = get_default_parameters();
-    //         parameters.similarity = rand::random::<u32>() % 40;
-    //         let mut similar_images = SimilarImages::new(parameters);
-    //
-    //         for i in 0..(rand::random::<u32>() % 2000) {
-    //             let mut entry = vec![1u8; 8];
-    //             entry[1] = rand::random::<u8>();
-    //             if rand::random::<bool>() {
-    //                 entry[2] = rand::random::<u8>();
-    //             }
-    //             if rand::random::<bool>() {
-    //                 entry[3] = rand::random::<u8>();
-    //             }
-    //             if rand::random::<bool>() {
-    //                 entry[4] = rand::random::<u8>();
-    //             }
-    //             let fe = create_random_file_entry(entry, &format!("file_{i}.txt"));
-    //             add_hashes(&mut similar_images.image_hashes, vec![fe]);
-    //         }
-    //
-    //         similar_images.find_similar_hashes(&Arc::default(), None);
-    //     }
-    // }
+    #[test]
+    #[ignore = "Fuzzer tests"]
+    fn test_fuzzer_basic() {
+        let mut rng = rand::rng();
+
+        for _ in 0..200 {
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = rng.random::<u32>() % 40;
+            let mut similar_images = SimilarImages::new(parameters);
+
+            let count = rng.random::<u32>() % 2000;
+            for i in 0..count {
+                let mut entry = vec![1u8; 8];
+                for byte in entry.iter_mut().skip(1) {
+                    if rng.random::<bool>() {
+                        *byte = rng.random::<u8>();
+                    }
+                }
+                add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(entry, &format!("file_{i}.txt"))]);
+            }
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+            SimilarImages::verify_duplicated_items(&similar_images.similar_vectors);
+        }
+    }
+
+    #[test]
+    #[ignore = "Fuzzer tests"]
+    fn test_fuzzer_large() {
+        let mut rng = rand::rng();
+
+        for _ in 0..20 {
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = rng.random::<u32>() % 20;
+            let mut similar_images = SimilarImages::new(parameters);
+
+            let count = 1000 + rng.random::<u32>() % 4000;
+            for i in 0..count {
+                let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>()).collect();
+                add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(hash, &format!("large_{i}.jpg"))]);
+            }
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+        }
+    }
+
+    #[test]
+    #[ignore = "Fuzzer tests"]
+    fn test_fuzzer_tolerance_zero_invariant() {
+        let mut rng = rand::rng();
+
+        for _ in 0..200 {
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = 0;
+            let mut similar_images = SimilarImages::new(parameters);
+
+            let count = rng.random::<u32>() % 500;
+            for i in 0..count {
+                let hash = vec![rng.random::<u8>() % 4, 0, 0, 0, 0, 0, 0, 0];
+                add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(hash, &format!("t0_{i}.jpg"))]);
+            }
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+
+            for group in similar_images.get_similar_images() {
+                let first_hash = &group[0].hashes;
+                for entry in group {
+                    assert_eq!(&entry.hashes, first_hash, "tolerance-0 group contains entries with different hashes");
+                }
+                assert!(group.len() >= 2, "group must have at least 2 entries");
+            }
+        }
+    }
+
+    #[test]
+    #[ignore = "Fuzzer tests"]
+    fn test_fuzzer_reference_folders_invariant() {
+        let mut rng = rand::rng();
+        let ref_dir = PathBuf::from("/ref/");
+        let non_ref_dir = PathBuf::from("/other/");
+
+        for _ in 0..200 {
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = 5 + rng.random::<u32>() % 10;
+            let mut similar_images = SimilarImages::new(parameters);
+            similar_images.set_use_reference_folders(true);
+            similar_images.common_data.directories.reference_directories = vec![ref_dir.clone()];
+
+            let count = rng.random::<u32>() % 300;
+            for i in 0..count {
+                let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>() % 8).collect();
+                let dir = if rng.random::<bool>() { &ref_dir } else { &non_ref_dir };
+                let path = dir.join(format!("img_{i}.jpg")).to_string_lossy().into_owned();
+                add_hashes(&mut similar_images.image_hashes, vec![create_random_file_entry(hash, &path)]);
+            }
+
+            similar_images.find_similar_hashes(&Arc::default(), None);
+
+            for (master, similars) in similar_images.get_similar_images_referenced() {
+                assert!(master.path.starts_with(&ref_dir), "master {:?} is not in reference dir", master.path);
+                for s in similars {
+                    assert!(!s.path.starts_with(&ref_dir), "similar {:?} must not be in reference dir", s.path);
+                }
+            }
+        }
+    }
+
+    #[test]
+    #[ignore = "Fuzzer tests"]
+    fn test_fuzzer_determinism() {
+        let mut rng = rand::rng();
+
+        for _ in 0..50 {
+            let tolerance = rng.random::<u32>() % 15;
+            let count = rng.random::<u32>() % 300;
+
+            let entries: Vec<ImagesEntry> = (0..count)
+                .map(|i| {
+                    let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>() % 16).collect();
+                    create_random_file_entry(hash, &format!("det_{i}.jpg"))
+                })
+                .collect();
+
+            let run_once = |entries: &[ImagesEntry]| {
+                let mut parameters = get_default_parameters();
+                parameters.max_difference = tolerance;
+                let mut si = SimilarImages::new(parameters);
+                for e in entries {
+                    add_hashes(&mut si.image_hashes, vec![e.clone()]);
+                }
+                si.find_similar_hashes(&Arc::default(), None);
+                let mut paths: Vec<Vec<String>> = si
+                    .get_similar_images()
+                    .iter()
+                    .map(|g| {
+                        let mut v: Vec<String> = g.iter().map(|e| e.path.to_string_lossy().into_owned()).collect();
+                        v.sort();
+                        v
+                    })
+                    .collect();
+                paths.sort();
+                paths
+            };
+
+            let result_a = run_once(&entries);
+            let result_b = run_once(&entries);
+            assert_eq!(result_a, result_b, "non-deterministic output for tolerance={tolerance} count={count}");
+        }
+    }
+
+    #[test]
+    #[ignore = "Fuzzer tests"]
+    fn test_fuzzer_no_false_negatives_tolerance_zero() {
+        let mut rng = rand::rng();
+
+        for _ in 0..200 {
+            let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>()).collect();
+            let fe1 = create_random_file_entry(hash.clone(), "a.jpg");
+            let fe2 = create_random_file_entry(hash.clone(), "b.jpg");
+
+            let mut parameters = get_default_parameters();
+            parameters.max_difference = 0;
+            let mut si = SimilarImages::new(parameters);
+            add_hashes(&mut si.image_hashes, vec![fe1, fe2]);
+            si.find_similar_hashes(&Arc::default(), None);
+
+            let groups = si.get_similar_images();
+            assert_eq!(groups.len(), 1, "identical hashes must produce exactly one group");
+            assert_eq!(groups[0].len(), 2);
+        }
+    }
 
     #[test]
     fn test_compare_no_images() {
@@ -1033,13 +1201,6 @@ mod tests {
         let fe1_again = create_random_file_entry(vec![1, 1, 1, 1, 1, 1, 1, 2], "abc.txt");
 
         SimilarImages::verify_duplicated_items(&[vec![fe1], vec![fe1_again]]);
-    }
-
-    #[test]
-    fn test_similar_images_cache_file_uses_new_cache_version() {
-        let cache_file = get_similar_images_cache_file(8, HashAlg::Gradient, FilterType::Lanczos3, GeometricInvariance::Off);
-
-        assert!(cache_file.ends_with("_101.bin"));
     }
 
     #[test]

@@ -238,6 +238,11 @@ pub fn spawn_thumbnail_loader(tasks: Vec<(usize, usize, String)>, tx: std::sync:
                     let data = if cur >= limit {
                         ThumbnailData::Placeholder
                     } else {
+                        // Re-check cancel right before the expensive decode/resize so a stale
+                        // loader doesn't burn CPU/IO/battery after a newer scan superseded it.
+                        if cancel.load(Ordering::Relaxed) {
+                            break;
+                        }
                         match load_and_resize_thumbnail(path, &cache_dir) {
                             Some((rgba, w, h)) => {
                                 let size = rgba.len() as u64;
@@ -252,6 +257,10 @@ pub fn spawn_thumbnail_loader(tasks: Vec<(usize, usize, String)>, tx: std::sync:
                             None => ThumbnailData::Placeholder,
                         }
                     };
+
+                    if cancel.load(Ordering::Relaxed) {
+                        break;
+                    }
 
                     if tx
                         .send(ThumbnailResult {

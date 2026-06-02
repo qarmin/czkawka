@@ -1,0 +1,24 @@
+import { Fonts } from "../../globals/fonts.slint";
+import { CediniaColors } from "../../globals/colors.slint";
+
+export component ToolGroupHeader inherits Rectangle {
+    in property <string> label;
+    in property <string> emoji: "";
+
+    height: 40px;
+    background: CediniaColors.accent_muted;
+
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+
+        Text {
+            text: (root.emoji != "" ? root.emoji + "  " : "") + root.label;
+            color: CediniaColors.accent_light;
+            font-size: Fonts.body;
+            font-weight: Fonts.bold;
+            vertical-alignment: TextVerticalAlignment.center;
+            letter-spacing: 0.8px;
+        }
+    }
+}

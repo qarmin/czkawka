@@ -1,0 +1,322 @@
+import { ExcludedPathsModel, IncludedPathsModel } from "common.slint";
+
+export global Settings {
+    in-out property <int> settings_preset_idx: 0;
+    in-out property <[string]> settings_presets: ["Preset 1", "Preset 2"];
+
+    in-out property <[string]> languages_list: ["English", "Polski (Polish)", "Français (French)", "Italiano (Italian)", "Русский (Russian)", "український (Ukrainian)", "한국어 (Korean)", "Česky (Czech)", "Deutsch (German)", "日本語 (Japanese)", "Português (Portuguese)", "Português Brasileiro (Brazilian Portuguese)", "简体中文 (Simplified Chinese)", "繁體中文 (Traditional Chinese)", "Español (Spanish)", "Norsk (Norwegian)", "Svenska (Swedish)", "العربية (Arabic)", "Български (Bulgarian)", "Ελληνικά (Greek)", "Nederlands (Dutch)", "Română (Romanian)", "Türkçe (Turkish)", "فارسی (Persian)", "हिंदी (Hindi)", "Bahasa Indonesia (Indonesian)", "Tiếng Việt (Vietnamese)"];
+    in-out property <int> language_index: 0;
+    in-out property <string> language_value: "English";
+
+    in-out property <[IncludedPathsModel]> included_paths_model: [{ path: "/home/pathssssssssssssssssssssss", referenced_path: false, focused_row: false },{ path: "/home/path", referenced_path: false, focused_row: false },{ path: "/home/path", referenced_path: false, focused_row: false },{ path: "/home/path", referenced_path: false, focused_row: false }];
+    in-out property <int> included_paths_model_selected_idx: -1;
+    in-out property <[ExcludedPathsModel]> excluded_paths_model: [{ path:"/home/pathssssssssssssssssssssssss", focused_row: false },{ path:"/home/path", focused_row: false },{ path:"/home/path", focused_row: false },{ path:"/home/path", focused_row: false }, { path:"/home/a", focused_row: false }];
+    in-out property <int> excluded_paths_model_selected_idx: -1;
+
+    // Settings
+    in-out property <bool> dark_theme: true;
+    in-out property <bool> show_only_icons: false;
+    in-out property <bool> load_windows_size_at_startup: true;
+    in-out property <bool> load_tabs_sizes_at_startup: true;
+    in-out property <bool> limit_messages_lines: true;
+    in-out property <float> manual_application_scale: 1.0;
+    in-out property <bool> use_manual_application_scale: false;
+    in-out property <string> excluded_items: "Excluded items";
+    in-out property <string> allowed_extensions: "Allowed extensions";
+    in-out property <string> excluded_extensions: "Excluded extensions";
+    in-out property <string> minimum_file_size: 0;
+    in-out property <string> maximum_file_size: 0;
+    in-out property <bool> recursive_search: true;
+    in-out property <bool> use_cache: false;
+    in-out property <bool> save_as_json: false;
+    in-out property <bool> ignore_other_filesystems: false;
+    in-out property <bool> delete_outdated_cache_entries: false;
+    in-out property <bool> hide_hard_links: false;
+    in-out property <float> thread_number: 4;
+
+    in-out property <bool> duplicate_image_preview;
+    in-out property <bool> duplicate_use_prehash;
+    in-out property <string> duplicate_minimal_hash_cache_size;
+    in-out property <string> duplicate_minimal_prehash_cache_size;
+    in-out property <bool> similar_images_show_image_preview;
+
+    in-out property <bool> video_thumbnails_preview;
+    in-out property <bool> clear_unused_video_thumbnails;
+
+
+    // Video Thumbnails Global Settings
+    in-out property <bool> video_thumbnails_generate: false;
+    in-out property <float> video_thumbnails_percentage: 10;
+    in-out property <float> video_thumbnails_percentage_max: 99;
+    in-out property <float> video_thumbnails_percentage_min: 1;
+    in-out property <bool> video_thumbnails_generate_grid: false;
+    in-out property <float> video_thumbnails_grid_tiles_per_side: 2;
+    in-out property <float> video_thumbnails_grid_tiles_per_side_max: 6;
+    in-out property <float> video_thumbnails_grid_tiles_per_side_min: 2;
+
+    // Allowed subsettings
+    // Similar Images
+    in-out property <[string]> similar_images_sub_available_hash_size: ["8", "16", "32", "64"];
+    in-out property <int> similar_images_sub_hash_size_index: 1;
+    in-out property <string> similar_images_sub_hash_size_value: "16";
+    in-out property <[string]> similar_images_sub_available_resize_algorithm: ["Lanczos3", "Gaussian", "CatmullRom", "Triangle", "Nearest"];
+    in-out property <int> similar_images_sub_resize_algorithm_index: 0;
+    in-out property <string> similar_images_sub_resize_algorithm_value: "Lanczos3";
+    in-out property <[string]> similar_images_sub_available_hash_type: ["Mean", "Gradient", "BlockHash", "VertGradient", "DoubleGradient", "Median"];
+    in-out property <int> similar_images_sub_hash_alg_index: 0;
+    in-out property <string> similar_images_sub_hash_alg_value: "Mean";
+    in-out property <[string]> similar_images_sub_available_geometric_invariance: ["Off", "Mirror + Flip", "Mirror + Flip + Rotate 90"];
+    in-out property <int> similar_images_sub_geometric_invariance_index: 0;
+    in-out property <string> similar_images_sub_geometric_invariance_value: "Off";
+    in-out property <float> similar_images_sub_max_similarity: 40;
+    in-out property <float> similar_images_sub_current_similarity: 20;
+    in-out property <bool> similar_images_sub_ignore_same_size: false;
+    in-out property <bool> similar_images_sub_ignore_same_resolution: false;
+
+    // Duplicates
+    in-out property <[string]> duplicates_sub_check_method: ["Hash", "Size", "Name", "Size and Name"];
+    in-out property <int> duplicates_sub_check_method_index: 0;
+    in-out property <string> duplicates_sub_check_method_value: "Hash";
+    in-out property <[string]> duplicates_sub_available_hash_type: ["Blake3", "CRC32", "XXH3"];
+    in-out property <int> duplicates_sub_available_hash_type_index: 0;
+    in-out property <string> duplicates_sub_available_hash_type_value: "Blake3";
+    in-out property <bool> duplicates_sub_name_case_sensitive: false;
+
+    // Big files
+    in-out property <[string]> biggest_files_sub_method: ["The Biggest", "The Smallest"];
+    in-out property <int> biggest_files_sub_method_index: 0;
+    in-out property <string> biggest_files_sub_method_value: "The Biggest";
+    in-out property <string> biggest_files_sub_number_of_files: 50;
+
+    // Similar Videos
+    in-out property <bool> similar_videos_sub_ignore_same_size;
+    in-out property <bool> similar_videos_sub_ignore_same_resolution;
+    in-out property <float> similar_videos_sub_max_similarity: 20;
+    in-out property <float> similar_videos_sub_current_similarity: 15;
+
+    in-out property <float> similar_videos_skip_forward_amount: 15;
+    in-out property <float> similar_videos_skip_forward_amount_max: 360;
+    in-out property <float> similar_videos_skip_forward_amount_min: 1;
+
+    in-out property <float> similar_videos_vid_hash_duration: 10;
+    in-out property <float> similar_videos_vid_hash_duration_max: 60;
+    in-out property <float> similar_videos_vid_hash_duration_min: 1;
+
+    in-out property <float> similar_videos_window_count: 5;
+    in-out property <float> similar_videos_window_count_max: 20;
+    in-out property <float> similar_videos_window_count_min: 1;
+
+    in-out property <bool> similar_videos_crop_detect: true;
+
+    in-out property <float> similar_videos_duration_tolerance_pct: 20;
+    in-out property <float> similar_videos_duration_tolerance_pct_max: 100;
+    in-out property <float> similar_videos_duration_tolerance_pct_min: 0;
+
+    in-out property <float> similar_videos_min_matching_windows: 0.6;
+    in-out property <float> similar_videos_min_matching_windows_max: 1;
+    in-out property <float> similar_videos_min_matching_windows_min: 0.2;
+
+    in-out property <float> similar_videos_subclip_min_match: 0.5;
+    in-out property <float> similar_videos_subclip_min_match_max: 1;
+    in-out property <float> similar_videos_subclip_min_match_min: 0.2;
+
+    in-out property <[string]> similar_videos_visual_preset_names: ["Custom", "Near-identical", "Similar", "Movies (long skip)"];
+    in-out property <string> similar_videos_visual_preset_value: "Custom";
+    in-out property <int> similar_videos_visual_preset_index: 0;
+
+    // Audio fingerprint sub-mode
+    in-out property <bool> similar_videos_audio_check_content: false;
+    in-out property <[string]> similar_videos_audio_preset_names: ["Custom", "Identical videos", "Clip in longer video", "Similar content"];
+    in-out property <string> similar_videos_audio_preset_value: "Custom";
+    in-out property <int> similar_videos_audio_preset_index: 0;
+    in-out property <float> similar_videos_audio_similarity_percent: 80.0;
+    in-out property <float> similar_videos_audio_similarity_percent_min: 0.0;
+    in-out property <float> similar_videos_audio_similarity_percent_max: 100.0;
+    in-out property <float> similar_videos_audio_length_ratio: 0.1;
+    in-out property <float> similar_videos_audio_length_ratio_min: 0.0;
+    in-out property <float> similar_videos_audio_length_ratio_max: 1.0;
+    in-out property <float> similar_videos_audio_min_duration_seconds: 10.0;
+    in-out property <float> similar_videos_audio_min_duration_seconds_max: 600.0;
+    in-out property <float> similar_videos_audio_maximum_difference: 3.0;
+    in-out property <float> similar_videos_audio_maximum_difference_max: 10.0;
+
+
+    // Same Music
+    in-out property <[string]> similar_music_sub_audio_check_type: ["Tags", "Fingerprint"];
+    in-out property <int> similar_music_sub_audio_check_type_index: 0;
+    in-out property <string> similar_music_sub_audio_check_type_value: "Tags";
+    in-out property <bool> similar_music_sub_approximate_comparison;
+    in-out property <bool> similar_music_sub_title: true;
+    in-out property <bool> similar_music_sub_artist: true;
+    in-out property <bool> similar_music_sub_year: false;
+    in-out property <bool> similar_music_sub_bitrate: false;
+    in-out property <bool> similar_music_sub_genre: false;
+    in-out property <bool> similar_music_sub_length: false;
+    in-out property <bool> similar_music_compare_fingerprints_only_with_similar_titles: false;
+    in-out property <float> similar_music_sub_minimal_fragment_duration_value: 5.0;
+    in-out property <float> similar_music_sub_minimal_fragment_duration_max: 180.0;
+    in-out property <float> similar_music_sub_maximum_difference_value: 3.0;
+    in-out property <float> similar_music_sub_maximum_difference_max: 10.0;
+
+    // Broken Files
+    in-out property <bool> empty_files_sub_zero_byte_content: false;
+    in-out property <bool> empty_files_sub_non_printable_content: false;
+
+    // Broken Files
+    in-out property <bool> broken_files_sub_audio: true;
+    in-out property <bool> broken_files_sub_pdf: false;
+    in-out property <bool> broken_files_sub_archive: false;
+    in-out property <bool> broken_files_sub_image: false;
+    in-out property <bool> broken_files_sub_video_ffprobe: false;
+    in-out property <bool> broken_files_sub_video_ffmpeg: false;
+    in-out property <bool> broken_files_sub_font: true;
+    in-out property <bool> broken_files_sub_markup: true;
+
+    // Bad Names
+    in-out property <bool> bad_names_sub_uppercase_extension: true;
+    in-out property <bool> bad_names_sub_emoji_used: true;
+    in-out property <bool> bad_names_sub_space_at_start_end: true;
+    in-out property <bool> bad_names_sub_non_ascii: true;
+    in-out property <bool> bad_names_sub_restricted_charset_enabled: false;
+    in-out property <string> bad_names_sub_restricted_charset: "_- ";
+    in-out property <bool> bad_names_sub_remove_duplicated: false;
+
+    // Video Optimizer
+    in-out property <[string]> video_optimizer_sub_mode: ["Crop", "Transcode"];
+    in-out property <int> video_optimizer_sub_mode_index: 1;
+    in-out property <string> video_optimizer_sub_mode_value: "Transcode";
+    in-out property <[string]> video_optimizer_sub_crop_type: ["Black Bars", "Static Content"];
+    in-out property <int> video_optimizer_sub_crop_type_index: 0;
+    in-out property <string> video_optimizer_sub_crop_type_value: "Black Bars";
+
+    // Video Crop scanning parameters
+    in-out property <string> video_optimizer_sub_black_pixel_threshold: "20";
+    in-out property <string> video_optimizer_sub_black_bar_min_percentage: "90";
+    in-out property <string> video_optimizer_sub_max_samples: "60";
+    in-out property <string> video_optimizer_sub_min_crop_size: "20";
+
+    in-out property <string> video_optimizer_sub_excluded_codecs: "h265,hevc,av1,vp9";
+    in-out property <float> video_optimizer_sub_video_quality: 23;
+    in-out property <float> video_optimizer_sub_video_quality_max: 51;
+    in-out property <float> video_optimizer_sub_video_quality_min: 0;
+    in-out property <float> video_optimizer_sub_image_threshold: 5;
+    in-out property <float> video_optimizer_sub_image_threshold_max: 255;
+    in-out property <float> video_optimizer_sub_image_threshold_min: 1;
+
+    // ComboBox model/value for optimizer codec (initialized from Rust)
+    in-out property <[string]> video_optimizer_sub_video_codec_config: ["HEVC/H265", "H264", "VP9", "AV1"];
+    in-out property <int> video_optimizer_sub_video_codec_index: 0;
+    in-out property <string> video_optimizer_sub_video_codec_value: "h265";
+
+    // Fail/overwrite/quality settings for optimizer (initialized from Rust)
+    in-out property <bool> video_optimizer_sub_fail_if_bigger: false;
+    in-out property <bool> video_optimizer_sub_overwrite_files: false;
+
+    // Video size limiting
+    in-out property <bool> video_optimizer_sub_limit_video_size: false;
+    in-out property <string> video_optimizer_sub_max_width: "1920";
+    in-out property <string> video_optimizer_sub_max_height: "1920";
+
+    // Video noise reduction
+    in-out property <[string]> video_optimizer_sub_noise_reduction: ["None", "hqdn3d (fast)"];
+    in-out property <int>      video_optimizer_sub_noise_reduction_index: 0;
+    in-out property <string>   video_optimizer_sub_noise_reduction_value: "none";
+    in-out property <float>    video_optimizer_sub_noise_reduction_strength: 5;
+
+    // Video hardware encoder
+    in-out property <[string]> video_optimizer_sub_hardware_encoder_config: ["None", "NVENC", "VAAPI", "QSV", "VideoToolbox", "AMF"];
+    in-out property <int>      video_optimizer_sub_hardware_encoder_index: 0;
+    in-out property <string>   video_optimizer_sub_hardware_encoder_value: "none";
+
+    // Custom FFmpeg command
+    in-out property <bool>   video_optimizer_sub_use_custom_command: false;
+    in-out property <string> video_optimizer_sub_custom_command: "";
+
+    // Exif Finder
+    in-out property <string> ignored_exif_tags: "";
+
+    // Temporary Files
+    in-out property <string> temporary_files_sub_extensions: "#,thumbs.db,.bak,~,.tmp,.temp,.ds_store,.crdownload,.part,.cache,.dmp,.download,.partial";
+
+    // Move/Copy popup settings
+    in-out property <bool> popup_move_preserve_folder_structure: false;
+    in-out property <bool> popup_move_copy_mode: false;
+    in-out property <bool> popup_move_rename_on_conflict: false;
+
+    // Clean EXIF popup settings
+    in-out property <bool> popup_clean_exif_overwrite_files: false;
+
+    // Reencode video popup settings
+    in-out property <bool> popup_reencode_video_overwrite_files: false;
+    in-out property <float> popup_reencode_video_quality: 23;
+    in-out property <bool> popup_reencode_video_fail_if_bigger: false;
+    in-out property <bool> popup_reencode_video_limit_video_size: false;
+    in-out property <string> popup_reencode_video_max_width: "1920";
+    in-out property <string> popup_reencode_video_max_height: "1920";
+
+    // Crop video popup settings
+    in-out property <bool> popup_crop_video_overwrite_files: false;
+    in-out property <bool> popup_crop_video_reencode: false;
+    in-out property <float> popup_crop_video_quality: 23;
+
+    // Custom select popup settings
+    in-out property <bool> popup_custom_select_save_restore: false;
+
+    // Audio
+    in-out property <bool> play_audio_on_scan_completion: true;
+
+    // Notifications
+    in-out property <bool> show_notification_on_scan_completion: false;
+
+    // Select popup visibility – global (not per-preset)
+    in-out property <bool> select_show_oldest: true;
+    in-out property <bool> select_show_newest: true;
+    in-out property <bool> select_show_smallest_size: true;
+    in-out property <bool> select_show_biggest_size: true;
+    in-out property <bool> select_show_smallest_resolution: true;
+    in-out property <bool> select_show_biggest_resolution: true;
+    in-out property <bool> select_show_shortest_path: true;
+    in-out property <bool> select_show_longest_path: true;
+    in-out property <bool> select_show_except_oldest: true;
+    in-out property <bool> select_show_except_newest: true;
+    in-out property <bool> select_show_except_smallest_size: true;
+    in-out property <bool> select_show_except_biggest_size: true;
+    in-out property <bool> select_show_except_smallest_resolution: true;
+    in-out property <bool> select_show_except_biggest_resolution: true;
+    in-out property <bool> select_show_except_shortest_path: true;
+    in-out property <bool> select_show_except_longest_path: true;
+
+    out property <length> path_px: 350px;
+    out property <length> name_px: 100px;
+    out property <length> mod_px: 125px;
+    out property <length> size_px: 75px;
+
+    in-out property <[string]> duplicates_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> duplicates_column_size: [35px, size_px, name_px, path_px, mod_px];
+    in-out property <[string]> empty_folders_column_name: ["Selection", "Folder Name", "Path", "Modification Date"];
+    in-out property <[length]> empty_folders_column_size: [35px, name_px, path_px, mod_px];
+    in-out property <[string]> big_files_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> big_files_column_size: [35px, size_px, name_px, path_px, mod_px];
+    in-out property <[string]> empty_files_column_name: ["Selection", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> empty_files_column_size: [35px, name_px, path_px, mod_px];
+    in-out property <[string]> temporary_files_column_name: ["Selection", "Size", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> temporary_files_column_size: [35px, size_px, name_px, path_px, mod_px];
+    in-out property <[string]> similar_images_column_name: ["Selection", "Similarity", "Size", "Dimensions", "File Name", "Path", "Modification Date"];
+    in-out property <[length]> similar_images_column_size: [35px, 80px, 80px, 80px, name_px, path_px, mod_px];
+    in-out property <[string]> similar_videos_column_name: ["Selection", "Size", "File Name", "Path", "Dimensions", "Duration", "Bitrate", "Fps", "Codec", "Modification Date"];
+    in-out property <[length]> similar_videos_column_size: [35px, size_px, name_px, path_px, 80px, 30px, 30px, 80px, 80px, mod_px];
+    in-out property <[string]> similar_music_column_name: ["Selection", "Size", "File Name", "Title", "Artist", "Year", "Bitrate", "Length", "Genre", "Path", "Modification Date"];
+    in-out property <[length]> similar_music_column_size: [35px, size_px, name_px, 80px, 80px, 80px, 80px, 80px, 80px, path_px, mod_px];
+    in-out property <[string]> invalid_symlink_column_name: ["Selection", "Symlink Name", "Symlink Folder", "Destination Path", "Modification Date"];
+    in-out property <[length]> invalid_symlink_column_size: [35px, name_px, path_px, path_px, mod_px];
+    in-out property <[string]> broken_files_column_name: ["Selection", "File Name", "Path", "Type of Error", "Size", "Modification Date"];
+    in-out property <[length]> broken_files_column_size: [35px, name_px, path_px, 200px, size_px, mod_px];
+    in-out property <[string]> bad_extensions_column_name: ["Selection", "File Name", "Path", "Current Extension", "Proper Extension"];
+    in-out property <[length]> bad_extensions_column_size: [35px, name_px, path_px, 40px, 200px];
+    in-out property <[string]> bad_names_column_name: ["Selection", "File Name", "New Name", "Path"];
+    in-out property <[length]> bad_names_column_size: [35px, name_px, 300px, path_px];
+    in-out property <[string]> exif_remover_column_name: ["Selection", "Size", "File Name", "Path", "EXIF Tags", "Modification Date"];
+    in-out property <[length]> exif_remover_column_size: [35px, size_px, name_px, path_px, 300px, mod_px];
+    in-out property <[string]> video_optimizer_column_name: ["Selection", "Size", "File Name", "Path", "Codec", "Dimensions", "New Dimensions", "Modification Date"];
+    in-out property <[length]> video_optimizer_column_size: [35px, size_px, name_px, path_px, 100px, 120px, 160px, mod_px];
+}

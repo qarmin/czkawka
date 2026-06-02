@@ -11,7 +11,7 @@ use czkawka_core::tools::duplicate::core::get_duplicate_cache_file;
 use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_images::core::get_similar_images_cache_file;
 use czkawka_core::tools::similar_videos::core::get_similar_videos_cache_file;
-use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION};
+use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_WINDOW_COUNT};
 use gtk4::prelude::*;
 use gtk4::{Label, ResponseType, Window};
 use image::imageops::FilterType;
@@ -219,7 +219,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
 
                 dialog.connect_response(move |dialog, response_type| {
                     if response_type == ResponseType::Ok {
-                        let file_name = get_similar_videos_cache_file(DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_CROP_DETECT);
+                        let file_name = get_similar_videos_cache_file(DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, DEFAULT_CROP_DETECT, DEFAULT_WINDOW_COUNT);
                         let (mut messages, loaded_items) =
                             load_cache_from_file_generalized_by_path::<czkawka_core::tools::similar_videos::VideosEntry>(&file_name, true, &Default::default());
 

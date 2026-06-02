@@ -1,0 +1,70 @@
+import { Fonts } from "../../globals/fonts.slint";
+import { CediniaColors } from "../../globals/colors.slint";
+import { AppState } from "../../globals/app_state.slint";
+
+export component TextInputRow {
+    in property <string> label;
+    in property <string> placeholder: "";
+    in-out property <string> value;
+
+    // Height driven by content so long extension lists wrap naturally.
+    height: content_vl.preferred-height;
+
+    Rectangle {
+        background: CediniaColors.bg_surface;
+
+        content_vl := VerticalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            spacing: 4px;
+
+            Text {
+                text: root.label;
+                color: CediniaColors.text_secondary;
+                font-size: Fonts.caption;
+                font-weight: Fonts.semibold;
+                wrap: word-wrap;
+            }
+
+            inp_box := Rectangle {
+                // Grows with content; minimum keeps single-line fields tidy.
+                height: max(36px, inp.preferred-height + 16px);
+                border-radius: 6px;
+                background: CediniaColors.bg_elevated;
+                border-width: 1px;
+                border-color: inp.has-focus ? CediniaColors.accent : CediniaColors.divider;
+                animate border-color { duration: 120ms; }
+
+                HorizontalLayout {
+                    padding-left: 10px;
+                    padding-right: 10px;
+                    padding-top: 8px;
+                    padding-bottom: 8px;
+
+                    inp := TextInput {
+                        text <=> root.value;
+                        color: CediniaColors.text_primary;
+                        font-size: Fonts.body_lg;
+                        vertical-alignment: TextVerticalAlignment.top;
+                        single-line: false;
+                        wrap: word-wrap;
+                        accepted => { AppState.save_settings_now(); }
+                    }
+                }
+
+                if inp.text == "" && !inp.has-focus : Text {
+                    x: 10px;
+                    y: 8px;
+                    width: parent.width - 20px;
+                    text: root.placeholder;
+                    color: CediniaColors.text_disabled;
+                    font-size: Fonts.body_lg;
+                    vertical-alignment: TextVerticalAlignment.top;
+                    wrap: word-wrap;
+                }
+            }
+        }
+    }
+}

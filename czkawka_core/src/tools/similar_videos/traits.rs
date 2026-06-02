@@ -11,7 +11,7 @@ use crate::common::consts::VIDEO_FILES_EXTENSIONS;
 use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
 use crate::common::model::{CheckingMethod, WorkContinueStatus};
 use crate::common::progress_data::ProgressData;
-use crate::common::tool_data::{CommonData, CommonToolData, DeleteMethod};
+use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
 use crate::common::traits::{AllTraits, DebugPrint, DeletingItems, PrintResults, Search};
 use crate::flc;
 use crate::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
@@ -87,6 +87,10 @@ impl DeletingItems for SimilarVideos {
     fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         if self.get_cd().delete_method == DeleteMethod::None {
             return WorkContinueStatus::Continue;
+        }
+        if self.get_use_reference_folders() {
+            let files_to_delete: Vec<_> = self.similar_referenced_vectors.iter().flat_map(|(_, files)| files.iter().cloned()).collect();
+            return self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(files_to_delete));
         }
         let files_to_delete = self.similar_vectors.clone();
         self.delete_advanced_elements_and_add_to_messages(stop_flag, progress_sender, files_to_delete)

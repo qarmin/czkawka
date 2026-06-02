@@ -1,0 +1,44 @@
+import { Button } from "std-widgets.slint";
+import { SortModel } from "../globals/common.slint";
+import { Callabler } from "../globals/callabler.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+import { GuiState } from "../globals/gui_state.slint";
+
+export component PopupSortResults inherits Rectangle {
+    callback show_popup();
+    callback close_popup();
+    property <[SortModel]> model: GuiState.sort_results_list;
+    property <length> item_height: 30px;
+    out property <length> item_width;
+    out property <length> all_items_height: item_height * model.length;
+
+    popup_window := PopupWindow {
+        width <=> item_width;
+        height: all_items_height;
+
+        close-policy: PopupClosePolicy.close-on-click-outside;
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            border-radius: 5px;
+            background: ColorPalette.popup_background;
+            VerticalLayout {
+                for i in model: Button {
+                    text: i.name;
+                    height: item_height;
+                    clicked => {
+                        Callabler.sort_items(i.data);
+                        popup_window.close();
+                    }
+                }
+            }
+        }
+    }
+
+    show_popup() => {
+        popup_window.show();
+    }
+    close_popup() => {
+        popup_window.close();
+    }
+}

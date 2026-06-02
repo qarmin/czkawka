@@ -40,7 +40,7 @@ pub(crate) fn scan_exif_remover(a: Weak<MainWindow>, sd: ScanData) {
 
             let info = tool.get_information();
             let stopped_search = tool.get_stopped_search();
-            sd.shared_models.lock().unwrap().shared_exif_remover_state = Some(tool);
+            sd.shared_models.lock().expect("Mutex poisoned").shared_exif_remover_state = Some(tool);
 
             let messages_data = MessagesData { critical, messages };
 

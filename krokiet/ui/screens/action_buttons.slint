@@ -1,0 +1,293 @@
+import { Button } from "std-widgets.slint";
+import { ActiveTab, BottomPanelVisibility, PopupRequest, SingleMainListModel } from "../globals/common.slint";
+import { GuiState } from "../globals/gui_state.slint";
+import { Translations } from "../globals/translations.slint";
+import { Settings } from "../globals/settings.slint";
+import { Callabler } from "../globals/callabler.slint";
+
+export component VisibilityButton inherits Button {
+    in-out property <BottomPanelVisibility> button_visibility;
+    in-out property <BottomPanelVisibility> bottom_panel_visibility;
+    checked: bottom_panel_visibility == button_visibility;
+    height: 30px;
+    width: 70px;
+    clicked => {
+        if (bottom_panel_visibility == button_visibility) {
+            bottom_panel_visibility = BottomPanelVisibility.NotVisible;
+        } else {
+            bottom_panel_visibility = button_visibility;
+        }
+    }
+}
+
+export component ActionButtons inherits HorizontalLayout {
+    callback scan_stopping;
+    callback scan_starting(ActiveTab);
+    callback show_select_popup(length, length);
+    callback show_sort_popup(length, length);
+    callback show_action_popup(PopupRequest);
+
+    in-out property <[SingleMainListModel]> duplicate_files_model: [];
+    in-out property <[SingleMainListModel]> empty_folder_model: [];
+    in-out property <[SingleMainListModel]> big_files_model: [];
+    in-out property <[SingleMainListModel]> empty_files_model: [];
+    in-out property <[SingleMainListModel]> temporary_files_model: [];
+    in-out property <[SingleMainListModel]> similar_images_model: [];
+    in-out property <[SingleMainListModel]> similar_videos_model: [];
+    in-out property <[SingleMainListModel]> similar_music_model: [];
+    in-out property <[SingleMainListModel]> invalid_symlinks_model: [];
+    in-out property <[SingleMainListModel]> broken_files_model: [];
+    in-out property <[SingleMainListModel]> bad_extensions_model: [];
+    in-out property <[SingleMainListModel]> bad_names_model: [];
+    in-out property <[SingleMainListModel]> exif_remover_model: [];
+    in-out property <[SingleMainListModel]> video_optimizer_model: [];
+
+    property <ActiveTab> active_tab: GuiState.active_tab;
+
+    in-out property <BottomPanelVisibility> bottom_panel_visibility <=> GuiState.bottom_panel_visibility;
+    in-out property <bool> stop_requested: false;
+    in-out property <bool> scanning;
+    in-out property <bool> processing;
+    in-out property <bool> base_buttons_may_be_available: !scanning && !processing && results_available;
+    in-out property <bool> lists_enabled: GuiState.is_tool_tab_active;
+    out property <int> name;
+
+    in-out property <bool> checked_anything: (
+        (active_tab == ActiveTab.DuplicateFiles && (GuiState.selected_results_duplicates > 0 || GuiState.selected_results_duplicates2 > 0)) ||
+        (active_tab == ActiveTab.SimilarImages && (GuiState.selected_results_similar_images > 0 || GuiState.selected_results_similar_images2 > 0)) ||
+        (active_tab == ActiveTab.SimilarVideos && (GuiState.selected_results_similar_videos > 0 || GuiState.selected_results_similar_videos2 > 0)) ||
+        (active_tab == ActiveTab.SimilarMusic && (GuiState.selected_results_similar_music > 0 || GuiState.selected_results_similar_music2 > 0)) ||
+        (active_tab == ActiveTab.BigFiles && (GuiState.selected_results_big_files > 0 || GuiState.selected_results_big_files2 > 0)) ||
+        (active_tab == ActiveTab.BrokenFiles && (GuiState.selected_results_broken_files > 0 || GuiState.selected_results_broken_files2 > 0)) ||
+        (active_tab == ActiveTab.InvalidSymlinks && (GuiState.selected_results_invalid_symlinks > 0 || GuiState.selected_results_invalid_symlinks2 > 0)) ||
+        (active_tab == ActiveTab.EmptyFolders && (GuiState.selected_results_empty_folders > 0 || GuiState.selected_results_empty_folders2 > 0)) ||
+        (active_tab == ActiveTab.EmptyFiles && (GuiState.selected_results_empty_files > 0 || GuiState.selected_results_empty_files2 > 0)) ||
+        (active_tab == ActiveTab.TemporaryFiles && (GuiState.selected_results_temporary_files > 0 || GuiState.selected_results_temporary_files2 > 0)) ||
+        (active_tab == ActiveTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0)) ||
+        (active_tab == ActiveTab.BadNames && (GuiState.selected_results_bad_names > 0 || GuiState.selected_results_bad_names2 > 0)) ||
+        (active_tab == ActiveTab.ExifRemover && (GuiState.selected_results_exif_remover > 0 || GuiState.selected_results_exif_remover2 > 0)) ||
+        (active_tab == ActiveTab.VideoOptimizer && (GuiState.selected_results_video_optimizer > 0 || GuiState.selected_results_video_optimizer2 > 0))
+    );
+    in-out property <bool> results_available: (
+        (active_tab == ActiveTab.DuplicateFiles && duplicate_files_model.length > 0) ||
+        (active_tab == ActiveTab.EmptyFolders && empty_folder_model.length > 0) ||
+        (active_tab == ActiveTab.BigFiles && big_files_model.length > 0) ||
+        (active_tab == ActiveTab.EmptyFiles && empty_files_model.length > 0) ||
+        (active_tab == ActiveTab.TemporaryFiles && temporary_files_model.length > 0) ||
+        (active_tab == ActiveTab.SimilarImages && similar_images_model.length > 0) ||
+        (active_tab == ActiveTab.SimilarVideos && similar_videos_model.length > 0) ||
+        (active_tab == ActiveTab.SimilarMusic && similar_music_model.length > 0) ||
+        (active_tab == ActiveTab.InvalidSymlinks && invalid_symlinks_model.length > 0) ||
+        (active_tab == ActiveTab.BrokenFiles && broken_files_model.length > 0) ||
+        (active_tab == ActiveTab.BadExtensions && bad_extensions_model.length > 0) ||
+        (active_tab == ActiveTab.BadNames && bad_names_model.length > 0) ||
+        (active_tab == ActiveTab.ExifRemover && exif_remover_model.length > 0) ||
+        (active_tab == ActiveTab.VideoOptimizer && video_optimizer_model.length > 0)
+    );
+
+    height: 30px;
+    spacing: 4px;
+
+    if (!scanning && !processing && lists_enabled): scan_button :=  Button {
+        height: parent.height;
+        enabled: !scanning && !processing && lists_enabled;
+        text: Settings.show_only_icons ? "" : Translations.scan_button_text;
+        icon: @image-url("../../icons/krokiet_search.svg");
+        colorize-icon: true;
+        clicked => {
+            root.scanning = true;
+            root.scan_starting(GuiState.active_tab);
+        }
+    }
+
+    if (scanning || processing): stop_button := Button {
+        height: parent.height;
+        enabled: (scanning || processing) && !stop_requested && root.lists_enabled;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.stop_button_text;
+        icon: @image-url("../../icons/krokiet_stop.svg");
+        colorize-icon: true;
+        clicked => {
+            root.scan_stopping();
+            root.stop_requested = true;
+        }
+    }
+
+    Rectangle {
+        max-width: 5px;
+    }
+
+    select_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.select_button_text;
+        icon: @image-url("../../icons/krokiet_select.svg");
+        colorize-icon: true;
+        clicked => {
+            show_select_popup(self.x + self.width / 2, self.y + parent.y);
+        }
+    }
+
+    move_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.move_button_text;
+        icon: @image-url("../../icons/krokiet_move.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Move);
+        }
+    }
+
+    delete_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.delete_button_text;
+        icon: @image-url("../../icons/krokiet_delete.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Delete);
+        }
+    }
+
+    trash_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.trash_button_text;
+        icon: @image-url("../../icons/krokiet_trash.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Trash);
+        }
+    }
+
+    save_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.save_button_text;
+        icon: @image-url("../../icons/krokiet_save.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Save);
+        }
+    }
+
+    sort_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.sort_button_text;
+        icon: @image-url("../../icons/krokiet_sort.svg");
+        colorize-icon: true;
+        clicked => {
+            show_sort_popup(self.x + self.width / 2, self.y + parent.y);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.BadExtensions: rename_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.rename_button_text;
+        icon: @image-url("../../icons/krokiet_rename.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.RenameBadExtension);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.BadNames: rename_button_bad_names := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.rename_button_text;
+        icon: @image-url("../../icons/krokiet_rename.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.RenameBadFileName);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.VideoOptimizer: optimize_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.optimize_button_text;
+        icon: @image-url("../../icons/krokiet_optimize.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.OptimizeVideo);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.ExifRemover: clean_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.clean_button_text;
+        icon: @image-url("../../icons/krokiet_clean.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.CleanExif);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.SimilarImages && results_available: compare_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.compare_button_text;
+        icon: @image-url("../../icons/krokiet_compare.svg");
+        colorize-icon: true;
+        clicked => {
+            Callabler.compare_open();
+        }
+    }
+
+    if lists_enabled && GuiState.tool_with_groups: hardlink_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.hardlink_button_text;
+        icon: @image-url("../../icons/krokiet_hardlink.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Hardlink);
+        }
+    }
+
+    if lists_enabled && GuiState.tool_with_groups: softlink_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.softlink_button_text;
+        icon: @image-url("../../icons/krokiet_symlink.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Symlink);
+        }
+    }
+
+    Rectangle {
+        horizontal-stretch: 0.5;
+    }
+
+    HorizontalLayout {
+        padding: 0px;
+        spacing: 0px;
+        VisibilityButton {
+            height: parent.height;
+            width: 40px;
+            button_visibility: BottomPanelVisibility.Directories;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            icon: @image-url("../../icons/krokiet_dir.svg");
+            colorize-icon: true;
+        }
+
+        VisibilityButton {
+            height: parent.height;
+            width: 40px;
+            button_visibility: BottomPanelVisibility.TextErrors;
+            bottom_panel_visibility <=> bottom_panel_visibility;
+            icon: @image-url("../../icons/krokiet_info.svg");
+            colorize-icon: true;
+        }
+    }
+}

@@ -4,7 +4,7 @@
 //
 // A Fragment's startActivityForResult + onActivityResult lifecycle is correctly
 // dispatched by the Activity framework even when the host Activity does NOT override
-// onActivityResult — so this avoids requiring CediniaActivity as the manifest activity.
+// onActivityResult - so this avoids requiring CediniaActivity as the manifest activity.
 
 import android.app.Activity;
 import android.app.Fragment;

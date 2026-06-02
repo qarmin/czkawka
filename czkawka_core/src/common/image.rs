@@ -5,8 +5,10 @@ use std::path::Path;
 
 use fast_image_resize::{FilterType as FirFilterType, ResizeAlg, ResizeOptions as FirResizeOptions, Resizer};
 use image::{DynamicImage, ImageReader};
+use little_exif::exif_tag::ExifTag;
+use little_exif::ifd::ExifTagGroup;
+use little_exif::metadata::Metadata;
 use log::{error, trace};
-use nom_exif::{ExifIter, ExifTag, MediaParser, MediaSource};
 
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::create_crash_message;
@@ -243,7 +245,7 @@ pub enum ExifOrientation {
     Rotate270CW,
 }
 
-pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientation>, nom_exif::Error> {
+pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientation>, std::io::Error> {
     if let Some(extension) = Path::new(path).extension()
         && HEIC_EXTENSIONS.contains(&extension.to_string_lossy().to_lowercase().as_str())
     {
@@ -251,36 +253,35 @@ pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientatio
     }
 
     let res = panic::catch_unwind(|| {
-        let mut parser = MediaParser::new();
-        let ms = MediaSource::file_path(path)?;
-        if !ms.has_exif() {
-            return Ok(None);
-        }
-        let exif_iter: ExifIter = parser.parse(ms)?;
-        for exif_entry in exif_iter {
-            if exif_entry.tag() == Some(ExifTag::Orientation)
-                && let Some(value) = exif_entry.get_value()
-            {
-                return match value.to_string().as_str() {
-                    "1" => Ok(Some(ExifOrientation::Normal)),
-                    "2" => Ok(Some(ExifOrientation::MirrorHorizontal)),
-                    "3" => Ok(Some(ExifOrientation::Rotate180)),
-                    "4" => Ok(Some(ExifOrientation::MirrorVertical)),
-                    "5" => Ok(Some(ExifOrientation::MirrorHorizontalAndRotate270CW)),
-                    "6" => Ok(Some(ExifOrientation::Rotate90CW)),
-                    "7" => Ok(Some(ExifOrientation::MirrorHorizontalAndRotate90CW)),
-                    "8" => Ok(Some(ExifOrientation::Rotate270CW)),
-                    _ => Ok(None),
-                };
-            }
+        let metadata = match Metadata::new_from_path(Path::new(path)) {
+            Ok(m) => m,
+            // File format has no EXIF support – treat as no orientation data
+            Err(e) if e.kind() == std::io::ErrorKind::Unsupported => return Ok(None),
+            Err(e) => return Err(e),
+        };
+
+        if let Some(ExifTag::Orientation(values)) = metadata.get_tag_by_hex(0x0112, Some(ExifTagGroup::GENERIC)).next()
+            && let Some(&value) = values.first()
+        {
+            return Ok(match value {
+                1 => Some(ExifOrientation::Normal),
+                2 => Some(ExifOrientation::MirrorHorizontal),
+                3 => Some(ExifOrientation::Rotate180),
+                4 => Some(ExifOrientation::MirrorVertical),
+                5 => Some(ExifOrientation::MirrorHorizontalAndRotate270CW),
+                6 => Some(ExifOrientation::Rotate90CW),
+                7 => Some(ExifOrientation::MirrorHorizontalAndRotate90CW),
+                8 => Some(ExifOrientation::Rotate270CW),
+                _ => None,
+            });
         }
         Ok(None)
     });
 
     res.unwrap_or_else(|_| {
-        let message = create_crash_message("nom-exif", path, "https://github.com/mindeng/nom-exif");
+        let message = create_crash_message("little-exif", path, "https://github.com/TechnikTobi/little_exif");
         error!("{message}");
-        Err(nom_exif::Error::IOError(std::io::Error::other("Panic in get_rotation_from_exif")))
+        Err(std::io::Error::other("Panic in get_rotation_from_exif"))
     })
 }
 

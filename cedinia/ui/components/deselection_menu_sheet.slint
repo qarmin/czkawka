@@ -1,0 +1,54 @@
+import { Fonts } from "../globals/fonts.slint";
+import { CediniaColors } from "../globals/colors.slint";
+import { AppState } from "../globals/app_state.slint";
+import { Translations } from "../globals/translations.slint";
+import { ScrimDialog } from "scrim_dialog.slint";
+import { TouchButton } from "buttons/touch_button.slint";
+
+export component DeselectionMenuSheet inherits ScrimDialog {
+    in-out property <bool> is_grouped: true;
+    callback closed;
+
+    card_max_width: 300px;
+    card_radius: 14px;
+    card_padding: 12px;
+    card_spacing: 6px;
+    shadow_color: CediniaColors.shadow_lg;
+    dismissed => { root.closed(); }
+
+    Text {
+        text: Translations.deselection_popup_title_text;
+        color: CediniaColors.text_secondary;
+        font-size: Fonts.body;
+        font-weight: Fonts.bold;
+        letter-spacing: 0.5px;
+        horizontal-alignment: TextHorizontalAlignment.center;
+    }
+
+    TouchButton {
+        label: Translations.deselect_all_text;
+        min_h: 44px;
+        bg: CediniaColors.bg_surface;
+        fg: CediniaColors.text_primary;
+        horizontal-stretch: 1.0;
+        clicked => { AppState.deselect_all(); root.closed(); }
+    }
+
+    if root.is_grouped : TouchButton {
+        label: Translations.deselect_except_one_text;
+        min_h: 44px;
+        bg: CediniaColors.bg_surface;
+        fg: CediniaColors.accent_light;
+        horizontal-stretch: 1.0;
+        clicked => { AppState.deselect_all_except_one(); root.closed(); }
+    }
+
+    TouchButton {
+        label: Translations.close_text;
+        min_h: 40px;
+        bg: CediniaColors.bg_elevated;
+        fg: CediniaColors.text_disabled;
+        horizontal-stretch: 1.0;
+        clicked => { root.closed(); }
+    }
+}

@@ -9,7 +9,9 @@ use indexmap::{IndexMap, IndexSet};
 use log::debug;
 use rayon::prelude::*;
 use rusty_chromaprint::{Configuration, match_fingerprints};
-use vid_dup_finder_lib::{CreationOptions, Cropdetect, VideoHash, VideoHashBuilder};
+use similario_core::SignatureConfig;
+use similario_core::compare::{CompareConfig, find_similar};
+use similario_core::visual::VideoSignature;
 
 use crate::common::audio_fingerprint::calc_fingerprint_and_duration;
 use crate::common::cache::{CACHE_VERSION, CACHE_VIDEO_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
@@ -29,12 +31,34 @@ impl SimilarVideos {
             common_data: CommonToolData::new(ToolType::SimilarVideos),
             information: Default::default(),
             similar_vectors: Vec::new(),
-            videos_hashes: Default::default(),
             videos_to_check: Default::default(),
             audio_to_check: Default::default(),
             similar_referenced_vectors: Vec::new(),
             audio_config: Configuration::preset_test1(),
             params,
+        }
+    }
+
+    fn signature_config(&self) -> SignatureConfig {
+        SignatureConfig {
+            skip_secs: f64::from(self.params.skip_forward_amount),
+            window_count: self.params.window_count as usize,
+            window_secs: f64::from(self.params.duration),
+            cropdetect: self.params.crop_detect,
+            audio_fingerprint: false,
+        }
+    }
+
+    fn compare_config(&self) -> CompareConfig {
+        // Map czkawka tolerance (0..=20) to similario_core tolerance (0.0..=0.5).
+        // Tolerance 0 → very strict; 20 → very loose.
+        let tolerance = (self.params.tolerance as f32) / 40.0;
+        CompareConfig {
+            tolerance,
+            duration_tolerance_pct: self.params.duration_tolerance_pct,
+            min_matching_windows: self.params.min_matching_windows as f32,
+            subclip_min_match: self.params.subclip_min_match as f32,
+            ..CompareConfig::default()
         }
     }
 
@@ -97,23 +121,17 @@ impl SimilarVideos {
         }
     }
 
-    fn check_video_file_entry(&self, mut file_entry: VideosEntry) -> VideosEntry {
-        let creation_options = CreationOptions {
-            skip_forward_amount: self.params.skip_forward_amount as f64,
-            duration: self.params.duration as f64,
-            cropdetect: self.params.crop_detect,
-        };
-        let vhash = match VideoHashBuilder::from_options(creation_options).hash(file_entry.path.clone()) {
-            Ok(t) => t,
+    fn check_video_file_entry(&self, mut file_entry: VideosEntry, stop_flag: &AtomicBool) -> VideosEntry {
+        let sig_config = self.signature_config();
+        match VideoSignature::from_path(&file_entry.path, &sig_config, stop_flag) {
+            Ok(sig) => {
+                file_entry.signature = Some(sig);
+            }
             Err(e) => {
                 let path = file_entry.path.to_string_lossy();
                 file_entry.error = format!("Failed to hash file \"{path}\": reason {e}");
-                return file_entry;
             }
-        };
-
-        file_entry.vhash = vhash;
-
+        }
         file_entry
     }
 
@@ -161,13 +179,10 @@ impl SimilarVideos {
                     return None;
                 }
 
-                // Currently size is not too much relevant
-                // let size = file_entry.size;
-                let res = self.check_video_file_entry(file_entry);
+                let res = self.check_video_file_entry(file_entry, stop_flag);
                 let res = Self::read_video_properties(res);
 
                 progress_handler.increase_items(1);
-                // progress_handler.increase_size(size);
 
                 Some(res)
             })
@@ -182,11 +197,14 @@ impl SimilarVideos {
         self.save_cache(&vec_file_entry, loaded_hash_map);
 
         let mut hashmap_with_file_entries: IndexMap<String, VideosEntry> = Default::default();
-        let mut vector_of_hashes: Vec<VideoHash> = Vec::new();
+        let mut signatures: Vec<VideoSignature> = Vec::new();
         for file_entry in vec_file_entry {
             if file_entry.error.is_empty() {
-                vector_of_hashes.push(file_entry.vhash.clone());
-                hashmap_with_file_entries.insert(file_entry.vhash.src_path().to_string_lossy().to_string(), file_entry);
+                if let Some(sig) = file_entry.signature.clone() {
+                    let key = sig.path.to_string_lossy().to_string();
+                    signatures.push(sig);
+                    hashmap_with_file_entries.insert(key, file_entry);
+                }
             } else {
                 self.common_data.text_messages.warnings.push(file_entry.error);
             }
@@ -197,7 +215,7 @@ impl SimilarVideos {
             return WorkContinueStatus::Stop;
         }
 
-        self.match_groups_of_videos(vector_of_hashes, &hashmap_with_file_entries);
+        self.match_groups_of_videos(&signatures, &hashmap_with_file_entries);
 
         if self.create_thumbnails(progress_sender, stop_flag) == WorkContinueStatus::Stop {
             return WorkContinueStatus::Stop;
@@ -218,7 +236,6 @@ impl SimilarVideos {
         }
 
         // Clean unused data
-        self.videos_hashes = Default::default();
         self.videos_to_check = Default::default();
 
         WorkContinueStatus::Continue
@@ -296,7 +313,7 @@ impl SimilarVideos {
     #[fun_time(message = "save_cache", level = "debug")]
     fn save_cache(&mut self, vec_file_entry: &[VideosEntry], loaded_hash_map: BTreeMap<String, VideosEntry>) {
         save_and_connect_cache_generalized_by_path(
-            &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
+            &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect, self.params.window_count),
             vec_file_entry,
             loaded_hash_map,
             self,
@@ -306,29 +323,29 @@ impl SimilarVideos {
     #[fun_time(message = "load_cache_at_start", level = "debug")]
     fn load_cache_at_start(&mut self) -> (BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>, BTreeMap<String, VideosEntry>) {
         load_and_split_cache_generalized_by_path(
-            &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect),
+            &get_similar_videos_cache_file(self.params.skip_forward_amount, self.params.duration, self.params.crop_detect, self.params.window_count),
             mem::take(&mut self.videos_to_check),
             self,
         )
     }
 
     #[fun_time(message = "match_groups_of_videos", level = "debug")]
-    fn match_groups_of_videos(&mut self, vector_of_hashes: Vec<VideoHash>, hashmap_with_file_entries: &IndexMap<String, VideosEntry>) {
-        // Tolerance in library is a value between 0 and 1
-        // Tolerance in this app is a value between 0 and 20
-        // Default tolerance in library is 0.30
-        // We need to allow to set value in range 0 - 0.5
-        let match_group = vid_dup_finder_lib::search(vector_of_hashes, self.get_params().tolerance as f64 / 40.0f64);
+    fn match_groups_of_videos(&mut self, signatures: &[VideoSignature], hashmap_with_file_entries: &IndexMap<String, VideosEntry>) {
+        let cmp_config = self.compare_config();
+        let groups = find_similar(signatures, &cmp_config);
 
         let exclude_same_size = self.get_params().exclude_videos_with_same_size;
         let exclude_same_resolution = self.get_params().exclude_videos_with_same_resolution;
         let mut collected_similar_videos: Vec<Vec<VideosEntry>> = Default::default();
-        for i in match_group {
+        for group in groups {
             let mut temp_vector: Vec<VideosEntry> = Vec::new();
             let mut bt_size: BTreeSet<u64> = Default::default();
             let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
-            for j in i.duplicates() {
-                let file_entry = &hashmap_with_file_entries[&j.to_string_lossy().to_string()];
+            for path in &group.files {
+                let key = path.to_string_lossy().to_string();
+                let Some(file_entry) = hashmap_with_file_entries.get(&key) else {
+                    continue;
+                };
                 if exclude_same_size && !bt_size.insert(file_entry.size) {
                     continue;
                 }
@@ -341,6 +358,7 @@ impl SimilarVideos {
                 temp_vector.push(file_entry.clone());
             }
             if temp_vector.len() > 1 {
+                temp_vector.sort_unstable_by(|a, b| a.modified_date.cmp(&b.modified_date).then(a.path.cmp(&b.path)));
                 collected_similar_videos.push(temp_vector);
             }
         }
@@ -455,6 +473,8 @@ impl SimilarVideos {
         let mut similar_vectors: Vec<Vec<VideosEntry>> = Vec::new();
         let mut used_paths: IndexSet<String> = Default::default();
 
+        let lookup: BTreeMap<String, &VideoAudioEntry> = entries.iter().map(|e| (e.path.to_string_lossy().to_string(), e)).collect();
+
         for f_entry in &entries {
             if check_if_stop_received(stop_flag) {
                 progress_handler.join_thread();
@@ -503,7 +523,6 @@ impl SimilarVideos {
 
             similar_entries.retain(|path| !used_paths.contains(path));
             if !similar_entries.is_empty() {
-                let lookup: BTreeMap<String, &VideoAudioEntry> = entries.iter().map(|e| (e.path.to_string_lossy().to_string(), e)).collect();
                 let mut result_group: Vec<VideosEntry> = similar_entries
                     .iter()
                     .filter_map(|path| {
@@ -518,6 +537,49 @@ impl SimilarVideos {
         }
 
         progress_handler.join_thread();
+
+        let exclude_same_size = self.params.exclude_videos_with_same_size;
+        let exclude_same_resolution = self.params.exclude_videos_with_same_resolution;
+        if exclude_same_size || exclude_same_resolution {
+            similar_vectors = similar_vectors
+                .into_par_iter()
+                .map(|group| {
+                    let enriched: Vec<VideosEntry> = if exclude_same_resolution {
+                        group
+                            .into_par_iter()
+                            .map(|mut entry| {
+                                if (entry.width.is_none() || entry.height.is_none())
+                                    && let Ok(meta) = VideoMetadata::from_path(&entry.path)
+                                {
+                                    entry.width = meta.width;
+                                    entry.height = meta.height;
+                                }
+                                entry
+                            })
+                            .collect()
+                    } else {
+                        group
+                    };
+                    let mut bt_size: BTreeSet<u64> = Default::default();
+                    let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
+                    let mut filtered_group: Vec<VideosEntry> = Vec::new();
+                    for entry in enriched {
+                        if exclude_same_size && !bt_size.insert(entry.size) {
+                            continue;
+                        }
+                        if exclude_same_resolution
+                            && let (Some(w), Some(h)) = (entry.width, entry.height)
+                            && !bt_resolution.insert((w, h))
+                        {
+                            continue;
+                        }
+                        filtered_group.push(entry);
+                    }
+                    filtered_group
+                })
+                .filter(|g| g.len() > 1)
+                .collect();
+        }
 
         self.similar_vectors = similar_vectors;
 
@@ -544,7 +606,7 @@ fn audio_entry_to_videos_entry(ae: &VideoAudioEntry) -> VideosEntry {
         path: ae.path.clone(),
         size: ae.size,
         modified_date: ae.modified_date,
-        vhash: Default::default(),
+        signature: None,
         error: String::new(),
         fps: None,
         codec: None,
@@ -560,13 +622,9 @@ pub fn get_similar_videos_audio_cache_file() -> String {
     format!("cache_similar_videos_audio_{CACHE_VERSION}.bin")
 }
 
-pub fn get_similar_videos_cache_file(skip_forward_amount: u32, duration: u32, crop_detect: Cropdetect) -> String {
-    let crop_detect_str = match crop_detect {
-        Cropdetect::None => "none",
-        Cropdetect::Letterbox => "letterbox",
-        Cropdetect::Motion => "motion",
-    };
-    format!("cache_similar_videos_{CACHE_VIDEO_VERSION}__skip_{skip_forward_amount}__dur_{duration}__cd_{crop_detect_str}.bin")
+pub fn get_similar_videos_cache_file(skip_forward_amount: u32, duration: u32, crop_detect: bool, window_count: u32) -> String {
+    let cd = if crop_detect { "on" } else { "off" };
+    format!("cache_similar_videos_{CACHE_VIDEO_VERSION}__skip_{skip_forward_amount}__dur_{duration}__cd_{cd}__wc_{window_count}.bin")
 }
 pub fn format_bitrate_opt(bitrate: Option<u64>) -> String {
     match bitrate {

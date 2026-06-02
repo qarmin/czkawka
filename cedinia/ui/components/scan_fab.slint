@@ -1,0 +1,40 @@
+import { Fonts } from "../globals/fonts.slint";
+import { CediniaColors } from "../globals/colors.slint";
+import { ScanState } from "../globals/common.slint";
+import { AppState } from "../globals/app_state.slint";
+
+export component ScanFab inherits Rectangle {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background: !AppState.storage_permission_granted
+        ? CediniaColors.text_disabled
+        : AppState.scan_state == ScanState.Scanning
+            ? CediniaColors.warning
+            : AppState.scan_state == ScanState.Stopping
+                ? CediniaColors.warning.with-alpha(0.5)
+                : CediniaColors.accent;
+    drop-shadow-blur: 12px;
+    drop-shadow-color: CediniaColors.shadow_md;
+    animate background { duration: 200ms; }
+
+    TouchArea {
+        enabled: AppState.storage_permission_granted && AppState.scan_state != ScanState.Stopping;
+        clicked => {
+            if (AppState.scan_state == ScanState.Scanning) {
+                AppState.stop_requested();
+            } else {
+                AppState.scan_requested();
+            }
+        }
+    }
+
+    Text {
+        text: AppState.scan_state == ScanState.Scanning || AppState.scan_state == ScanState.Stopping
+            ? "⏹" : "▶";
+        font-size: Fonts.display_sm;
+        color: (!AppState.storage_permission_granted || AppState.scan_state == ScanState.Stopping) ? CediniaColors.fg_on_accent_disabled : CediniaColors.fg_on_accent;
+        horizontal-alignment: TextHorizontalAlignment.center;
+        vertical-alignment: TextVerticalAlignment.center;
+    }
+}

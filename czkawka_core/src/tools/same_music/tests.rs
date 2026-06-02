@@ -55,10 +55,10 @@ fn test_same_music_by_content_medium_similarity() {
     let info = finder.get_information();
     let duplicates = finder.get_duplicated_music_entries();
 
-    assert_eq!(info.number_of_duplicates, 1);
+    assert_eq!(info.number_of_duplicates, 2);
     assert_eq!(info.number_of_groups, 1);
     assert_eq!(duplicates.len(), 1);
-    assert_eq!(duplicates.iter().map(|e| e.len()).sum::<usize>(), 2);
+    assert_eq!(duplicates.iter().map(|e| e.len()).sum::<usize>(), 3);
 }
 
 #[test]
@@ -264,4 +264,48 @@ fn test_same_music_empty_directory() {
     assert_eq!(info.number_of_duplicates, 0);
     assert_eq!(info.number_of_groups, 0);
     assert_eq!(duplicates.len(), 0);
+}
+
+#[test]
+fn test_same_music_reference_mode_deletes_only_non_reference() {
+    use std::fs;
+    use std::path::Path;
+
+    use tempfile::TempDir;
+
+    use crate::common::tool_data::DeleteMethod;
+    use crate::common::traits::DeletingItems;
+    use crate::tools::same_music::MusicEntry;
+
+    let temp_dir = TempDir::new().unwrap();
+    let reference = temp_dir.path().join("reference.mp3");
+    let duplicate = temp_dir.path().join("duplicate.mp3");
+    fs::write(&reference, "ref").unwrap();
+    fs::write(&duplicate, "dup").unwrap();
+
+    let mk = |path: &Path| MusicEntry {
+        size: 3,
+        path: path.to_path_buf(),
+        modified_date: 0,
+        fingerprint: Vec::new(),
+        track_title: String::new(),
+        track_artist: String::new(),
+        year: String::new(),
+        length: 0,
+        genre: String::new(),
+        bitrate: 0,
+    };
+
+    let params = SameMusicParameters::new(MusicSimilarity::TRACK_TITLE, false, CheckingMethod::AudioTags, 10.0, 0.2, false);
+    let mut finder = SameMusic::new(params);
+    finder.set_delete_method(DeleteMethod::Delete);
+    finder.set_move_to_trash(false);
+    finder.set_use_reference_folders(true);
+    finder.duplicated_music_entries_referenced = vec![(mk(&reference), vec![mk(&duplicate)])];
+
+    let stop_flag = Arc::new(AtomicBool::new(false));
+    let _ = finder.delete_files(&stop_flag, None);
+
+    assert!(reference.exists(), "Reference track must be kept");
+    assert!(!duplicate.exists(), "Non-reference duplicate must be deleted (#1643)");
 }

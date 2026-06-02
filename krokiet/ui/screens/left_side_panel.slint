@@ -1,0 +1,172 @@
+import { Button, ListView } from "std-widgets.slint";
+import { ActiveTab, BottomPanelVisibility } from "../globals/common.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+import { GuiState } from "../globals/gui_state.slint";
+import { Callabler } from "../globals/callabler.slint";
+import { FontSizes } from "../globals/fonts.slint";
+import { Translations } from "../globals/translations.slint";
+import { MaxTextMeasure } from "../globals/text_size.slint";
+
+component TabItem {
+    in property <string> text;
+    in property <ActiveTab> curr_tab;
+    callback changed_active_tab();
+
+    Rectangle {
+        width: parent.width;
+        horizontal-stretch: 1.0;
+        background: touch-area.has-hover ? ColorPalette.tab_hovered_color : transparent;
+        touch_area := TouchArea {
+            clicked => {
+                if (GuiState.active_tab == root.curr_tab) {
+                    return;
+                }
+                GuiState.active_tab = root.curr_tab;
+                Callabler.tab_changed();
+                changed_active_tab();
+            }
+        }
+    }
+
+    HorizontalLayout {
+        width: parent.width;
+        alignment: LayoutAlignment.start;
+        layout_rectangle := VerticalLayout {
+            empty_rectangle := Rectangle { }
+
+            current_rectangle := Rectangle {
+                visible: (GuiState.active_tab == root.curr_tab);
+                border-radius: 2px;
+                width: 5px;
+                height: 0px;
+                background: ColorPalette.tab_selected_color;
+                animate height {
+                    duration: 150ms;
+                    easing: ease;
+                }
+            }
+
+            empty_rectangle2 := Rectangle { }
+        }
+    }
+
+    Text {
+        text: root.text;
+        width: parent.width;
+        horizontal-alignment: center;
+        font-size: FontSizes.normal;
+        font-weight: FontSizes.bold_light;
+    }
+
+    states [
+        is-selected when GuiState.active_tab == root.curr_tab: {
+            current_rectangle.height: layout_rectangle.height;
+        }
+        is-not-selected when GuiState.active_tab != root.curr_tab: {
+            current_rectangle.height: 0px;
+        }
+    ]
+}
+
+export component LeftSidePanel {
+    callback changed_active_tab();
+
+    // Measure the natural width of every tool label so the panel auto-sizes
+    // to the widest translated name without any hard-coded per-language constant.
+    t_tools := MaxTextMeasure {
+        font-size: FontSizes.normal;
+        font-weight: FontSizes.bold_light;
+        texts: [
+            Translations.tool_duplicate_files_text,
+            Translations.tool_empty_folders_text,
+            Translations.tool_big_files_text,
+            Translations.tool_empty_files_text,
+            Translations.tool_temporary_files_text,
+            Translations.tool_similar_images_text,
+            Translations.tool_similar_videos_text,
+            Translations.tool_music_duplicates_text,
+            Translations.tool_invalid_symlinks_text,
+            Translations.tool_broken_files_text,
+            Translations.tool_bad_extensions_text,
+            Translations.tool_exif_remover_text,
+            Translations.tool_video_optimizer_text,
+            Translations.tool_bad_names_text,
+        ];
+    }
+
+    preferred-width: t_tools.measure_width + 20px;
+    VerticalLayout {
+        spacing: 2px;
+        Rectangle {
+            visible: GuiState.active_tab != ActiveTab.About;
+            height: 80px;
+            Image {
+                width: parent.height;
+                source: @image-url("../../icons/krokiet_logo_flag.svg");
+                image-fit: ImageFit.contain;
+            }
+
+            touch_area := TouchArea {
+                clicked => {
+                    GuiState.active_tab = ActiveTab.About;
+                    Callabler.tab_changed();
+                    root.changed_active_tab();
+                    GuiState.bottom_panel_visibility = BottomPanelVisibility.NotVisible;
+                }
+            }
+        }
+
+        ListView {
+            out property <length> element_size: 25px;
+            out property <[{name: string, tab: ActiveTab}]> tools_model <=> GuiState.tools_model;
+
+            for r[idx] in tools_model: TabItem {
+                height: parent.element_size;
+                text: r.name;
+                curr_tab: r.tab;
+                changed_active_tab() => {
+                    root.changed_active_tab();
+                }
+            }
+        }
+
+        Rectangle {
+            min-width: 90px;
+            HorizontalLayout {
+                alignment: start;
+                Button {
+                    visible: GuiState.active_tab != ActiveTab.Settings;
+                    min-width: 20px;
+                    min-height: 20px;
+                    max-height: self.width;
+                    preferred-height: self.width;
+                    icon: @image-url("../../icons/krokiet_settings.svg");
+                    colorize-icon: true;
+                    clicked => {
+                        GuiState.active_tab = ActiveTab.Settings;
+                        Callabler.tab_changed();
+                        root.changed_active_tab();
+                    }
+                }
+            }
+
+            HorizontalLayout {
+                alignment: end;
+                Button {
+                    checkable: true;
+                    checked: GuiState.visible_tool_settings;
+                    visible: GuiState.available_subsettings;
+                    min-width: 20px;
+                    min-height: 20px;
+                    max-height: self.width;
+                    preferred-height: self.width;
+                    icon: @image-url("../../icons/krokiet_subsettings.svg");
+                    colorize-icon: true;
+                    clicked => {
+                        GuiState.visible_tool_settings = !GuiState.visible_tool_settings;
+                    }
+                }
+            }
+        }
+    }
+}

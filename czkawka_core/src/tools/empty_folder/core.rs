@@ -219,7 +219,12 @@ impl EmptyFolder {
         #[cfg(target_family = "unix")]
         if directories.exclude_other_filesystems() {
             match directories.is_on_other_filesystems(&next_folder) {
-                Ok(true) => return,
+                Ok(true) => {
+                    if non_empty_folder.is_none() {
+                        *non_empty_folder = Some(current_folder_as_str.to_string());
+                    }
+                    return;
+                }
                 Err(e) => warnings.push(e),
                 _ => (),
             }

@@ -26,7 +26,11 @@ pub(crate) fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
                 sd.custom_settings.similar_videos_sub_ignore_same_resolution,
                 sd.custom_settings.similar_videos_skip_forward_amount,
                 sd.custom_settings.similar_videos_vid_hash_duration,
-                sd.combo_box_items.videos_crop_detect.value,
+                sd.custom_settings.similar_videos_crop_detect,
+                sd.custom_settings.similar_videos_window_count,
+                sd.custom_settings.similar_videos_duration_tolerance_pct as f64,
+                sd.custom_settings.similar_videos_min_matching_windows as f64,
+                sd.custom_settings.similar_videos_subclip_min_match as f64,
                 sd.custom_settings.video_thumbnails_generate,
                 sd.custom_settings.video_thumbnails_percentage,
                 sd.custom_settings.video_thumbnails_generate_grid,
@@ -66,7 +70,7 @@ pub(crate) fn scan_similar_videos(a: Weak<MainWindow>, sd: ScanData) {
             let stopped_search = tool.get_stopped_search();
             let items_found = info.number_of_duplicates;
             let groups = info.number_of_groups;
-            sd.shared_models.lock().unwrap().shared_similar_videos_state = Some(tool);
+            sd.shared_models.lock().expect("Mutex poisoned").shared_similar_videos_state = Some(tool);
 
             let messages_data = MessagesData { critical, messages };
 

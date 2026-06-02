@@ -128,7 +128,7 @@ The stage label (e.g. "Calculating hashes", "Reading tags") is derived from the
 compact JSON, pretty JSON) and buffers stdout output, which is printed after the
 thread join. The `CliOutput.found_any_files` flag drives the exit code:
 
-- `exit(11)` when items are found (and `-W` is not set) — useful in scripts.
+- `exit(11)` when items are found (and `-W` is not set) - useful in scripts.
 - `exit(0)` otherwise.
 
 ---

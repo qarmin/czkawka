@@ -1,0 +1,45 @@
+import { CediniaColors } from "../globals/colors.slint";
+
+export component ScrimDialog inherits Rectangle {
+    // Overlay
+    in property <bool>   strong_scrim: false;
+    in property <bool>   dismissible: true;
+    callback dismissed;
+
+    // Card
+    in property <length> card_max_width: 360px;
+    in property <length> side_margin: 48px;
+    in property <length> card_radius: 16px;
+    in property <length> card_padding: 24px;
+    in property <length> card_spacing: 16px;
+    in property <color>  card_bg: CediniaColors.bg_elevated;
+    in property <bool>   bordered: false;
+    in property <length> shadow_blur: 24px;
+    in property <color>  shadow_color: CediniaColors.shadow_md;
+
+    background: root.strong_scrim ? CediniaColors.scrim_strong : CediniaColors.scrim;
+
+    TouchArea {
+        clicked => { if (root.dismissible) { root.dismissed(); } }
+    }
+
+    Rectangle {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        width: min(parent.width - root.side_margin, root.card_max_width);
+        height: vl.preferred-height;
+        border-radius: root.card_radius;
+        background: root.card_bg;
+        border-width: root.bordered ? 1px : 0px;
+        border-color: CediniaColors.divider;
+        drop-shadow-blur: root.shadow_blur;
+        drop-shadow-color: root.shadow_color;
+        clip: true;
+
+        vl := VerticalLayout {
+            padding: root.card_padding;
+            spacing: root.card_spacing;
+            @children
+        }
+    }
+}

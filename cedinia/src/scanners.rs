@@ -595,7 +595,10 @@ pub(crate) fn scan_similar_videos<H: ScanResultHandler>(
     handler: &Arc<H>,
     scan_id: u32,
 ) -> Vec<FileItem> {
-    use czkawka_core::tools::similar_videos::{DEFAULT_CROP_DETECT, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_VID_HASH_DURATION, SimilarVideos, SimilarVideosParameters, VideosEntry};
+    use czkawka_core::tools::similar_videos::{
+        DEFAULT_CROP_DETECT, DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_VID_HASH_DURATION,
+        DEFAULT_WINDOW_COUNT, SimilarVideos, SimilarVideosParameters, VideosEntry,
+    };
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
     let params = SimilarVideosParameters::new(
         10,    // tolerance (not used in audio mode)
@@ -604,6 +607,10 @@ pub(crate) fn scan_similar_videos<H: ScanResultHandler>(
         DEFAULT_SKIP_FORWARD_AMOUNT,
         DEFAULT_VID_HASH_DURATION,
         DEFAULT_CROP_DETECT,
+        DEFAULT_WINDOW_COUNT,
+        DEFAULT_DURATION_TOLERANCE_PCT,
+        DEFAULT_MIN_MATCHING_WINDOWS,
+        DEFAULT_SUBCLIP_MIN_MATCH,
         false, // generate_thumbnails
         10,    // thumbnail_video_percentage_from_start
         false, // generate_thumbnail_grid_instead_of_single

@@ -25,7 +25,7 @@ pub(crate) fn connect_save(app: &MainWindow, shared_models: Arc<Mutex<SharedMode
             if let Some(folder) = folder {
                 let folder_str = folder.to_string_lossy().to_string();
                 weak.upgrade_in_event_loop(move |app| {
-                    if let Err(e) = shared_models.lock().unwrap().save_results(active_tab, &folder_str) {
+                    if let Err(e) = shared_models.lock().expect("Mutex poisoned").save_results(active_tab, &folder_str) {
                         app.global::<GuiState>().set_info_text(e.into());
                     }
                 })

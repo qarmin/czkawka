@@ -1,8 +1,7 @@
 // Remove console window in Windows OS
 #![windows_subsystem = "windows"]
-#![allow(clippy::unwrap_used)] // Cannot use due unwrap used in a lot of places in generated code
-#![allow(clippy::indexing_slicing)] // Cannot use due unwrap used in a lot of places in generated code
-#![allow(clippy::todo)] // Cannot use due unwrap used in a lot of places in generated code
+#![allow(clippy::allow_attributes)]
+#![allow(clippy::indexing_slicing)]
 
 use std::rc::Rc;
 use std::sync::Arc;
@@ -83,7 +82,13 @@ mod simpler_model;
 #[cfg(test)]
 mod test_common;
 
-slint::include_modules!();
+// Slint's generated code triggers many clippy lints (unwrap_used, indexing_slicing, ...)
+// that we enforce ourselves but cannot influence in third-party generated code.
+#[allow(clippy::all, clippy::pedantic, clippy::nursery, clippy::restriction, clippy::cargo, unused_qualifications)]
+mod ui {
+    slint::include_modules!();
+}
+pub use ui::*;
 
 fn main() {
     register_image_decoding_hooks();
@@ -130,7 +135,6 @@ fn main() {
     // Create audio player for scan completion notifications
     let audio_player = Arc::new(crate::audio_player::AudioPlayer::new());
 
-    // Disabled for now, due invalid settings model at start
     set_initial_gui_infos(&app);
 
     set_initial_scroll_list_data_indexes(&app);

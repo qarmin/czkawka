@@ -1,46 +1,46 @@
-ab_glyph 0.2.32  [Apache-2.0]  — Alex Butler <alexheretic@gmail.com>
+ab_glyph 0.2.32  [Apache-2.0]  - Alex Butler <alexheretic@gmail.com>
     https://github.com/alexheretic/ab-glyph
-ab_glyph_rasterizer 0.1.10  [Apache-2.0]  — Alex Butler <alexheretic@gmail.com>
+ab_glyph_rasterizer 0.1.10  [Apache-2.0]  - Alex Butler <alexheretic@gmail.com>
     https://github.com/alexheretic/ab-glyph
 addr2line 0.25.1  [Apache-2.0 OR MIT]
     https://github.com/gimli-rs/addr2line
-adler2 2.0.1  [0BSD OR MIT OR Apache-2.0]  — Jonas Schievink <jonasschievink@gmail.com>, oyvindln <oyvindln@users.noreply.github.com>
+adler2 2.0.1  [0BSD OR MIT OR Apache-2.0]  - Jonas Schievink <jonasschievink@gmail.com>, oyvindln <oyvindln@users.noreply.github.com>
     https://github.com/oyvindln/adler2
-adler32 1.2.0  [Zlib]  — Remi Rampin <remirampin@gmail.com>
+adler32 1.2.0  [Zlib]  - Remi Rampin <remirampin@gmail.com>
     https://github.com/remram44/adler32-rs
-aes 0.8.4  [MIT OR Apache-2.0]  — RustCrypto Developers
+aes 0.8.4  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/block-ciphers
-ahash 0.8.12  [MIT OR Apache-2.0]  — Tom Kaitchuck <Tom.Kaitchuck@gmail.com>
+ahash 0.8.12  [MIT OR Apache-2.0]  - Tom Kaitchuck <Tom.Kaitchuck@gmail.com>
     https://github.com/tkaitchuck/ahash
-aho-corasick 1.1.4  [Unlicense OR MIT]  — Andrew Gallant <jamslam@gmail.com>
+aho-corasick 1.1.4  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
     https://github.com/BurntSushi/aho-corasick
 aligned 0.4.3  [MIT OR Apache-2.0]
     https://github.com/rust-embedded-community/aligned
-aligned-vec 0.6.4  [MIT]  — sarah <>
+aligned-vec 0.6.4  [MIT]  - sarah <>
     https://github.com/sarah-ek/aligned-vec/
-alloc-no-stdlib 2.0.4  [BSD-3-Clause]  — Daniel Reiter Horn <danielrh@dropbox.com>
+alloc-no-stdlib 2.0.4  [BSD-3-Clause]  - Daniel Reiter Horn <danielrh@dropbox.com>
     https://github.com/dropbox/rust-alloc-no-stdlib
-alloc-stdlib 0.2.2  [BSD-3-Clause]  — Daniel Reiter Horn <danielrh@dropbox.com>
+alloc-stdlib 0.2.2  [BSD-3-Clause]  - Daniel Reiter Horn <danielrh@dropbox.com>
     https://github.com/dropbox/rust-alloc-no-stdlib
-alloca 0.4.0  [MIT]  — Adel Prokurov <adel.prokurov@gmail.com>, StackOverflowExcept1on
+alloca 0.4.0  [MIT]  - Adel Prokurov <adel.prokurov@gmail.com>, StackOverflowExcept1on
     https://github.com/playXE/alloca-rs
-allocator-api2 0.2.21  [MIT OR Apache-2.0]  — Zakarum <zaq.dev@icloud.com>
+allocator-api2 0.2.21  [MIT OR Apache-2.0]  - Zakarum <zaq.dev@icloud.com>
     https://github.com/zakarumych/allocator-api2
 android-activity 0.5.2  [MIT OR Apache-2.0]
     https://github.com/rust-mobile/android-activity
 android-activity 0.6.0  [MIT OR Apache-2.0]
     https://github.com/rust-mobile/android-activity
-android-build 0.1.3  [MIT]  — Kevin Boos <kevinaboos@gmail.com>, Robius Project Maintainers
+android-build 0.1.3  [MIT]  - Kevin Boos <kevinaboos@gmail.com>, Robius Project Maintainers
     https://github.com/project-robius/android-build
-android-properties 0.2.2  [MIT]  — Mikhail Lappo <mikhail.lappo@esrlabs.com>
+android-properties 0.2.2  [MIT]  - Mikhail Lappo <mikhail.lappo@esrlabs.com>
     https://github.com/miklelappo/android-properties
-android_log-sys 0.3.2  [MIT OR Apache-2.0]  — The android_log_sys Developers
+android_log-sys 0.3.2  [MIT OR Apache-2.0]  - The android_log_sys Developers
     https://github.com/rust-mobile/android_log-sys-rs
-android_logger 0.15.1  [MIT OR Apache-2.0]  — The android_logger Developers
+android_logger 0.15.1  [MIT OR Apache-2.0]  - The android_logger Developers
     https://github.com/rust-mobile/android_logger-rs
-android_system_properties 0.1.5  [MIT/Apache-2.0]  — Nicolas Silva <nical@fastmail.com>
+android_system_properties 0.1.5  [MIT/Apache-2.0]  - Nicolas Silva <nical@fastmail.com>
     https://github.com/nical/android_system_properties
-anes 0.1.6  [MIT OR Apache-2.0]  — Robert Vojta <rvojta@me.com>
+anes 0.1.6  [MIT OR Apache-2.0]  - Robert Vojta <rvojta@me.com>
     https://github.com/zrzka/anes-rs
 annotate-snippets 0.12.13  [MIT OR Apache-2.0]
     https://github.com/rust-lang/annotate-snippets-rs
@@ -54,157 +54,157 @@ anstyle-query 1.1.5  [MIT OR Apache-2.0]
     https://github.com/rust-cli/anstyle.git
 anstyle-wincon 3.0.11  [MIT OR Apache-2.0]
     https://github.com/rust-cli/anstyle.git
-anyhow 1.0.102  [MIT OR Apache-2.0]  — David Tolnay <dtolnay@gmail.com>
+anyhow 1.0.102  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/anyhow
-approx 0.5.1  [Apache-2.0]  — Brendan Zabarauskas <bjzaba@yahoo.com.au>
+approx 0.5.1  [Apache-2.0]  - Brendan Zabarauskas <bjzaba@yahoo.com.au>
     https://github.com/brendanzab/approx
-arbitrary 1.4.2  [MIT OR Apache-2.0]  — The Rust-Fuzz Project Developers, Nick Fitzgerald <fitzgen@gmail.com>, Manish Goregaokar <manishsmail@gmail.com>, Simonas Kazlauskas <arbitrary@kazlauskas.me>, Brian L. Troutwine <brian@troutwine.us>, Corey Farwell <coreyf@rwell.org>
+arbitrary 1.4.2  [MIT OR Apache-2.0]  - The Rust-Fuzz Project Developers, Nick Fitzgerald <fitzgen@gmail.com>, Manish Goregaokar <manishsmail@gmail.com>, Simonas Kazlauskas <arbitrary@kazlauskas.me>, Brian L. Troutwine <brian@troutwine.us>, Corey Farwell <coreyf@rwell.org>
     https://github.com/rust-fuzz/arbitrary/
-arc-swap 1.8.2  [MIT OR Apache-2.0]  — Michal 'vorner' Vaner <vorner@vorner.cz>
+arc-swap 1.8.2  [MIT OR Apache-2.0]  - Michal 'vorner' Vaner <vorner@vorner.cz>
     https://github.com/vorner/arc-swap
-arg_enum_proc_macro 0.3.4  [MIT]  — Luca Barbato <lu_zero@gentoo.org>
+arg_enum_proc_macro 0.3.4  [MIT]  - Luca Barbato <lu_zero@gentoo.org>
     https://github.com/lu-zero/arg_enum_proc_macro
-arrayref 0.3.9  [BSD-2-Clause]  — David Roundy <roundyd@physics.oregonstate.edu>
+arrayref 0.3.9  [BSD-2-Clause]  - David Roundy <roundyd@physics.oregonstate.edu>
     https://github.com/droundy/arrayref
-arrayvec 0.7.6  [MIT OR Apache-2.0]  — bluss
+arrayvec 0.7.6  [MIT OR Apache-2.0]  - bluss
     https://github.com/bluss/arrayvec
 as-raw-xcb-connection 1.0.1  [MIT OR Apache-2.0]
     https://github.com/psychon/as-raw-xcb-connection
-as-slice 0.2.1  [MIT OR Apache-2.0]  — Jorge Aparicio <jorge@japaric.io>, Emil Fresk <emil.fresk@gmail.com>
+as-slice 0.2.1  [MIT OR Apache-2.0]  - Jorge Aparicio <jorge@japaric.io>, Emil Fresk <emil.fresk@gmail.com>
     https://github.com/japaric/as-slice
-async-broadcast 0.7.2  [MIT OR Apache-2.0]  — Stjepan Glavina <stjepang@gmail.com>, Yoshua Wuyts <yoshuawuyts@gmail.com>, Zeeshan Ali Khan <zeeshanak@gnome.org>
+async-broadcast 0.7.2  [MIT OR Apache-2.0]  - Stjepan Glavina <stjepang@gmail.com>, Yoshua Wuyts <yoshuawuyts@gmail.com>, Zeeshan Ali Khan <zeeshanak@gnome.org>
     https://github.com/smol-rs/async-broadcast
-async-channel 2.5.0  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>
+async-channel 2.5.0  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/async-channel
-async-executor 1.14.0  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>, John Nunley <dev@notgull.net>
+async-executor 1.14.0  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>, John Nunley <dev@notgull.net>
     https://github.com/smol-rs/async-executor
-async-io 2.6.0  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>
+async-io 2.6.0  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/async-io
-async-lock 3.4.2  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>
+async-lock 3.4.2  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/async-lock
-async-process 2.5.0  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>
+async-process 2.5.0  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/async-process
-async-recursion 1.1.1  [MIT OR Apache-2.0]  — Robert Usher <266585+dcchut@users.noreply.github.com>
+async-recursion 1.1.1  [MIT OR Apache-2.0]  - Robert Usher <266585+dcchut@users.noreply.github.com>
     https://github.com/dcchut/async-recursion
-async-signal 0.2.13  [Apache-2.0 OR MIT]  — John Nunley <dev@notgull.net>
+async-signal 0.2.13  [Apache-2.0 OR MIT]  - John Nunley <dev@notgull.net>
     https://github.com/smol-rs/async-signal
-async-task 4.7.1  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>
+async-task 4.7.1  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/async-task
-async-trait 0.1.89  [MIT OR Apache-2.0]  — David Tolnay <dtolnay@gmail.com>
+async-trait 0.1.89  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/async-trait
-atomic-waker 1.1.2  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>, Contributors to futures-rs
+atomic-waker 1.1.2  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>, Contributors to futures-rs
     https://github.com/smol-rs/atomic-waker
 auto_enums 0.8.8  [Apache-2.0 OR MIT]
     https://github.com/taiki-e/auto_enums
-autocfg 1.5.0  [Apache-2.0 OR MIT]  — Josh Stone <cuviper@gmail.com>
+autocfg 1.5.0  [Apache-2.0 OR MIT]  - Josh Stone <cuviper@gmail.com>
     https://github.com/cuviper/autocfg
-av-scenechange 0.14.1  [MIT]  — Josh Holmer <jholmer.in@gmail.com>
+av-scenechange 0.14.1  [MIT]  - Josh Holmer <jholmer.in@gmail.com>
     https://github.com/rust-av/av-scenechange
 av1-grain 0.2.5  [BSD-2-Clause]
     https://github.com/rust-av/av1-grain
-avif-serialize 0.8.8  [BSD-3-Clause]  — Kornel Lesiński <kornel@geekhood.net>
+avif-serialize 0.8.8  [BSD-3-Clause]  - Kornel Lesiński <kornel@geekhood.net>
     https://github.com/kornelski/avif-serialize
-backtrace 0.3.76  [MIT OR Apache-2.0]  — The Rust Project Developers
+backtrace 0.3.76  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-lang/backtrace-rs
-base64 0.22.1  [MIT OR Apache-2.0]  — Marshall Pierce <marshall@mpierce.org>
+base64 0.22.1  [MIT OR Apache-2.0]  - Marshall Pierce <marshall@mpierce.org>
     https://github.com/marshallpierce/rust-base64
-basic-toml 0.1.10  [MIT OR Apache-2.0]  — Alex Crichton <alex@alexcrichton.com>, David Tolnay <dtolnay@gmail.com>
+basic-toml 0.1.10  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>, David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/basic-toml
-bincode 1.3.3  [MIT]  — Ty Overby <ty@pre-alpha.com>, Francesco Mazzoli <f@mazzo.li>, David Tolnay <dtolnay@gmail.com>, Zoey Riordan <zoey@dos.cafe>
+bincode 1.3.3  [MIT]  - Ty Overby <ty@pre-alpha.com>, Francesco Mazzoli <f@mazzo.li>, David Tolnay <dtolnay@gmail.com>, Zoey Riordan <zoey@dos.cafe>
     https://github.com/servo/bincode
-bincode 2.0.1  [MIT]  — Ty Overby <ty@pre-alpha.com>, Zoey Riordan <zoey@dos.cafe>, Victor Koenders <bincode@trangar.com>
+bincode 2.0.1  [MIT]  - Ty Overby <ty@pre-alpha.com>, Zoey Riordan <zoey@dos.cafe>, Victor Koenders <bincode@trangar.com>
     https://github.com/bincode-org/bincode
-bindgen 0.72.1  [BSD-3-Clause]  — Jyun-Yan You <jyyou.tw@gmail.com>, Emilio Cobos Álvarez <emilio@crisal.io>, Nick Fitzgerald <fitzgen@gmail.com>, The Servo project developers
+bindgen 0.72.1  [BSD-3-Clause]  - Jyun-Yan You <jyyou.tw@gmail.com>, Emilio Cobos Álvarez <emilio@crisal.io>, Nick Fitzgerald <fitzgen@gmail.com>, The Servo project developers
     https://github.com/rust-lang/rust-bindgen
-bit_field 0.10.3  [Apache-2.0/MIT]  — Philipp Oppermann <dev@phil-opp.com>
+bit_field 0.10.3  [Apache-2.0/MIT]  - Philipp Oppermann <dev@phil-opp.com>
     https://github.com/phil-opp/rust-bit-field
-bitflags 1.3.2  [MIT/Apache-2.0]  — The Rust Project Developers
+bitflags 1.3.2  [MIT/Apache-2.0]  - The Rust Project Developers
     https://github.com/bitflags/bitflags
-bitflags 2.11.0  [MIT OR Apache-2.0]  — The Rust Project Developers
+bitflags 2.11.0  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/bitflags/bitflags
-bitstream-io 4.9.0  [MIT/Apache-2.0]  — Brian Langenberger <bjl@usa.net>
+bitstream-io 4.9.0  [MIT/Apache-2.0]  - Brian Langenberger <bjl@usa.net>
     https://github.com/tuffy/bitstream-io
 bitvec 1.0.1  [MIT]
     https://github.com/bitvecto-rs/bitvec
-bk-tree 0.5.0  [MIT]  — Eugene Bulkin <eugene.bulkin2@gmail.com>
+bk-tree 0.5.0  [MIT]  - Eugene Bulkin <eugene.bulkin2@gmail.com>
     https://github.com/eugene-bulkin/rust-bk-tree
-blake3 1.8.3  [CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception]  — Jack O'Connor <oconnor663@gmail.com>, Samuel Neves
+blake3 1.8.3  [CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception]  - Jack O'Connor <oconnor663@gmail.com>, Samuel Neves
     https://github.com/BLAKE3-team/BLAKE3
-block-buffer 0.10.4  [MIT OR Apache-2.0]  — RustCrypto Developers
+block-buffer 0.10.4  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
-block-padding 0.3.3  [MIT OR Apache-2.0]  — RustCrypto Developers
+block-padding 0.3.3  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
-block2 0.5.1  [MIT]  — Steven Sheldon, Mads Marquart <mads@marquart.dk>
+block2 0.5.1  [MIT]  - Steven Sheldon, Mads Marquart <mads@marquart.dk>
     https://github.com/madsmtm/objc2
-block2 0.6.2  [MIT]  — Mads Marquart <mads@marquart.dk>
+block2 0.6.2  [MIT]  - Mads Marquart <mads@marquart.dk>
     https://github.com/madsmtm/objc2
-blocking 1.6.2  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>
+blocking 1.6.2  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/blocking
-borsh 1.6.0  [MIT OR Apache-2.0]  — Near Inc <hello@near.org>
+borsh 1.6.0  [MIT OR Apache-2.0]  - Near Inc <hello@near.org>
     https://github.com/near/borsh-rs
-brotli 8.0.2  [BSD-3-Clause AND MIT]  — Daniel Reiter Horn <danielrh@dropbox.com>, The Brotli Authors
+brotli 8.0.2  [BSD-3-Clause AND MIT]  - Daniel Reiter Horn <danielrh@dropbox.com>, The Brotli Authors
     https://github.com/dropbox/rust-brotli
-brotli-decompressor 5.0.0  [BSD-3-Clause/MIT]  — Daniel Reiter Horn <danielrh@dropbox.com>, The Brotli Authors
+brotli-decompressor 5.0.0  [BSD-3-Clause/MIT]  - Daniel Reiter Horn <danielrh@dropbox.com>, The Brotli Authors
     https://github.com/dropbox/rust-brotli-decompressor
-built 0.8.0  [MIT]  — Lukas Lueg <lukas.lueg@gmail.com>
+built 0.8.0  [MIT]  - Lukas Lueg <lukas.lueg@gmail.com>
     https://github.com/lukaslueg/built
-bumpalo 3.20.2  [MIT OR Apache-2.0]  — Nick Fitzgerald <fitzgen@gmail.com>
+bumpalo 3.20.2  [MIT OR Apache-2.0]  - Nick Fitzgerald <fitzgen@gmail.com>
     https://github.com/fitzgen/bumpalo
-by_address 1.2.1  [MIT OR Apache-2.0]  — Matt Brubeck <mbrubeck@limpet.net>
+by_address 1.2.1  [MIT OR Apache-2.0]  - Matt Brubeck <mbrubeck@limpet.net>
     https://github.com/mbrubeck/by_address
-bytecount 0.6.9  [Apache-2.0/MIT]  — Andre Bogus <bogusandre@gmail.de>, Joshua Landau <joshua@landau.ws>
+bytecount 0.6.9  [Apache-2.0/MIT]  - Andre Bogus <bogusandre@gmail.de>, Joshua Landau <joshua@landau.ws>
     https://github.com/llogiq/bytecount
-bytemuck 1.25.0  [Zlib OR Apache-2.0 OR MIT]  — Lokathor <zefria@gmail.com>
+bytemuck 1.25.0  [Zlib OR Apache-2.0 OR MIT]  - Lokathor <zefria@gmail.com>
     https://github.com/Lokathor/bytemuck
-bytemuck_derive 1.10.2  [Zlib OR Apache-2.0 OR MIT]  — Lokathor <zefria@gmail.com>
+bytemuck_derive 1.10.2  [Zlib OR Apache-2.0 OR MIT]  - Lokathor <zefria@gmail.com>
     https://github.com/Lokathor/bytemuck
-byteorder 1.5.0  [Unlicense OR MIT]  — Andrew Gallant <jamslam@gmail.com>
+byteorder 1.5.0  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
     https://github.com/BurntSushi/byteorder
 byteorder-lite 0.1.0  [Unlicense OR MIT]
     https://github.com/image-rs/byteorder-lite
-bytes 1.11.1  [MIT]  — Carl Lerche <me@carllerche.com>, Sean McArthur <sean@seanmonstar.com>
+bytes 1.11.1  [MIT]  - Carl Lerche <me@carllerche.com>, Sean McArthur <sean@seanmonstar.com>
     https://github.com/tokio-rs/bytes
 bzip2 0.6.1  [MIT OR Apache-2.0]
     https://github.com/trifectatechfoundation/bzip2-rs
-calloop 0.13.0  [MIT]  — Elinor Berger <elinor@safaradeg.net>
+calloop 0.13.0  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/Smithay/calloop
-calloop 0.14.4  [MIT]  — Elinor Berger <elinor@safaradeg.net>
+calloop 0.14.4  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/Smithay/calloop
-calloop-wayland-source 0.3.0  [MIT]  — Kirill Chibisov <contact@kchibisov.com>
+calloop-wayland-source 0.3.0  [MIT]  - Kirill Chibisov <contact@kchibisov.com>
     https://github.com/smithay/calloop-wayland-source
-calloop-wayland-source 0.4.1  [MIT]  — Kirill Chibisov <contact@kchibisov.com>
+calloop-wayland-source 0.4.1  [MIT]  - Kirill Chibisov <contact@kchibisov.com>
     https://github.com/smithay/calloop-wayland-source
-cast 0.3.0  [MIT OR Apache-2.0]  — Jorge Aparicio <jorge@japaric.io>
+cast 0.3.0  [MIT OR Apache-2.0]  - Jorge Aparicio <jorge@japaric.io>
     https://github.com/japaric/cast.rs
-cbc 0.1.2  [MIT OR Apache-2.0]  — RustCrypto Developers
+cbc 0.1.2  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/block-modes
-cc 1.2.57  [MIT OR Apache-2.0]  — Alex Crichton <alex@alexcrichton.com>
+cc 1.2.57  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/rust-lang/cc-rs
-cesu8 1.1.0  [Apache-2.0/MIT]  — Eric Kidd <git@randomhacks.net>
+cesu8 1.1.0  [Apache-2.0/MIT]  - Eric Kidd <git@randomhacks.net>
     https://github.com/emk/cesu8-rs
-cexpr 0.6.0  [Apache-2.0/MIT]  — Jethro Beekman <jethro@jbeekman.nl>
+cexpr 0.6.0  [Apache-2.0/MIT]  - Jethro Beekman <jethro@jbeekman.nl>
     https://github.com/jethrogb/rust-cexpr
-cfb 0.7.3  [MIT]  — Matthew D. Steele <mdsteele@alum.mit.edu>
+cfb 0.7.3  [MIT]  - Matthew D. Steele <mdsteele@alum.mit.edu>
     https://github.com/mdsteele/rust-cfb
-cfg-if 1.0.4  [MIT OR Apache-2.0]  — Alex Crichton <alex@alexcrichton.com>
+cfg-if 1.0.4  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/rust-lang/cfg-if
-cfg_aliases 0.2.1  [MIT]  — Zicklag <zicklag@katharostech.com>
+cfg_aliases 0.2.1  [MIT]  - Zicklag <zicklag@katharostech.com>
     https://github.com/katharostech/cfg_aliases
-cgl 0.3.2  [MIT / Apache-2.0]  — The Servo Project Developers
+cgl 0.3.2  [MIT / Apache-2.0]  - The Servo Project Developers
     https://github.com/servo/cgl-rs
-chacha20 0.10.0  [MIT OR Apache-2.0]  — RustCrypto Developers
+chacha20 0.10.0  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/stream-ciphers
 chrono 0.4.44  [MIT OR Apache-2.0]
     https://github.com/chronotope/chrono
-ciborium 0.2.2  [Apache-2.0]  — Nathaniel McCallum <npmccallum@profian.com>
+ciborium 0.2.2  [Apache-2.0]  - Nathaniel McCallum <npmccallum@profian.com>
     https://github.com/enarx/ciborium
-ciborium-io 0.2.2  [Apache-2.0]  — Nathaniel McCallum <npmccallum@profian.com>
+ciborium-io 0.2.2  [Apache-2.0]  - Nathaniel McCallum <npmccallum@profian.com>
     https://github.com/enarx/ciborium
-ciborium-ll 0.2.2  [Apache-2.0]  — Nathaniel McCallum <npmccallum@profian.com>
+ciborium-ll 0.2.2  [Apache-2.0]  - Nathaniel McCallum <npmccallum@profian.com>
     https://github.com/enarx/ciborium
-cipher 0.4.4  [MIT OR Apache-2.0]  — RustCrypto Developers
+cipher 0.4.4  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/traits
-clang-sys 1.8.1  [Apache-2.0]  — Kyle Mayes <kyle@mayeses.com>
+clang-sys 1.8.1  [Apache-2.0]  - Kyle Mayes <kyle@mayeses.com>
     https://github.com/KyleMayes/clang-sys
 clap 4.6.0  [MIT OR Apache-2.0]
     https://github.com/clap-rs/clap
@@ -214,55 +214,55 @@ clap_derive 4.6.0  [MIT OR Apache-2.0]
     https://github.com/clap-rs/clap
 clap_lex 1.1.0  [MIT OR Apache-2.0]
     https://github.com/clap-rs/clap
-clipboard-win 5.4.1  [BSL-1.0]  — Douman <douman@gmx.se>
+clipboard-win 5.4.1  [BSL-1.0]  - Douman <douman@gmx.se>
     https://github.com/DoumanAsh/clipboard-win
-clru 0.6.3  [MIT]  — marmeladema <xademax@gmail.com>
+clru 0.6.3  [MIT]  - marmeladema <xademax@gmail.com>
     https://github.com/marmeladema/clru-rs
-color_quant 1.1.0  [MIT]  — nwin <nwin@users.noreply.github.com>
+color_quant 1.1.0  [MIT]  - nwin <nwin@users.noreply.github.com>
     https://github.com/image-rs/color_quant.git
 colorchoice 1.0.5  [MIT OR Apache-2.0]
     https://github.com/rust-cli/anstyle.git
-combine 4.6.7  [MIT]  — Markus Westerlind <marwes91@gmail.com>
+combine 4.6.7  [MIT]  - Markus Westerlind <marwes91@gmail.com>
     https://github.com/Marwes/combine
-concurrent-queue 2.5.0  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>, Taiki Endo <te316e89@gmail.com>, John Nunley <dev@notgull.net>
+concurrent-queue 2.5.0  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>, Taiki Endo <te316e89@gmail.com>, John Nunley <dev@notgull.net>
     https://github.com/smol-rs/concurrent-queue
-const-field-offset 0.1.5  [MIT OR Apache-2.0]  — Slint Developers <info@slint.dev>
+const-field-offset 0.1.5  [MIT OR Apache-2.0]  - Slint Developers <info@slint.dev>
     https://github.com/slint-ui/slint
-const-field-offset-macro 0.1.5  [MIT OR Apache-2.0]  — Slint Developers <info@slint.dev>
+const-field-offset-macro 0.1.5  [MIT OR Apache-2.0]  - Slint Developers <info@slint.dev>
     https://github.com/slint-ui/slint
-constant_time_eq 0.4.2  [CC0-1.0 OR MIT-0 OR Apache-2.0]  — Cesar Eduardo Barros <cesarb@cesarb.eti.br>
+constant_time_eq 0.4.2  [CC0-1.0 OR MIT-0 OR Apache-2.0]  - Cesar Eduardo Barros <cesarb@cesarb.eti.br>
     https://github.com/cesarb/constant_time_eq
-convert_case 0.10.0  [MIT]  — rutrum <dave@rutrum.net>
+convert_case 0.10.0  [MIT]  - rutrum <dave@rutrum.net>
     https://github.com/rutrum/convert-case
-copypasta 0.10.2  [MIT / Apache-2.0]  — Christian Duerr <contact@christianduerr.com>
+copypasta 0.10.2  [MIT / Apache-2.0]  - Christian Duerr <contact@christianduerr.com>
     https://github.com/alacritty/copypasta
-core-foundation 0.9.4  [MIT OR Apache-2.0]  — The Servo Project Developers
+core-foundation 0.9.4  [MIT OR Apache-2.0]  - The Servo Project Developers
     https://github.com/servo/core-foundation-rs
-core-foundation-sys 0.8.7  [MIT OR Apache-2.0]  — The Servo Project Developers
+core-foundation-sys 0.8.7  [MIT OR Apache-2.0]  - The Servo Project Developers
     https://github.com/servo/core-foundation-rs
-core-graphics 0.23.2  [MIT OR Apache-2.0]  — The Servo Project Developers
+core-graphics 0.23.2  [MIT OR Apache-2.0]  - The Servo Project Developers
     https://github.com/servo/core-foundation-rs
-core-graphics-types 0.1.3  [MIT OR Apache-2.0]  — The Servo Project Developers
+core-graphics-types 0.1.3  [MIT OR Apache-2.0]  - The Servo Project Developers
     https://github.com/servo/core-foundation-rs
-core2 0.4.0  [Apache-2.0 OR MIT]  — Brendan Molloy <brendan@bbqsrc.net>
+core2 0.4.0  [Apache-2.0 OR MIT]  - Brendan Molloy <brendan@bbqsrc.net>
     https://github.com/bbqsrc/core2
-core_maths 0.1.1  [MIT]  — Robert Bastian <me@robertbastian.dev
+core_maths 0.1.1  [MIT]  - Robert Bastian <me@robertbastian.dev
     https://github.com/robertbastian/core_maths
-countme 3.0.1  [MIT OR Apache-2.0]  — Aleksey Kladov <aleksey.kladov@gmail.com>
+countme 3.0.1  [MIT OR Apache-2.0]  - Aleksey Kladov <aleksey.kladov@gmail.com>
     https://github.com/matklad/countme
-cpufeatures 0.3.0  [MIT OR Apache-2.0]  — RustCrypto Developers
+cpufeatures 0.3.0  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
-cpufeatures 0.2.17  [MIT OR Apache-2.0]  — RustCrypto Developers
+cpufeatures 0.2.17  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
-crc 3.4.0  [MIT OR Apache-2.0]  — Rui Hu <code@mrhooray.com>, Akhil Velagapudi <4@4khil.com>
+crc 3.4.0  [MIT OR Apache-2.0]  - Rui Hu <code@mrhooray.com>, Akhil Velagapudi <4@4khil.com>
     https://github.com/mrhooray/crc-rs.git
-crc-catalog 2.4.0  [MIT OR Apache-2.0]  — Akhil Velagapudi <akhilvelagapudi@gmail.com>
+crc-catalog 2.4.0  [MIT OR Apache-2.0]  - Akhil Velagapudi <akhilvelagapudi@gmail.com>
     https://github.com/akhilles/crc-catalog.git
-crc32fast 1.5.0  [MIT OR Apache-2.0]  — Sam Rijs <srijs@airpost.net>, Alex Crichton <alex@alexcrichton.com>
+crc32fast 1.5.0  [MIT OR Apache-2.0]  - Sam Rijs <srijs@airpost.net>, Alex Crichton <alex@alexcrichton.com>
     https://github.com/srijs/rust-crc32fast
-criterion 0.8.2  [Apache-2.0 OR MIT]  — Jorge Aparicio <japaricious@gmail.com>, Brook Heisler <brookheisler@gmail.com>
+criterion 0.8.2  [Apache-2.0 OR MIT]  - Jorge Aparicio <japaricious@gmail.com>, Brook Heisler <brookheisler@gmail.com>
     https://github.com/criterion-rs/criterion.rs
-criterion-plot 0.8.2  [Apache-2.0 OR MIT]  — Jorge Aparicio <japaricious@gmail.com>, Brook Heisler <brookheisler@gmail.com>
+criterion-plot 0.8.2  [Apache-2.0 OR MIT]  - Jorge Aparicio <japaricious@gmail.com>, Brook Heisler <brookheisler@gmail.com>
     https://github.com/criterion-rs/criterion.rs
 critical-section 1.2.0  [MIT OR Apache-2.0]
     https://github.com/rust-embedded/critical-section
@@ -274,163 +274,163 @@ crossbeam-epoch 0.9.18  [MIT OR Apache-2.0]
     https://github.com/crossbeam-rs/crossbeam
 crossbeam-utils 0.8.21  [MIT OR Apache-2.0]
     https://github.com/crossbeam-rs/crossbeam
-crunchy 0.2.4  [MIT]  — Eira Fransham <jackefransham@gmail.com>
+crunchy 0.2.4  [MIT]  - Eira Fransham <jackefransham@gmail.com>
     https://github.com/eira-fransham/crunchy
-crypto-common 0.1.7  [MIT OR Apache-2.0]  — RustCrypto Developers
+crypto-common 0.1.7  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/traits
-ctor-lite 0.1.2  [MIT OR Apache-2.0]  — John Nunley <dev@notgull.net>
+ctor-lite 0.1.2  [MIT OR Apache-2.0]  - John Nunley <dev@notgull.net>
     https://codeberg.org/notgull/ctor-lite
-cursor-icon 1.2.0  [MIT OR Apache-2.0 OR Zlib]  — Kirill Chibisov <contact@kchibisov.com>
+cursor-icon 1.2.0  [MIT OR Apache-2.0 OR Zlib]  - Kirill Chibisov <contact@kchibisov.com>
     https://github.com/rust-windowing/cursor-icon
-czkawka_core 11.0.1  [MIT]  — Rafał Mikrut <mikrutrafal@protonmail.com>
+czkawka_core 11.0.1  [MIT]  - Rafał Mikrut <mikrutrafal@protonmail.com>
     https://github.com/qarmin/czkawka
-darling 0.14.4  [MIT]  — Ted Driggs <ted.driggs@outlook.com>
+darling 0.14.4  [MIT]  - Ted Driggs <ted.driggs@outlook.com>
     https://github.com/TedDriggs/darling
-darling_core 0.14.4  [MIT]  — Ted Driggs <ted.driggs@outlook.com>
+darling_core 0.14.4  [MIT]  - Ted Driggs <ted.driggs@outlook.com>
     https://github.com/TedDriggs/darling
-darling_macro 0.14.4  [MIT]  — Ted Driggs <ted.driggs@outlook.com>
+darling_macro 0.14.4  [MIT]  - Ted Driggs <ted.driggs@outlook.com>
     https://github.com/TedDriggs/darling
-dary_heap 0.3.8  [MIT OR Apache-2.0]  — Han Mertens <hanmertens@outlook.com>
+dary_heap 0.3.8  [MIT OR Apache-2.0]  - Han Mertens <hanmertens@outlook.com>
     https://github.com/hanmertens/dary_heap
-data-encoding 2.10.0  [MIT]  — Julien Cretin <git@ia0.eu>
+data-encoding 2.10.0  [MIT]  - Julien Cretin <git@ia0.eu>
     https://github.com/ia0/data-encoding
-data-url 0.3.2  [MIT OR Apache-2.0]  — Simon Sapin <simon.sapin@exyr.org>
+data-url 0.3.2  [MIT OR Apache-2.0]  - Simon Sapin <simon.sapin@exyr.org>
     https://github.com/servo/rust-url
-deranged 0.5.8  [MIT OR Apache-2.0]  — Jacob Pratt <jacob@jhpratt.dev>
+deranged 0.5.8  [MIT OR Apache-2.0]  - Jacob Pratt <jacob@jhpratt.dev>
     https://github.com/jhpratt/deranged
-derive_more 2.1.1  [MIT]  — Jelte Fennema <github-tech@jeltef.nl>
+derive_more 2.1.1  [MIT]  - Jelte Fennema <github-tech@jeltef.nl>
     https://github.com/JelteF/derive_more
-derive_more-impl 2.1.1  [MIT]  — Jelte Fennema <github-tech@jeltef.nl>
+derive_more-impl 2.1.1  [MIT]  - Jelte Fennema <github-tech@jeltef.nl>
     https://github.com/JelteF/derive_more
 derive_utils 0.15.1  [Apache-2.0 OR MIT]
     https://github.com/taiki-e/derive_utils
-deunicode 1.6.2  [BSD-3-Clause]  — Kornel Lesinski <kornel@geekhood.net>, Amit Chowdhury <amitc97@gmail.com>
+deunicode 1.6.2  [BSD-3-Clause]  - Kornel Lesinski <kornel@geekhood.net>, Amit Chowdhury <amitc97@gmail.com>
     https://github.com/kornelski/deunicode/
-digest 0.10.7  [MIT OR Apache-2.0]  — RustCrypto Developers
+digest 0.10.7  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/traits
-directories-next 2.0.0  [MIT OR Apache-2.0]  — The @xdg-rs members
+directories-next 2.0.0  [MIT OR Apache-2.0]  - The @xdg-rs members
     https://github.com/xdg-rs/dirs/tree/master/directories
-dirs-sys-next 0.1.2  [MIT OR Apache-2.0]  — The @xdg-rs members
+dirs-sys-next 0.1.2  [MIT OR Apache-2.0]  - The @xdg-rs members
     https://github.com/xdg-rs/dirs/tree/master/dirs-sys
-dispatch 0.2.0  [MIT]  — Steven Sheldon
+dispatch 0.2.0  [MIT]  - Steven Sheldon
     http://github.com/SSheldon/rust-dispatch
-dispatch2 0.3.1  [Zlib OR Apache-2.0 OR MIT]  — Mads Marquart <mads@marquart.dk>, Mary <mary@mary.zone>
+dispatch2 0.3.1  [Zlib OR Apache-2.0 OR MIT]  - Mads Marquart <mads@marquart.dk>, Mary <mary@mary.zone>
     https://github.com/madsmtm/objc2
-displaydoc 0.2.5  [MIT OR Apache-2.0]  — Jane Lusby <jlusby@yaah.dev>
+displaydoc 0.2.5  [MIT OR Apache-2.0]  - Jane Lusby <jlusby@yaah.dev>
     https://github.com/yaahc/displaydoc
-dlib 0.5.3  [MIT]  — Elinor Berger <elinor@safaradeg.net>
+dlib 0.5.3  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/elinorbgr/dlib
-document-features 0.2.12  [MIT OR Apache-2.0]  — Slint Developers <info@slint.dev>
+document-features 0.2.12  [MIT OR Apache-2.0]  - Slint Developers <info@slint.dev>
     https://github.com/slint-ui/document-features
-downcast-rs 1.2.1  [MIT/Apache-2.0]  — Ashish Myles <marcianx@gmail.com>, Runji Wang <wangrunji0408@163.com>
+downcast-rs 1.2.1  [MIT/Apache-2.0]  - Ashish Myles <marcianx@gmail.com>, Runji Wang <wangrunji0408@163.com>
     https://github.com/marcianx/downcast-rs
 dpi 0.1.2  [Apache-2.0 AND MIT]
     https://github.com/rust-windowing/winit
-drm 0.14.2  [MIT]  — Tyler Slabinski <slabity@slabity.dev>, Victoria Brekenfeld <crates-io@drakulix.de>
+drm 0.14.2  [MIT]  - Tyler Slabinski <slabity@slabity.dev>, Victoria Brekenfeld <crates-io@drakulix.de>
     https://github.com/Smithay/drm-rs
-drm-ffi 0.9.1  [MIT]  — Tyler Slabinski <tslabinski@slabity.net>
+drm-ffi 0.9.1  [MIT]  - Tyler Slabinski <tslabinski@slabity.net>
     https://github.com/Smithay/drm-rs
-drm-fourcc 2.2.0  [MIT]  — Daniel Franklin <daniel@danielzfranklin.org>
+drm-fourcc 2.2.0  [MIT]  - Daniel Franklin <daniel@danielzfranklin.org>
     https://github.com/danielzfranklin/drm-fourcc-rs
-drm-sys 0.8.1  [MIT]  — Tyler Slabinski <tslabinski@slabity.net>
+drm-sys 0.8.1  [MIT]  - Tyler Slabinski <tslabinski@slabity.net>
     https://github.com/Smithay/drm-rs
-dunce 1.0.5  [CC0-1.0 OR MIT-0 OR Apache-2.0]  — Kornel <kornel@geekhood.net>
+dunce 1.0.5  [CC0-1.0 OR MIT-0 OR Apache-2.0]  - Kornel <kornel@geekhood.net>
     https://gitlab.com/kornelski/dunce
-ecb 0.1.2  [MIT]  — RustCrypto Developers, magic-akari
+ecb 0.1.2  [MIT]  - RustCrypto Developers, magic-akari
     https://github.com/magic-akari/ecb
-either 1.15.0  [MIT OR Apache-2.0]  — bluss
+either 1.15.0  [MIT OR Apache-2.0]  - bluss
     https://github.com/rayon-rs/either
-encoding_rs 0.8.35  [(Apache-2.0 OR MIT) AND BSD-3-Clause]  — Henri Sivonen <hsivonen@hsivonen.fi>
+encoding_rs 0.8.35  [(Apache-2.0 OR MIT) AND BSD-3-Clause]  - Henri Sivonen <hsivonen@hsivonen.fi>
     https://github.com/hsivonen/encoding_rs
-endi 1.1.1  [MIT]  — Zeeshan Ali Khan <zeenix@gmail.com>
+endi 1.1.1  [MIT]  - Zeeshan Ali Khan <zeenix@gmail.com>
     https://github.com/zeenix/endi
-enum-utils 0.1.2  [MIT]  — Dylan MacKenzie <ecstaticmorse@gmail.com>
+enum-utils 0.1.2  [MIT]  - Dylan MacKenzie <ecstaticmorse@gmail.com>
     https://github.com/ecstatic-morse/enum-utils
-enum-utils-from-str 0.1.2  [MIT]  — Dylan MacKenzie <ecstaticmorse@gmail.com>
+enum-utils-from-str 0.1.2  [MIT]  - Dylan MacKenzie <ecstaticmorse@gmail.com>
     https://github.com/ecstatic-morse/enum-utils
-enumflags2 0.7.12  [MIT OR Apache-2.0]  — maik klein <maikklein@googlemail.com>, Maja Kądziołka <maya@compilercrim.es>
+enumflags2 0.7.12  [MIT OR Apache-2.0]  - maik klein <maikklein@googlemail.com>, Maja Kądziołka <maya@compilercrim.es>
     https://github.com/meithecatte/enumflags2
-enumflags2_derive 0.7.12  [MIT OR Apache-2.0]  — maik klein <maikklein@googlemail.com>, Maja Kądziołka <maya@compilercrim.es>
+enumflags2_derive 0.7.12  [MIT OR Apache-2.0]  - maik klein <maikklein@googlemail.com>, Maja Kądziołka <maya@compilercrim.es>
     https://github.com/meithecatte/enumflags2
-enumn 0.1.14  [MIT OR Apache-2.0]  — David Tolnay <dtolnay@gmail.com>
+enumn 0.1.14  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/enumn
 env_filter 0.1.4  [MIT OR Apache-2.0]
     https://github.com/rust-cli/env_logger
-equator 0.4.2  [MIT]  — sarah <>
+equator 0.4.2  [MIT]  - sarah <>
     https://github.com/sarah-ek/equator/
-equator-macro 0.4.2  [MIT]  — sarah <>
+equator-macro 0.4.2  [MIT]  - sarah <>
     https://github.com/sarah-ek/equator/
 equivalent 1.0.2  [Apache-2.0 OR MIT]
     https://github.com/indexmap-rs/equivalent
-errno 0.3.14  [MIT OR Apache-2.0]  — Chris Wong <lambda.fairy@gmail.com>, Dan Gohman <dev@sunfishcode.online>
+errno 0.3.14  [MIT OR Apache-2.0]  - Chris Wong <lambda.fairy@gmail.com>, Dan Gohman <dev@sunfishcode.online>
     https://github.com/lambda-fairy/rust-errno
-error-code 3.3.2  [BSL-1.0]  — Douman <douman@gmx.se>
+error-code 3.3.2  [BSL-1.0]  - Douman <douman@gmx.se>
     https://github.com/DoumanAsh/error-code
-euclid 0.22.13  [MIT OR Apache-2.0]  — The Servo Project Developers
+euclid 0.22.13  [MIT OR Apache-2.0]  - The Servo Project Developers
     https://github.com/servo/euclid
-event-listener 5.4.1  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>, John Nunley <dev@notgull.net>
+event-listener 5.4.1  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>, John Nunley <dev@notgull.net>
     https://github.com/smol-rs/event-listener
-event-listener-strategy 0.5.4  [Apache-2.0 OR MIT]  — John Nunley <dev@notgull.net>
+event-listener-strategy 0.5.4  [Apache-2.0 OR MIT]  - John Nunley <dev@notgull.net>
     https://github.com/smol-rs/event-listener-strategy
-exr 1.74.0  [BSD-3-Clause]  — johannesvollmer <contact@johannesvollmer.com>
+exr 1.74.0  [BSD-3-Clause]  - johannesvollmer <contact@johannesvollmer.com>
     https://github.com/johannesvollmer/exrs
-extended 0.1.0  [MIT]  — Dietrich Epp <depp@zdome.net>
+extended 0.1.0  [MIT]  - Dietrich Epp <depp@zdome.net>
     https://github.com/depp/extended-rs
-failure 0.1.8  [MIT OR Apache-2.0]  — Without Boats <boats@mozilla.com>
+failure 0.1.8  [MIT OR Apache-2.0]  - Without Boats <boats@mozilla.com>
     https://github.com/rust-lang-nursery/failure
-fast_image_resize 5.5.0  [MIT OR Apache-2.0]  — Kirill Kuzminykh <cykooz@gmail.com>
+fast_image_resize 5.5.0  [MIT OR Apache-2.0]  - Kirill Kuzminykh <cykooz@gmail.com>
     https://github.com/cykooz/fast_image_resize
-fast_image_resize 6.0.0  [MIT OR Apache-2.0]  — Kirill Kuzminykh <cykooz@gmail.com>
+fast_image_resize 6.0.0  [MIT OR Apache-2.0]  - Kirill Kuzminykh <cykooz@gmail.com>
     https://github.com/cykooz/fast_image_resize
-fastrand 2.3.0  [Apache-2.0 OR MIT]  — Stjepan Glavina <stjepang@gmail.com>
+fastrand 2.3.0  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/fastrand
-fax 0.2.6  [MIT]  — Sebastian K <s3bk@protonmail.com>
+fax 0.2.6  [MIT]  - Sebastian K <s3bk@protonmail.com>
     https://github.com/pdf-rs/fax
-fax_derive 0.2.0  [MIT]  — Sebastian K <s3bk@protonmail.com>
+fax_derive 0.2.0  [MIT]  - Sebastian K <s3bk@protonmail.com>
     https://github.com/pdf-rs/fax
-fdeflate 0.3.7  [MIT OR Apache-2.0]  — The image-rs Developers
+fdeflate 0.3.7  [MIT OR Apache-2.0]  - The image-rs Developers
     https://github.com/image-rs/fdeflate
-femtovg 0.20.4  [MIT OR Apache-2.0]  — Peter Todorov <ptodorov@cytec.bg>, Adam Nemecek <adamnemecek@gmail.com>
+femtovg 0.20.4  [MIT OR Apache-2.0]  - Peter Todorov <ptodorov@cytec.bg>, Adam Nemecek <adamnemecek@gmail.com>
     https://github.com/femtovg/femtovg
 ffmpeg_cmdline_utils 0.4.0  [MIT OR Apache-2.0]
     https://github.com/Farmadupe/ffmpeg_cmdline_utils
 ffmpeg_gst_wrapper 0.4.0  [MIT OR Apache-2.0]
     https://github.com/Farmadupe/vid_dup_finder_lib
-field-offset 0.3.6  [MIT OR Apache-2.0]  — Diggory Blake <diggsey@googlemail.com>
+field-offset 0.3.6  [MIT OR Apache-2.0]  - Diggory Blake <diggsey@googlemail.com>
     https://github.com/Diggsey/rust-field-offset
-file-id 0.2.3  [MIT OR Apache-2.0]  — Daniel Faust <hessijames@gmail.com>
+file-id 0.2.3  [MIT OR Apache-2.0]  - Daniel Faust <hessijames@gmail.com>
     https://github.com/notify-rs/notify.git
-file-rotate 0.8.0  [MIT]  — Kevin Robert Stravers <kevin@stravers.net>, Erlend Langseth <3rlendhl@gmail.com>
+file-rotate 0.8.0  [MIT]  - Kevin Robert Stravers <kevin@stravers.net>, Erlend Langseth <3rlendhl@gmail.com>
     https://github.com/kstrafe/file-rotate
-filetime 0.2.27  [MIT/Apache-2.0]  — Alex Crichton <alex@alexcrichton.com>
+filetime 0.2.27  [MIT/Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/alexcrichton/filetime
-find-crate 0.6.3  [Apache-2.0 OR MIT]  — Taiki Endo <te316e89@gmail.com>
+find-crate 0.6.3  [Apache-2.0 OR MIT]  - Taiki Endo <te316e89@gmail.com>
     https://github.com/taiki-e/find-crate
 find-msvc-tools 0.1.9  [MIT OR Apache-2.0]
     https://github.com/rust-lang/cc-rs
-flate2 1.1.9  [MIT OR Apache-2.0]  — Alex Crichton <alex@alexcrichton.com>, Josh Triplett <josh@joshtriplett.org>
+flate2 1.1.9  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>, Josh Triplett <josh@joshtriplett.org>
     https://github.com/rust-lang/flate2-rs
-float-cmp 0.9.0  [MIT]  — Mike Dilger <mike@mikedilger.com>
+float-cmp 0.9.0  [MIT]  - Mike Dilger <mike@mikedilger.com>
     https://github.com/mikedilger/float-cmp
-fluent 0.17.0  [Apache-2.0 OR MIT]  — Caleb Maclennan <caleb@alerque.com>, Bruce Mitchener <bruce.mitchener@gmail.com, Zibi Braniecki <zibi@unicode.org>, Staś Małolepszy <stas@mozilla.com>
+fluent 0.17.0  [Apache-2.0 OR MIT]  - Caleb Maclennan <caleb@alerque.com>, Bruce Mitchener <bruce.mitchener@gmail.com, Zibi Braniecki <zibi@unicode.org>, Staś Małolepszy <stas@mozilla.com>
     https://github.com/projectfluent/fluent-rs
-fluent-bundle 0.16.0  [Apache-2.0 OR MIT]  — Caleb Maclennan <caleb@alerque.com>, Bruce Mitchener <bruce.mitchener@gmail.com, Zibi Braniecki <zibi@unicode.org>, Staś Małolepszy <stas@mozilla.com>
+fluent-bundle 0.16.0  [Apache-2.0 OR MIT]  - Caleb Maclennan <caleb@alerque.com>, Bruce Mitchener <bruce.mitchener@gmail.com, Zibi Braniecki <zibi@unicode.org>, Staś Małolepszy <stas@mozilla.com>
     https://github.com/projectfluent/fluent-rs
-fluent-langneg 0.13.1  [Apache-2.0 OR MIT]  — Zibi Braniecki <gandalf@mozilla.com>
+fluent-langneg 0.13.1  [Apache-2.0 OR MIT]  - Zibi Braniecki <gandalf@mozilla.com>
     https://github.com/projectfluent/fluent-langneg-rs
-fluent-syntax 0.12.0  [Apache-2.0 OR MIT]  — Caleb Maclennan <caleb@alerque.com>, Bruce Mitchener <bruce.mitchener@gmail.com, Zibi Braniecki <zibi@unicode.org>, Staś Małolepszy <stas@mozilla.com>
+fluent-syntax 0.12.0  [Apache-2.0 OR MIT]  - Caleb Maclennan <caleb@alerque.com>, Bruce Mitchener <bruce.mitchener@gmail.com, Zibi Braniecki <zibi@unicode.org>, Staś Małolepszy <stas@mozilla.com>
     https://github.com/projectfluent/fluent-rs
-fnv 1.0.7  [Apache-2.0 / MIT]  — Alex Crichton <alex@alexcrichton.com>
+fnv 1.0.7  [Apache-2.0 / MIT]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/servo/rust-fnv
-foldhash 0.2.0  [Zlib]  — Orson Peters <orsonpeters@gmail.com>
+foldhash 0.2.0  [Zlib]  - Orson Peters <orsonpeters@gmail.com>
     https://github.com/orlp/foldhash
-foldhash 0.1.5  [Zlib]  — Orson Peters <orsonpeters@gmail.com>
+foldhash 0.1.5  [Zlib]  - Orson Peters <orsonpeters@gmail.com>
     https://github.com/orlp/foldhash
 font-types 0.10.1  [MIT OR Apache-2.0]
     https://github.com/googlefonts/fontations
-fontdb 0.23.0  [MIT]  — Yevhenii Reizner <razrfalcon@gmail.com>
+fontdb 0.23.0  [MIT]  - Yevhenii Reizner <razrfalcon@gmail.com>
     https://github.com/RazrFalcon/fontdb
-fontdue 0.9.3  [MIT OR Apache-2.0 OR Zlib]  — Joe Cumbo <mooman219@gmail.com>
+fontdue 0.9.3  [MIT OR Apache-2.0 OR Zlib]  - Joe Cumbo <mooman219@gmail.com>
     https://github.com/mooman219/fontdue
 fontique 0.7.0  [Apache-2.0 OR MIT]
     https://github.com/linebender/parley

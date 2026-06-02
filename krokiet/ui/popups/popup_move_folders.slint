@@ -1,0 +1,63 @@
+import { CheckBox } from "std-widgets.slint";
+import { Callabler } from "../globals/callabler.slint";
+import { Translations } from "../globals/translations.slint";
+import { PopupBase } from "../components/popup_base.slint";
+import { PopupCenteredText } from "../components/popup_centered_text.slint";
+import { Settings } from "../globals/settings.slint";
+
+export component PopupMoveFolders inherits Rectangle {
+    out property <length> popup_width: 500px;
+    out property <length> popup_height: 190px;
+    in-out property <string> folder_name: "";
+    callback show_popup();
+
+    popup_window := PopupBase {
+        width: popup_width;
+        height: popup_height;
+        title_text <=> Translations.popup_move_title_text;
+
+        VerticalLayout {
+            PopupCenteredText {
+                text: Translations.move_confirmation_text + "\n" + folder_name;
+            }
+
+            Rectangle {height: 5px;}
+
+            VerticalLayout {
+                HorizontalLayout {
+                    alignment: center;
+                    CheckBox {
+                        text <=> Translations.popup_move_copy_checkbox_text;
+                        checked <=> Settings.popup_move_copy_mode;
+                    }
+                }
+                Rectangle {height: 5px;}
+
+                HorizontalLayout {
+                    alignment: center;
+                    CheckBox {
+                        text <=> Translations.popup_move_preserve_folder_checkbox_text;
+                        checked <=> Settings.popup_move_preserve_folder_structure;
+                    }
+                }
+                Rectangle {height: 5px;}
+
+                HorizontalLayout {
+                    alignment: center;
+                    CheckBox {
+                        text <=> Translations.popup_move_rename_on_conflict_checkbox_text;
+                        checked <=> Settings.popup_move_rename_on_conflict;
+                    }
+                }
+            }
+        }
+
+        ok_clicked => {
+            Callabler.move_items(folder_name);
+        }
+    }
+
+    show_popup() => {
+        popup_window.show();
+    }
+}

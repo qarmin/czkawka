@@ -20,11 +20,12 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
         biggest_files_method,
         audio_check_type,
         duplicates_check_method,
-        videos_crop_detect,
         video_optimizer_crop_type,
         video_optimizer_mode,
         video_optimizer_video_codec,
         video_optimizer_noise_reduction,
+        similar_videos_visual_preset,
+        similar_videos_audio_preset,
     } = &*collected_items;
 
     let languages_display_names = StringComboBoxItems::get_display_names(languages);
@@ -36,11 +37,12 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
     let biggest_files_method_display_names = StringComboBoxItems::get_display_names(biggest_files_method);
     let audio_check_type_display_names = StringComboBoxItems::get_display_names(audio_check_type);
     let duplicates_check_method_display_names = StringComboBoxItems::get_display_names(duplicates_check_method);
-    let videos_crop_detect_display_names = StringComboBoxItems::get_display_names(videos_crop_detect);
     let video_optimizer_crop_type_display_names = StringComboBoxItems::get_display_names(video_optimizer_crop_type);
     let video_optimizer_mode_display_names = StringComboBoxItems::get_display_names(video_optimizer_mode);
     let video_optimizer_video_codec_display_names = StringComboBoxItems::get_display_names(video_optimizer_video_codec);
     let video_optimizer_noise_reduction_display_names = StringComboBoxItems::get_display_names(video_optimizer_noise_reduction);
+    let similar_videos_visual_preset_display_names = StringComboBoxItems::get_display_names(similar_videos_visual_preset);
+    let similar_videos_audio_preset_display_names = StringComboBoxItems::get_display_names(similar_videos_audio_preset);
 
     // Currently this is not possible due to slint bug - after 11.0 version I will try to fight with this - https://github.com/slint-ui/slint/issues/7632
     // For now I just assert that names will be in sync with slint files
@@ -92,10 +94,6 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
         audio_check_type_display_names
     );
     assert_eq!(
-        settings.get_similar_videos_crop_detect().iter().collect::<Vec<SharedString>>(),
-        videos_crop_detect_display_names
-    );
-    assert_eq!(
         settings.get_video_optimizer_sub_crop_type().iter().collect::<Vec<SharedString>>(),
         video_optimizer_crop_type_display_names
     );
@@ -110,5 +108,13 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
     assert_eq!(
         settings.get_video_optimizer_sub_noise_reduction().iter().collect::<Vec<SharedString>>(),
         video_optimizer_noise_reduction_display_names
+    );
+    assert_eq!(
+        settings.get_similar_videos_visual_preset_names().iter().collect::<Vec<SharedString>>(),
+        similar_videos_visual_preset_display_names
+    );
+    assert_eq!(
+        settings.get_similar_videos_audio_preset_names().iter().collect::<Vec<SharedString>>(),
+        similar_videos_audio_preset_display_names
     );
 }

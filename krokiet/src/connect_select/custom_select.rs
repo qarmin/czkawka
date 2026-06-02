@@ -130,6 +130,7 @@ pub(super) fn build_custom_select_columns(active_tab: ActiveTab) -> Vec<CustomSe
             col_full_path!(&full_path),
             col_str!(&file_name, StrDataTemporaryFiles::Name),
             col_str!(&path, StrDataTemporaryFiles::Path),
+            col_int_pair!(format!("{} [KB]", size), IntDataTemporaryFiles::SizePart1),
             col_date!(&mod_date, IntDataTemporaryFiles::ModificationDatePart1),
         ],
         ActiveTab::SimilarImages => vec![

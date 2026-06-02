@@ -1,0 +1,33 @@
+import { CediniaColors } from "../../globals/colors.slint";
+
+export component CircleIconButton {
+    in property <string> emoji;
+    in property <length> size: 40px;
+    in property <length> emoji_font_size: 18px;
+    in property <color>  tint: CediniaColors.text_secondary;
+    in property <color>  hover_bg: CediniaColors.accent.with-alpha(0.15);
+    callback clicked;
+
+    horizontal-stretch: 0.0;
+    vertical-stretch: 0.0;
+    width: root.size;
+    height: root.size;
+
+    Rectangle {
+        border-radius: root.size / 2;
+        background: ta.has-hover ? root.hover_bg : transparent;
+        ta := TouchArea {
+            clicked => { root.clicked(); }
+        }
+        VerticalLayout {
+            alignment: LayoutAlignment.center;
+            Text {
+                text: root.emoji;
+                color: root.tint;
+                font-size: root.emoji_font_size;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+    }
+}

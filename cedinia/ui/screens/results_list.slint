@@ -1,0 +1,343 @@
+import { Fonts } from "../globals/fonts.slint";
+import { CediniaColors } from "../globals/colors.slint";
+import { ConfirmPopupAction, FileEntry, FileEntryIdx, ScanState, SelectionSheet } from "../globals/common.slint";
+import { AppState } from "../globals/app_state.slint";
+import { Translations } from "../globals/translations.slint";
+import { FileRow } from "../components/file_row.slint";
+import { StatusChip } from "../components/status_chip.slint";
+import { TouchButton } from "../components/buttons/touch_button.slint";
+import { ContextMenuSheet } from "../components/context_menu_sheet.slint";
+import { ScanFab } from "../components/scan_fab.slint";
+import { EmptyState } from "../components/empty_state.slint";
+import { ScrimDialog } from "../components/scrim_dialog.slint";
+import { SelectionMenuSheet } from "../components/selection_menu_sheet.slint";
+import { DeselectionMenuSheet } from "../components/deselection_menu_sheet.slint";
+import { ListView } from "std-widgets.slint";
+
+export component ResultsList {
+    in property <[FileEntry]> entries: [];
+    in property <string>      tool_title: "Wyniki";
+    in property <string>      tool_emoji: "?";
+    in property <bool>        can_delete: true;
+    in property <bool>        can_rename: false;
+    in property <bool>        can_clean_exif: false;
+
+    in property <bool>        is_grouped: false;
+
+    in property <bool>        has_gallery_mode: false;
+    in property <bool>        has_size_select: false;
+    in property <bool>        has_resolution_select: false;
+    in property <bool>        extra_as_line2: false;
+
+    property <SelectionSheet> menu_state: SelectionSheet.None;
+
+    // Context menu (long-press)
+    property <bool>   ctx_open_visible: false;
+    property <string> ctx_open_file:    "";
+    property <string> ctx_open_folder:  "";
+    property <string> ctx_item_name:    "";
+
+
+    VerticalLayout {
+        spacing: 0px;
+
+
+        if entries.length > 0 : Rectangle {
+            height: 52px;
+            background: CediniaColors.bg_elevated;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+
+            HorizontalLayout {
+                padding-left: 12px;
+                padding-right: 12px;
+                padding-top: 8px;
+                padding-bottom: 8px;
+                spacing: 8px;
+
+                if root.can_delete && AppState.selected_count > 0 : TouchButton {
+                    label: "X";
+                    min_h: 36px;
+                    bg: CediniaColors.danger;
+                    fg: CediniaColors.fg_on_danger;
+                    clicked => { AppState.delete_selected(); }
+                }
+
+                if root.can_clean_exif && AppState.selected_count > 0 : TouchButton {
+                    label: "🏷";
+                    min_h: 36px;
+                    bg: CediniaColors.accent_muted;
+                    fg: CediniaColors.accent_light;
+                    clicked => { AppState.clean_exif_selected(); }
+                }
+
+                if root.can_rename && AppState.selected_count > 0 : TouchButton {
+                    label: "🏷";
+                    min_h: 36px;
+                    bg: CediniaColors.accent_muted;
+                    fg: CediniaColors.accent_light;
+                    clicked => { AppState.rename_selected(); }
+                }
+
+                if AppState.selected_count > 0 : StatusChip {
+                    label: AppState.selected_count;
+                    chip_color: CediniaColors.accent_muted;
+                    text_color: CediniaColors.accent_light;
+                    vertical-stretch: 0.0;
+                }
+
+                Rectangle { horizontal-stretch: 1.0; }
+
+                TouchButton {
+                    label: Translations.select_label_text;
+                    min_h: 36px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_secondary;
+                    clicked => { root.menu_state = SelectionSheet.Selection; }
+                }
+
+                TouchButton {
+                    label: Translations.deselect_label_text;
+                    min_h: 36px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_secondary;
+                    clicked => { root.menu_state = SelectionSheet.Deselection; }
+                }
+
+                if root.has_gallery_mode : TouchButton {
+                    label: AppState.similar_images_gallery_mode ? Translations.list_label_text : Translations.gallery_label_text;
+                    min_h: 36px;
+                    bg: CediniaColors.bg_elevated;
+                    fg: CediniaColors.text_secondary;
+                    clicked => { AppState.similar_images_gallery_mode = !AppState.similar_images_gallery_mode; }
+                }
+            }
+        }
+
+
+        if entries.length > 0 : ListView {
+            vertical-stretch: 1.0;
+
+            for entry[idx] in entries : FileRow {
+                name:           entry.val_str[FileEntryIdx.name_idx];
+                path:           entry.val_str[FileEntryIdx.path_idx];
+                size:           entry.val_str[FileEntryIdx.size_idx];
+                val_str:        entry.val_str;
+                checked:        entry.checked;
+                is_header:      entry.is_header;
+                is_reference:   entry.is_reference;
+                is_even:        mod(idx, 2) == 0;
+                extra_as_line2: root.extra_as_line2 && !entry.is_header;
+                toggle_checked => { AppState.toggle_file_checked(idx); }
+                open_item   => { AppState.open_path(entry.val_str[FileEntryIdx.path_idx] == "" ? entry.val_str[FileEntryIdx.name_idx] : entry.val_str[FileEntryIdx.path_idx] + "/" + entry.val_str[FileEntryIdx.name_idx]); }
+                open_parent => { AppState.open_parent_folder(entry.val_str[FileEntryIdx.path_idx]); }
+                long_pressed => {
+                    root.ctx_item_name   = entry.val_str[FileEntryIdx.name_idx];
+                    root.ctx_open_file   = entry.val_str[FileEntryIdx.path_idx] == ""
+                        ? entry.val_str[FileEntryIdx.name_idx]
+                        : entry.val_str[FileEntryIdx.path_idx] + "/" + entry.val_str[FileEntryIdx.name_idx];
+                    root.ctx_open_folder = entry.val_str[FileEntryIdx.path_idx];
+                    root.ctx_open_visible = true;
+                }
+            }
+        }
+
+
+        if entries.length == 0 : Rectangle {
+            vertical-stretch: 1.0;
+            background: CediniaColors.bg_primary;
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                spacing: 12px;
+
+                EmptyState {
+                    emoji: root.tool_emoji;
+                    emoji_size: 56px;
+                    message: AppState.scan_state == ScanState.Scanning
+                        ? Translations.scanning_text
+                        : AppState.scan_state == ScanState.Stopping
+                            ? Translations.stopping_text
+                            : AppState.scan_state == ScanState.Done
+                                ? Translations.no_results_text
+                                : Translations.press_start_text;
+                    message_font_size: 15px;
+                }
+
+                if !AppState.storage_permission_granted : Rectangle {
+                    height: perm_vl.preferred-height + 24px;
+                    width: min(parent.width - 48px, 320px);
+                    x: (parent.width - self.width) / 2;
+                    border-radius: 10px;
+                    background: CediniaColors.bg_elevated;
+                    border-width: 1px;
+                    border-color: CediniaColors.warning.with-alpha(0.5);
+
+                    perm_vl := VerticalLayout {
+                        padding: 12px;
+                        spacing: 10px;
+
+                        Text {
+                            text: Translations.no_permission_scan_warning_text;
+                            color: CediniaColors.warning;
+                            font-size: Fonts.body_lg;
+                            wrap: TextWrap.word-wrap;
+                            horizontal-alignment: TextHorizontalAlignment.center;
+                        }
+
+                        TouchArea {
+                            height: 40px;
+                            clicked => { AppState.request_storage_permission(); }
+
+                            Rectangle {
+                                border-radius: 8px;
+                                background: CediniaColors.accent_muted;
+
+                                Text {
+                                    text: Translations.grant_text;
+                                    color: CediniaColors.accent_light;
+                                    font-size: Fonts.subtitle;
+                                    font-weight: Fonts.semibold;
+                                    horizontal-alignment: TextHorizontalAlignment.center;
+                                    vertical-alignment: TextVerticalAlignment.center;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    ContextMenuSheet {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        visible_ <=> root.ctx_open_visible;
+        item_name: root.ctx_item_name;
+        folder: root.ctx_open_folder;
+        file_path: root.ctx_open_file;
+    }
+
+
+    if root.menu_state == SelectionSheet.Selection : SelectionMenuSheet {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 50;
+        is_grouped: root.is_grouped;
+        has_size_select: root.has_size_select;
+        has_resolution_select: root.has_resolution_select;
+        closed => { root.menu_state = SelectionSheet.None; }
+    }
+
+
+
+    if root.menu_state == SelectionSheet.Deselection : DeselectionMenuSheet {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 50;
+        is_grouped: root.is_grouped;
+        closed => { root.menu_state = SelectionSheet.None; }
+    }
+
+
+
+    if AppState.confirm_popup_visible : ScrimDialog {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 40;
+        strong_scrim: true;
+        dismissible: false;
+        card_max_width: 400px;
+        side_margin: 32px;
+        card_radius: 14px;
+        card_padding: 20px;
+        card_spacing: 12px;
+        shadow_color: CediniaColors.shadow_xl;
+
+        Text {
+            text: AppState.confirm_popup_message;
+            color: CediniaColors.text_primary;
+            font-size: Fonts.label_lg;
+            font-weight: Fonts.semibold;
+            wrap: TextWrap.word-wrap;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+
+            TouchButton {
+                label: Translations.cancel_text;
+                horizontal-stretch: 1.0;
+                min_h: 44px;
+                bg: CediniaColors.bg_surface;
+                fg: CediniaColors.text_secondary;
+                clicked => { AppState.confirm_popup_cancel(); }
+            }
+
+            TouchButton {
+                label: (AppState.confirm_popup_action == ConfirmPopupAction.Rename || AppState.confirm_popup_action == ConfirmPopupAction.RenameBadNames) ? Translations.rename_text : Translations.delete_text;
+                horizontal-stretch: 1.0;
+                min_h: 44px;
+                bg: (AppState.confirm_popup_action == ConfirmPopupAction.Rename || AppState.confirm_popup_action == ConfirmPopupAction.RenameBadNames) ? CediniaColors.accent_muted : CediniaColors.danger;
+                fg: (AppState.confirm_popup_action == ConfirmPopupAction.Rename || AppState.confirm_popup_action == ConfirmPopupAction.RenameBadNames) ? CediniaColors.accent_light : CediniaColors.fg_on_danger;
+                clicked => { AppState.confirm_popup_ok(); }
+            }
+        }
+    }
+
+
+
+    if AppState.delete_errors_visible : ScrimDialog {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 30;
+        strong_scrim: true;
+        dismissible: false;
+        card_max_width: 400px;
+        side_margin: 32px;
+        card_radius: 14px;
+        card_padding: 20px;
+        card_spacing: 12px;
+        shadow_color: CediniaColors.shadow_xl;
+
+        Text {
+            text: Translations.delete_errors_title_text;
+            color: CediniaColors.warning;
+            font-size: Fonts.label_lg;
+            font-weight: Fonts.semibold;
+            wrap: TextWrap.word-wrap;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
+
+        Text {
+            text: AppState.delete_errors_text;
+            color: CediniaColors.text_secondary;
+            font-size: Fonts.caption;
+            wrap: TextWrap.word-wrap;
+        }
+
+        TouchButton {
+            label: Translations.ok_text;
+            min_h: 44px;
+            bg: CediniaColors.bg_surface;
+            fg: CediniaColors.text_secondary;
+            clicked => { AppState.delete_errors_visible = false; }
+        }
+    }
+
+
+
+    ScanFab {
+        x: root.width - self.width - 16px;
+        y: root.height - self.height - 16px;
+        z: 20;
+    }
+}

@@ -3,13 +3,13 @@ use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Once};
 
 use tempfile::TempDir;
-use vid_dup_finder_lib::Cropdetect;
 
 use crate::common::config_cache_path::set_config_cache_path_test;
 use crate::common::tool_data::CommonData;
 use crate::common::traits::Search;
 use crate::tools::similar_videos::{
-    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, SimilarVideos, SimilarVideosParameters,
+    DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_CROP_DETECT,
+    DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_WINDOW_COUNT, SimilarVideos, SimilarVideosParameters,
 };
 
 static INIT: Once = Once::new();
@@ -33,7 +33,11 @@ fn make_params_visual() -> SimilarVideosParameters {
         false,
         15,
         10,
-        Cropdetect::Letterbox,
+        DEFAULT_CROP_DETECT,
+        DEFAULT_WINDOW_COUNT,
+        DEFAULT_DURATION_TOLERANCE_PCT,
+        DEFAULT_MIN_MATCHING_WINDOWS,
+        DEFAULT_SUBCLIP_MIN_MATCH,
         false,
         0,
         false,
@@ -53,7 +57,11 @@ fn make_params_audio() -> SimilarVideosParameters {
         false,
         15,
         10,
-        Cropdetect::Letterbox,
+        DEFAULT_CROP_DETECT,
+        DEFAULT_WINDOW_COUNT,
+        DEFAULT_DURATION_TOLERANCE_PCT,
+        DEFAULT_MIN_MATCHING_WINDOWS,
+        DEFAULT_SUBCLIP_MIN_MATCH,
         false,
         0,
         false,
@@ -181,4 +189,47 @@ fn test_similar_videos_hide_hard_links() {
 
         assert_eq!(finder.videos_to_check.len(), 2);
     }
+}
+
+#[test]
+fn test_similar_videos_reference_mode_deletes_only_non_reference() {
+    use std::fs;
+    use std::path::Path;
+
+    use crate::common::tool_data::DeleteMethod;
+    use crate::common::traits::DeletingItems;
+    use crate::tools::similar_videos::VideosEntry;
+
+    let temp_dir = TempDir::new().unwrap();
+    let reference = temp_dir.path().join("reference.mp4");
+    let duplicate = temp_dir.path().join("duplicate.mp4");
+    fs::write(&reference, "ref").unwrap();
+    fs::write(&duplicate, "dup").unwrap();
+
+    let mk = |path: &Path| VideosEntry {
+        path: path.to_path_buf(),
+        size: 3,
+        modified_date: 0,
+        signature: None,
+        error: String::new(),
+        fps: None,
+        codec: None,
+        bitrate: None,
+        width: None,
+        height: None,
+        duration: None,
+        thumbnail_path: None,
+    };
+
+    let mut finder = SimilarVideos::new(make_params_visual());
+    finder.set_delete_method(DeleteMethod::Delete);
+    finder.set_move_to_trash(false);
+    finder.set_use_reference_folders(true);
+    finder.similar_referenced_vectors = vec![(mk(&reference), vec![mk(&duplicate)])];
+
+    let stop_flag = Arc::new(AtomicBool::new(false));
+    let _ = finder.delete_files(&stop_flag, None);
+
+    assert!(reference.exists(), "Reference video must be kept");
+    assert!(!duplicate.exists(), "Non-reference duplicate must be deleted (#1643)");
 }

@@ -12,7 +12,7 @@ const DURATION_BEFORE_CLEANING_SECS: u64 = 7 * 24 * 60 * 60; // 7 days
 
 pub fn clear_outdated_video_thumbnails(app: &MainWindow) {
     let settings_custom = collect_settings(app);
-    if settings_custom.video_thumbnails_unused_thumbnails {
+    if settings_custom.clear_unused_video_thumbnails {
         thread::spawn(|| {
             let Some(config_cache_path) = get_config_cache_path() else {
                 return;
