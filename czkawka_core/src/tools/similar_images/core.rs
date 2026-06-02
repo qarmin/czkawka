@@ -402,7 +402,7 @@ impl SimilarImages {
 
         progress_handler.join_thread();
 
-        check_for_duplicated_things(&hashes_parents, &hashes_similarity, all_hashed_images, "post-grouping");
+        check_for_duplicated_things(self.get_params().geometric_invariance, &hashes_parents, &hashes_similarity, all_hashed_images, "post-grouping");
         self.collect_hash_compare_result(hashes_parents, &hashes_with_multiple_images, all_hashed_images, collected_similar_images, hashes_similarity);
 
         WorkContinueStatus::Continue
@@ -832,15 +832,24 @@ pub(crate) fn convert_algorithm_to_string(hash_alg: HashAlg) -> String {
 // Verifies internal invariants on the parent/similarity maps:
 //   - no hash is a key in both `hashes_parents` and `hashes_similarity`
 //   - no file path appears under more than one parent group, nor in both maps
-// Holds in both normal and reference-folder modes — in ref-folders mode the
+// Holds in both normal and reference-folder modes - in ref-folders mode the
 // parent keys are ref-folder hashes and similarity keys are normal-folder hashes,
 // so the same invariant applies.
+//
+// Only valid when geometric invariance is `Off`. With geometric invariance enabled a single
+// image contributes multiple hashes (flips/rotations), so the same file path legitimately appears
+// under several hashes/groups - the invariant does not hold and the check would false-positive.
 fn check_for_duplicated_things(
+    geometric_invariance: GeometricInvariance,
     hashes_parents: &IndexMap<ImHash, u32>,
     hashes_similarity: &IndexMap<ImHash, (ImHash, u32)>,
     all_hashed_images: &IndexMap<ImHash, Vec<ImagesEntry>>,
     phase: &str,
 ) {
+    if geometric_invariance != GeometricInvariance::Off {
+        return;
+    }
+
     let mut found_broken_thing = false;
     let mut hashmap_hashes: IndexSet<_> = Default::default();
     let mut hashmap_names: IndexSet<_> = Default::default();

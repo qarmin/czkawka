@@ -221,20 +221,20 @@ This section describes typical workflows for common tasks using Czkawka.
    - Appear in scan results for comparison
    - Be protected from deletion or modification by automatic actions
    - Be shown with a different indicator in the results if the UI supports it
-4. Proceed with scan and operations — reference paths are protected
+4. Proceed with scan and operations - reference paths are protected
 
 ## Config/Cache files
 - **Configuration files (frontend-specific)**
   - Configuration files are kept per frontend and are not automatically shared. Examples:
-    - `czkawka_gui_config.txt` — GTK GUI configuration stored under the user config directory
-    - Krokiet stores its own settings file (created under the user config directory) — do not rely on configuration being synchronized between frontends
+    - `czkawka_gui_config.txt` - GTK GUI configuration stored under the user config directory
+    - Krokiet stores its own settings file (created under the user config directory) - do not rely on configuration being synchronized between frontends
 
 - **Cache files (shared across frontends)**
   - Cache contains computed results (hashes, thumbnails, parsed metadata) and is shared by all frontends to avoid re-computation.
   - Example cache files:
-    - `cache_similar_image_SIZE_HASH_FILTER.bin/json` — image hashes and cache
+    - `cache_similar_image_SIZE_HASH_FILTER.bin/json` - image hashes and cache
     - `cache_broken_files.txt`
-    - `cache_duplicates_HASH.txt` — duplicates cache (only fully hashed files bigger than configured threshold are stored)
+    - `cache_duplicates_HASH.txt` - duplicates cache (only fully hashed files bigger than configured threshold are stored)
     - `cache_similar_videos.bin/json`
 
 It is possible to modify files with JSON extension (may be helpful when moving files to different disk or trying to use cache file on different computer). To do this, it is required to enable in settings option to generate also cache json file. By default, cache files with `bin` extension are loaded, but if it is missing (can be renamed or removed), then data from json file is loaded if exists.

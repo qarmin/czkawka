@@ -64,7 +64,7 @@ $UPDATE_CMD
 
 $INSTALL_CMD $BASE
 
-$INSTALL_CMD $OPTIONAL || echo "Some optional packages unavailable on this distro version — skipping."
+$INSTALL_CMD $OPTIONAL || echo "Some optional packages unavailable on this distro version - skipping."
 
 echo ""
 echo "Successfully installed all dependencies."

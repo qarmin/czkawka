@@ -106,7 +106,7 @@ impl bk_tree::Metric<ImHash> for Hamming {
     // Returning None when distance exceeds the threshold lets BKTree::find skip
     // the entire subtree under this node (see bk_tree::find::Find::next). The
     // distance itself is still computed in full because hamming_bitwise_fast is
-    // already very fast — a chunked early-exit was measurably slower.
+    // already very fast - a chunked early-exit was measurably slower.
     fn threshold_distance(&self, a: &ImHash, b: &ImHash, threshold: u32) -> Option<u32> {
         let d = hamming_bitwise_fast(a, b);
         if d > threshold { None } else { Some(d) }

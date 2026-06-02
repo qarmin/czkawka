@@ -31,7 +31,7 @@ export component ContextMenuSheet inherits Rectangle {
             padding: 12px;
             spacing: 6px;
 
-            // Item name — lets the user see exactly what will be opened.
+            // Item name - lets the user see exactly what will be opened.
             Text {
                 text: root.item_name != "" ? root.item_name : Translations.ctx_menu_title_text;
                 color: CediniaColors.text_primary;
@@ -41,7 +41,7 @@ export component ContextMenuSheet inherits Rectangle {
                 wrap: word-wrap;
             }
 
-            // Parent folder path — shown in a smaller, muted colour.
+            // Parent folder path - shown in a smaller, muted colour.
             if root.folder != "" : Text {
                 text: root.folder;
                 color: CediniaColors.text_disabled;

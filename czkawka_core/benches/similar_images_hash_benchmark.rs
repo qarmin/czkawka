@@ -31,7 +31,7 @@
 // }
 //
 // // Hybrid: use hamming_bitwise_fast (fast SIMD popcount) but return None when
-// // distance exceeds threshold — lets bk-tree skip entire subtrees without
+// // distance exceeds threshold - lets bk-tree skip entire subtrees without
 // // paying for chunked-popcount impl.
 // struct HammingHybrid;
 // impl Metric<Vec<u8>> for HammingHybrid {

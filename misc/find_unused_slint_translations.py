@@ -91,7 +91,7 @@ print(f"Found {len(arguments)} arguments in {translations_path}")
 # Skip arguments that are intentionally set from Rust (set_xxx) and not needed in Slint directly
 for argument in arguments:
     if f"Translations.{argument}" not in slint_files_content:
-        # If the argument is set from Rust, it's intentionally Rust-side — don't flag it
+        # If the argument is set from Rust, it's intentionally Rust-side - don't flag it
         if f"set_{argument}(" not in rust_translation_content:
             missing_in_slint.append(argument)
 missing_in_slint.sort()

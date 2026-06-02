@@ -74,7 +74,7 @@ Each tool lives in its own directory with three files:
 | `core.rs` | Internal scanning functions (`check_files_*`, `hash_calculation`, …) |
 | `traits.rs` | Trait implementations: `Search`, `CommonData`, `DeletingItems`, `PrintResults` |
 
-Example — `EmptyFiles`:
+Example - `EmptyFiles`:
 
 ```
 src/tools/empty_files/
@@ -204,7 +204,7 @@ pub struct ProgressData {
 counters and sends `ProgressData` to the frontend channel every ~200 ms.
 
 Call `handler.increase_items(n)` / `handler.increase_size(n)` from rayon tasks
-(using `Relaxed` ordering — fast, no synchronization overhead).
+(using `Relaxed` ordering - fast, no synchronization overhead).
 
 ---
 
@@ -217,7 +217,7 @@ if check_if_stop_received(stop_flag) {
 }
 ```
 
-`stop_flag` is `Arc<AtomicBool>` with `Relaxed` ordering — sufficient for simple
+`stop_flag` is `Arc<AtomicBool>` with `Relaxed` ordering - sufficient for simple
 "should I stop?" polling without synchronization cost. The frontend sets it to
 `true`; the backend polls and stops gracefully.
 

@@ -74,6 +74,11 @@ impl ExcludedItems {
                 continue;
             }
 
+            // On Windows the scanned path is lowercased before matching (see `normalize_windows_path`),
+            // so the expression must be lowercased too, otherwise patterns with uppercase letters never match.
+            #[cfg(target_family = "windows")]
+            let expression = expression.to_ascii_lowercase();
+
             checked_expressions.push(expression);
         }
 
@@ -173,6 +178,23 @@ mod tests {
         // Empty items - nothing excluded
         let items_empty = ExcludedItems::new();
         assert!(!items_empty.is_excluded(Path::new("/any/path")));
+    }
+
+    #[cfg(target_family = "windows")]
+    #[test]
+    fn test_is_excluded_windows_case_insensitive() {
+        // Regression test for issue #1957: on Windows the scanned path is lowercased before
+        // matching, so an uppercase pattern like `*\TEST\*` must still exclude `...\test\...`.
+        let items = ExcludedItems::new_from(vec!["*\\TEST\\*".to_string()]);
+
+        // Uppercase pattern matches the same-cased and differently-cased path segments.
+        assert!(items.is_excluded(Path::new("C:\\NOT_TEST\\TEST\\file.txt")));
+        assert!(items.is_excluded(Path::new("C:\\Some\\test\\file.txt")));
+        assert!(items.is_excluded(Path::new("C:\\Some\\TeSt\\file.txt")));
+
+        // A path without a `\TEST\` segment must not be excluded.
+        assert!(!items.is_excluded(Path::new("C:\\NOT_TEST\\TEST2\\file.txt")));
+        assert!(!items.is_excluded(Path::new("C:\\root\\file.txt")));
     }
 
     #[test]

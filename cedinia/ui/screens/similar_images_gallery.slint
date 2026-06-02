@@ -377,7 +377,7 @@ export component SimilarImagesGallery {
                     handle-swipe-right: true;
                     height: 244px;
                     swiped => {
-                        // Horizontal gesture finished — release the lock so the
+                        // Horizontal gesture finished - release the lock so the
                         // outer ListView can handle verticals again.
                         root._h_locked = false;
                         self.committed_x = self.committed_x + self.current-position.x - self.pressed-position.x;
@@ -423,11 +423,11 @@ export component SimilarImagesGallery {
                 }
 
                 // Track horizontal swipe state.
-                // Safe: depends only on sgr.swiping — no layout properties.
+                // Safe: depends only on sgr.swiping - no layout properties.
                 property <bool> _row_swiping: sgr.swiping;
                 changed _row_swiping => {
                     if _row_swiping { root._h_locked = true; }
-                    // Do NOT clear on false — only swiped() clears the lock.
+                    // Do NOT clear on false - only swiped() clears the lock.
                 }
 
                 Rectangle { height: 1px; background: CediniaColors.divider; }

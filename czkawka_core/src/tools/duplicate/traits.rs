@@ -39,7 +39,7 @@ impl DeletingItems for DuplicateFinder {
             }
             // For non-HardLink methods with reference folders, delete every non-reference
             // duplicate.  The reference file is already retained as the "original", so we
-            // flatten all destination lists and delete them unconditionally — bypassing the
+            // flatten all destination lists and delete them unconditionally - bypassing the
             // "keep one" group-selection logic of delete_advanced_elements which would
             // incorrectly preserve files in single-element groups (AllExcept* modes).
             let files_to_delete: Vec<_> = match self.get_params().check_method {

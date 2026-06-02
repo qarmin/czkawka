@@ -92,7 +92,7 @@ core_failed_to_get_metadata_of_optimized_file = Nie udało się pobrać metadany
 core_cannot_create_config_folder = Nie można utworzyć folderu konfiguracyjnego "{ $folder }": { $reason }
 core_cannot_create_cache_folder = Nie można utworzyć folderu pamięci podręcznej "{ $folder }": { $reason }
 core_cannot_create_or_open_cache_file = Nie można utworzyć ani otworzyć pliku pamięci podręcznej "{ $file }": { $reason }
-core_cannot_set_config_cache_path = Nie można ustawić ścieżki do konfiguracji/pamięci podręcznej — konfiguracja i pamięć podręczna nie zostaną użyte.
+core_cannot_set_config_cache_path = Nie można ustawić ścieżki do konfiguracji/pamięci podręcznej - konfiguracja i pamięć podręczna nie zostaną użyte.
 core_invalid_extension_contains_space = "{ $extension }" nie jest prawidłowym rozszerzeniem, ponieważ zawiera spację
 core_invalid_extension_contains_dot = "{ $extension }" nie jest prawidłowym rozszerzeniem, ponieważ zawiera kropkę
 

@@ -100,7 +100,7 @@ icon = "@mipmap/ic_launcher"
 
 # Plain NativeActivity is fine; onActivityResult is handled by a headless
 # CediniaPickerFragment (android.app.Fragment) attached at runtime from the
-# dynamically-loaded DEX — no manifest activity subclass needed.
+# dynamically-loaded DEX - no manifest activity subclass needed.
 [package.metadata.android.application.activity]
 name = "android.app.NativeActivity"
 # Prevent Android from destroying and recreating the Activity on common
