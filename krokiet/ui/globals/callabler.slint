@@ -30,6 +30,7 @@ export global Callabler {
     callback row_copy_file_name(int);
     callback row_copy_parent_folder_path(int);
     callback row_copy_full_path(int);
+    callback row_rename_item(int);
 
     // Right click or middle click opener
     callback open_item(string);
@@ -64,6 +65,8 @@ export global Callabler {
     callback save_results();
     callback move_items(string);
     callback rename_files();
+    callback rename_single_file(int, string);
+    pure callback rename_target_exists(int, string) -> bool;
     callback crop_video_items();
     callback reencode_video_items();
     callback clean_exif_items();

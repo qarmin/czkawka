@@ -4,7 +4,8 @@ use std::thread;
 
 use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
-use slint::{ComponentHandle, Weak};
+use log::{error, info, warn};
+use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel, Weak};
 
 use crate::common::StrDataBadNames;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
@@ -31,6 +32,120 @@ pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressD
             }
             _ => panic!("{active_tab:?} is not supported for renaming bad extensions/bad file names"),
         }
+    });
+
+    connect_rename_single_file(app);
+}
+
+// Issue #162: arbitrary per-row rename to a user-supplied name.
+// Unlike `rename_files` (a batch confirm over checked items in BadExtensions/BadNames),
+// this renames a single row to any name and updates the row in place - the file stays in its group.
+fn connect_rename_single_file(app: &MainWindow) {
+    let a = app.as_weak();
+    app.global::<Callabler>().on_rename_single_file(move |idx, new_name| {
+        use std::path::{MAIN_SEPARATOR, Path};
+
+        let app = a.upgrade().expect("Failed to upgrade app :(");
+        let active_tab = app.global::<GuiState>().get_active_tab();
+        let model = active_tab.get_tool_model(&app);
+        let path_idx = active_tab.get_str_path_idx();
+        let name_idx = active_tab.get_str_name_idx();
+
+        // Surfaces a failed rename both in the (often hidden) info bar and as a popup, so the user
+        // always learns the action did not succeed instead of only seeing it in the console logs.
+        let report_failure = |app: &MainWindow, msg: String| {
+            app.global::<GuiState>().set_info_text(msg.clone().into());
+            app.invoke_show_error_popup(msg.into());
+        };
+
+        let new_name = new_name.trim();
+        if new_name.is_empty() || new_name.contains('/') || new_name.contains('\\') {
+            warn!("Single rename rejected (row {idx}): invalid name {new_name:?}");
+            report_failure(&app, crate::flk!("rust_rename_single_invalid_name"));
+            return;
+        }
+
+        let row = model
+            .row_data(idx as usize)
+            .unwrap_or_else(|| panic!("Single rename: no row at index {idx} (model has {} rows)", model.row_count()));
+        if row.header_row {
+            warn!("Single rename aborted: row {idx} is a header row");
+            report_failure(&app, crate::flk!("rust_rename_single_invalid_name"));
+            return;
+        }
+        let folder = row.val_str.iter().nth(path_idx).map(|s| s.to_string()).unwrap_or_default();
+        let old_name = row.val_str.iter().nth(name_idx).map(|s| s.to_string()).unwrap_or_default();
+        if new_name == old_name.as_str() {
+            warn!("Single rename skipped (row {idx}): new name equals current name {old_name:?}");
+            report_failure(&app, crate::flk!("rust_rename_single_same_name"));
+            return;
+        }
+
+        let old_full_path = if folder.is_empty() { old_name.clone() } else { format!("{folder}{MAIN_SEPARATOR}{old_name}") };
+        let new_full_path = if folder.is_empty() { new_name.to_string() } else { format!("{folder}{MAIN_SEPARATOR}{new_name}") };
+
+        if Path::new(&new_full_path).exists() {
+            warn!("Single rename rejected: target {new_full_path:?} already exists");
+            report_failure(&app, crate::flk!("rust_rename_single_target_exists"));
+            return;
+        }
+        if let Err(e) = std::fs::rename(&old_full_path, &new_full_path) {
+            error!("Failed to rename {old_full_path:?} to {new_full_path:?}: {e}");
+            report_failure(
+                &app,
+                crate::flk!("rust_failed_to_rename_file", old_path = old_full_path, new_path = new_full_path, error = e.to_string()),
+            );
+            return;
+        }
+        info!("Renamed {old_full_path:?} to {new_full_path:?}");
+
+        // Update the Name cell in place - keeps the file in its duplicate/similar group.
+        let new_val_str: Vec<SharedString> = row
+            .val_str
+            .iter()
+            .enumerate()
+            .map(|(i, s)| if i == name_idx { new_name.into() } else { s })
+            .collect();
+        let mut row = row;
+        row.val_str = ModelRc::new(VecModel::from(new_val_str));
+        model.set_row_data(idx as usize, row);
+
+        app.global::<GuiState>()
+            .set_info_text(crate::flk!("rust_renamed_file", old_name = old_name, new_name = new_name.to_string()).into());
+    });
+
+    // Live check used by the rename popup to disable OK and show a warning when the new name
+    // already exists on disk. Returns false for empty/invalid/unchanged names (those are handled
+    // by separate warnings), so it only reports a genuine pre-existing target.
+    let a = app.as_weak();
+    app.global::<Callabler>().on_rename_target_exists(move |idx, new_name| {
+        use std::path::{MAIN_SEPARATOR, Path};
+
+        let app = a.upgrade().expect("Failed to upgrade app :(");
+        let active_tab = app.global::<GuiState>().get_active_tab();
+        let model = active_tab.get_tool_model(&app);
+        let path_idx = active_tab.get_str_path_idx();
+        let name_idx = active_tab.get_str_name_idx();
+
+        let new_name = new_name.trim();
+        if new_name.is_empty() || new_name.contains('/') || new_name.contains('\\') {
+            return false;
+        }
+
+        let row = model
+            .row_data(idx as usize)
+            .unwrap_or_else(|| panic!("Rename target check: no row at index {idx} (model has {} rows)", model.row_count()));
+        if row.header_row {
+            return false;
+        }
+        let folder = row.val_str.iter().nth(path_idx).map(|s| s.to_string()).unwrap_or_default();
+        let old_name = row.val_str.iter().nth(name_idx).map(|s| s.to_string()).unwrap_or_default();
+        if new_name == old_name.as_str() {
+            return false;
+        }
+
+        let new_full_path = if folder.is_empty() { new_name.to_string() } else { format!("{folder}{MAIN_SEPARATOR}{new_name}") };
+        Path::new(&new_full_path).exists()
     });
 }
 

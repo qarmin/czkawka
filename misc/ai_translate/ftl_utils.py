@@ -15,6 +15,8 @@ LANGUAGE_NAMES = {
     "es-ES": "Spanish",
     "fa": "Persian",
     "fr": "French",
+    "hi": "Hindi",
+    "id": "Indonesian",
     "it": "Italian",
     "ja": "Japanese",
     "ko": "Korean",
@@ -28,6 +30,7 @@ LANGUAGE_NAMES = {
     "sv-SE": "Swedish",
     "tr": "Turkish",
     "uk": "Ukrainian",
+    "vi": "Vietnamese",
     "zh-CN": "Simplified Chinese",
     "zh-TW": "Traditional Chinese",
 }

@@ -102,11 +102,12 @@ pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedM
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let model = app.global::<GuiState>().get_custom_select_columns();
         let idx = idx as usize;
-        if let Some(mut col) = model.row_data(idx) {
-            col.enabled = enabled;
-            col.filter_value = filter_value;
-            model.set_row_data(idx, col);
-        }
+        let mut col = model
+            .row_data(idx)
+            .unwrap_or_else(|| panic!("Custom select column idx={idx} out of bounds (row_count={})", model.row_count()));
+        col.enabled = enabled;
+        col.filter_value = filter_value;
+        model.set_row_data(idx, col);
     });
 
     let a = app.as_weak();

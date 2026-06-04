@@ -792,6 +792,7 @@ mod context_menu {
         connect_copy_file_name(app);
         connect_copy_parent_folder_path(app);
         connect_copy_full_path(app);
+        connect_rename_item(app);
     }
 
     fn connect_remove_from_results(app: &MainWindow) {
@@ -802,7 +803,9 @@ mod context_menu {
             let model = active_tab.get_tool_model(&app);
             let idx = idx as usize;
 
-            let Some(row) = model.row_data(idx) else { return };
+            let row = model
+                .row_data(idx)
+                .unwrap_or_else(|| panic!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
             if row.header_row {
                 return;
             }
@@ -833,7 +836,9 @@ mod context_menu {
         let model = active_tab.get_tool_model(app);
         let path_idx = active_tab.get_str_path_idx();
 
-        let Some(clicked_row) = model.row_data(idx) else { return };
+        let clicked_row = model
+            .row_data(idx)
+            .unwrap_or_else(|| panic!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
         if clicked_row.header_row {
             return;
         }
@@ -884,7 +889,9 @@ mod context_menu {
         let path_idx = active_tab.get_str_path_idx();
         let is_header_mode = active_tab.get_is_header_mode();
 
-        let Some(clicked_row) = model.row_data(idx) else { return };
+        let clicked_row = model
+            .row_data(idx)
+            .unwrap_or_else(|| panic!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
         if clicked_row.header_row {
             return;
         }
@@ -1169,6 +1176,25 @@ mod context_menu {
                 .to_string();
             let full_path = if path.is_empty() { name } else { format!("{path}{MAIN_SEPARATOR}{name}") };
             set_clipboard(full_path);
+        });
+    }
+
+    fn connect_rename_item(app: &MainWindow) {
+        let a = app.as_weak();
+        app.global::<Callabler>().on_row_rename_item(move |idx| {
+            let app = a.upgrade().expect("Failed to upgrade app");
+            let active_tab = app.global::<GuiState>().get_active_tab();
+            let model = active_tab.get_tool_model(&app);
+            let name_idx = active_tab.get_str_name_idx();
+
+            let row = model
+                .row_data(idx as usize)
+                .unwrap_or_else(|| panic!("Row idx={idx} out of bounds (row_count={})", model.row_count()));
+            if row.header_row {
+                return;
+            }
+            let name = row.val_str.iter().nth(name_idx).map(|s| s.to_string()).unwrap_or_default();
+            app.invoke_show_rename_single_file_popup(idx, name.into());
         });
     }
 }

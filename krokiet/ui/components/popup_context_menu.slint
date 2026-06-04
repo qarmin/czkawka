@@ -15,6 +15,7 @@ export component PopupContextMenu inherits Rectangle {
     callback copy_file_name();
     callback copy_parent_folder_path();
     callback copy_full_path();
+    callback rename_item();
 
     out property <length> popup_menu_width: 230px;
     private property <length> menu_item_height: 28px;
@@ -24,7 +25,7 @@ export component PopupContextMenu inherits Rectangle {
 
     popup_window := PopupWindow {
         width: popup_menu_width;
-        height: menu_item_height * 12 + divider_height * 4;
+        height: menu_item_height * 13 + divider_height * 5;
         close-policy: PopupClosePolicy.close-on-click-outside;
 
         Rectangle {
@@ -92,6 +93,15 @@ export component PopupContextMenu inherits Rectangle {
                     text: Translations.context_menu_exclude_item_text;
                     height: menu_item_height;
                     clicked => { popup_window.close(); root.exclude_item(); }
+                }
+
+                Rectangle { height: divider_height; background: ColorPalette.popup_border_color.with_alpha(0.25); }
+
+                // Rename
+                Button {
+                    text: Translations.context_menu_rename_text;
+                    height: menu_item_height;
+                    clicked => { popup_window.close(); root.rename_item(); }
                 }
 
                 Rectangle { height: divider_height; background: ColorPalette.popup_border_color.with_alpha(0.25); }

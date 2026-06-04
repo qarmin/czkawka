@@ -1,0 +1,32 @@
+import { Translations } from "../globals/translations.slint";
+import { PopupBase } from "../components/popup_base.slint";
+import { PopupCenteredText } from "../components/popup_centered_text.slint";
+
+// Generic error popup, shown from Rust via `show_error_popup(message)`.
+// Used to make failed actions (e.g. a rename that could not be completed) visible to the user,
+// instead of only logging them to the console / hidden bottom panel.
+export component PopupError inherits Rectangle {
+    out property <length> popup_width: 450px;
+    out property <length> popup_height: 190px;
+    private property <string> message_text;
+    callback show_popup(string);
+
+    popup_window := PopupBase {
+        width: popup_width;
+        height: popup_height;
+        title_text <=> Translations.popup_error_title_text;
+        show_cancel_button: false;
+
+        VerticalLayout {
+            padding: 10px;
+            PopupCenteredText {
+                text <=> root.message_text;
+            }
+        }
+    }
+
+    show_popup(message) => {
+        root.message_text = message;
+        popup_window.show();
+    }
+}

@@ -19,6 +19,7 @@ use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::process_utils::run_with_long_operation_warnings;
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, VideoMetadata, generate_thumbnail};
@@ -123,12 +124,15 @@ impl SimilarVideos {
 
     fn check_video_file_entry(&self, mut file_entry: VideosEntry, stop_flag: &AtomicBool) -> VideosEntry {
         let sig_config = self.signature_config();
-        match VideoSignature::from_path(&file_entry.path, &sig_config, stop_flag) {
+        let path = file_entry.path.to_string_lossy().to_string();
+        // Visual hashing runs in-process and cannot be interrupted, so a watchdog at least logs a
+        // warning if a single file keeps hashing for very long (likely a hang) instead of freezing silently.
+        let signature = run_with_long_operation_warnings(&path, || VideoSignature::from_path(&file_entry.path, &sig_config, stop_flag));
+        match signature {
             Ok(sig) => {
                 file_entry.signature = Some(sig);
             }
             Err(e) => {
-                let path = file_entry.path.to_string_lossy();
                 file_entry.error = format!("Failed to hash file \"{path}\": reason {e}");
             }
         }
@@ -167,7 +171,7 @@ impl SimilarVideos {
             CurrentStage::SimilarVideosCalculatingHashes,
             non_cached_files_to_check.len(),
             self.get_test_type(),
-            0, // non_cached_files_to_check.values().map(|e| e.size).sum(), // Looks, that at least for now, there is no big difference between checking big and small files, so at least for now, only tracking number of files is enough
+            non_cached_files_to_check.values().map(|e| e.size).sum(),
         );
 
         let non_cached_files_to_check: Vec<_> = non_cached_files_to_check.into_iter().map(|f| f.1).collect();
@@ -179,10 +183,12 @@ impl SimilarVideos {
                     return None;
                 }
 
+                let size = file_entry.size;
                 let res = self.check_video_file_entry(file_entry, stop_flag);
                 let res = Self::read_video_properties(res);
 
                 progress_handler.increase_items(1);
+                progress_handler.increase_size(size);
 
                 Some(res)
             })
@@ -407,7 +413,7 @@ impl SimilarVideos {
                 }
 
                 let size = audio_entry.size;
-                let res = calc_fingerprint_and_duration(&path, configuration, stop_flag);
+                let res = run_with_long_operation_warnings(&path, || calc_fingerprint_and_duration(&path, configuration, stop_flag));
                 progress_handler.increase_size(size);
                 progress_handler.increase_items(1);
 

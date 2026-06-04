@@ -28,6 +28,45 @@ pub struct CommandOutput {
     pub stderr: String,
 }
 
+// Seconds after which a still-running operation logs a warning - shared by the subprocess
+// watchdog (`run_command_interruptible`) and the in-process watchdog below.
+const WARNING_STEPS_SECS: [u64; 4] = [50, 250, 1250, 6000];
+
+// Runs a blocking in-process operation while a watchdog thread logs a warning if it keeps
+// running past the WARNING_STEPS_SECS thresholds. Mirrors the watchdog in
+// `run_command_interruptible`, but for work that cannot be killed (e.g. in-process video hashing),
+// so a hang on a single file is at least visible in the logs instead of silently freezing.
+pub fn run_with_long_operation_warnings<T, F: FnOnce() -> T>(context: &str, f: F) -> T {
+    let finished = Arc::new(AtomicBool::new(false));
+    let finished_watchdog = finished.clone();
+    let context = context.to_string();
+
+    let watchdog = thread::spawn(move || {
+        let start_time = Instant::now();
+        let mut next_warning_idx = 0;
+        loop {
+            if finished_watchdog.load(Ordering::Relaxed) {
+                break;
+            }
+
+            let elapsed_secs = start_time.elapsed().as_secs();
+            if let Some(warning_time) = WARNING_STEPS_SECS.get(next_warning_idx)
+                && elapsed_secs >= *warning_time
+            {
+                warn!("Operation is still running after {warning_time} seconds, for: {context}");
+                next_warning_idx += 1;
+            }
+
+            thread::sleep(Duration::from_millis(100));
+        }
+    });
+
+    let result = f();
+    finished.store(true, Ordering::Relaxed);
+    let _ = watchdog.join();
+    result
+}
+
 // Remember - Ok returned by this function does not necessarily mean that the command executed successfully
 // it only means that the command was executed and its output was captured.
 // The actual success of the command should be determined by checking the `status` field of the returned `CommandOutput`.
@@ -79,7 +118,7 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
     });
 
     let start_time = Instant::now();
-    let warning_steps = [50, 250, 1250, 6000];
+    let warning_steps = WARNING_STEPS_SECS;
     let mut next_warning_idx = 0;
 
     loop {
