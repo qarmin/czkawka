@@ -51,10 +51,7 @@ fn connect_rename_single_file(app: &MainWindow) {
         let path_idx = active_tab.get_str_path_idx();
         let name_idx = active_tab.get_str_name_idx();
 
-        // Surfaces a failed rename both in the (often hidden) info bar and as a popup, so the user
-        // always learns the action did not succeed instead of only seeing it in the console logs.
         let report_failure = |app: &MainWindow, msg: String| {
-            app.global::<GuiState>().set_info_text(msg.clone().into());
             app.invoke_show_error_popup(msg.into());
         };
 

@@ -23,23 +23,15 @@ pub fn make_file_model(items: Vec<FileItem>) -> ModelRc<FileEntry> {
 }
 
 pub fn toggle_row(model: &ModelRc<FileEntry>, index: usize) {
-    if let Some(vm) = model.as_any().downcast_ref::<VecModel<FileEntry>>() {
-        let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
-        if let Some(entry) = items.get_mut(index)
-            && !entry.is_header
-            && !entry.is_reference
-        {
-            entry.checked = !entry.checked;
-        }
-        vm.set_vec(items);
+    let Some(mut entry) = model.row_data(index) else { return };
+    if !entry.is_header && !entry.is_reference {
+        entry.checked = !entry.checked;
+        model.set_row_data(index, entry);
     }
 }
 
 pub fn count_checked(model: &ModelRc<FileEntry>) -> i32 {
-    model
-        .as_any()
-        .downcast_ref::<VecModel<FileEntry>>()
-        .map_or(0, |vm| vm.iter().filter(|e: &FileEntry| e.checked).count() as i32)
+    model.iter().filter(|e: &FileEntry| e.checked).count() as i32
 }
 
 #[cfg(test)]

@@ -30,8 +30,8 @@ pub(crate) enum DeleteEvent {
     ExifCleanFinished(Vec<String>, Vec<String>),
 }
 
-fn vm_of(model: &ModelRc<FileEntry>) -> Option<&VecModel<FileEntry>> {
-    model.as_any().downcast_ref::<VecModel<FileEntry>>()
+fn vm_of(model: &ModelRc<FileEntry>) -> &VecModel<FileEntry> {
+    model.as_any().downcast_ref::<VecModel<FileEntry>>().expect("FileEntry model must be backed by a VecModel")
 }
 
 fn size_from_entry(e: &FileEntry) -> u64 {
@@ -62,7 +62,7 @@ fn full_path_of(e: &FileEntry) -> String {
 fn execute_delete_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteEvent>) {
     let tool = win.global::<AppState>().get_active_tool();
     let model = get_model_for_tool(win, tool);
-    let Some(vm) = vm_of(&model) else { return };
+    let vm = vm_of(&model);
 
     let items: Vec<FileEntry> = vm.iter().collect();
     let to_delete: Vec<(usize, String)> = items
@@ -101,7 +101,7 @@ fn execute_delete_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteE
 
 fn execute_rename_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteEvent>) {
     let model = win.get_bad_extensions_model();
-    let Some(vm) = vm_of(&model) else { return };
+    let vm = vm_of(&model);
 
     let items: Vec<FileEntry> = vm.iter().collect();
     let to_rename: Vec<(usize, String, String)> = items
@@ -157,7 +157,7 @@ fn execute_rename_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteE
 
 fn execute_rename_bad_names(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteEvent>) {
     let model = win.get_bad_names_model();
-    let Some(vm) = vm_of(&model) else { return };
+    let vm = vm_of(&model);
 
     let items: Vec<FileEntry> = vm.iter().collect();
     let to_rename: Vec<(usize, String, String)> = items
@@ -208,7 +208,7 @@ fn execute_rename_bad_names(win: &MainWindow, tx: std::sync::mpsc::Sender<Delete
 }
 fn execute_clean_exif_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteEvent>) {
     let model = win.get_exif_remover_model();
-    let Some(vm) = vm_of(&model) else { return };
+    let vm = vm_of(&model);
 
     let items: Vec<FileEntry> = vm.iter().collect();
     let to_clean: Vec<(usize, String)> = items
@@ -335,15 +335,14 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
             let win = weak.upgrade().expect("MainWindow dropped in on_invert_selection");
             let tool = win.global::<AppState>().get_active_tool();
             let model = get_model_for_tool(&win, tool);
-            if let Some(vm) = vm_of(&model) {
-                let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
-                for e in &mut items {
-                    if !e.is_header && !e.is_reference {
-                        e.checked = !e.checked;
-                    }
+            let vm = vm_of(&model);
+            let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
+            for e in &mut items {
+                if !e.is_header && !e.is_reference {
+                    e.checked = !e.checked;
                 }
-                vm.set_vec(items);
             }
+            vm.set_vec(items);
             sync_gallery_if_similar(&win, tool);
             win.global::<AppState>().set_selected_count(count_checked(&model));
         });
@@ -612,19 +611,18 @@ pub(crate) fn get_model_for_tool(win: &MainWindow, tool: ActiveTool) -> ModelRc<
 }
 
 pub(crate) fn set_all_checked(model: &ModelRc<FileEntry>, state: bool) {
-    if let Some(vm) = vm_of(model) {
-        let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
-        for e in &mut items {
-            if !e.is_header && !e.is_reference {
-                e.checked = state;
-            }
+    let vm = vm_of(model);
+    let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
+    for e in &mut items {
+        if !e.is_header && !e.is_reference {
+            e.checked = state;
         }
-        vm.set_vec(items);
     }
+    vm.set_vec(items);
 }
 
 pub(crate) fn select_except_one_per_group(model: &ModelRc<FileEntry>, select: bool) {
-    let Some(vm) = vm_of(model) else { return };
+    let vm = vm_of(model);
     let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
     let has_headers = items.iter().any(|e| e.is_header);
 
@@ -701,7 +699,7 @@ pub(crate) fn select_all_except_smallest(model: &ModelRc<FileEntry>) {
 }
 
 fn select_by_size_per_group(model: &ModelRc<FileEntry>, largest: bool, select_target: bool) {
-    let Some(vm) = vm_of(model) else { return };
+    let vm = vm_of(model);
     let mut items: Vec<FileEntry> = vm.iter().collect();
 
     let mut i = 0;
@@ -749,7 +747,7 @@ fn resolution_from_entry(e: &FileEntry) -> u64 {
 }
 
 fn select_by_resolution_per_group(model: &ModelRc<FileEntry>, highest: bool, select_target: bool) {
-    let Some(vm) = vm_of(model) else { return };
+    let vm = vm_of(model);
     let mut items: Vec<FileEntry> = vm.iter().collect();
 
     let mut i = 0;
@@ -816,7 +814,12 @@ pub(crate) fn sync_gallery_checked_from_flat(win: &MainWindow) {
                 changed = true;
             }
         }
-        if changed && let Some(vm) = group.items.as_any().downcast_ref::<VecModel<SimilarImageItem>>() {
+        if changed {
+            let vm = group
+                .items
+                .as_any()
+                .downcast_ref::<VecModel<SimilarImageItem>>()
+                .expect("SimilarImageItem model must be backed by a VecModel");
             vm.set_vec(items);
         }
     }

@@ -117,6 +117,13 @@ fn build_gallery_groups(items: &[FileItem], placeholder: &slint::Image) -> Vec<S
     groups
 }
 
+fn vm_file_entry(model: &ModelRc<FileEntry>) -> &VecModel<FileEntry> {
+    model
+        .as_any()
+        .downcast_ref::<VecModel<FileEntry>>()
+        .expect("FileEntry model must be backed by a VecModel")
+}
+
 fn show_delete_errors(win: &MainWindow, errors: &[String]) {
     let mut msg = errors.iter().take(10).cloned().collect::<Vec<_>>().join("\n\n");
     if errors.len() > 10 {
@@ -505,46 +512,45 @@ fn run_app_inner(
                         if !del_set.is_empty() {
                             let tool = win.global::<AppState>().get_active_tool();
                             let model = get_model_for_tool(&win, tool);
-                            if let Some(vm) = model.as_any().downcast_ref::<slint::VecModel<FileEntry>>() {
-                                let mut items: Vec<FileEntry> = vm.iter().collect();
-                                items.retain(|e| {
-                                    if e.is_header {
-                                        return true;
-                                    }
-                                    let name = e
-                                        .val_str
-                                        .row_data(0)
-                                        .map_or_else(|| panic!("Expected name in val_str[0] - {:?}", e.val_str), |s| s.to_string());
-                                    let path = e
-                                        .val_str
-                                        .row_data(1)
-                                        .map_or_else(|| panic!("Expected path in val_str[1] - {:?}", e.val_str), |s| s.to_string());
-                                    let full = if path.is_empty() { name } else { format!("{path}/{name}") };
-                                    !del_set.contains(&full)
-                                });
-
-                                loop {
-                                    let mut removed = false;
-                                    let mut i = 0;
-                                    while i < items.len() {
-                                        if items[i].is_header {
-                                            let group_len = items[i + 1..].iter().take_while(|e| !e.is_header).count();
-                                            if group_len <= 1 {
-                                                let end = i + 1 + group_len;
-                                                items.drain(i..end);
-                                                removed = true;
-                                                continue;
-                                            }
-                                        }
-                                        i += 1;
-                                    }
-                                    if !removed {
-                                        break;
-                                    }
+                            let vm = vm_file_entry(&model);
+                            let mut items: Vec<FileEntry> = vm.iter().collect();
+                            items.retain(|e| {
+                                if e.is_header {
+                                    return true;
                                 }
-                                vm.set_vec(items);
-                                win.global::<AppState>().set_selected_count(0);
+                                let name = e
+                                    .val_str
+                                    .row_data(0)
+                                    .map_or_else(|| panic!("Expected name in val_str[0] - {:?}", e.val_str), |s| s.to_string());
+                                let path = e
+                                    .val_str
+                                    .row_data(1)
+                                    .map_or_else(|| panic!("Expected path in val_str[1] - {:?}", e.val_str), |s| s.to_string());
+                                let full = if path.is_empty() { name } else { format!("{path}/{name}") };
+                                !del_set.contains(&full)
+                            });
+
+                            loop {
+                                let mut removed = false;
+                                let mut i = 0;
+                                while i < items.len() {
+                                    if items[i].is_header {
+                                        let group_len = items[i + 1..].iter().take_while(|e| !e.is_header).count();
+                                        if group_len <= 1 {
+                                            let end = i + 1 + group_len;
+                                            items.drain(i..end);
+                                            removed = true;
+                                            continue;
+                                        }
+                                    }
+                                    i += 1;
+                                }
+                                if !removed {
+                                    break;
+                                }
                             }
+                            vm.set_vec(items);
+                            win.global::<AppState>().set_selected_count(0);
 
                             rebuild_similar_images_after_delete(&win, &del_set);
                         }
@@ -571,11 +577,10 @@ fn run_app_inner(
                         win.global::<AppState>().set_delete_running(false);
 
                         let model = win.get_bad_extensions_model();
-                        if let Some(vm) = model.as_any().downcast_ref::<slint::VecModel<FileEntry>>() {
-                            let items: Vec<FileEntry> = vm.iter().filter(|e| !e.checked).collect();
-                            vm.set_vec(items);
-                            win.global::<AppState>().set_selected_count(0);
-                        }
+                        let vm = vm_file_entry(&model);
+                        let items: Vec<FileEntry> = vm.iter().filter(|e| !e.checked).collect();
+                        vm.set_vec(items);
+                        win.global::<AppState>().set_selected_count(0);
 
                         let status = if errors.is_empty() {
                             format!("{} {renamed} {}", crate::flc!("renamed_prefix"), crate::flc!("renamed_files_suffix"))
@@ -601,22 +606,21 @@ fn run_app_inner(
                         let cleaned_set: std::collections::HashSet<String> = cleaned.iter().cloned().collect();
                         if !cleaned_set.is_empty() {
                             let model = win.get_exif_remover_model();
-                            if let Some(vm) = model.as_any().downcast_ref::<slint::VecModel<FileEntry>>() {
-                                let items: Vec<FileEntry> = vm
-                                    .iter()
-                                    .filter(|e| {
-                                        if e.is_header {
-                                            return true;
-                                        }
-                                        let name = e.val_str.row_data(0).map(|s| s.to_string()).expect("Expected name in val_str[0]");
-                                        let path = e.val_str.row_data(1).map(|s| s.to_string()).expect("Expected path in val_str[1]");
-                                        let full = if path.is_empty() { name } else { format!("{path}/{name}") };
-                                        !cleaned_set.contains(&full)
-                                    })
-                                    .collect();
-                                vm.set_vec(items);
-                                win.global::<AppState>().set_selected_count(0);
-                            }
+                            let vm = vm_file_entry(&model);
+                            let items: Vec<FileEntry> = vm
+                                .iter()
+                                .filter(|e| {
+                                    if e.is_header {
+                                        return true;
+                                    }
+                                    let name = e.val_str.row_data(0).map(|s| s.to_string()).expect("Expected name in val_str[0]");
+                                    let path = e.val_str.row_data(1).map(|s| s.to_string()).expect("Expected path in val_str[1]");
+                                    let full = if path.is_empty() { name } else { format!("{path}/{name}") };
+                                    !cleaned_set.contains(&full)
+                                })
+                                .collect();
+                            vm.set_vec(items);
+                            win.global::<AppState>().set_selected_count(0);
                         }
 
                         let status = if errors.is_empty() {

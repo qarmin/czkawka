@@ -272,12 +272,12 @@ impl SimilarImages {
             let mut files_from_referenced_folders: IndexMap<ImHash, Vec<ImagesEntry>> = IndexMap::new();
             let mut normal_files: IndexMap<ImHash, Vec<ImagesEntry>> = IndexMap::new();
 
-            all_hashed_images.clone().into_iter().for_each(|(hash, vec_file_entry)| {
+            all_hashed_images.iter().for_each(|(hash, vec_file_entry)| {
                 for file_entry in vec_file_entry {
                     if is_in_reference_folder(&self.common_data.directories.reference_directories, &file_entry.path) {
-                        files_from_referenced_folders.entry(hash.clone()).or_default().push(file_entry);
+                        files_from_referenced_folders.entry(hash.clone()).or_default();
                     } else {
-                        normal_files.entry(hash.clone()).or_default().push(file_entry);
+                        normal_files.entry(hash.clone()).or_default();
                     }
                 }
             });

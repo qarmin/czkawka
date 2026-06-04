@@ -517,10 +517,9 @@ fn finish_cancel(app: &MainWindow) {
 }
 
 fn update_compare_checked(images_model: &ModelRc<CompareImageData>, compare_idx: usize, new_checked: bool) {
-    if let Some(vm) = images_model.as_any().downcast_ref::<VecModel<CompareImageData>>()
-        && let Some(mut item) = vm.row_data(compare_idx)
-    {
-        item.checked = new_checked;
-        vm.set_row_data(compare_idx, item);
-    }
+    let mut item = images_model
+        .row_data(compare_idx)
+        .unwrap_or_else(|| panic!("update_compare_checked: compare_idx={compare_idx} out of bounds (row_count={})", images_model.row_count()));
+    item.checked = new_checked;
+    images_model.set_row_data(compare_idx, item);
 }

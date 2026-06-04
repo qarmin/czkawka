@@ -479,27 +479,31 @@ impl SimilarVideos {
         let mut similar_vectors: Vec<Vec<VideosEntry>> = Vec::new();
         let mut used_paths: IndexSet<String> = Default::default();
 
-        let lookup: BTreeMap<String, &VideoAudioEntry> = entries.iter().map(|e| (e.path.to_string_lossy().to_string(), e)).collect();
+        // Compute each entry's path string once instead of re-allocating it for every pair on every
+        // outer iteration (previously an O(n^2) flood of `to_string_lossy().to_string()` allocations).
+        // The strings are then shared via zipped iterators; only grouped entries' strings get cloned
+        // (into `used_paths`). The expensive `match_fingerprints` call stays gated behind the
+        // duration-ratio check, and the set of compared pairs / grouping is unchanged.
+        let path_strings: Vec<String> = entries.iter().map(|e| e.path.to_string_lossy().to_string()).collect();
 
-        for f_entry in &entries {
+        for (f_entry, f_string) in entries.iter().zip(path_strings.iter()) {
             if check_if_stop_received(stop_flag) {
                 progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
             progress_handler.increase_items(1);
-            let f_string = f_entry.path.to_string_lossy().to_string();
-            if used_paths.contains(&f_string) {
+            if used_paths.contains(f_string) {
                 continue;
             }
 
             let f_duration = f64::from(f_entry.audio_duration_seconds);
 
-            let (mut similar_entries, errors): (Vec<_>, Vec<_>) = entries
+            let (similar_entries, errors): (Vec<&VideoAudioEntry>, Vec<_>) = entries
                 .par_iter()
-                .map(|e_entry| {
-                    let e_string = e_entry.path.to_string_lossy().to_string();
-                    if used_paths.contains(&e_string) || e_string == f_string {
+                .zip(path_strings.par_iter())
+                .map(|(e_entry, e_string)| {
+                    if used_paths.contains(e_string) || e_string == f_string {
                         return None;
                     }
 
@@ -517,26 +521,25 @@ impl SimilarVideos {
                     segments.retain(|s| s.score < maximum_difference);
                     let matched_duration: f32 = segments.iter().map(|s| s.duration(configuration)).sum();
                     let threshold = shorter as f32 * (audio_similarity_percent / 100.0) as f32;
-                    if matched_duration >= threshold { Some(Ok(e_string)) } else { None }
+                    if matched_duration >= threshold { Some(Ok(e_entry)) } else { None }
                 })
                 .flatten()
                 .partition_map(|res| match res {
-                    Ok(path) => itertools::Either::Left(path),
+                    Ok(entry) => itertools::Either::Left(entry),
                     Err(err) => itertools::Either::Right(err),
                 });
 
             self.common_data.text_messages.errors.extend(errors);
 
-            similar_entries.retain(|path| !used_paths.contains(path));
             if !similar_entries.is_empty() {
                 let mut result_group: Vec<VideosEntry> = similar_entries
                     .iter()
-                    .filter_map(|path| {
-                        used_paths.insert(path.clone());
-                        lookup.get(path).map(|ae| audio_entry_to_videos_entry(ae))
+                    .map(|e_entry| {
+                        used_paths.insert(e_entry.path.to_string_lossy().to_string());
+                        audio_entry_to_videos_entry(e_entry)
                     })
                     .collect();
-                used_paths.insert(f_string);
+                used_paths.insert(f_string.clone());
                 result_group.push(audio_entry_to_videos_entry(f_entry));
                 similar_vectors.push(result_group);
             }
