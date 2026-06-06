@@ -5,6 +5,7 @@ mod app;
 mod callbacks;
 pub mod common;
 mod compare;
+mod file_actions;
 #[cfg(target_os = "android")]
 mod file_picker_android;
 pub mod localizer_cedinia;

@@ -238,6 +238,8 @@ renamed_errors_suffix = errors
 cleaned_exif_prefix = Cleaned EXIF from
 cleaned_exif_suffix = files
 cleaned_exif_errors_suffix = errors
+rename_error_read_file_name = Cannot read file name
+rename_error_read_directory = Cannot read directory
 and_more_prefix = ...and
 and_more_suffix = more
 

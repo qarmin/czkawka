@@ -83,12 +83,7 @@ clip:
     cargo clippy --fix --allow-dirty --allow-staged --no-default-features --features winit_software --all-targets
 
 fix:
-    grep -rlZ --include='*.rs' \
-               --include='*.slint' \
-               --include='*.md' \
-               --include='*.ftl' \
-               --exclude='AGENTS.md' \
-               '─' . | xargs -0 sed -i 's/─//g' || true
+    grep -rlZ --include='*.rs' --include='*.slint' --include='*.md' --include='*.ftl' --exclude='AGENTS.md' --exclude='Justfile' '[─–—]' . | xargs -0 -r sed -i 's/[─–—]/-/g' || true
     cp misc/pyproject.toml .
     uv sync
 

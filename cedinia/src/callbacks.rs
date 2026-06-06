@@ -2,6 +2,7 @@ mod directories;
 mod misc;
 mod scan;
 mod selection;
+pub(crate) mod selection_ops;
 
 pub(crate) use directories::{build_excluded_model, build_included_model, wire_directories};
 pub(crate) use misc::{
@@ -9,4 +10,6 @@ pub(crate) use misc::{
     wire_save_settings_now,
 };
 pub(crate) use scan::wire_scan;
-pub(crate) use selection::{DeleteEvent, get_model_for_tool, wire_selection};
+pub(crate) use selection::{get_model_for_tool, wire_selection};
+
+pub(crate) use crate::file_actions::DeleteEvent;

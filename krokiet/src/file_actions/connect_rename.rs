@@ -78,8 +78,16 @@ fn connect_rename_single_file(app: &MainWindow) {
             return;
         }
 
-        let old_full_path = if folder.is_empty() { old_name.clone() } else { format!("{folder}{MAIN_SEPARATOR}{old_name}") };
-        let new_full_path = if folder.is_empty() { new_name.to_string() } else { format!("{folder}{MAIN_SEPARATOR}{new_name}") };
+        let old_full_path = if folder.is_empty() {
+            old_name.clone()
+        } else {
+            format!("{folder}{MAIN_SEPARATOR}{old_name}")
+        };
+        let new_full_path = if folder.is_empty() {
+            new_name.to_string()
+        } else {
+            format!("{folder}{MAIN_SEPARATOR}{new_name}")
+        };
 
         if Path::new(&new_full_path).exists() {
             warn!("Single rename rejected: target {new_full_path:?} already exists");
@@ -97,12 +105,7 @@ fn connect_rename_single_file(app: &MainWindow) {
         info!("Renamed {old_full_path:?} to {new_full_path:?}");
 
         // Update the Name cell in place - keeps the file in its duplicate/similar group.
-        let new_val_str: Vec<SharedString> = row
-            .val_str
-            .iter()
-            .enumerate()
-            .map(|(i, s)| if i == name_idx { new_name.into() } else { s })
-            .collect();
+        let new_val_str: Vec<SharedString> = row.val_str.iter().enumerate().map(|(i, s)| if i == name_idx { new_name.into() } else { s }).collect();
         let mut row = row;
         row.val_str = ModelRc::new(VecModel::from(new_val_str));
         model.set_row_data(idx as usize, row);
@@ -141,7 +144,11 @@ fn connect_rename_single_file(app: &MainWindow) {
             return false;
         }
 
-        let new_full_path = if folder.is_empty() { new_name.to_string() } else { format!("{folder}{MAIN_SEPARATOR}{new_name}") };
+        let new_full_path = if folder.is_empty() {
+            new_name.to_string()
+        } else {
+            format!("{folder}{MAIN_SEPARATOR}{new_name}")
+        };
         Path::new(&new_full_path).exists()
     });
 }

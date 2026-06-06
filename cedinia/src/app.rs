@@ -20,7 +20,7 @@ use crate::settings::{apply_settings_to_gui, collect_settings_from_gui, load_dir
 use crate::thumbnail_loader::{ThumbnailData, collect_thumb_tasks, make_placeholder_image, rgba_to_slint_image, spawn_thumbnail_loader};
 use crate::translations::translate_items;
 use crate::volumes::home_dir;
-use crate::{AppState, FileEntry, MainWindow, ProgressData, ScanState, SimilarGroupCard, SimilarImageItem};
+use crate::{AppState, FileEntry, MainWindow, ProgressData, ScanState};
 
 #[cfg(target_os = "android")]
 thread_local! {
@@ -74,121 +74,12 @@ pub fn run_app_with_insets(inset_bottom_px: f32, scale: f32, _unused: ()) {
     run_app_inner(inset_bottom_px, scale, None::<()>);
 }
 
-fn build_gallery_groups(items: &[FileItem], placeholder: &slint::Image) -> Vec<SimilarGroupCard> {
-    use slint::{ModelRc, SharedString, VecModel};
-
-    use crate::common::{STR_IDX_NAME, STR_IDX_PATH, STR_IDX_SIZE};
-    let mut groups: Vec<SimilarGroupCard> = Vec::new();
-    let mut cur_label = String::new();
-    let mut cur_items: Vec<SimilarImageItem> = Vec::new();
-
-    for (flat_idx, item) in items.iter().enumerate() {
-        if item.is_header {
-            if !cur_items.is_empty() {
-                groups.push(SimilarGroupCard {
-                    label: SharedString::from(&cur_label),
-                    items: ModelRc::new(VecModel::from(std::mem::take(&mut cur_items))),
-                });
-            }
-            cur_label = item.val_str[STR_IDX_NAME].clone();
-        } else {
-            let name = &item.val_str[STR_IDX_NAME];
-            let path = &item.val_str[STR_IDX_PATH];
-            let size = &item.val_str[STR_IDX_SIZE];
-            let full_path = if path.is_empty() { name.clone() } else { format!("{path}/{name}") };
-            cur_items.push(SimilarImageItem {
-                full_path: SharedString::from(full_path),
-                name: SharedString::from(name),
-                size: SharedString::from(size),
-                val_str: ModelRc::new(VecModel::from(item.val_str.iter().map(|s| SharedString::from(s.as_str())).collect::<Vec<_>>())),
-                flat_idx: flat_idx as i32,
-                thumbnail: placeholder.clone(),
-                checked: false,
-                is_reference: item.is_reference,
-            });
-        }
-    }
-    if !cur_items.is_empty() {
-        groups.push(SimilarGroupCard {
-            label: SharedString::from(&cur_label),
-            items: ModelRc::new(VecModel::from(cur_items)),
-        });
-    }
-    groups
-}
-
-fn vm_file_entry(model: &ModelRc<FileEntry>) -> &VecModel<FileEntry> {
-    model
-        .as_any()
-        .downcast_ref::<VecModel<FileEntry>>()
-        .expect("FileEntry model must be backed by a VecModel")
-}
-
-fn show_delete_errors(win: &MainWindow, errors: &[String]) {
-    let mut msg = errors.iter().take(10).cloned().collect::<Vec<_>>().join("\n\n");
-    if errors.len() > 10 {
-        msg.push_str(&format!("\n\n{} {} {}", crate::flc!("and_more_prefix"), errors.len() - 10, crate::flc!("and_more_suffix")));
-    }
-    win.global::<AppState>().set_delete_errors_text(SharedString::from(msg));
-    win.global::<AppState>().set_delete_errors_visible(true);
-}
-
-fn rebuild_similar_images_after_delete(win: &MainWindow, deleted: &std::collections::HashSet<String>) {
-    let groups = win.get_similar_images_groups();
-    let mut new_groups: Vec<SimilarGroupCard> = Vec::new();
-    let mut new_flat: Vec<FileEntry> = Vec::new();
-
-    for gi in 0..groups.row_count() {
-        if let Some(group) = groups.row_data(gi) {
-            let surviving: Vec<_> = (0..group.items.row_count())
-                .filter_map(|ii| group.items.row_data(ii))
-                .filter(|item| !deleted.contains(item.full_path.as_str()))
-                .map(|mut item| {
-                    item.checked = false;
-                    item
-                })
-                .collect();
-
-            if surviving.is_empty() {
-                continue;
-            }
-
-            new_flat.push(FileEntry {
-                checked: false,
-                is_header: true,
-                is_reference: false,
-                val_str: ModelRc::new(VecModel::from(vec![
-                    group.label.clone(),
-                    SharedString::default(),
-                    SharedString::default(),
-                    SharedString::default(),
-                ])),
-                val_int: ModelRc::new(VecModel::from(Vec::new())),
-            });
-
-            let mut final_items: Vec<SimilarImageItem> = Vec::new();
-            for mut item in surviving {
-                item.flat_idx = new_flat.len() as i32;
-                new_flat.push(FileEntry {
-                    checked: false,
-                    is_header: false,
-                    is_reference: false,
-                    val_str: item.val_str.clone(),
-                    val_int: ModelRc::new(VecModel::from(Vec::new())),
-                });
-                final_items.push(item);
-            }
-
-            new_groups.push(SimilarGroupCard {
-                label: group.label.clone(),
-                items: ModelRc::new(VecModel::from(final_items)),
-            });
-        }
-    }
-
-    win.set_similar_images_model(ModelRc::new(VecModel::from(new_flat)));
-    win.set_similar_images_groups(ModelRc::new(VecModel::from(new_groups)));
-    win.global::<AppState>().set_selected_count(0);
+fn set_tool_model(weak: Weak<MainWindow>, items: Vec<FileItem>, setter: fn(&MainWindow, ModelRc<FileEntry>)) {
+    slint::invoke_from_event_loop(move || {
+        let win = weak.upgrade().expect("Failed to upgrade app :(");
+        setter(&win, make_file_model(items));
+    })
+    .expect("Failed to invoke progress update in event loop");
 }
 
 struct GuiHandler {
@@ -221,20 +112,8 @@ impl ScanResultHandler for GuiHandler {
                 .expect("Failed to invoke progress update in event loop");
             }
 
-            ScanResult::DuplicateFiles(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_duplicate_files_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
-            ScanResult::EmptyFolders(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_empty_folder_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
+            ScanResult::DuplicateFiles(items) => set_tool_model(weak, items, MainWindow::set_duplicate_files_model),
+            ScanResult::EmptyFolders(items) => set_tool_model(weak, items, MainWindow::set_empty_folder_model),
             ScanResult::SimilarImages(items) => {
                 let thumb_tx = self.thumb_tx.clone();
                 let thumb_cancel = Arc::clone(&self.thumb_cancel);
@@ -242,7 +121,7 @@ impl ScanResultHandler for GuiHandler {
                     let win = weak.upgrade().expect("Failed to upgrade app :(");
                     let tasks = collect_thumb_tasks(&items);
                     let ph = make_placeholder_image();
-                    let groups = build_gallery_groups(&items, &ph);
+                    let groups = crate::model::build_gallery_groups(&items, &ph);
                     win.set_similar_images_model(make_file_model(items));
                     win.set_similar_images_groups(ModelRc::new(VecModel::from(groups)));
 
@@ -255,69 +134,15 @@ impl ScanResultHandler for GuiHandler {
                 })
                 .expect("Failed to invoke progress update in event loop");
             }
-            ScanResult::EmptyFiles(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_empty_files_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
-            ScanResult::TemporaryFiles(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_temporary_files_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
-            ScanResult::BigFiles(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_big_files_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
-            ScanResult::BrokenFiles(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_broken_files_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
-            ScanResult::BadExtensions(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_bad_extensions_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
-            ScanResult::SameMusic(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_same_music_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
-            ScanResult::BadNames(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_bad_names_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
-            ScanResult::ExifRemover(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_exif_remover_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
-            ScanResult::SimilarVideos(items) => {
-                slint::invoke_from_event_loop(move || {
-                    let win = weak.upgrade().expect("Failed to upgrade app :(");
-                    win.set_similar_videos_model(make_file_model(items));
-                })
-                .expect("Failed to invoke progress update in event loop");
-            }
+            ScanResult::EmptyFiles(items) => set_tool_model(weak, items, MainWindow::set_empty_files_model),
+            ScanResult::TemporaryFiles(items) => set_tool_model(weak, items, MainWindow::set_temporary_files_model),
+            ScanResult::BigFiles(items) => set_tool_model(weak, items, MainWindow::set_big_files_model),
+            ScanResult::BrokenFiles(items) => set_tool_model(weak, items, MainWindow::set_broken_files_model),
+            ScanResult::BadExtensions(items) => set_tool_model(weak, items, MainWindow::set_bad_extensions_model),
+            ScanResult::SameMusic(items) => set_tool_model(weak, items, MainWindow::set_same_music_model),
+            ScanResult::BadNames(items) => set_tool_model(weak, items, MainWindow::set_bad_names_model),
+            ScanResult::ExifRemover(items) => set_tool_model(weak, items, MainWindow::set_exif_remover_model),
+            ScanResult::SimilarVideos(items) => set_tool_model(weak, items, MainWindow::set_similar_videos_model),
             ScanResult::Finished(id) => {
                 slint::invoke_from_event_loop(move || {
                     let win = weak.upgrade().expect("Failed to upgrade app :(");
@@ -482,166 +307,7 @@ fn run_app_inner(
         {
             let rx = delete_rx_poll.borrow();
             while let Ok(event) = rx.try_recv() {
-                match event {
-                    DeleteEvent::Progress(done, total) => {
-                        win.global::<AppState>().set_delete_progress_text(SharedString::from(format!("{done} / {total}")));
-                    }
-                    DeleteEvent::Finished(deleted, errors) => {
-                        win.global::<AppState>().set_delete_running(false);
-
-                        if !deleted.is_empty() {
-                            let del_set: std::collections::HashSet<String> = deleted.into_iter().collect();
-                            rebuild_similar_images_after_delete(&win, &del_set);
-                        }
-
-                        let status = if errors.is_empty() {
-                            crate::flc!("status_deleted_selected").to_string()
-                        } else {
-                            crate::flc!("status_deleted_with_errors").to_string()
-                        };
-                        win.global::<AppState>().set_status_message(SharedString::from(status));
-
-                        if !errors.is_empty() {
-                            show_delete_errors(&win, &errors);
-                        }
-                    }
-                    DeleteEvent::ListDeleteFinished(deleted, errors) => {
-                        win.global::<AppState>().set_delete_running(false);
-
-                        let del_set: std::collections::HashSet<String> = deleted.iter().cloned().collect();
-                        if !del_set.is_empty() {
-                            let tool = win.global::<AppState>().get_active_tool();
-                            let model = get_model_for_tool(&win, tool);
-                            let vm = vm_file_entry(&model);
-                            let mut items: Vec<FileEntry> = vm.iter().collect();
-                            items.retain(|e| {
-                                if e.is_header {
-                                    return true;
-                                }
-                                let name = e
-                                    .val_str
-                                    .row_data(0)
-                                    .map_or_else(|| panic!("Expected name in val_str[0] - {:?}", e.val_str), |s| s.to_string());
-                                let path = e
-                                    .val_str
-                                    .row_data(1)
-                                    .map_or_else(|| panic!("Expected path in val_str[1] - {:?}", e.val_str), |s| s.to_string());
-                                let full = if path.is_empty() { name } else { format!("{path}/{name}") };
-                                !del_set.contains(&full)
-                            });
-
-                            loop {
-                                let mut removed = false;
-                                let mut i = 0;
-                                while i < items.len() {
-                                    if items[i].is_header {
-                                        let group_len = items[i + 1..].iter().take_while(|e| !e.is_header).count();
-                                        if group_len <= 1 {
-                                            let end = i + 1 + group_len;
-                                            items.drain(i..end);
-                                            removed = true;
-                                            continue;
-                                        }
-                                    }
-                                    i += 1;
-                                }
-                                if !removed {
-                                    break;
-                                }
-                            }
-                            vm.set_vec(items);
-                            win.global::<AppState>().set_selected_count(0);
-
-                            rebuild_similar_images_after_delete(&win, &del_set);
-                        }
-
-                        let status = if errors.is_empty() {
-                            format!("{} {} {}", crate::flc!("deleted_items_prefix"), deleted.len(), crate::flc!("deleted_items_suffix"))
-                        } else {
-                            format!(
-                                "{} {} {}, {} {}",
-                                crate::flc!("deleted_items_prefix"),
-                                deleted.len(),
-                                crate::flc!("deleted_items_suffix"),
-                                errors.len(),
-                                crate::flc!("deleted_errors_suffix")
-                            )
-                        };
-                        win.global::<AppState>().set_status_message(SharedString::from(status));
-
-                        if !errors.is_empty() {
-                            show_delete_errors(&win, &errors);
-                        }
-                    }
-                    DeleteEvent::ListRenameFinished(renamed, errors) => {
-                        win.global::<AppState>().set_delete_running(false);
-
-                        let model = win.get_bad_extensions_model();
-                        let vm = vm_file_entry(&model);
-                        let items: Vec<FileEntry> = vm.iter().filter(|e| !e.checked).collect();
-                        vm.set_vec(items);
-                        win.global::<AppState>().set_selected_count(0);
-
-                        let status = if errors.is_empty() {
-                            format!("{} {renamed} {}", crate::flc!("renamed_prefix"), crate::flc!("renamed_files_suffix"))
-                        } else {
-                            format!(
-                                "{} {} {}, {} {}",
-                                crate::flc!("renamed_prefix"),
-                                renamed,
-                                crate::flc!("renamed_files_suffix"),
-                                errors.len(),
-                                crate::flc!("renamed_errors_suffix")
-                            )
-                        };
-                        win.global::<AppState>().set_status_message(SharedString::from(status));
-
-                        if !errors.is_empty() {
-                            show_delete_errors(&win, &errors);
-                        }
-                    }
-                    DeleteEvent::ExifCleanFinished(cleaned, errors) => {
-                        win.global::<AppState>().set_delete_running(false);
-
-                        let cleaned_set: std::collections::HashSet<String> = cleaned.iter().cloned().collect();
-                        if !cleaned_set.is_empty() {
-                            let model = win.get_exif_remover_model();
-                            let vm = vm_file_entry(&model);
-                            let items: Vec<FileEntry> = vm
-                                .iter()
-                                .filter(|e| {
-                                    if e.is_header {
-                                        return true;
-                                    }
-                                    let name = e.val_str.row_data(0).map(|s| s.to_string()).expect("Expected name in val_str[0]");
-                                    let path = e.val_str.row_data(1).map(|s| s.to_string()).expect("Expected path in val_str[1]");
-                                    let full = if path.is_empty() { name } else { format!("{path}/{name}") };
-                                    !cleaned_set.contains(&full)
-                                })
-                                .collect();
-                            vm.set_vec(items);
-                            win.global::<AppState>().set_selected_count(0);
-                        }
-
-                        let status = if errors.is_empty() {
-                            format!("{} {} {}", crate::flc!("cleaned_exif_prefix"), cleaned.len(), crate::flc!("cleaned_exif_suffix"))
-                        } else {
-                            format!(
-                                "{} {} {}, {} {}",
-                                crate::flc!("cleaned_exif_prefix"),
-                                cleaned.len(),
-                                crate::flc!("cleaned_exif_suffix"),
-                                errors.len(),
-                                crate::flc!("cleaned_exif_errors_suffix")
-                            )
-                        };
-                        win.global::<AppState>().set_status_message(SharedString::from(status));
-
-                        if !errors.is_empty() {
-                            show_delete_errors(&win, &errors);
-                        }
-                    }
-                }
+                crate::file_actions::handle_delete_event(&win, event);
             }
         }
 
