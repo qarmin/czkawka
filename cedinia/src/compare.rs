@@ -39,7 +39,7 @@ thread_local! {
         RefCell::new(Arc::new(AtomicU64::new(0)));
     static SET_RIGHT_GEN: RefCell<Arc<AtomicU64>> =
         RefCell::new(Arc::new(AtomicU64::new(0)));
-    // Counter for open_group background loads – used to discard stale results
+    // Counter for open_group background loads - used to discard stale results
     // when the user navigates to another group before the previous load finishes.
     static OPEN_GEN: RefCell<Arc<AtomicU64>> =
         RefCell::new(Arc::new(AtomicU64::new(0)));
@@ -466,14 +466,14 @@ fn open_group(app: &MainWindow, group_idx: usize) {
     state.set_compare_loading_total(total);
     state.set_compare_visible(true);
 
-    // Load full-size images in the background (only RawPixels are sent – they are Send).
+    // Load full-size images in the background (only RawPixels are sent - they are Send).
     let cancel = new_cancel_token();
     let (open_gen_counter, open_gen_val) = next_open_gen();
     let weak = app.as_weak();
 
     thread::spawn(move || {
         if cancel.load(Ordering::Relaxed) {
-            // Explicit user cancel – still the current group, so close the overlay.
+            // Explicit user cancel - still the current group, so close the overlay.
             if open_gen_counter.load(Ordering::Relaxed) == open_gen_val {
                 weak.upgrade_in_event_loop(|app| finish_cancel(&app)).expect("open_group cancel1: upgrade failed");
             }

@@ -255,7 +255,7 @@ pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientatio
     let res = panic::catch_unwind(|| {
         let metadata = match Metadata::new_from_path(Path::new(path)) {
             Ok(m) => m,
-            // File format has no EXIF support – treat as no orientation data
+            // File format has no EXIF support - treat as no orientation data
             Err(e) if e.kind() == std::io::ErrorKind::Unsupported => return Ok(None),
             Err(e) => return Err(e),
         };

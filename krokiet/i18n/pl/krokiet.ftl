@@ -7,7 +7,7 @@ rust_init_error_message =
     
     Może to być spowodowane brakiem lub uszkodzeniem sterowników OpenGL/Vulkan, uruchamianiem aplikacji w maszynie wirtualnej lub błędem w Krokiecie albo jednej z używanych bibliotek.
     
-    Możesz spróbować uruchomić różne wersje renderera (skia_opengl, skia_vulkan, femtovg_opengl — domyślny) lub użyć renderera programowego, aby sprawdzić, czy to rozwiąże problem.
+    Możesz spróbować uruchomić różne wersje renderera (skia_opengl, skia_vulkan, femtovg_opengl - domyślny) lub użyć renderera programowego, aby sprawdzić, czy to rozwiąże problem.
 rust_loaded_preset = Wczytano preset { $preset_idx }
 rust_file_already_exists = Plik "{ $file }" już istnieje i nie zostanie nadpisany
 rust_error_removing_file_after_copy = Błąd podczas usuwania pliku "{ $file }" (po skopiowaniu na inną partycję), powód: { $reason }
@@ -60,9 +60,9 @@ rust_found_duplicate_files = Znaleziono { $items_found } duplikatów w { $groups
 rust_found_duplicate_files_no_lost_space = Znaleziono duplikaty: { $items_found } w { $groups } grupach w { $time }
 rust_found_big_files = Znaleziono { $items_found } dużych plików o rozmiarze { $size } w { $time }
 rust_found_exif_files = Znaleziono { $items_found } plików z danymi EXIF w { $time }
-rust_cannot_load_preset = Nie można wczytać presetu { $preset_idx } — powód: { $reason }. Zastosowano ustawienia domyślne
+rust_cannot_load_preset = Nie można wczytać presetu { $preset_idx } - powód: { $reason }. Zastosowano ustawienia domyślne
 rust_saved_preset = Zapisano preset { $preset_idx }
-rust_cannot_save_preset = Nie można zapisać presetu { $preset_idx } — powód: { $reason }
+rust_cannot_save_preset = Nie można zapisać presetu { $preset_idx } - powód: { $reason }
 rust_reset_preset = Zresetowano preset { $preset_idx }
 rust_cannot_create_output_folder = Nie można utworzyć folderu wyjściowego "{ $output_folder }", powód: { $error }
 rust_delete_summary = Usunięto { $deleted } elementów, nie udało się usunąć { $failed } elementów spośród { $total }
@@ -148,7 +148,7 @@ column_new_name = Nowa nazwa
 ok_button = OK
 cancel_button = Anuluj
 do_you_want_to_continue = Czy chcesz kontynuować?
-main_window_title = Krokiet — Czyścioch Danych
+main_window_title = Krokiet - Czyścioch Danych
 scan_button = Skanuj
 stop_button = Zatrzymaj
 stop_text = Stop

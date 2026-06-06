@@ -84,7 +84,7 @@ impl EmptyFiles {
                 }
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!(
-                    "collect_files – {} zero-size, {} queued for content check",
+                    "collect_files - {} zero-size, {} queued for content check",
                     self.empty_files.len(),
                     self.files_to_check.len()
                 );

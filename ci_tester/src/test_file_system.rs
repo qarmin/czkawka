@@ -7,7 +7,7 @@
 //!   * putting the file into TestFiles.zip, **or**
 //!   * appending an entry to `add_synthetic_entries()` below.
 //!
-//! Rust decides which files go where – no external tooling is required.
+//! Rust decides which files go where - no external tooling is required.
 //!
 //! # File-size and mtime contract
 //!
@@ -197,7 +197,7 @@ fn validate_known_file_sizes(entries: &[TestFileEntry]) {
         });
         assert_eq!(
             actual, expected_size,
-            "TestFiles.zip: '{path}' has size {actual} B but expected {expected_size} B – wrong zip version?"
+            "TestFiles.zip: '{path}' has size {actual} B but expected {expected_size} B - wrong zip version?"
         );
     }
 }
@@ -212,7 +212,7 @@ fn add_synthetic_entries(entries: &mut Vec<TestFileEntry>) {
     // BadNames/photo.JPG disappears from the directory tree.
     //
     // mtime_unix_secs = None so the file gets the current timestamp, which is
-    // fine – bad-names checks the *name*, not the modification time.
+    // fine - bad-names checks the *name*, not the modification time.
     entries.push(TestFileEntry {
         path: "BadNames".to_string(),
         kind: EntryKind::Dir,

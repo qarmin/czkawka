@@ -26,7 +26,7 @@ impl Search for SimilarVideos {
 
         let () = (|| {
             if self.params.check_audio_content {
-                // Audio fingerprint mode – no need for ffmpeg
+                // Audio fingerprint mode - no need for ffmpeg
                 if self.prepare_items(Some(VIDEO_FILES_EXTENSIONS)).is_err() {
                     return;
                 }

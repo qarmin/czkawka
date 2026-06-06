@@ -13,7 +13,7 @@ import { DeselectionMenuSheet } from "../components/deselection_menu_sheet.slint
 import { Translations } from "../globals/translations.slint";
 import { ListView } from "std-widgets.slint";
 
-// Index of the group within similar_images_groups – passed in by the repeater.
+// Index of the group within similar_images_groups - passed in by the repeater.
 // Used so the Compare button can open the right group.
 component GroupCompareBtn inherits Rectangle {
     in property <int> group_idx;
@@ -61,7 +61,7 @@ component GalleryImageCell {
     // Suppresses the clicked event that fires right after the long-press timer.
     property <bool> lp_fired: false;
 
-    // Explicit armed flag – set to true only while a genuine long-press is in
+    // Explicit armed flag - set to true only while a genuine long-press is in
     // progress.  Cleared imperatively by every cancellation path so that even
     // if the timer callback runs just after a cancel/up/move event it will not
     // open the popup.  This is more reliable than checking `ta.pressed` because
@@ -112,7 +112,7 @@ component GalleryImageCell {
                 cell_lp_timer.running = false;
             }
         }
-        // Fires while finger is held and moving – cancel on dead-zone breach.
+        // Fires while finger is held and moving - cancel on dead-zone breach.
         moved => {
             // Well - this rarely works, because faster cancel event is gathered
             if (self.mouse-x - root._lp_start_x > 30px

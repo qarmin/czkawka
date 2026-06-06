@@ -314,13 +314,13 @@ krokiet_promo_title = Poznaj Krokieta!
 krokiet_promo_message =
         Hej, dzielny użytkowniku Czkawki! 🦄
 
-        Czy wiesz, że istnieje nowa, lśniąca wersja tej aplikacji? Oto Krokiet — szybszy, lżejszy i znacznie przystojniejszy (o ile aplikacje mogą być przystojne).
+        Czy wiesz, że istnieje nowa, lśniąca wersja tej aplikacji? Oto Krokiet - szybszy, lżejszy i znacznie przystojniejszy (o ile aplikacje mogą być przystojne).
 
         Krokiet ma wszystko, co kochasz w Czkawce, plus masę nowych funkcji, mniej zależności i działa na większej liczbie platform (tak, nawet na telefonach!).
 
-        Czkawka GTK służyła nam wiernie, ale czas na nowy początek. Pomyśl o tym jak o przesiadce z roweru na jednorożca — ten sam kierunek, ale DUŻO więcej magii.
+        Czkawka GTK służyła nam wiernie, ale czas na nowy początek. Pomyśl o tym jak o przesiadce z roweru na jednorożca - ten sam kierunek, ale DUŻO więcej magii.
 
-        Daj mu szansę — Twoje zduplikowane pliki nie będą wiedzieć, co je trafiło!
+        Daj mu szansę - Twoje zduplikowane pliki nie będą wiedzieć, co je trafiło!
 krokiet_promo_link_download = Pobierz Krokieta/Cedynię
 krokiet_promo_link_project = Strona projektu
 

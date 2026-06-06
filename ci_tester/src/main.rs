@@ -24,7 +24,7 @@ pub(crate) struct CollectedFiles {
 
 pub(crate) static CZKAWKA_PATH: state::InitCell<String> = state::InitCell::new();
 static COLLECTED_FILES: state::InitCell<CollectedFiles> = state::InitCell::new();
-/// All test file entries held in memory – both zip-derived and synthetic.
+/// All test file entries held in memory - both zip-derived and synthetic.
 /// `unzip_files()` reads from this to recreate the tree on disk.
 static ZIP_ENTRIES: state::InitCell<Vec<TestFileEntry>> = state::InitCell::new();
 
@@ -47,7 +47,7 @@ fn main() {
     test_args();
 
     // Load the zip into memory once, add any synthetic entries, then derive
-    // the baseline from the in-memory list – no on-disk extraction needed here.
+    // the baseline from the in-memory list - no on-disk extraction needed here.
     let mut entries = test_file_system::load_all_test_entries("TestFiles.zip");
     // Sort for deterministic baseline ordering.
     entries.sort_by(|a, b| a.path.cmp(&b.path));

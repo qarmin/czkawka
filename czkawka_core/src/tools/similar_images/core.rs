@@ -690,7 +690,7 @@ impl SimilarImages {
             }
         }
 
-        assert!(!found, "Found Invalid entries - invariant violations detected – check error log above");
+        assert!(!found, "Found Invalid entries - invariant violations detected - check error log above");
     }
 }
 

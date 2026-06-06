@@ -67,7 +67,7 @@ impl ExcludedItems {
                         #[cfg(not(target_family = "windows"))]
                         checked_expressions.push(item.to_string());
                         // On Windows, scanned paths are lowercased before matching, so patterns
-                        // must be lowercased too — including those from the DEFAULT set.
+                        // must be lowercased too - including those from the DEFAULT set.
                         #[cfg(target_family = "windows")]
                         checked_expressions.push(item.to_ascii_lowercase());
                     }

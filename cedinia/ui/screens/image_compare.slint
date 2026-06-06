@@ -59,7 +59,7 @@ export component ImageCompareOverlay inherits Rectangle {
         AppState.compare_right_idx >= 0 &&
         AppState.compare_right_idx < AppState.compare_images.length;
 
-    // Compare actual loaded pixel dimensions – avoids false positives from
+    // Compare actual loaded pixel dimensions - avoids false positives from
     // differing display-string formatting (e.g. empty dims for reference images).
     private property <bool> res_mismatch:
         AppState.compare_left_image.width > 0 &&
@@ -268,7 +268,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 width: parent.width; height: parent.height;
                 background: CediniaColors.bg_surface;
 
-                // Left image – clipped to split position
+                // Left image - clipped to split position
                 Rectangle {
                     clip: true;
                     x: 0; y: 0;
@@ -282,7 +282,7 @@ export component ImageCompareOverlay inherits Rectangle {
                     }
                 }
 
-                // Right image – clipped from split position
+                // Right image - clipped from split position
                 Rectangle {
                     clip: true;
                     x: main_area.width * root.slider_value; y: 0;
@@ -574,7 +574,7 @@ export component ImageCompareOverlay inherits Rectangle {
                                 image-fit: ImageFit.contain;
                             }
 
-                            // Checked badge – coloured dot only at this size
+                            // Checked badge - coloured dot only at this size
                             if img.checked: Rectangle {
                                 x: parent.width - 22px; y: 4px;
                                 width: 18px; height: 18px;

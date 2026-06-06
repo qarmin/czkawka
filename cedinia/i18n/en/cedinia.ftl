@@ -355,7 +355,7 @@ path_edit_placeholder = Enter path...
 path_edit_not_exists = Path does not exist
 path_edit_is_dir = Directory
 path_edit_is_file = File
-path_edit_no_newlines = Paths cannot contain newlines — Enter key is not allowed
+path_edit_no_newlines = Paths cannot contain newlines - Enter key is not allowed
 
 ctx_menu_title = Open
 ctx_open_file = Open item
@@ -371,5 +371,5 @@ compare_mode_normal = Side
 compare_mode_split = Split
 compare_mode_overlay = Overlay
 compare_mode_diff = Diff
-compare_res_mismatch = Different resolutions – diff may be inaccurate
+compare_res_mismatch = Different resolutions - diff may be inaccurate
 
