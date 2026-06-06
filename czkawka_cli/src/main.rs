@@ -40,6 +40,7 @@ use crate::commands::{
 use crate::progress::connect_progress;
 
 mod commands;
+mod parsers;
 mod progress;
 
 #[derive(Debug)]

@@ -550,44 +550,7 @@ impl SimilarVideos {
         let exclude_same_size = self.params.exclude_videos_with_same_size;
         let exclude_same_resolution = self.params.exclude_videos_with_same_resolution;
         if exclude_same_size || exclude_same_resolution {
-            similar_vectors = similar_vectors
-                .into_par_iter()
-                .map(|group| {
-                    let enriched: Vec<VideosEntry> = if exclude_same_resolution {
-                        group
-                            .into_par_iter()
-                            .map(|mut entry| {
-                                if (entry.width.is_none() || entry.height.is_none())
-                                    && let Ok(meta) = VideoMetadata::from_path(&entry.path)
-                                {
-                                    entry.width = meta.width;
-                                    entry.height = meta.height;
-                                }
-                                entry
-                            })
-                            .collect()
-                    } else {
-                        group
-                    };
-                    let mut bt_size: BTreeSet<u64> = Default::default();
-                    let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
-                    let mut filtered_group: Vec<VideosEntry> = Vec::new();
-                    for entry in enriched {
-                        if exclude_same_size && !bt_size.insert(entry.size) {
-                            continue;
-                        }
-                        if exclude_same_resolution
-                            && let (Some(w), Some(h)) = (entry.width, entry.height)
-                            && !bt_resolution.insert((w, h))
-                        {
-                            continue;
-                        }
-                        filtered_group.push(entry);
-                    }
-                    filtered_group
-                })
-                .filter(|g| g.len() > 1)
-                .collect();
+            similar_vectors = exclude_same_size_and_resolution(similar_vectors, exclude_same_size, exclude_same_resolution);
         }
 
         self.similar_vectors = similar_vectors;
@@ -608,6 +571,47 @@ impl SimilarVideos {
 
         WorkContinueStatus::Continue
     }
+}
+
+fn exclude_same_size_and_resolution(similar_vectors: Vec<Vec<VideosEntry>>, exclude_same_size: bool, exclude_same_resolution: bool) -> Vec<Vec<VideosEntry>> {
+    similar_vectors
+        .into_par_iter()
+        .map(|group| {
+            let enriched: Vec<VideosEntry> = if exclude_same_resolution {
+                group
+                    .into_par_iter()
+                    .map(|mut entry| {
+                        if (entry.width.is_none() || entry.height.is_none())
+                            && let Ok(meta) = VideoMetadata::from_path(&entry.path)
+                        {
+                            entry.width = meta.width;
+                            entry.height = meta.height;
+                        }
+                        entry
+                    })
+                    .collect()
+            } else {
+                group
+            };
+            let mut bt_size: BTreeSet<u64> = Default::default();
+            let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
+            let mut filtered_group: Vec<VideosEntry> = Vec::new();
+            for entry in enriched {
+                if exclude_same_size && !bt_size.insert(entry.size) {
+                    continue;
+                }
+                if exclude_same_resolution
+                    && let (Some(w), Some(h)) = (entry.width, entry.height)
+                    && !bt_resolution.insert((w, h))
+                {
+                    continue;
+                }
+                filtered_group.push(entry);
+            }
+            filtered_group
+        })
+        .filter(|g| g.len() > 1)
+        .collect()
 }
 
 fn audio_entry_to_videos_entry(ae: &VideoAudioEntry) -> VideosEntry {

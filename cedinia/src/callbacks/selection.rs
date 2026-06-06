@@ -12,6 +12,21 @@ use crate::file_actions::{DeleteEvent, delete_path, execute_clean_exif_selected,
 use crate::model::{count_checked, toggle_row};
 use crate::{ActiveTool, AppState, ConfirmPopupAction, FileEntry, MainWindow, SimilarGroupCard, SimilarImageItem};
 
+macro_rules! wire_select {
+    ($window:expr, $setter:ident, $action:expr) => {{
+        let weak = $window.as_weak();
+        $window.global::<AppState>().$setter(move || {
+            let win = weak.upgrade().expect(concat!("MainWindow dropped in ", stringify!($setter)));
+            let tool = win.global::<AppState>().get_active_tool();
+            let model = get_model_for_tool(&win, tool);
+            let action = $action;
+            action(&model);
+            sync_gallery_if_similar(&win, tool);
+            win.global::<AppState>().set_selected_count(count_checked(&model));
+        });
+    }};
+}
+
 pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Sender<DeleteEvent>, delete_stop: Rc<std::cell::RefCell<Arc<AtomicBool>>>) {
     {
         let weak = window.as_weak();
@@ -48,156 +63,28 @@ pub(crate) fn wire_selection(window: &MainWindow, delete_tx: std::sync::mpsc::Se
             let _ = tx.clone();
         });
     }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_all(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_all");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            set_all_checked(&model, true);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_deselect_all(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_deselect_all");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            set_all_checked(&model, false);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(0);
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_all_except_one(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_one");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_except_one_per_group(&model, true);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_deselect_all_except_one(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_deselect_all_except_one");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_except_one_per_group(&model, false);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_invert_selection(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_invert_selection");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            let vm = vm_of(&model);
-            let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
-            for e in &mut items {
-                if !e.is_header && !e.is_reference {
-                    e.checked = !e.checked;
-                }
+    wire_select!(window, on_select_all, |m: &ModelRc<FileEntry>| set_all_checked(m, true));
+    wire_select!(window, on_deselect_all, |m: &ModelRc<FileEntry>| set_all_checked(m, false));
+    wire_select!(window, on_select_all_except_one, |m: &ModelRc<FileEntry>| select_except_one_per_group(m, true));
+    wire_select!(window, on_deselect_all_except_one, |m: &ModelRc<FileEntry>| select_except_one_per_group(m, false));
+    wire_select!(window, on_invert_selection, |m: &ModelRc<FileEntry>| {
+        let vm = vm_of(m);
+        let mut items: Vec<FileEntry> = vm.iter().collect::<Vec<_>>();
+        for e in &mut items {
+            if !e.is_header && !e.is_reference {
+                e.checked = !e.checked;
             }
-            vm.set_vec(items);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_largest_per_group(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_largest_per_group");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_largest_per_group(&model);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_all_except_largest(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_largest");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_all_except_largest(&model);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_smallest_per_group(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_smallest_per_group");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_smallest_per_group(&model);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_all_except_smallest(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_smallest");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_all_except_smallest(&model);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_highest_resolution_per_group(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_highest_resolution_per_group");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_highest_resolution_per_group(&model);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_all_except_highest_resolution(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_highest_resolution");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_all_except_highest_resolution(&model);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_lowest_resolution_per_group(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_lowest_resolution_per_group");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_lowest_resolution_per_group(&model);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
-    {
-        let weak = window.as_weak();
-        window.global::<AppState>().on_select_all_except_lowest_resolution(move || {
-            let win = weak.upgrade().expect("MainWindow dropped in on_select_all_except_lowest_resolution");
-            let tool = win.global::<AppState>().get_active_tool();
-            let model = get_model_for_tool(&win, tool);
-            select_all_except_lowest_resolution(&model);
-            sync_gallery_if_similar(&win, tool);
-            win.global::<AppState>().set_selected_count(count_checked(&model));
-        });
-    }
+        }
+        vm.set_vec(items);
+    });
+    wire_select!(window, on_select_largest_per_group, select_largest_per_group);
+    wire_select!(window, on_select_all_except_largest, select_all_except_largest);
+    wire_select!(window, on_select_smallest_per_group, select_smallest_per_group);
+    wire_select!(window, on_select_all_except_smallest, select_all_except_smallest);
+    wire_select!(window, on_select_highest_resolution_per_group, select_highest_resolution_per_group);
+    wire_select!(window, on_select_all_except_highest_resolution, select_all_except_highest_resolution);
+    wire_select!(window, on_select_lowest_resolution_per_group, select_lowest_resolution_per_group);
+    wire_select!(window, on_select_all_except_lowest_resolution, select_all_except_lowest_resolution);
     {
         let weak = window.as_weak();
         window.global::<AppState>().on_toggle_file_checked(move |idx| {

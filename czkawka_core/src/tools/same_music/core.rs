@@ -230,55 +230,22 @@ impl SameMusic {
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![mem::take(&mut self.music_entries)];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
 
-        if (self.params.music_similarity & MusicSimilarity::TRACK_TITLE) == MusicSimilarity::TRACK_TITLE {
-            if check_if_stop_received(stop_flag) {
-                progress_handler.join_thread();
-                return WorkContinueStatus::Stop;
+        let approximate = self.params.approximate_comparison;
+        let tag_checks: [(MusicSimilarity, fn(&MusicEntry) -> String, bool); 5] = [
+            (MusicSimilarity::TRACK_TITLE, |fe| fe.track_title.clone(), approximate),
+            (MusicSimilarity::TRACK_ARTIST, |fe| fe.track_artist.clone(), approximate),
+            (MusicSimilarity::YEAR, |fe| fe.year.clone(), false),
+            (MusicSimilarity::LENGTH, |fe| format_audio_duration(fe.length), false),
+            (MusicSimilarity::GENRE, |fe| fe.genre.clone(), false),
+        ];
+        for (flag, get_item, approximate_comparison) in tag_checks {
+            if (self.params.music_similarity & flag) == flag {
+                if check_if_stop_received(stop_flag) {
+                    progress_handler.join_thread();
+                    return WorkContinueStatus::Stop;
+                }
+                old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), get_item, approximate_comparison);
             }
-
-            old_duplicates = self.check_music_item(
-                old_duplicates,
-                progress_handler.items_counter(),
-                |fe| fe.track_title.clone(),
-                self.params.approximate_comparison,
-            );
-        }
-        if (self.params.music_similarity & MusicSimilarity::TRACK_ARTIST) == MusicSimilarity::TRACK_ARTIST {
-            if check_if_stop_received(stop_flag) {
-                progress_handler.join_thread();
-                return WorkContinueStatus::Stop;
-            }
-
-            old_duplicates = self.check_music_item(
-                old_duplicates,
-                progress_handler.items_counter(),
-                |fe| fe.track_artist.clone(),
-                self.params.approximate_comparison,
-            );
-        }
-        if (self.params.music_similarity & MusicSimilarity::YEAR) == MusicSimilarity::YEAR {
-            if check_if_stop_received(stop_flag) {
-                progress_handler.join_thread();
-                return WorkContinueStatus::Stop;
-            }
-
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| fe.year.clone(), false);
-        }
-        if (self.params.music_similarity & MusicSimilarity::LENGTH) == MusicSimilarity::LENGTH {
-            if check_if_stop_received(stop_flag) {
-                progress_handler.join_thread();
-                return WorkContinueStatus::Stop;
-            }
-
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| format_audio_duration(fe.length), false);
-        }
-        if (self.params.music_similarity & MusicSimilarity::GENRE) == MusicSimilarity::GENRE {
-            if check_if_stop_received(stop_flag) {
-                progress_handler.join_thread();
-                return WorkContinueStatus::Stop;
-            }
-
-            old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), |fe| fe.genre.clone(), false);
         }
         if (self.params.music_similarity & MusicSimilarity::BITRATE) == MusicSimilarity::BITRATE {
             if check_if_stop_received(stop_flag) {

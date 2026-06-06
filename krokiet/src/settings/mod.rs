@@ -23,7 +23,8 @@ use crate::settings::combo_box::StringComboBoxItems;
 use crate::settings::model::{
     BasicSettings, ComboBoxItems, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT,
     DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX,
-    SettingsCustom, default_video_optimizer_black_pixel_threshold, default_video_optimizer_max_samples, default_video_optimizer_min_crop_size,
+    SettingsCustom, default_video_optimizer_black_bar_min_percentage, default_video_optimizer_black_pixel_threshold, default_video_optimizer_max_samples,
+    default_video_optimizer_min_crop_size,
 };
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
@@ -756,7 +757,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let video_optimizer_black_bar_min_percentage = settings
         .get_video_optimizer_sub_black_bar_min_percentage()
         .parse::<u8>()
-        .unwrap_or(default_video_optimizer_black_pixel_threshold())
+        .unwrap_or(default_video_optimizer_black_bar_min_percentage())
         .clamp(50, 100);
     let video_optimizer_max_samples = settings
         .get_video_optimizer_sub_max_samples()
