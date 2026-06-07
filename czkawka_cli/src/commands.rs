@@ -183,8 +183,8 @@ pub struct DuplicatesArgs {
         long,
         default_value = "HASH",
         value_parser = parse_checking_method_duplicate,
-        help = "Search method (NAME, SIZE, HASH)",
-        long_help = "Methods to search files.\nNAME - Fast but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nHASH - The slowest method, checking by the hash of the entire file"
+        help = "Search method (NAME, SIZE, SIZE_NAME, HASH)",
+        long_help = "Methods to search files.\nNAME - Fast but rarely usable,\nSIZE - Fast but not accurate, checking by the file's size,\nSIZE_NAME - Checking by both the file's size and name,\nHASH - The slowest method, checking by the hash of the entire file"
     )]
     pub search_method: CheckingMethod,
     #[clap(flatten)]

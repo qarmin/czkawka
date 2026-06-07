@@ -115,7 +115,7 @@ impl DuplicateFinderParameters {
 pub struct DuplicateFinder {
     common_data: CommonToolData,
     information: Info,
-    // File Size, File Entry
+    // File Name, File Entry
     files_with_identical_names: BTreeMap<String, Vec<DuplicateEntry>>,
     // File (Size, Name), File Entry
     files_with_identical_size_names: BTreeMap<(u64, String), Vec<DuplicateEntry>>,
@@ -123,7 +123,7 @@ pub struct DuplicateFinder {
     files_with_identical_size: BTreeMap<u64, Vec<DuplicateEntry>>,
     // File Size, next grouped by file size, next grouped by hash
     files_with_identical_hashes: BTreeMap<u64, Vec<Vec<DuplicateEntry>>>,
-    // File Size, File Entry
+    // File Name, File Entry
     files_with_identical_names_referenced: BTreeMap<String, (DuplicateEntry, Vec<DuplicateEntry>)>,
     // File (Size, Name), File Entry
     files_with_identical_size_names_referenced: BTreeMap<(u64, String), (DuplicateEntry, Vec<DuplicateEntry>)>,

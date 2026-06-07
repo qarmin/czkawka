@@ -132,7 +132,7 @@ pub fn remove_folder_if_contains_only_empty_folders<P: AsRef<Path>>(path: P, rem
     }
 }
 
-/// Remove a single file. If `remove_to_trash` is set, the folder will instead be sent to the system's
+/// Remove a single file. If `remove_to_trash` is set, the file will instead be sent to the system's
 /// recycle bin/trash equivalent rather than being deleted.
 ///
 /// Note: if used on Android or iOS platforms, ensure `remove_to_trash` is false, as trash is not supported

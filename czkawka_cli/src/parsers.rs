@@ -175,7 +175,7 @@ pub(crate) fn parse_checking_method_duplicate(src: &str) -> Result<CheckingMetho
         "size" => Ok(CheckingMethod::Size),
         "size_name" => Ok(CheckingMethod::SizeName),
         "hash" => Ok(CheckingMethod::Hash),
-        _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, HASH)"),
+        _ => Err("Couldn't parse the search method (allowed: NAME, SIZE, SIZE_NAME, HASH)"),
     }
 }
 

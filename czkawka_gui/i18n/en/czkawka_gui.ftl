@@ -553,6 +553,7 @@ saving_loading_saving_success = Saved configuration to file { $name }.
 saving_loading_saving_failure = Failed to save configuration data to file { $name }, reason { $reason }.
 saving_loading_reset_configuration = Current configuration was cleared.
 saving_loading_loading_success = Properly loaded app configuration.
+saving_loading_no_config_file = No configuration file found, using default settings.
 
 saving_loading_failed_to_create_config_file = Failed to create config file "{ $path }", reason "{ $reason }".
 saving_loading_failed_to_read_config_file = Cannot load configuration from "{ $path }" because it does not exist or is not a file.

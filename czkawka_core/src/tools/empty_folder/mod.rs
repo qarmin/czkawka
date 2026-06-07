@@ -41,7 +41,8 @@ pub struct EmptyFolder {
 }
 
 /// Enum with values which show if folder is empty.
-/// In function "`optimize_folders`" automatically "Maybe" is changed to "Yes", so it is not necessary to put it here
+/// `Maybe` means the folder is still considered empty and is what selects folders for the final
+/// output. `optimize_folders` only deduplicates nested empty folders; it does not change emptiness state.
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub(crate) enum FolderEmptiness {
     No,
