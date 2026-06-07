@@ -318,7 +318,7 @@ fn send_notification(title: &str, body: &str) {
                 )?
                 .l()?;
             if !launch_intent.is_null() {
-                // android.content.Intent flags — bring the existing Activity to front instead of creating a new instance.
+                // android.content.Intent flags - bring the existing Activity to front instead of creating a new instance.
                 const FLAG_ACTIVITY_SINGLE_TOP: i32 = 0x2000_0000;
                 const FLAG_ACTIVITY_CLEAR_TOP: i32 = 0x0400_0000;
                 // android.app.PendingIntent flag, required on Android 12+ (API 31+). Numerically equal to
@@ -337,7 +337,12 @@ fn send_notification(title: &str, body: &str) {
                         jni_str!("android/app/PendingIntent"),
                         jni_str!("getActivity"),
                         &sig_pending.method_signature(),
-                        &[JValue::Object(&activity), JValue::Int(0), JValue::Object(&launch_intent), JValue::Int(PENDING_INTENT_FLAG_IMMUTABLE)],
+                        &[
+                            JValue::Object(&activity),
+                            JValue::Int(0),
+                            JValue::Object(&launch_intent),
+                            JValue::Int(PENDING_INTENT_FLAG_IMMUTABLE),
+                        ],
                     )?
                     .l()?;
                 if !pending_intent.is_null() {
