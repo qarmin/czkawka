@@ -35,7 +35,7 @@ Czkawka consists of several independent frontends sharing a common core library.
 **Configuration files (per frontend, not shared):**
 
 - GTK stores `czkawka_gui_config.txt` under the user config directory.
-- Krokiet stores `base.json` and `preset_N.json` under the user config directory.
+- Krokiet stores `config_general.json` and `config_preset_N.json` under the user config directory (`~/.config/krokiet/` on Linux).
 - CLI does not store configuration files.
 
 **Cache files (shared across all frontends):**
@@ -50,14 +50,13 @@ Notable files:
 
 JSON-format cache files can be manually edited (useful when moving a collection to a different disk or machine). To generate them, enable "Save also as JSON" in settings. By default `.bin` files are loaded; if missing, the `.json` fallback is used.
 
-**Default paths:**
+**Default paths (GTK and CLI use "Czkawka" for both config and cache; Krokiet uses "Krokiet" for config but "Czkawka" for cache):**
 
-| OS | Config | Cache |
-|----|--------|-------|
-| Linux | `~/.config/czkawka/` | `~/.cache/czkawka/` |
-| Linux Flatpak | `~/.var/app/com.github.qarmin.czkawka/config/czkawka/` | `~/.var/app/.../cache/czkawka/` |
-| macOS | `~/Library/Application Support/pl.Qarmin.Czkawka/` | `~/Library/Caches/pl.Qarmin.Czkawka/` |
-| Windows | `%APPDATA%\Qarmin\Czkawka\config\` | `%LOCALAPPDATA%\Qarmin\Czkawka\cache\` |
+| OS | GTK/CLI Config | Krokiet Config | Cache (all frontends) |
+|----|----------------|----------------|-----------------------|
+| Linux | `~/.config/czkawka/` | `~/.config/krokiet/` | `~/.cache/czkawka/` |
+| macOS | `~/Library/Application Support/pl.Qarmin.Czkawka/` | `~/Library/Application Support/pl.Qarmin.Krokiet/` | `~/Library/Caches/pl.Qarmin.Czkawka/` |
+| Windows | `%APPDATA%\Qarmin\Czkawka\config\` | `%APPDATA%\Qarmin\Krokiet\config\` | `%LOCALAPPDATA%\Qarmin\Czkawka\cache\` |
 
 Override with environment variables:
 
@@ -103,7 +102,7 @@ CZKAWKA_CACHE_PATH="$(dirname "$(realpath "$0")")/cache"
   You can stop a scan mid-way. All computed hashes are already written to cache and will speed up the next full scan.
 
 - **Prehash cache**  
-  Enable "Use prehash cache" in settings when repeatedly scanning large collections. Partial hashes (first and last 4 KB) are cached, significantly cutting re-scan time. Disabled by default because it increases cache file size.
+  Caches partial hashes (first and last 4 KB) of large files so re-scans only need to fully hash new or changed files. **Enabled by default in Krokiet.** In the CLI it must be explicitly enabled with `--use-prehash-cache`. Disable if the cache file size is a concern.
 
 - **Cache for removable drives**  
   Disable "Delete outdated cache entries automatically" when scanning external drives that you regularly unplug. Use "Remove outdated results" manually instead to avoid entries being evicted on disconnect.

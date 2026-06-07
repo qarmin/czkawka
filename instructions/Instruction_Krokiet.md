@@ -173,7 +173,7 @@ Finds files with identical content (or matching name/size, depending on the meth
 | XXH3 | Fastest | When speed matters most |
 | CRC32 | Medium | Legacy use cases |
 
-**Prehash cache** - speeds up re-scans by caching partial hashes of large files. Disabled by default because it increases cache file size.
+**Prehash cache** - speeds up re-scans by caching partial hashes (first and last 4 KB) of large files. Enabled by default.
 
 ### Empty Folders
 
@@ -201,16 +201,16 @@ The extension list can be customized in settings.
 
 Finds images that look alike but are not byte-for-byte identical (different resolution, watermarks, compression artifacts, JPEG re-save, etc.).
 
-[[[Image: Krokiet Similar Images settings panel showing: similarity slider or number input set to 10, hash algorithm dropdown showing "Gradient", hash size buttons with "16" selected, resize filter dropdown showing "Nearest", geometric invariance toggle set to off, and the exclude same size/resolution toggles]]]
+[[[Image: Krokiet Similar Images settings panel showing: similarity slider or number input set to 10, hash algorithm dropdown showing "Mean", hash size buttons with "16" selected, resize filter dropdown showing "Lanczos3", geometric invariance toggle set to off, and the exclude same size/resolution toggles]]]
 
 **Key settings:**
 
-| Setting | Default | Notes |
-|---------|---------|-------|
-| Similarity | 5 | Max hash distance (0-40). Start at 5-10 for typical use; raise if too few matches. |
-| Hash algorithm | Gradient | Gradient recommended for most photos; Blockhash good for near-identical resizes |
+| Setting | Default (Krokiet) | Notes |
+|---------|-------------------|-------|
+| Similarity | 10 | Max hash distance (0-40). Raise if too few matches, lower for stricter results. |
+| Hash algorithm | Mean | Mean is default; Gradient is also good for photos; Blockhash is unique - does not resize before hashing |
 | Hash size | 16 | Higher = more precise comparison; requires higher similarity threshold |
-| Resize filter | Nearest | Nearest is fastest; Lanczos3 is highest quality |
+| Resize filter | Lanczos3 | Lanczos3 is highest quality (default); Nearest is fastest |
 | Geometric invariance | off | Enable to also find mirrored or rotated copies of images |
 | Exclude same size | off | Skip groups where all images have identical byte size |
 | Exclude same resolution | off | Skip groups where all images have identical pixel dimensions |
@@ -222,7 +222,7 @@ Finds images that look alike but are not byte-for-byte identical (different reso
 Finds visually similar videos using perceptual frame hashing. Requires **ffmpeg** installed.
 
 **Key settings:**
-- **Tolerance** (0-20) - maximum frame difference; start at 10
+- **Tolerance** (0-20) - maximum frame difference; Krokiet default is 15
 - **Duration tolerance %** - how much video lengths may differ and still be compared
 - **Window count** - temporal samples per video (more = more accurate, slower)
 - **Min matching windows** - fraction of windows that must match to call two videos similar
@@ -246,7 +246,7 @@ Finds symbolic links whose target does not exist or that form a circular chain (
 
 Finds files that fail to open with their expected library (corrupted or truncated content).
 
-**Supported types**: Images, Audio, Video (fast ffprobe check or full ffmpeg decode), PDF, Archives (zip, 7z, gz, tar, zst, bz2, xz), Fonts (ttf, otf, ttc), Markup (JSON, XML, TOML, YAML, SVG).
+**Supported types**: Images, Audio, PDF, Archives (zip, 7z, gz, tar, zst, bz2, xz), Fonts (ttf, otf, ttc), Markup (JSON, XML, TOML, YAML, SVG) - all enabled by default. Video (fast ffprobe check or full ffmpeg decode) - disabled by default, requires ffmpeg.
 
 Note: false positives can occur depending on the library used. Always verify before deleting.
 
@@ -261,12 +261,12 @@ The "Proper Extension" column shows `(detected type)` and all compatible extensi
 ### Bad Names
 
 Finds files with problematic names. Each check can be enabled independently:
-- Uppercase extensions (e.g. `.JPG`)
-- Emoji in filename
-- Spaces at start or end of name
-- Non-ASCII graphical characters
-- Characters outside a configured restricted charset
-- Duplicated non-alphanumeric characters (e.g. `file__name`, `doc---final`)
+- **Uppercase extensions** (e.g. `.JPG`) - enabled by default
+- **Emoji in filename** - enabled by default
+- **Spaces at start or end of name** - enabled by default
+- **Non-ASCII graphical characters** - enabled by default
+- **Characters outside a configured restricted charset** - disabled by default (requires defining the allowed charset)
+- **Duplicated non-alphanumeric characters** (e.g. `file__name`, `doc---final`) - disabled by default
 
 Results include a suggested corrected name in the "Proper Name" column.
 
@@ -303,7 +303,7 @@ Open settings via the gear icon in the top bar. Organized into tabs:
 ### Performance
 - **Thread count** - CPU threads to use (0 = all available)
 - **Use cache** - enable/disable hash and thumbnail cache
-- **Prehash cache** - cache partial hashes; speeds up re-scans of large files; disabled by default
+- **Prehash cache** - cache partial hashes of large files to speed up re-scans (enabled by default)
 - **Delete outdated cache entries automatically** - auto-clean stale entries on each scan (recommended on)
 
 ### Presets
@@ -312,7 +312,7 @@ Open settings via the gear icon in the top bar. Organized into tabs:
 
 Each preset stores: included/excluded directories, extension and size filters, tool-specific parameters.
 
-Presets are saved at `~/.config/Czkawka/krokiet/preset_N.json`.
+Presets are saved at `~/.config/krokiet/config_preset_N.json` (Linux).
 
 ---
 
@@ -333,7 +333,7 @@ Presets are saved at `~/.config/Czkawka/krokiet/preset_N.json`.
 
 1. Add all photo directories to **Included paths**
 2. Select **Similar Images** tool
-3. Set similarity **10**, hash size **16**, algorithm **Gradient**
+3. Set similarity **10**, hash size **16**, algorithm **Mean** (default) or **Gradient**
 4. Enable **Geometric invariance** if you want to catch mirrored/rotated copies
 5. Click **Scan**
 6. Use the right preview pane to compare pairs visually before deciding
@@ -367,21 +367,22 @@ This populates the thumbnail cache so Krokiet can display previews without re-co
 
 | OS | Path |
 |----|------|
-| Linux | `~/.config/Czkawka/krokiet/` |
-| Linux Flatpak | `~/.var/app/com.github.qarmin.czkawka/config/czkawka/` |
-| macOS | `~/Library/Application Support/pl.Qarmin.Czkawka/` |
-| Windows | `C:\Users\<user>\AppData\Roaming\Qarmin\Czkawka\config\` |
+| Linux | `~/.config/krokiet/` |
+| Linux Flatpak | `~/.var/app/com.github.qarmin.czkawka/config/krokiet/` |
+| macOS | `~/Library/Application Support/pl.Qarmin.Krokiet/` |
+| Windows | `C:\Users\<user>\AppData\Roaming\Qarmin\Krokiet\config\` |
 
 Key files:
-- `base.json` - window size, theme, preset count, active preset index
-- `preset_N.json` - all scan settings for preset N (paths, filters, tool parameters)
+- `config_general.json` - window size, theme, preset count, active preset index
+- `config_preset_N.json` - all scan settings for preset N (paths, filters, tool parameters)
+- `config_custom_select_state.json` - saved custom selection rules
 
 Override location:
 ```shell
 CZKAWKA_CONFIG_PATH="/custom/path/config" krokiet
 ```
 
-### Cache files (shared across all frontends)
+### Cache files (shared across Krokiet, GTK, and CLI)
 
 | OS | Path |
 |----|------|
@@ -416,7 +417,7 @@ CZKAWKA_CACHE_PATH="/custom/path/cache" krokiet
   RUSTFLAGS="-C target-cpu=native" cargo build --release
   ```
 
-- **Prehash cache** - enable in Settings > Performance when you repeatedly scan large collections. After the first scan, only new/changed files need full hashing.
+- **Prehash cache** - enabled by default in Krokiet. Caches partial hashes (first and last 4 KB) of large files so re-scans only need to fully hash new or changed files. Disable only if the cache file size is a concern.
 
 - **Persistent cache for removable drives** - disable "Delete outdated cache entries automatically" when scanning external drives you regularly unplug. Use "Remove outdated results" button manually instead to avoid entries being evicted on unplug.
 

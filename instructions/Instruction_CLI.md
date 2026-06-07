@@ -379,7 +379,7 @@ czkawka_cli music -d <dirs> [options]
 | `-r` / `--reference-directories` | - | Reference directories |
 | `-D` / `-Q` / `-y` | | Delete method / dry-run / trash |
 
-Available tag fields for `-z`: `track_title`, `track_artist`, `year`, `bitrate`, `genre`, `length`, `album_title`, `album_artist`
+Available tag fields for `-z`: `track_title`, `track_artist`, `year`, `bitrate`, `genre`, `length`
 
 Example:
 ```shell

@@ -85,7 +85,7 @@ Settings are opened via button **7**. Key options:
 - **Hash type** - Blake3, XXH3, CRC32
 - **Min/Max file size** - filter out files outside this range
 - **Use cache** - enable/disable hash and thumbnail caching
-- **Use prehash cache** - cache partial hashes; speeds up re-scans on large collections
+- **Use prehash cache** - cache partial hashes (first and last 4 KB) of large files; speeds up re-scans; must be explicitly enabled in Settings
 - **Delete outdated cache entries automatically** - evict stale cache entries each scan
 
 ## Tips and Tricks
@@ -100,7 +100,7 @@ Settings are opened via button **7**. Key options:
 
 - **Partial scanning** - You can stop a scan mid-way; all computed hashes are already saved to cache and speed up the next run.
 
-- **Prehash cache** - Enable in Settings when repeatedly scanning large collections. Partial hashes (first and last 4 KB) are cached, cutting re-scan time significantly.
+- **Prehash cache** - Enable "Use prehash cache" in Settings when repeatedly scanning large collections. Partial hashes (first and last 4 KB) are cached, cutting re-scan time significantly. Must be explicitly enabled - not on by default in the GTK frontend.
 
 - **Permanent cache for removable drives** - Disable "Delete outdated cache entries automatically" when scanning external drives that you regularly unplug. Use the "Remove outdated results" button to clean stale entries manually instead.
 

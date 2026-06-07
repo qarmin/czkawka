@@ -393,12 +393,12 @@ use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters, MusicSimil
 use czkawka_core::common::model::CheckingMethod;
 
 let params = SameMusicParameters::new(
-    CheckingMethod::AudioTags, // or AudioContent
-    MusicSimilarity::TRACK_TITLE | MusicSimilarity::TRACK_ARTIST,
-    false, // approximate_comparison
-    false, // compare_fingerprints_only_with_similar_titles
-    10.0,  // minimum_segment_duration (seconds, for Content mode)
-    2.0,   // maximum_difference (0.0-10.0, for Content mode)
+    MusicSimilarity::TRACK_TITLE | MusicSimilarity::TRACK_ARTIST, // which fields to compare
+    false,                       // approximate_comparison
+    CheckingMethod::AudioTags,   // AudioTags or AudioContent
+    10.0,                        // minimum_segment_duration (seconds, for AudioContent mode)
+    2.0,                         // maximum_difference (0.0-10.0, for AudioContent mode)
+    false,                       // compare_fingerprints_only_with_similar_titles
 );
 let mut tool = SameMusic::new(params);
 tool.search(&stop_flag, progress_sender);
@@ -410,9 +410,9 @@ for group in tool.get_similar_music_entries() { }
 for (reference, duplicates) in tool.get_similar_music_referenced() { }
 ```
 
-`MusicEntry` contains `path`, `size`, `modified_date`, and tag fields (`track_title`, `track_artist`, `album_title`, `album_artist`, `year`, `bitrate`, `genre`, `length`).
+`MusicEntry` contains `path`, `size`, `modified_date`, and tag fields (`track_title`, `track_artist`, `year`, `bitrate`, `genre`, `length`).
 
-`MusicSimilarity` is a bitflag - combine fields with `|`: `TRACK_TITLE | TRACK_ARTIST | YEAR | BITRATE | GENRE | LENGTH | ALBUM_TITLE | ALBUM_ARTIST`.
+`MusicSimilarity` is a bitflag - combine fields with `|`: `TRACK_TITLE | TRACK_ARTIST | YEAR | BITRATE | GENRE | LENGTH`.
 
 ---
 
@@ -490,23 +490,31 @@ use czkawka_core::tools::similar_videos::{
     DEFAULT_WINDOW_COUNT, DEFAULT_DURATION_TOLERANCE_PCT,
     DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SUBCLIP_MIN_MATCH,
     DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_CROP_DETECT,
+    DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, DEFAULT_THUMBNAIL_GRID_TILES_PER_SIDE,
+    DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_AUDIO_LENGTH_RATIO,
+    DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS,
 };
-use czkawka_core::common::model::CheckingMethod;
 
 let params = SimilarVideosParameters::new(
-    10,                              // tolerance (0-20), frame difference threshold
-    CheckingMethod::None,            // or VideoAudioContent for audio comparison
-    DEFAULT_WINDOW_COUNT,            // temporal windows per video
-    DEFAULT_DURATION_TOLERANCE_PCT,  // max duration difference %
-    DEFAULT_MIN_MATCHING_WINDOWS,    // min fraction of windows to match
-    DEFAULT_SUBCLIP_MIN_MATCH,       // min fraction for subclip detection
-    DEFAULT_SKIP_FORWARD_AMOUNT,     // seconds to skip at video start
-    DEFAULT_CROP_DETECT,             // detect and remove letterbox bars before hashing
-    // audio mode params (used when CheckingMethod::VideoAudioContent):
-    2.0,   // audio_maximum_difference
-    50.0,  // audio_similarity_percent
-    0.5,   // audio_length_ratio
-    10,    // audio_min_duration_seconds
+    10,                                    // tolerance (0-20)
+    false,                                 // exclude_videos_with_same_size
+    false,                                 // exclude_videos_with_same_resolution
+    DEFAULT_SKIP_FORWARD_AMOUNT,           // seconds to skip at video start
+    10,                                    // scan duration per video (seconds)
+    DEFAULT_CROP_DETECT,                   // detect/remove letterbox bars before hashing
+    DEFAULT_WINDOW_COUNT,                  // temporal windows per video
+    DEFAULT_DURATION_TOLERANCE_PCT,        // max duration difference %
+    DEFAULT_MIN_MATCHING_WINDOWS,          // min fraction of windows to match
+    DEFAULT_SUBCLIP_MIN_MATCH,             // min fraction for subclip detection
+    false,                                 // generate_thumbnails
+    DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL,// thumbnail position %
+    false,                                 // generate_thumbnail_grid_instead_of_single
+    DEFAULT_THUMBNAIL_GRID_TILES_PER_SIDE, // tiles per side in grid thumbnail
+    false,                                 // check_audio_content (set true for audio comparison)
+    DEFAULT_AUDIO_SIMILARITY_PERCENT,      // min % of matching audio
+    DEFAULT_AUDIO_MAXIMUM_DIFFERENCE,      // max audio segment difference
+    DEFAULT_AUDIO_LENGTH_RATIO,            // min ratio shorter/longer audio
+    DEFAULT_AUDIO_MIN_DURATION_SECONDS,    // min audio duration for comparison
 );
 let mut tool = SimilarVideos::new(params);
 tool.search(&stop_flag, progress_sender);
@@ -734,28 +742,36 @@ JSON files can be manually edited (e.g., to update paths when moving a collectio
 
 ## Config and Cache Paths
 
-The cache and config root directories are resolved automatically by `czkawka_core`:
+Paths depend on the `cache_name` and `config_name` strings passed to `set_config_cache_path`. Existing frontends use:
 
-| OS | Cache | Config |
-|----|-------|--------|
-| Linux | `~/.cache/czkawka/` | `~/.config/czkawka/` |
-| Linux Flatpak | `~/.var/app/com.github.qarmin.czkawka/cache/czkawka/` | `~/.var/.../config/czkawka/` |
-| macOS | `~/Library/Caches/pl.Qarmin.Czkawka/` | `~/Library/Application Support/pl.Qarmin.Czkawka/` |
-| Windows | `%LOCALAPPDATA%\Qarmin\Czkawka\cache\` | `%APPDATA%\Qarmin\Czkawka\config\` |
+| Frontend | `cache_name` | `config_name` |
+|----------|-------------|---------------|
+| Krokiet | `"Czkawka"` | `"Krokiet"` |
+| GTK / CLI | `"Czkawka"` | `"Czkawka"` |
+| Cedinia | `"cedinia"` | `"cedinia"` |
 
-Override with environment variables:
+Resulting paths (Linux example, using `directories_next::ProjectDirs`):
+- Cache `"Czkawka"` → `~/.cache/czkawka/`
+- Config `"Krokiet"` → `~/.config/krokiet/`
+- Config `"Czkawka"` → `~/.config/czkawka/`
 
-```shell
-CZKAWKA_CONFIG_PATH="/custom/config" CZKAWKA_CACHE_PATH="/custom/cache" ./my_app
-```
-
-To retrieve the paths programmatically:
+`set_config_cache_path` **must be called once before any cache or config access**:
 
 ```rust
-use czkawka_core::common::config_cache_path::get_config_cache_path;
+use czkawka_core::common::config_cache_path::{set_config_cache_path, get_config_cache_path};
+
+// Call once at startup - choose names appropriate for your app
+let result = set_config_cache_path("MyApp", "MyApp");
+// result.infos / result.warnings contain diagnostic messages
 
 if let Some(paths) = get_config_cache_path() {
     println!("Cache: {}", paths.cache_folder.display());
     println!("Config: {}", paths.config_folder.display());
 }
+```
+
+Override with environment variables (checked before the default path):
+
+```shell
+CZKAWKA_CONFIG_PATH="/custom/config" CZKAWKA_CACHE_PATH="/custom/cache" ./my_app
 ```
