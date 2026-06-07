@@ -4,14 +4,6 @@
 
 ## Table of Contents
 
-- [Adding as Dependency](#adding-as-dependency)
-- [Integration Pattern](#integration-pattern)
-  - [Common configuration (all tools)](#common-configuration-all-tools)
-  - [Running a scan](#running-a-scan)
-  - [Progress reporting](#progress-reporting)
-  - [Stop flag](#stop-flag)
-  - [Reading results](#reading-results)
-  - [Deleting files](#deleting-files)
 - [Tools](#tools)
   - [Duplicate Finder](#duplicate-finder)
   - [Empty Files](#empty-files)
@@ -28,173 +20,15 @@
   - [Exif Remover](#exif-remover)
   - [Video Optimizer](#video-optimizer)
 - [Cache](#cache)
+- [Adding as Dependency](#adding-as-dependency)
+- [Integration Pattern](#integration-pattern)
+  - [Common configuration (all tools)](#common-configuration-all-tools)
+  - [Running a scan](#running-a-scan)
+  - [Progress reporting](#progress-reporting)
+  - [Stop flag](#stop-flag)
+  - [Reading results](#reading-results)
+  - [Deleting files](#deleting-files)
 - [Config and Cache Paths](#config-and-cache-paths)
-
----
-
-## Adding as Dependency
-
-```toml
-# Cargo.toml
-[dependencies]
-czkawka_core = { path = "../czkawka_core" }
-# OR from git:
-# czkawka_core = { git = "https://github.com/qarmin/czkawka" }
-```
-
-Optional features (require native libraries installed at build and runtime):
-
-| Feature | Library | Purpose |
-|---------|---------|---------|
-| `heif` | `libheif` | HEIF/HEIC image support |
-| `libraw` | `libraw` | RAW camera image support |
-| `libavif` | `libavif`, `libdav1d` | AVIF image support |
-
-The `similar_videos` tool requires **ffmpeg** at runtime only (not a build dependency).
-
----
-
-## Integration Pattern
-
-All tools follow the same pattern: create with parameters, configure with `CommonData` trait setters, call `.search()`, then read results.
-
-### Common configuration (all tools)
-
-Every tool struct implements `CommonData`, which exposes setters shared across all tools:
-
-```rust
-use czkawka_core::common::tool_data::CommonData;
-
-// Required: directories to scan
-tool.set_included_paths(vec![PathBuf::from("/home/user/Documents")]);
-
-// Optional filters
-tool.set_excluded_paths(vec![PathBuf::from("/home/user/.cache")]);
-tool.set_excluded_items(vec!["*/tmp*".to_string(), "*/.git".to_string()]);
-tool.set_allowed_extensions(vec!["jpg".to_string(), "png".to_string()]);
-tool.set_excluded_extensions(vec!["db".to_string()]);
-
-// File size limits (in bytes)
-tool.set_minimal_file_size(8_192);
-tool.set_maximal_file_size(u64::MAX);
-
-// Traversal
-tool.set_recursive_search(true);          // default: true
-tool.set_exclude_other_filesystems(false); // Unix only
-
-// Cache behaviour
-tool.set_use_cache(true);                  // default: true
-tool.set_delete_outdated_cache(true);      // default: true
-tool.set_save_also_as_json(false);         // write .json alongside .bin cache
-
-// Reference paths (supported by: Duplicate, SimilarImages, SimilarVideos, SameMusic)
-tool.set_reference_paths(vec![PathBuf::from("/home/user/Archive")]);
-tool.set_use_reference_folders(true);
-
-// Deletion (used when calling delete_files() after search)
-use czkawka_core::common::tool_data::DeleteMethod;
-tool.set_delete_method(DeleteMethod::AllExceptNewest);
-tool.set_dry_run(false);
-tool.set_move_to_trash(false);
-```
-
-`DeleteMethod` values: `None`, `Delete`, `AllExceptNewest`, `AllExceptOldest`, `OneNewest`, `OneOldest`, `AllExceptBiggest`, `AllExceptSmallest`, `OneBiggest`, `OneSmallest`, `HardLink`.
-
-### Running a scan
-
-All tools implement the `Search` trait:
-
-```rust
-use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
-use czkawka_core::common::traits::Search;
-
-let stop_flag = Arc::new(AtomicBool::new(false));
-
-// Blocking call - returns when scan is complete or stopped
-tool.search(&stop_flag, None);             // no progress reporting
-tool.search(&stop_flag, Some(&progress_tx)); // with progress channel
-```
-
-### Progress reporting
-
-Progress is sent over a `crossbeam_channel::Sender<ProgressData>`:
-
-```rust
-use crossbeam_channel::unbounded;
-use czkawka_core::common::progress_data::{ProgressData, CurrentStage};
-
-let (progress_tx, progress_rx) = unbounded::<ProgressData>();
-
-// Spawn receiver before calling search
-std::thread::spawn(move || {
-    for progress in progress_rx {
-        println!(
-            "[{:?}] stage {}/{}: {}/{} entries",
-            progress.sstage,
-            progress.current_stage_idx,
-            progress.max_stage_idx,
-            progress.entries_checked,
-            progress.entries_to_check,
-        );
-        // Use progress.bytes_checked / progress.bytes_to_check for byte-level progress
-        // Use CurrentStage::check_if_loading_saving_cache() to detect indeterminate phases
-    }
-});
-
-tool.search(&stop_flag, Some(&progress_tx));
-```
-
-`ProgressData` fields:
-- `sstage: CurrentStage` - which sub-step is running (e.g. `DuplicateFullHashing`, `SimilarImagesCalculatingHashes`)
-- `current_stage_idx / max_stage_idx: u8` - overall progress through tool stages
-- `entries_checked / entries_to_check: usize` - item-level progress within the current stage
-- `bytes_checked / bytes_to_check: u64` - byte-level progress (set for hashing stages)
-- `tool_type: ToolType` - which tool is running
-- `checking_method: CheckingMethod` - which mode is active
-
-`CurrentStage::check_if_loading_saving_cache()` returns `true` during cache load/save phases, where `entries_to_check` is 0 and no progress bar can be shown (use an indeterminate indicator instead).
-
-### Stop flag
-
-To interrupt a running scan from another thread:
-
-```rust
-use std::sync::atomic::Ordering;
-
-stop_flag.store(true, Ordering::Relaxed);
-```
-
-The tool checks the flag regularly and returns from `.search()` early. Check `tool.get_stopped_search()` afterwards to know if the scan was interrupted.
-
-### Reading results
-
-Each tool exposes its own getter methods (described per-tool below). After a search, also check messages:
-
-```rust
-let messages = tool.get_text_messages();
-// messages.errors   - Vec<String>
-// messages.warnings - Vec<String>
-// messages.messages - Vec<String>
-```
-
-### Deleting files
-
-After a successful search, call `delete_files()` to apply the configured `DeleteMethod`:
-
-```rust
-use czkawka_core::common::traits::DeletingItems;
-
-tool.set_delete_method(DeleteMethod::AllExceptNewest);
-tool.delete_files(&stop_flag, Some(&progress_tx));
-```
-
-For tools that support fixing (renaming, EXIF removal, transcoding), use the `FixingItems` trait:
-
-```rust
-use czkawka_core::common::traits::FixingItems;
-tool.fix_items(&stop_flag, Some(&progress_tx), fix_params);
-```
 
 ---
 
@@ -431,9 +265,9 @@ Unlike cryptographic hashes, perceptual hashes are designed so visually similar 
 
 **Geometric invariance** - when enabled, additional hashes are computed for mirrored, flipped, and/or rotated (90-degree) variants of each image. This allows matching flipped/rotated copies at the cost of more hashing.
 
-**Hash algorithms:** `Gradient` (default, good for most photos), `Mean` (fast, less accurate), `Blockhash` (does not resize), `VertGradient`, `DoubleGradient`, `Median`.
+**Hash algorithms:** `Gradient` (default in CLI, good for most photos), `Mean` (default in Krokiet), `Blockhash` (does not resize), `VertGradient`, `DoubleGradient`, `Median`.
 
-**Resize filters:** `Nearest` (fastest), `Lanczos3` (best quality), `Triangle`, `Gaussian`, `CatmullRom`.
+**Resize filters:** `Nearest` (fastest, default in CLI), `Lanczos3` (best quality, default in Krokiet), `Triangle`, `Gaussian`, `CatmullRom`.
 
 **SIMILAR_VALUES** constant - preset `max_difference` values per hash size and similarity level:
 
@@ -538,18 +372,16 @@ Finds files that fail to open or validate with their expected library.
 
 **Supported checkers:**
 
-| Checker | File types | Notes |
-|---------|-----------|-------|
-| `IMAGE` | jpg, jpeg, png, tiff, gif, bmp, ico, webp, exr, avif, and others | |
-| `AUDIO` | mp3, flac, wav, ogg, m4a, aac, and others | |
-| `PDF` | pdf | |
-| `ARCHIVE` | zip, 7z, gz/tgz, tar, zst, bz2, xz | |
-| `FONT` | ttf, otf, ttc | |
-| `MARKUP` | JSON, XML, TOML, YAML, SVG | |
-| `VIDEO_FFPROBE` | mp4, mkv, avi, mov, webm, and others | Fast - headers only; requires ffmpeg |
-| `VIDEO_FFMPEG` | same as above | Slow - full decode; requires ffmpeg |
-
-Default: all types except video (to avoid requiring ffmpeg).
+| Checker | File types | Default |
+|---------|-----------|---------|
+| `IMAGE` | jpg, jpeg, png, tiff, gif, bmp, ico, webp, exr, avif, and others | on |
+| `AUDIO` | mp3, flac, wav, ogg, m4a, aac, and others | on |
+| `PDF` | pdf | on |
+| `ARCHIVE` | zip, 7z, gz/tgz, tar, zst, bz2, xz | on |
+| `FONT` | ttf, otf, ttc | on |
+| `MARKUP` | JSON, XML, TOML, YAML, SVG | on |
+| `VIDEO_FFPROBE` | mp4, mkv, avi, mov, webm, and others - fast headers-only check | off (requires ffmpeg) |
+| `VIDEO_FFMPEG` | same as above - slow full decode | off (requires ffmpeg) |
 
 **Integration:**
 
@@ -737,6 +569,172 @@ Notable files:
 By default `.bin` (binary/bincode format) is loaded; if the `.bin` file is missing the `.json` fallback is used. Call `set_save_also_as_json(true)` to write both formats.
 
 JSON files can be manually edited (e.g., to update paths when moving a collection to another machine).
+
+---
+
+## Adding as Dependency
+
+```toml
+# Cargo.toml
+[dependencies]
+czkawka_core = { path = "../czkawka_core" }
+# OR from git:
+# czkawka_core = { git = "https://github.com/qarmin/czkawka" }
+```
+
+Optional features (require native libraries installed at build and runtime):
+
+| Feature | Library | Purpose |
+|---------|---------|---------|
+| `heif` | `libheif` | HEIF/HEIC image support |
+| `libraw` | `libraw` | RAW camera image support |
+| `libavif` | `libavif`, `libdav1d` | AVIF image support |
+
+The `similar_videos` tool requires **ffmpeg** at runtime only (not a build dependency).
+
+---
+
+## Integration Pattern
+
+All tools follow the same pattern: create with parameters, configure with `CommonData` trait setters, call `.search()`, then read results.
+
+### Common configuration (all tools)
+
+Every tool struct implements `CommonData`, which exposes setters shared across all tools:
+
+```rust
+use czkawka_core::common::tool_data::CommonData;
+
+// Required: directories to scan
+tool.set_included_paths(vec![PathBuf::from("/home/user/Documents")]);
+
+// Optional filters
+tool.set_excluded_paths(vec![PathBuf::from("/home/user/.cache")]);
+tool.set_excluded_items(vec!["*/tmp*".to_string(), "*/.git".to_string()]);
+tool.set_allowed_extensions(vec!["jpg".to_string(), "png".to_string()]);
+tool.set_excluded_extensions(vec!["db".to_string()]);
+
+// File size limits (in bytes)
+tool.set_minimal_file_size(8_192);
+tool.set_maximal_file_size(u64::MAX);
+
+// Traversal
+tool.set_recursive_search(true);          // default: true
+tool.set_exclude_other_filesystems(false); // Unix only
+
+// Cache behaviour
+tool.set_use_cache(true);                  // default: true
+tool.set_delete_outdated_cache(true);      // default: true
+tool.set_save_also_as_json(false);         // write .json alongside .bin cache
+
+// Reference paths (supported by: Duplicate, SimilarImages, SimilarVideos, SameMusic)
+tool.set_reference_paths(vec![PathBuf::from("/home/user/Archive")]);
+tool.set_use_reference_folders(true);
+
+// Deletion (used when calling delete_files() after search)
+use czkawka_core::common::tool_data::DeleteMethod;
+tool.set_delete_method(DeleteMethod::AllExceptNewest);
+tool.set_dry_run(false);
+tool.set_move_to_trash(false);
+```
+
+`DeleteMethod` values: `None`, `Delete`, `AllExceptNewest`, `AllExceptOldest`, `OneNewest`, `OneOldest`, `AllExceptBiggest`, `AllExceptSmallest`, `OneBiggest`, `OneSmallest`, `HardLink`.
+
+### Running a scan
+
+All tools implement the `Search` trait:
+
+```rust
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
+use czkawka_core::common::traits::Search;
+
+let stop_flag = Arc::new(AtomicBool::new(false));
+
+// Blocking call - returns when scan is complete or stopped
+tool.search(&stop_flag, None);               // no progress reporting
+tool.search(&stop_flag, Some(&progress_tx)); // with progress channel
+```
+
+### Progress reporting
+
+Progress is sent over a `crossbeam_channel::Sender<ProgressData>`:
+
+```rust
+use crossbeam_channel::unbounded;
+use czkawka_core::common::progress_data::{ProgressData, CurrentStage};
+
+let (progress_tx, progress_rx) = unbounded::<ProgressData>();
+
+// Spawn receiver before calling search
+std::thread::spawn(move || {
+    for progress in progress_rx {
+        println!(
+            "[{:?}] stage {}/{}: {}/{} entries",
+            progress.sstage,
+            progress.current_stage_idx,
+            progress.max_stage_idx,
+            progress.entries_checked,
+            progress.entries_to_check,
+        );
+        // Use progress.bytes_checked / progress.bytes_to_check for byte-level progress
+        // Use CurrentStage::check_if_loading_saving_cache() to detect indeterminate phases
+    }
+});
+
+tool.search(&stop_flag, Some(&progress_tx));
+```
+
+`ProgressData` fields:
+- `sstage: CurrentStage` - which sub-step is running (e.g. `DuplicateFullHashing`, `SimilarImagesCalculatingHashes`)
+- `current_stage_idx / max_stage_idx: u8` - overall progress through tool stages
+- `entries_checked / entries_to_check: usize` - item-level progress within the current stage
+- `bytes_checked / bytes_to_check: u64` - byte-level progress (set for hashing stages)
+- `tool_type: ToolType` - which tool is running
+- `checking_method: CheckingMethod` - which mode is active
+
+`CurrentStage::check_if_loading_saving_cache()` returns `true` during cache load/save phases, where `entries_to_check` is 0 and no progress bar can be shown (use an indeterminate indicator instead).
+
+### Stop flag
+
+To interrupt a running scan from another thread:
+
+```rust
+use std::sync::atomic::Ordering;
+
+stop_flag.store(true, Ordering::Relaxed);
+```
+
+The tool checks the flag regularly and returns from `.search()` early. Check `tool.get_stopped_search()` afterwards to know if the scan was interrupted.
+
+### Reading results
+
+Each tool exposes its own getter methods (described per-tool above). After a search, also check messages:
+
+```rust
+let messages = tool.get_text_messages();
+// messages.errors   - Vec<String>
+// messages.warnings - Vec<String>
+// messages.messages - Vec<String>
+```
+
+### Deleting files
+
+After a successful search, call `delete_files()` to apply the configured `DeleteMethod`:
+
+```rust
+use czkawka_core::common::traits::DeletingItems;
+
+tool.set_delete_method(DeleteMethod::AllExceptNewest);
+tool.delete_files(&stop_flag, Some(&progress_tx));
+```
+
+For tools that support fixing (renaming, EXIF removal, transcoding), use the `FixingItems` trait:
+
+```rust
+use czkawka_core::common::traits::FixingItems;
+tool.fix_items(&stop_flag, Some(&progress_tx), fix_params);
+```
 
 ---
 

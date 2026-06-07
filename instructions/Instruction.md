@@ -6,6 +6,7 @@ Czkawka consists of several independent frontends sharing a common core library.
 - [CLI (command-line frontend)](Instruction_CLI.md) - full flag reference and automation examples
 - [GTK GUI (legacy)](Instruction_GTK.md) - **12.0 is the last version**, migrate to Krokiet
 - [Core library integration](Instruction_Core.md) - tool descriptions, API, embedding czkawka_core
+- [FAQ](FAQ.md) - frequently asked questions from 1200+ GitHub issues (blank window, ffmpeg, min file size, etc.)
 - [Translations](Translations.md) - how to contribute or add a new language
 
 ---

@@ -36,8 +36,6 @@
 
 ## Installation
 
-[[[Image: GitHub releases page for czkawka - show the "Assets" section of the latest release with the binary filenames highlighted (krokiet_linux_x86_64, krokiet_windows.zip, krokiet_macos) and a callout pointing to the recommended variant for each OS]]]
-
 Prebuilt binaries (no extra dependencies required) are available for Windows 10/11, macOS, and Ubuntu 22.04+.
 
 Download from the [GitHub releases page](https://github.com/qarmin/czkawka/releases).
@@ -104,8 +102,6 @@ The main window has six areas:
 
 ### Left panel - tool list
 
-[[[Image: Krokiet left side panel in isolation showing all tool entries listed vertically: Duplicate Files, Empty Folders, Big Files, Empty Files, Temporary Files, Similar Images, Similar Videos, Same Music, Invalid Symlinks, Broken Files, Bad Extensions, Bad Names, Exif Remover, Video Optimizer - with one item highlighted as active]]]
-
 Available tools: Duplicate Files, Empty Folders, Big Files, Empty Files, Temporary Files, Similar Images, Similar Videos, Same Music, Invalid Symlinks, Broken Files, Bad Extensions, Bad Names, Exif Remover, Video Optimizer.
 
 ### Directory panel
@@ -120,8 +116,6 @@ Available tools: Duplicate Files, Empty Folders, Big Files, Empty Files, Tempora
 
 ### Results area
 
-[[[Image: Krokiet results area showing a duplicate group - one bold header row reading "3 files x 1.4 MB/file = 4.2 MB total" with a group indicator icon, followed by three indented file rows each showing filename, path, size, and modification date - with one row checked/selected showing a checkbox]]]
-
 - **Header rows** (bold) represent groups (e.g., a duplicate group or a set of similar images).
 - **File rows** show name, path, size, and tool-specific extra info (e.g., image dimensions, similarity score).
 - Click a file row to select/deselect it.
@@ -130,8 +124,6 @@ Available tools: Duplicate Files, Empty Folders, Big Files, Empty Files, Tempora
 - Right-click for context menu (open, copy path, compare images, etc.).
 
 ### Bottom action panel
-
-[[[Image: Krokiet bottom panel showing all visible buttons: "Select all", "Deselect all", "Select all except oldest", "Select all except newest", "Select all except biggest", "Select all except smallest", "Invert selection", "Custom selection", "Delete", "Move to trash", "Move", "Copy" - with the "Custom selection" button highlighted and its popup partially visible]]]
 
 **Selection buttons:**
 - Select all / Deselect all
@@ -178,8 +170,6 @@ Finds files with identical content (or matching name/size, depending on the meth
 ### Empty Folders
 
 Finds directories that contain no files or subdirectories. Uses a recursive algorithm that propagates "not empty" status upward through the directory tree.
-
-[[[Image: Krokiet Empty Folders results showing a flat list of folder paths with columns for path and size (all showing 0 bytes), no groups/headers needed]]]
 
 ### Big Files
 
@@ -254,8 +244,6 @@ Note: false positives can occur depending on the library used. Always verify bef
 
 Finds files whose content (detected from magic bytes at the start of the file) does not match their extension.
 
-[[[Image: Krokiet Bad Extensions results - table with columns: filename, path, current extension, "Proper Extension" column showing "(detected_type) compatible_ext_list" e.g. "(7z) rar zip p7" - with one row selected and the Rename button visible in the bottom panel]]]
-
 The "Proper Extension" column shows `(detected type)` and all compatible extensions. Use the **Rename** button to apply the suggested fix.
 
 ### Bad Names
@@ -284,8 +272,6 @@ Identifies videos suitable for optimization. Two modes:
 
 **Crop** - find videos with black bars (letterbox/pillarbox) that can be cropped.
 
-[[[Image: Krokiet Video Optimizer results in Transcode mode - list of video files showing filename, path, size, and current codec column - with codec column highlighting entries that are not in the excluded codec list]]]
-
 ---
 
 ## Settings
@@ -307,8 +293,6 @@ Open settings via the gear icon in the top bar. Organized into tabs:
 - **Delete outdated cache entries automatically** - auto-clean stale entries on each scan (recommended on)
 
 ### Presets
-
-[[[Image: Krokiet preset area - a dropdown showing preset names like "Preset 1", "Home scan", "Work scan", with Load/Save/Delete buttons next to the dropdown]]]
 
 Each preset stores: included/excluded directories, extension and size filters, tool-specific parameters.
 
