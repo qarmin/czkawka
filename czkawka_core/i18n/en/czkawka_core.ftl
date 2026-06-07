@@ -24,6 +24,7 @@ core_path_must_exists = Provided path must exist, ignoring { $path }
 core_must_be_directory_or_file = Provided path must point to a vaild directory or file, ignoring { $path }
 core_excluded_paths_pointless_slash = Excluding / is pointless, because it means no files will be scanned
 core_paths_unable_to_get_device_id = Unable to get device id from folder { $path }
+core_excluded_items_wildcard_required = Excluded Items Warning: Wildcard * is required in expression, ignoring { $expression }
 
 core_needs_allowed_extensions_limited_by_tool = Cannot start scan, when all extensions available in this tool ({ $extensions }) were excluded from scan
 core_needs_allowed_extensions = Cannot start scan, when all extensions were excluded from scan
@@ -93,6 +94,7 @@ core_failed_to_load_data_from_json_cache = Failed to load data from json cache f
 core_failed_to_replace_with_optimized = Failed to replace file "{ $file }" with optimized version: { $reason }
 core_failed_to_write_data_to_cache = Cannot write data to cache file "{ $file }", reason { $reason }
 core_properly_saved_cache_entries = Properly saved to file { $count } cache entries.
+core_properly_loaded_cache_entries = Properly loaded { $count } cache entries.
 core_video_processing_stopped_by_user = Video processing was stopped by user
 core_thumbnail_generation_stopped_by_user = Thumbnail generation was stopped by user
 core_failed_to_optimize_video = Failed to optimize video "{ $file }": { $reason }

@@ -54,7 +54,7 @@ impl Default for CommonFilters {
             max_file_size_bytes: None,
             recursive_search: true,
             use_cache: true,
-            hide_hard_links: true,
+            hide_hard_links: false,
             delete_outdated_cache: true,
             save_also_as_json: false,
             referenced_dirs: Vec::new(),

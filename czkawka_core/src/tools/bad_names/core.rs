@@ -113,9 +113,13 @@ impl BadNames {
 
                 let new_path = entry.path.with_file_name(&entry.new_name);
 
+                if new_path.exists() {
+                    return Some(Some(format!("Cannot rename {:?} to {:?}: target file already exists", entry.path, new_path)));
+                }
+
                 match fs::rename(&entry.path, &new_path) {
                     Ok(()) => Some(None),
-                    Err(e) => Some(Some(format!("Failed to rename {:?}: {}", entry.path, e))),
+                    Err(e) => Some(Some(format!("Failed to rename {:?} to {:?}: {}", entry.path, new_path, e))),
                 }
             })
             .while_some()
@@ -183,6 +187,11 @@ pub fn check_and_generate_new_name(path: &Path, checked_issues: &NameIssues) -> 
         if let Some(ref mut ext) = extension {
             *ext = ext.trim().to_string();
         }
+    }
+
+    // An empty stem would make `with_file_name` resolve to the parent directory, so fall back to a placeholder.
+    if stem.trim().is_empty() {
+        stem = "empty".to_string();
     }
 
     let new_name = if let Some(ext) = extension {

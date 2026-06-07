@@ -92,8 +92,8 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
                 let start = std::time::Instant::now();
                 let volumes = detect_storage_volumes();
                 let volume_count = volumes.len() as i32;
-                let mut total_files: i32 = 0;
-                let mut total_folders: i32 = 0;
+                let mut total_files: u64 = 0;
+                let mut total_folders: u64 = 0;
                 let mut stopped = false;
                 'outer: for vol in &volumes {
                     let canonical = std::fs::canonicalize(vol.path.as_str()).unwrap_or_else(|_| std::path::PathBuf::from(vol.path.as_str()));
@@ -107,8 +107,8 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
                 let elapsed_time = format_duration_ms(start.elapsed().as_millis());
                 let result = CollectTestResult {
                     volumes: volume_count,
-                    files: total_files,
-                    folders: total_folders,
+                    files: total_files.min(i32::MAX as u64) as i32,
+                    folders: total_folders.min(i32::MAX as u64) as i32,
                     elapsed_time,
                 };
                 let _ = slint::invoke_from_event_loop(move || {

@@ -19,6 +19,7 @@ use crate::helpers::messages::Messages;
 #[derive(Debug, Clone, Default)]
 pub struct DeleteResult {
     deleted_files: usize,
+    hardlinked_files: usize,
     gained_bytes: u64,
     failed_to_delete_files: usize,
     errors: Vec<String>,
@@ -43,7 +44,8 @@ impl<T: ResultEntry + Sized + Send + Sync> DeleteItemType<T> {
     fn calculate_size_to_delete(&self) -> u64 {
         match &self {
             Self::DeletingFiles(items) | Self::DeletingFolders(items) => items.iter().map(|item| item.get_size()).sum(),
-            Self::HardlinkingFiles(items) => items.iter().map(|(item, _)| item.get_size()).sum(),
+            // Sum the linked files, not the originals, to match what progress accounts.
+            Self::HardlinkingFiles(items) => items.iter().flat_map(|(_original, files)| files.iter().map(ResultEntry::get_size)).sum(),
         }
     }
 
@@ -201,8 +203,10 @@ pub(crate) fn delete_elements<T: ResultEntry + Sized + Send + Sync>(
                 }
 
                 let mut progress_tmp = progress;
-                progress_tmp.bytes_checked = bytes_processed.fetch_add(e.get_size(), std::sync::atomic::Ordering::Relaxed);
-                progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                let item_size = e.get_size();
+                // `+ item_size`: fetch_add returns the pre-add value, so add it back to reach the totals.
+                progress_tmp.bytes_checked = bytes_processed.fetch_add(item_size, std::sync::atomic::Ordering::Relaxed) + item_size;
+                progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
 
                 if let Some(e) = delayed_sender.as_ref() {
                     e.send(progress_tmp);
@@ -234,8 +238,9 @@ pub(crate) fn delete_elements<T: ResultEntry + Sized + Send + Sync>(
                 }
 
                 let mut progress_tmp = progress;
-                progress_tmp.bytes_checked = bytes_processed.fetch_add(files.iter().map(|e| e.get_size()).sum(), std::sync::atomic::Ordering::Relaxed);
-                progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                let linked_size: u64 = files.iter().map(|e| e.get_size()).sum();
+                progress_tmp.bytes_checked = bytes_processed.fetch_add(linked_size, std::sync::atomic::Ordering::Relaxed) + linked_size;
+                progress_tmp.entries_checked = files_processed.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
 
                 if let Some(e) = delayed_sender.as_ref() {
                     e.send(progress_tmp);
@@ -286,20 +291,31 @@ pub(crate) fn delete_elements<T: ResultEntry + Sized + Send + Sync>(
                     delete_result.infos.push(format!("Would delete: \"{}\"", file_entry.get_path().to_string_lossy()));
                 }
             }
-            delete_result.deleted_files += 1;
+            if is_hardlinking {
+                delete_result.hardlinked_files += 1;
+            } else {
+                delete_result.deleted_files += 1;
+            }
             delete_result.gained_bytes += file_entry.get_size();
         }
     }
 
     if !dry_run {
-        let action = if is_hardlinking { "hardlink" } else { "delete" };
-        let action2 = if is_hardlinking { "hardlinked" } else { "deleted" };
-        info!(
-            "{} items {action2}, {} gained, {} failed to {action}",
-            delete_result.deleted_files,
-            format_size(delete_result.gained_bytes, BINARY),
-            delete_result.failed_to_delete_files
-        );
+        if is_hardlinking {
+            info!(
+                "{} items hardlinked, {} gained, {} failed to hardlink",
+                delete_result.hardlinked_files,
+                format_size(delete_result.gained_bytes, BINARY),
+                delete_result.failed_to_delete_files
+            );
+        } else {
+            info!(
+                "{} items deleted, {} gained, {} failed to delete",
+                delete_result.deleted_files,
+                format_size(delete_result.gained_bytes, BINARY),
+                delete_result.failed_to_delete_files
+            );
+        }
     }
 
     delete_result
@@ -350,6 +366,7 @@ mod tests {
     fn test_delete_result_add_to_messages() {
         let delete_result = DeleteResult {
             deleted_files: 5,
+            hardlinked_files: 0,
             gained_bytes: 1024,
             failed_to_delete_files: 2,
             errors: vec!["Error 1".to_string(), "Error 2".to_string()],
@@ -397,7 +414,7 @@ mod tests {
             (files[0].clone(), vec![files[1].clone()]),
             (files[2].clone(), vec![files[0].clone(), files[1].clone()]),
         ]);
-        assert_eq!(hardlink_files.calculate_size_to_delete(), 400);
+        assert_eq!(hardlink_files.calculate_size_to_delete(), 500); // linked files: 200 + (100 + 200)
         assert_eq!(hardlink_files.calculate_entries_to_delete(), 3);
     }
 

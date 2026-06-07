@@ -4,7 +4,7 @@ use crate::callbacks::get_model_for_tool;
 use crate::callbacks::selection_ops::{full_path_of, get_val_str, vm_of};
 use crate::common::{StrDataBadExtensions, StrDataBadNames};
 use crate::model::rebuild_similar_images_after_delete;
-use crate::{AppState, FileEntry, MainWindow};
+use crate::{ActiveTool, AppState, FileEntry, MainWindow};
 
 #[cfg(not(target_os = "android"))]
 pub(crate) fn delete_path(path: &str) -> Result<(), String> {
@@ -310,7 +310,10 @@ pub(crate) fn handle_delete_event(win: &MainWindow, event: DeleteEvent) {
                 vm.set_vec(items);
                 win.global::<AppState>().set_selected_count(0);
 
-                rebuild_similar_images_after_delete(win, &del_set);
+                // Guard by tool: rebuilding for other tools would wipe loaded similar-images results.
+                if tool == ActiveTool::SimilarImages {
+                    rebuild_similar_images_after_delete(win, &del_set);
+                }
             }
 
             let status = if errors.is_empty() {

@@ -284,16 +284,9 @@ impl BrokenFiles {
         match File::open(&file_entry.path) {
             Ok(file) => {
                 let error = match audio_checker::parse_audio_file(file, stop_flag) {
-                    Err(e) => {
-                        let err_str = e.to_string();
-                        if err_str.contains("not supported codec") {
-                            None
-                        } else {
-                            Some(normalize_error_string(&err_str))
-                        }
-                    }
+                    Err(audio_checker::AudioCheckError::Other(err_str)) => Some(normalize_error_string(&err_str)),
                     Ok(None) => return None, // stop flag was set
-                    Ok(Some(())) => None,
+                    Err(audio_checker::AudioCheckError::UnsupportedCodec) | Ok(Some(())) => None,
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Audio, error);
                 Some(Some(file_entry))

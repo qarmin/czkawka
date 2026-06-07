@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use crate::common::regex_check;
+use crate::flc;
 use crate::helpers::messages::Messages;
 
 #[cfg(target_family = "unix")]
@@ -75,7 +76,7 @@ impl ExcludedItems {
                 continue;
             }
             if !expression.contains('*') {
-                warnings.push("Excluded Items Warning: Wildcard * is required in expression, ignoring ".to_string() + expression.as_str());
+                warnings.push(flc!("core_excluded_items_wildcard_required", expression = expression.clone()));
                 continue;
             }
 
