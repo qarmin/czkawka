@@ -1,7 +1,7 @@
 ## Version 12.0 - ??.??.????
 
 ### Czkawka GTK Deprecation Notice
-**Version 12.0 is the last released version of Czkawka GTK.** No new binaries will be provided from this point on. All users are encouraged to migrate to [Krokiet](krokiet/README.md), the new Slint-based GUI frontend.
+**Version 12.0 is the last released version of Czkawka GTK.** No new binaries will be provided from this point on. All users are encouraged to migrate to Krokiet, the new Slint-based GUI frontend.
 
 The source code remains in the repository and compatibility with `czkawka_core` will be maintained for some time so the application can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds such as Debian or Docker packages.
 

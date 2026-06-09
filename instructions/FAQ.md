@@ -28,7 +28,7 @@ It is derived from hundreds of real user reports and is updated alongside the pr
 12. [Selection & "Select Custom"](#selection--select-custom)
 13. [Bad Extensions Tool](#bad-extensions-tool)
 14. [Scanning External Drives, NAS, Network Paths](#scanning-external-drives-nas-network-paths)
-15. [Snap, Flatpak, AppImage Packages](#snap-flatpak-appimage-packages)
+15. [Snap & Flatpak Packages](#snap--flatpak-packages)
 16. [Performance & Large Scans](#performance--large-scans)
 17. [CLI Usage](#cli-usage)
 18. [Security - Antivirus False Positives](#security---antivirus-false-positives)
@@ -51,19 +51,22 @@ It is derived from hundreds of real user reports and is updated alongside the pr
 Both share the same scanning engine (`czkawka_core`). The difference is the frontend:
 
 - **Krokiet** - the current recommended GUI, built with the Slint framework. Statically linked, no external GUI dependencies, works reliably on Windows, macOS, and Linux. Actively developed.
-- **Czkawka GTK** - the old GTK4-based GUI. Deprecated since v12.0 and receives only critical bug fixes. New features are implemented in Krokiet only.
+- **Czkawka GTK** - the old GTK4-based GUI. Deprecated since v12.0; no new features - all development happens in Krokiet. **GTK worked well on Linux, but outside Linux (Windows and macOS) it had a lot of problems** - transparent/unclickable windows, blurry HiDPI text, broken previews, renderer crashes - many of which could not be fully fixed because of the state of the GTK4 Windows/macOS ports. Krokiet was created largely to escape these cross-platform GTK issues.
 - **czkawka_cli** - the command-line interface for scripting and automation.
 
-When in doubt, use Krokiet.
+Use Krokiet - it is the recommended frontend for all platforms.
 
 ### Q: Is Czkawka safe? Does it access the Internet?
 
 Czkawka and Krokiet do not make any network connections. The application has no telemetry, no update checks, and no analytics. If you observe network traffic in a sandboxed analysis, it is typically caused by the analysis environment itself or by the GTK runtime.
 
-The only officially supported download sources are:
-- [GitHub releases page](https://github.com/qarmin/czkawka/releases)
+If you want to confirm this yourself, look through `Cargo.lock` in the repository - there are no networking/HTTP/telemetry crates among the dependencies (no `reqwest`, `hyper`, `curl`, etc.), so the app has no code path that could reach the Internet.
+
+The actively maintained download sources are:
+- [GitHub releases page](https://github.com/qarmin/czkawka/releases) - the primary, always-current source
 - [crates.io](https://crates.io/)
-- [Flathub](https://flathub.org/) (GTK GUI only, Krokiet Flatpak not yet published as of mid-2026)
+
+The [Flathub](https://flathub.org/) package (GTK GUI) still exists but is **no longer maintained by the author and is frozen at v10.0** - it lags far behind. There is no Krokiet Flatpak.
 
 Sites such as `czkawka.net`, `czkawka.com`, `czawka.net` and similar are **not** official and may be unsafe.
 
@@ -73,13 +76,19 @@ You can run instances of different tools simultaneously (each tool has its own c
 
 ### Q: What is the project license?
 
-Czkawka and Krokiet are released under the MIT license. You can find the full license text in the `LICENSE` file in the repository root.
+The project is **not** uniformly MIT - it depends on the component, and for the Slint apps it depends on whether you mean the source or the finished binary:
+
+- **czkawka_core**, **czkawka_cli**, and the **Czkawka GTK GUI** - MIT.
+- **Krokiet** and **Cedinia** - their **own application source code is MIT** (see `LICENSE_MIT_CODE` in each crate), **but the apps as a whole are GPL-3.0-only**. This is because they link the Slint UI framework under its free license, which is GPL-3.0; so the resulting combined work / binary must be distributed under GPL-3.0 (see `LICENSE_GPL_APP`). In other words: you may reuse their code under MIT, but a built Krokiet/Cedinia is GPL.
+- All **images and audio files** - CC BY 4.0.
+
+The per-component `LICENSE_*` files in each crate directory hold the exact texts.
 
 ### Q: Is there a web-based UI or Docker-based web interface for Czkawka?
 
-The official GTK Docker image (`jlesage/czkawka`) provides a VNC-based web UI. There is also a community project called **Schluckauf** (https://github.com/fadykuzman/schluckauf) that provides a self-hosted browser-based UI for reviewing duplicate photos found by the Czkawka CLI. It parses Czkawka's JSON output and lets you mark duplicates as keep/trash via keyboard shortcuts.
+There are **third-party** Docker images by jlesage that wrap the GUI in a VNC/web UI accessible from a browser: `jlesage/krokiet` (Krokiet) and `jlesage/czkawka` (the GTK GUI). They are **not** official and are not maintained by the Czkawka author - use them at your own discretion.
 
-Krokiet itself does not have a web interface. If you need web access, use the CLI and process its JSON output with an external tool.
+The applications themselves do not have a built-in web interface. If you need web access without Docker, use the CLI and process its JSON output with an external tool.
 
 ### Q: Are there nightly / pre-release builds available?
 
@@ -95,29 +104,35 @@ Yes. Nightly builds compiled from the latest master branch commits are published
 - **Windows**: Windows 10 or newer. Krokiet binaries are self-contained.
 - **macOS**: Krokiet binaries are available for both Intel (x86_64) and Apple Silicon (ARM64). The GTK GUI binaries require GTK4 to be installed (e.g. via Homebrew).
 
-### Q: How do I install on macOS?
+### Q: How do I run it, and what do I need to install? (Linux / Windows / macOS)
 
-For **Krokiet** (recommended): download `mac_krokiet_arm64` (Apple Silicon) or `mac_krokiet_x86_64` (Intel) from the releases page, make it executable, and run it:
+Krokiet itself is a single self-contained binary - just download, run, and it works. You only need to install extra system libraries if you want **optional functionality**: `ffmpeg` for the Similar Videos tool, and `libheif`/`libavif`/`libraw` if you use a build with those image-format features. (The GTK GUI additionally needs GTK4 itself at runtime.)
 
-```bash
-chmod +x mac_krokiet_arm64
-./mac_krokiet_arm64
-```
+**There are ready-made scripts in the repo that install these dependencies for you** (`misc/install_scripts/`):
+- `install_linux.sh` (run with `sudo`) - auto-detects apt / dnf / pacman / zypper and installs `ffmpeg` + `gtk4` (base) and `libheif`/`libraw`/`libavif`/`dav1d` (optional).
+- `install_macos.sh` - installs (and offers to set up Homebrew, then) `ffmpeg libheif libraw libavif` via `brew`.
+- `install_windows.bat` - installs `ffmpeg` via `winget`; notes that `libheif`/`libraw`/`libavif` are only available through MSYS2 builds.
 
-If macOS shows a "cannot be opened because it is from an unidentified developer" dialog, right-click the file and choose "Open", then confirm.
+Per platform:
 
-If macOS opens the file as a text document in TextEdit, the file does not have the executable bit set - run the `chmod +x` command first.
+- **Linux**: download `linux_krokiet_x86_64` (or `_arm64`), `chmod +x` it, and run. For HEIF/AVIF/RAW use a `heif_raw_avif` build and install the matching libs (or just run `sudo misc/install_scripts/install_linux.sh`). The GTK GUI needs GTK4 installed.
+- **Windows**: download a `windows_krokiet_on_*` build and run the `.exe` - no runtime to install for the core app. Install `ffmpeg` (e.g. `winget install Gyan.FFmpeg` or `misc/install_scripts/install_windows.bat`) only if you need Similar Videos.
+- **macOS**: download `mac_krokiet_arm64` (Apple Silicon) or `mac_krokiet_x86_64` (Intel), then:
 
-For the **GTK GUI** (`mac_czkawka_gui_*`): GTK4 must be installed via Homebrew (`brew install gtk4`). The `_heif_avif` variant additionally requires `libheif` and `libavif` (`brew install libheif libavif`).
+  ```bash
+  chmod +x mac_krokiet_arm64
+  ./mac_krokiet_arm64
+  ```
+
+  If macOS says "cannot be opened because it is from an unidentified developer", right-click the file and choose "Open", then confirm. If it opens as text in TextEdit, the executable bit is not set - run `chmod +x` first. For optional codecs use a `heif_avif` build and `brew install ffmpeg libheif libavif libraw` (or run `misc/install_scripts/install_macos.sh`). The GTK GUI (`mac_czkawka_gui_*`) additionally needs `brew install gtk4`.
 
 ### Q: Which Linux packages are available?
 
-- **Pre-built binaries**: Download from the GitHub releases page (recommended, always up to date).
-- **Flatpak** (GTK GUI): Available on Flathub (`com.github.qarmin.czkawka`). The Krokiet Flatpak is not yet published on Flathub.
-- **AppImage**: Available on the releases page.
-- **Snap**: The Snap package is **no longer maintained**. Use Flatpak or the AppImage instead.
-- **AUR (Arch Linux)**: `czkawka` package available.
-- **Debian / Ubuntu**: Official Debian package exists but may lag several versions behind the current release.
+- **Pre-built binaries**: Download from the GitHub releases page (recommended, always up to date). This is now effectively the only source the author actively maintains.
+- **Flatpak** (GTK GUI, `com.github.qarmin.czkawka`): Was author-maintained but is **no longer updated and is stuck at v10.0**. It still works but lags far behind; hopefully a new maintainer takes it over. No Krokiet Flatpak exists.
+- **AppImage**: **No longer provided.** AppImages were dropped (random AppImage-specific bugs, little value over the plain Linux binaries). Use the pre-built binary instead.
+- **Snap**: The author **used to publish a Snap but no longer maintains it**. It is outdated and has known permission issues (external drives, NFS); prefer the pre-built binary.
+- **AUR / Debian / other distro repos**: Community-maintained, not by the project author. They may lag several versions behind. For the newest version use the GitHub binaries.
 
 ### Q: Similar Videos does not work - ffmpeg not found
 
@@ -135,17 +150,23 @@ After installation, restart Krokiet or the CLI. On Windows, a new terminal sessi
 
 ## Which Build / Binary to Use
 
-### Q: There are several Windows Krokiet binaries. Which one should I pick?
+The release assets stack a few naming components, e.g. `<os>_<app>[_<features>][_<backend>]_<arch>`. Once you know the legend below, the same scheme applies to every platform, so there is nothing extra to learn per OS.
 
-The release page provides these Krokiet variants for Windows:
+### Legend
 
-| Binary name | Renderer | Notes |
-|-------------|----------|-------|
-| `windows_krokiet.exe` | femtovg (OpenGL via Rust) | Default, no external DLL dependencies. Best starting point. |
-| `windows_krokiet_on_windows_skia_opengl.exe` | Skia + OpenGL | Better text rendering on most systems. Requires C/C++ runtime DLLs bundled in the ZIP. |
-| `windows_krokiet_on_windows_skia_vulkan.exe` | Skia + Vulkan | May hang the entire system on some GPU drivers - use with caution. |
+- `krokiet` - primary graphical version of the application, fully supported and actively developed, includes new features and ongoing improvements
+- `gtk_gui` (`czkawka_gui`) - legacy GTK-based graphical version, maintenance mode only, receives critical fixes but no new features
+- `cli` (`czkawka_cli`) - command-line version of the app
+- `cedinia` - experimental Android app
+- `arm` / `arm64`, `x86_64` - CPU architecture. Most Windows/Linux machines use `x86_64`, while on Mac the `arm` (Apple Silicon) version is becoming the most common choice
+- `heif`, `raw`, `avif` - additional image-format features that require extra libraries installed on the OS (libheif / libraw / libavif)
+- `skia_opengl`, `skia_vulkan`, `femtovg_wgpu`, `all_backends` - alternative Krokiet rendering backends; different builds may fix some problems like blurry fonts or graphics crashes. `all_backends` bundles all of them (plus launcher scripts) in one package
+- `apk` / `aab` - Cedinia Android package formats - just use `apk`; `aab` is used only for testing purposes
+- (Windows only) `on_linux` / `on_windows` - which host the `.exe` was cross-compiled on
 
-Start with the default `windows_krokiet.exe`. If text looks blurry or fonts are wrong, try the `skia_opengl` variant. Avoid the Vulkan variant unless you know your GPU drivers support it correctly.
+### Q: Which one should I pick?
+
+Pick `krokiet` for your architecture with the **default** backend - it is built to be the most compatible everywhere. Only reach for a `skia_opengl` / `skia_vulkan` / `femtovg_wgpu` / `all_backends` build if the default one shows blurry text, fails to render, or crashes on your GPU. Choose a `heif` / `raw` / `avif` build only if you need those image formats (and install the matching system libraries). On Windows, if you are unsure between `on_linux` and `on_windows`, start with `windows_krokiet_on_linux`.
 
 ### Q: On Linux Krokiet shows nothing or crashes with a rendering error
 
@@ -157,31 +178,11 @@ SLINT_BACKEND=software krokiet
 
 On systems without a GPU (VMs, headless servers), this is often the only option.
 
-### Q: Which macOS binary should I use?
+The default `linux_krokiet_*` binary only ships the femtovg and software renderers. If you want to try Skia/OpenGL/Vulkan/wgpu backends too, download the **`linux_krokiet_all_backends_*`** build - it is packaged as a **ZIP that contains the binary plus small bash launcher scripts**, one per renderer, that just set the right `SLINT_BACKEND` and start the app. So instead of exporting the variable yourself you can simply run, for example, `./krokiet_winit_skia_opengl.sh`, `./krokiet_winit_skia_vulkan.sh`, `./krokiet_winit_software.sh`, `./krokiet_femtovg_wgpu.sh`, or `./krokiet_winit_femtovg.sh` until one renders correctly.
 
-Use `mac_krokiet_all_backends_arm64` (Apple Silicon) or `mac_krokiet_all_backends_x86_64` (Intel). The `all_backends` variant supports multiple rendering backends and is the most compatible.
+### Q: Which Windows GTK GUI variant is provided?
 
-If you need HEIF/AVIF support, use the `_heif_avif_all_backends_*` variant, but note that `libheif` must be installed on the system.
-
-### Q: What is the difference between "winversion" and "linversion" Krokiet binaries for Windows?
-
-Both variants should work identically. The difference is the compilation host:
-- `winversion` - compiled natively on Windows. Requires the [Microsoft Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) to be installed.
-- `linversion` - cross-compiled on Linux. Self-contained, no extra runtime required.
-
-If you are unsure, use `linversion`. Both should produce identical results at runtime.
-
-### Q: What is the difference between "gtk_46" and "gtk_412" Windows GTK GUI variants?
-
-The number refers to the GTK version bundled with the binary. `gtk_46` uses GTK 4.6, `gtk_412` uses GTK 4.12. Both are the legacy GTK GUI (deprecated). If `gtk_412` does not launch on your system, try `gtk_46` - it is older but more compatible. Alternatively, use Krokiet which does not require GTK at all.
-
-### Q: What does the "heif_avif" / "libraw" label on binaries mean?
-
-These variants are compiled with optional support for additional image formats:
-- `heif` / `heif_avif` - adds HEIC/HEIF and AVIF image support (requires `libheif` / `libavif` as a system library on macOS/Linux; bundled on Windows in some releases).
-- `libraw` - adds RAW camera format support (CR2, NEF, ARW, etc.).
-
-The base binary without these suffixes does not read HEIC/HEIF, AVIF, or RAW files.
+Only one GTK build is shipped: `windows_czkawka_gui_gtk_412.zip` (GTK 4.12). The ZIP also contains `czkawka_cli.exe` and small `.bat` launchers that set `GSK_RENDERER` (cairo / opengl / vulkan) for the GTK GUI. The GTK GUI is deprecated - prefer Krokiet, which needs no GTK at all.
 
 ---
 
@@ -189,7 +190,7 @@ The base binary without these suffixes does not read HEIC/HEIF, AVIF, or RAW fil
 
 ### Q: I get a popup in Czkawka GTK saying to switch to Krokiet. Is GTK really deprecated?
 
-Yes. **Version 12.0 is the last release of the Czkawka GTK frontend**. It enters maintenance mode: only critical bug fixes for the unofficial Docker and Debian packages may still be applied. No new features will be added to the GTK version.
+Yes. **Version 12.0 is the last released version of the Czkawka GTK frontend** - no new GTK binaries will be provided, and no new features are planned. (Any Docker or distro packages built on top of it are third-party, not maintained by the project author.)
 
 All new features and active development happen in **Krokiet**. Users should migrate to Krokiet.
 
@@ -205,7 +206,7 @@ Krokiet avoids all of these by using the Slint framework, which has a pure-Rust 
 
 ### Q: Does Czkawka work on Windows 7 or older Windows versions?
 
-Windows 10 is the minimum officially supported version. GTK4 (used by the legacy GUI) and the Rust standard library have both dropped support for older Windows versions. Running on Windows 7 or Windows XP is not supported and is very unlikely to work with any current release.
+Windows 10 is the minimum supported version. The Rust standard library has dropped support for older Windows versions, so running on Windows 7 or Windows XP is not supported and is very unlikely to work with any current release. There are no plans to support systems that have themselves been out of support for years. Windows 10 will likely keep working until Rust itself drops it, which is probably ~10 years away.
 
 ### Q: The GTK GUI shows text too small on my 4K display
 
@@ -225,19 +226,11 @@ Adjust the value as needed. Alternatively, use Krokiet, which supports a manual 
 
 ### Q: Krokiet window is completely black / blank / invisible
 
-This is usually a GPU driver or rendering backend issue. Try:
+This is usually a GPU driver or rendering backend issue. Try, in order:
 
-1. Use the software renderer: `SLINT_BACKEND=software krokiet` (Linux/macOS) or set the environment variable `SLINT_BACKEND=software` in Windows system environment variables, then restart.
-2. On Windows, try the `skia_opengl` variant instead of the default binary.
+1. **Try a different build / rendering backend.** The default backend is meant to be the most compatible, but no single backend works with every system and GPU driver. Download the `all_backends` build and start it through its per-backend launcher scripts (or set `SLINT_BACKEND` yourself) until one renders correctly.
+2. Force the software renderer: `SLINT_BACKEND=software krokiet` (Linux/macOS), or set `SLINT_BACKEND=software` in Windows system environment variables and restart. On machines without a GPU (VMs, headless servers) this is often the only option.
 3. Update your GPU drivers.
-
-### Q: Krokiet panics with "The wayland library could not be loaded"
-
-This is a library path issue on some distributions (notably NixOS). The Krokiet binary needs `libwayland-client.so` to be in `LD_LIBRARY_PATH`. On NixOS, see the project's NixOS packaging notes and ensure the `wayland` package is available in the build/run environment.
-
-### Q: Krokiet crashes or shows garbled text on Linux with a custom WM (not a full DE)
-
-This is often caused by a missing or incompatible font shaping library. Try the `software` backend or the `skia_opengl` backend. If you use a tiling WM without XWayland, ensure XWayland or a proper Wayland compositor is running.
 
 ### Q: Krokiet on Windows says it is blocked by antivirus / Windows Defender
 
@@ -245,17 +238,7 @@ This is a false positive. The binaries are compiled from source via GitHub Actio
 
 You can verify the binary on [VirusTotal](https://www.virustotal.com/) - the overwhelming majority of engines report it as clean, and any detections are from obscure engines.
 
-If Defender blocks the download, you can try the `skia_opengl` variant or compile from source. You can also report the false positive to Microsoft via the Defender Feedback portal.
-
-### Q: The GTK GUI (czkawka_gui) crashes on macOS with "Unrecognized image file format" / pixbuf error
-
-This is a known crash in the GTK GUI when GTK's pixbuf loaders are missing or corrupted. Fixes to try in order:
-
-1. Install GTK4 and its dependencies via Homebrew: `brew install gtk4 adwaita-icon-theme`
-2. Regenerate the pixbuf loader cache: `gdk-pixbuf-query-loaders --update-cache`
-3. Clear stale config: `rm -rf "$HOME/Library/Application Support/pl.Qarmin.Czkawka"` and `rm -rf "$HOME/Library/Caches/pl.Qarmin.Czkawka"`, then relaunch.
-
-If none of these work, use **Krokiet** instead - it does not depend on GTK and does not have this issue.
+If Defender blocks the download, you can try a different Krokiet build or compile from source. You can also report the false positive to Microsoft via the Defender Feedback portal.
 
 ---
 
@@ -273,29 +256,30 @@ If none of these work, use **Krokiet** instead - it does not depend on GTK and d
 The cache is **shared between all frontends** (CLI, Krokiet, GTK). Both Krokiet and the GTK GUI read and write the same cache files in `~/.cache/czkawka/`.
 
 The Krokiet config files are:
-- `config_general.json` - window size, language, dark/light theme, etc.
-- `config_preset_N.json` (N = 0-9) - per-preset scan directories and tool settings.
+- `config_general.json` - window size, language, dark/light theme, current preset, etc.
+- `config_preset_N.json` (N = 0-10) - per-preset scan directories and tool settings. There are 11 slots: 10 user presets plus a reserved one ("CLI Folders").
+- `config_custom_select_state.json` - saved state for the custom-select dialog.
 
 ### Q: How large is the cache? Can it fill my disk?
 
-The cache stores only metadata (hashes, timestamps, sizes) - not file contents. A typical large scan (150 TB of files) may produce a cache a few hundred MB in size at most, not terabytes. If the settings pane shows "1.83 TiB cached", that is the total size of all files that were scanned, not the cache file size.
+The cache stores only metadata (hashes, timestamps, sizes) - not file contents. A typical large scan (150 TB of files) may produce a cache a few hundred MB in size at most, not terabytes.
 
 ### Q: What does "Remove outdated results from cache" do?
 
-It removes cache entries for files that no longer exist on disk. This keeps the cache lean and avoids stale entries being used in future scans. Click it periodically if you have deleted many files since your last scan.
+It removes cache entries for files that no longer exist on disk. This keeps the cache lean and avoids stale entries being used in future scans. Click it periodically if you have deleted many files since your last scan, and you want to increase the speed of loading/saving the cache.
 
 ### Q: Should I delete the cache to fix problems?
 
-If you suspect cache corruption (e.g., scan results look wrong, or the app crashes when loading cache), you can delete the cache files in `~/.cache/czkawka/`. The next scan will rebuild the cache from scratch, which will be slower but correct.
+If you suspect cache corruption (e.g., scan results look wrong, or the app crashes when loading cache), you can delete the cache files in `~/.cache/czkawka/`. The next scan will rebuild the cache from scratch, which will be slower but may fix your issues.
 
-### Q: Do not run two instances scanning the same tool at the same time
+### Q: Can I run two instances scanning with the same tool at the same time?
 
-Each tool (duplicates, similar images, etc.) uses a separate cache file. Running two instances of the same tool simultaneously can corrupt that tool's cache. Running different tools in parallel is safe.
+No - avoid it. Each tool (duplicates, similar images, etc.) uses a separate cache file. Running two instances of the same tool simultaneously can corrupt that tool's cache. Running different tools in parallel is safe.
 
 ### Q: What is the difference between the prehash cache file and the hash cache file?
 
 The duplicate finder uses a two-stage hashing pipeline:
-- **Prehash**: a fast partial hash computed over the first few KB of each file. Used to quickly eliminate files that cannot possibly be duplicates (they differ in prehash). Files that share the same size and prehash are promoted to the full hash stage.
+- **Prehash**: a fast partial hash computed over a small chunk from both the start and the end of each file (in the current version - older versions read only the start). Used to quickly eliminate files that cannot possibly be duplicates (they differ in prehash). Files that share the same size and prehash are promoted to the full hash stage.
 - **Full hash**: a cryptographically strong hash of the entire file content. Only computed for files that survived the prehash stage.
 
 Both stages have separate cache files. This is why you see two cache files for the duplicate tool. The prehash cache is much cheaper to build; the full hash cache is the authoritative deduplication signal.
@@ -312,37 +296,38 @@ Changing directory paths in the JSON cache directly is possible in principle, bu
 
 ### Q: Czkawka does not find my duplicate files even though I can see they are identical
 
-The most common reason is the **minimum file size** setting. By default, files smaller than **16 384 bytes (16 KB)** are ignored. To scan smaller files:
+The most common reason is the **minimum file size** setting. In the Krokiet GUI the default minimum is **16 KB (16 384 bytes)**, so smaller files are ignored. (The CLI uses per-tool defaults, and for `dup` that default is lower - 8 192 bytes.) To scan smaller files:
 
-- **Krokiet**: Settings > Duplicate Files > Min file size > set to `1` (bytes) or `0`.
+- **Krokiet**: Settings > minimum file size > set to a low value (the GUI value is in KB).
 - **GTK GUI**: "Items configuration" tab > "Size (bytes) Min" > set to `1`.
 - **CLI**: add `--minimal-file-size 1` to the command.
 
 ### Q: I have files below 16 KB that are duplicates - why are they excluded by default?
 
-The 16 KB default exists to avoid hashing very small files (license headers, empty placeholders, etc.) that are frequently identical by coincidence but are not meaningful duplicates. For most workflows involving media files (photos, videos, audio), 16 KB is a sensible floor.
+A large share of users scan whole drives looking for duplicates, and at that scale tiny files (a few bytes to a few KB - config snippets, empty placeholders, license headers, icons) are very often identical by pure coincidence without being meaningful duplicates. Surfacing thousands of such matches mostly just buries the larger duplicates the user actually came to find and makes the results harder to review. The 16 KB floor keeps the focus on duplicates worth acting on. If you specifically want the small ones, lower the minimum size as shown above.
 
 ### Q: Duplicates mode found files in the Recycle Bin / Trash
 
-Czkawka scans whatever directories you add. If you add your entire drive root (`C:\` or `/`), it will scan the Recycle Bin (`$RECYCLE.BIN`) or Trash (`.Trash-*`). To exclude them:
+By default this should not happen: the **default Excluded Items** already cover the trash on every platform - `*:\$RECYCLE.BIN\*` (and other Windows system dirs) on Windows, and `*/Trash/*` + `*/.Trash-*/*` on Linux/macOS. So out of the box, scanning even a whole drive root (`C:\` or `/`) skips the Recycle Bin / Trash.
 
-- Add an exclusion item in the **Excluded Items** field. Example patterns:
-  - Windows: `*:\$RECYCLE.BIN\*`
-  - Linux: `*/Trash/*`, `*/.Trash-*/*`
-
-On Linux, the default excluded items already contain `*/Trash/*` and `*/.Trash-*/*` patterns.
+If trash files still show up, your **Excluded Items** field was probably cleared or edited and lost those defaults. Restore them (or reset excluded items to the default) - for example add back:
+- Windows: `*:\$RECYCLE.BIN\*`
+- Linux/macOS: `*/Trash/*`, `*/.Trash-*/*`
 
 ### Q: The scan found far fewer files than I expected during the "full hash" stage - is something wrong?
 
 No. The number shown for "Analyzed full hash of X/Y files" reflects only the files that reached the full-hash stage, not the total number of files scanned. Files that differ in size or prehash never need a full hash, so Y can be much smaller than the total file count. This is expected and correct behavior.
 
-### Q: The scan seems stuck at 99-100% for a long time
+### Q: The scan seems to freeze near the end (and Stop/Cancel does nothing)
 
-This is expected behavior when the last remaining files are very large. The progress bar shows file count; the final large files can take most of the total time. More recent versions show a size-based progress indicator that is more accurate.
+The progress bar is already size-based, so a very large last file legitimately takes a while - but the more common reason it looks *frozen* is that per-file work (decoding, hashing, verifying a file) is run as one indivisible task. The app can only stop *between* tasks, not in the middle of one, so while a single huge or slow-to-decode file is being processed there is nothing to interrupt - and Rust cannot forcibly abort it either, because the work runs in-process as a normal function call, not as a separate external process (usually) that could simply be killed. So a single pathological file can make the whole scan appear stuck and unresponsive to Stop until it finishes.
 
-### Q: Czkawka finds my symlinks as duplicates of the files they point to
+For some tools this has been improved by splitting large tasks into smaller, individually-interruptible chunks so Stop reacts quickly - this already applies to e.g. duplicate finding and similar-video search. Other tools may still block until the current file is done.
 
-By default hard links are filtered, but regular symlinks are followed and their targets are compared. If you use symlinks to intentionally alias files, add the symlink directory to the excluded paths or use the "Ignore same inode" option.
+### Q: How are symlinks and hard links treated in the duplicate scan?
+
+- **Symbolic links are not followed and not scanned.** During file collection a symlink is skipped entirely - the scanner never compares a symlink against its target, so a symlink will not be reported as a "duplicate" of the file it points to. To scan the contents a symlink points at, add the real target path as an included directory.
+- **Hard links are ignored by default** (the "Ignore hard links" / `hide_hard_links` option is on in both Krokiet and the CLI), so multiple names sharing one inode are counted once rather than flagged as duplicates of each other. Turn that option off (CLI `-L` / `--allow-hard-links`) if you want hard links treated as separate files.
 
 ---
 
@@ -352,22 +337,18 @@ By default hard links are filtered, but regular symlinks are followed and their 
 
 Check these settings:
 1. **Minimum file size**: default is 16 KB. Images smaller than this are skipped. Lower it if needed.
-2. **Max difference (similarity threshold)**: a value of `0` means only bitwise identical files are matched. Increase it (e.g. to `8` or `10`) to catch near-duplicates.
-3. **Hash algorithm and hash size**: different algorithms catch different types of similarity. The default in Krokiet is Mean hash with hash size 16. If you miss duplicates, try Gradient or Double Gradient with hash size 32 or 64.
+2. **Max difference (similarity threshold)**: a value of `0` means only effectively identical hashes are matched. The Krokiet GUI default is `10`. The allowed range scales with hash size (up to about 40 at hash size 64), so raise it to catch looser near-duplicates. (The CLI's default is lower - `5` - so if you scan via CLI you may need to raise `-s`.)
+3. **Hash algorithm and hash size**: different algorithms catch different types of similarity. The default in Krokiet is Mean hash with hash size 16. If you miss duplicates, try Gradient or DoubleGradient with hash size 32 or 64.
 4. The image format must be supported. See the next question.
 
 ### Q: What image formats does Similar Images support?
 
-Supported in all builds: JPEG, PNG, GIF, BMP, TIFF, WebP, ICO, PNM, TGA, and most common formats handled by the `image` crate.
+Supported in all builds: JPEG, PNG, BMP, TIFF, WebP, TGA, plus the less common FF (Farbfeld), QOI, EXR, and JXL. (These are the extensions the Similar Images tool actually enumerates.)
 
 Formats requiring optional features:
-- **HEIC/HEIF**: needs a build with the `heif` feature (requires `libheif` system library on Linux/macOS, bundled on Windows in some releases).
-- **AVIF**: needs a build with the `libavif` feature (Linux pre-built binaries as of 11.0.1 do not include AVIF support - compile with `--features libavif` or use the `heif_avif` binary variant where available).
-- **RAW** (CR2, NEF, ARW, etc.): needs a build with the `libraw` feature.
-
-### Q: Results of Similar Images are different on each run (non-deterministic)
-
-This is fixed in recent versions (starting around 10.x). Earlier versions had a race condition in the comparison phase that caused different groupings on each run. Update to the latest release.
+- **HEIC/HEIF**: needs a build with the `heif` feature (requires the `libheif` system library on Linux/macOS).
+- **AVIF**: needs a build with the `libavif` feature - compile with `--features libavif` or use a binary variant whose name includes `avif`.
+- **RAW** (CR2, NEF, ARW, etc.): basic RAW support is **always built in** via the pure-Rust `rawler` library, but it does not cover every format and not always fully. The optional `libraw` feature adds the `libraw` backend - the industry-standard library - which supports a larger set of RAW formats more completely. So RAW works without any special build; use a `libraw` build only if your camera's format is missing or mis-decoded.
 
 ### Q: Can Similar Images find duplicates across different image formats (e.g., JPEG vs WebP vs PNG)?
 
@@ -377,28 +358,33 @@ Yes. The Similar Images tool compares pixel content regardless of the file forma
 
 Yes - and there is currently no built-in option to exclude greyscale matches. All perceptual hash algorithms (Mean, Gradient, Double Gradient, Blockhash) ignore color and work on luminance, so a greyscale conversion of an image will appear highly similar to the original. If you want to avoid greyscale false positives, you must filter results manually or with a post-processing script.
 
-### Q: Similar Images does not detect horizontally mirrored or rotated images
+### Q: Can Similar Images detect horizontally mirrored or rotated images?
 
-Detecting mirrored/flipped images is not yet implemented. Detecting images with EXIF rotation tags is supported (the EXIF orientation is applied before hashing). Detecting images that are physically rotated in their pixel data (not just via EXIF) is a planned feature but not available yet.
+Yes - via the **Geometric invariance** setting (CLI `--geometric-invariance`). It has three modes:
+- `off` (default) - compare images as-is.
+- `mirror-flip` - also match mirrored/flipped variants.
+- `mirror-flip-rotate90` - also match 90/180/270-degree rotations.
+
+These modes make matching more expensive, which is why they are off by default. EXIF orientation is always applied before hashing regardless of this setting.
 
 ### Q: I have many false positives in Similar Images (unrelated images grouped together)
 
-Lower the **Max difference** (similarity threshold). The default setting `10` can match visually distinct images if they share large uniform areas (e.g., black borders, white backgrounds). Try `4` or `5` for stricter matching.
+Lower the **Max difference** (similarity threshold). The default setting `10` can match visually distinct images if they share large uniform areas (e.g., black borders, white backgrounds). Try `4` or `5` for stricter matching. Also try **increasing the hash size** (e.g. 32 or 64): a larger hash captures more detail, so unrelated images are less likely to collide - at the cost of being slightly stricter about re-encoded/resized copies.
 
 ### Q: What do the hash algorithm and hash size settings mean? Which should I use?
 
 The settings control the perceptual hashing step in Similar Images:
-- **Hash algorithm**: how the image is converted to a short fingerprint. `Mean` is the fastest and most permissive. `Gradient` and `Double Gradient` are more sensitive to structural differences. `Blockhash` is a different approach that can find different near-duplicates.
+- **Hash algorithm**: how the image is converted to a short fingerprint. The available algorithms are `Mean`, `Gradient`, `VertGradient`, `DoubleGradient`, `Median`, and `Blockhash`. `Mean` (the Krokiet GUI default) is the fastest and most permissive. `Gradient` / `VertGradient` / `DoubleGradient` are more sensitive to structural differences. `Median` is more robust against brightness/color shifts. `Blockhash` is a different approach that can find different near-duplicates.
 - **Hash size**: 8, 16, 32, or 64 bits per dimension. Larger values produce longer, more precise fingerprints that reduce false positives but may miss re-encoded versions.
 
 Practical guidance: for finding re-encoded/resized copies of the same image, start with Mean hash + size 16 and a "max difference" of 8-10. For stricter matching (fewer false positives), use Gradient/Double Gradient with size 32 and lower the max difference to 4-5.
 
 ### Q: HEIC images are not found / "The image format could not be determined" error for HEIC files
 
-Ensure you are using a build that includes the `heif` feature. The `linux_krokiet_all_backends_x86_64` binary as of v11.0.1 does **not** include HEIF/AVIF support. Use the `_heif_avif_` variant or compile with the appropriate feature flags:
+Ensure you are using a build that includes the `heif` feature. The plain `linux_krokiet_all_backends_x86_64` binary does **not** include HEIF/AVIF support. Use a `heif_raw_avif` variant (e.g. `linux_krokiet_heif_raw_avif_x86_64`) or compile with the appropriate feature flags:
 
 ```bash
-cargo run --bin krokiet --features "winit_femtovg,winit_software,heif,libavif"
+cargo run --bin krokiet --features "winit_femtovg,winit_software,heif,libavif,libraw"
 ```
 
 ---
@@ -407,14 +393,20 @@ cargo run --bin krokiet --features "winit_femtovg,winit_software,heif,libavif"
 
 ### Q: How does Similar Videos detect duplicate videos?
 
-Similar Videos works by sampling frames from the video at fixed intervals and computing visual perceptual hashes of those frames. The similarity is then the hamming distance between the frame-hash sequences. The algorithm is provided by the `vid_dup_finder_lib` library; a detailed description is available at https://github.com/Farmadupe/vid_dup_finder_lib#how-it-works.
+Similar Videos works by sampling frames from the video and computing visual perceptual hashes, then comparing those hash sequences across short temporal "windows". The matching engine is provided by the project's own `similario_core` crate (the tool no longer uses the older `vid_dup_finder_lib`). `ffmpeg`/`ffprobe` must be installed for frame extraction.
 
-### Q: What do the "Skip duration" and "Video has duration" settings do in Similar Videos?
+### Q: What are the main tuning settings in Similar Videos?
 
-- **Skip duration**: the number of seconds skipped at the start and end of each video before frame sampling begins. Useful for skipping common intros or outros.
-- **Video has duration**: the minimum total duration a video must have to be included in the scan. Very short clips (below approximately a few seconds) are skipped by default.
+The Krokiet GUI exposes visual presets (Custom, Near-identical, Similar, Movies) that set sensible values; the underlying parameters (also exposed individually in the CLI) are:
 
-Lowering the skip duration captures more of each video but may increase false positives if many videos share a common opener. Lowering the minimum duration allows very short clips to be compared.
+- **Max difference / tolerance**: how different two videos may be and still match (`0-20`; GUI default `15`, CLI `-t` default `10`). Lower = stricter.
+- **Skip forward amount** (`--skip-forward-amount`, default `15` s): how many seconds to seek into the video before sampling begins, to skip intros/black openers (`0-300`; `0` = no skip).
+- **Scan duration** (`-A`, default `10` s): how long a span of the video is sampled to build the signature.
+- **Window count** (default per preset, `1-20`): how many temporal windows are sampled. More windows = more accurate but slower.
+- **Duration tolerance %**: videos are pre-grouped by total duration; two videos are only compared if their durations differ by no more than this percentage.
+- **Min matching windows fraction** (`0.0-1.0`): the fraction of windows that must agree to call two videos "same content".
+
+There is also an optional **audio fingerprint** comparison (off by default, resource-intensive) with its own similarity/duration parameters. Note: there is no setting that simply skips both the start *and* end of every video, nor a single "minimum video duration" toggle - very short videos are skipped because they cannot fill the sampled windows.
 
 ### Q: Similar Videos scan starts but finds nothing, or produces many false positives
 
@@ -476,9 +468,9 @@ When all duplicate files have identical timestamps and sizes, some delete modes 
 ### Q: Delete does nothing / "Deleted 0 items, failed to remove 1 items"
 
 Common causes:
-1. **Trash on Samba/NFS shares**: Krokiet v11 defaults to moving deleted files to the trash. On network shares (SMB, NFS), moving to trash fails because the remote filesystem does not support it. **Fix**: in Settings, switch the delete method from "Move to trash" to "Permanent delete", or use the dedicated "Delete permanently" button (added in v12.x).
+1. **Trash on Samba/NFS shares**: Krokiet offers two separate actions - a permanent **Delete** button and a **Move to trash** button (and the CLI permanently deletes by default, with `-y`/`--move-to-trash` opting into trash). On network shares (SMB, NFS) the move-to-trash path can fail because the remote filesystem has no usable trash location. **Fix**: use the permanent **Delete** button (or omit `-y` in the CLI) instead of moving to trash.
 2. **Read-only files/folders**: the file itself may be writable but its parent directory is read-only. Check permissions on the containing folder.
-3. **Flatpak sandbox**: the Flatpak version has restricted filesystem access. Grant full filesystem access in Flatpak permissions, or use the AppImage / native binary.
+3. **Flatpak sandbox**: the Flatpak version has restricted filesystem access. Grant full filesystem access in Flatpak permissions, or use the pre-built native binary.
 
 ### Q: Move is slow - it copies the whole file instead of just renaming
 
@@ -586,7 +578,7 @@ If you use the Snap version: Snap has strict filesystem sandboxing. Run:
 ```bash
 sudo snap connect czkawka:removable-media
 ```
-to grant access to removable media. However, the Snap package is no longer maintained - switch to Flatpak or the AppImage.
+to grant access to removable media. However, the Snap is no longer maintained and is outdated - prefer the pre-built binary.
 
 If you use the Flatpak version: grant full filesystem access in Flatpak permissions, or use "Other Files" to add the mount point manually in the directory picker.
 
@@ -602,18 +594,15 @@ This is expected. System directories and volumes reserved by Windows are inacces
 
 ---
 
-## Snap, Flatpak, AppImage Packages
+## Snap & Flatpak Packages
 
 ### Q: The Snap package is outdated / has permission problems
 
-The **Snap package is no longer maintained**. It receives no updates and has known permission issues with external drives and NFS mounts. Use one of these alternatives:
-- **Flatpak** from Flathub (`com.github.qarmin.czkawka`) - GTK GUI only.
-- **AppImage** from the GitHub releases page.
-- **Pre-built binary** from the GitHub releases page.
+The author **used to publish a Snap but stopped maintaining it**, so it is stuck on an old version and has known permission issues for external drives and NFS mounts. Use the **pre-built binary** from the GitHub releases page instead (recommended).
 
 ### Q: The Flatpak version is out of date
 
-The Flathub version tracks the official releases but may lag a few weeks behind. The Flatpak is maintained by a separate maintainer. For the latest version, use the AppImage or pre-built binary from the GitHub releases page.
+Yes - the Flathub package (GTK GUI, `com.github.qarmin.czkawka`) is **no longer maintained by the author and is frozen at v10.0**, so it is many versions behind. It may be adopted by a new maintainer in the future. For the latest version, use the pre-built binary from the GitHub releases page.
 
 ### Q: How do I use the CLI via Flatpak?
 
@@ -646,9 +635,9 @@ The progress line shows the current count in the format `Collecting files: N`. I
 
 For scanning 100TB+ datasets, expect the initial scan to take several hours. Subsequent scans are faster because the cache holds pre-computed hashes.
 
-### Q: The progress bar shows 100% but the scan is still running for a long time
+### Q: The progress bar shows ~100% but the scan is still running for a long time
 
-The percentage is based on file count. The last few files can be very large (e.g., video files) and take a disproportionate amount of time to hash. This is not a bug. Newer versions show a size-based progress bar that is more accurate.
+The progress is size-based, but a single very large file (e.g. a big video) still takes a disproportionate amount of time to hash/decode, so the bar can sit at the end while that last file is processed. This is not a bug. Because per-file work runs as one uninterruptible task, Stop may not react until it finishes - see ["The scan seems to freeze near the end"](#q-the-scan-seems-to-freeze-near-the-end-and-stopcancel-does-nothing) above for the details.
 
 ### Q: The UI becomes very slow / laggy after a scan with thousands of groups
 
@@ -789,11 +778,9 @@ Krokiet uses bundled fonts and may not include CJK (Chinese/Japanese/Korean) gly
 The following are frequently requested but are not planned for implementation:
 
 - **Finding duplicate folders**: finding folders whose contents are identical is not implemented. The tool finds duplicate files.
-- **Detecting rotated/mirrored images**: detecting images that have been physically flipped or rotated in their pixel data (beyond EXIF orientation) is not yet implemented.
 - **GPU-accelerated hashing**: disk I/O is the bottleneck, not hash computation.
 - **Pause and resume a scan**: scans cannot be paused mid-way. You can stop and restart; the cache preserves already-computed hashes. On Linux, you can suspend the process with `kill -STOP <PID>` and resume it with `kill -CONT <PID>`.
 - **Scanning inside archives (ZIP, RAR, etc.)**: files inside archives are not scanned. Extract them first.
-- **Finding duplicate directories**: the tool finds duplicate files, not duplicate directory structures.
 - **Apple Photos library support**: the Photos library database format is proprietary and not supported.
 - **Browser / internet access**: the tool has no internet access, no update checks, no telemetry.
 - **Loading saved scan results back into the GUI**: scan results can be exported to TXT and JSON files, but re-importing them into the application is not currently supported. The TXT/JSON formats were designed for external scripting, not for re-loading into the app.
@@ -907,7 +894,7 @@ By default, Czkawka uses hashes only (size + prehash + full hash pipeline). A fu
 
 ### Q: What hash algorithm does the duplicate finder use?
 
-The default hash algorithm is **Blake3** (very fast, cryptographically strong). You can also choose SHA-256, SHA-512, and xxHash variants in the settings. All provide collision resistance sufficient for practical deduplication; Blake3 is the best choice for performance.
+The default hash algorithm is **Blake3** (very fast, cryptographically strong). The other two options are **CRC32** (a fast checksum, not cryptographic) and **XXH3** (xxHash, very fast, not cryptographic). There is no SHA-256/SHA-512 option. For deduplication any of the three is fine in practice; Blake3 is the recommended default because it combines high speed with cryptographic-grade collision resistance.
 
 ### Q: How does the duplicate finder handle files that differ only in name but are otherwise identical?
 
@@ -940,8 +927,8 @@ Run the `.bat` file instead of the executable directly. Alternatively, switch to
 
 On some Windows systems, the GTK GUI fails silently. Try:
 1. Run from a command prompt to see any error output.
-2. Try the `gtk_46` variant if the `gtk_412` variant fails (or vice versa).
-3. Switch to Krokiet (`windows_krokiet.exe`) which has no GTK dependency.
+2. Use the launcher `.bat` files shipped in `windows_czkawka_gui_gtk_412.zip` to try a different `GSK_RENDERER` (cairo / opengl / vulkan).
+3. Switch to Krokiet (e.g. `windows_krokiet_on_linux.exe`), which has no GTK dependency.
 
 ### Q: Can I use drag and drop to add directories in Krokiet on Windows?
 
