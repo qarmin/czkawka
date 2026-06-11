@@ -63,10 +63,13 @@ fn setup_android_paths(android_app: &slint::android::AndroidApp) {
 #[cfg(target_os = "android")]
 #[unsafe(no_mangle)]
 fn android_main(android_app: slint::android::AndroidApp) {
-    android_logger::init_once(android_logger::Config::default().with_max_level(log::LevelFilter::Debug).with_tag("cedinia"));
+    // DATA_DIR must be set before setup_logger_cache so the file logger can
+    // resolve the cache folder; setup_logger_cache then installs the logger
+    // that fans out to BOTH logcat and cedinia.log.
     setup_android_paths(&android_app);
     crate::app::setup_logger_cache();
     log::info!("android_main: started");
+    asan_smoketest_if_requested();
     let scale = android_app.config().density().unwrap_or(160) as f32 / 160.0;
     log::info!("android_main: display scale={:.2}", scale);
     log::info!("android_main: initialising file picker (JNI + DEX)");
@@ -82,4 +85,23 @@ fn android_main(android_app: slint::android::AndroidApp) {
     log::info!("android_main: launching app UI");
     app::run_app_with_insets(inset_bottom_px, scale, android_app);
     log::info!("android_main: app UI returned (exiting)");
+}
+
+// ASan smoke test: only fires when CEDINIA_ASAN_SMOKETEST is set (the asan_wrap.sh
+// exports it for `just android_asan smoke`). Triggers an out-of-bounds heap read,
+// which AddressSanitizer aborts on with a 'heap-buffer-overflow' report - a
+// non-instrumented build would not flag it, so seeing that report in logcat
+// proves ASan is actually active in the build. Harmless in normal runs.
+#[cfg(target_os = "android")]
+fn asan_smoketest_if_requested() {
+    if std::env::var_os("CEDINIA_ASAN_SMOKETEST").is_none() {
+        return;
+    }
+    log::error!("ASAN SMOKETEST: triggering a deliberate heap-buffer-overflow now");
+    let v: Vec<u8> = vec![0xAB; 4];
+    let ptr = v.as_ptr();
+    let offset = std::hint::black_box(64usize);
+    let byte = unsafe { std::ptr::read_volatile(ptr.add(offset)) };
+    std::hint::black_box(byte);
+    log::error!("ASAN SMOKETEST: still alive at byte={byte:#x} - ASan is NOT active in this build");
 }

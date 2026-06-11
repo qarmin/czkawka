@@ -5,7 +5,9 @@ use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 
 use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
 use czkawka_core::common::image::register_image_decoding_hooks;
-use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
+use czkawka_core::common::logger::{filtering_messages, print_version_mode};
+#[cfg(not(target_os = "android"))]
+use czkawka_core::common::logger::setup_logger;
 use slint::{ComponentHandle, Model, ModelRc, SharedString, Timer, TimerMode, VecModel, Weak};
 
 use crate::callbacks::{
@@ -342,7 +344,91 @@ pub(crate) fn setup_logger_cache() {
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("cedinia", "cedinia");
 
+    // Desktop: czkawka_core installs a TermLogger + rotating file WriteLogger.
+    // Android: android_logger owns logcat there, so its init_once would win the
+    // single global `log` slot and the file WriteLogger would silently never
+    // install (cedinia.log stays 0 bytes). Instead we install one logger that
+    // fans out to BOTH logcat and a file, so the export actually has content.
+    #[cfg(not(target_os = "android"))]
     setup_logger(false, "cedinia", filtering_messages);
+    #[cfg(target_os = "android")]
+    setup_android_logger();
+
     print_version_mode("Cedinia");
     print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
+}
+
+#[cfg(target_os = "android")]
+struct DualLogger {
+    android: android_logger::AndroidLogger,
+    file: std::sync::Mutex<Option<std::fs::File>>,
+    level: log::LevelFilter,
+}
+
+#[cfg(target_os = "android")]
+impl log::Log for DualLogger {
+    fn enabled(&self, metadata: &log::Metadata) -> bool {
+        metadata.level() <= self.level
+    }
+
+    fn log(&self, record: &log::Record) {
+        // logcat keeps its full output (AndroidLogger applies its own level).
+        self.android.log(record);
+
+        // The file mirrors the desktop filter so the exported log stays on-topic.
+        if !self.enabled(record.metadata()) || !filtering_messages(record) {
+            return;
+        }
+        if let Ok(mut guard) = self.file.lock()
+            && let Some(f) = guard.as_mut()
+        {
+            use std::io::Write;
+            let ts = chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
+            let _ = writeln!(f, "{ts} {:<5} [{}] {}", record.level(), record.target(), record.args());
+        }
+    }
+
+    fn flush(&self) {
+        self.android.flush();
+        if let Ok(mut guard) = self.file.lock()
+            && let Some(f) = guard.as_mut()
+        {
+            use std::io::Write;
+            let _ = f.flush();
+        }
+    }
+}
+
+#[cfg(target_os = "android")]
+fn setup_android_logger() {
+    let android = android_logger::AndroidLogger::new(android_logger::Config::default().with_max_level(log::LevelFilter::Debug).with_tag("cedinia"));
+
+    let file = czkawka_core::common::config_cache_path::get_config_cache_path().and_then(|p| {
+        let path = p.cache_folder.join("cedinia.log");
+        // Bound growth across launches: start a fresh file once it passes 50 MiB.
+        let truncate = std::fs::metadata(&path).map_or(false, |m| m.len() > 50 * 1024 * 1024);
+        let mut opts = std::fs::OpenOptions::new();
+        opts.create(true);
+        if truncate {
+            opts.write(true).truncate(true);
+        } else {
+            opts.append(true);
+        }
+        opts.open(&path).ok()
+    });
+
+    let logger = DualLogger {
+        android,
+        file: std::sync::Mutex::new(file),
+        level: log::LevelFilter::Debug,
+    };
+    if log::set_boxed_logger(Box::new(logger)).is_ok() {
+        log::set_max_level(log::LevelFilter::Debug);
+    }
+
+    // Route panics into the logger (and thus the file) - log_panics is not a
+    // direct dependency here, so a minimal hook does the job.
+    std::panic::set_hook(Box::new(|info| {
+        log::error!("PANIC: {info}");
+    }));
 }

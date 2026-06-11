@@ -14,13 +14,19 @@ permissions, system insets, and no video tools (FFmpeg unavailable on Android).
 ```rust
 #[unsafe(no_mangle)]
 fn android_main(android_app: AndroidApp) {
-    android_logger::init_once(…);        // Log to logcat
-    setup_android_paths(&android_app);   // JNI: get /data and /cache paths
+    setup_android_paths(&android_app);   // JNI: get /data and /cache paths (sets DATA_DIR)
+    app::setup_logger_cache();           // installs DualLogger: logcat + cedinia.log file
     file_picker_android::init(&android_app); // Load DEX + init JNI
     slint::android::init(android_app.clone()).expect(…);
     app::run_app_with_insets(inset_bottom_px, scale, android_app);
 }
 ```
+
+Logging: on Android `android_logger` would grab the single global `log` slot, so
+czkawka_core's file `WriteLogger` never installs (cedinia.log stays 0 bytes).
+`app.rs::setup_android_logger` installs a `DualLogger` fanning out to BOTH the
+`AndroidLogger` (logcat) and an appended `cedinia.log` in the cache folder, so
+log export has real content. Desktop keeps `czkawka_core::setup_logger`.
 
 **Desktop** (`src/app.rs`):
 ```rust

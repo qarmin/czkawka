@@ -265,27 +265,53 @@ fn downloads_dir() -> Option<PathBuf> {
     }
 }
 
-fn export_logs_to_downloads() -> std::io::Result<PathBuf> {
-    let files = collect_log_files();
-    if files.is_empty() {
-        return Err(std::io::Error::new(std::io::ErrorKind::NotFound, "no log files found"));
+// On Android the file logger never installs: android_logger grabs the global
+// `log` slot in android_main before czkawka_core's WriteLogger can, so cedinia.log
+// stays empty and the real log sink is logcat. A non-privileged app's logcat is
+// filtered by logd to its own UID, so this dumps exactly our process's lines.
+#[cfg(target_os = "android")]
+fn dump_logcat(dest: &Path) -> bool {
+    let Ok(output) = std::process::Command::new("/system/bin/logcat").args(["-d", "-v", "threadtime"]).output() else {
+        return false;
+    };
+    if output.stdout.is_empty() {
+        return false;
     }
+    std::fs::write(dest, &output.stdout).is_ok()
+}
+
+fn export_logs_to_downloads() -> std::io::Result<PathBuf> {
+    // Flush any buffered terminal/file sinks so the freshest lines are on disk.
+    log::logger().flush();
+
     let downloads = downloads_dir().ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "no downloads directory"))?;
     let dest = downloads.join("cedinia_logs");
     std::fs::create_dir_all(&dest)?;
 
-    let mut copied = 0;
-    for f in &files {
-        if let Some(name) = f.file_name() {
-            if std::fs::copy(f, dest.join(name)).is_ok() {
-                copied += 1;
-            }
+    let mut exported = 0;
+
+    // Persistent log files (cedinia.log + rotations on desktop; on Android the
+    // DualLogger writes cedinia.log too).
+    for f in collect_log_files() {
+        if std::fs::metadata(&f).map_or(true, |m| m.len() == 0) {
+            continue;
+        }
+        if let Some(name) = f.file_name()
+            && std::fs::copy(&f, dest.join(name)).is_ok()
+        {
+            exported += 1;
         }
     }
-    if copied == 0 {
-        return Err(std::io::Error::new(std::io::ErrorKind::Other, "no log file could be copied"));
+
+    #[cfg(target_os = "android")]
+    if dump_logcat(&dest.join("cedinia-logcat.txt")) {
+        exported += 1;
     }
-    log::info!("export_logs: copied {copied} log file(s) to \"{}\"", dest.to_string_lossy());
+
+    if exported == 0 {
+        return Err(std::io::Error::new(std::io::ErrorKind::NotFound, "no log content to export"));
+    }
+    log::info!("export_logs: exported {exported} log file(s) to \"{}\"", dest.to_string_lossy());
     Ok(dest)
 }
 

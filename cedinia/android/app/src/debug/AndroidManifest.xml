@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only overlay (merged only into assembleDebug).
+     wrap.sh-based AddressSanitizer needs the native libs unpacked onto disk so
+     that wrap.sh can LD_PRELOAD the ASan runtime from its own directory; modern
+     AGP defaults extractNativeLibs to false, so force it on for debug builds.
+     Release/AAB is untouched. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
+    <application
+        android:extractNativeLibs="true"
+        tools:replace="android:extractNativeLibs" />
+</manifest>
