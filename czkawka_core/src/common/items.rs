@@ -18,6 +18,13 @@ pub const DEFAULT_EXCLUDED_ITEMS: &str = "*/.git/*,*/node_modules/*,*/lost+found
 #[cfg(not(target_family = "unix"))]
 pub const DEFAULT_EXCLUDED_ITEMS: &str = "*\\.git\\*,*\\node_modules\\*,*\\lost+found\\*,*:\\windows\\*,*:\\$RECYCLE.BIN\\*,*:\\$SysReset\\*,*:\\System Volume Information\\*,*:\\OneDriveTemp\\*,*:\\hiberfil.sys,*:\\pagefile.sys,*:\\swapfile.sys,*:\\Users\\*\\AppData";
 
+#[cfg(all(target_family = "unix", target_os = "macos"))]
+pub const TRASH_EXCLUDED_ITEMS: &str = "*/Trash/*,*/.Trash-*/*";
+#[cfg(all(target_family = "unix", not(target_os = "macos")))]
+pub const TRASH_EXCLUDED_ITEMS: &str = "*/Trash/*,*/.Trash-*/*";
+#[cfg(not(target_family = "unix"))]
+pub const TRASH_EXCLUDED_ITEMS: &str = "*:\\$RECYCLE.BIN\\*";
+
 #[derive(Debug, Clone, Default)]
 pub struct ExcludedItems {
     expressions: Vec<String>,
@@ -62,17 +69,11 @@ impl ExcludedItems {
             let expression = expression.replace("/", "\\");
 
             if expression == "DEFAULT" {
-                for item in DEFAULT_EXCLUDED_ITEMS.split(',') {
-                    let item = item.trim();
-                    if !item.is_empty() {
-                        #[cfg(not(target_family = "windows"))]
-                        checked_expressions.push(item.to_string());
-                        // On Windows, scanned paths are lowercased before matching, so patterns
-                        // must be lowercased too - including those from the DEFAULT set.
-                        #[cfg(target_family = "windows")]
-                        checked_expressions.push(item.to_ascii_lowercase());
-                    }
-                }
+                push_preset_items(&mut checked_expressions, DEFAULT_EXCLUDED_ITEMS);
+                continue;
+            }
+            if expression == "$TRASH" {
+                push_preset_items(&mut checked_expressions, TRASH_EXCLUDED_ITEMS);
                 continue;
             }
             if !expression.contains('*') {
@@ -122,6 +123,20 @@ impl ExcludedItems {
     }
 }
 
+fn push_preset_items(checked_expressions: &mut Vec<String>, preset: &str) {
+    for item in preset.split(',') {
+        let item = item.trim();
+        if !item.is_empty() {
+            #[cfg(not(target_family = "windows"))]
+            checked_expressions.push(item.to_string());
+            // On Windows, scanned paths are lowercased before matching, so patterns
+            // must be lowercased too - including those from the preset sets.
+            #[cfg(target_family = "windows")]
+            checked_expressions.push(item.to_ascii_lowercase());
+        }
+    }
+}
+
 pub fn new_excluded_item(expression: &str) -> SingleExcludedItem {
     let expression = expression.trim().to_string();
     let expression_splits: Vec<String> = expression.split('*').filter_map(|e| if e.is_empty() { None } else { Some(e.to_string()) }).collect();
@@ -160,6 +175,15 @@ mod tests {
         assert_eq!(items.expressions.len(), expected);
         assert!(items.expressions.iter().any(|e| e.contains(".git")));
         assert!(items.expressions.iter().any(|e| e.contains("node_modules")));
+    }
+
+    #[test]
+    fn test_set_excluded_items_with_trash() {
+        let mut items = ExcludedItems::new();
+        let msgs = items.set_excluded_items(vec!["$TRASH".to_string()]);
+        assert!(msgs.warnings.is_empty());
+        let expected = TRASH_EXCLUDED_ITEMS.split(',').filter(|s| !s.trim().is_empty()).count();
+        assert_eq!(items.expressions.len(), expected);
     }
 
     #[test]

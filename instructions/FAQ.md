@@ -33,14 +33,12 @@ It is derived from hundreds of real user reports and is updated alongside the pr
 17. [CLI Usage](#cli-usage)
 18. [Security - Antivirus False Positives](#security---antivirus-false-positives)
 19. [Common Error Messages](#common-error-messages)
-20. [Unsupported / Not Planned Features](#unsupported--not-planned-features)
-21. [Portable / Custom Data Paths](#portable--custom-data-paths)
-22. [Hardlink Behavior & Safety](#hardlink-behavior--safety)
-23. [Symlink Handling](#symlink-handling)
-24. [Scanning Phones / Android Devices](#scanning-phones--android-devices)
-25. [Saving & Loading Scan Results](#saving--loading-scan-results)
-26. [How Duplicate Detection Works Internally](#how-duplicate-detection-works-internally)
-27. [Windows-Specific Issues](#windows-specific-issues)
+20. [Portable / Custom Data Paths](#portable--custom-data-paths)
+21. [Hardlink Behavior & Safety](#hardlink-behavior--safety)
+22. [Symlink Handling](#symlink-handling)
+23. [Scanning Phones / Android Devices](#scanning-phones--android-devices)
+24. [Saving & Loading Scan Results](#saving--loading-scan-results)
+25. [How Duplicate Detection Works Internally](#how-duplicate-detection-works-internally)
 
 ---
 
@@ -182,7 +180,7 @@ The default `linux_krokiet_*` binary only ships the femtovg and software rendere
 
 ### Q: Which Windows GTK GUI variant is provided?
 
-Only one GTK build is shipped: `windows_czkawka_gui_gtk_412.zip` (GTK 4.12). The ZIP also contains `czkawka_cli.exe` and small `.bat` launchers that set `GSK_RENDERER` (cairo / opengl / vulkan) for the GTK GUI. The GTK GUI is deprecated - prefer Krokiet, which needs no GTK at all.
+Only one GTK build is shipped: `windows_czkawka_gui_gtk_412.zip` (GTK 4.12). The ZIP also contains `czkawka_cli.exe` and small `.bat` launchers that set `GSK_RENDERER` (cairo / opengl / vulkan) for the GTK GUI. If the GTK GUI renders a black window or fails to start with the default renderer, run those launchers instead of the `.exe` directly until one works (cairo is the safest software fallback). The GTK GUI is deprecated - prefer Krokiet, which needs no GTK at all.
 
 ---
 
@@ -232,14 +230,6 @@ This is usually a GPU driver or rendering backend issue. Try, in order:
 2. Force the software renderer: `SLINT_BACKEND=software krokiet` (Linux/macOS), or set `SLINT_BACKEND=software` in Windows system environment variables and restart. On machines without a GPU (VMs, headless servers) this is often the only option.
 3. Update your GPU drivers.
 
-### Q: Krokiet on Windows says it is blocked by antivirus / Windows Defender
-
-This is a false positive. The binaries are compiled from source via GitHub Actions CI, and the SHA256 checksums can be verified against the CI build artifacts. The detection is typically caused by Link-Time Optimization (LTO), which produces binary patterns similar to obfuscated code.
-
-You can verify the binary on [VirusTotal](https://www.virustotal.com/) - the overwhelming majority of engines report it as clean, and any detections are from obscure engines.
-
-If Defender blocks the download, you can try a different Krokiet build or compile from source. You can also report the false positive to Microsoft via the Defender Feedback portal.
-
 ---
 
 ## Cache & Config Files
@@ -271,10 +261,6 @@ It removes cache entries for files that no longer exist on disk. This keeps the 
 ### Q: Should I delete the cache to fix problems?
 
 If you suspect cache corruption (e.g., scan results look wrong, or the app crashes when loading cache), you can delete the cache files in `~/.cache/czkawka/`. The next scan will rebuild the cache from scratch, which will be slower but may fix your issues.
-
-### Q: Can I run two instances scanning with the same tool at the same time?
-
-No - avoid it. Each tool (duplicates, similar images, etc.) uses a separate cache file. Running two instances of the same tool simultaneously can corrupt that tool's cache. Running different tools in parallel is safe.
 
 ### Q: What is the difference between the prehash cache file and the hash cache file?
 
@@ -308,11 +294,25 @@ A large share of users scan whole drives looking for duplicates, and at that sca
 
 ### Q: Duplicates mode found files in the Recycle Bin / Trash
 
-By default this should not happen: the **default Excluded Items** already cover the trash on every platform - `*:\$RECYCLE.BIN\*` (and other Windows system dirs) on Windows, and `*/Trash/*` + `*/.Trash-*/*` on Linux/macOS. So out of the box, scanning even a whole drive root (`C:\` or `/`) skips the Recycle Bin / Trash.
+**In the GUI** this should not happen by default: the **default Excluded Items** already cover the trash on every platform - `*:\$RECYCLE.BIN\*` (and other Windows system dirs) on Windows, and `*/Trash/*` + `*/.Trash-*/*` on Linux/macOS. So out of the box, scanning even a whole drive root (`C:\` or `/`) skips the Recycle Bin / Trash.
 
-If trash files still show up, your **Excluded Items** field was probably cleared or edited and lost those defaults. Restore them (or reset excluded items to the default) - for example add back:
+If trash files still show up in the GUI, your **Excluded Items** field was probably cleared or edited and lost those defaults. Restore them (or reset excluded items to the default) - for example add back:
 - Windows: `*:\$RECYCLE.BIN\*`
 - Linux/macOS: `*/Trash/*`, `*/.Trash-*/*`
+
+**In the CLI** these defaults are *not* applied automatically - you must add the exclusions yourself with `-E` / `--excluded-items`. To make this easy there are two macros that expand to the same patterns the GUI uses:
+- `$TRASH` - just the OS trash / recycle bin (`*/Trash/*,*/.Trash-*/*` on Linux/macOS, `*:\$RECYCLE.BIN\*` on Windows).
+- `DEFAULT` - the full set of default GUI exclusions (trash plus `.git`, `node_modules`, caches, Windows system dirs, etc.).
+
+```bash
+# Skip the trash while scanning a whole drive:
+czkawka_cli dup -d / -E '$TRASH'
+
+# Or apply the complete GUI default exclusion set:
+czkawka_cli dup -d / -E DEFAULT
+```
+
+(Quote `$TRASH` in shells like bash/zsh so it is not treated as a variable.)
 
 ### Q: The scan found far fewer files than I expected during the "full hash" stage - is something wrong?
 
@@ -379,7 +379,7 @@ The settings control the perceptual hashing step in Similar Images:
 
 Practical guidance: for finding re-encoded/resized copies of the same image, start with Mean hash + size 16 and a "max difference" of 8-10. For stricter matching (fewer false positives), use Gradient/Double Gradient with size 32 and lower the max difference to 4-5.
 
-### Q: HEIC images are not found / "The image format could not be determined" error for HEIC files
+### Q: HEIC images are not found
 
 Ensure you are using a build that includes the `heif` feature. The plain `linux_krokiet_all_backends_x86_64` binary does **not** include HEIF/AVIF support. Use a `heif_raw_avif` variant (e.g. `linux_krokiet_heif_raw_avif_x86_64`) or compile with the appropriate feature flags:
 
@@ -393,7 +393,7 @@ cargo run --bin krokiet --features "winit_femtovg,winit_software,heif,libavif,li
 
 ### Q: How does Similar Videos detect duplicate videos?
 
-Similar Videos works by sampling frames from the video and computing visual perceptual hashes, then comparing those hash sequences across short temporal "windows". The matching engine is provided by the project's own `similario_core` crate (the tool no longer uses the older `vid_dup_finder_lib`). `ffmpeg`/`ffprobe` must be installed for frame extraction.
+Similar Videos works by sampling frames from the video and computing visual perceptual hashes, then comparing those hash sequences across short temporal "windows". The matching engine is provided by the project's own `similario_core` crate. `ffmpeg`/`ffprobe` must be installed for frame extraction.
 
 ### Q: What are the main tuning settings in Similar Videos?
 
@@ -415,15 +415,20 @@ Similar Videos compares videos by sampling frames and computing visual hashes. F
 - Videos share common intro/outro sequences.
 - Videos have unusual encoding (e.g., very low resolution, corrupt files).
 
+If instead the scan finds **nothing** (real duplicates are missed), the cause is usually that the sampled span does not capture enough of the video. Several settings feed into this, so check them together:
+- **Scan duration** too short - too small a span is sampled to build a reliable signature; increase it.
+- **Window count** too low - fewer temporal windows means less of the video is compared; raise it.
+- **Skip forward amount** too large - it can seek past the only content two clips share.
+- **Min matching windows fraction** too high, or **Duration tolerance %** too low - both can reject genuine matches before they are compared.
+- The tolerance / **Max difference** is too low (stricter) - raise it.
+
 The algorithm is fundamentally heuristic and works best for finding re-encoded copies of the same source material, not for finding videos that happen to have a few similar-looking scenes.
-
-### Q: Similar Videos popup window / command prompt appears briefly on Windows
-
-In older versions, ffmpeg was launched as a visible process on Windows. This is fixed in current releases; ffmpeg now runs without a visible console window.
 
 ### Q: Similar Videos cache - is it reused across scans?
 
 Yes, the video hash cache is stored in `~/.cache/czkawka/` and is reused on subsequent scans. Each video is processed once; subsequent scans load the pre-computed hash from cache.
+
+Note that the cache is keyed by the video **processing** parameters (the settings that affect how each video is sampled and hashed - scan duration, window count, skip forward amount, etc.). Changing any of these makes the app use a **different** cache file, because the computed hashes would otherwise differ. So after changing a processing parameter you have to rescan, and that scan re-processes the videos from scratch. Parameters that only affect how the already-computed hashes are **grouped** into the similar-videos list (e.g. max difference / min matching windows) do not invalidate the cache.
 
 ---
 
@@ -433,7 +438,7 @@ Yes, the video hash cache is stored in `~/.cache/czkawka/` and is reused on subs
 
 A reference folder is a directory added to the scan but **protected from deletion or modification**. Files in reference folders appear in the results only for comparison - they show which "keep" candidate they matched against. Files outside reference folders can be selected and deleted normally.
 
-Typical use case: add your main archive as reference, add a downloads folder as a regular included path, then scan. Only files in the downloads folder will be selectable for deletion; the archive is always preserved.
+Typical use case: add your main, well-organized collection folder (e.g. your curated photo or music library) as a reference, add a downloads folder as a regular included path, then scan. Only files in the downloads folder will be selectable for deletion; the files in your main collection are always preserved.
 
 ### Q: How do I delete duplicates from one folder while keeping the copy in another folder?
 
@@ -442,10 +447,6 @@ Use Reference Folders. Add the folder you want to protect as a reference folder 
 ### Q: With a reference folder set, will groups that have duplicates only within the non-reference folder still appear?
 
 No. When a reference folder is set, only groups that contain at least one file from the reference folder are shown. Groups that are entirely within non-reference directories are hidden. This is intentional: the reference folder marks "originals", so a group is only meaningful when at least one original is present.
-
-### Q: I set a reference folder but files inside it are still selectable / deleted
-
-This is a known issue in some older versions of the GTK GUI (particularly when using the MSYS2 Windows build). Upgrade to the latest Krokiet, where reference folder protection is implemented correctly.
 
 ### Q: How do I use reference folders in the CLI?
 
@@ -457,10 +458,6 @@ czkawka_cli dup -d /path/to/search -r /path/to/ref1 -r /path/to/ref2 -D AEO
 
 Using comma- or semicolon-separated values in a single `-r` flag does **not** work. Each reference directory must be a separate `-r` flag.
 
-### Q: CLI with reference folder and `-D` (delete) does nothing - 0 files deleted
-
-When all duplicate files have identical timestamps and sizes, some delete modes (AEN, AEO) cannot determine which is "newest" or "oldest" and skip deletion. Use a delete mode that does not rely on timestamps, or check that the reference folder logic is correctly identifying which copy to preserve. This is a known limitation tracked in issue #1815.
-
 ---
 
 ## Deleting, Moving, Hardlinking Files
@@ -470,7 +467,6 @@ When all duplicate files have identical timestamps and sizes, some delete modes 
 Common causes:
 1. **Trash on Samba/NFS shares**: Krokiet offers two separate actions - a permanent **Delete** button and a **Move to trash** button (and the CLI permanently deletes by default, with `-y`/`--move-to-trash` opting into trash). On network shares (SMB, NFS) the move-to-trash path can fail because the remote filesystem has no usable trash location. **Fix**: use the permanent **Delete** button (or omit `-y` in the CLI) instead of moving to trash.
 2. **Read-only files/folders**: the file itself may be writable but its parent directory is read-only. Check permissions on the containing folder.
-3. **Flatpak sandbox**: the Flatpak version has restricted filesystem access. Grant full filesystem access in Flatpak permissions, or use the pre-built native binary.
 
 ### Q: Move is slow - it copies the whole file instead of just renaming
 
@@ -482,7 +478,7 @@ This is a known behavior of the Flatpak sandbox. Files moved to trash inside a F
 
 ### Q: How does Hardlink work? What does it actually do to my files?
 
-Hardlink replaces selected duplicate files with hard links pointing to one retained copy. After hardlinking, all files share the same inode - they appear as separate filenames but consume disk space only once. **Note**: hardlinking across different filesystems or partitions is not possible; the operation silently skips such pairs.
+Hardlink replaces selected duplicate files with hard links pointing to one retained copy. After hardlinking, all files share the same inode - they appear as separate filenames but consume disk space only once. **Note**: hardlinking across different filesystems or partitions is not possible. Such a pair is not silently skipped - the operation fails for it and an error is reported (e.g. "Failed to hardlink ...: Invalid cross-device link"); the original file is left untouched, so nothing is lost.
 
 ### Q: When hardlinking multiple groups at once, do files from different groups get linked together?
 
@@ -529,34 +525,27 @@ Or for `.flac` files:
 
 On Windows, use a plain path prefix without a trailing backslash or wildcard. For example, enter `C:\Users\username\Desktop` (not `C:\Users\username\Desktop\*`). The filter matches any file whose path contains the entered string as a substring.
 
-### Q: "Select Biggest/Smallest Resolution" options are inverted
-
-This was a bug in v11.0.1, fixed in a subsequent release. Update to the latest version.
-
----
-
 ## Bad Extensions Tool
 
 ### Q: Bad Extensions says my file has the wrong extension. How do I rename it?
 
-In **Krokiet** (v11.0+): select the files in the results list and use the **Rename** button (or right-click > Rename). The suggested new extension is shown in the "Extra" column (`current_ext -> correct_ext`).
+In **Krokiet**: select the files in the results list and use the **Rename** button (or right-click > Rename). The suggested new extension is shown in the "Extra" column (`current_ext -> correct_ext`).
 
-In the **CLI**: the CLI does not rename files automatically. Export results to a file (`-f results.txt`), then process the output with a script. Example with `sed`:
+In the **CLI**: pass `-F` / `--fix-extensions` to `bad-ext` and the matched files are renamed automatically to use the detected correct extension:
 
 ```bash
-czkawka_cli bad-ext -d /path/to/scan -f results.txt
-# Parse results.txt and generate mv commands
+czkawka_cli bad-ext -d /path/to/scan -F
 ```
 
 In the **GTK GUI**: renaming from the GUI is not supported. Export results and rename manually.
 
-### Q: Bad Extensions incorrectly flags `.pub` files as `.msi`, or other obvious mistakes
+### Q: Bad Extensions incorrectly flags a file's extension, or makes other obvious mistakes
 
-The extension detection uses file magic bytes (the `infer` crate). Some file types share similar signatures or the library's database is incomplete. Known issues:
-- Old Microsoft Office formats (`.doc`, `.xls`, `.ppt`) are compound binary files that are hard to distinguish from each other.
-- Some file types (`.pub`, `.mdb`, etc.) may not be in the library's database.
+The extension detection uses file magic bytes (the `infer` crate). Many file formats share the same leading bytes, so there is no unambiguous way to pick a single "correct" extension from the content alone. Examples:
+- ZIP-based formats (`.zip`, `.docx`, `.xlsx`, `.pptx`, `.jar`, `.apk`, `.epub`) all start with the same ZIP signature.
+- Old Microsoft Office formats (`.doc`, `.xls`, `.ppt`) are compound binary files that share the same OLE container header.
 
-These are upstream library limitations. You can exclude specific extensions from the scan if needed.
+In those cases the tool can only report the family it detects, not which specific extension is "right". Some less common formats may also simply be missing from the library's database. You can exclude specific extensions from the scan if needed.
 
 ---
 
@@ -572,25 +561,19 @@ Use the **Excluded Items** field (not Excluded Directories). Add a wildcard patt
 
 The excluded items patterns use `*` as a wildcard and match against the full path of each file/directory.
 
-### Q: Czkawka does not scan my external USB drive
-
-If you use the Snap version: Snap has strict filesystem sandboxing. Run:
-```bash
-sudo snap connect czkawka:removable-media
-```
-to grant access to removable media. However, the Snap is no longer maintained and is outdated - prefer the pre-built binary.
-
-If you use the Flatpak version: grant full filesystem access in Flatpak permissions, or use "Other Files" to add the mount point manually in the directory picker.
-
-For the native binary: if the drive is mounted under `/run/media/` (common on Fedora/openSUSE), note that `/run` is in the default excluded items list. Remove `/run` from excluded items or add the specific mount path to the included directories.
-
 ### Q: Cannot scan a Windows network share (SMB path) with Krokiet on Windows
 
 On Windows, UNC paths like `\\server\share\` may not be shown in the file picker dialog. Use the "Manual add" text input in the directories panel to type or paste the UNC path directly.
 
+If that still gives you trouble, it is worth mapping the share to a drive letter (e.g. `net use Z: \\server\share` or Explorer > "Map network drive"), then scan the resulting `Z:\` path instead - a regular drive letter behaves more predictably than a raw UNC path.
+
 ### Q: Czkawka / Krokiet cannot access `C:\System Volume Information` - Access is denied
 
 This is expected. System directories and volumes reserved by Windows are inaccessible to normal user processes. Czkawka logs access errors but continues scanning the rest of the directory tree. These errors are harmless.
+
+### Q: Can I use drag and drop to add directories in Krokiet?
+
+Not currently. Drag and drop to add directories is not implemented, because Slint (the UI framework Krokiet uses) does not yet expose drag-and-drop support. Once Slint adds it, it can be implemented in Krokiet. For now, use the "Add" button or type/paste the path directly in the text field.
 
 ---
 
@@ -598,17 +581,11 @@ This is expected. System directories and volumes reserved by Windows are inacces
 
 ### Q: The Snap package is outdated / has permission problems
 
-The author **used to publish a Snap but stopped maintaining it**, so it is stuck on an old version and has known permission issues for external drives and NFS mounts. Use the **pre-built binary** from the GitHub releases page instead (recommended).
+I used to publish a Snap but I no longer maintain it - I dropped Snap builds in v9.0, so the last Snap is stuck at **v8.0** and it has known permission issues for external drives and NFS mounts. Use the **pre-built binary** from the GitHub releases page instead (recommended).
 
 ### Q: The Flatpak version is out of date
 
-Yes - the Flathub package (GTK GUI, `com.github.qarmin.czkawka`) is **no longer maintained by the author and is frozen at v10.0**, so it is many versions behind. It may be adopted by a new maintainer in the future. For the latest version, use the pre-built binary from the GitHub releases page.
-
-### Q: How do I use the CLI via Flatpak?
-
-The Flatpak package contains only the GUI. Flathub does not accept CLI-only applications. To use the CLI:
-- Download the CLI binary from the GitHub releases page.
-- Or install via your system's native package manager.
+Yes - I no longer maintain the Flathub package (GTK GUI, `com.github.qarmin.czkawka`); it is **frozen at v10.0**, so it is many versions behind. It may be adopted by a new maintainer in the future. For the latest version, use the pre-built binary from the GitHub releases page.
 
 ---
 
@@ -622,34 +599,15 @@ Tips:
 - Enable the **cache** (enabled by default). The second scan of the same files is much faster.
 - Enable **prehash** (enabled by default in Krokiet). This adds a fast partial-hash stage that eliminates most non-duplicates before the full hash.
 - Limit the scan to specific subdirectories rather than scanning an entire multi-TB drive in one run.
-
-### Q: Scanning becomes very slow or the system becomes unresponsive when scanning millions of files
-
-When scanning a very large number of files (millions), the file collection phase can take many minutes, especially on HDDs. The app may appear stuck. You can run the CLI with `RUST_LOG=debug` to see what stage it is in:
-
-```bash
-RUST_LOG=debug czkawka_cli dup -d /path
-```
-
-The progress line shows the current count in the format `Collecting files: N`. If the count is still growing, the app is working normally.
-
-For scanning 100TB+ datasets, expect the initial scan to take several hours. Subsequent scans are faster because the cache holds pre-computed hashes.
-
-### Q: The progress bar shows ~100% but the scan is still running for a long time
-
-The progress is size-based, but a single very large file (e.g. a big video) still takes a disproportionate amount of time to hash/decode, so the bar can sit at the end while that last file is processed. This is not a bug. Because per-file work runs as one uninterruptible task, Stop may not react until it finishes - see ["The scan seems to freeze near the end"](#q-the-scan-seems-to-freeze-near-the-end-and-stopcancel-does-nothing) above for the details.
+- It is possible to limit how many threads read from disk at once, but in practice this currently helps little: file data is already read in fairly large chunks (1-2 MB at a time), so the threads are not generating the kind of tiny random reads that throttling the thread count would smooth out.
 
 ### Q: The UI becomes very slow / laggy after a scan with thousands of groups
 
-This is a known performance issue with the Slint log/output panel. When there are 5000+ result groups, the log accumulates a large amount of text and rendering it becomes slow. As a workaround, collapse or hide the log panel at the bottom of the window. This is a Slint framework issue being tracked upstream.
+In Krokiet itself this should not happen - the results list is virtualized and Krokiet can render millions of entries without any problem. The one place that can genuinely slow down is the **bottom text/output panel**: when it accumulates a very large amount of text, rendering that text gets slow. That is a Slint text-rendering bug, not a problem with the result list. As a workaround, collapse or hide the bottom panel.
 
 ### Q: CPU usage rises sharply during a large Similar Images or Similar Videos scan - is this expected?
 
-Yes. The first phase (collecting files, computing sizes) uses only a few threads. The hashing phase is CPU-intensive and parallelized across all available cores, which causes CPU usage to spike. This is normal and desirable behavior.
-
-### Q: Can Czkawka use GPU acceleration for hashing?
-
-No. GPU hashing is not implemented and is unlikely to be added - disk I/O is typically the bottleneck, not CPU hash computation. Even with a GPU, the bottleneck would remain the disk read speed.
+Yes. Different stages stress different resources: some steps are heavily CPU-bound (the perceptual-hashing / decoding work, parallelized across all cores, which makes CPU usage spike), while others are mostly disk-bound (reading file contents). This is normal. If you want to keep CPU usage down, you can limit the number of threads (CLI `-T <N>` / `--thread-number`, or the thread setting in the GUI).
 
 ---
 
@@ -665,14 +623,6 @@ czkawka_cli dup -d /path/to/dir1 -d /path/to/dir2
 
 # Wrong (will fail):
 czkawka_cli dup -d /path/to/dir1 /path/to/dir2
-```
-
-### Q: How do I use multiple reference directories with the CLI?
-
-Repeat the `-r` / `--reference-directories` flag:
-
-```bash
-czkawka_cli dup -d /data -r /archive1 -r /archive2
 ```
 
 ### Q: How do I delete duplicates via CLI?
@@ -703,7 +653,7 @@ czkawka_cli dup -d /path -p results_pretty.json  # pretty JSON
 
 ### Q: Does the CLI have a progress display?
 
-The CLI does not show a real-time progress bar by default (no spinner/percentage in current releases). Run with `RUST_LOG=debug` to see verbose progress information including the current scanning stage and file counts.
+The CLI does not show a real-time progress bar (no spinner/percentage in current releases). It prints the high-level stage transitions as the scan proceeds, but there is no live per-file progress counter.
 
 ### Q: How do I suppress CLI output / run silently?
 
@@ -717,13 +667,22 @@ Use `-T <N>` / `--thread-number <N>`. Setting `0` (the default) uses all availab
 
 Use `-P <ext>` / `--excluded-extensions <ext>` to exclude specific extensions. Use `-x <ext>` / `--allowed-extensions <ext>` to scan only specific extensions. The `--allowed-extensions` flag also accepts macros: `IMAGE`, `VIDEO`, `MUSIC`, `TEXT`.
 
+### Q: How do I exclude paths/items in the CLI, and does it have the same trash defaults as the GUI?
+
+Use `-E <pattern>` / `--excluded-items <pattern>` with wildcards (e.g. `-E '*/temp*'`). Unlike the GUI, the CLI does **not** apply any default exclusions automatically. Two macros expand to the same patterns the GUI uses by default:
+- `$TRASH` - the OS trash / recycle bin only (`*/Trash/*,*/.Trash-*/*` on Linux/macOS, `*:\$RECYCLE.BIN\*` on Windows).
+- `DEFAULT` - the full default GUI exclusion set (trash plus `.git`, `node_modules`, caches, Windows system dirs, etc.).
+
+```bash
+czkawka_cli dup -d / -E '$TRASH'     # skip the trash/recycle bin
+czkawka_cli dup -d / -E DEFAULT      # apply all GUI default exclusions
+```
+
+Quote `$TRASH` so your shell does not expand it as a variable.
+
 ### Q: Is there a dry-run mode in the CLI?
 
 Yes. Add `--dry-run` to preview what would be deleted without actually deleting anything. Note that dry-run output currently goes to the console only and is not written to the result file.
-
-### Q: The CLI Flatpak version - how do I run it?
-
-The Flatpak only contains the GUI. Download the `linux_czkawka_cli_x86_64` binary from the GitHub releases page and run it directly.
 
 ---
 
@@ -749,9 +708,7 @@ If your antivirus continues to flag it, report the file as a false positive to y
 
 This is normal. Czkawka tries to scan all directories under the included path. Some system directories (`.ssh`, `/proc`, `/sys`, `/dev`) are not readable by normal users. These errors are logged and the scan continues. To suppress them, add those directories to the excluded paths.
 
-### Q: "Failed to hash file, reason Too short" (Similar Videos)
-
-The video file is shorter than the minimum duration needed for the similarity algorithm to work (approximately a few seconds). Very short clips are skipped. This is expected behavior.
+If you genuinely need to scan such a location, first check your own permissions on it (ownership and mode), and only as a last resort run the application as administrator / root - though scanning a whole system as root is rarely what you actually want, and it lets the tool act on files a normal user could not.
 
 ### Q: "Error during trash operation" / files not moved to trash
 
@@ -761,33 +718,15 @@ Usually means the trash is on a different filesystem from the file (e.g., the fi
 
 ### Q: "malformed stream: mp3 invalid main_data offset" in Broken Files scan
 
-This message is produced by the audio decoding library when the MP3 header contains a `main_data_begin` value that points outside the bitstream. Many MP3 files contain this "error" due to encoder quirks, and most media players silently tolerate it. The file is still playable. You can ignore this result or choose to keep the file.
+This message comes from the `symphonia` decoding library, which checks the bitstream strictly: it reports that the MP3 header contains a `main_data_begin` value pointing outside the bitstream. `symphonia` is quite pedantic and flags such issues even when they are harmless - many MP3 files carry this "error" because of encoder quirks, and most media players (and likely your own player) decode and play them just fine. The file is still playable; you can ignore this result or keep the file.
 
 ### Q: The app shows ".fuse_hidden..." files as duplicates
 
-These are temporary files created by FUSE-based filesystems (e.g., when a file is opened by another application and then "deleted" - the file is renamed to a hidden name until the last file handle is closed). They are not duplicates in the usual sense. You can exclude them by adding `*/.fuse_hidden*` to the excluded items list.
+These files are created automatically by the operating system / FUSE-based filesystems - this is not something Czkawka or Krokiet does. When a file that is still open in another application is "deleted", FUSE renames it to a hidden `.fuse_hidden...` name and only truly removes it once the last handle is closed. They are not duplicates in the usual sense. You can exclude them by adding `*/.fuse_hidden*` to the excluded items list.
 
 ### Q: Krokiet on macOS shows garbled text in Chinese/Japanese
 
 Krokiet uses bundled fonts and may not include CJK (Chinese/Japanese/Korean) glyphs. This is a known limitation. A workaround is to copy a CJK-capable font file into the directory from which Krokiet is launched, or to set the `SLINT_FONT_PATH` environment variable. This is tracked as a known issue on the project.
-
----
-
-## Unsupported / Not Planned Features
-
-The following are frequently requested but are not planned for implementation:
-
-- **Finding duplicate folders**: finding folders whose contents are identical is not implemented. The tool finds duplicate files.
-- **GPU-accelerated hashing**: disk I/O is the bottleneck, not hash computation.
-- **Pause and resume a scan**: scans cannot be paused mid-way. You can stop and restart; the cache preserves already-computed hashes. On Linux, you can suspend the process with `kill -STOP <PID>` and resume it with `kill -CONT <PID>`.
-- **Scanning inside archives (ZIP, RAR, etc.)**: files inside archives are not scanned. Extract them first.
-- **Apple Photos library support**: the Photos library database format is proprietary and not supported.
-- **Browser / internet access**: the tool has no internet access, no update checks, no telemetry.
-- **Loading saved scan results back into the GUI**: scan results can be exported to TXT and JSON files, but re-importing them into the application is not currently supported. The TXT/JSON formats were designed for external scripting, not for re-loading into the app.
-- **OneDrive / cloud storage without local sync**: Czkawka reads files from the local filesystem. If you add an OneDrive or similar cloud folder, the OS must download each file before Czkawka can hash it. There is no way to scan cloud storage without downloading the files.
-- **Comparing files only within the same folder (not across folders)**: this "same-folder-only" comparison mode is not implemented. The workaround is to add each folder as a separate scan and run it individually.
-- **"Mark as not a duplicate" / ignore list**: there is no persistent ignore list to suppress specific pairs from appearing in future scans. You can work around this by moving files you want to keep together into a subfolder and excluding it, or by using a reference folder.
-- **Scanning files without an extension as images**: Similar Images requires files to have a known image extension. Extensionless files are not scanned even if their content is a valid image.
 
 ---
 
@@ -890,7 +829,7 @@ Yes. Use `-C <filename>` for compact JSON or `-p <filename>` for pretty-printed 
 
 ### Q: Does Czkawka use only hashes, or does it do a full byte-by-byte comparison to confirm duplicates?
 
-By default, Czkawka uses hashes only (size + prehash + full hash pipeline). A full byte-by-byte comparison is not performed. Hash collisions are theoretically possible but extremely unlikely with the default hash algorithm (Blake3). If you require absolute certainty, you would need to use an external tool to verify the matches.
+Czkawka uses hashes only (size + prehash + full hash pipeline) - no byte-by-byte comparison. This is reliable: candidates are first grouped by exact file size, and only files of the same size are ever compared by hash, so the hash space each comparison draws from is tiny. A collision would require two different files of the *identical* size to also produce the same full hash, which in practice never happens with the default Blake3 (a cryptographic hash). A byte-by-byte pass would only confirm what the hashes already establish, while being much slower, so it is intentionally not done.
 
 ### Q: What hash algorithm does the duplicate finder use?
 
@@ -899,37 +838,3 @@ The default hash algorithm is **Blake3** (very fast, cryptographically strong). 
 ### Q: How does the duplicate finder handle files that differ only in name but are otherwise identical?
 
 Two files with different names but identical content (same size and same hash) are reported as duplicates. The filename is not part of the duplicate comparison when using the "Hash" check method. If you want to find duplicates by name only, use the "Name" check method instead.
-
----
-
-## Windows-Specific Issues
-
-### Q: Krokiet fails to delete files with "Access is denied (os error 5)"
-
-The most common cause is that the individual files have the read-only attribute set, even if the parent folder does not. Check and remove the read-only attribute from the files:
-1. Select the files in File Explorer.
-2. Right-click > Properties > uncheck "Read-only".
-
-Another workaround is to move the files to a new folder - the read-only attribute is sometimes reset during the move.
-
-### Q: The GTK GUI shows a black screen on Windows. How do I fix it?
-
-Set the `GSK_RENDERER` environment variable to `cairo` to force the Cairo software renderer. Create a `.bat` file in the same directory as the executable:
-
-```bat
-set GSK_RENDERER=cairo
-start czkawka_gui.exe
-```
-
-Run the `.bat` file instead of the executable directly. Alternatively, switch to Krokiet which does not have this issue.
-
-### Q: The Windows GTK GUI binary (.exe) does nothing when I double-click it
-
-On some Windows systems, the GTK GUI fails silently. Try:
-1. Run from a command prompt to see any error output.
-2. Use the launcher `.bat` files shipped in `windows_czkawka_gui_gtk_412.zip` to try a different `GSK_RENDERER` (cairo / opengl / vulkan).
-3. Switch to Krokiet (e.g. `windows_krokiet_on_linux.exe`), which has no GTK dependency.
-
-### Q: Can I use drag and drop to add directories in Krokiet on Windows?
-
-Drag and drop to add directories to the search list was supported in some older versions but has had regressions. If drag and drop does not work, use the "Add" button or type/paste the path directly in the text field.

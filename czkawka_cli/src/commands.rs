@@ -935,7 +935,7 @@ pub struct CommonCliItems {
         short = 'E',
         long,
         help = "Excluded item(s)",
-        long_help = "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible."
+        long_help = "List of excluded items using wildcards (e.g., */temp*, *.tmp). May be slower than -e, so use -e for directories when possible. Helpful macros are available: DEFAULT (the same default excluded items the GUI uses) and $TRASH (the OS trash / recycle bin, matching the GUI defaults - */Trash/*,*/.Trash-*/* on Linux/macOS, *:\\$RECYCLE.BIN\\* on Windows)."
     )]
     pub excluded_items: Vec<String>,
     #[clap(

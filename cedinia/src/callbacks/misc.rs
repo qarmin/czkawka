@@ -236,6 +236,93 @@ fn open_dir(path: &Path) {
     }
 }
 
+fn collect_log_files() -> Vec<PathBuf> {
+    let Some(ccp) = czkawka_core::common::config_cache_path::get_config_cache_path() else {
+        return Vec::new();
+    };
+    let mut files = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(&ccp.cache_folder) {
+        for entry in entries.flatten() {
+            // Picks up "cedinia.log" plus the file_rotate suffixes ("cedinia.log.<timestamp>").
+            if entry.file_name().to_string_lossy().starts_with("cedinia.log") {
+                files.push(entry.path());
+            }
+        }
+    }
+    files
+}
+
+fn downloads_dir() -> Option<PathBuf> {
+    #[cfg(target_os = "android")]
+    {
+        Some(PathBuf::from("/sdcard/Download"))
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let home = std::env::var_os("HOME")?;
+        let downloads = Path::new(&home).join("Downloads");
+        Some(if downloads.is_dir() { downloads } else { PathBuf::from(home) })
+    }
+}
+
+fn export_logs_to_downloads() -> std::io::Result<PathBuf> {
+    let files = collect_log_files();
+    if files.is_empty() {
+        return Err(std::io::Error::new(std::io::ErrorKind::NotFound, "no log files found"));
+    }
+    let downloads = downloads_dir().ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "no downloads directory"))?;
+    let dest = downloads.join("cedinia_logs");
+    std::fs::create_dir_all(&dest)?;
+
+    let mut copied = 0;
+    for f in &files {
+        if let Some(name) = f.file_name() {
+            if std::fs::copy(f, dest.join(name)).is_ok() {
+                copied += 1;
+            }
+        }
+    }
+    if copied == 0 {
+        return Err(std::io::Error::new(std::io::ErrorKind::Other, "no log file could be copied"));
+    }
+    log::info!("export_logs: copied {copied} log file(s) to \"{}\"", dest.to_string_lossy());
+    Ok(dest)
+}
+
+pub(crate) fn wire_export_logs(window: &MainWindow) {
+    let weak = window.as_weak();
+    window.global::<AppState>().on_export_logs(move || {
+        let win = weak.upgrade().expect("Failed to upgrade app :(");
+        if win.global::<AppState>().get_log_export_running() {
+            return;
+        }
+        win.global::<AppState>().set_log_export_running(true);
+
+        let weak2 = win.as_weak();
+        std::thread::spawn(move || {
+            let result = export_logs_to_downloads();
+            let _ = slint::invoke_from_event_loop(move || {
+                if let Some(win) = weak2.upgrade() {
+                    let st = win.global::<AppState>();
+                    st.set_log_export_running(false);
+                    match result {
+                        Ok(dest) => {
+                            st.set_log_export_ok(true);
+                            st.set_log_export_result(dest.to_string_lossy().to_string().into());
+                        }
+                        Err(e) => {
+                            log::error!("export_logs: failed: {e}");
+                            st.set_log_export_ok(false);
+                            st.set_log_export_result(slint::SharedString::new());
+                        }
+                    }
+                    st.set_log_export_done(true);
+                }
+            });
+        });
+    });
+}
+
 pub(crate) fn wire_language_change(window: &MainWindow) {
     let weak = window.as_weak();
     window.global::<AppState>().on_apply_language_change(move || {

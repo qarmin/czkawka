@@ -167,6 +167,11 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_diagnostics_open_thumbnails_folder_text(flc!("diagnostics_open_thumbnails_folder").into());
     t.set_diagnostics_clear_cache_text(flc!("diagnostics_clear_cache").into());
     t.set_diagnostics_open_cache_folder_text(flc!("diagnostics_open_cache_folder").into());
+    t.set_diagnostics_export_logs_text(flc!("diagnostics_export_logs").into());
+    t.set_logs_label_text(flc!("logs_label").into());
+    t.set_logs_export_title_text(flc!("logs_export_title").into());
+    t.set_logs_export_saved_text(flc!("logs_export_saved").into());
+    t.set_logs_export_failed_text(flc!("logs_export_failed").into());
     t.set_diagnostics_collect_test_text(flc!("diagnostics_collect_test").into());
     t.set_diagnostics_collect_test_desc_text(flc!("diagnostics_collect_test_desc").into());
     t.set_diagnostics_collect_test_run_text(flc!("diagnostics_collect_test_run").into());

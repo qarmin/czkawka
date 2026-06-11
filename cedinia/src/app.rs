@@ -9,8 +9,8 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use slint::{ComponentHandle, Model, ModelRc, SharedString, Timer, TimerMode, VecModel, Weak};
 
 use crate::callbacks::{
-    DeleteEvent, build_excluded_model, build_included_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_language_change, wire_licenses_popup,
-    wire_notification_settings, wire_open_path, wire_open_url, wire_permission, wire_save_settings_now, wire_scan, wire_selection,
+    DeleteEvent, build_excluded_model, build_included_model, get_model_for_tool, wire_cache_info, wire_collect_test, wire_directories, wire_export_logs, wire_language_change,
+    wire_licenses_popup, wire_notification_settings, wire_open_path, wire_open_url, wire_permission, wire_save_settings_now, wire_scan, wire_selection,
 };
 use crate::compare::wire_compare;
 use crate::model::make_file_model;
@@ -270,6 +270,7 @@ fn run_app_inner(
     wire_language_change(&window);
     wire_open_url(&window);
     wire_cache_info(&window);
+    wire_export_logs(&window);
     wire_licenses_popup(&window);
     wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone());
     wire_compare(&window);
