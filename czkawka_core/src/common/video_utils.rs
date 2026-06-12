@@ -9,7 +9,7 @@ use image::{GenericImage, RgbImage};
 use serde::{Deserialize, Serialize};
 
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
-use crate::common::process_utils::disable_windows_console_window;
+use crate::common::process_utils::{disable_windows_console_window, run_with_long_operation_warnings};
 use crate::common::progress_stop_handler::check_if_stop_received;
 use crate::flc;
 use crate::helpers::ffprobe::ffprobe;
@@ -116,7 +116,7 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
         command_mut.arg("-vf").arg(&vf_filter);
     }
 
-    let output = command_mut
+    command_mut
         .arg("-vframes")
         .arg("1")
         .arg("-f")
@@ -126,9 +126,13 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
         .arg("pipe:1")
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .output()
-        .map_err(|e| flc!("core_failed_to_execute_ffmpeg", reason = e.to_string()))?;
+        .stderr(Stdio::null());
+
+    // ffmpeg frame extraction is a blocking subprocess that occasionally hangs on a
+    // single broken/odd file; the shared watcher logs a warning past the time thresholds
+    // so it is visible in the logs instead of silently freezing the whole scan.
+    let key = video_path.to_string_lossy();
+    let output = run_with_long_operation_warnings("ffmpeg_frame_extraction", &key, || command_mut.output()).map_err(|e| flc!("core_failed_to_execute_ffmpeg", reason = e.to_string()))?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).replace("\r\n", "\n").replace("\n", " ");
