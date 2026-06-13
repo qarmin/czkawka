@@ -49,14 +49,14 @@ It is derived from hundreds of real user reports and is updated alongside the pr
 Both share the same scanning engine (`czkawka_core`). The difference is the frontend:
 
 - **Krokiet** - the current recommended GUI, built with the Slint framework. Statically linked, no external GUI dependencies, works reliably on Windows, macOS, and Linux. Actively developed.
-- **Czkawka GTK** - the old GTK4-based GUI. Deprecated since v12.0; no new features - all development happens in Krokiet. **GTK worked well on Linux, but outside Linux (Windows and macOS) it had a lot of problems** - transparent/unclickable windows, blurry HiDPI text, broken previews, renderer crashes - many of which could not be fully fixed because of the state of the GTK4 Windows/macOS ports. Krokiet was created largely to escape these cross-platform GTK issues.
+- **Czkawka GTK** - the old GTK4-based GUI. Deprecated since v12.0; no new features - all development happens in Krokiet. GTK worked well on Linux, but outside Linux (Windows and macOS) it had a lot of problems - transparent/unclickable windows, blurry HiDPI text, broken previews, renderer crashes - many of which could not be fully fixed because of the state of the GTK4 Windows/macOS ports. Krokiet was created largely to escape these cross-platform GTK issues.
 - **czkawka_cli** - the command-line interface for scripting and automation.
 
-Use Krokiet - it is the recommended frontend for all platforms.
+Just use Krokiet - it is the recommended frontend for all platforms.
 
 ### Q: Is Czkawka safe? Does it access the Internet?
 
-Czkawka and Krokiet do not make any network connections. The application has no telemetry, no update checks, and no analytics. If you observe network traffic in a sandboxed analysis, it is typically caused by the analysis environment itself or by the GTK runtime.
+Czkawka and Krokiet do not make any network connections. The application has no telemetry, no update checks, and no analytics. If you observe network traffic in a sandboxed analysis, it is typically caused by the analysis environment itself.
 
 If you want to confirm this yourself, look through `Cargo.lock` in the repository - there are no networking/HTTP/telemetry crates among the dependencies (no `reqwest`, `hyper`, `curl`, etc.), so the app has no code path that could reach the Internet.
 
@@ -84,9 +84,7 @@ The per-component `LICENSE_*` files in each crate directory hold the exact texts
 
 ### Q: Is there a web-based UI or Docker-based web interface for Czkawka?
 
-There are **third-party** Docker images by jlesage that wrap the GUI in a VNC/web UI accessible from a browser: `jlesage/krokiet` (Krokiet) and `jlesage/czkawka` (the GTK GUI). They are **not** official and are not maintained by the Czkawka author - use them at your own discretion.
-
-The applications themselves do not have a built-in web interface. If you need web access without Docker, use the CLI and process its JSON output with an external tool.
+There are third-party Docker images by jlesage that wrap the GUI in a VNC/web UI accessible from a browser: `jlesage/krokiet` (Krokiet) and `jlesage/czkawka` (the GTK GUI).
 
 ### Q: Are there nightly / pre-release builds available?
 
@@ -104,9 +102,9 @@ Yes. Nightly builds compiled from the latest master branch commits are published
 
 ### Q: How do I run it, and what do I need to install? (Linux / Windows / macOS)
 
-Krokiet itself is a single self-contained binary - just download, run, and it works. You only need to install extra system libraries if you want **optional functionality**: `ffmpeg` for the Similar Videos tool, and `libheif`/`libavif`/`libraw` if you use a build with those image-format features. (The GTK GUI additionally needs GTK4 itself at runtime.)
+Krokiet itself is a single self-contained binary - just download, run, and it works. You only need to install extra system libraries if you want optional functionality: `ffmpeg` for the Similar Videos tool, and `libheif`/`libavif`/`libraw` if you use a build with those image-format features. (The GTK GUI additionally needs GTK4 itself at runtime.)
 
-**There are ready-made scripts in the repo that install these dependencies for you** (`misc/install_scripts/`):
+There are ready-made scripts in the repo that install these dependencies for you (`misc/install_scripts/`):
 - `install_linux.sh` (run with `sudo`) - auto-detects apt / dnf / pacman / zypper and installs `ffmpeg` + `gtk4` (base) and `libheif`/`libraw`/`libavif`/`dav1d` (optional).
 - `install_macos.sh` - installs (and offers to set up Homebrew, then) `ffmpeg libheif libraw libavif` via `brew`.
 - `install_windows.bat` - installs `ffmpeg` via `winget`; notes that `libheif`/`libraw`/`libavif` are only available through MSYS2 builds.
@@ -720,13 +718,9 @@ Usually means the trash is on a different filesystem from the file (e.g., the fi
 
 This message comes from the `symphonia` decoding library, which checks the bitstream strictly: it reports that the MP3 header contains a `main_data_begin` value pointing outside the bitstream. `symphonia` is quite pedantic and flags such issues even when they are harmless - many MP3 files carry this "error" because of encoder quirks, and most media players (and likely your own player) decode and play them just fine. The file is still playable; you can ignore this result or keep the file.
 
-### Q: The app shows ".fuse_hidden..." files as duplicates
+### Q: The app shows ".fuse_hidden..." files
 
 These files are created automatically by the operating system / FUSE-based filesystems - this is not something Czkawka or Krokiet does. When a file that is still open in another application is "deleted", FUSE renames it to a hidden `.fuse_hidden...` name and only truly removes it once the last handle is closed. They are not duplicates in the usual sense. You can exclude them by adding `*/.fuse_hidden*` to the excluded items list.
-
-### Q: Krokiet on macOS shows garbled text in Chinese/Japanese
-
-Krokiet uses bundled fonts and may not include CJK (Chinese/Japanese/Korean) glyphs. This is a known limitation. A workaround is to copy a CJK-capable font file into the directory from which Krokiet is launched, or to set the `SLINT_FONT_PATH` environment variable. This is tracked as a known issue on the project.
 
 ---
 

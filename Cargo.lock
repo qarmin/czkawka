@@ -1359,7 +1359,6 @@ dependencies = [
 [[package]]
 name = "const-field-offset"
 version = "0.2.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "const-field-offset-macro",
  "field-offset",
@@ -1368,7 +1367,6 @@ dependencies = [
 [[package]]
 name = "const-field-offset-macro"
 version = "0.2.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1910,6 +1908,9 @@ name = "deranged"
 version = "0.5.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7cd812cc2bc1d69d4764bd80df88b4317eaef9e773c75226407d9bc0876b211c"
+dependencies = [
+ "powerfmt",
+]
 
 [[package]]
 name = "derive_more"
@@ -3397,7 +3398,6 @@ dependencies = [
 [[package]]
 name = "i-slint-backend-android-activity"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "android-activity 0.5.2",
  "android-activity 0.6.1",
@@ -3413,7 +3413,6 @@ dependencies = [
 [[package]]
 name = "i-slint-backend-linuxkms"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "bytemuck",
  "calloop 0.14.4",
@@ -3436,7 +3435,6 @@ dependencies = [
 [[package]]
 name = "i-slint-backend-selector"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "cfg-if",
  "i-slint-backend-android-activity",
@@ -3452,7 +3450,6 @@ dependencies = [
 [[package]]
 name = "i-slint-backend-winit"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "block2 0.6.2",
  "bytemuck",
@@ -3496,7 +3493,6 @@ dependencies = [
 [[package]]
 name = "i-slint-common"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "derive_more",
  "fontique 0.10.0",
@@ -3511,7 +3507,6 @@ dependencies = [
 [[package]]
 name = "i-slint-compiler"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "annotate-snippets",
  "by_address",
@@ -3543,7 +3538,6 @@ dependencies = [
 [[package]]
 name = "i-slint-core"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "async-channel",
  "auto_enums",
@@ -3596,7 +3590,6 @@ dependencies = [
 [[package]]
 name = "i-slint-core-macros"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "quote",
  "serde_json",
@@ -3606,7 +3599,6 @@ dependencies = [
 [[package]]
 name = "i-slint-renderer-femtovg"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "cfg-if",
  "const-field-offset",
@@ -3628,7 +3620,6 @@ dependencies = [
 [[package]]
 name = "i-slint-renderer-skia"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "ash",
  "bytemuck",
@@ -3669,7 +3660,6 @@ dependencies = [
 [[package]]
 name = "i-slint-renderer-software"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "bytemuck",
  "clru",
@@ -4339,9 +4329,9 @@ dependencies = [
 
 [[package]]
 name = "js-sys"
-version = "0.3.100"
+version = "0.3.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2025f20d7a4fa7785846e7b63d10a76d3f1cee98ee5cb79ea59703f95e42162"
+checksum = "03d04c30968dffe80775bd4d7fb676131cd04a1fb46d2686dbffbaec2d9dfd31"
 dependencies = [
  "cfg-if",
  "futures-util",
@@ -4978,14 +4968,16 @@ checksum = "ce716bf1a316f47a280fc76295f6495b5bea4752bca01c3b3885e101b1c23c02"
 
 [[package]]
 name = "mac-notification-sys"
-version = "0.6.13"
+version = "0.6.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50efa634682b3fc5a1ab6f3dd5b2bce7b848011fc485b53b063dc68f2f74feae"
+checksum = "04fd0110fd05744c3c904acf1a8ca624a721d75a35638f127cd5fb6b7ccfb1bf"
 dependencies = [
  "cc",
+ "log",
  "objc2 0.6.4",
  "objc2-foundation 0.3.2",
  "time",
+ "uuid",
 ]
 
 [[package]]
@@ -7390,7 +7382,6 @@ checksum = "9db491c0d4152a069911a0fbdaca959691bf0b9d7110d98a7ed1c8e59b79ab30"
 [[package]]
 name = "slint"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "const-field-offset",
  "i-slint-backend-android-activity",
@@ -7412,7 +7403,6 @@ dependencies = [
 [[package]]
 name = "slint-build"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "derive_more",
  "fontique 0.10.0",
@@ -7424,7 +7414,6 @@ dependencies = [
 [[package]]
 name = "slint-macros"
 version = "1.17.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "i-slint-compiler",
  "proc-macro2",
@@ -8299,11 +8288,12 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.48"
+version = "0.3.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc1aa89044e7786ffb2ec017acb22cb7de5b0be46d0f21aea2b224b8561e5db2"
+checksum = "743bd48c283afc0388f9b8827b976905fb217ad9e647fae3a379a9283c4def2c"
 dependencies = [
  "deranged",
+ "itoa",
  "js-sys",
  "libc",
  "num-conv",
@@ -8316,15 +8306,15 @@ dependencies = [
 
 [[package]]
 name = "time-core"
-version = "0.1.9"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e1c906769ad99c88eaa54e728060edef082f8e358ff32030cb7c7d315e81109"
+checksum = "7694e1cfe791f8d31026952abf09c69ca6f6fa4e1a1229e18988f06a04a12dca"
 
 [[package]]
 name = "time-macros"
-version = "0.2.28"
+version = "0.2.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d3bfe86347f0cc659f586f01e26303ccd32418f26f30c7b0309b3ca3a07d695"
+checksum = "2e70e4c5a0e0a8a4823ad65dfe1a6930e4f4d756dcd9dd7939022b5e8c501215"
 dependencies = [
  "num-conv",
  "time-core",
@@ -8912,7 +8902,6 @@ dependencies = [
 [[package]]
 name = "vtable"
 version = "0.4.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "const-field-offset",
  "portable-atomic",
@@ -8923,7 +8912,6 @@ dependencies = [
 [[package]]
 name = "vtable-macro"
 version = "0.4.0"
-source = "git+https://github.com/qarmin/slint.git?branch=text_cache#5d8b0e29a510708b96932bb2a5fef37a987c4445"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -8977,9 +8965,9 @@ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
 
 [[package]]
 name = "wasip2"
-version = "1.0.3+wasi-0.2.9"
+version = "1.0.4+wasi-0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20064672db26d7cdc89c7798c48a0fdfac8213434a1186e5ef29fd560ae223d6"
+checksum = "b67efb37e106e55ce722a510d6b5f9c17f083e5fc79afc2badeb12cc313d9487"
 dependencies = [
  "wit-bindgen 0.57.1",
 ]
@@ -8995,9 +8983,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen"
-version = "0.2.123"
+version = "0.2.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a254a4b10c19a76f09a27640e7ffbf9bc30bf67e16a3bf28aaefa4920fe81563"
+checksum = "8ddb3f79143bced6de84270411622a2699cee572fc0875aeaf1e7867cf9fca1a"
 dependencies = [
  "cfg-if",
  "once_cell",
@@ -9008,9 +8996,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-futures"
-version = "0.4.73"
+version = "0.4.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54568702fabf5d4849ce2b90fadfa64168a097eaf4b351ce9df8b687a0086aaf"
+checksum = "503b14d284f2c8dac03b819967e155ea753f573586193b2b2c95990cb5d69280"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -9018,9 +9006,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro"
-version = "0.2.123"
+version = "0.2.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24a40fc75b0ec6f3746ceb10d36f53a93dcd68a93b11b6445983945d79eba0dc"
+checksum = "4e21a184b13fb19e157296e2c46056aec9092264fab83e4ba59e68c61b323c3d"
 dependencies = [
  "quote",
  "wasm-bindgen-macro-support",
@@ -9028,9 +9016,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro-support"
-version = "0.2.123"
+version = "0.2.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "908f34bd9b9ce3d4caf07b72dfab63d61504d156856c6bd3cd87fa350cf3985b"
+checksum = "fecefd9c35bd935a20fc3fc344b5f29138961e4f47fb03297d88f2587afb5ebd"
 dependencies = [
  "bumpalo",
  "proc-macro2",
@@ -9041,9 +9029,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-shared"
-version = "0.2.123"
+version = "0.2.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7acbf7616c27b194bbb550bf77ed0c2c3e5b7fd1260a93082b95fb7f47959b92"
+checksum = "23939e44bb9a5d7576fa2b563dc2e136628f1224e88a8deed09e04858b77871f"
 dependencies = [
  "unicode-ident",
 ]
@@ -9219,9 +9207,9 @@ dependencies = [
 
 [[package]]
 name = "web-sys"
-version = "0.3.100"
+version = "0.3.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e0871acf327f283dc6da28a1696cdc64fb355ba9f935d052021fa77f35cce69"
+checksum = "a6430a72df5eb332242960fe84b3002a241163998241eb596d4f739b9757061d"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -10482,9 +10470,9 @@ dependencies = [
 
 [[package]]
 name = "zeroize"
-version = "1.8.2"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b97154e67e32c85465826e8bcc1c59429aaaf107c1e4a9e53c8d8ccd5eff88d0"
+checksum = "e13c156562582aa81c60cb29407084cdb54c4164760106ab78e6c5b0858cf64e"
 
 [[package]]
 name = "zerotrie"
