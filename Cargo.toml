@@ -18,9 +18,9 @@ resolver = "3"
 # Temporary solution for spamming mouse events in Slint
 # Even with workaround, performance is quite low in specific cases in Cedinia
 #o
-[patch.crates-io]
-slint = { path = "/home/rafal/test/slint/api/rs/slint" }
-slint-build = { path = "/home/rafal/test/slint/api/rs/build" }
+#[patch.crates-io]
+#slint = { path = "/home/rafal/test/slint/api/rs/slint" }
+#slint-build = { path = "/home/rafal/test/slint/api/rs/build" }
 #fontique = { path = "/home/rafal/test/slint/parley/fontique" }
 #parley = { path = "/home/rafal/test/slint/parley/parley" }
 #slint = { git = "https://github.com/slint-ui/slint.git" }
