@@ -53,7 +53,7 @@ struct RawPixels {
 impl RawPixels {
     fn empty() -> Self {
         Self {
-            data: vec![],
+            data: Vec::new(),
             width: 0,
             height: 0,
         }
@@ -294,10 +294,12 @@ fn open_group(app: &MainWindow, header_idx: usize) {
         .collect();
 
     gui_state.set_compare_current_group_header_flat_idx(header_idx as i32);
+    gui_state.set_compare_has_next_group(find_adjacent_group_header(&model, header_idx, true).is_some());
+    gui_state.set_compare_has_prev_group(find_adjacent_group_header(&model, header_idx, false).is_some());
     gui_state.set_compare_loading_current(0);
     gui_state.set_compare_loading_total(total);
 
-    gui_state.set_compare_images(Rc::new(VecModel::from(vec![])).into());
+    gui_state.set_compare_images(Rc::new(VecModel::from(Vec::new())).into());
     gui_state.set_compare_left_image(slint::Image::default());
     gui_state.set_compare_right_image(slint::Image::default());
     gui_state.set_compare_diff_image(slint::Image::default());

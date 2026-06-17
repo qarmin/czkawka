@@ -99,7 +99,7 @@ os_info = { version = "3", default-features = false }
 log = "0.4.22"
 handsome_logger = "0.9"
 fun_time = { version = "0.3", features = ["log"] }
-itertools = "0.14"
+itertools = "0.15"
 static_assertions = "1.1.0"
 file-rotate = "0.8.0"
 

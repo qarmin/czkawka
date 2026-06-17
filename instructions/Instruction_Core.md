@@ -177,7 +177,7 @@ Finds files matching a predefined list of temporary file patterns.
 use czkawka_core::tools::temporary::{Temporary, TemporaryParameters};
 
 let params = TemporaryParameters::new(
-    vec![],  // empty = use built-in defaults; provide strings to override entirely
+    Vec::new(),  // empty = use built-in defaults; provide strings to override entirely
 );
 let mut tool = Temporary::new(params);
 tool.search(&stop_flag, progress_sender);

@@ -105,7 +105,7 @@ fn load_zip(zip_path: &str) -> Vec<TestFileEntry> {
             zf.read_to_end(&mut data).unwrap();
             entries.push(TestFileEntry { path, kind: EntryKind::Symlink, data, mtime_unix_secs });
         } else if zf.is_dir() {
-            entries.push(TestFileEntry { path, kind: EntryKind::Dir, data: vec![], mtime_unix_secs });
+            entries.push(TestFileEntry { path, kind: EntryKind::Dir, data: Vec::new(), mtime_unix_secs });
         } else {
             let mut data = Vec::new();
             zf.read_to_end(&mut data).unwrap();
@@ -216,7 +216,7 @@ fn add_synthetic_entries(entries: &mut Vec<TestFileEntry>) {
     entries.push(TestFileEntry {
         path: "BadNames".to_string(),
         kind: EntryKind::Dir,
-        data: vec![],
+        data: Vec::new(),
         mtime_unix_secs: None,
     });
     entries.push(TestFileEntry {

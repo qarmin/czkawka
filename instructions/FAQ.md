@@ -134,10 +134,10 @@ Per platform:
 
 The **Similar Videos** tool requires `ffmpeg` to be installed separately and available in `PATH`. Krokiet and czkawka_cli do not bundle ffmpeg.
 
-| OS | Installation |
-|----|-------------|
-| Linux | `sudo apt install ffmpeg` (Debian/Ubuntu), `sudo pacman -S ffmpeg` (Arch) |
-| macOS | `brew install ffmpeg` |
+| OS      | Installation                                                                                                                                                                                                           |
+|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Linux   | `sudo apt install ffmpeg` (Debian/Ubuntu), `sudo pacman -S ffmpeg` (Arch)                                                                                                                                              |
+| macOS   | `brew install ffmpeg`                                                                                                                                                                                                  |
 | Windows | Install from [ffmpeg.org](https://ffmpeg.org/download.html) and add the folder containing `ffmpeg.exe` to the system `PATH`. On Windows, you can also place `ffmpeg.exe` in the same folder as the Krokiet executable. |
 
 After installation, restart Krokiet or the CLI. On Windows, a new terminal session (or system restart) may be required for the PATH change to take effect.

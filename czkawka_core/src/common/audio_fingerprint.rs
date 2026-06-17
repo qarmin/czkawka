@@ -142,7 +142,7 @@ pub(crate) fn calc_fingerprint_and_duration<P: AsRef<Path>>(path: P, config: &Co
         if rms < 0.001 && max_amp < 0.01 {
             // Cache with an empty fingerprint so this file is not re-decoded on the next run
             // but is still excluded from comparisons via the `!fingerprint.is_empty()` filter.
-            return Ok(Some((vec![], duration_seconds)));
+            return Ok(Some((Vec::new(), duration_seconds)));
         }
 
         Ok(Some((fingerprint, duration_seconds)))

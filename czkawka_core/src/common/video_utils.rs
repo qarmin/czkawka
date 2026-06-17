@@ -132,7 +132,8 @@ pub(crate) fn extract_frame_ffmpeg(video_path: &Path, timestamp: f32, max_values
     // single broken/odd file; the shared watcher logs a warning past the time thresholds
     // so it is visible in the logs instead of silently freezing the whole scan.
     let key = video_path.to_string_lossy();
-    let output = run_with_long_operation_warnings("ffmpeg_frame_extraction", &key, || command_mut.output()).map_err(|e| flc!("core_failed_to_execute_ffmpeg", reason = e.to_string()))?;
+    let output =
+        run_with_long_operation_warnings("ffmpeg_frame_extraction", &key, || command_mut.output()).map_err(|e| flc!("core_failed_to_execute_ffmpeg", reason = e.to_string()))?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).replace("\r\n", "\n").replace("\n", " ");

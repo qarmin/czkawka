@@ -127,7 +127,9 @@ impl SimilarVideos {
         let path = file_entry.path.to_string_lossy().to_string();
         // Visual hashing runs in-process and cannot be interrupted, so a watchdog at least logs a
         // warning if a single file keeps hashing for very long (likely a hang) instead of freezing silently.
-        let signature = run_with_long_operation_warnings("similar_videos_hash_calculation", &path, || VideoSignature::from_path(&file_entry.path, &sig_config, stop_flag));
+        let signature = run_with_long_operation_warnings("similar_videos_hash_calculation", &path, || {
+            VideoSignature::from_path(&file_entry.path, &sig_config, stop_flag)
+        });
         match signature {
             Ok(sig) => {
                 file_entry.signature = Some(sig);

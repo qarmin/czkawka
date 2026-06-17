@@ -260,6 +260,7 @@ pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientatio
             Ok(m) => m,
             Err(e) if e.kind() == std::io::ErrorKind::Unsupported => return Ok(None),
             Err(e) if e.to_string().contains("No EXIF data") => return Ok(None),
+            Err(e) if e.to_string().contains("No metadata found") => return Ok(None),
             Err(e) => return Err(e),
         };
 

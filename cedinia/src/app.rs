@@ -5,9 +5,9 @@ use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 
 use czkawka_core::common::config_cache_path::{print_infos_and_warnings, set_config_cache_path};
 use czkawka_core::common::image::register_image_decoding_hooks;
-use czkawka_core::common::logger::{filtering_messages, print_version_mode};
 #[cfg(not(target_os = "android"))]
 use czkawka_core::common::logger::setup_logger;
+use czkawka_core::common::logger::{filtering_messages, print_version_mode};
 use slint::{ComponentHandle, Model, ModelRc, SharedString, Timer, TimerMode, VecModel, Weak};
 
 use crate::callbacks::{
