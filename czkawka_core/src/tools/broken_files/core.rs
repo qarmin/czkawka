@@ -408,13 +408,36 @@ impl BrokenFiles {
     }
 
     fn check_broken_video(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>, checked_types: CheckedTypes) -> Option<BrokenEntry> {
-        if checked_types.contains(CheckedTypes::VIDEO_FFPROBE) {
+        if checked_types.contains(CheckedTypes::VIDEO_FFPROBE) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfprobe) {
             file_entry = Self::check_broken_video_ffprobe(file_entry, stop_flag)?;
         }
-        if checked_types.contains(CheckedTypes::VIDEO_FFMPEG) {
+        if checked_types.contains(CheckedTypes::VIDEO_FFMPEG) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg) {
             file_entry = Self::check_broken_video_ffmpeg(file_entry, stop_flag)?;
         }
         Some(file_entry)
+    }
+
+    pub(crate) fn video_entry_missing_required_checks(file_entry: &BrokenEntry, checked_types: CheckedTypes) -> bool {
+        (checked_types.contains(CheckedTypes::VIDEO_FFPROBE) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfprobe))
+            || (checked_types.contains(CheckedTypes::VIDEO_FFMPEG) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg))
+    }
+
+    pub(crate) fn move_cached_entries_missing_required_checks(
+        records_already_cached: &mut BTreeMap<String, BrokenEntry>,
+        non_cached_files_to_check: &mut BTreeMap<String, BrokenEntry>,
+        checked_types: CheckedTypes,
+    ) {
+        let keys_to_recheck: Vec<String> = records_already_cached
+            .iter()
+            .filter(|(_, file_entry)| Self::video_entry_missing_required_checks(file_entry, checked_types))
+            .map(|(path, _)| path.clone())
+            .collect();
+
+        for path in keys_to_recheck {
+            if let Some(file_entry) = records_already_cached.remove(&path) {
+                non_cached_files_to_check.insert(path, file_entry);
+            }
+        }
     }
 
     #[fun_time(message = "load_cache", level = "debug")]
@@ -492,7 +515,10 @@ impl BrokenFiles {
             return WorkContinueStatus::Continue;
         }
 
-        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
+        let (loaded_hash_map, mut records_already_cached, mut non_cached_files_to_check) = self.load_cache();
+
+        let checked_types = self.params.checked_types;
+        Self::move_cached_entries_missing_required_checks(&mut records_already_cached, &mut non_cached_files_to_check, checked_types);
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
@@ -503,7 +529,6 @@ impl BrokenFiles {
         );
 
         let non_cached_files_to_check = non_cached_files_to_check.into_iter().collect::<Vec<_>>();
-        let checked_types = self.params.checked_types;
 
         debug!("look_for_broken_files - started finding for broken files");
         let mut vec_file_entry: Vec<BrokenEntry> = non_cached_files_to_check
