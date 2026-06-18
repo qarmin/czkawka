@@ -15,6 +15,7 @@ terminal.
 czkawka_cli/src/
 ├── main.rs       # Entry point, thread spawning, tool dispatchers
 ├── commands.rs   # All clap CLI argument definitions
+├── parsers.rs    # parse_* clap value-parser functions used by commands.rs
 └── progress.rs   # indicatif progress bar rendering
 ```
 
@@ -71,7 +72,7 @@ variants:
 - `-X` (unix only) exclude other filesystems
 - `-f` save text results to file
 - `-C` save compact JSON results to file
-- `--pretty-json-file-to-save` save pretty JSON results to file
+- `--pretty-file-to-save` (`-p`) save pretty JSON results to file
 - `-N` / `-M` suppress result/message output
 - `-W` suppress non-zero exit code when items found
 - `-T` thread count (0 = all CPUs)

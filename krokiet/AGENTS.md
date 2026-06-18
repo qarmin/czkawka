@@ -30,7 +30,13 @@ krokiet/
 │   ├── connect_scan.rs               # Routes scan to per-tool functions
 │   ├── connect_scan/                 # One file per tool (duplicate.rs, …)
 │   ├── connect_progress_receiver.rs  # Receives ProgressData → updates UI bar
-│   ├── connect_row_selection.rs      # Row checkbox logic, group handling
+│   ├── connect_row_selection/        # Row checkbox logic, group handling
+│   │   ├── mod.rs
+│   │   ├── checker.rs
+│   │   ├── clipboard.rs
+│   │   ├── context_menu.rs
+│   │   ├── opener.rs
+│   │   └── selection.rs
 │   ├── connect_sort.rs               # Column-header sort (string + int indices)
 │   ├── connect_translation.rs        # LANGUAGE_LIST, change_language(), translate_items()
 │   ├── connect_compare.rs            # Image comparison overlay
@@ -63,25 +69,36 @@ krokiet/
 │       └── combo_box.rs              # StringComboBoxItems + regenerate_items()
 └── ui/
     ├── main_window.slint             # Root component; imports everything; exports globals
-    ├── common.slint                  # Enums + structs: ActiveTab, SingleMainListModel, …
-    ├── gui_state.slint               # Global GuiState (transient runtime state)
-    ├── settings.slint                # Global Settings (persisted)
-    ├── translations.slint            # Global Translations (all UI strings)
-    ├── callabler.slint               # Global Callabler (all Rust→UI callbacks)
-    ├── left_side_panel.slint         # Tool selector + tool settings sub-panel
-    ├── main_lists.slint              # Results table (bound to model)
-    ├── action_buttons.slint          # Scan / Stop / Select / Delete / … buttons
-    ├── bottom_panel.slint            # Progress bar + error text + status
-    ├── progress.slint                # Real-time scan progress widget
-    ├── preview.slint                 # File preview / thumbnail side panel
-    ├── image_compare.slint           # Side-by-side image diff overlay
-    ├── settings_list.slint           # Settings tab form
-    ├── tool_settings.slint           # Per-tool options (hash alg, threshold, …)
-    ├── about.slint                   # About tab
-    ├── selectable_tree_view.slint    # Custom tree widget for path lists
-    ├── fonts.slint                   # FontSizes global
-    ├── color_palette.slint           # Dark-theme color definitions
-    └── popup_*.slint                 # 15 modal dialogs
+    ├── globals/
+    │   ├── common.slint              # Enums + structs: ActiveTab, SingleMainListModel, …
+    │   ├── gui_state.slint           # Global GuiState (transient runtime state)
+    │   ├── settings.slint            # Global Settings (persisted)
+    │   ├── translations.slint        # Global Translations (all UI strings)
+    │   ├── callabler.slint           # Global Callabler (all Rust to UI callbacks)
+    │   ├── fonts.slint               # FontSizes global
+    │   ├── color_palette.slint       # Dark-theme color definitions
+    │   └── text_size.slint
+    ├── screens/
+    │   ├── left_side_panel.slint     # Tool selector + tool settings sub-panel
+    │   ├── main_lists.slint          # Results table (bound to model)
+    │   ├── action_buttons.slint      # Scan / Stop / Select / Delete / … buttons
+    │   ├── bottom_panel.slint        # Progress bar + error text + status
+    │   ├── progress.slint            # Real-time scan progress widget
+    │   ├── image_compare.slint       # Side-by-side image diff overlay
+    │   ├── settings_list.slint       # Settings tab form
+    │   ├── tool_settings.slint       # Per-tool options (hash alg, threshold, …)
+    │   ├── about.slint                # About tab
+    │   └── included_paths.slint
+    ├── components/
+    │   ├── preview.slint             # File preview / thumbnail side panel
+    │   ├── selectable_tree_view.slint # Custom tree widget for path lists
+    │   ├── hint_text.slint
+    │   ├── popup_base.slint
+    │   ├── popup_centered_text.slint
+    │   └── popup_context_menu.slint
+    └── popups/                       # 18 modal dialogs: popup_delete, popup_save,
+                                       #   popup_optimize, popup_crop_video,
+                                       #   popup_custom_select, popup_rename_*, …
 ```
 
 ---
@@ -136,6 +153,13 @@ every callback that needs scan results (preview, compare, save, delete, …).
 Worker threads lock exclusively to **write** results after a scan finishes.
 UI callbacks lock briefly to **read** results for previews / exports.
 
+`VideoOptimizer` is one of the 14 tools but doesn't fit the scan/select/delete
+shape of the others: it has its own `connect_scan/video_optimizer.rs` entry
+point plus a dedicated `file_actions/connect_optimize_video.rs` action, and
+two popups (`popup_optimize.slint` for transcode options,
+`popup_crop_video.slint` for crop-region preview) instead of reusing the
+generic delete/save popups.
+
 ---
 
 ## Scan Data Flow
@@ -185,8 +209,8 @@ Slint cannot store `i64`, so dates and file sizes are split into two `i32` field
 Slint has no native Fluent support. Workaround:
 1. All UI text is bound to properties in the `Translations` global
    (`ui/translations.slint`), not hardcoded in `.slint`.
-2. `translate_items()` in `connect_translation.rs` (~350 lines) sets every
-   property via `flk!("key")` after language changes.
+2. `translate_items()` in `connect_translation.rs` (~440 lines, file is ~750 lines total)
+   sets every property via `flk!("key")` after language changes.
 3. Language list defined as `LANGUAGE_LIST: &[Language]` in
    `connect_translation.rs`.
 4. Hardcoded combo-box lists in `.slint` files (e.g. `Settings.languages_list`)
@@ -201,8 +225,11 @@ Two-tier JSON system:
 
 | File | Content |
 |------|---------|
-| `~/.config/Czkawka/krokiet/base.json` | `BasicSettings` – default preset index, preset names, theme, window size |
-| `~/.config/Czkawka/krokiet/preset_N.json` | `SettingsCustom` – paths, extensions, tool parameters |
+| `~/.config/krokiet/config_general.json` | `BasicSettings` – default preset index, preset names, theme, window size |
+| `~/.config/krokiet/config_preset_N.json` | `SettingsCustom` – paths, extensions, tool parameters |
+
+(`directories-next` resolves the config dir from the lowercased app name only - the
+qualifier/organization passed to `set_config_cache_path` are ignored on Linux.)
 
 11 preset slots (indices 0–10). Slot 10 is reserved for CLI-mode overrides.
 `StringComboBoxItems::regenerate_items()` builds all combo box option arrays

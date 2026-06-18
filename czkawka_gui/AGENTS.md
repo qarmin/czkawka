@@ -61,7 +61,8 @@ czkawka_gui/src/
 │   ├── connect_popovers_sort.rs
 │   ├── connect_header_buttons.rs
 │   ├── connect_about_buttons.rs
-│   ├── connect_krokiet_info_dialog.rs  # One-time Krokiet migration notice
+│   ├── connect_krokiet_info_dialog.rs  # One-time Krokiet deprecation notice (shown on first run)
+│   ├── connect_krokiet_promo_dialog.rs # Krokiet promo dialog (shown from the header button)
 │   └── file_chooser_helpers.rs
 ├── helpers/
 │   ├── enums.rs                     # Column index enums for all tools
@@ -74,15 +75,19 @@ czkawka_gui/src/
 ├── notebook_enums.rs                # NotebookMainEnum (per-tool tab index)
 ├── notebook_info.rs                 # Tab label + ListStore column definitions
 ├── opening_selecting_records.rs     # Double-click → open file/folder
-├── taskbar_progress.rs              # Windows/dummy taskbar progress
+├── taskbar_progress.rs              # Windows taskbar progress (real impl)
+├── taskbar_progress_dummy.rs        # No-op stand-in for non-Windows targets
+├── taskbar_progress_win.rs          # Windows-specific taskbar API calls
 └── gtk_traits.rs                    # Custom GTK trait extensions
 
 ui/
+├── czkawka.cmb         # Cambalache project file (source of truth for the .ui files below)
 ├── main_window.ui      # Cambalache XML (65 KB) – entire main window layout
 ├── settings.ui         # Settings dialog
 ├── compare_images.ui   # Image comparison panel
 ├── popover_select.ui   # Selection filter popover
 ├── popover_sort.ui     # Sort popover
+├── popover_right_click.ui # Right-click context menu popover
 ├── about_dialog.ui     # About window
 └── progress.ui         # Scan progress dialog
 ```
@@ -108,6 +113,9 @@ pub struct GuiData {
     pub popovers_sort: GuiSortPopovers,
     pub entry_info: gtk4::Entry,
     pub text_view_errors: gtk4::TextView,
+    pub scrolled_window_errors: gtk4::ScrolledWindow,  // show/hide bottom error panel
+    pub file_dialog_include_exclude_folder_selection: gtk4::FileChooserNative,
+    pub file_dialog_move_to_folder: gtk4::FileChooserNative,
     pub taskbar_state: Rc<RefCell<TaskbarProgress>>,
     pub shared_buttons: Rc<RefCell<HashMap<NotebookMainEnum, …>>>,
     pub stop_flag: Arc<AtomicBool>,
