@@ -250,7 +250,7 @@ pub struct EmptyFilesArgs {
     #[clap(
         long,
         help = "Also find files filled entirely with non-printable characters",
-        long_help = "Also find non-empty files whose entire content consists of non-printable ASCII characters: null (0x00), tab (0x09), LF (0x0A), VT (0x0B), FF (0x0C), CR (0x0D), space (0x20). Implies --zero-byte-content."
+        long_help = "Also find non-empty files whose entire content consists of non-printable characters (any byte outside the visible ASCII range 0x21-0x7E: all control characters, space (0x20), DEL (0x7F), and non-ASCII bytes 0x80-0xFF). Implies --zero-byte-content."
     )]
     pub non_printable_content: bool,
 }
@@ -901,7 +901,7 @@ pub struct ExifRemoverArgs {
         short = 'o',
         long,
         help = "Override original files",
-        long_help = "Override original files instead of creating backup files with '_cleaned' suffix"
+        long_help = "Override original files instead of creating a copy with 'czkawka_cleaned_exif' inserted before the extension (e.g. 'photo.jpg' becomes 'photo.czkawka_cleaned_exif.jpg')"
     )]
     pub override_file: bool,
 }
@@ -1012,7 +1012,7 @@ pub struct DMethod {
         default_value = "NONE",
         value_parser = parse_delete_method,
         help = "Delete method (AEN, AEO, ON, OO, AEB, AES, OB, OS, HARD)",
-        long_help = "Method for selecting which files to delete from duplicate groups:\nAEN - All files Except Newest (keeps newest)\nAEO - All files Except Oldest (keeps oldest)\nON - Only 1 file, the Newest (deletes all but newest)\nOO - Only 1 file, the Oldest (deletes all but oldest)\nAEB - All files Except Biggest (keeps biggest)\nAES - All files Except Smallest (keeps smallest)\nOB - Only 1 file, the Biggest (deletes all but biggest)\nOS - Only 1 file, the Smallest (deletes all but smallest)\nHARD - create hard links to save space\nNONE - do not delete files (default)"
+        long_help = "Method for selecting which files to delete from duplicate groups:\nAEN - All files Except Newest (keeps only newest)\nAEO - All files Except Oldest (keeps only oldest)\nON - Only the Newest deleted (keeps all but newest)\nOO - Only the Oldest deleted (keeps all but oldest)\nAEB - All files Except Biggest (keeps only biggest)\nAES - All files Except Smallest (keeps only smallest)\nOB - Only the Biggest deleted (keeps all but biggest)\nOS - Only the Smallest deleted (keeps all but smallest)\nHARD - create hard links to save space\nNONE - do not delete files (default)"
     )]
     pub delete_method: DeleteMethod,
     #[clap(
@@ -1070,7 +1070,7 @@ pub struct ReferenceDirectories {
         short,
         long,
         help = "Reference directory(ies)",
-        long_help = "List of reference directory(ies) to search (absolute paths). Files in these directories will be scanned but won't appear in the results (useful for comparing against a known good set of files)."
+        long_help = "List of reference directory(ies) (absolute paths). Files here appear as the reference entry in results - only non-reference files that match a reference file are reported. Files found exclusively in reference directories are not listed."
     )]
     pub reference_directories: Vec<PathBuf>,
 }
@@ -1127,7 +1127,7 @@ pub struct IgnoreSameSize {
         short = 'J',
         long,
         help = "Ignore files with same size",
-        long_help = "Groups files by size and keeps only one file from each size group, ignoring files with identical sizes (useful for quick deduplication based solely on file size)."
+        long_help = "Within each similar-file group, removes entries that share a file size with another entry in the same group. Groups that shrink to a single entry are discarded."
     )]
     pub ignore_same_size: bool,
 }
@@ -1138,7 +1138,7 @@ pub struct IgnoreSameResolution {
         short = 'Z',
         long,
         help = "Ignore images with same resolution",
-        long_help = "Skips images that have identical resolution (width x height), keeping only one image per resolution group."
+        long_help = "Within each similar-file group, removes entries that share a resolution (WxH) with another entry in the same group. Groups that shrink to a single entry are discarded."
     )]
     pub ignore_same_resolution: bool,
 }
