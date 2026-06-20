@@ -17,7 +17,7 @@ use crate::common::cache::{CACHE_IMAGE_VERSION, load_and_split_cache_generalized
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::image::get_dynamic_image_from_path;
 use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, SimilarImagesStage, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::flc;
@@ -53,9 +53,8 @@ impl SimilarImages {
 
                 let progress_handler = prepare_thread_handler_common(
                     progress_sender,
-                    CurrentStage::SimilarImagesHidingHardLinks,
+                    ToolStage::SimilarImages(SimilarImagesStage::HidingHardLinks),
                     grouped_file_entries.len(),
-                    self.get_test_type(),
                     0,
                 );
                 let hide_hard_links = self.get_hide_hard_links();
@@ -133,9 +132,8 @@ impl SimilarImages {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SimilarImagesCalculatingHashes,
+            ToolStage::SimilarImages(SimilarImagesStage::CalculatingHashes),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|entry| entry.size).sum(),
         );
 
@@ -340,7 +338,7 @@ impl SimilarImages {
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
         let (base_hashes, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SimilarImagesComparingHashes, base_hashes.len(), self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SimilarImages(SimilarImagesStage::ComparingHashes), base_hashes.len(), 0);
 
         let mut hashes_parents: IndexMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
         let mut hashes_similarity: IndexMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)

@@ -21,9 +21,9 @@ use crate::common::consts::{
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::process_utils::run_command_interruptible;
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::common::{create_crash_message_generic, normalize_error_string};
 use crate::helpers::audio_checker;
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, CheckedTypesSingle, Info, TypeOfFile};
@@ -522,9 +522,8 @@ impl BrokenFiles {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::BrokenFilesChecking,
+            ToolStage::BrokenFilesChecking,
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|item| item.size).sum::<u64>(),
         );
 

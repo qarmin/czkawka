@@ -8,7 +8,7 @@ use log::info;
 use rayon::prelude::*;
 
 use crate::common::model::WorkContinueStatus;
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::check_if_stop_received;
 use crate::common::tool_data::{CommonToolData, DeleteMethod};
 use crate::common::traits::ResultEntry;
@@ -172,11 +172,9 @@ pub(crate) fn delete_elements<T: ResultEntry + Sized + Send + Sync>(
 ) -> DeleteResult {
     let dry_run = cd.dry_run;
     let move_to_trash = cd.move_to_trash;
-    let mut progress = ProgressData::get_empty_state(CurrentStage::DeletingFiles);
-    progress.bytes_to_check = delete_item_type.calculate_size_to_delete();
-    progress.entries_to_check = delete_item_type.calculate_entries_to_delete();
-
     let is_hardlinking = matches!(delete_item_type, DeleteItemType::HardlinkingFiles(_));
+    let stage = if is_hardlinking { ToolStage::HardlinkingFiles } else { ToolStage::DeletingFiles };
+    let progress = ProgressData::new(stage, delete_item_type.calculate_entries_to_delete(), delete_item_type.calculate_size_to_delete());
 
     let msg_common = format!(
         "{} items, total size: {} bytes, dry_run: {dry_run}",

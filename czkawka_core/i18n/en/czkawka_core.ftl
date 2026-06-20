@@ -110,3 +110,54 @@ core_ffmpeg_unknown_encoder = Cannot encode { $file } using the { $encoder } enc
 core_ffmpeg_error = FFmpeg error while processing { $file }, status code { $code }, reason { $reason }
 core_custom_command_missing_path_placeholder = Custom FFmpeg command must contain {"{PATH}"} as input file placeholder
 core_custom_command_empty = Custom FFmpeg command cannot be empty
+# Scan stage labels
+# Collecting / scanning files (the { $entries_checked } counter grows while the disk is walked)
+stage_collecting_files = Scanning { $entries_checked } file
+stage_collecting_folders = Scanning { $entries_checked } folder
+stage_scanning_name = Scanning name of { $entries_checked } file
+stage_scanning_size_name = Scanning size and name of { $entries_checked } file
+stage_scanning_size = Scanning size of { $entries_checked } file
+# Cache load/save (indeterminate, no counters)
+stage_filtering_outdated_cache = Filtering outdated cache entries
+stage_loading_prehash_cache = Loading prehash cache
+stage_saving_prehash_cache = Saving prehash cache
+stage_loading_hash_cache = Loading hash cache
+stage_saving_hash_cache = Saving hash cache
+stage_loading_tags_cache = Loading tags cache
+stage_saving_tags_cache = Saving tags cache
+stage_loading_fingerprints_cache = Loading fingerprints cache
+stage_saving_fingerprints_cache = Saving fingerprints cache
+stage_loading_exif_cache = Loading EXIF cache
+stage_saving_exif_cache = Saving EXIF cache
+# Per-tool work stages - items_stats holds "checked/total", size_stats holds the byte sizes
+stage_hiding_links = Hiding hard links { $items_stats }
+stage_analyzed_partial_hash = Analyzed partial hash of { $items_stats } files ({ $size_stats })
+stage_analyzed_full_hash = Analyzed full hash of { $items_stats } files ({ $size_stats })
+stage_checked_tags = Checked tags of { $items_stats }
+stage_compared_tags = Compared tags of { $items_stats }
+stage_checked_content = Checked content of { $items_stats } ({ $size_stats })
+stage_compared_content = Compared content of { $items_stats }
+stage_hashed_images = Hashed { $items_stats } images ({ $size_stats })
+stage_compared_image_hashes = Compared image hashes of { $items_stats }
+stage_hashed_videos = Hashed { $items_stats } videos
+stage_created_thumbnails = Created thumbnails for { $items_stats } videos
+stage_checked_videos = Checked { $items_stats } videos ({ $size_stats })
+stage_extracted_exif_tags = Extracted EXIF tags from { $items_stats } files ({ $size_stats })
+stage_checked_files = Checked { $items_stats } file ({ $size_stats })
+stage_checked_files_bad_extensions = Checked { $items_stats } file
+stage_checked_files_bad_names = Checked { $items_stats } file
+stage_checking_empty_files_content = Checking content of { $items_stats } files ({ $size_stats })
+# File operations (delete/rename/move/...); the "no_size" variant is used when no byte total is known
+stage_deleting_files = Deleting { $items_stats } file ({ $size_stats })
+stage_deleting_no_size_files = Deleting { $items_stats } file
+stage_renaming_files = Renaming { $items_stats } file
+stage_moving_files = Moving { $items_stats } file ({ $size_stats })
+stage_moving_no_size_files = Moving { $items_stats } file
+stage_hardlinking_files = Hardlinking { $items_stats } file ({ $size_stats })
+stage_hardlinking_no_size_files = Hardlinking { $items_stats } file
+stage_symlinking_files = Symlinking { $items_stats } file ({ $size_stats })
+stage_symlinking_no_size_files = Symlinking { $items_stats } file
+stage_optimizing_videos = Optimized { $items_stats } video ({ $size_stats })
+stage_optimizing_no_size_videos = Optimized { $items_stats } video
+stage_cleaning_exif = Cleaning EXIF from { $items_stats } file ({ $size_stats })
+stage_cleaning_no_size_exif = Cleaning EXIF from { $items_stats } file

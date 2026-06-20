@@ -200,7 +200,6 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_gallery_confirm_delete_text(flc!("gallery_confirm_delete").into());
     t.set_deleting_files_text(flc!("deleting_files").into());
     t.set_stop_text(flc!("stop").into());
-    t.set_files_suffix_text(flc!("files_suffix").into());
     t.set_scanning_fallback_text(flc!("scanning_fallback").into());
     t.set_app_subtitle_text(flc!("app_subtitle").into());
     t.set_app_license_text(flc!("app_license").into());

@@ -105,8 +105,7 @@ impl ScanResultHandler for GuiHandler {
                     }
                     let pd = ProgressData {
                         step_name: SharedString::from(p.step_name),
-                        current_progress: p.current,
-                        all_progress: p.all,
+                        all_progress: p.all_progress,
                         is_indeterminate: p.is_indeterminate,
                     };
                     win.global::<AppState>().set_progress(pd);

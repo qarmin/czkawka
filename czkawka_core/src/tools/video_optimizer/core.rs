@@ -12,9 +12,9 @@ use crate::common::cache::{load_and_split_cache_generalized_by_path, save_and_co
 use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage, VideoOptimizerStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, generate_thumbnail};
 use crate::tools::video_optimizer::{
     Info, VideoCropEntry, VideoCropParams, VideoCropSingleFixParams, VideoOptimizer, VideoOptimizerFixParams, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
@@ -100,9 +100,8 @@ impl VideoOptimizer {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::VideoOptimizerProcessingVideos,
+            ToolStage::VideoOptimizer(VideoOptimizerStage::ProcessingVideos),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|entry| entry.size).sum(),
         );
 
@@ -154,9 +153,8 @@ impl VideoOptimizer {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::VideoOptimizerProcessingVideos,
+            ToolStage::VideoOptimizer(VideoOptimizerStage::ProcessingVideos),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|entry| entry.size).sum(),
         );
 
@@ -201,9 +199,8 @@ impl VideoOptimizer {
     fn create_transcode_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>, params: &VideoTranscodeParams) -> WorkContinueStatus {
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::VideoOptimizerCreatingThumbnails,
+            ToolStage::VideoOptimizer(VideoOptimizerStage::CreatingThumbnails),
             self.video_transcode_result_entries.len(),
-            self.get_test_type(),
             0,
         );
 
@@ -274,9 +271,8 @@ impl VideoOptimizer {
     fn create_crop_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>, params: &VideoCropParams) -> WorkContinueStatus {
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::VideoOptimizerCreatingThumbnails,
+            ToolStage::VideoOptimizer(VideoOptimizerStage::CreatingThumbnails),
             self.video_crop_result_entries.len(),
-            self.get_test_type(),
             self.video_crop_result_entries.iter().map(|e| e.size).sum(),
         );
 

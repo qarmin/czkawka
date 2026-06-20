@@ -18,10 +18,10 @@ use crate::common::audio_fingerprint::calc_fingerprint_and_duration;
 use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::create_crash_message;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
-use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
+use crate::common::progress_data::{CacheLoadPhase, ProgressData, SameMusicMode, SameMusicStage, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::common::traits::ResultEntry;
 use crate::flc;
 use crate::tools::same_music::{GroupedFilesToCheck, Info, MusicEntry, MusicSimilarity, SameMusic, SameMusicParameters};
@@ -47,7 +47,6 @@ impl SameMusic {
             .stop_flag(stop_flag)
             .progress_sender(progress_sender)
             .common_data(&self.common_data)
-            .checking_method(self.params.check_type)
             .build()
             .run();
 
@@ -83,6 +82,12 @@ impl SameMusic {
             return WorkContinueStatus::Continue;
         }
 
+        let mode = match self.get_params().check_type {
+            CheckingMethod::AudioTags => SameMusicMode::AudioTags,
+            CheckingMethod::AudioContent => SameMusicMode::AudioContent,
+            _ => unreachable!("SameMusic only supports AudioTags and AudioContent"),
+        };
+
         // We only calculate fingerprints, for files with similar titles
         // This saves a lot of time, because we don't need to calculate and later compare fingerprints for files with different titles
 
@@ -98,7 +103,12 @@ impl SameMusic {
             self.music_to_check = mem::take(&mut self.music_entries).into_iter().map(|e| (e.path.to_string_lossy().to_string(), e)).collect();
         }
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingFingerprints, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            ToolStage::SameMusic(mode, SameMusicStage::LoadingFingerprintCache(CacheLoadPhase::Loading)),
+            0,
+            0,
+        );
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(false);
 
@@ -109,9 +119,8 @@ impl SameMusic {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SameMusicCalculatingFingerprints,
+            ToolStage::SameMusic(mode, SameMusicStage::CalculatingFingerprints),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(),
         );
         let configuration = &self.hash_preset_config;
@@ -147,7 +156,7 @@ impl SameMusic {
 
         progress_handler.join_thread();
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingFingerprints, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SameMusic(mode, SameMusicStage::SavingFingerprintCache), 0, 0);
 
         vec_file_entry.extend(records_already_cached.into_values());
 
@@ -168,7 +177,13 @@ impl SameMusic {
             return WorkContinueStatus::Continue;
         }
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheLoadingTags, 0, self.get_test_type(), 0);
+        let mode = match self.get_params().check_type {
+            CheckingMethod::AudioTags => SameMusicMode::AudioTags,
+            CheckingMethod::AudioContent => SameMusicMode::AudioContent,
+            _ => unreachable!("SameMusic only supports AudioTags and AudioContent"),
+        };
+
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SameMusic(mode, SameMusicStage::LoadingTagsCache(CacheLoadPhase::Loading)), 0, 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache(true);
 
@@ -177,13 +192,7 @@ impl SameMusic {
             return WorkContinueStatus::Stop;
         }
 
-        let progress_handler = prepare_thread_handler_common(
-            progress_sender,
-            CurrentStage::SameMusicReadingTags,
-            non_cached_files_to_check.len(),
-            self.get_test_type(),
-            0,
-        );
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SameMusic(mode, SameMusicStage::ReadingTags), non_cached_files_to_check.len(), 0);
 
         debug!("read_tags - starting reading tags");
         // Clean for duplicate files
@@ -204,7 +213,7 @@ impl SameMusic {
         debug!("read_tags - ended reading tags");
 
         progress_handler.join_thread();
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicCacheSavingTags, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SameMusic(mode, SameMusicStage::SavingTagsCache), 0, 0);
 
         vec_file_entry.extend(records_already_cached.into_values());
 
@@ -225,7 +234,12 @@ impl SameMusic {
         if self.music_entries.is_empty() {
             return WorkContinueStatus::Continue;
         }
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingTags, self.music_entries.len(), self.get_test_type(), 0);
+        let mode = match self.get_params().check_type {
+            CheckingMethod::AudioTags => SameMusicMode::AudioTags,
+            CheckingMethod::AudioContent => SameMusicMode::AudioContent,
+            _ => unreachable!("SameMusic only supports AudioTags and AudioContent"),
+        };
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SameMusic(mode, SameMusicStage::ComparingTags), self.music_entries.len(), 0);
 
         let mut old_duplicates: Vec<Vec<MusicEntry>> = vec![mem::take(&mut self.music_entries)];
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
@@ -419,7 +433,12 @@ impl SameMusic {
         let grouped_files_to_check = self.split_fingerprints_to_check();
         let base_files_number = grouped_files_to_check.iter().map(|g| g.base_files.len()).sum::<usize>();
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SameMusicComparingFingerprints, base_files_number, self.get_test_type(), 0);
+        let mode = match self.get_params().check_type {
+            CheckingMethod::AudioTags => SameMusicMode::AudioTags,
+            CheckingMethod::AudioContent => SameMusicMode::AudioContent,
+            _ => unreachable!("SameMusic only supports AudioTags and AudioContent"),
+        };
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SameMusic(mode, SameMusicStage::ComparingFingerprints), base_files_number, 0);
 
         let mut duplicated_music_entries = Vec::new();
         for group in grouped_files_to_check {

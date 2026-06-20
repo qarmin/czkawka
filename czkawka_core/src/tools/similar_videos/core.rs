@@ -19,7 +19,7 @@ use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::process_utils::run_with_long_operation_warnings;
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{CacheLoadPhase, ProgressData, SimilarVideosMode, SimilarVideosStage, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, VideoMetadata, generate_thumbnail};
@@ -77,11 +77,15 @@ impl SimilarVideos {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.common_data.text_messages.warnings.extend(warnings);
 
+                let mode = if self.params.check_audio_content {
+                    SimilarVideosMode::AudioContent
+                } else {
+                    SimilarVideosMode::VisualHash
+                };
                 let progress_handler = prepare_thread_handler_common(
                     progress_sender,
-                    CurrentStage::SimilarVideosHidingHardLinks,
+                    ToolStage::SimilarVideos(mode, SimilarVideosStage::HidingHardLinks),
                     grouped_file_entries.len(),
-                    self.get_test_type(),
                     0,
                 );
                 let hide_hard_links = self.get_hide_hard_links();
@@ -168,12 +172,16 @@ impl SimilarVideos {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
+        let mode = if self.params.check_audio_content {
+            SimilarVideosMode::AudioContent
+        } else {
+            SimilarVideosMode::VisualHash
+        };
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SimilarVideosCalculatingHashes,
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::CalculatingHashes),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
-            non_cached_files_to_check.values().map(|e| e.size).sum(),
+            0, // non_cached_files_to_check.values().map(|e| e.size).sum(), // Looks, that at least for now, there is no big difference between checking big and small files, so at least for now, only tracking number of files is enough
         );
 
         let non_cached_files_to_check: Vec<_> = non_cached_files_to_check.into_iter().map(|f| f.1).collect();
@@ -251,12 +259,17 @@ impl SimilarVideos {
 
     #[fun_time(message = "create_thumbnails", level = "debug")]
     pub(crate) fn create_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
-        let stage = if self.params.check_audio_content {
-            CurrentStage::SimilarVideosAudioCreatingThumbnails
+        let mode = if self.params.check_audio_content {
+            SimilarVideosMode::AudioContent
         } else {
-            CurrentStage::SimilarVideosCreatingThumbnails
+            SimilarVideosMode::VisualHash
         };
-        let progress_handler = prepare_thread_handler_common(progress_sender, stage, self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(), self.get_test_type(), 0);
+        let stage = if self.params.check_audio_content {
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::CreatingAudioThumbnails)
+        } else {
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::CreatingThumbnails)
+        };
+        let progress_handler = prepare_thread_handler_common(progress_sender, stage, self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(), 0);
 
         let Some(config_cache_path) = get_config_cache_path() else {
             return WorkContinueStatus::Continue;
@@ -386,7 +399,17 @@ impl SimilarVideos {
             return WorkContinueStatus::Continue;
         }
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SimilarVideosAudioCacheLoading, 0, self.get_test_type(), 0);
+        let mode = if self.params.check_audio_content {
+            SimilarVideosMode::AudioContent
+        } else {
+            SimilarVideosMode::VisualHash
+        };
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::LoadingAudioCache(CacheLoadPhase::Loading)),
+            0,
+            0,
+        );
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) =
             load_and_split_cache_generalized_by_path(&get_similar_videos_audio_cache_file(), mem::take(&mut self.audio_to_check), self);
@@ -398,9 +421,8 @@ impl SimilarVideos {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SimilarVideosAudioCalculatingFingerprints,
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::CalculatingAudioFingerprints),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(),
         );
         let configuration = &self.audio_config;
@@ -438,7 +460,7 @@ impl SimilarVideos {
 
         progress_handler.join_thread();
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SimilarVideosAudioCacheSaving, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SimilarVideos(mode, SimilarVideosStage::SavingAudioCache), 0, 0);
 
         vec_audio_entries.extend(records_already_cached.into_values());
 
@@ -465,11 +487,15 @@ impl SimilarVideos {
             .filter(|e| e.audio_duration_seconds >= audio_min_duration_seconds)
             .collect();
 
+        let mode = if self.params.check_audio_content {
+            SimilarVideosMode::AudioContent
+        } else {
+            SimilarVideosMode::VisualHash
+        };
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SimilarVideosAudioComparingFingerprints,
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::ComparingAudioFingerprints),
             entries.len(),
-            self.get_test_type(),
             0,
         );
 

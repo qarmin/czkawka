@@ -10,9 +10,9 @@ use rayon::prelude::*;
 
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::tools::bad_names::{BadNameEntry, BadNames, BadNamesParameters, Info, NameFixerParams, NameIssues};
 
 impl BadNames {
@@ -56,9 +56,8 @@ impl BadNames {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::BadNamesChecking,
+            ToolStage::BadNamesChecking,
             self.files_to_check.len(),
-            self.get_test_type(),
             self.files_to_check.iter().map(|item| item.size).sum::<u64>(),
         );
 

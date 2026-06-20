@@ -254,7 +254,6 @@ gallery_back = Back
 gallery_confirm_delete = Yes, delete
 deleting_files = Deleting files...
 stop = Stop
-files_suffix = files
 scanning_fallback = Scanning...
 app_subtitle = In honour of the Battle of Cedynia (972 CE)
 app_license = Frontend for Czkawka Core - GPL-3.0
@@ -274,37 +273,6 @@ gallery_confirm_delete_warning = All items are selected in { $unsafe_groups } gr
 same_music_fingerprint_warning = Calculating and comparing audio fingerprints is very resource-intensive and may take a long time. It is recommended to use Krokiet on a desktop system for this task.
 
 # Scan stage labels (shown during scan progress)
-stage_collecting_files = Collecting files
-stage_scanning_name = Scanning by name
-stage_scanning_size_name = Scanning by name and size
-stage_scanning_size = Scanning by size
-stage_pre_hash = Pre-hashing
-stage_full_hash = Hashing
-stage_loading_cache = Loading cache
-stage_saving_cache = Saving cache
-stage_calculating_image_hashes = Calculating image hashes
-stage_comparing_images = Comparing images
-stage_calculating_video_hashes = Calculating video hashes
-stage_checking_files = Checking files
-stage_checking_extensions = Checking extensions
-stage_checking_names = Checking names
-stage_reading_music_tags = Reading music tags
-stage_comparing_tags = Comparing tags
-stage_calculating_music_fingerprints = Calculating music fingerprints
-stage_comparing_fingerprints = Comparing fingerprints
-stage_extracting_exif = Reading EXIF tags
-stage_creating_video_thumbnails = Creating video thumbnails
-stage_processing_videos = Processing videos
-stage_deleting = Deleting files
-stage_renaming = Renaming files
-stage_moving = Moving files
-stage_hardlinking = Creating hard links
-stage_symlinking = Creating symlinks
-stage_optimizing_videos = Optimizing videos
-stage_cleaning_exif = Cleaning EXIF
-stage_all_hiding_links = Hiding hard links
-stage_empty_files_checking_content = Checking file content
-
 # Group headers in scan results
 duplicates_group_header = { $count } files  x  { $per_file } / file  =  { $total } total
 similar_images_group_header = { $count } similar images
