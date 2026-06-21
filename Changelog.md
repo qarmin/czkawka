@@ -37,6 +37,8 @@ The source code remains in the repository and compatibility with `czkawka_core` 
 - Fixed a bug where similar videos were not deleted when using reference-folder mode - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 - Replaced `nom-exif` with `little_exif` for reading EXIF orientation data - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 - Fixed reversed logic of hiding hardlinks in similar images/videos modes - [#1952](https://github.com/qarmin/czkawka/pull/1952)
+- Added a `$TRASH` excluded-items preset (alongside the existing `DEFAULT`) to exclude common Trash/Recycle Bin paths from scans - [#1962](https://github.com/qarmin/czkawka/pull/1962)
+- Reworked internal progress stage tracking, to unify progress calculations across all backends - [#1962](https://github.com/qarmin/czkawka/pull/1962)
 
 ### CLI
 
@@ -58,6 +60,7 @@ The source code remains in the repository and compatibility with `czkawka_core` 
 - Fixed shortest/longest path selection modes, which previously compared only paths without file names - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 - Ability to restore save/restore data in custom popup - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 - Added "Rename on conflict" option to the move/copy popup to automatically rename files instead of skipping them - [#1948](https://github.com/qarmin/czkawka/pull/1948)
+- Added the ability to rename items - [#1962](https://github.com/qarmin/czkawka/pull/1962)
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)

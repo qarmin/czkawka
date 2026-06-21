@@ -662,23 +662,21 @@ Progress is sent over a `crossbeam_channel::Sender<ProgressData>`:
 
 ```rust
 use crossbeam_channel::unbounded;
-use czkawka_core::common::progress_data::{ProgressData, CurrentStage};
+use czkawka_core::common::progress_data::ProgressData;
 
 let (progress_tx, progress_rx) = unbounded::<ProgressData>();
 
 // Spawn receiver before calling search
 std::thread::spawn(move || {
     for progress in progress_rx {
+        // `to_display()` returns everything a frontend needs to render this update -
+        // a fully translated label and ready-to-show percentages - without the
+        // frontend having to branch on the stage itself.
+        let display = progress.to_display();
         println!(
-            "[{:?}] stage {}/{}: {}/{} entries",
-            progress.sstage,
-            progress.current_stage_idx,
-            progress.max_stage_idx,
-            progress.entries_checked,
-            progress.entries_to_check,
+            "{} (overall: {}%, current stage: {:?}%)",
+            display.label, display.all_progress, display.current_progress,
         );
-        // Use progress.bytes_checked / progress.bytes_to_check for byte-level progress
-        // Use CurrentStage::check_if_loading_saving_cache() to detect indeterminate phases
     }
 });
 
@@ -686,14 +684,13 @@ tool.search(&stop_flag, Some(&progress_tx));
 ```
 
 `ProgressData` fields:
-- `sstage: CurrentStage` - which sub-step is running (e.g. `DuplicateFullHashing`, `SimilarImagesCalculatingHashes`)
-- `current_stage_idx / max_stage_idx: u8` - overall progress through tool stages
+- `stage: ToolStage` - which sub-step is running (e.g. `ToolStage::Duplicate(DuplicateStage::FullHashing)`, `ToolStage::SimilarImages(SimilarImagesStage::CalculatingHashes)`)
 - `entries_checked / entries_to_check: usize` - item-level progress within the current stage
 - `bytes_checked / bytes_to_check: u64` - byte-level progress (set for hashing stages)
-- `tool_type: ToolType` - which tool is running
-- `checking_method: CheckingMethod` - which mode is active
 
-`CurrentStage::check_if_loading_saving_cache()` returns `true` during cache load/save phases, where `entries_to_check` is 0 and no progress bar can be shown (use an indeterminate indicator instead).
+`ToolStage` is a nested enum - top-level variants like `ToolStage::Duplicate`/`ToolStage::SimilarImages` carry a tool-specific sub-stage enum (`DuplicateStage`, `SimilarImagesStage`, ...), so a stage can't be paired with a tool it doesn't belong to. Useful queries: `ToolStage::is_cache_loading_saving()` (cache phases, where `entries_to_check` is 0 and no progress bar can be shown), `ToolStage::is_indeterminate()`, `ToolStage::current_stage_idx()` / `max_stage_idx()`.
+
+If you need lower-level access than `to_display()` (e.g. a custom UI), call `ProgressData::label()` for just the translated string, or `item_progress()` / `all_progress()` for the raw percentages.
 
 ### Stop flag
 

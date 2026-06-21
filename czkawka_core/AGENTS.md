@@ -207,22 +207,23 @@ match result {
 
 ## Progress Reporting (`src/common/progress_data.rs` + `src/common/progress_stop_handler.rs`)
 
-`ProgressData`/`CurrentStage` are defined in `progress_data.rs`; `ProgressThreadHandler` and
+`ProgressData`/`ToolStage` are defined in `progress_data.rs`; `ProgressThreadHandler` and
 `check_if_stop_received` live in `progress_stop_handler.rs`.
 
 ```rust
 pub struct ProgressData {
-    pub sstage: CurrentStage,       // Current operation
-    pub checking_method: CheckingMethod,
-    pub current_stage_idx: u8,      // Index of current stage
-    pub max_stage_idx: u8,          // Max stages for this tool
+    pub stage: ToolStage,           // Current operation
     pub entries_checked: usize,
     pub entries_to_check: usize,
     pub bytes_checked: u64,
     pub bytes_to_check: u64,
-    pub tool_type: ToolType,
 }
 ```
+
+`ToolStage` is a nested enum (`ToolStage::Duplicate(DuplicateStage)`, `ToolStage::SimilarImages(SimilarImagesStage)`, ...) so a
+stage can't be paired with a tool it doesn't belong to - this replaces the old flat `CurrentStage` enum plus its runtime
+`ProgressData::validate()` assertions. Call `progress.to_display()` to get a fully translated, ready-to-render
+`ProgressDisplay` (label + percentages) instead of branching on the stage in frontend code.
 
 `ProgressThreadHandler` spawns a background thread that polls `AtomicUsize`/`AtomicU64`
 counters and sends `ProgressData` to the frontend channel every ~200 ms.

@@ -1,3 +1,4 @@
+use std::path::{MAIN_SEPARATOR, Path};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
@@ -43,8 +44,6 @@ pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressD
 fn connect_rename_single_file(app: &MainWindow) {
     let a = app.as_weak();
     app.global::<Callabler>().on_rename_single_file(move |idx, new_name| {
-        use std::path::{MAIN_SEPARATOR, Path};
-
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
         let model = active_tab.get_tool_model(&app);
@@ -56,7 +55,7 @@ fn connect_rename_single_file(app: &MainWindow) {
         };
 
         let new_name = new_name.trim();
-        if new_name.is_empty() || new_name.contains('/') || new_name.contains('\\') {
+        if !is_valid_rename_target_name(new_name) {
             warn!("Single rename rejected (row {idx}): invalid name {new_name:?}");
             report_failure(&app, crate::flk!("rust_rename_single_invalid_name"));
             return;
@@ -78,16 +77,8 @@ fn connect_rename_single_file(app: &MainWindow) {
             return;
         }
 
-        let old_full_path = if folder.is_empty() {
-            old_name.clone()
-        } else {
-            format!("{folder}{MAIN_SEPARATOR}{old_name}")
-        };
-        let new_full_path = if folder.is_empty() {
-            new_name.to_string()
-        } else {
-            format!("{folder}{MAIN_SEPARATOR}{new_name}")
-        };
+        let old_full_path = build_full_path(&folder, &old_name);
+        let new_full_path = build_full_path(&folder, new_name);
 
         if Path::new(&new_full_path).exists() {
             warn!("Single rename rejected: target {new_full_path:?} already exists");
@@ -119,8 +110,6 @@ fn connect_rename_single_file(app: &MainWindow) {
     // by separate warnings), so it only reports a genuine pre-existing target.
     let a = app.as_weak();
     app.global::<Callabler>().on_rename_target_exists(move |idx, new_name| {
-        use std::path::{MAIN_SEPARATOR, Path};
-
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
         let model = active_tab.get_tool_model(&app);
@@ -128,7 +117,7 @@ fn connect_rename_single_file(app: &MainWindow) {
         let name_idx = active_tab.get_str_name_idx();
 
         let new_name = new_name.trim();
-        if new_name.is_empty() || new_name.contains('/') || new_name.contains('\\') {
+        if !is_valid_rename_target_name(new_name) {
             return false;
         }
 
@@ -144,13 +133,17 @@ fn connect_rename_single_file(app: &MainWindow) {
             return false;
         }
 
-        let new_full_path = if folder.is_empty() {
-            new_name.to_string()
-        } else {
-            format!("{folder}{MAIN_SEPARATOR}{new_name}")
-        };
+        let new_full_path = build_full_path(&folder, new_name);
         Path::new(&new_full_path).exists()
     });
+}
+
+fn is_valid_rename_target_name(new_name: &str) -> bool {
+    !new_name.is_empty() && !new_name.contains('/') && !new_name.contains('\\')
+}
+
+fn build_full_path(folder: &str, name: &str) -> String {
+    if folder.is_empty() { name.to_string() } else { format!("{folder}{MAIN_SEPARATOR}{name}") }
 }
 
 impl ModelProcessor {
@@ -339,5 +332,23 @@ mod tests {
         assert!(new_model[1].val_str.iter().all(|s| s == "test_error"));
         assert!(!new_model[0].checked);
         assert!(new_model.iter().skip(2).all(|model| !model.checked));
+    }
+
+    #[test]
+    fn test_is_valid_rename_target_name() {
+        assert!(is_valid_rename_target_name("new_name.txt"));
+        assert!(!is_valid_rename_target_name(""));
+        assert!(!is_valid_rename_target_name("has/slash"));
+        assert!(!is_valid_rename_target_name("has\\backslash"));
+    }
+
+    #[test]
+    fn test_build_full_path_empty_folder() {
+        assert_eq!(build_full_path("", "file.txt"), "file.txt");
+    }
+
+    #[test]
+    fn test_build_full_path_with_folder() {
+        assert_eq!(build_full_path("/home/user", "file.txt"), format!("/home/user{MAIN_SEPARATOR}file.txt"));
     }
 }
