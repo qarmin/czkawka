@@ -45,11 +45,16 @@ Applies to every Rust crate in the workspace (`czkawka_core`, `czkawka_cli`, `cz
 - Prefer external crates over reimplementing them.
 
 **Comments**
-Keep comments minimal. Code should be self-documenting through clear naming. Add a comment only
-when the _why_ is not obvious from reading the code - algorithmic choices, non-obvious
-constraints, workarounds for external library bugs, etc. Do not restate what the code already
-says. Never use the `—`/`–` dash characters in code, comments, or commit messages - plain `-`
-only (ASCII box-drawing diagrams are the only exception).
+Keep comments short and minimal - a single terse line, not a paragraph. Code should be
+self-documenting through clear naming. Add a comment only when the _why_ is not easily inferred
+from reading the code - algorithmic choices, non-obvious constraints, workarounds for external
+library bugs, etc. Do not restate what the code already says. Never use the `—`/`–` dash
+characters in code, comments, or commit messages - plain `-` only (ASCII box-drawing diagrams are
+the only exception).
+
+Exception: `czkawka_core` is a library - every frontend in this workspace depends on it, and so do
+external consumers who only read its public API, not its internals. Its `pub fn`/`pub struct`
+surface warrants more explanation than the rest of the workspace; see `czkawka_core/AGENTS.md`.
 
 **Tests, fuzzers, benchmarks**
 - Cover as much code as possible with tests; keep them readable with explicit `assert_eq!` and

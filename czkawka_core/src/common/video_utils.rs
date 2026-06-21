@@ -9,10 +9,11 @@ use image::{GenericImage, RgbImage};
 use serde::{Deserialize, Serialize};
 
 use crate::common::consts::VIDEO_RESOLUTION_LIMIT;
-use crate::common::process_utils::{disable_windows_console_window, run_with_long_operation_warnings};
+use crate::common::process_utils::disable_windows_console_window;
 use crate::common::progress_stop_handler::check_if_stop_received;
 use crate::flc;
 use crate::helpers::ffprobe::ffprobe;
+use crate::helpers::long_operation_watcher::run_with_long_operation_warnings;
 
 pub const VIDEO_THUMBNAILS_SUBFOLDER: &str = "video_thumbnails";
 

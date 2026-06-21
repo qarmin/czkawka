@@ -23,7 +23,9 @@ pub fn make_file_model(items: Vec<FileItem>) -> ModelRc<FileEntry> {
 }
 
 pub fn toggle_row(model: &ModelRc<FileEntry>, index: usize) {
-    let Some(mut entry) = model.row_data(index) else { return };
+    let mut entry = model
+        .row_data(index)
+        .unwrap_or_else(|| panic!("toggle_row: index {index} out of bounds (row_count={})", model.row_count()));
     if !entry.is_header && !entry.is_reference {
         entry.checked = !entry.checked;
         model.set_row_data(index, entry);
@@ -208,10 +210,10 @@ mod tests {
     }
 
     #[test]
-    fn toggle_row_out_of_bounds_is_noop() {
+    #[should_panic(expected = "toggle_row: index 99 out of bounds")]
+    fn toggle_row_out_of_bounds_panics() {
         let model = make_model(vec![make_entry(false, false, false)]);
         toggle_row(&model, 99);
-        assert!(!model.as_any().downcast_ref::<VecModel<FileEntry>>().unwrap().row_data(0).unwrap().checked);
     }
 
     #[test]

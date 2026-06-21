@@ -143,7 +143,11 @@ fn is_valid_rename_target_name(new_name: &str) -> bool {
 }
 
 fn build_full_path(folder: &str, name: &str) -> String {
-    if folder.is_empty() { name.to_string() } else { format!("{folder}{MAIN_SEPARATOR}{name}") }
+    if folder.is_empty() {
+        name.to_string()
+    } else {
+        format!("{folder}{MAIN_SEPARATOR}{name}")
+    }
 }
 
 impl ModelProcessor {

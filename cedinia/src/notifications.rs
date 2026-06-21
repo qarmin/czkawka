@@ -304,7 +304,6 @@ fn send_notification(title: &str, body: &str) {
             let sig_bool = RuntimeMethodSignature::from_str("(Z)Landroid/app/Notification$Builder;").unwrap();
             env.call_method(&builder, jni_str!("setAutoCancel"), &sig_bool.method_signature(), &[JValue::Bool(true)])?;
 
-            // Attach a PendingIntent so tapping the notification brings the app to the foreground.
             let pm: JObject = env
                 .call_method(&activity, jni_str!("getPackageManager"), jni_sig!(() -> android.content.pm.PackageManager), &[])?
                 .l()?;
@@ -318,11 +317,10 @@ fn send_notification(title: &str, body: &str) {
                 )?
                 .l()?;
             if !launch_intent.is_null() {
-                // android.content.Intent flags - bring the existing Activity to front instead of creating a new instance.
                 const FLAG_ACTIVITY_SINGLE_TOP: i32 = 0x2000_0000;
                 const FLAG_ACTIVITY_CLEAR_TOP: i32 = 0x0400_0000;
-                // android.app.PendingIntent flag, required on Android 12+ (API 31+). Numerically equal to
-                // FLAG_ACTIVITY_CLEAR_TOP but belongs to a different flag namespace.
+                // PendingIntent flag required on Android 12+ (API 31+); same numeric value as
+                // FLAG_ACTIVITY_CLEAR_TOP above but belongs to a different flag namespace.
                 const PENDING_INTENT_FLAG_IMMUTABLE: i32 = 0x0400_0000;
 
                 env.call_method(

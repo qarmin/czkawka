@@ -265,10 +265,7 @@ fn downloads_dir() -> Option<PathBuf> {
     }
 }
 
-// On Android the file logger never installs: android_logger grabs the global
-// `log` slot in android_main before czkawka_core's WriteLogger can, so cedinia.log
-// stays empty and the real log sink is logcat. A non-privileged app's logcat is
-// filtered by logd to its own UID, so this dumps exactly our process's lines.
+// Backup alongside cedinia.log: logd already filters logcat to our own UID.
 #[cfg(target_os = "android")]
 fn dump_logcat(dest: &Path) -> bool {
     let Ok(output) = std::process::Command::new("/system/bin/logcat").args(["-d", "-v", "threadtime"]).output() else {
@@ -281,7 +278,6 @@ fn dump_logcat(dest: &Path) -> bool {
 }
 
 fn export_logs_to_downloads() -> std::io::Result<PathBuf> {
-    // Flush any buffered terminal/file sinks so the freshest lines are on disk.
     log::logger().flush();
 
     let downloads = downloads_dir().ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "no downloads directory"))?;
@@ -290,8 +286,6 @@ fn export_logs_to_downloads() -> std::io::Result<PathBuf> {
 
     let mut exported = 0;
 
-    // Persistent log files (cedinia.log + rotations on desktop; on Android the
-    // DualLogger writes cedinia.log too).
     for f in collect_log_files() {
         if std::fs::metadata(&f).map_or(true, |m| m.len() == 0) {
             continue;

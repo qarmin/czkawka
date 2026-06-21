@@ -11,9 +11,7 @@ pub(crate) fn delete_path(path: &str) -> Result<(), String> {
     trash::delete(path).map_err(|e| e.to_string())
 }
 
-// Android has no trash support, so deletion here is permanent. Dispatch on the path type and call
-// the matching remove function, so the user sees the real error instead of a spurious directory-removal
-// error when removing a regular file fails.
+// No trash support on Android: deletion is permanent, dispatched by path type.
 #[cfg(target_os = "android")]
 pub(crate) fn delete_path(path: &str) -> Result<(), String> {
     let metadata = std::fs::symlink_metadata(path).map_err(|e| e.to_string())?;

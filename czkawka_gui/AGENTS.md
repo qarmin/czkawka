@@ -200,3 +200,11 @@ language preference.
 
 Optional features (forwarded to core): `heif`, `libraw`, `libavif`,
 `xdg_portal_trash`.
+
+---
+
+## Comments
+
+Short and minimal - see root `AGENTS.md`. Only add a comment where the code's behavior can't be
+inferred from reading it (a non-obvious constraint, a workaround, a cross-module coupling);
+never restate what the code already says.

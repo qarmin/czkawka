@@ -279,3 +279,35 @@ Cross-thread updates use `weak.upgrade_in_event_loop(|app| { … })`.
 
 `build.rs` compiles `ui/main_window.slint` with style `fluent-dark` (overridable
 via `SLINT_STYLE` env var).
+
+---
+
+## Comments
+
+Short and minimal - see root `AGENTS.md`. Only add a comment where the code's behavior can't be
+inferred from reading it (a non-obvious constraint, a workaround, a cross-module coupling);
+never restate what the code already says.
+
+---
+
+## Slint model `row_data()` - panic, don't silently no-op
+
+`ModelRc::row_data(index)` returns `Option<T>`. When `index` comes from a synchronous,
+user-triggered callback (the index was just produced by the model that owns it - a click handler,
+a toggle, a rename), an out-of-bounds result means the index and the model have already gone out
+of sync with each other - a programmer error, not a legitimate race. Panic loudly instead of
+swallowing it with `if let Some(...) = ... { }` or `let Some(...) = ... else { return };`: a silent
+no-op there hides the desync and risks corrupting whatever state depends on that row.
+
+```rust
+let mut entry = model
+    .row_data(index)
+    .unwrap_or_else(|| panic!("toggle_row: index {index} out of bounds (row_count={})", model.row_count()));
+```
+
+Two situations remain legitimate `if let Some(...)` / silent-skip:
+- The index comes from a `0..model.row_count()` loop bound - it cannot be out of range by
+  construction.
+- The lookup happens inside a background/timer task that is already guarded by an explicit
+  staleness check (e.g. a generation/scan-id comparison) - the data may legitimately be gone
+  because the user navigated away mid-flight; that is a real race, not a bug.

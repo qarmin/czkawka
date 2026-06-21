@@ -244,8 +244,7 @@ pub fn spawn_thumbnail_loader(tasks: Vec<(usize, usize, String)>, tx: std::sync:
                     let data = if cur >= limit {
                         ThumbnailData::Placeholder
                     } else {
-                        // Re-check cancel right before the expensive decode/resize so a stale
-                        // loader doesn't burn CPU/IO/battery after a newer scan superseded it.
+                        // Re-check right before the expensive decode so a superseded loader doesn't burn CPU/IO.
                         if cancel.load(Ordering::Relaxed) {
                             break;
                         }

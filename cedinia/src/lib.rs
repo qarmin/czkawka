@@ -63,9 +63,7 @@ fn setup_android_paths(android_app: &slint::android::AndroidApp) {
 #[cfg(target_os = "android")]
 #[unsafe(no_mangle)]
 fn android_main(android_app: slint::android::AndroidApp) {
-    // DATA_DIR must be set before setup_logger_cache so the file logger can
-    // resolve the cache folder; setup_logger_cache then installs the logger
-    // that fans out to BOTH logcat and cedinia.log.
+    // DATA_DIR must be set before setup_logger_cache, which resolves the cache folder from it.
     setup_android_paths(&android_app);
     crate::app::setup_logger_cache();
     log::info!("android_main: started");
@@ -87,11 +85,8 @@ fn android_main(android_app: slint::android::AndroidApp) {
     log::info!("android_main: app UI returned (exiting)");
 }
 
-// ASan smoke test: only fires when CEDINIA_ASAN_SMOKETEST is set (the asan_wrap.sh
-// exports it for `just android_asan smoke`). Triggers an out-of-bounds heap read,
-// which AddressSanitizer aborts on with a 'heap-buffer-overflow' report - a
-// non-instrumented build would not flag it, so seeing that report in logcat
-// proves ASan is actually active in the build. Harmless in normal runs.
+// Triggers a deliberate heap-buffer-overflow so ASan's abort proves it's active in the build.
+// Only fires when CEDINIA_ASAN_SMOKETEST is set (asan_wrap.sh sets it for `just android_asan smoke`).
 #[cfg(target_os = "android")]
 fn asan_smoketest_if_requested() {
     if std::env::var_os("CEDINIA_ASAN_SMOKETEST").is_none() {

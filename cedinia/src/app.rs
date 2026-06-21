@@ -343,11 +343,6 @@ pub(crate) fn setup_logger_cache() {
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("cedinia", "cedinia");
 
-    // Desktop: czkawka_core installs a TermLogger + rotating file WriteLogger.
-    // Android: android_logger owns logcat there, so its init_once would win the
-    // single global `log` slot and the file WriteLogger would silently never
-    // install (cedinia.log stays 0 bytes). Instead we install one logger that
-    // fans out to BOTH logcat and a file, so the export actually has content.
     #[cfg(not(target_os = "android"))]
     setup_logger(false, "cedinia", filtering_messages);
     #[cfg(target_os = "android")]
@@ -371,10 +366,10 @@ impl log::Log for DualLogger {
     }
 
     fn log(&self, record: &log::Record) {
-        // logcat keeps its full output (AndroidLogger applies its own level).
+        // logcat gets everything (AndroidLogger applies its own level); the file is filtered
+        // to match the desktop logger so the exported log stays on-topic.
         self.android.log(record);
 
-        // The file mirrors the desktop filter so the exported log stays on-topic.
         if !self.enabled(record.metadata()) || !filtering_messages(record) {
             return;
         }
@@ -404,7 +399,6 @@ fn setup_android_logger() {
 
     let file = czkawka_core::common::config_cache_path::get_config_cache_path().and_then(|p| {
         let path = p.cache_folder.join("cedinia.log");
-        // Bound growth across launches: start a fresh file once it passes 50 MiB.
         let truncate = std::fs::metadata(&path).map_or(false, |m| m.len() > 50 * 1024 * 1024);
         let mut opts = std::fs::OpenOptions::new();
         opts.create(true);
@@ -425,8 +419,7 @@ fn setup_android_logger() {
         log::set_max_level(log::LevelFilter::Debug);
     }
 
-    // Route panics into the logger (and thus the file) - log_panics is not a
-    // direct dependency here, so a minimal hook does the job.
+    // Route panics into the logger/file without pulling in the log_panics crate.
     std::panic::set_hook(Box::new(|info| {
         log::error!("PANIC: {info}");
     }));

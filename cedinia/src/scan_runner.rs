@@ -169,9 +169,7 @@ pub trait ScanResultHandler: Send + Sync + 'static {
     fn on_result(&self, result: ScanResult);
 }
 
-/// RAII guard that acquires a WakeLock on construction and releases it on drop.
-/// Keeps the CPU running while a scan executes in the background so Android
-/// does not throttle the worker thread.
+/// Holds a WakeLock for the scan's duration so Android doesn't throttle the worker thread.
 #[cfg(target_os = "android")]
 struct ScanWakeLock;
 
@@ -216,9 +214,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
         }
 
         scan_id += 1;
-        // Acquire a CPU WakeLock for the duration of the scan so Android does
-        // not throttle this worker thread when the app is in the background.
-        // The guard is automatically released via Drop at the end of the block.
         #[cfg(target_os = "android")]
         let _wakelock = ScanWakeLock::acquire();
 

@@ -338,3 +338,13 @@ Optional (behind features):
 - `xdg_portal_trash` – FlatPak trash via XDG portal
 - `blake_pure` → `blake3/pure` – pure-Rust Blake3 (no SIMD asm), for targets where the asm
   backend doesn't build
+
+---
+
+## Comments
+
+Short and minimal, same baseline as the rest of the workspace (root `AGENTS.md`). The one
+exception in this workspace: `czkawka_core` is a library every frontend depends on, and external
+consumers often read only its `pub fn`/`pub struct` surface, not the internals. That public API
+may carry a bit more explanation than code elsewhere in the repo - still terse, no paragraphs,
+just enough to cover what isn't obvious from the signature alone.

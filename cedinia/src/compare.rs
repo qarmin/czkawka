@@ -11,8 +11,6 @@ use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
 use crate::{AppState, CompareImageData, MainWindow};
 
-// Cancel token
-
 thread_local! {
     static CANCEL_TOKEN: RefCell<Arc<AtomicBool>> =
         RefCell::new(Arc::new(AtomicBool::new(false)));
@@ -27,8 +25,6 @@ fn new_cancel_token() -> Arc<AtomicBool> {
 fn request_cancel() {
     CANCEL_TOKEN.with(|t| t.borrow().store(true, Ordering::Relaxed));
 }
-
-// Generation counters
 
 thread_local! {
     static DIFF_GEN: RefCell<Arc<AtomicU64>> =
@@ -77,8 +73,6 @@ fn next_open_gen() -> (Arc<AtomicU64>, u64) {
     })
 }
 
-// Raw pixel buffer
-
 struct RawPixels {
     data: Vec<u8>,
     width: u32,
@@ -94,8 +88,6 @@ impl RawPixels {
         slint::Image::from_rgba8(buf)
     }
 }
-
-// Image loading
 
 fn load_raw_image(path: &str, max_w: u32, max_h: u32) -> Option<RawPixels> {
     let meta = std::fs::metadata(path).ok()?;
@@ -127,15 +119,12 @@ fn load_raw_image(path: &str, max_w: u32, max_h: u32) -> Option<RawPixels> {
     }
 }
 
-// Diff computation
-
 fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {
     let left = load_raw_image(left_path, 1200, 900)?;
     let right = load_raw_image(right_path, 1200, 900)?;
 
     let (w, h) = (left.width, left.height);
 
-    // If dimensions differ, resize right to match left.
     let right_data: Vec<u8> = if (right.width, right.height) != (w, h) {
         let right_buf = image::ImageBuffer::<image::Rgba<u8>, _>::from_raw(right.width, right.height, right.data)?;
         let resized = imageops::resize(&right_buf, w, h, imageops::FilterType::Lanczos3);
@@ -144,7 +133,6 @@ fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {
         right.data
     };
 
-    // Per-pixel squared-difference → greyscale RGBA.
     let mut out: Vec<u8> = Vec::with_capacity((w * h * 4) as usize);
     for (lp, rp) in left.data.chunks_exact(4).zip(right_data.chunks_exact(4)) {
         let dr = (lp[0] as f32 - rp[0] as f32).powi(2);
@@ -158,8 +146,6 @@ fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {
     Some(RawPixels { data: out, width: w, height: h })
 }
 
-// Public wiring function
-
 pub fn wire_compare(app: &MainWindow) {
     wire_compare_open(app);
     wire_compare_set_left(app);
@@ -171,8 +157,6 @@ pub fn wire_compare(app: &MainWindow) {
     wire_compare_cancel_load(app);
     wire_compare_compute_diff(app);
 }
-
-// Individual callback wires
 
 fn wire_compare_open(app: &MainWindow) {
     let weak = app.as_weak();
@@ -203,7 +187,6 @@ fn wire_compare_set_left(app: &MainWindow) {
         state.set_compare_left_idx(compare_idx);
         state.set_compare_diff_image(slint::Image::default());
 
-        // Load the image on a background thread to avoid blocking the UI.
         let (gen_counter, gen_val) = next_set_left_gen();
         let weak2 = weak.clone();
         thread::spawn(move || {
@@ -245,7 +228,6 @@ fn wire_compare_set_right(app: &MainWindow) {
         state.set_compare_right_idx(compare_idx);
         state.set_compare_diff_image(slint::Image::default());
 
-        // Load the image on a background thread to avoid blocking the UI.
         let (gen_counter, gen_val) = next_set_right_gen();
         let weak2 = weak.clone();
         thread::spawn(move || {
@@ -286,26 +268,27 @@ fn wire_compare_toggle_checkbox(app: &MainWindow) {
         let group_idx = item.group_idx as usize;
         let item_idx = item.item_idx as usize;
 
-        // Sync checked state back into the flat similar_images_model.
+        // checked state lives in three separate models (flat, gallery groups, compare) - update all.
         let flat_model = app.get_similar_images_model();
-        if let Some(mut row) = flat_model.row_data(flat_idx) {
-            row.checked = new_checked;
-            flat_model.set_row_data(flat_idx, row);
-        }
+        let mut row = flat_model
+            .row_data(flat_idx)
+            .unwrap_or_else(|| panic!("wire_compare_toggle_checkbox: flat_idx {flat_idx} out of bounds (row_count={})", flat_model.row_count()));
+        row.checked = new_checked;
+        flat_model.set_row_data(flat_idx, row);
 
-        // Sync into similar_images_groups (gallery thumbnails reflect selection).
         let groups = app.get_similar_images_groups();
-        if let Some(group) = groups.row_data(group_idx)
-            && let Some(mut gi) = group.items.row_data(item_idx)
-        {
-            gi.checked = new_checked;
-            group.items.set_row_data(item_idx, gi);
-        }
+        let group = groups
+            .row_data(group_idx)
+            .unwrap_or_else(|| panic!("wire_compare_toggle_checkbox: group_idx {group_idx} out of bounds (row_count={})", groups.row_count()));
+        let mut gi = group
+            .items
+            .row_data(item_idx)
+            .unwrap_or_else(|| panic!("wire_compare_toggle_checkbox: item_idx {item_idx} out of bounds in group {group_idx}"));
+        gi.checked = new_checked;
+        group.items.set_row_data(item_idx, gi);
 
-        // Update compare_images model entry.
         update_compare_checked(&images_model, cidx, new_checked);
 
-        // Keep the global selected_count in sync.
         let delta: i64 = if new_checked { 1 } else { -1 };
         let cur = state.get_selected_count() as i64 + delta;
         state.set_selected_count(cur.max(0) as i32);
@@ -401,8 +384,6 @@ fn wire_compare_compute_diff(app: &MainWindow) {
     });
 }
 
-// open_group
-
 fn open_group(app: &MainWindow, group_idx: usize) {
     let groups = app.get_similar_images_groups();
     let state = app.global::<AppState>();
@@ -452,7 +433,6 @@ fn open_group(app: &MainWindow, group_idx: usize) {
     let left_path = compare_data.first().map(|s| s.path.to_string()).unwrap_or_default();
     let right_path = compare_data.get(right_idx as usize).map(|s| s.path.to_string()).unwrap_or_default();
 
-    // Set up the full data model and show the overlay on the UI thread.
     state.set_compare_current_group_idx(group_idx as i32);
     state.set_compare_images(ModelRc::new(VecModel::from(compare_data)));
     state.set_compare_left_idx(left_idx);
@@ -466,7 +446,7 @@ fn open_group(app: &MainWindow, group_idx: usize) {
     state.set_compare_loading_total(total);
     state.set_compare_visible(true);
 
-    // Load full-size images in the background (only RawPixels are sent - they are Send).
+    // RawPixels (not slint::Image) crosses the thread boundary - slint::Image isn't Send.
     let cancel = new_cancel_token();
     let (open_gen_counter, open_gen_val) = next_open_gen();
     let weak = app.as_weak();
