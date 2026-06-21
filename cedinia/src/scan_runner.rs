@@ -5,13 +5,12 @@ use std::thread;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::model::{CheckingMethod, HashType};
-use czkawka_core::common::progress_data::{CurrentStage, ProgressData as CoreProgress};
+use czkawka_core::common::progress_data::ProgressData as CoreProgress;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::{GeometricInvariance, SimilarityPreset};
 
-use crate::flc;
 use crate::scanners::{
     scan_bad_extensions, scan_bad_names, scan_big_files, scan_broken_files, scan_duplicate_files, scan_empty_files, scan_empty_folders, scan_exif_remover, scan_same_music,
     scan_similar_images, scan_similar_videos, scan_temporary_files,
@@ -54,7 +53,7 @@ impl Default for CommonFilters {
             max_file_size_bytes: None,
             recursive_search: true,
             use_cache: true,
-            hide_hard_links: true,
+            hide_hard_links: false,
             delete_outdated_cache: true,
             save_also_as_json: false,
             referenced_dirs: Vec::new(),
@@ -143,8 +142,7 @@ pub enum ScanRequest {
 #[derive(Debug, Clone)]
 pub struct ProgressUpdate {
     pub step_name: String,
-    pub current: i32,
-    pub all: i32,
+    pub all_progress: i32,
     pub is_indeterminate: bool,
     pub scan_id: u32,
 }
@@ -171,9 +169,7 @@ pub trait ScanResultHandler: Send + Sync + 'static {
     fn on_result(&self, result: ScanResult);
 }
 
-/// RAII guard that acquires a WakeLock on construction and releases it on drop.
-/// Keeps the CPU running while a scan executes in the background so Android
-/// does not throttle the worker thread.
+/// Holds a WakeLock for the scan's duration so Android doesn't throttle the worker thread.
 #[cfg(target_os = "android")]
 struct ScanWakeLock;
 
@@ -218,9 +214,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
         }
 
         scan_id += 1;
-        // Acquire a CPU WakeLock for the duration of the scan so Android does
-        // not throttle this worker thread when the app is in the background.
-        // The guard is automatically released via Drop at the end of the block.
         #[cfg(target_os = "android")]
         let _wakelock = ScanWakeLock::acquire();
 
@@ -365,76 +358,6 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
     }
 }
 
-fn stage_uses_bytes(stage: CurrentStage) -> bool {
-    matches!(
-        stage,
-        CurrentStage::DuplicatePreHashing | CurrentStage::DuplicateFullHashing | CurrentStage::SimilarImagesCalculatingHashes | CurrentStage::SameMusicCalculatingFingerprints
-    )
-}
-
-fn stage_label(stage: CurrentStage) -> String {
-    match stage {
-        CurrentStage::CollectingFiles => flc!("stage_collecting_files"),
-        CurrentStage::DuplicateScanningName => flc!("stage_scanning_name"),
-        CurrentStage::DuplicateScanningSizeName => flc!("stage_scanning_size_name"),
-        CurrentStage::DuplicateScanningSize => flc!("stage_scanning_size"),
-        CurrentStage::DuplicatePreHashing => flc!("stage_pre_hash"),
-        CurrentStage::DuplicateFullHashing => flc!("stage_full_hash"),
-        CurrentStage::DuplicateCacheLoading
-        | CurrentStage::DuplicatePreHashCacheLoading
-        | CurrentStage::SameMusicCacheLoadingTags
-        | CurrentStage::SameMusicCacheLoadingFingerprints
-        | CurrentStage::ExifRemoverCacheLoading
-        | CurrentStage::SimilarVideosAudioCacheLoading => flc!("stage_loading_cache"),
-        CurrentStage::DuplicateCacheSaving
-        | CurrentStage::DuplicatePreHashCacheSaving
-        | CurrentStage::SameMusicCacheSavingTags
-        | CurrentStage::SameMusicCacheSavingFingerprints
-        | CurrentStage::ExifRemoverCacheSaving
-        | CurrentStage::SimilarVideosAudioCacheSaving => flc!("stage_saving_cache"),
-        CurrentStage::SimilarImagesCalculatingHashes => flc!("stage_calculating_image_hashes"),
-        CurrentStage::SimilarImagesComparingHashes => flc!("stage_comparing_images"),
-        CurrentStage::SimilarVideosCalculatingHashes => flc!("stage_calculating_video_hashes"),
-        CurrentStage::BrokenFilesChecking => flc!("stage_checking_files"),
-        CurrentStage::BadExtensionsChecking => flc!("stage_checking_extensions"),
-        CurrentStage::BadNamesChecking => flc!("stage_checking_names"),
-        CurrentStage::SameMusicReadingTags => flc!("stage_reading_music_tags"),
-        CurrentStage::SameMusicComparingTags => flc!("stage_comparing_tags"),
-        CurrentStage::SimilarVideosAudioCalculatingFingerprints | CurrentStage::SimilarVideosAudioComparingFingerprints | CurrentStage::SameMusicCalculatingFingerprints => {
-            flc!("stage_calculating_music_fingerprints")
-        }
-        CurrentStage::SameMusicComparingFingerprints => flc!("stage_comparing_fingerprints"),
-        CurrentStage::ExifRemoverExtractingTags => flc!("stage_extracting_exif"),
-        CurrentStage::VideoOptimizerCreatingThumbnails | CurrentStage::SimilarVideosCreatingThumbnails | CurrentStage::SimilarVideosAudioCreatingThumbnails => {
-            flc!("stage_creating_video_thumbnails")
-        }
-        CurrentStage::VideoOptimizerProcessingVideos => flc!("stage_processing_videos"),
-        CurrentStage::DeletingFiles => flc!("stage_deleting"),
-        CurrentStage::RenamingFiles => flc!("stage_renaming"),
-        CurrentStage::MovingFiles => flc!("stage_moving"),
-        CurrentStage::HardlinkingFiles => flc!("stage_hardlinking"),
-        CurrentStage::SymlinkingFiles => flc!("stage_symlinking"),
-        CurrentStage::OptimizingVideos => flc!("stage_optimizing_videos"),
-        CurrentStage::CleaningExif => flc!("stage_cleaning_exif"),
-        CurrentStage::DuplicateHidingHardLinks | CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarVideosHidingHardLinks => flc!("stage_all_hiding_links"),
-        CurrentStage::EmptyFilesCheckingContent => flc!("stage_empty_files_checking_content"),
-    }
-}
-
-fn stage_label_full(pd: &CoreProgress) -> String {
-    let base = stage_label(pd.sstage);
-    let label = if stage_uses_bytes(pd.sstage) && pd.bytes_to_check > 0 {
-        format!("{base}  ({} / {})", fmt_size(pd.bytes_checked), fmt_size(pd.bytes_to_check))
-    } else {
-        base
-    };
-    if pd.max_stage_idx > 0 {
-        format!("{}/{}  {label}", pd.current_stage_idx + 1, pd.max_stage_idx + 1)
-    } else {
-        label
-    }
-}
-
 pub(crate) fn apply_filters<T: CommonData>(tool: &mut T, filters: &CommonFilters) {
     if !filters.excluded_items.is_empty() {
         tool.set_excluded_items(filters.excluded_items.clone());
@@ -466,12 +389,11 @@ pub(crate) fn spawn_progress_forwarder<H: ScanResultHandler + Sync>(handler: Arc
     let (ptx, prx) = unbounded::<CoreProgress>();
     let handle = thread::spawn(move || {
         while let Ok(pd) = prx.recv() {
-            let is_indeterminate = pd.sstage.check_if_loading_saving_cache();
+            let display = pd.to_display();
             let update = ProgressUpdate {
-                step_name: stage_label_full(&pd),
-                current: pd.entries_checked as i32,
-                all: pd.entries_to_check as i32,
-                is_indeterminate,
+                step_name: display.label,
+                all_progress: display.all_progress.max(0),
+                is_indeterminate: display.current_progress.is_none(),
                 scan_id,
             };
             handler.on_result(ScanResult::Progress(update));

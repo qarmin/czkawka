@@ -7,8 +7,7 @@ use std::time::{Duration, Instant};
 use crossbeam_channel::Sender;
 use fun_time::fun_time;
 
-use crate::common::model::{CheckingMethod, ToolType};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage};
 pub const LOOP_DURATION: u32 = 20;
 pub const SEND_PROGRESS_DATA_TIME_BETWEEN: u32 = 200;
 
@@ -59,15 +58,7 @@ impl ProgressStatus {
     }
 }
 
-pub(crate) fn prepare_thread_handler_common(
-    progress_sender: Option<&Sender<ProgressData>>,
-    sstage: CurrentStage,
-    max_items: usize,
-    test_type: (ToolType, CheckingMethod),
-    max_size: u64,
-) -> ProgressThreadHandler {
-    let (tool_type, checking_method) = test_type;
-    assert_ne!(tool_type, ToolType::None, "Cannot send progress data for ToolType::None");
+pub(crate) fn prepare_thread_handler_common(progress_sender: Option<&Sender<ProgressData>>, stage: ToolStage, max_items: usize, max_size: u64) -> ProgressThreadHandler {
     let progress_status = ProgressStatus::new();
     let progress_thread_running = Arc::new(AtomicBool::new(true));
 
@@ -81,18 +72,12 @@ pub(crate) fn prepare_thread_handler_common(
             loop {
                 if time_since_last_send.elapsed().as_millis() > SEND_PROGRESS_DATA_TIME_BETWEEN as u128 {
                     let progress_data = ProgressData {
-                        sstage,
-                        checking_method,
-                        current_stage_idx: sstage.get_current_stage(),
-                        max_stage_idx: tool_type.get_max_stage(checking_method),
+                        stage,
                         entries_checked: progress_status.items_counter.load(atomic::Ordering::Relaxed),
                         entries_to_check: max_items,
                         bytes_checked: progress_status.size_counter.load(atomic::Ordering::Relaxed),
                         bytes_to_check: max_size,
-                        tool_type,
                     };
-
-                    progress_data.validate();
 
                     progress_sender.send(progress_data).expect("Cannot send progress data");
                     time_since_last_send = Instant::now();
@@ -123,6 +108,7 @@ pub(crate) fn send_info_and_wait_for_ending_all_threads(progress_thread_run: &Ar
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::common::progress_data::DuplicateStage;
 
     #[test]
     fn test_progress_status_and_stop_flag() {
@@ -145,7 +131,7 @@ mod tests {
     #[test]
     fn test_progress_thread_handler_with_sender() {
         let (sender, _receiver) = crossbeam_channel::unbounded();
-        let handler = prepare_thread_handler_common(Some(&sender), CurrentStage::DuplicateFullHashing, 100, (ToolType::Duplicate, CheckingMethod::Hash), 10000);
+        let handler = prepare_thread_handler_common(Some(&sender), ToolStage::Duplicate(DuplicateStage::FullHashing), 100, 10000);
 
         assert_eq!(handler.items_counter().load(atomic::Ordering::Relaxed), 0);
         assert_eq!(handler.size_counter().load(atomic::Ordering::Relaxed), 0);
@@ -163,7 +149,7 @@ mod tests {
 
     #[test]
     fn test_progress_thread_handler_without_sender() {
-        let handler = prepare_thread_handler_common(None, CurrentStage::CollectingFiles, 50, (ToolType::EmptyFiles, CheckingMethod::None), 5000);
+        let handler = prepare_thread_handler_common(None, ToolStage::CollectingFiles(crate::common::model::CheckingMethod::None), 50, 5000);
 
         handler.increase_items(10);
         handler.increase_size(1000);
@@ -172,11 +158,5 @@ mod tests {
         assert_eq!(handler.size_counter().load(atomic::Ordering::Relaxed), 1000);
 
         handler.join_thread();
-    }
-
-    #[test]
-    #[should_panic(expected = "Cannot send progress data for ToolType::None")]
-    fn test_panics_on_none_tool_type() {
-        prepare_thread_handler_common(None, CurrentStage::CollectingFiles, 50, (ToolType::None, CheckingMethod::None), 5000);
     }
 }

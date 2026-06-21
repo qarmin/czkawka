@@ -17,9 +17,9 @@ czkawka_core/src/
 ├── lib.rs                         # Crate root; TOOLS_NUMBER constant
 ├── localizer_core.rs              # Fluent i18n loader (flc! macro)
 ├── common/
-│   ├── mod.rs                     # Shared helpers (format_time, split_path, …)
-│   ├── traits.rs                  # Core traits: Search, CommonData, PrintResults, …
-│   ├── tool_data.rs               # CommonToolData struct
+│   ├── mod.rs                     # Module declarations + re-exports only (no logic of its own)
+│   ├── traits.rs                  # Search, PrintResults, DeletingItems, FixingItems, ResultEntry, AllTraits
+│   ├── tool_data.rs               # CommonToolData struct + the CommonData trait (defined here, not traits.rs)
 │   ├── model.rs                   # ToolType, CheckingMethod, FileEntry, DeleteMethod
 │   ├── progress_data.rs           # ProgressData, CurrentStage enum
 │   ├── progress_stop_handler.rs   # ProgressThreadHandler, check_if_stop_received
@@ -32,6 +32,12 @@ czkawka_core/src/
 │   ├── extensions.rs              # Extensions struct (allowed/excluded filtering)
 │   ├── items.rs                   # ExcludedItems (glob pattern matching)
 │   ├── consts.rs                  # Extension lists: IMAGE_RS_EXTENSIONS, …
+│   ├── formatting.rs              # format_time and other display formatting helpers
+│   ├── path_utils.rs              # split_path, regex_check, normalize_windows_path
+│   ├── fs_ops.rs                  # make_hard_link, make_file_symlink, remove_single_file/folder
+│   ├── threads.rs                 # get_number_of_threads, set_number_of_threads
+│   ├── deletion.rs                # DeleteResult, DeleteItemType
+│   ├── audio_fingerprint.rs       # Chromaprint fingerprint calculation (used by same_music)
 │   ├── ffmpeg_utils.rs            # FFmpeg invocation helpers
 │   ├── video_utils.rs             # Video metadata extraction
 │   ├── image.rs                   # Image loading helpers
@@ -66,26 +72,38 @@ czkawka_core/src/
 
 ## Tool Module Layout
 
-Each tool lives in its own directory with three files:
+Each tool lives in its own directory, typically with these files:
 
 | File | Content |
 |------|---------|
 | `mod.rs` | Tool struct + `Info` struct + `Parameters` struct (if needed) |
 | `core.rs` | Internal scanning functions (`check_files_*`, `hash_calculation`, …) |
 | `traits.rs` | Trait implementations: `Search`, `CommonData`, `DeletingItems`, `PrintResults` |
+| `tests.rs` | Unit tests for the tool (every tool has one except `temporary/`) |
+
+A few tools don't fit the plain 4-file pattern: `bad_extensions/` adds a `workarounds.rs`, and
+`video_optimizer/` adds `encoding.rs` plus its own `core/` subdirectory
+(`video_converter.rs`, `video_cropper.rs`).
 
 Example - `EmptyFiles`:
 
 ```
 src/tools/empty_files/
-├── mod.rs      # pub struct EmptyFiles { common_data, information, empty_files }
+├── mod.rs      # pub struct EmptyFiles { common_data, information, files_to_check, params }
+│               #   params: EmptyFilesParameters
 ├── core.rs     # fn check_files() → WorkContinueStatus
+├── tests.rs    # Unit tests
 └── traits.rs   # impl Search, CommonData, PrintResults, DeletingItems, AllTraits
 ```
 
 ---
 
-## Core Traits (`src/common/traits.rs`)
+## Core Traits
+
+`CommonData` is the odd one out: it's defined in `src/common/tool_data.rs` next to
+`CommonToolData`, not in `traits.rs`. Every other trait below lives in `src/common/traits.rs`.
+Signatures are simplified for orientation - both files have more methods (mostly
+setter/getter pairs and default-impl helpers) than shown here.
 
 ```rust
 pub trait Search {
@@ -93,19 +111,21 @@ pub trait Search {
               progress_sender: Option<&Sender<ProgressData>>);
 }
 
+// src/common/tool_data.rs - NOT traits.rs
 pub trait CommonData {
     type Info;
     type Parameters;
     fn get_cd(&self) -> &CommonToolData;
     fn get_cd_mut(&mut self) -> &mut CommonToolData;
     fn found_any_items(&self) -> bool;
-    // + common setters/getters
+    // ~30 more setters/getters for directories, extensions, delete method, cache flags, …
 }
 
 pub trait PrintResults: CommonData {
     fn write_results<T: Write>(&self, w: &mut T) -> io::Result<()>;
     fn print_results_to_writer<T: Write>(&self, w: &mut T) -> io::Result<()>;
     fn save_results_to_file_as_json(&self, file: &str, pretty: bool) -> io::Result<()>;
+    // + write_base_search_paths, print_results_to_output/_to_file, save_all_in_one, …
 }
 
 pub trait DeletingItems {
@@ -185,20 +205,25 @@ match result {
 
 ---
 
-## Progress Reporting (`src/common/progress_stop_handler.rs`)
+## Progress Reporting (`src/common/progress_data.rs` + `src/common/progress_stop_handler.rs`)
+
+`ProgressData`/`ToolStage` are defined in `progress_data.rs`; `ProgressThreadHandler` and
+`check_if_stop_received` live in `progress_stop_handler.rs`.
 
 ```rust
 pub struct ProgressData {
-    pub sstage: CurrentStage,       // Current operation
-    pub current_stage_idx: u8,      // Index of current stage
-    pub max_stage_idx: u8,          // Max stages for this tool
+    pub stage: ToolStage,           // Current operation
     pub entries_checked: usize,
     pub entries_to_check: usize,
     pub bytes_checked: u64,
     pub bytes_to_check: u64,
-    pub tool_type: ToolType,
 }
 ```
+
+`ToolStage` is a nested enum (`ToolStage::Duplicate(DuplicateStage)`, `ToolStage::SimilarImages(SimilarImagesStage)`, ...) so a
+stage can't be paired with a tool it doesn't belong to - this replaces the old flat `CurrentStage` enum plus its runtime
+`ProgressData::validate()` assertions. Call `progress.to_display()` to get a fully translated, ready-to-render
+`ProgressDisplay` (label + percentages) instead of branching on the stage in frontend code.
 
 `ProgressThreadHandler` spawns a background thread that polls `AtomicUsize`/`AtomicU64`
 counters and sends `ProgressData` to the frontend channel every ~200 ms.
@@ -298,16 +323,28 @@ Tools that support reference directories: `Duplicate`, `SameMusic`,
 | `lofty` | Audio tag reading |
 | `symphonia` | Audio decoding |
 | `rusty-chromaprint` | Audio fingerprinting |
-| `vid_dup_finder_lib` | Video similarity |
 | `bincode` | Cache serialization |
 | `zip` | ZIP validation |
 | `i18n-embed` + `rust-embed` | Fluent translations |
 | `trash` | Move-to-trash |
 | `directories-next` | Config/cache path |
 | `fun_time` | `#[fun_time]` timing attribute |
+| `similario_core` | Video similarity (sibling path-dependency; replaced `vid_dup_finder_lib`) |
 
 Optional (behind features):
 - `heif` → `libheif-rs` – HEIC/HEIF image support
 - `libraw` → `rawler` / `libraw-rs` – RAW photo support
 - `libavif` – AVIF image support
 - `xdg_portal_trash` – FlatPak trash via XDG portal
+- `blake_pure` → `blake3/pure` – pure-Rust Blake3 (no SIMD asm), for targets where the asm
+  backend doesn't build
+
+---
+
+## Comments
+
+Short and minimal, same baseline as the rest of the workspace (root `AGENTS.md`). The one
+exception in this workspace: `czkawka_core` is a library every frontend depends on, and external
+consumers often read only its `pub fn`/`pub struct` surface, not the internals. That public API
+may carry a bit more explanation than code elsewhere in the repo - still terse, no paragraphs,
+just enough to cover what isn't obvious from the signature alone.

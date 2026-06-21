@@ -21,9 +21,9 @@ use crate::common::consts::{
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
 use crate::common::process_utils::run_command_interruptible;
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::common::{create_crash_message_generic, normalize_error_string};
 use crate::helpers::audio_checker;
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, CheckedTypesSingle, Info, TypeOfFile};
@@ -284,16 +284,9 @@ impl BrokenFiles {
         match File::open(&file_entry.path) {
             Ok(file) => {
                 let error = match audio_checker::parse_audio_file(file, stop_flag) {
-                    Err(e) => {
-                        let err_str = e.to_string();
-                        if err_str.contains("not supported codec") {
-                            None
-                        } else {
-                            Some(normalize_error_string(&err_str))
-                        }
-                    }
+                    Err(audio_checker::AudioCheckError::Other(err_str)) => Some(normalize_error_string(&err_str)),
                     Ok(None) => return None, // stop flag was set
-                    Ok(Some(())) => None,
+                    Err(audio_checker::AudioCheckError::UnsupportedCodec) | Ok(Some(())) => None,
                 };
                 file_entry.errors.insert(CheckedTypesSingle::Audio, error);
                 Some(Some(file_entry))
@@ -415,13 +408,36 @@ impl BrokenFiles {
     }
 
     fn check_broken_video(mut file_entry: BrokenEntry, stop_flag: &Arc<AtomicBool>, checked_types: CheckedTypes) -> Option<BrokenEntry> {
-        if checked_types.contains(CheckedTypes::VIDEO_FFPROBE) {
+        if checked_types.contains(CheckedTypes::VIDEO_FFPROBE) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfprobe) {
             file_entry = Self::check_broken_video_ffprobe(file_entry, stop_flag)?;
         }
-        if checked_types.contains(CheckedTypes::VIDEO_FFMPEG) {
+        if checked_types.contains(CheckedTypes::VIDEO_FFMPEG) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg) {
             file_entry = Self::check_broken_video_ffmpeg(file_entry, stop_flag)?;
         }
         Some(file_entry)
+    }
+
+    pub(crate) fn video_entry_missing_required_checks(file_entry: &BrokenEntry, checked_types: CheckedTypes) -> bool {
+        (checked_types.contains(CheckedTypes::VIDEO_FFPROBE) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfprobe))
+            || (checked_types.contains(CheckedTypes::VIDEO_FFMPEG) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg))
+    }
+
+    pub(crate) fn move_cached_entries_missing_required_checks(
+        records_already_cached: &mut BTreeMap<String, BrokenEntry>,
+        non_cached_files_to_check: &mut BTreeMap<String, BrokenEntry>,
+        checked_types: CheckedTypes,
+    ) {
+        let keys_to_recheck: Vec<String> = records_already_cached
+            .iter()
+            .filter(|(_, file_entry)| Self::video_entry_missing_required_checks(file_entry, checked_types))
+            .map(|(path, _)| path.clone())
+            .collect();
+
+        for path in keys_to_recheck {
+            if let Some(file_entry) = records_already_cached.remove(&path) {
+                non_cached_files_to_check.insert(path, file_entry);
+            }
+        }
     }
 
     #[fun_time(message = "load_cache", level = "debug")]
@@ -499,18 +515,19 @@ impl BrokenFiles {
             return WorkContinueStatus::Continue;
         }
 
-        let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache();
+        let (loaded_hash_map, mut records_already_cached, mut non_cached_files_to_check) = self.load_cache();
+
+        let checked_types = self.params.checked_types;
+        Self::move_cached_entries_missing_required_checks(&mut records_already_cached, &mut non_cached_files_to_check, checked_types);
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::BrokenFilesChecking,
+            ToolStage::BrokenFilesChecking,
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|item| item.size).sum::<u64>(),
         );
 
         let non_cached_files_to_check = non_cached_files_to_check.into_iter().collect::<Vec<_>>();
-        let checked_types = self.params.checked_types;
 
         debug!("look_for_broken_files - started finding for broken files");
         let mut vec_file_entry: Vec<BrokenEntry> = non_cached_files_to_check

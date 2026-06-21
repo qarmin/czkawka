@@ -6,29 +6,96 @@ All code, comments, commit messages, and documentation must be written in **Engl
 
 ---
 
-## Comments
+## Rust Style
 
-Keep comments minimal. Code should be self-documenting through clear naming. Add a comment only
-when the _why_ is not obvious from reading the code – algorithmic choices, non-obvious constraints,
-workarounds for external library bugs, etc. Do not restate what the code already says.
+Applies to every Rust crate in the workspace (`czkawka_core`, `czkawka_cli`, `czkawka_gui`,
+`krokiet`, `cedinia`). Program-specific deviations or elaborations live in that program's own
+`AGENTS.md`.
 
----
+**Formatting & lints**
+- Format with `cargo +nightly fmt`, then `cargo fmt` for stable compatibility
+  (`.rustfmt.toml`: `max_width = 120`, granular import grouping `group_imports = "StdExternalCrate"`).
+- Code must compile without clippy warnings. Suppress a lint locally only with a comment
+  explaining why.
 
-## Panics and `expect()`
-
-`expect()` (and `unwrap()` but only in tests) are acceptable and **preferred** over silently ignoring a failure when
-a failed call would leave the program in an inconsistent or corrupted state. This is visible
-throughout Krokiet's callback code: the Slint weak reference is upgraded with `expect()` because
-if the window is already gone there is nothing meaningful to do except crash.
-
-Rules of thumb:
-- Use `expect()` for logic invariants – things that _cannot_ fail unless there is a programming
-  error (e.g. "failed to upgrade MainWindow weak ref in callback that was just registered").
-- Use proper `Result`/`Option` propagation for _expected_ failures (I/O errors, missing files,
-  user-cancellable operations).
+**Errors & panics**
+- Prefer `?`, `ok_or_else`, `map_err` over panic-based flows.
+- `unwrap()` only in tests.
+- `expect()` in production only when BOTH hold: there is no correct recovery path, and
+  continuing would likely hide a serious bug - always with a precise, actionable message. This
+  is visible throughout Krokiet/Cedinia callback code: a Slint weak reference is upgraded with
+  `expect()` because if the window is already gone there is nothing meaningful to do except crash.
 - Never silently swallow errors with `let _ = ...` unless the failure is genuinely irrelevant.
-- Prefer `unwrap_or_default()` / `unwrap_or_else()` over `unwrap()` when a sensible fallback
-  exists.
+- Model domain errors with explicit types (`thiserror`/enums), not raw strings.
+- Wrap I/O errors with context (e.g. file path) instead of letting std's bare "Permission
+  denied" propagate - without the path it's hard to find the source.
+- Don't ignore `Result`; handle it explicitly.
+
+**Code shape**
+- Keep functions focused; once one grows past ~30-50 lines, extract its logical steps into
+  separate, well-named functions. Never carve a long function into sections with comment
+  headers or bare `{ ... }` scope blocks - a `// validate input` comment over a block is the
+  signal to pull it out into `validate_input(...)`, not to fence it off.
+- Name things by intent, not by container/type (`user_count`, not `vec_users_len`).
+- Make invalid states unrepresentable: enums over strings, `Option<T>` over sentinel values
+  (`-1`, empty string).
+- Prefer iterators and collection methods over manual index-based loops.
+- Prefer `#[derive(...)]` over manual impls when behavior is standard.
+- Avoid unnecessary copies and allocations; prefer references and `Cow` where it helps.
+- Prefer external crates over reimplementing them.
+
+**Comments**
+Keep comments short and minimal - a single terse line, not a paragraph. Code should be
+self-documenting through clear naming. Add a comment only when the _why_ is not easily inferred
+from reading the code - algorithmic choices, non-obvious constraints, workarounds for external
+library bugs, etc. Do not restate what the code already says. Never use the `—`/`–` dash
+characters in code, comments, or commit messages - plain `-` only (ASCII box-drawing diagrams are
+the only exception).
+
+Exception: `czkawka_core` is a library - every frontend in this workspace depends on it, and so do
+external consumers who only read its public API, not its internals. Its `pub fn`/`pub struct`
+surface warrants more explanation than the rest of the workspace; see `czkawka_core/AGENTS.md`.
+
+**Tests, fuzzers, benchmarks**
+- Cover as much code as possible with tests; keep them readable with explicit `assert_eq!` and
+  input data close to the assertions.
+- Add fuzzers/examples/benchmarks where it helps show usage, find bugs, or measure the
+  performance impact of a change.
+
+**`unsafe`**
+Avoid whenever possible. Every `unsafe` block documents its invariants and why the safety
+requirements hold (see cedinia's `#[unsafe(no_mangle)] android_main`).
+
+**Files & logging**
+- Keep source files at or below 500 lines; split large files into modules.
+- Always log via `log` (`handsome_logger`); reach for `tracing` only if actually needed.
+
+**Auto-vectorization**
+LLVM vectorizes a loop when it can prove: no loop-carried dependency, no aliasing, no bounds
+checks, and a favorable cost model.
+- Enable it: `.iter()`/`.iter_mut()` + `.zip()` instead of index loops (drops bounds checks);
+  `.chunks_exact(N)`/`.chunks_exact_mut(N)` + `.remainder()` for aligned SIMD chunk processing;
+  `(&[T], &mut [T])` over `(&mut [T], &mut [T])` so LLVM can assume no aliasing; keep the loop
+  body uniform (no per-element `if`/`match`, no early returns); use a reduction (`.sum()`/
+  `.fold()`) instead of a running accumulator that depends on its own previous value.
+- Kills it: `slice[i]` index loops, value-based `continue` inside an element loop, mutable
+  state shared across iterations.
+- Verify: inspect asm on godbolt.org for `vmulps`/`vpaddb`/`vpsubusb` vs scalar `mulss`/`movss`;
+  measure the delta with `RUSTFLAGS="-C opt-level=3 -C no-vectorize-loops -C no-vectorize-slp"`;
+  build with `RUSTFLAGS="-C target-cpu=native"` to unlock AVX2/AVX-512 on the host CPU.
+- When LLVM won't vectorize, reach for explicit SIMD: `std::arch` (stable, arch-specific),
+  `std::simd`/`portable_simd` (nightly, portable), or the stable `wide`/`pulp` crates.
+
+**Performance micro-hints**
+- Pre-allocate with `Vec::with_capacity(n)` / `HashMap::with_capacity(n)` when the count is
+  roughly known - avoids the realloc ladder.
+- Reuse buffers across calls (`buf.clear()`) instead of reallocating.
+- For almost-always-short collections, consider `SmallVec`/`ArrayVec` (stack-allocated until
+  they spill).
+- Use the smallest enum discriminant that fits (`#[repr(u8)]`/`#[repr(u16)]`) for tighter
+  packing and better cache density.
+- Wrap Criterion bench inputs/outputs in `std::hint::black_box(...)` to stop dead-code
+  elimination from invalidating the measurement.
 
 ---
 
@@ -52,16 +119,23 @@ Two properties are non-negotiable across every sub-project:
 
 Running `just fix` must pass before any merge request. It runs, in order:
 
-1. `ruff format` – Python code formatting.
-2. `mypy misc --strict` – static type checking for all scripts in `misc/`.
-3. `bash misc/run_checks.sh` – project-specific checks:
+1. Repo-wide auto-fix of `—`/`–`/`―` dash characters back to plain `-` (`.rs`, `.slint`, `.md`,
+   `.ftl`; `AGENTS.md` and `justfile` themselves are excluded) – the enforcement behind the
+   "never use em/en dash" style rule above.
+2. `uv run ruff format --line-length 120` – Python code formatting.
+3. `uv run mypy misc --strict` – static type checking for all scripts in `misc/`.
+4. `bash misc/run_checks.sh` – project-specific checks:
    - `delete_unused_krokiet_slint_imports.py` for krokiet and cedinia
    - `find_unused_fluent_translations.py` for all four projects
    - `find_unused_slint_translations.py` for krokiet and cedinia
    - `find_unused_callbacks.py` for krokiet and cedinia
    - `find_unused_settings_properties.py` for krokiet and cedinia
-4. `cargo +nightly fmt` + `cargo fmt` – Rust formatting.
-5. `cargo clippy --fix` – Rust linting (two passes: with and without default features).
+5. `cargo +nightly fmt` – Rust formatting.
+6. `cargo clippy --fix --all-features --all-targets` – Rust linting (single pass).
+7. `cargo +nightly fmt` + `cargo fmt` again – re-format whatever clippy's fixes touched.
+
+For a clippy pass that also covers the `--no-default-features` build, run `just clip` separately
+(two passes: `--all-features` and `--no-default-features --features winit_software`).
 
 If `just fix` produces any output on stderr or exits non-zero the code is not ready for review.
 
@@ -147,7 +221,7 @@ The Android (and secondary desktop) GUI. Architecture mirrors Krokiet but adapts
 constraints. Compiled as `cdylib` for Android (loaded via `android-activity`).
 
 **Entry points:**
-- Android: `#[no_mangle] pub fn android_main(app: AndroidApp)` in `src/lib.rs`
+- Android: `#[unsafe(no_mangle)] fn android_main(android_app: AndroidApp)` in `src/lib.rs`
 - Desktop: `fn run_app()` in `src/app.rs`
 
 **Android-specific:**
@@ -157,9 +231,11 @@ constraints. Compiled as `cdylib` for Android (loaded via `android-activity`).
 - `android_logger` routes Rust log output to logcat.
 
 **Differences from Krokiet:**
-- No video tools (ffmpeg not available on Android).
+- Has `SimilarVideos` (audio-fingerprint matching only, via `rusty-chromaprint`), but not
+  `VideoOptimizer` - ffmpeg-based transcoding/crop-detection is not available on Android.
 - Touch-optimised UI (`cedinia/ui/`); momentum-scroll views, bottom sheets, FAB.
 - `flc!` macro (cedinia-specific) in `src/localizer_cedinia.rs`.
+- See `cedinia/AGENTS.md` ("Differences from krokiet") for the full comparison table.
 
 **Translation:** `flc!("key")` macro; language files in `cedinia/i18n/<lang-code>/cedinia.ftl`.
 
@@ -181,12 +257,39 @@ keep it compatible with core API changes are accepted.
 
 ## misc/
 
-- `ai_translate/translate.py` – AI-powered batch translation into all supported languages.
-- `ai_translate/validate_translations.py` – Checks placeholder consistency across translations.
+**Translation tooling** (`ai_translate/`):
+- `translate.py` – AI-powered batch translation into all supported languages.
+- `validate_translations.py` – Checks placeholder consistency across translations.
   Pass `--fix` to automatically remove invalid entries.
-- `find_unused_fluent_translations.py` / `find_unused_slint_translations.py` – Dead-code
-  detection for translation keys.
+
+**Dead-code detection** (run by `run_checks.sh`, see `just fix` above):
+- `find_unused_fluent_translations.py` / `find_unused_slint_translations.py` – Unused
+  translation keys.
+- `find_unused_callbacks.py` – Slint callbacks never invoked from Rust.
+- `find_unused_settings_properties.py` – Settings struct fields never read by the UI.
+- `delete_unused_krokiet_slint_imports.py` – Removes dead `import` lines from `.slint` files.
+
+**Packaging / release:**
 - `gen_cedinia_licenses.py` – Generates `THIRD_PARTY_LICENSES.txt` from Cargo metadata.
+- `gen_android_icons.py` – Generates cedinia's Android adaptive-icon assets from an SVG logo.
+- `simplify_and_minify_svg.py` – Minifies SVG icons via Inkscape.
+- `pack_all_backends.sh` / `.ps1` – Bundles an all-backends krokiet binary with per-backend
+  launcher scripts into a release zip.
+- `flathub.sh` – Generates Flatpak cargo-sources metadata for the Flathub manifest.
+- `add_icon_exe/` – Cargo helper crate that embeds the `.ico` into Windows binaries at build time.
+- `docker/` – `Dockerfile` for containerized builds.
+- `nix/` – Nix flake (`flake.nix`, `packages.nix`) for Nix-based builds.
+- `install_scripts/` – `install_linux.sh`, `install_macos.sh`, `install_windows.bat` end-user
+  installers.
+
+**Dev utilities:**
+- `remove_comments.py` – Strips comments from source files (one-off cleanup tool).
+- `compare_files.sh` – Diffs MD5 hashes of CI build artifacts across runs to check determinism.
+- `run_checks.sh` – Runs all the dead-code detection scripts above; invoked by `just fix`.
+
+**Benchmarks** (standalone Cargo crates):
+- `test_image_perf/`, `test_read_perf/` – Microbenchmarks for image hashing / file reading.
+- `test_compilation_speed_size/` – Tracks build time and binary size across changes.
 
 ---
 

@@ -17,7 +17,7 @@ use crate::common::cache::{CACHE_IMAGE_VERSION, load_and_split_cache_generalized
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::image::get_dynamic_image_from_path;
 use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, SimilarImagesStage, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::flc;
@@ -53,9 +53,8 @@ impl SimilarImages {
 
                 let progress_handler = prepare_thread_handler_common(
                     progress_sender,
-                    CurrentStage::SimilarImagesHidingHardLinks,
+                    ToolStage::SimilarImages(SimilarImagesStage::HidingHardLinks),
                     grouped_file_entries.len(),
-                    self.get_test_type(),
                     0,
                 );
                 let hide_hard_links = self.get_hide_hard_links();
@@ -133,9 +132,8 @@ impl SimilarImages {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SimilarImagesCalculatingHashes,
+            ToolStage::SimilarImages(SimilarImagesStage::CalculatingHashes),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|entry| entry.size).sum(),
         );
 
@@ -272,12 +270,12 @@ impl SimilarImages {
             let mut files_from_referenced_folders: IndexMap<ImHash, Vec<ImagesEntry>> = IndexMap::new();
             let mut normal_files: IndexMap<ImHash, Vec<ImagesEntry>> = IndexMap::new();
 
-            all_hashed_images.clone().into_iter().for_each(|(hash, vec_file_entry)| {
+            all_hashed_images.iter().for_each(|(hash, vec_file_entry)| {
                 for file_entry in vec_file_entry {
                     if is_in_reference_folder(&self.common_data.directories.reference_directories, &file_entry.path) {
-                        files_from_referenced_folders.entry(hash.clone()).or_default().push(file_entry);
+                        files_from_referenced_folders.entry(hash.clone()).or_default();
                     } else {
-                        normal_files.entry(hash.clone()).or_default().push(file_entry);
+                        normal_files.entry(hash.clone()).or_default();
                     }
                 }
             });
@@ -340,7 +338,7 @@ impl SimilarImages {
         // Don't use hashes with multiple images in bktree, because they will always be master of group and cannot be find by other hashes
         let (base_hashes, hashes_with_multiple_images) = self.split_hashes(all_hashed_images);
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SimilarImagesComparingHashes, base_hashes.len(), self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SimilarImages(SimilarImagesStage::ComparingHashes), base_hashes.len(), 0);
 
         let mut hashes_parents: IndexMap<ImHash, u32> = Default::default(); // Hashes used as parent (hash, children_number_of_hash)
         let mut hashes_similarity: IndexMap<ImHash, (ImHash, u32)> = Default::default(); // Hashes used as child, (parent_hash, similarity)
@@ -690,7 +688,7 @@ impl SimilarImages {
             }
         }
 
-        assert!(!found, "Found Invalid entries - invariant violations detected – check error log above");
+        assert!(!found, "Found Invalid entries - invariant violations detected - check error log above");
     }
 }
 

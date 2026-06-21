@@ -1,9 +1,9 @@
-## Version ? - ??.??.????
+## Version 12.0 - ??.??.????
 
 ### Czkawka GTK Deprecation Notice
-This is the latest version of Czkawka GTK. From now on, I will no longer provide binaries for it, and users are encouraged to switch to Krokiet.
+**Version 12.0 is the last released version of Czkawka GTK.** No new binaries will be provided from this point on. All users are encouraged to migrate to Krokiet, the new Slint-based GUI frontend.
 
-The project will remain available in the repository. For some time I will ensure it continues to compile with `czkawka_core` library, so it can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds, such as Debian or Docker packages.
+The source code remains in the repository and compatibility with `czkawka_core` will be maintained for some time so the application can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds such as Debian or Docker packages.
 
 ### Breaking changes
 
@@ -37,6 +37,8 @@ The project will remain available in the repository. For some time I will ensure
 - Fixed a bug where similar videos were not deleted when using reference-folder mode - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 - Replaced `nom-exif` with `little_exif` for reading EXIF orientation data - [#1948](https://github.com/qarmin/czkawka/pull/1948)
 - Fixed reversed logic of hiding hardlinks in similar images/videos modes - [#1952](https://github.com/qarmin/czkawka/pull/1952)
+- Added a `$TRASH` excluded-items preset (alongside the existing `DEFAULT`) to exclude common Trash/Recycle Bin paths from scans - [#1962](https://github.com/qarmin/czkawka/pull/1962)
+- Reworked internal progress stage tracking, to unify progress calculations across all backends - [#1962](https://github.com/qarmin/czkawka/pull/1962)
 
 ### CLI
 
@@ -58,6 +60,7 @@ The project will remain available in the repository. For some time I will ensure
 - Fixed shortest/longest path selection modes, which previously compared only paths without file names - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 - Ability to restore save/restore data in custom popup - [#1919](https://github.com/qarmin/czkawka/pull/1919)
 - Added "Rename on conflict" option to the move/copy popup to automatically rename files instead of skipping them - [#1948](https://github.com/qarmin/czkawka/pull/1948)
+- Added the ability to rename items - [#1962](https://github.com/qarmin/czkawka/pull/1962)
 
 ### Cedinia
 - Initial experimental release of Cedinia, a new Android app with touch support - [#1821](https://github.com/qarmin/czkawka/pull/1821)

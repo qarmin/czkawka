@@ -31,9 +31,7 @@ export component ScanProgressBar {
                 }
 
                 if !AppState.progress.is_indeterminate : Text {
-                    text: AppState.progress.all_progress > 0
-                        ? (AppState.progress.current_progress + " / " + AppState.progress.all_progress)
-                        : (AppState.progress.current_progress + " " + Translations.files_suffix_text);
+                    text: AppState.progress.all_progress + "%";
                     color: CediniaColors.accent_light;
                     font-size: Fonts.body;
                     font-weight: Fonts.bold;
@@ -47,7 +45,7 @@ export component ScanProgressBar {
             }
 
 
-            if !AppState.progress.is_indeterminate && AppState.progress.all_progress > 0 : Rectangle {
+            if !AppState.progress.is_indeterminate : Rectangle {
                 horizontal-stretch: 1.0;
                 height: 4px;
                 border-radius: 2px;
@@ -56,7 +54,7 @@ export component ScanProgressBar {
                 Rectangle {
                     x: 0;
                     height: parent.height;
-                    width: parent.width * AppState.progress.current_progress / AppState.progress.all_progress;
+                    width: parent.width * AppState.progress.all_progress / 100;
                     border-radius: 2px;
                     background: CediniaColors.accent;
                     animate width { duration: 300ms; easing: ease-out; }

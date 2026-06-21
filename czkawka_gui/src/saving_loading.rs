@@ -105,7 +105,7 @@ impl LoadSaveStruct {
 
         if !json_file.is_file() {
             if manual_execution {
-                add_text_to_text_view(text_view_errors, &flg!("saving_loading_loading_success"));
+                add_text_to_text_view(text_view_errors, &flg!("saving_loading_no_config_file"));
             }
             return;
         }

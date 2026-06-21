@@ -1,5 +1,5 @@
 use std::fs::DirEntry;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
@@ -13,9 +13,9 @@ use crate::common::dir_traversal::{common_get_entry_data, common_get_metadata_di
 use crate::common::directories::Directories;
 use crate::common::items::ExcludedItems;
 use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::tools::empty_folder::{EmptyFolder, FolderEmptiness, FolderEntry, Info};
 
 impl EmptyFolder {
@@ -58,7 +58,7 @@ impl EmptyFolder {
     pub(crate) fn check_for_empty_folders(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::CollectingFolders, 0, 0);
 
         let excluded_items = self.common_data.excluded_items.clone();
         let directories = self.common_data.directories.clone();
@@ -107,7 +107,6 @@ impl EmptyFolder {
                         if file_type.is_dir() {
                             counter += 1;
                             Self::process_dir_in_dir_mode(
-                                &current_folder,
                                 &current_folder_as_string,
                                 entry_data,
                                 &directories,
@@ -198,7 +197,6 @@ impl EmptyFolder {
     }
 
     fn process_dir_in_dir_mode(
-        current_folder: &Path,
         current_folder_as_str: &str,
         entry_data: &DirEntry,
         directories: &Directories,
@@ -238,11 +236,12 @@ impl EmptyFolder {
         };
 
         dir_result.push(next_folder.clone());
+        let modified_date = get_modified_time(&metadata, warnings, &next_folder, true);
         folder_entries_list.push(FolderEntry {
             path: next_folder,
             parent_path: Some(current_folder_as_str.to_string()),
             is_empty: FolderEmptiness::Maybe,
-            modified_date: get_modified_time(&metadata, warnings, current_folder, true),
+            modified_date,
         });
     }
 }

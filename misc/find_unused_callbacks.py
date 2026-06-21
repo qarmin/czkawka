@@ -85,7 +85,7 @@ for callback in callbacks:
     if callback in excluded:
         continue
 
-    pattern = rf"\.on_{callback}\("
+    pattern = rf"\.on_{callback}\(|\bon_{callback}\s*,"
     matches = list(re.finditer(pattern, rust_content))
 
     if len(matches) == 0:

@@ -18,6 +18,8 @@ import { PopupSelectResults } from "popups/popup_select_results.slint";
 import { PopupCustomSelect } from "popups/popup_custom_select.slint";
 import { PopupRenameBadExtensions } from "popups/popup_rename_bad_extensions.slint";
 import { PopupRenameBadFileNames } from "popups/popup_rename_bad_file_names.slint";
+import { PopupRenameFile } from "popups/popup_rename_file.slint";
+import { PopupError } from "popups/popup_error.slint";
 import { PopupSave } from "popups/popup_save.slint";
 import { PopupSortResults } from "popups/popup_sort.slint";
 import { PopupActionConfirm } from "popups/popup_action_confirm.slint";
@@ -48,6 +50,8 @@ export component MainWindow inherits Window {
     // Opening popup is done via Rust call
     callback request_setup_action_popup(PopupRequest); // When opening popup we need to setup data in it, Slint -> Rust
     callback show_action_popup(PopupRequest, string); // After setup, we can show popup - Rust -> Slint - string is choosed folder - to avoid having multiple callbacks, string will be empty for things that do not need it
+    callback show_rename_single_file_popup(int, string); // Single-row rename, Rust -> Slint - (row_idx, current_name) prefilled into the popup
+    callback show_error_popup(string); // Generic error message popup, Rust -> Slint
 
     title <=> Translations.main_window_title_text;
 
@@ -297,6 +301,22 @@ export component MainWindow inherits Window {
         y: parent.y + (parent.height - self.popup_height) / 2.0;
     }
 
+    rename_file_popup_window := PopupRenameFile {
+        height: root.height;
+        width: root.width;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+    }
+
+    error_popup_window := PopupError {
+        height: root.height;
+        width: root.width;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+    }
+
     save_popup_window := PopupSave {
         height: root.height;
         width: root.width;
@@ -505,5 +525,13 @@ export component MainWindow inherits Window {
         } else {
             debug("Unsupported popup request");
         }
+    }
+
+    show_rename_single_file_popup(idx, current_name) => {
+        rename_file_popup_window.show_popup(idx, current_name);
+    }
+
+    show_error_popup(message) => {
+        error_popup_window.show_popup(message);
     }
 }

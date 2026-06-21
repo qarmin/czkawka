@@ -23,7 +23,7 @@ export component FileRow {
     // Prevents clicked from toggling selection after a drag/scroll release.
     property <bool> _moved: false;
 
-    // Explicit armed flag – only true while a valid long-press is in progress.
+    // Explicit armed flag - only true while a valid long-press is in progress.
     // Cleared by every cancellation path before the timer callback can read it.
     property <bool> _lp_active: false;
 
@@ -53,7 +53,7 @@ export component FileRow {
                     : root.is_even ? CediniaColors.row_alt : CediniaColors.row_normal;
         animate background { duration: 80ms; }
 
-        // Left accent bar – muted for reference, coloured for selected, hidden otherwise
+        // Left accent bar - muted for reference, coloured for selected, hidden otherwise
         if !root.is_header : Rectangle {
             x: 0;
             y: 0;

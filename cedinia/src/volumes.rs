@@ -132,13 +132,13 @@ pub(crate) fn refresh_volumes_flags(win: &MainWindow, included: &[PathBuf], excl
     }
 }
 
-pub(crate) fn count_files_and_dirs_stoppable(root: &std::path::Path, stop: &Arc<AtomicBool>, stopped: &mut bool) -> (i32, i32) {
+pub(crate) fn count_files_and_dirs_stoppable(root: &std::path::Path, stop: &Arc<AtomicBool>, stopped: &mut bool) -> (u64, u64) {
     if stop.load(Ordering::Relaxed) {
         *stopped = true;
         return (0, 0);
     }
-    let mut files: i32 = 0;
-    let mut dirs: i32 = 0;
+    let mut files: u64 = 0;
+    let mut dirs: u64 = 0;
     let Ok(rd) = std::fs::read_dir(root) else {
         return (0, 0);
     };

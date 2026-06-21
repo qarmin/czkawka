@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -7,7 +8,7 @@ use tempfile::TempDir;
 
 use crate::common::tool_data::CommonData;
 use crate::common::traits::Search;
-use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
+use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, CheckedTypesSingle};
 
 fn run_check(dir: &TempDir, checked_types: CheckedTypes) -> Vec<BrokenEntry> {
     let params = BrokenFilesParameters::new(checked_types);
@@ -317,4 +318,55 @@ fn test_no_file_types_selected() {
 
     let broken_files = finder.get_broken_files();
     assert_eq!(broken_files.len(), 0, "Should find no files when no types are selected");
+}
+
+//  Video cache
+
+fn make_broken_entry(name: &str, errors: &[(CheckedTypesSingle, Option<&str>)]) -> BrokenEntry {
+    BrokenEntry {
+        path: PathBuf::from(name),
+        modified_date: 0,
+        size: 0,
+        errors: errors.iter().map(|(k, v)| (*k, v.map(str::to_string))).collect(),
+    }
+}
+
+#[test]
+fn test_video_entry_checked_only_with_ffprobe_needs_recheck_when_both_methods_enabled() {
+    let entry = make_broken_entry("a.mp4", &[(CheckedTypesSingle::VideoFfprobe, None)]);
+    let both = CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
+    assert!(BrokenFiles::video_entry_missing_required_checks(&entry, both));
+}
+
+#[test]
+fn test_video_entry_checked_with_both_methods_does_not_need_recheck() {
+    let entry = make_broken_entry("a.mp4", &[(CheckedTypesSingle::VideoFfprobe, None), (CheckedTypesSingle::VideoFfmpeg, None)]);
+    let both = CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
+    assert!(!BrokenFiles::video_entry_missing_required_checks(&entry, both));
+}
+
+#[test]
+fn test_move_cached_video_entries_promotes_only_entries_missing_required_checks() {
+    let mut records_already_cached = BTreeMap::from([
+        (
+            "ffprobe_only.mp4".to_string(),
+            make_broken_entry("ffprobe_only.mp4", &[(CheckedTypesSingle::VideoFfprobe, None)]),
+        ),
+        (
+            "both.mp4".to_string(),
+            make_broken_entry("both.mp4", &[(CheckedTypesSingle::VideoFfprobe, None), (CheckedTypesSingle::VideoFfmpeg, None)]),
+        ),
+    ]);
+    let mut non_cached_files_to_check = BTreeMap::new();
+
+    let both = CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
+    BrokenFiles::move_cached_entries_missing_required_checks(&mut records_already_cached, &mut non_cached_files_to_check, both);
+
+    assert!(records_already_cached.contains_key("both.mp4"), "fully checked entry should stay cached");
+    assert!(!records_already_cached.contains_key("ffprobe_only.mp4"), "partially checked entry should be promoted");
+    assert!(non_cached_files_to_check.contains_key("ffprobe_only.mp4"));
+
+    let promoted = &non_cached_files_to_check["ffprobe_only.mp4"];
+    assert!(promoted.errors.contains_key(&CheckedTypesSingle::VideoFfprobe));
+    assert!(!promoted.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg));
 }

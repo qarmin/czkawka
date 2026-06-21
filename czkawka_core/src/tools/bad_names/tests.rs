@@ -590,13 +590,14 @@ mod tests2 {
 
         let mut errors = Vec::new();
         let test_cases = [
-            ("😀.txt", ".txt"),
-            ("   .TXT", ".txt"),
-            ("😀😀😀.txt", ".txt"),
+            // Stems stripped to nothing become the "empty" placeholder.
+            ("😀.txt", "empty.txt"),
+            ("   .TXT", "empty.txt"),
+            ("😀😀😀.txt", "empty.txt"),
             ("___", "_"),
             ("---", "-"),
             ("...", "."),
-            (" 😀 .TXT ", ".txt"),
+            (" 😀 .TXT ", "empty.txt"),
             ("test.", "test"),
             (".test", ".test"),
         ];

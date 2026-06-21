@@ -43,7 +43,7 @@ impl Search for BadExtensions {
 impl DeletingItems for BadExtensions {
     fn delete_files(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
         match self.common_data.delete_method {
-            DeleteMethod::Delete => self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFolders(self.bad_extensions_files.clone())),
+            DeleteMethod::Delete => self.delete_simple_elements_and_add_to_messages(stop_flag, progress_sender, DeleteItemType::DeletingFiles(self.bad_extensions_files.clone())),
             DeleteMethod::None => WorkContinueStatus::Continue,
             _ => unreachable!(),
         }

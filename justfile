@@ -66,6 +66,11 @@ setup_sanitizer:
     rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
     rustup component add llvm-tools-preview --toolchain nightly-x86_64-unknown-linux-gnu
 
+setup_sanitizer_android:
+    rustup install nightly
+    rustup target add aarch64-linux-android --toolchain nightly
+    rustup component add llvm-tools-preview --toolchain nightly
+
 
 bench:
     cd czkawka_core && cargo bench
@@ -83,12 +88,7 @@ clip:
     cargo clippy --fix --allow-dirty --allow-staged --no-default-features --features winit_software --all-targets
 
 fix:
-    grep -rlZ --include='*.rs' \
-               --include='*.slint' \
-               --include='*.md' \
-               --include='*.ftl' \
-               --exclude='AGENTS.md' \
-               '─' . | xargs -0 sed -i 's/─//g' || true
+    grep -rl --null -F --include='*.rs' --include='*.slint' --include='*.md' --include='*.ftl' --exclude='AGENTS.md' --exclude='justfile' --exclude-dir='.git' --exclude-dir='target' -e '─' -e '–' -e '—' . | xargs -0 -r perl -CSD -i -pe 's/[\x{2500}\x{2013}\x{2014}]/-/g' || true
     cp misc/pyproject.toml .
     uv sync
 
@@ -207,6 +207,94 @@ android: android_build android_install android_run
 
 androidr: android_build_release android_install_release android_run
 
+# Build, install and launch a debug APK with AddressSanitizer for testing the
+# JNI bridge (file_picker_android.rs) on a real arm64 device/emulator.
+#
+# Requires: nightly toolchain, ANDROID_NDK_HOME, a connected arm64 device.
+# How it works:
+#   1. Compile libcedinia.so for aarch64-linux-android with -Zsanitizer=address
+#      (nightly), linking through the NDK clang wrapper. The cdylib leaves the
+#      __asan_* symbols undefined - they are resolved at load by wrap.sh.
+#   2. Stage libcedinia.so + the NDK ASan runtime into Gradle jniLibs and drop
+#      wrap.sh into resources/lib/<abi>/ (the only supported ASan injection on
+#      Android). The debug overlay manifest forces extractNativeLibs=true.
+#   3. gradle assembleDebug packages a debuggable APK; install + launch.
+# After launch it auto-streams logcat (heap-buffer-overflow / use-after-free
+# reports + the Cedinia/crash tags); press Ctrl-C to stop.
+#
+# Pass `smoke` to enable a deliberate startup heap-buffer-overflow that ASan must
+# report - use it once to confirm ASan is really active:  just android_asan smoke
+android_asan smoke="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    : "${ANDROID_NDK_HOME:?Set ANDROID_NDK_HOME to your NDK (e.g. \$ANDROID_HOME/ndk/27.2.12479018)}"
+    ROOT="$(pwd)"
+    TRIPLE=aarch64-linux-android
+    API=26
+    ABI=arm64-v8a
+
+    HOSTTAG=$(ls "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt" | head -n1)
+    TOOLBIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOSTTAG/bin"
+
+    GRADLE_APP="$ROOT/cedinia/android/app"
+    JNI="$GRADLE_APP/src/main/jniLibs/$ABI"
+    RES="$GRADLE_APP/src/main/resources/lib/$ABI"
+    # Keep release builds clean: never leave the ASan runtime / wrap.sh staged.
+    cleanup() { rm -rf "$GRADLE_APP/src/main/jniLibs" "$GRADLE_APP/src/main/resources/lib"; }
+    trap cleanup EXIT
+    cleanup
+
+    # 1. Instrumented .so (build.rs still embeds the Java DEX for the android target).
+    export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$TOOLBIN/${TRIPLE}${API}-clang"
+    export CC_aarch64_linux_android="$TOOLBIN/${TRIPLE}${API}-clang"
+    export CXX_aarch64_linux_android="$TOOLBIN/${TRIPLE}${API}-clang++"
+    export AR_aarch64_linux_android="$TOOLBIN/llvm-ar"
+    export RUSTFLAGS="-Zsanitizer=address -Cforce-frame-pointers=yes -Cdebuginfo=2"
+    cargo +nightly build -p cedinia --lib --target "$TRIPLE"
+
+    # 2. Stage native libs + ASan runtime + wrap.sh for Gradle.
+    mkdir -p "$JNI" "$RES"
+    cp "$ROOT/target/$TRIPLE/debug/libcedinia.so" "$JNI/"
+    ASAN_RT=$(find "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOSTTAG/lib/clang" \
+        -name "libclang_rt.asan-aarch64-android.so" | head -n1)
+    [ -n "$ASAN_RT" ] || { echo "ASan runtime not found in NDK"; exit 1; }
+    cp "$ASAN_RT" "$JNI/"
+    cp "$ROOT/cedinia/android/asan_wrap.sh" "$RES/wrap.sh"
+    if [ "{{smoke}}" = "smoke" ]; then
+        # Inject the smoke-test env so android_main triggers a heap-buffer-overflow.
+        sed -i 's|^exec "\$@"|export CEDINIA_ASAN_SMOKETEST=1\nexec "$@"|' "$RES/wrap.sh"
+        echo "Smoke test ENABLED: the app will deliberately heap-overflow at startup."
+    fi
+    chmod +x "$RES/wrap.sh"
+
+    # 3. Debuggable APK -> install -> launch -> auto-capture logcat.
+    cd "$ROOT/cedinia/android"
+    gradle assembleDebug
+    {{adb}} install -r app/build/outputs/apk/debug/app-debug.apk
+    {{adb}} logcat -c || true
+    {{adb}} shell am start -n {{apk_package}}/{{apk_activity}}
+    echo "ASan build launched - streaming logcat (Ctrl-C to stop)."
+    echo "Look for lines starting with '==... ERROR: AddressSanitizer:'."
+    # Symbolize backtraces to function + file:line via the unstripped local .so.
+    # The on-device ASan symbolizer only resolves names, not source lines; ndk-stack
+    # reads DWARF from target/.../debug/libcedinia.so (same code offsets as the APK).
+    # Raw stream is also teed to a file so nothing is lost if ndk-stack filters it.
+    # Not exec: keep the EXIT trap so the gradle staging is cleaned after Ctrl-C.
+    SYMDIR="$ROOT/target/$TRIPLE/debug"
+    NDK_STACK="$ANDROID_NDK_HOME/ndk-stack"
+    if [ -x "$NDK_STACK" ]; then
+        {{adb}} logcat -v threadtime | tee "$ROOT/target/cedinia-asan-logcat.txt" | "$NDK_STACK" -sym "$SYMDIR" || true
+    else
+        echo "ndk-stack not found at $NDK_STACK - raw logcat (offsets only); symbolize later with: just android_symbolize <dump>"
+        {{adb}} logcat -v threadtime | tee "$ROOT/target/cedinia-asan-logcat.txt" || true
+    fi
+
+# Symbolize a saved logcat / tombstone dump: offsets -> function + file:line, using
+# the unstripped local libcedinia.so (build it first with `just android_asan`).
+# Usage: just android_symbolize target/cedinia-asan-logcat.txt
+android_symbolize dump:
+    "$ANDROID_NDK_HOME/ndk-stack" -sym target/aarch64-linux-android/debug -dump {{dump}}
+
 # Build a signed release AAB suitable for Google Play Store upload.
 # Requires gradle 8.9+ in PATH (e.g. sdk install gradle 8.9 via sdkman).
 # The libcedinia.so is compiled by cargo-apk and the DEX is already embedded
@@ -223,6 +311,7 @@ android_build_aab:
     export KEY_PASSWORD="$PASS"
 
     rm -rf "$ROOT/cedinia/android/app/src/main/jniLibs"
+    rm -rf "$ROOT/cedinia/android/app/src/main/resources/lib"
     rm -f "$ROOT/cedinia.aab"
     rm -rf "$ROOT/cedinia/android/.gradle"
     rm -rf "$ROOT/cedinia/android/app/build"

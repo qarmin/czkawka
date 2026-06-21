@@ -53,7 +53,7 @@ struct RawPixels {
 impl RawPixels {
     fn empty() -> Self {
         Self {
-            data: vec![],
+            data: Vec::new(),
             width: 0,
             height: 0,
         }
@@ -75,7 +75,6 @@ struct RawCompareItem {
     resolution: String,
     modification_date: String,
     similarity: String,
-    checked: bool,
     thumbnail: RawPixels,
     flat_idx: i32,
 }
@@ -166,15 +165,16 @@ fn connect_compare_toggle_checkbox(app: &MainWindow) {
         let new_checked = !item.checked;
 
         let main_model = app.get_similar_images_model();
-        if let Some(mut main_row) = main_model.row_data(flat_idx) {
-            let old_main_checked = main_row.checked;
-            main_row.checked = new_checked;
-            main_model.set_row_data(flat_idx, main_row);
+        let mut main_row = main_model
+            .row_data(flat_idx)
+            .unwrap_or_else(|| panic!("flat_idx={flat_idx} out of bounds in similar_images_model (row_count={})", main_model.row_count()));
+        let old_main_checked = main_row.checked;
+        main_row.checked = new_checked;
+        main_model.set_row_data(flat_idx, main_row);
 
-            if old_main_checked != new_checked {
-                let delta: i64 = if new_checked { 1 } else { -1 };
-                change_number_of_enabled_items(&app, ActiveTab::SimilarImages, delta);
-            }
+        if old_main_checked != new_checked {
+            let delta: i64 = if new_checked { 1 } else { -1 };
+            change_number_of_enabled_items(&app, ActiveTab::SimilarImages, delta);
         }
 
         update_compare_checked(&gui_state, compare_idx, new_checked);
@@ -282,22 +282,24 @@ fn open_group(app: &MainWindow, header_idx: usize) {
 
     let total = data_indices.len() as i32;
 
-    let rows: Vec<(usize, bool, Vec<String>)> = data_indices
+    let rows: Vec<(usize, Vec<String>)> = data_indices
         .iter()
         .map(|&flat_idx| {
             let row = model.row_data(flat_idx).expect("data_indices must contain valid model indices");
             let strs: Vec<String> = (0..row.val_str.row_count())
                 .map(|i| row.val_str.row_data(i).map(|s| s.to_string()).expect("SimilarImages row must have enough columns"))
                 .collect();
-            (flat_idx, row.checked, strs)
+            (flat_idx, strs)
         })
         .collect();
 
     gui_state.set_compare_current_group_header_flat_idx(header_idx as i32);
+    gui_state.set_compare_has_next_group(find_adjacent_group_header(&model, header_idx, true).is_some());
+    gui_state.set_compare_has_prev_group(find_adjacent_group_header(&model, header_idx, false).is_some());
     gui_state.set_compare_loading_current(0);
     gui_state.set_compare_loading_total(total);
 
-    gui_state.set_compare_images(Rc::new(VecModel::from(vec![])).into());
+    gui_state.set_compare_images(Rc::new(VecModel::from(Vec::new())).into());
     gui_state.set_compare_left_image(slint::Image::default());
     gui_state.set_compare_right_image(slint::Image::default());
     gui_state.set_compare_diff_image(slint::Image::default());
@@ -311,7 +313,7 @@ fn open_group(app: &MainWindow, header_idx: usize) {
     thread::spawn(move || {
         let mut raw_items: Vec<RawCompareItem> = Vec::with_capacity(rows.len());
 
-        for (i, (flat_idx, checked, strs)) in rows.iter().enumerate() {
+        for (i, (flat_idx, strs)) in rows.iter().enumerate() {
             if cancel.load(Ordering::Relaxed) {
                 let weak_c = weak.clone();
                 weak_c
@@ -356,7 +358,6 @@ fn open_group(app: &MainWindow, header_idx: usize) {
                     .get(StrDataSimilarImages::Similarity as usize)
                     .cloned()
                     .expect("SimilarImages row must contain a Similarity column"),
-                checked: *checked,
                 thumbnail,
                 flat_idx: *flat_idx as i32,
             });
@@ -403,7 +404,10 @@ fn open_group(app: &MainWindow, header_idx: usize) {
             let compare_data: Vec<CompareImageData> = raw_items
                 .into_iter()
                 .map(|r| {
-                    let current_checked = main_model.row_data(r.flat_idx as usize).map_or(r.checked, |row| row.checked);
+                    let current_checked = main_model
+                        .row_data(r.flat_idx as usize)
+                        .unwrap_or_else(|| panic!("flat_idx={} out of bounds in similar_images_model (row_count={})", r.flat_idx, main_model.row_count()))
+                        .checked;
                     CompareImageData {
                         path: r.path.into(),
                         dir: r.dir.into(),

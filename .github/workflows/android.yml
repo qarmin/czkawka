@@ -81,26 +81,25 @@ jobs:
           cargo apk build -p cedinia --lib --target aarch64-linux-android
           mv target/debug/apk/cedinia.apk cedinia.apk
 
-      - name: Set up Gradle for AAB build
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.9'
+      # - name: Set up Gradle for AAB build
+      #   uses: gradle/actions/setup-gradle@v3
+      #   with:
+      #     gradle-version: '8.9'
 
-      - name: Build AAB
-        run: |
-          mkdir -p cedinia/android/app/src/main/jniLibs/arm64-v8a
-          cp target/aarch64-linux-android/${{ env.VERS }}/libcedinia.so \
-             cedinia/android/app/src/main/jniLibs/arm64-v8a/
-          cd cedinia/android
-          gradle bundleRelease
-          mv app/build/outputs/bundle/release/app-release.aab ../../cedinia.aab
+      # - name: Build AAB
+      #   run: |
+      #     mkdir -p cedinia/android/app/src/main/jniLibs/arm64-v8a
+      #     cp target/aarch64-linux-android/${{ env.VERS }}/libcedinia.so \
+      #        cedinia/android/app/src/main/jniLibs/arm64-v8a/
+      #     cd cedinia/android
+      #     gradle bundleRelease
+      #     mv app/build/outputs/bundle/release/app-release.aab ../../cedinia.aab
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
         with:
           name: cedinia-${{ env.VERS }}-apk
           path: |
-            cedinia.aab
             cedinia.apk
 
       - name: Release
@@ -110,5 +109,4 @@ jobs:
           tag_name: "Nightly"
           files: |
             cedinia.apk
-            cedinia.aab
           token: ${{ secrets.PAT_REPOSITORY }}

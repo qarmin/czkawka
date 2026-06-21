@@ -12,9 +12,9 @@ use rayon::prelude::*;
 
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{FileEntry, ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::tools::bad_extensions::workarounds::{DISABLED_EXTENSIONS, WORKAROUNDS};
 use crate::tools::bad_extensions::{BadExtensions, BadExtensionsParameters, BadFileEntry, Info};
 
@@ -60,7 +60,7 @@ impl BadExtensions {
             return WorkContinueStatus::Continue;
         }
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::BadExtensionsChecking, self.files_to_check.len(), self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::BadExtensionsChecking, self.files_to_check.len(), 0);
 
         let files_to_check = mem::take(&mut self.files_to_check);
 

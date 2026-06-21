@@ -15,9 +15,9 @@ use rayon::prelude::*;
 use crate::common::cache::{CACHE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{CacheLoadPhase, ExifRemoverStage, ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::flc;
 use crate::tools::exif_remover::{ExifEntry, ExifRemover, ExifRemoverParameters, ExifTagInfo, ExifTagsFixerParams, Info};
 
@@ -93,7 +93,7 @@ impl ExifRemover {
         _stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
     ) -> (BTreeMap<String, ExifEntry>, BTreeMap<String, ExifEntry>, BTreeMap<String, ExifEntry>) {
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheLoading, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::ExifRemover(ExifRemoverStage::LoadingCache(CacheLoadPhase::Loading)), 0, 0);
         let res = load_and_split_cache_generalized_by_path(&get_exif_remover_cache_file(), mem::take(&mut self.files_to_check), self);
 
         progress_handler.join_thread();
@@ -108,7 +108,7 @@ impl ExifRemover {
         _stop_flag: &Arc<AtomicBool>,
         progress_sender: Option<&Sender<ProgressData>>,
     ) {
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::ExifRemoverCacheSaving, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::ExifRemover(ExifRemoverStage::SavingCache), 0, 0);
 
         save_and_connect_cache_generalized_by_path(&get_exif_remover_cache_file(), vec_file_entry, loaded_hash_map, self);
 
@@ -125,9 +125,8 @@ impl ExifRemover {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::ExifRemoverExtractingTags,
+            ToolStage::ExifRemover(ExifRemoverStage::ExtractingTags),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|item| item.size).sum::<u64>(),
         );
 

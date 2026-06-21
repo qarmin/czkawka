@@ -5,7 +5,7 @@
 
 <div align="center"><img src="https://user-images.githubusercontent.com/41945903/102616149-66490400-4137-11eb-9cd6-813b2b070834.png" alt="czkawka_logo" width="600" /></div>
 
-**Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) older gtk4 GUI frontend, superseded by Krokiet, but still receiving bugfix updates.
+**Czkawka** (_tch•kav•ka_ (IPA: [ˈʧ̑kafka]), "hiccup" in Polish) older gtk4 GUI frontend, superseded by Krokiet. **Version 12.0 is the last released version** - no new binaries will be provided. New users and existing users are encouraged to switch to Krokiet.
 
 <div align="center"><img src="https://github.com/user-attachments/assets/ed6dfeea-a984-49e8-a621-8d6ae521c760" alt="cedinia_logo" width="600" /></div>
 
@@ -101,7 +101,7 @@ options to choose than other).
 |   In active development   |     Yes     | Yes<sup>**</sup> | Yes***  |   No   |  No<sup>*</sup>   |     Yes     |
 
 <p><sup>*</sup> Few small commits added recently and last version released in 2023</p> 
-<p><sup>**</sup> Czkawka GTK is in maintenance mode receiving only bugfixes</p>
+<p><sup>**</sup> Czkawka GTK 12.0 is the last released version - no new binaries will be provided; migrate to Krokiet</p>
 <p><sup>***</sup> Cedinia is an experimental android app, video tools are not available due missing ffmpeg in Android</p>
 
 ## Other apps

@@ -205,8 +205,8 @@ fn test_hardlink_two_dirs_size_only(dir: &str) -> Result<(), String> {
 /// was specified (`-r ref_dir -d scan_dir -D HARD`).
 ///
 /// Structure:
-///   dir/ref_dir/original.bin  (reference – must not be deleted)
-///   dir/scan_dir/duplicate.bin (scan target – should be hardlinked to original)
+///   dir/ref_dir/original.bin  (reference - must not be deleted)
+///   dir/scan_dir/duplicate.bin (scan target - should be hardlinked to original)
 ///
 /// Expected: duplicate.bin gets the same inode as original.bin.
 fn test_hardlink_reference_dir(dir: &str) -> Result<(), String> {
@@ -314,9 +314,9 @@ fn test_dup_detect_manual_copy(dir: &str) -> Result<(), String> {
 /// is bypassed entirely for ref-mode groups).
 ///
 /// Layout:
-///   ref/master.bin          (old mtime – reference, always protected)
-///   scan/old_copy.bin       (mtime 2021 – non-ref)
-///   scan/new_copy.bin       (mtime 2024 – non-ref)
+///   ref/master.bin          (old mtime - reference, always protected)
+///   scan/old_copy.bin       (mtime 2021 - non-ref)
+///   scan/new_copy.bin       (mtime 2024 - non-ref)
 ///
 /// With -D AEO and a reference dir:
 ///   - ref/master.bin  → kept (reference, untouchable)
@@ -332,9 +332,9 @@ fn test_ref_never_deleted_aeo(dir: &str) -> Result<(), String> {
     write_file(&scan_old, &content)?;
     write_file(&scan_new, &content)?;
 
-    set_mtime(&ref_file, "202001010000")?;   // 2020 – oldest overall
+    set_mtime(&ref_file, "202001010000")?;   // 2020 - oldest overall
     set_mtime(&scan_old, "202101010000")?;   // 2021
-    set_mtime(&scan_new, "202401010000")?;   // 2024 – newest
+    set_mtime(&scan_new, "202401010000")?;   // 2024 - newest
 
     let ref_dir  = format!("{dir}/ref");
     let scan_dir = format!("{dir}/scan");
@@ -355,7 +355,7 @@ fn test_ref_never_deleted_aeo(dir: &str) -> Result<(), String> {
 /// Layout:
 ///   ref/copy_a.bin   ┐  (same content, both reference)
 ///   ref/copy_b.bin   ┘
-///   scan/unique.bin      (different content – no duplicates outside ref)
+///   scan/unique.bin      (different content - no duplicates outside ref)
 fn test_ref_all_dups_in_ref_no_scan_deletions(dir: &str) -> Result<(), String> {
     let dup_content    = make_content(7);
     let unique_content = make_content(8);  // distinct content
@@ -384,14 +384,14 @@ fn test_ref_all_dups_in_ref_no_scan_deletions(dir: &str) -> Result<(), String> {
 /// in ref mode; only HARD is handled specially (hardlink instead of delete).
 ///
 /// Layout:
-///   ref/master.bin           (mtime: 2024 – newest overall, but it's a ref)
-///   scan/older_copy.bin      (mtime: 2021 – non-ref)
-///   scan/newer_copy.bin      (mtime: 2023 – non-ref, newer among non-ref)
+///   ref/master.bin           (mtime: 2024 - newest overall, but it's a ref)
+///   scan/older_copy.bin      (mtime: 2021 - non-ref)
+///   scan/newer_copy.bin      (mtime: 2023 - non-ref, newer among non-ref)
 ///
 /// With -D AEN and a reference dir:
 ///   - ref/master.bin    → kept (reference, untouchable)
 ///   - scan/older_copy.bin → deleted (ALL non-ref copies removed unconditionally)
-///   - scan/newer_copy.bin → deleted (same – NOT kept even though it's "newest non-ref")
+///   - scan/newer_copy.bin → deleted (same - NOT kept even though it's "newest non-ref")
 fn test_ref_aen_keeps_newest_nonref(dir: &str) -> Result<(), String> {
     let content = make_content(9);
     let ref_file   = format!("{dir}/ref/master.bin");
@@ -404,7 +404,7 @@ fn test_ref_aen_keeps_newest_nonref(dir: &str) -> Result<(), String> {
 
     set_mtime(&ref_file,   "202401010000")?;  // 2024 (ref)
     set_mtime(&scan_older, "202101010000")?;  // 2021
-    set_mtime(&scan_newer, "202301010000")?;  // 2023 – newest non-ref
+    set_mtime(&scan_newer, "202301010000")?;  // 2023 - newest non-ref
 
     let ref_dir  = format!("{dir}/ref");
     let scan_dir = format!("{dir}/scan");
@@ -477,7 +477,7 @@ fn test_ref_multiple_ref_dirs(dir: &str) -> Result<(), String> {
     write_file(&format!("{dir}/scan/dup_b.bin"),   &content_b)?;
     write_file(&format!("{dir}/scan/unique.bin"),  &content_c)?;
 
-    // Make ref files older so OO would "want" to delete them – but refs are
+    // Make ref files older so OO would "want" to delete them - but refs are
     // always preserved, so they must still be here after the run.
     set_mtime(&format!("{dir}/ref1/file_a.bin"), "202001010000")?;
     set_mtime(&format!("{dir}/ref2/file_b.bin"), "202001010000")?;
@@ -517,7 +517,7 @@ fn test_ref_multiple_ref_dirs(dir: &str) -> Result<(), String> {
 ///
 /// Layout:
 ///   scan/active/file.bin    (content D)
-///   scan/excluded/file.bin  (content D – excluded via -e)
+///   scan/excluded/file.bin  (content D - excluded via -e)
 ///
 /// Without the exclusion czkawka would see two duplicates and delete one.
 /// With -e scan/excluded the excluded copy is invisible, leaving only one
@@ -547,7 +547,7 @@ fn test_dup_excluded_dir(dir: &str) -> Result<(), String> {
 /// invisible to czkawka; the remaining copies form the deduplication pool.
 ///
 /// Layout:
-///   scan/keep/file.bin     (content E – excluded by pattern)
+///   scan/keep/file.bin     (content E - excluded by pattern)
 ///   scan/trash1/file.bin   (content E)
 ///   scan/trash2/file.bin   (content E)
 ///
@@ -581,8 +581,8 @@ fn test_dup_excluded_glob(dir: &str) -> Result<(), String> {
 /// -R (non-recursive) must not descend into sub-directories.
 ///
 /// Layout:
-///   scan/file.bin        (content F – at top level)
-///   scan/sub/file.bin    (content F – in sub-directory, must be invisible)
+///   scan/file.bin        (content F - at top level)
+///   scan/sub/file.bin    (content F - in sub-directory, must be invisible)
 ///
 /// With -R, only the top level is scanned: one copy seen → no duplicate → no deletion.
 fn test_dup_non_recursive(dir: &str) -> Result<(), String> {
@@ -611,8 +611,8 @@ fn test_dup_non_recursive(dir: &str) -> Result<(), String> {
 /// share the same size but have different content.
 ///
 /// Layout:
-///   a/file.bin   (content G – 16 KiB)
-///   b/file.bin   (content H – 16 KiB, different content)
+///   a/file.bin   (content G - 16 KiB)
+///   b/file.bin   (content H - 16 KiB, different content)
 ///
 /// Same size, different hash → must NOT be treated as duplicates.
 fn test_dup_hash_no_false_positive(dir: &str) -> Result<(), String> {
@@ -640,8 +640,8 @@ fn test_dup_hash_no_false_positive(dir: &str) -> Result<(), String> {
 /// different content ARE detected as "duplicates" in NAME mode.
 ///
 /// Layout:
-///   a/report.bin   (content I – 16 KiB)
-///   b/report.bin   (content J – 16 KiB, different)
+///   a/report.bin   (content I - 16 KiB)
+///   b/report.bin   (content J - 16 KiB, different)
 ///
 /// -s NAME + -D ON (one newest) must delete the newer copy.
 fn test_dup_name_mode_same_name(dir: &str) -> Result<(), String> {

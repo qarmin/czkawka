@@ -8,7 +8,7 @@ use image::{DynamicImage, ImageReader};
 use little_exif::exif_tag::ExifTag;
 use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
-use log::{error, trace};
+use log::{error, trace, warn};
 
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::create_crash_message;
@@ -87,7 +87,10 @@ pub fn get_dynamic_image_from_path(path: &str, opts: Option<ImgResizeOptions>) -
     if let Ok(res) = res {
         match res {
             Ok((img, w, h)) => {
-                let rotation = get_rotation_from_exif(path).unwrap_or(None);
+                let rotation = get_rotation_from_exif(path).unwrap_or_else(|e| {
+                    warn!("Failed to read EXIF rotation from {path}: {e}");
+                    None
+                });
                 let img_rotated = match rotation {
                     Some(ExifOrientation::Normal) | None => img,
                     Some(ExifOrientation::MirrorHorizontal) => img.fliph(),
@@ -255,8 +258,9 @@ pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientatio
     let res = panic::catch_unwind(|| {
         let metadata = match Metadata::new_from_path(Path::new(path)) {
             Ok(m) => m,
-            // File format has no EXIF support – treat as no orientation data
             Err(e) if e.kind() == std::io::ErrorKind::Unsupported => return Ok(None),
+            Err(e) if e.to_string().contains("No EXIF data") => return Ok(None),
+            Err(e) if e.to_string().contains("No metadata found") => return Ok(None),
             Err(e) => return Err(e),
         };
 

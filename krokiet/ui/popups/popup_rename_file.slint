@@ -1,0 +1,61 @@
+import { LineEdit } from "std-widgets.slint";
+import { Callabler } from "../globals/callabler.slint";
+import { Translations } from "../globals/translations.slint";
+import { FontSizes } from "../globals/fonts.slint";
+import { PopupBase } from "../components/popup_base.slint";
+
+export component PopupRenameFile inherits Rectangle {
+    out property <length> popup_width: 500px;
+    out property <length> popup_height: 185px;
+    in-out property <int> row_idx: -1;
+    private property <string> original_name;
+    private property <string> text_data;
+
+    private property <bool> name_empty: text_data == "";
+    private property <bool> name_unchanged: text_data == original_name;
+    // Filesystem check is deferred to Rust; only run it once the name is a real, changed candidate.
+    private property <bool> target_exists: !name_empty && !name_unchanged && Callabler.rename_target_exists(row_idx, text_data);
+
+    private property <string> warning_text:
+        name_unchanged ? Translations.popup_rename_single_same_name_text
+        : target_exists ? Translations.popup_rename_single_target_exists_text
+        : "";
+
+    callback show_popup(int, string); // (row_idx, current_name)
+
+    popup_window := PopupBase {
+        width: popup_width;
+        height: popup_height;
+        title_text <=> Translations.popup_rename_single_title_text;
+        enabled_ok_button: !name_empty && !name_unchanged && !target_exists;
+
+        VerticalLayout {
+            padding: 10px;
+            spacing: 8px;
+            LineEdit {
+                text <=> text_data;
+                placeholder-text <=> Translations.popup_rename_single_title_text;
+            }
+
+            Text {
+                text: warning_text;
+                visible: warning_text != "";
+                color: #e74c3c;
+                font-size: FontSizes.normal;
+                wrap: word-wrap;
+                horizontal-alignment: center;
+            }
+        }
+
+        ok_clicked => {
+            Callabler.rename_single_file(root.row_idx, text_data);
+        }
+    }
+
+    show_popup(idx, current_name) => {
+        root.row_idx = idx;
+        original_name = current_name;
+        text_data = current_name;
+        popup_window.show();
+    }
+}

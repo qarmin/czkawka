@@ -10,7 +10,7 @@ use rayon::prelude::*;
 
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{CheckingMethod, FileEntry, ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::CommonToolData;
 use crate::tools::empty_files::{EmptyFiles, EmptyFilesParameters, Info};
@@ -69,7 +69,6 @@ impl EmptyFiles {
             .progress_sender(progress_sender)
             .minimal_file_size(0)
             .maximal_file_size(max_size)
-            .checking_method(checking_method)
             .build()
             .run();
 
@@ -84,7 +83,7 @@ impl EmptyFiles {
                 }
                 self.common_data.text_messages.warnings.extend(warnings);
                 debug!(
-                    "collect_files – {} zero-size, {} queued for content check",
+                    "collect_files - {} zero-size, {} queued for content check",
                     self.empty_files.len(),
                     self.files_to_check.len()
                 );
@@ -102,13 +101,7 @@ impl EmptyFiles {
         }
 
         let total_size: u64 = files.iter().map(|fe| fe.size).sum();
-        let progress_handler = prepare_thread_handler_common(
-            progress_sender,
-            CurrentStage::EmptyFilesCheckingContent,
-            files.len(),
-            (ToolType::EmptyFiles, CheckingMethod::EmptyFilesContent),
-            total_size,
-        );
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::EmptyFilesCheckingContent, files.len(), total_size);
 
         let search_non_printable = self.params.search_non_printable_content_files;
         let stopped = AtomicBool::new(false);

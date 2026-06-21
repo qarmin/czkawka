@@ -8,6 +8,7 @@ export component PopupBase inherits PopupWindow {
     in-out property <string> ok_text <=> Translations.ok_button_text;
     in-out property <string> cancel_text <=> Translations.cancel_button_text;
     in-out property <bool> enabled_ok_button: true;
+    in-out property <bool> show_cancel_button: true;
 
     callback ok_clicked();
     callback cancel_clicked();
@@ -51,7 +52,7 @@ export component PopupBase inherits PopupWindow {
 
                 Rectangle { }
 
-                Button {
+                if show_cancel_button: Button {
                     text <=> cancel_text;
                     clicked => {
                         root.close();

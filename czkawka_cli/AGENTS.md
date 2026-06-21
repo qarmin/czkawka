@@ -15,6 +15,7 @@ terminal.
 czkawka_cli/src/
 ├── main.rs       # Entry point, thread spawning, tool dispatchers
 ├── commands.rs   # All clap CLI argument definitions
+├── parsers.rs    # parse_* clap value-parser functions used by commands.rs
 └── progress.rs   # indicatif progress bar rendering
 ```
 
@@ -71,7 +72,7 @@ variants:
 - `-X` (unix only) exclude other filesystems
 - `-f` save text results to file
 - `-C` save compact JSON results to file
-- `--pretty-json-file-to-save` save pretty JSON results to file
+- `--pretty-file-to-save` (`-p`) save pretty JSON results to file
 - `-N` / `-M` suppress result/message output
 - `-W` suppress non-zero exit code when items found
 - `-T` thread count (0 = all CPUs)
@@ -158,3 +159,11 @@ and stop gracefully when it is `true`.
 - `libraw` – RAW image support (requires libraw)
 - `libavif` – AVIF image support (requires libavif)
 - `xdg_portal_trash` – FlatPak-compatible trash (XDG portal)
+
+---
+
+## Comments
+
+Short and minimal - see root `AGENTS.md`. Only add a comment where the code's behavior can't be
+inferred from reading it (a non-obvious constraint, a workaround, a cross-module coupling);
+never restate what the code already says.

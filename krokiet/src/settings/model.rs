@@ -340,7 +340,7 @@ pub struct BasicSettings {
     #[serde(default)]
     pub show_notification_on_scan_completion: bool,
 
-    // Select popup visibility – global (not per-preset)
+    // Select popup visibility - global (not per-preset)
     #[serde(default)]
     pub select_show_oldest: bool,
     #[serde(default)]

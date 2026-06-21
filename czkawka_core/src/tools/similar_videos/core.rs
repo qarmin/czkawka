@@ -18,11 +18,12 @@ use crate::common::cache::{CACHE_VERSION, CACHE_VIDEO_VERSION, load_and_split_ca
 use crate::common::config_cache_path::get_config_cache_path;
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{CacheLoadPhase, ProgressData, SimilarVideosMode, SimilarVideosStage, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::video_utils::{VIDEO_THUMBNAILS_SUBFOLDER, VideoMetadata, generate_thumbnail};
 use crate::flc;
+use crate::helpers::long_operation_watcher::run_with_long_operation_warnings;
 use crate::tools::similar_videos::{SimilarVideos, SimilarVideosParameters, VideoAudioEntry, VideosEntry};
 
 impl SimilarVideos {
@@ -76,11 +77,15 @@ impl SimilarVideos {
             DirTraversalResult::SuccessFiles { grouped_file_entries, warnings } => {
                 self.common_data.text_messages.warnings.extend(warnings);
 
+                let mode = if self.params.check_audio_content {
+                    SimilarVideosMode::AudioContent
+                } else {
+                    SimilarVideosMode::VisualHash
+                };
                 let progress_handler = prepare_thread_handler_common(
                     progress_sender,
-                    CurrentStage::SimilarVideosHidingHardLinks,
+                    ToolStage::SimilarVideos(mode, SimilarVideosStage::HidingHardLinks),
                     grouped_file_entries.len(),
-                    self.get_test_type(),
                     0,
                 );
                 let hide_hard_links = self.get_hide_hard_links();
@@ -123,12 +128,17 @@ impl SimilarVideos {
 
     fn check_video_file_entry(&self, mut file_entry: VideosEntry, stop_flag: &AtomicBool) -> VideosEntry {
         let sig_config = self.signature_config();
-        match VideoSignature::from_path(&file_entry.path, &sig_config, stop_flag) {
+        let path = file_entry.path.to_string_lossy().to_string();
+        // Visual hashing runs in-process and cannot be interrupted, so a watchdog at least logs a
+        // warning if a single file keeps hashing for very long (likely a hang) instead of freezing silently.
+        let signature = run_with_long_operation_warnings("similar_videos_hash_calculation", &path, || {
+            VideoSignature::from_path(&file_entry.path, &sig_config, stop_flag)
+        });
+        match signature {
             Ok(sig) => {
                 file_entry.signature = Some(sig);
             }
             Err(e) => {
-                let path = file_entry.path.to_string_lossy();
                 file_entry.error = format!("Failed to hash file \"{path}\": reason {e}");
             }
         }
@@ -162,11 +172,15 @@ impl SimilarVideos {
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.load_cache_at_start();
 
+        let mode = if self.params.check_audio_content {
+            SimilarVideosMode::AudioContent
+        } else {
+            SimilarVideosMode::VisualHash
+        };
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SimilarVideosCalculatingHashes,
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::CalculatingHashes),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             0, // non_cached_files_to_check.values().map(|e| e.size).sum(), // Looks, that at least for now, there is no big difference between checking big and small files, so at least for now, only tracking number of files is enough
         );
 
@@ -179,10 +193,12 @@ impl SimilarVideos {
                     return None;
                 }
 
+                let size = file_entry.size;
                 let res = self.check_video_file_entry(file_entry, stop_flag);
                 let res = Self::read_video_properties(res);
 
                 progress_handler.increase_items(1);
+                progress_handler.increase_size(size);
 
                 Some(res)
             })
@@ -243,12 +259,17 @@ impl SimilarVideos {
 
     #[fun_time(message = "create_thumbnails", level = "debug")]
     pub(crate) fn create_thumbnails(&mut self, progress_sender: Option<&Sender<ProgressData>>, stop_flag: &Arc<AtomicBool>) -> WorkContinueStatus {
-        let stage = if self.params.check_audio_content {
-            CurrentStage::SimilarVideosAudioCreatingThumbnails
+        let mode = if self.params.check_audio_content {
+            SimilarVideosMode::AudioContent
         } else {
-            CurrentStage::SimilarVideosCreatingThumbnails
+            SimilarVideosMode::VisualHash
         };
-        let progress_handler = prepare_thread_handler_common(progress_sender, stage, self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(), self.get_test_type(), 0);
+        let stage = if self.params.check_audio_content {
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::CreatingAudioThumbnails)
+        } else {
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::CreatingThumbnails)
+        };
+        let progress_handler = prepare_thread_handler_common(progress_sender, stage, self.similar_vectors.iter().map(|e| e.len()).sum::<usize>(), 0);
 
         let Some(config_cache_path) = get_config_cache_path() else {
             return WorkContinueStatus::Continue;
@@ -378,7 +399,17 @@ impl SimilarVideos {
             return WorkContinueStatus::Continue;
         }
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SimilarVideosAudioCacheLoading, 0, self.get_test_type(), 0);
+        let mode = if self.params.check_audio_content {
+            SimilarVideosMode::AudioContent
+        } else {
+            SimilarVideosMode::VisualHash
+        };
+        let progress_handler = prepare_thread_handler_common(
+            progress_sender,
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::LoadingAudioCache(CacheLoadPhase::Loading)),
+            0,
+            0,
+        );
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) =
             load_and_split_cache_generalized_by_path(&get_similar_videos_audio_cache_file(), mem::take(&mut self.audio_to_check), self);
@@ -390,9 +421,8 @@ impl SimilarVideos {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SimilarVideosAudioCalculatingFingerprints,
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::CalculatingAudioFingerprints),
             non_cached_files_to_check.len(),
-            self.get_test_type(),
             non_cached_files_to_check.values().map(|e| e.size).sum::<u64>(),
         );
         let configuration = &self.audio_config;
@@ -407,7 +437,7 @@ impl SimilarVideos {
                 }
 
                 let size = audio_entry.size;
-                let res = calc_fingerprint_and_duration(&path, configuration, stop_flag);
+                let res = run_with_long_operation_warnings("similar_videos_audio_fingerprint", &path, || calc_fingerprint_and_duration(&path, configuration, stop_flag));
                 progress_handler.increase_size(size);
                 progress_handler.increase_items(1);
 
@@ -430,7 +460,7 @@ impl SimilarVideos {
 
         progress_handler.join_thread();
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::SimilarVideosAudioCacheSaving, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::SimilarVideos(mode, SimilarVideosStage::SavingAudioCache), 0, 0);
 
         vec_audio_entries.extend(records_already_cached.into_values());
 
@@ -457,11 +487,15 @@ impl SimilarVideos {
             .filter(|e| e.audio_duration_seconds >= audio_min_duration_seconds)
             .collect();
 
+        let mode = if self.params.check_audio_content {
+            SimilarVideosMode::AudioContent
+        } else {
+            SimilarVideosMode::VisualHash
+        };
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::SimilarVideosAudioComparingFingerprints,
+            ToolStage::SimilarVideos(mode, SimilarVideosStage::ComparingAudioFingerprints),
             entries.len(),
-            self.get_test_type(),
             0,
         );
 
@@ -473,27 +507,31 @@ impl SimilarVideos {
         let mut similar_vectors: Vec<Vec<VideosEntry>> = Vec::new();
         let mut used_paths: IndexSet<String> = Default::default();
 
-        let lookup: BTreeMap<String, &VideoAudioEntry> = entries.iter().map(|e| (e.path.to_string_lossy().to_string(), e)).collect();
+        // Compute each entry's path string once instead of re-allocating it for every pair on every
+        // outer iteration (previously an O(n^2) flood of `to_string_lossy().to_string()` allocations).
+        // The strings are then shared via zipped iterators; only grouped entries' strings get cloned
+        // (into `used_paths`). The expensive `match_fingerprints` call stays gated behind the
+        // duration-ratio check, and the set of compared pairs / grouping is unchanged.
+        let path_strings: Vec<String> = entries.iter().map(|e| e.path.to_string_lossy().to_string()).collect();
 
-        for f_entry in &entries {
+        for (f_entry, f_string) in entries.iter().zip(path_strings.iter()) {
             if check_if_stop_received(stop_flag) {
                 progress_handler.join_thread();
                 return WorkContinueStatus::Stop;
             }
 
             progress_handler.increase_items(1);
-            let f_string = f_entry.path.to_string_lossy().to_string();
-            if used_paths.contains(&f_string) {
+            if used_paths.contains(f_string) {
                 continue;
             }
 
             let f_duration = f64::from(f_entry.audio_duration_seconds);
 
-            let (mut similar_entries, errors): (Vec<_>, Vec<_>) = entries
+            let (similar_entries, errors): (Vec<&VideoAudioEntry>, Vec<_>) = entries
                 .par_iter()
-                .map(|e_entry| {
-                    let e_string = e_entry.path.to_string_lossy().to_string();
-                    if used_paths.contains(&e_string) || e_string == f_string {
+                .zip(path_strings.par_iter())
+                .map(|(e_entry, e_string)| {
+                    if used_paths.contains(e_string) || e_string == f_string {
                         return None;
                     }
 
@@ -511,26 +549,25 @@ impl SimilarVideos {
                     segments.retain(|s| s.score < maximum_difference);
                     let matched_duration: f32 = segments.iter().map(|s| s.duration(configuration)).sum();
                     let threshold = shorter as f32 * (audio_similarity_percent / 100.0) as f32;
-                    if matched_duration >= threshold { Some(Ok(e_string)) } else { None }
+                    if matched_duration >= threshold { Some(Ok(e_entry)) } else { None }
                 })
                 .flatten()
                 .partition_map(|res| match res {
-                    Ok(path) => itertools::Either::Left(path),
+                    Ok(entry) => itertools::Either::Left(entry),
                     Err(err) => itertools::Either::Right(err),
                 });
 
             self.common_data.text_messages.errors.extend(errors);
 
-            similar_entries.retain(|path| !used_paths.contains(path));
             if !similar_entries.is_empty() {
                 let mut result_group: Vec<VideosEntry> = similar_entries
                     .iter()
-                    .filter_map(|path| {
-                        used_paths.insert(path.clone());
-                        lookup.get(path).map(|ae| audio_entry_to_videos_entry(ae))
+                    .map(|e_entry| {
+                        used_paths.insert(e_entry.path.to_string_lossy().to_string());
+                        audio_entry_to_videos_entry(e_entry)
                     })
                     .collect();
-                used_paths.insert(f_string);
+                used_paths.insert(f_string.clone());
                 result_group.push(audio_entry_to_videos_entry(f_entry));
                 similar_vectors.push(result_group);
             }
@@ -541,44 +578,7 @@ impl SimilarVideos {
         let exclude_same_size = self.params.exclude_videos_with_same_size;
         let exclude_same_resolution = self.params.exclude_videos_with_same_resolution;
         if exclude_same_size || exclude_same_resolution {
-            similar_vectors = similar_vectors
-                .into_par_iter()
-                .map(|group| {
-                    let enriched: Vec<VideosEntry> = if exclude_same_resolution {
-                        group
-                            .into_par_iter()
-                            .map(|mut entry| {
-                                if (entry.width.is_none() || entry.height.is_none())
-                                    && let Ok(meta) = VideoMetadata::from_path(&entry.path)
-                                {
-                                    entry.width = meta.width;
-                                    entry.height = meta.height;
-                                }
-                                entry
-                            })
-                            .collect()
-                    } else {
-                        group
-                    };
-                    let mut bt_size: BTreeSet<u64> = Default::default();
-                    let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
-                    let mut filtered_group: Vec<VideosEntry> = Vec::new();
-                    for entry in enriched {
-                        if exclude_same_size && !bt_size.insert(entry.size) {
-                            continue;
-                        }
-                        if exclude_same_resolution
-                            && let (Some(w), Some(h)) = (entry.width, entry.height)
-                            && !bt_resolution.insert((w, h))
-                        {
-                            continue;
-                        }
-                        filtered_group.push(entry);
-                    }
-                    filtered_group
-                })
-                .filter(|g| g.len() > 1)
-                .collect();
+            similar_vectors = exclude_same_size_and_resolution(similar_vectors, exclude_same_size, exclude_same_resolution);
         }
 
         self.similar_vectors = similar_vectors;
@@ -599,6 +599,47 @@ impl SimilarVideos {
 
         WorkContinueStatus::Continue
     }
+}
+
+fn exclude_same_size_and_resolution(similar_vectors: Vec<Vec<VideosEntry>>, exclude_same_size: bool, exclude_same_resolution: bool) -> Vec<Vec<VideosEntry>> {
+    similar_vectors
+        .into_par_iter()
+        .map(|group| {
+            let enriched: Vec<VideosEntry> = if exclude_same_resolution {
+                group
+                    .into_par_iter()
+                    .map(|mut entry| {
+                        if (entry.width.is_none() || entry.height.is_none())
+                            && let Ok(meta) = VideoMetadata::from_path(&entry.path)
+                        {
+                            entry.width = meta.width;
+                            entry.height = meta.height;
+                        }
+                        entry
+                    })
+                    .collect()
+            } else {
+                group
+            };
+            let mut bt_size: BTreeSet<u64> = Default::default();
+            let mut bt_resolution: BTreeSet<(u32, u32)> = Default::default();
+            let mut filtered_group: Vec<VideosEntry> = Vec::new();
+            for entry in enriched {
+                if exclude_same_size && !bt_size.insert(entry.size) {
+                    continue;
+                }
+                if exclude_same_resolution
+                    && let (Some(w), Some(h)) = (entry.width, entry.height)
+                    && !bt_resolution.insert((w, h))
+                {
+                    continue;
+                }
+                filtered_group.push(entry);
+            }
+            filtered_group
+        })
+        .filter(|g| g.len() > 1)
+        .collect()
 }
 
 fn audio_entry_to_videos_entry(ae: &VideoAudioEntry) -> VideosEntry {
