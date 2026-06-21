@@ -125,7 +125,7 @@ column_new_name = New Name
 column_full_path = Full Path
 
 # Slint translations
-ok_button = Ok
+ok_button = OK
 cancel_button = Cancel
 do_you_want_to_continue = Do you want to continue?
 main_window_title = Krokiet - Data Cleaner

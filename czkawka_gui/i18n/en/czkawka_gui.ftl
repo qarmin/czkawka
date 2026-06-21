@@ -5,7 +5,7 @@ window_progress_title = Scanning
 window_compare_images = Compare Images
 
 # General
-general_ok_button = Ok
+general_ok_button = OK
 general_close_button = Close
 
 # Krokiet info dialog
