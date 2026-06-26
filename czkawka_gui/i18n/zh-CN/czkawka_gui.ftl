@@ -8,14 +8,14 @@ general_ok_button = 好的
 general_close_button = 关闭
 # Krokiet info dialog
 krokiet_info_title = 废弃通知
-krokiet_info_message =
+krokiet_info_message = 
     Czkawka GTK 12.0是最后版本。没有计划进一步更新、功能或错误修复。
     
     来自Czkawka GTK 的大多数功能都可以使用 Krokiet, 通常是更简单、更快和更稳定的形式。 Krokiet还在GTK版本中添加了新的功能和改进。
     
     如果您仍在使用Czkawka GTK, 则切换到 Krokiet 应该很容易， 因为它有一个相似的接口，依赖性减少，跨平台支持更好。
     
-    PS：此消息只能显示一次。如果它再次显示，请将CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。
+    PS：此消息只能显示一次。如果它再次显示，请将CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。.
 # Main window
 music_title_checkbox = 标题
 music_artist_checkbox = 艺人
@@ -96,7 +96,7 @@ image_hash_alg_tooltip =
     每种算法都有强项和弱项，对于不同的图像，有时结果更好，有时结果更差。
     
     因此，为了确定最适合你的算法，需要进行人工测试。.
-image_geometric_invariance_tooltip = 还比较每个图像的镜像/翻转和可选的旋转变体。这可以提高匹配性，但增加散列时间。
+image_geometric_invariance_tooltip = 还比较每个图像的镜像/翻转和可选的旋转变体。这可以提高匹配性，但增加散列时间。.
 big_files_mode_combobox_tooltip = 允许搜索最小/最大的文件
 big_files_mode_label = 已检查的文件
 big_files_mode_smallest_combo_box = 最小的
@@ -310,7 +310,7 @@ header_about_button_tooltip = 打开包含应用程序信息的对话框。.
 header_krokiet_button_tooltip = 尝试 Krokiet - 新的和改进的版本！
 # Krokiet promo dialog
 krokiet_promo_title = 会见Krokie！
-krokiet_promo_message =
+krokiet_promo_message = 
     你好，勇敢的 Czkawka 用户！
     
     部队与你有明显的关系，但Krokiet不是一个新的、更快的、更轻松的部队。 并且更多的手动(假定应用程序可能实际上是手提的) 重复清洁器。
@@ -319,7 +319,7 @@ krokiet_promo_message =
     
     如果您有些错过了它，则已经比Krokiet - Cedinia更新的应用了。 主要专为安卓设备和触摸屏使用。
     
-    Czkawka GTK 对我们的服务很好，但它的观察已经结束。
+    Czkawka GTK 对我们的服务很好，但它的观察已经结束。.
 krokiet_promo_link_download = 下载 Krokiet/Cedinia
 krokiet_promo_link_project = 项目页面
 
@@ -458,7 +458,7 @@ saving_loading_saving_success = 配置保存到文件 { $name }。.
 saving_loading_saving_failure = 无法将配置数据保存到文件 { $name }, 原因 { $reason }.
 saving_loading_reset_configuration = 当前配置已被清除。.
 saving_loading_loading_success = 正确加载应用程序配置。.
-saving_loading_no_config_file = 未找到配置文件，使用默认设置。
+saving_loading_no_config_file = 未找到配置文件，使用默认设置。.
 saving_loading_failed_to_create_config_file = 无法创建配置文件 "{ $path }", 原因"{ $reason }".
 saving_loading_failed_to_read_config_file = 无法从 "{ $path }" 加载配置，因为它不存在或不是文件。.
 saving_loading_failed_to_read_data_from_file = 无法从文件读取数据"{ $path }", 原因"{ $reason }".

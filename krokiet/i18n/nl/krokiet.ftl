@@ -422,7 +422,7 @@ optimize_overwrite_files_text = Schrijf bestanden over
 optimize_limit_video_size_text = Beperk videogrootte
 optimize_max_width_text = Max breedte:
 optimize_max_height_text = Maximale hoogte:
-optimize_crf_hint = Lagere waarde = betere kwaliteit. 0 is bijna verlies, 51 is het ergste. Aanbevolen: 18-28
+optimize_crf_hint = Lagere waarde = betere kwaliteit. 0 is bijna verlies, 51 is het ergste. Aanbevolen: 18-28.
 optimize_noise_reduction_hint = Geluidsreductie kan de coderingstijd aanzienlijk verhogen.
 optimize_noise_reduction_strength_hint = 1 = minimaal, 10 = maximale geluidsvermindering.
 hardlink_button_text = Hardlink
