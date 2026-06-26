@@ -535,7 +535,7 @@ text_view_messages = MESSAGES
 text_view_warnings = WARNINGS
 text_view_errors = ERRORS
 about_window_motto = This program is free to use and will always be.
-krokiet_new_app = Czkawka is in maintenance mode, which means that only critical bugs will be fixed and no new features will be added. For new features, please check out new Krokiet app, which is more stable and performant and is still under active development.
+krokiet_new_app = This GTK version of Czkawka is no longer developed as of version 12. For new features and active development, please use Krokiet, which is more stable and performant.
 
 # Various dialog
 dialogs_ask_next_time = Ask next time

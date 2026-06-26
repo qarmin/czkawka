@@ -194,8 +194,24 @@ pub fn make_hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Res
         }
         Err(e) => {
             let _ = fs::rename(&temp, dst);
-            Err(e)
+            Err(describe_hardlink_error(e, dst))
         }
+    }
+}
+
+// rclone/network/FUSE mounts and cross-device targets can't hold a hard link; the bare
+// OS error ("Function not implemented") is cryptic, so name the real cause (issue #1975).
+fn describe_hardlink_error(e: io::Error, dst: &Path) -> io::Error {
+    if matches!(e.kind(), io::ErrorKind::Unsupported | io::ErrorKind::CrossesDevices) {
+        let kind = e.kind();
+        let message = flc!(
+            "core_hardlink_unsupported_filesystem",
+            path = dst.to_string_lossy().to_string(),
+            reason = e.to_string()
+        );
+        Error::new(kind, message)
+    } else {
+        e
     }
 }
 
@@ -247,5 +263,32 @@ pub fn debug_save_file(path: &str, data: &str) {
     use std::io::Write;
     if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(path) {
         let _ = writeln!(f, "{data}");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::ErrorKind;
+
+    use super::*;
+
+    #[test]
+    fn describe_hardlink_error_explains_unsupported_filesystem() {
+        let raw = Error::new(ErrorKind::Unsupported, "Function not implemented");
+        let described = describe_hardlink_error(raw, Path::new("/mnt/rclone/b"));
+
+        assert_eq!(described.kind(), ErrorKind::Unsupported);
+        let message = described.to_string();
+        assert!(message.contains("/mnt/rclone/b"), "missing path in: {message}");
+        assert!(message.contains("Function not implemented"), "missing original reason in: {message}");
+    }
+
+    #[test]
+    fn describe_hardlink_error_passes_through_unrelated_errors() {
+        let raw = Error::new(ErrorKind::PermissionDenied, "Permission denied");
+        let described = describe_hardlink_error(raw, Path::new("/mnt/rclone/b"));
+
+        assert_eq!(described.kind(), ErrorKind::PermissionDenied);
+        assert_eq!(described.to_string(), "Permission denied");
     }
 }

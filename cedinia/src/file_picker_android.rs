@@ -391,6 +391,49 @@ pub fn setup_nav_bar() {
     .unwrap_or_else(|e| log::error!("setup_nav_bar: JNI failed: {:?}", e));
 }
 
+// Cedinia's theme is independent of the system dark/light setting, so the status/nav bar
+// icon colour must be driven from the app theme or it can turn invisible (light icons on a
+// light bar). Java side hops to the UI thread, which the bar appearance API requires.
+pub fn apply_theme_to_system_bars(dark_theme: bool) {
+    let Some(app) = get_android_app() else {
+        log::error!("apply_theme_to_system_bars: AndroidApp not initialised");
+        return;
+    };
+    let Some(loader_ref) = get_loader() else {
+        log::error!("apply_theme_to_system_bars: DEX loader not initialised");
+        return;
+    };
+    let Some(activity_ref) = get_activity_global_ref() else {
+        log::error!("apply_theme_to_system_bars: activity global ref not initialised");
+        return;
+    };
+
+    let Some(vm) = try_jvm(&app) else {
+        return;
+    };
+    vm.attach_current_thread(|env| -> jni::errors::Result<()> {
+        let native_activity = activity_ref.as_obj();
+        let class_name = env.new_string("CediniaFilePicker")?;
+        let picker_class_obj = env
+            .call_method(
+                loader_ref.as_obj(),
+                jni_str!("findClass"),
+                jni_sig!((name: java.lang.String) -> java.lang.Class),
+                &[JValue::Object(&class_name)],
+            )?
+            .l()?;
+        let picker_class: JClass = unsafe { JClass::from_raw(env, picker_class_obj.as_raw()) };
+        env.call_static_method(
+            &picker_class,
+            jni_str!("applyThemeToSystemBars"),
+            jni_sig!((activity: android.app.Activity, darkTheme: boolean) -> void),
+            &[JValue::Object(&native_activity), JValue::Bool(dark_theme)],
+        )?;
+        Ok(())
+    })
+    .unwrap_or_else(|e| log::error!("apply_theme_to_system_bars: JNI failed: {:?}", e));
+}
+
 pub fn acquire_wakelock() {
     let Some(app) = get_android_app() else {
         log::error!("acquire_wakelock: AndroidApp not initialised");

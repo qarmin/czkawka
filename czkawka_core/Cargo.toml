@@ -34,7 +34,7 @@ lofty = "0.24"
 
 # Needed by broken files
 zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
-lopdf = "0.41.0"
+lopdf = "0.42.0"
 sevenz-rust2 = "0.21.0"
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 tar = { version = "0.4", default-features = false }

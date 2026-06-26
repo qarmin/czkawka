@@ -521,6 +521,12 @@ export component ImageCompareOverlay inherits Rectangle {
                             clicked => { Callabler.compare_set_left(idx); }
                         }
                         Button {
+                            width: 38px; height: parent.height;
+                            text: img.checked ? "✓" : "□";
+                            checked: img.checked;
+                            clicked => { Callabler.compare_toggle_checkbox(idx); }
+                        }
+                        Button {
                             text: "→"; height: parent.height; horizontal-stretch: 1;
                             checked: idx == GuiState.compare_right_idx;
                             enabled: idx != GuiState.compare_left_idx;
@@ -528,21 +534,13 @@ export component ImageCompareOverlay inherits Rectangle {
                         }
                     }
 
-                    HorizontalLayout {
-                        height: 28px; spacing: 3px; alignment: center;
-                        Button {
-                            width: 38px; height: parent.height;
-                            text: img.checked ? "✓" : "□";
-                            checked: img.checked;
-                            clicked => { Callabler.compare_toggle_checkbox(idx); }
-                        }
-                        Text {
-                            text: img.name;
-                            font-size: FontSizes.small;
-                            overflow: elide;
-                            vertical-alignment: center;
-                            horizontal-stretch: 1;
-                        }
+                    Text {
+                        height: 28px;
+                        text: img.name;
+                        font-size: FontSizes.small;
+                        overflow: elide;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
                     }
                 }
             }
