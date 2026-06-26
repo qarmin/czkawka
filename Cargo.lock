@@ -2544,21 +2544,6 @@ dependencies = [
 
 [[package]]
 name = "fontique"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23358480a54a886d51b306718d5ca743fdfe238e5df38ef650f4e72f29c5d9e9"
-dependencies = [
- "hashbrown 0.16.1",
- "linebender_resource_handle",
- "memmap2",
- "parlance",
- "read-fonts 0.37.0",
- "smallvec",
- "yeslogic-fontconfig-sys",
-]
-
-[[package]]
-name = "fontique"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "274fa4f0f0a926ae182c7c076c078cce8a38471d15e61a102a02cac984be9813"
@@ -2571,7 +2556,7 @@ dependencies = [
  "objc2-core-text",
  "objc2-foundation 0.3.2",
  "parlance",
- "read-fonts 0.39.2",
+ "read-fonts",
  "roxmltree",
  "smallvec",
  "windows 0.62.2",
@@ -3291,7 +3276,7 @@ checksum = "d12c7c642d4ce8c2e784b4751a6634bd89583912265add4a679a8882d123fbcd"
 dependencies = [
  "bitflags 2.13.0",
  "bytemuck",
- "read-fonts 0.39.2",
+ "read-fonts",
  "smallvec",
 ]
 
@@ -3551,7 +3536,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4be292acd6d591cf376f2338786b0c95faddb79fdbce4ff89f840daf2d7bac4"
 dependencies = [
  "derive_more",
- "fontique 0.10.0",
+ "fontique",
  "htmlparser",
  "icu_decimal",
  "icu_locale_core",
@@ -3708,7 +3693,7 @@ dependencies = [
  "pin-weak",
  "raw-window-handle",
  "raw-window-metal",
- "read-fonts 0.39.2",
+ "read-fonts",
  "scoped-tls-hkt",
  "skia-safe",
  "softbuffer",
@@ -4623,7 +4608,7 @@ dependencies = [
  "chrono",
  "crossbeam-channel",
  "czkawka_core",
- "fontique 0.8.0",
+ "fontique",
  "fs_extra",
  "home",
  "humansize",
@@ -6124,7 +6109,7 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6b1cfcf399c774719fb1fa51bc6b91e86bdf003b03202a0902f1827ba6750746"
 dependencies = [
- "fontique 0.10.0",
+ "fontique",
  "harfrust",
  "hashbrown 0.17.1",
  "icu_normalizer",
@@ -6700,16 +6685,6 @@ checksum = "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
-]
-
-[[package]]
-name = "read-fonts"
-version = "0.37.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b634fabf032fab15307ffd272149b622260f55974d9fad689292a5d33df02e5"
-dependencies = [
- "bytemuck",
- "font-types",
 ]
 
 [[package]]
@@ -7379,7 +7354,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c34617370ae968efb7161bb2beb517d9084659aae19e24b89e3db25b46e4564"
 dependencies = [
  "bytemuck",
- "read-fonts 0.39.2",
+ "read-fonts",
 ]
 
 [[package]]
@@ -7424,7 +7399,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc34415cacfde72e062d7e9c2bdd764429f5946870647c9f605fb7066a82015c"
 dependencies = [
  "derive_more",
- "fontique 0.10.0",
+ "fontique",
  "i-slint-compiler",
  "spin_on",
  "toml_edit 0.25.12+spec-1.1.0",
@@ -10071,7 +10046,7 @@ dependencies = [
  "indexmap",
  "kurbo",
  "log",
- "read-fonts 0.39.2",
+ "read-fonts",
 ]
 
 [[package]]

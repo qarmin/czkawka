@@ -207,6 +207,11 @@ android: android_build android_install android_run
 
 androidr: android_build_release android_install_release android_run
 
+# Install and launch a prebuilt APK (e.g. downloaded from CI) without building.
+android_manual apk:
+    {{adb}} install -r "{{apk}}"
+    {{adb}} shell am start -n {{apk_package}}/{{apk_activity}}
+
 # Build, install and launch a debug APK with AddressSanitizer for testing the
 # JNI bridge (file_picker_android.rs) on a real arm64 device/emulator.
 #
