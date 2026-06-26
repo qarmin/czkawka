@@ -107,7 +107,7 @@ settings_check_method_label = МЕТОД НА СРАВНЕНИЕ
 settings_check_method = Метод
 settings_hash_type_label = ТИП НА ХЕША
 settings_hash_type = Хеш тип
-settings_hash_type_desc = Blake3 – това е препоръчителният вариант, тъй като CRC32 има малък шанс за фалшиво положителни резултати
+settings_hash_type_desc = Blake3 - това е препоръчителният вариант, тъй като CRC32 има малък шанс за фалшиво положителни резултати
 settings_similar_images_header = ПОДОБНИ СНИМКИ
 settings_similarity_preset = Праг на сходство
 settings_similarity_desc = Много високо качество = само почти идентични
@@ -302,7 +302,7 @@ path_edit_placeholder = Въведете пътя...
 path_edit_not_exists = Пътят не съществува
 path_edit_is_dir = Директория
 path_edit_is_file = Файл
-path_edit_no_newlines = Пътищата не могат да съдържат нови редове – натискането на клавиша "Enter" не е разрешено
+path_edit_no_newlines = Пътищата не могат да съдържат нови редове - натискането на клавиша "Enter" не е разрешено
 ctx_menu_title = Отворено
 ctx_open_file = Отворена точка
 ctx_open_folder = Отворете родителската папка

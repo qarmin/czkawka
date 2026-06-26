@@ -107,7 +107,7 @@ settings_check_method_label = 比較方法
 settings_check_method = 方法
 settings_hash_type_label = 雜湊類型
 settings_hash_type = 雜湊類型
-settings_hash_type_desc = Blake3 – 這是推薦的選項，CRC32 存在極小的誤判機率。
+settings_hash_type_desc = Blake3 - 這是推薦的選項，CRC32 存在極小的誤判機率。
 settings_similar_images_header = 相似圖片
 settings_similarity_preset = 相似度閾值
 settings_similarity_desc = 極高 = 僅接近完全相同。
@@ -302,7 +302,7 @@ path_edit_placeholder = 請輸入路徑...
 path_edit_not_exists = 路徑不存在。
 path_edit_is_dir = 目錄
 path_edit_is_file = 檔案
-path_edit_no_newlines = 路徑名稱中不能包含換行符號 — 不允許使用Enter鍵。
+path_edit_no_newlines = 路徑名稱中不能包含換行符號 - 不允許使用Enter鍵。
 ctx_menu_title = 開啟。
 ctx_open_file = 開啟項目。
 ctx_open_folder = 開啟父目錄。

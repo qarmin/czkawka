@@ -88,12 +88,7 @@ pub fn show_other_apps_dialog(window_main: &gtk4::Window) {
         list_box.append(&row);
     }
 
-    let scrolled = ScrolledWindow::builder()
-        .child(&list_box)
-        .vexpand(true)
-        .hexpand(true)
-        .min_content_height(300)
-        .build();
+    let scrolled = ScrolledWindow::builder().child(&list_box).vexpand(true).hexpand(true).min_content_height(300).build();
 
     let parent = button_close
         .parent()

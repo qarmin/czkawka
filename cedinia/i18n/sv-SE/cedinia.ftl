@@ -242,7 +242,7 @@ app_license = Frontend för Czkawka Core - GPL-3.0
 about_app_label = OM
 cache_label = CACHE
 # Notification
-scan_completed_notification = Skanning klar – { $file_count } objekt hittade
+scan_completed_notification = Skanning klar - { $file_count } objekt hittade
 # Confirm popups (set from Rust)
 confirm_clean_exif = Vill du verkligen rensa EXIF-taggar från { $n } markerade filer?
 confirm_delete_items = Är du säker på att du vill ta bort { $n } markerade objekt?

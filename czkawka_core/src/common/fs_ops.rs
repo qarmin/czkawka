@@ -204,11 +204,7 @@ pub fn make_hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Res
 fn describe_hardlink_error(e: io::Error, dst: &Path) -> io::Error {
     if matches!(e.kind(), io::ErrorKind::Unsupported | io::ErrorKind::CrossesDevices) {
         let kind = e.kind();
-        let message = flc!(
-            "core_hardlink_unsupported_filesystem",
-            path = dst.to_string_lossy().to_string(),
-            reason = e.to_string()
-        );
+        let message = flc!("core_hardlink_unsupported_filesystem", path = dst.to_string_lossy().to_string(), reason = e.to_string());
         Error::new(kind, message)
     } else {
         e

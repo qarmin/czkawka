@@ -7,12 +7,12 @@ rust_init_error_message =
     
     Může to být způsobeno chybějícími nebo nefunkčními ovladači OpenGL/Vulkan, spuštěním aplikace ve virtuálním stroji nebo chybou v Krokiet nebo jedné z jeho knihoven.
     
-    Můžete zkusit spustit různá sestavení (skia_opengl, skia_vulkan, femtovg_opengl – výchozí) nebo se softwarovým vykreslováním, abyste zjistili, zda to problém vyřeší.
+    Můžete zkusit spustit různá sestavení (skia_opengl, skia_vulkan, femtovg_opengl - výchozí) nebo se softwarovým vykreslováním, abyste zjistili, zda to problém vyřeší.
 rust_loaded_preset = Načtené přednastavení { $preset_idx }
 rust_file_already_exists = Soubor „{ $file }“ už existuje a nebude přepsán
-rust_error_removing_file_after_copy = Chyba při odstraňování souboru „{ $file }“ (po zkopírování na jiný oddíl) – důvod: { $reason }
-rust_error_copying_file = Chyba při kopírování „{ $input }“ do „{ $output }“ – důvod: { $reason }
-rust_failed_to_rename_file = Nepodařilo se přejmenovat soubor { $old_path } na { $new_path } – chyba: { $error }
+rust_error_removing_file_after_copy = Chyba při odstraňování souboru „{ $file }“ (po zkopírování na jiný oddíl) - důvod: { $reason }
+rust_error_copying_file = Chyba při kopírování „{ $input }“ do „{ $output }“ - důvod: { $reason }
+rust_failed_to_rename_file = Nepodařilo se přejmenovat soubor { $old_path } na { $new_path } - chyba: { $error }
 rust_rename_single_invalid_name = Nové jméno nesmí být prázdné nebo musí obsahovat oddělovače cest.
 rust_rename_single_target_exists = Soubor s tímto názvem již v této složce existuje.
 rust_rename_single_same_name = Nové jméno je stejné jako aktuální jméno.
@@ -35,18 +35,18 @@ rust_found_duplicate_files = Nalezeno { $items_found } duplicitních souborů v 
 rust_found_duplicate_files_no_lost_space = Nalezeno { $items_found } duplicitních souborů v { $groups } skupinách za { $time }
 rust_found_big_files = Nalezeno { $items_found } velkých souborů o velikosti { $size } za { $time }
 rust_found_exif_files = Nalezeno { $items_found } souborů s EXIF metadaty za { $time }
-rust_cannot_load_preset = Nebylo možné změnit a načíst přednastavení { $preset_idx } – důvod: { $reason }. Namísto toho budou použita výchozí nastavení
+rust_cannot_load_preset = Nebylo možné změnit a načíst přednastavení { $preset_idx } - důvod: { $reason }. Namísto toho budou použita výchozí nastavení
 rust_saved_preset = Uloženo přednastavení { $preset_idx }
-rust_cannot_save_preset = Nebylo možné uložit přednastavení { $preset_idx } – důvod: { $reason }
+rust_cannot_save_preset = Nebylo možné uložit přednastavení { $preset_idx } - důvod: { $reason }
 rust_reset_preset = Vrátit přednastavení na výchozí hodnoty { $preset_idx }
-rust_cannot_create_output_folder = Nebylo možné vytvořit výstupní složku { $output_folder } – důvod: { $error }
-rust_delete_summary = Smazáno { $deleted } položek – nepodařilo se odstranit { $failed } položek z { $total } položek
-rust_rename_summary = Přejmenováno { $renamed } položek – nepodařilo se přejmenovat { $failed } položek z { $total } položek
+rust_cannot_create_output_folder = Nebylo možné vytvořit výstupní složku { $output_folder } - důvod: { $error }
+rust_delete_summary = Smazáno { $deleted } položek - nepodařilo se odstranit { $failed } položek z { $total } položek
+rust_rename_summary = Přejmenováno { $renamed } položek - nepodařilo se přejmenovat { $failed } položek z { $total } položek
 rust_move_summary = Přesunuto { $moved } položek, nepodařilo se přesunout { $failed } položek z { $total } položek
-rust_hardlink_summary = Vytvořeny pevné odkazy na { $hardlinked } položek – nepodařilo se pro { $failed } položek z { $total } položek
-rust_symlink_summary = Vytvořeny symbolické odkazy na { $symlinked } položek – nepodařilo se pro { $failed } položek z { $total } položek
-rust_optimize_video_summary = Optimalizováno { $optimized } videí – nepodařilo se u { $failed } videí z { $total } videí
-rust_clean_exif_summary = Odstraněna EXIF metadata z { $cleaned } souborů – nepodařilo se u { $failed } souborů z { $total } souborů
+rust_hardlink_summary = Vytvořeny pevné odkazy na { $hardlinked } položek - nepodařilo se pro { $failed } položek z { $total } položek
+rust_symlink_summary = Vytvořeny symbolické odkazy na { $symlinked } položek - nepodařilo se pro { $failed } položek z { $total } položek
+rust_optimize_video_summary = Optimalizováno { $optimized } videí - nepodařilo se u { $failed } videí z { $total } videí
+rust_clean_exif_summary = Odstraněna EXIF metadata z { $cleaned } souborů - nepodařilo se u { $failed } souborů z { $total } souborů
 rust_no_files_deleted = Nevybrány žádné soubory ani složky pro smazání
 rust_no_files_renamed = Nevybrány žádné soubory ani složky pro přejmenování
 rust_no_files_moved = Nevybrány žádné soubory ani složky pro přesunutí
@@ -80,8 +80,8 @@ rust_cache_processed_files = Zpracováno { $files } souborů mezipaměti
 rust_cache_entries_stats = Odstraněno { $removed } položek ze všech { $all }, { $left } zbývá
 rust_cache_size_reduced = Velikost souborů mezipaměti snížena o { $size }
 rust_cache_time_elapsed = Uplynulý čas: { $time }
-rust_symlink_failed = Nepodařilo se vytvořit symbolický odkaz { $name } na { $target } – důvod: { $reason }
-rust_hardlink_failed = Nepodařilo se vytvořit pevný odkaz { $name } na { $target } – důvod: { $reason }
+rust_symlink_failed = Nepodařilo se vytvořit symbolický odkaz { $name } na { $target } - důvod: { $reason }
+rust_hardlink_failed = Nepodařilo se vytvořit pevný odkaz { $name } na { $target } - důvod: { $reason }
 
 # Slint translations, but in arrays
 
@@ -115,7 +115,7 @@ column_full_path = Plná cesta
 ok_button = OK
 cancel_button = Zrušit
 do_you_want_to_continue = Chcete pokračovat?
-main_window_title = Krokiet – čistič dat
+main_window_title = Krokiet - čistič dat
 file_dialog_open = Pro pokračování zavřete okno
 scan_button = Skenovat
 stop_button = Zastavit
@@ -292,9 +292,9 @@ settings_hide_hard_links_hint = Ve výsledcích skrýt pevné odkazy na stejné 
 settings_thread_number = Počet vláken procesoru
 settings_restart_required = --- Aby se změna v počtu vláken projevila, je třeba aplikaci restartovat ---
 settings_duplicate_image_preview = Náhled obrázku
-settings_duplicate_minimal_hash_cache_size = Minimální velikost souboru pro uložení do mezipaměti – otisk (KB)
+settings_duplicate_minimal_hash_cache_size = Minimální velikost souboru pro uložení do mezipaměti - otisk (KB)
 settings_duplicate_use_prehash = Použít rozpoznání
-settings_duplicate_minimal_prehash_cache_size = Minimální velikost souboru pro uložení do mezipaměti – rozpoznání (KB)
+settings_duplicate_minimal_prehash_cache_size = Minimální velikost souboru pro uložení do mezipaměti - rozpoznání (KB)
 settings_similar_images_show_image_preview = Náhled obrázku
 settings_similar_videos_preview_hint = Náhled je viditelný pouze v případě, že je povoleno "Vygenerovat náhledy" nebo pokud již byl náhled vygenerován.
 settings_application_scale_text = Měřítko aplikace
@@ -367,7 +367,7 @@ move_confirmation_text = Opravdu chcete označené položky přesunout?
 rename_confirmation_text = Opravdu chcete vybrané položky přejmenovat?
 delete = Odstranit položky
 trash = Přesunout položky do koše
-stopping_scan = Zastavování skenování – vyčkejte….
+stopping_scan = Zastavování skenování - vyčkejte….
 searching = Vyhledávání….
 subsettings_videos_crop_detect = Detekce oříznutí listovní schránky
 subsettings_videos_skip_forward_amount = Délka přeskočení [s]

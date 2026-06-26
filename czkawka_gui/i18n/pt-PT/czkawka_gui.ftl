@@ -148,7 +148,7 @@ main_check_box_broken_files_image = Imagem
 main_check_box_broken_files_video = Vídeo
 main_check_box_broken_files_video_tooltip = Usa ffmpeg/ffprobe para validar arquivos de vídeo. Muito lento e pode detectar erros pedantes mesmo se o arquivo reproduzir bem.
 check_button_general_same_size = Ignorar do mesmo tamanho
-check_button_general_same_size_tooltip = Ignorar arquivos com tamanho idêntico nos resultados — geralmente estes são duplicatas 1:1
+check_button_general_same_size_tooltip = Ignorar arquivos com tamanho idêntico nos resultados - geralmente estes são duplicatas 1:1
 main_label_size_bytes_tooltip = Tamanho dos arquivos usados na verificação
 # Upper window
 upper_tree_view_included_folder_column_title = Pastas para Buscar
@@ -185,7 +185,7 @@ upper_allowed_extensions_tooltip =
     
     Os seguintes Macros, que adicionam várias extensões de uma só vez, também estão disponíveis: IMAGE, VIDEO, MUSIC, TEXT.
     
-    Exemplo de uso ".exe, IMAGE, VIDEO, .rar, 7z" — isto significa que as imagens (ex., jpg, png), vídeos (ex., avi, mp4), exe, rar e arquivos 7z serão escaneados.
+    Exemplo de uso ".exe, IMAGE, VIDEO, .rar, 7z" - isto significa que as imagens (ex., jpg, png), vídeos (ex., avi, mp4), exe, rar e arquivos 7z serão escaneados.
 upper_excluded_extensions_tooltip =
     Lista de arquivos desabilitados que serão ignorados na verificação.
     
