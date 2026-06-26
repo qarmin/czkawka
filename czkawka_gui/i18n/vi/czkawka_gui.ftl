@@ -7,15 +7,15 @@ window_compare_images = So sánh hình ảnh
 general_ok_button = Được
 general_close_button = Đóng
 # Krokiet info dialog
-krokiet_info_title = Deprecation Notice
-krokiet_info_message =
-    Czkawka GTK 12.0 is the final release. No further updates, features, or bug fixes are planned.
-    
-    Most features from Czkawka GTK are available in Krokiet, usually in a simpler, faster, and more stable form. Krokiet also adds new features and improvements that were not possible in the GTK version.
-    
-    If you are still using Czkawka GTK, switching to Krokiet should be easy, since it has a similar interface, fewer dependencies, and better cross-platform support.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Thông báo về việc ngừng hỗ trợ
+krokiet_info_message = 
+        Czkawka GTK 12.0 là phiên bản cuối cùng. Không có kế hoạch phát hành thêm các bản cập nhật, tính năng hoặc sửa lỗi.
+
+        Hầu hết các tính năng của Czkawka GTK đã có mặt trong Krokiet, thường ở dạng đơn giản hơn, nhanh hơn và ổn định hơn. Krokiet cũng bổ sung các tính năng và cải tiến mới mà không thể thực hiện được trong phiên bản GTK.
+
+        Nếu bạn vẫn đang sử dụng Czkawka GTK, việc chuyển sang Krokiet sẽ khá dễ dàng, vì nó có giao diện tương tự, ít phụ thuộc hơn và hỗ trợ đa nền tảng tốt hơn.
+
+        P.S: Thông báo này chỉ nên xuất hiện một lần. Nếu nó xuất hiện lại, hãy đặt biến môi trường CZKAWKA_DONT_ANNOY_ME thành bất kỳ giá trị nào khác trống.
 # Main window
 music_title_checkbox = Tiêu đề
 music_artist_checkbox = Nghệ sĩ
@@ -96,7 +96,7 @@ image_hash_alg_tooltip =
     Mỗi thuật toán có những ưu điểm và nhược điểm riêng, và đôi khi sẽ cho kết quả tốt hơn, đôi khi lại cho kết quả tệ hơn, tùy thuộc vào từng hình ảnh.
     
     Do đó, để xác định thuật toán tốt nhất cho bạn, cần phải thực hiện kiểm tra thủ công.
-image_geometric_invariance_tooltip = Also compare mirrored/flipped and optionally rotated variants of each image. This improves matching but increases hashing time.
+image_geometric_invariance_tooltip = Ngoài ra, hãy so sánh các phiên bản đối xứng/lật ngang và tùy chọn xoay của mỗi hình ảnh. Điều này giúp cải thiện độ chính xác khi so sánh, nhưng sẽ làm tăng thời gian tính toán hash.
 big_files_mode_combobox_tooltip = Cho phép tìm kiếm các tập tin có kích thước nhỏ nhất/lớn nhất
 big_files_mode_label = Các tệp đã được kiểm tra
 big_files_mode_smallest_combo_box = Nhỏ nhất
@@ -132,11 +132,11 @@ main_tree_view_column_type_of_error = Loại lỗi
 main_tree_view_column_current_extension = Phiên bản mở rộng hiện tại
 main_tree_view_column_proper_extensions = Độ mở rộng phù hợp
 main_tree_view_column_fps = FPS
-main_tree_view_column_codec = Codec
+main_tree_view_column_codec = Mã hóa/Giải mã
 main_label_check_method = Kiểm tra phương pháp
 main_label_hash_type = Loại hàm băm
 main_label_hash_size = Kích thước hàm
-main_label_geometric_invariance = Geometric invariance
+main_label_geometric_invariance = Tính bất biến hình học
 main_label_size_bytes = Kích thước (byte)
 main_label_min_size = Tối thiểu
 main_label_max_size = Max
@@ -305,21 +305,21 @@ about_translation_button = Dịch thuật
 # Header
 header_setting_button_tooltip = Mở hộp thoại cài đặt.
 header_about_button_tooltip = Mở hộp thoại hiển thị thông tin về ứng dụng.
-header_krokiet_button_tooltip = Try Krokiet - the new and improved version!
+header_krokiet_button_tooltip = Hãy thử Krokiet - phiên bản mới và được cải tiến!
 # Krokiet promo dialog
-krokiet_promo_title = Meet Krokiet!
-krokiet_promo_message =
-    Hello there, brave Czkawka user!
-    
-    The Force is clearly with you, but Krokiet is not - a newer, faster, lighter, and significantly more handsome (assuming apps can actually be handsome) duplicate cleaner.
-    
-    Krokiet includes everything people liked about Czkawka. It is completely free, open source, has a unique and simple UI (both praised and hated by many), introduces a lot of new features, uses fewer dependencies, and works far more reliably across different platforms.
-    
-    And if you somehow missed it, there is already an even newer app than Krokiet - Cedinia, designed primarily for Android devices and touchscreen usage.
-    
-    Czkawka GTK served us well, but its watch has ended.
-krokiet_promo_link_download = Download Krokiet/Cedinia
-krokiet_promo_link_project = Project page
+krokiet_promo_title = Gặp gỡ Krokiet!
+krokiet_promo_message = 
+        Xin chào, người dùng Czkawka dũng cảm!
+
+        Có vẻ như "Lực" đang đồng hành cùng bạn, nhưng Krokiet thì không – một ứng dụng làm sạch trùng lặp mới hơn, nhanh hơn, nhẹ hơn và đáng chú ý là đẹp hơn (giả sử các ứng dụng có thể đẹp).
+
+        Krokiet bao gồm tất cả những điều mà mọi người thích ở Czkawka. Nó hoàn toàn miễn phí, mã nguồn mở, có giao diện người dùng độc đáo và đơn giản (vừa được nhiều người khen ngợi vừa bị nhiều người ghét), giới thiệu rất nhiều tính năng mới, sử dụng ít phần phụ thuộc hơn và hoạt động đáng tin cậy hơn trên nhiều nền tảng khác nhau.
+
+        Và nếu bạn vô tình bỏ lỡ, đã có một ứng dụng mới hơn cả Krokiet – Cedinia, được thiết kế chủ yếu cho các thiết bị Android và sử dụng màn hình cảm ứng.
+
+        Czkawka GTK đã phục vụ chúng ta rất tốt, nhưng thời gian của nó đã kết thúc.
+krokiet_promo_link_download = Tải xuống Krokiet/Cedinia
+krokiet_promo_link_project = Trang dự án
 
 # Settings
 
@@ -456,7 +456,7 @@ saving_loading_saving_success = Đã lưu cấu hình vào file { $name }.
 saving_loading_saving_failure = Không thể lưu dữ liệu cấu hình vào tệp { $name }, lý do: { $reason }.
 saving_loading_reset_configuration = Cấu hình hiện tại đã được xóa.
 saving_loading_loading_success = Cấu hình ứng dụng đã được tải đúng.
-saving_loading_no_config_file = No configuration file found, using default settings.
+saving_loading_no_config_file = Không tìm thấy tệp cấu hình, đang sử dụng các cài đặt mặc định.
 saving_loading_failed_to_create_config_file = Không thể tạo file cấu hình "{ $path }", lý do: "{ $reason }".
 saving_loading_failed_to_read_config_file = Không thể tải cấu hình từ "{ $path }" vì nó không tồn tại hoặc không phải là một tệp.
 saving_loading_failed_to_read_data_from_file = Không thể đọc dữ liệu từ tệp "{ $path }", lý do: "{ $reason }".

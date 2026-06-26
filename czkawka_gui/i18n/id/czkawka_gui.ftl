@@ -7,15 +7,15 @@ window_compare_images = Bandingkan Gambar
 general_ok_button = OK
 general_close_button = Tutup
 # Krokiet info dialog
-krokiet_info_title = Deprecation Notice
-krokiet_info_message =
-    Czkawka GTK 12.0 is the final release. No further updates, features, or bug fixes are planned.
-    
-    Most features from Czkawka GTK are available in Krokiet, usually in a simpler, faster, and more stable form. Krokiet also adds new features and improvements that were not possible in the GTK version.
-    
-    If you are still using Czkawka GTK, switching to Krokiet should be easy, since it has a similar interface, fewer dependencies, and better cross-platform support.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Pemberitahuan Penghapusan Fitur
+krokiet_info_message = 
+        Czkawka GTK 12.0 adalah rilis terakhir. Tidak ada pembaruan, fitur, atau perbaikan bug lebih lanjut yang direncanakan.
+
+        Sebagian besar fitur dari Czkawka GTK tersedia di Krokiet, biasanya dalam bentuk yang lebih sederhana, lebih cepat, dan lebih stabil. Krokiet juga menambahkan fitur dan peningkatan baru yang tidak mungkin dilakukan pada versi GTK.
+
+        Jika Anda masih menggunakan Czkawka GTK, beralih ke Krokiet seharusnya mudah, karena memiliki antarmuka yang serupa, lebih sedikit dependensi, dan dukungan lintas platform yang lebih baik.
+
+        PS: Pesan ini seharusnya hanya muncul sekali. Jika muncul lagi, atur variabel lingkungan CZKAWKA_DONT_ANNOY_ME ke nilai apa pun yang tidak kosong.
 # Main window
 music_title_checkbox = Judul
 music_artist_checkbox = Artis
@@ -96,7 +96,7 @@ image_hash_alg_tooltip =
     Setiap algoritma memiliki kelebihan dan kekurangan masing-masing, dan terkadang memberikan hasil yang lebih baik, sementara di lain waktu memberikan hasil yang kurang optimal, tergantung pada gambar yang digunakan.
     
     Oleh karena itu, untuk menentukan algoritma yang paling sesuai untuk Anda, diperlukan pengujian manual.
-image_geometric_invariance_tooltip = Also compare mirrored/flipped and optionally rotated variants of each image. This improves matching but increases hashing time.
+image_geometric_invariance_tooltip = Selain itu, bandingkan juga varian yang telah dicerminkan/dibalik dan, opsional, diputar dari setiap gambar. Hal ini meningkatkan akurasi pencocokan, tetapi memperpanjang waktu proses hashing.
 big_files_mode_combobox_tooltip = Memungkinkan untuk mencari file terkecil/terbesar
 big_files_mode_label = Berkas yang telah diperiksa
 big_files_mode_smallest_combo_box = Yang Terkecil
@@ -136,7 +136,7 @@ main_tree_view_column_codec = Codec
 main_label_check_method = Metode cek
 main_label_hash_type = Jenis hash
 main_label_hash_size = Ukuran hash
-main_label_geometric_invariance = Geometric invariance
+main_label_geometric_invariance = Invarian geometri
 main_label_size_bytes = Ukuran (byte)
 main_label_min_size = Min
 main_label_max_size = Maks
@@ -305,21 +305,21 @@ about_translation_button = Terjemahan
 # Header
 header_setting_button_tooltip = Membuka dialog pengaturan.
 header_about_button_tooltip = Membuka dialog yang berisi informasi tentang aplikasi.
-header_krokiet_button_tooltip = Try Krokiet - the new and improved version!
+header_krokiet_button_tooltip = Coba Krokiet sekarang – versi terbaru dan lebih baik!
 # Krokiet promo dialog
-krokiet_promo_title = Meet Krokiet!
-krokiet_promo_message =
-    Hello there, brave Czkawka user!
-    
-    The Force is clearly with you, but Krokiet is not - a newer, faster, lighter, and significantly more handsome (assuming apps can actually be handsome) duplicate cleaner.
-    
-    Krokiet includes everything people liked about Czkawka. It is completely free, open source, has a unique and simple UI (both praised and hated by many), introduces a lot of new features, uses fewer dependencies, and works far more reliably across different platforms.
-    
-    And if you somehow missed it, there is already an even newer app than Krokiet - Cedinia, designed primarily for Android devices and touchscreen usage.
-    
-    Czkawka GTK served us well, but its watch has ended.
-krokiet_promo_link_download = Download Krokiet/Cedinia
-krokiet_promo_link_project = Project page
+krokiet_promo_title = Kenalan dengan Krokiet!
+krokiet_promo_message = 
+        Halo, pengguna Czkawka yang hebat!
+
+        Jelas sekali, kekuatan ada di pihak Anda, tetapi Krokiet tidak - sebuah aplikasi pembersih duplikat yang lebih baru, lebih cepat, lebih ringan, dan secara signifikan lebih menarik (dengan asumsi aplikasi bisa terlihat menarik).
+
+        Krokiet mencakup semua hal yang disukai orang dari Czkawka. Aplikasi ini sepenuhnya gratis, *open source*, memiliki antarmuka pengguna (UI) yang unik dan sederhana (yang dipuji dan dikritik oleh banyak orang), memperkenalkan banyak fitur baru, menggunakan lebih sedikit dependensi, dan bekerja jauh lebih andal di berbagai platform.
+
+        Dan jika Anda mungkin melewatkannya, sudah ada aplikasi yang lebih baru lagi dari Krokiet, yaitu Cedinia, yang dirancang terutama untuk perangkat Android dan penggunaan layar sentuh.
+
+        Czkawka GTK telah memberikan banyak manfaat bagi kita, tetapi masa pakainya telah berakhir.
+krokiet_promo_link_download = Unduh Krokiet/Cedinia
+krokiet_promo_link_project = Halaman proyek
 
 # Settings
 
@@ -456,7 +456,7 @@ saving_loading_saving_success = Konfigurasi telah disimpan ke file { $name }.
 saving_loading_saving_failure = Gagal menyimpan data konfigurasi ke file { $name }, alasannya { $reason }.
 saving_loading_reset_configuration = Konfigurasi saat ini telah dihapus.
 saving_loading_loading_success = Konfigurasi aplikasi telah dimuat dengan benar.
-saving_loading_no_config_file = No configuration file found, using default settings.
+saving_loading_no_config_file = Tidak ditemukan berkas konfigurasi, menggunakan pengaturan bawaan.
 saving_loading_failed_to_create_config_file = Gagal membuat file konfigurasi "{ $path }", alasannya "{ $reason }".
 saving_loading_failed_to_read_config_file = Tidak dapat memuat konfigurasi dari "{ $path }" karena file tersebut tidak ada atau bukan merupakan sebuah file.
 saving_loading_failed_to_read_data_from_file = Tidak dapat membaca data dari file "{ $path }", alasannya "{ $reason }".

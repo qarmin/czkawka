@@ -7,15 +7,15 @@ window_compare_images = Resimleri Karşılaştır
 general_ok_button = Tamam
 general_close_button = Kapat
 # Krokiet info dialog
-krokiet_info_title = Deprecation Notice
-krokiet_info_message =
-    Czkawka GTK 12.0 is the final release. No further updates, features, or bug fixes are planned.
-    
-    Most features from Czkawka GTK are available in Krokiet, usually in a simpler, faster, and more stable form. Krokiet also adds new features and improvements that were not possible in the GTK version.
-    
-    If you are still using Czkawka GTK, switching to Krokiet should be easy, since it has a similar interface, fewer dependencies, and better cross-platform support.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Eski Versiyon Bildirimi
+krokiet_info_message = 
+        Czkawka GTK 12.0, son sürümdür. Daha fazla güncelleme, özellik veya hata düzeltmesi planlanmamaktadır.
+
+        Czkawka GTK'deki çoğu özellik, genellikle daha basit, daha hızlı ve daha kararlı bir şekilde Krokiet'te mevcuttur. Krokiet ayrıca, GTK sürümünde mümkün olmayan yeni özellikler ve geliştirmeler de sunmaktadır.
+
+        Eğer hala Czkawka GTK kullanıyorsanız, benzer bir arayüze, daha az bağımlılığa ve daha iyi platformlar arası desteğe sahip olduğu için Krokiet'e geçmek kolay olmalıdır.
+
+        Not: Bu mesaj yalnızca bir kez görünmelidir. Eğer tekrar görünüyorsa, `CZKAWKA_DONT_ANNOY_ME` ortam değişkenini herhangi bir boş olmayan bir değerle ayarlayın.
 # Main window
 music_title_checkbox = Başlık
 music_artist_checkbox = Sanatçı
@@ -109,7 +109,7 @@ image_hash_alg_tooltip =
     Her birinin hem güçlü hem de zayıf noktaları vardır ve farklı görüntüler için 
     bazen daha iyi, bazen daha kötü sonuçlar verir. Bu nedenle, size göre en iyisini belirlemek için 
     elle test gereklidir.
-image_geometric_invariance_tooltip = Also compare mirrored/flipped and optionally rotated variants of each image. This improves matching but increases hashing time.
+image_geometric_invariance_tooltip = Ayrıca, her bir görselin ayna görüntüsü alınmış, ters çevrilmiş ve isteğe bağlı olarak döndürülmüş versiyonlarını da karşılaştırın. Bu, eşleşme doğruluğunu artırır ancak hashleme süresini uzatır.
 big_files_mode_combobox_tooltip = Boyut bakımından En Büyük/En Küçük dosyaları aramaya izin verir
 big_files_mode_label = Denetim şekli
 big_files_mode_smallest_combo_box = En Küçük
@@ -149,9 +149,9 @@ main_tree_view_column_codec = KodçTürkçe: Kodç
 main_label_check_method = Denetim yöntemi:
 main_label_hash_type = SUÇ türü:
 main_label_hash_size = SURÇ boyutu:
-main_label_geometric_invariance = Geometric invariance
+main_label_geometric_invariance = Geometrik değişmezlik
 main_label_size_bytes = Boyut (bayt):
-main_label_min_size = Min
+main_label_min_size = En az
 main_label_max_size = Maks
 main_label_shown_files = Gösterilecek Dosya Sayısı:
 main_label_resize_algorithm = Yeniden boyutlandırma algoritması:
@@ -324,21 +324,21 @@ about_translation_button = Çeviri
 # Header
 header_setting_button_tooltip = Ayarlar iletişim kutusunu açar.
 header_about_button_tooltip = Czkawka hakkında bilgi içeren iletişim kutusunu açar.
-header_krokiet_button_tooltip = Try Krokiet - the new and improved version!
+header_krokiet_button_tooltip = Krokiet'i deneyin - yeni ve geliştirilmiş versiyonunu!
 # Krokiet promo dialog
-krokiet_promo_title = Meet Krokiet!
-krokiet_promo_message =
-    Hello there, brave Czkawka user!
-    
-    The Force is clearly with you, but Krokiet is not - a newer, faster, lighter, and significantly more handsome (assuming apps can actually be handsome) duplicate cleaner.
-    
-    Krokiet includes everything people liked about Czkawka. It is completely free, open source, has a unique and simple UI (both praised and hated by many), introduces a lot of new features, uses fewer dependencies, and works far more reliably across different platforms.
-    
-    And if you somehow missed it, there is already an even newer app than Krokiet - Cedinia, designed primarily for Android devices and touchscreen usage.
-    
-    Czkawka GTK served us well, but its watch has ended.
-krokiet_promo_link_download = Download Krokiet/Cedinia
-krokiet_promo_link_project = Project page
+krokiet_promo_title = Krokiet ile tanışın!
+krokiet_promo_message = 
+        Merhaba cesur Czkawka kullanıcısı!
+
+        Gücün kesinlikle sizinle, ancak Krokiet maalesef değil - daha yeni, daha hızlı, daha hafif ve önemli ölçüde daha çekici (eğer uygulamaların çekici olabilmesi mümkünse) bir uygulama temizleyici.
+
+        Krokiet, insanların Czkawka'da beğendiği her şeyi içeriyor. Tamamen ücretsiz, açık kaynaklıdır, benzersiz ve basit bir kullanıcı arayüzüne (hem övülen hem de birçok kişi tarafından eleştirilen) sahiptir, birçok yeni özellik sunar, daha az bağımlılık kullanır ve farklı platformlarda çok daha güvenilir bir şekilde çalışır.
+
+        Eğer bir şekilde kaçırdıysanız, Krokiet'ten bile daha yeni bir uygulama var: Cedinia, öncelikle Android cihazlar ve dokunmatik ekran kullanımı için tasarlanmıştır.
+
+        Czkawka GTK bize iyi hizmet etti, ancak artık kullanım ömrünün sonuna geldi.
+krokiet_promo_link_download = Krokiet/Cedinia'yı indirin
+krokiet_promo_link_project = Proje sayfası
 
 # Settings
 
@@ -489,7 +489,7 @@ saving_loading_saving_success = Yapılandırma { $name } dosyasına kaydedildi.
 saving_loading_saving_failure = Konfigürasyon verilerini dosya { $name }'a kaydetme başarısız oldu, sebep { $reason }.
 saving_loading_reset_configuration = Geçerli yapılandırma temizlendi.
 saving_loading_loading_success = Uygulama yapılandırması düzgünce yüklendi.
-saving_loading_no_config_file = No configuration file found, using default settings.
+saving_loading_no_config_file = Konfigürasyon dosyası bulunamadı, varsayılan ayarlarla devam ediliyor.
 saving_loading_failed_to_create_config_file = "{ $path }" dizininde yapılandırma dosyası oluşturulamadı, nedeni:  "{ $reason }".
 saving_loading_failed_to_read_config_file = "{ $path }" dizininden yapılandırma dosyası yüklenemiyor, böyle dosya yok ya da bir dosya değil.
 saving_loading_failed_to_read_data_from_file = "{ $path }" dosyasından veri okunamıyor, nedeni: "{ $reason }".

@@ -7,15 +7,15 @@ window_compare_images = Сравни изображения
 general_ok_button = Добре
 general_close_button = Затвори
 # Krokiet info dialog
-krokiet_info_title = Deprecation Notice
-krokiet_info_message =
-    Czkawka GTK 12.0 is the final release. No further updates, features, or bug fixes are planned.
-    
-    Most features from Czkawka GTK are available in Krokiet, usually in a simpler, faster, and more stable form. Krokiet also adds new features and improvements that were not possible in the GTK version.
-    
-    If you are still using Czkawka GTK, switching to Krokiet should be easy, since it has a similar interface, fewer dependencies, and better cross-platform support.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = Забележка за прекратяване на поддръжката
+krokiet_info_message = 
+        Czkawka GTK 12.0 е последната версия. Не са планирани допълнителни актуализации, нови функции или поправки на бъгове.
+
+        Повечето функции на Czkawka GTK са достъпни в Krokiet, обикновено в по-опростен, бърз и стабилен вид. Krokiet също така добавя нови функции и подобрения, които не бяха възможни във версията с GTK.
+
+        Ако все още използвате Czkawka GTK, преминаването към Krokiet трябва да бъде лесно, тъй като има подобен интерфейс, по-малко зависимости и по-добра крос-платформена поддръжка.
+
+        P.S.: Това съобщение трябва да се появява само веднъж. Ако се появи отново, задайте променливата на средата CZKAWKA_DONT_ANNOY_ME на произволна стойност, която не е празна.
 # Main window
 music_title_checkbox = Заглавие
 music_artist_checkbox = Изпълнител
@@ -96,7 +96,7 @@ image_hash_alg_tooltip =
     Всеки от тях има както силни, така и слаби страни и понякога дава по-добри, а понякога по-лоши резултати за различни изображения.
     
     Затова, за да определите най-добрия за вас, е необходимо ръчно тестване.
-image_geometric_invariance_tooltip = Also compare mirrored/flipped and optionally rotated variants of each image. This improves matching but increases hashing time.
+image_geometric_invariance_tooltip = Също така, сравнете огледални/обърнати и, по желание, завъртени варианти на всяко изображение. Това подобрява съвпадението, но увеличава времето за хеширане.
 big_files_mode_combobox_tooltip = Позволява търсене на най-малките/най-големите файлове
 big_files_mode_label = Проверени файлове
 big_files_mode_smallest_combo_box = Най-малкия
@@ -136,7 +136,7 @@ main_tree_view_column_codec = Кодек
 main_label_check_method = Провери метод
 main_label_hash_type = Хеш тип
 main_label_hash_size = Хеш размер
-main_label_geometric_invariance = Geometric invariance
+main_label_geometric_invariance = Геометрична инвариантност
 main_label_size_bytes = Размер (байтове)
 main_label_min_size = Мин
 main_label_max_size = Макс
@@ -305,21 +305,21 @@ about_translation_button = Преводи
 # Header
 header_setting_button_tooltip = Отваря диалогов прозорец за настройки.
 header_about_button_tooltip = Отваря диалогов прозорец с информация за приложението.
-header_krokiet_button_tooltip = Try Krokiet - the new and improved version!
+header_krokiet_button_tooltip = Опитайте Krokiet – новата и подобрена версия!
 # Krokiet promo dialog
-krokiet_promo_title = Meet Krokiet!
-krokiet_promo_message =
-    Hello there, brave Czkawka user!
-    
-    The Force is clearly with you, but Krokiet is not - a newer, faster, lighter, and significantly more handsome (assuming apps can actually be handsome) duplicate cleaner.
-    
-    Krokiet includes everything people liked about Czkawka. It is completely free, open source, has a unique and simple UI (both praised and hated by many), introduces a lot of new features, uses fewer dependencies, and works far more reliably across different platforms.
-    
-    And if you somehow missed it, there is already an even newer app than Krokiet - Cedinia, designed primarily for Android devices and touchscreen usage.
-    
-    Czkawka GTK served us well, but its watch has ended.
-krokiet_promo_link_download = Download Krokiet/Cedinia
-krokiet_promo_link_project = Project page
+krokiet_promo_title = Запознайте се с Krokiet!
+krokiet_promo_message = 
+        Здравей, смел потребителю на Czkawka!
+
+        Ясно е, че Силата е с теб, но Krokiet не е – по-нов, по-бърз, по-лек и значително по-привлекателен (ако приложенията могат да бъдат привлекателни) инструмент за почистване на дубликати.
+
+        Krokiet включва всичко, което хората харесаха в Czkawka. Той е напълно безплатен, с отворен код, има уникален и прост интерфейс (който е едновременно хвален и критикуван от много), предлага много нови функции, използва по-малко зависимости и работи много по-надеждно на различни платформи.
+
+        И ако сте пропуснали това, вече има още едно приложение, което е по-ново от Krokiet – Cedinia, което е предназначено предимно за Android устройства и работа със тъчскрийн.
+
+        Czkawka GTK ни служи добре, но неговият период на действие приключи.
+krokiet_promo_link_download = Изтеглете Krokiet/Cedinia
+krokiet_promo_link_project = Страница на проекта
 
 # Settings
 
@@ -456,7 +456,7 @@ saving_loading_saving_success = Запазване на конфигурация
 saving_loading_saving_failure = Неуспешно спъжаване на конфигурационните данни в файл { $name }, причина { $reason }.
 saving_loading_reset_configuration = Текущата конфигурация е изтрита.
 saving_loading_loading_success = Правилно заредена конфигурация на приложението.
-saving_loading_no_config_file = No configuration file found, using default settings.
+saving_loading_no_config_file = Не е намерен конфигурационен файл, използва се конфигурация по подразбиране.
 saving_loading_failed_to_create_config_file = Неуспешно създаване на конфигурационен файл "{ $path }", причина "{ $reason }".
 saving_loading_failed_to_read_config_file = Не може да се зареди конфигурация от "{ $path }", защото тя не съществува или не е файл.
 saving_loading_failed_to_read_data_from_file = Не може да се прочетат данни от файл "{ $path }", причина "{ $reason }".

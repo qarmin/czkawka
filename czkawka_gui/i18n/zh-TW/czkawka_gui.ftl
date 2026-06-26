@@ -7,15 +7,15 @@ window_compare_images = 比較影像
 general_ok_button = 好的。
 general_close_button = 關閉
 # Krokiet info dialog
-krokiet_info_title = Deprecation Notice
-krokiet_info_message =
-    Czkawka GTK 12.0 is the final release. No further updates, features, or bug fixes are planned.
-    
-    Most features from Czkawka GTK are available in Krokiet, usually in a simpler, faster, and more stable form. Krokiet also adds new features and improvements that were not possible in the GTK version.
-    
-    If you are still using Czkawka GTK, switching to Krokiet should be easy, since it has a similar interface, fewer dependencies, and better cross-platform support.
-    
-    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
+krokiet_info_title = 已過時提示。
+krokiet_info_message = 
+        Czkawka GTK 12.0 是最终版本。未来不会有任何更新、新功能或错误修复。
+
+        Czkawka GTK 的大部分功能都已在 Krokiet 中实现，通常以更简单、更快、更稳定的形式提供。此外，Krokiet 还增加了在 GTK 版本中无法实现的新功能和改进。
+
+        如果您仍在使用 Czkawka GTK，切换到 Krokiet 应该会很简单，因为它具有相似的界面、更少的依赖项以及更好的跨平台支持。
+
+        P.S. 此消息应只显示一次。如果再次出现，请将环境变量 CZKAWKA_DONT_ANNOY_ME 设置为任何非空值。.
 # Main window
 music_title_checkbox = 標題
 music_artist_checkbox = 藝人
@@ -96,7 +96,7 @@ image_hash_alg_tooltip =
     每種演算法都有強項和弱項，對於不同的圖片，有時會有更好的結果，有時會有更差的結果。
     
     因此，為了確定最適合你的演算法，需要進行人工測試。.
-image_geometric_invariance_tooltip = Also compare mirrored/flipped and optionally rotated variants of each image. This improves matching but increases hashing time.
+image_geometric_invariance_tooltip = 同時，也請比較每個圖像的鏡像/反轉版本，以及可選的旋轉版本。這有助於提高匹配的準確性，但會增加雜湊運算的所需時間。.
 big_files_mode_combobox_tooltip = 允許搜尋最小/最大的檔案
 big_files_mode_label = 已檢查的檔案
 big_files_mode_smallest_combo_box = 最小的
@@ -136,7 +136,7 @@ main_tree_view_column_codec = 編碼解碼器
 main_label_check_method = 檢查方法
 main_label_hash_type = 雜湊類型
 main_label_hash_size = 雜湊大小
-main_label_geometric_invariance = Geometric invariance
+main_label_geometric_invariance = 幾何不變性。
 main_label_size_bytes = 大小（位元組）
 main_label_min_size = 最小
 main_label_max_size = 最大
@@ -305,21 +305,21 @@ about_translation_button = 翻譯
 # Header
 header_setting_button_tooltip = 開啟設定對話方塊。.
 header_about_button_tooltip = 開啟包含應用程式資訊的對話方塊。.
-header_krokiet_button_tooltip = Try Krokiet - the new and improved version!
+header_krokiet_button_tooltip = 試試 Krokiet，全新且更優化的版本！
 # Krokiet promo dialog
-krokiet_promo_title = Meet Krokiet!
-krokiet_promo_message =
-    Hello there, brave Czkawka user!
-    
-    The Force is clearly with you, but Krokiet is not - a newer, faster, lighter, and significantly more handsome (assuming apps can actually be handsome) duplicate cleaner.
-    
-    Krokiet includes everything people liked about Czkawka. It is completely free, open source, has a unique and simple UI (both praised and hated by many), introduces a lot of new features, uses fewer dependencies, and works far more reliably across different platforms.
-    
-    And if you somehow missed it, there is already an even newer app than Krokiet - Cedinia, designed primarily for Android devices and touchscreen usage.
-    
-    Czkawka GTK served us well, but its watch has ended.
-krokiet_promo_link_download = Download Krokiet/Cedinia
-krokiet_promo_link_project = Project page
+krokiet_promo_title = 來認識一下 Krokiet 吧！
+krokiet_promo_message = 
+        親愛的勇敢的 Czkawka 用戶，您好！
+
+        顯然，原力與您同在，但 Krokiet 並不在。它是一款更新、更快、更輕巧，而且（假設應用程式也能擁有美貌的話）更具吸引力的重複文件清理工具。
+
+        Krokiet 包含了人們喜歡 Czkawka 的所有優點。它完全免費、開源，擁有獨特且簡潔的介面（深受許多人的讚賞，但也同樣受到一些人的批評），引入了許多新功能，減少了依賴項，並且在不同平台上運作得更加穩定。
+
+        如果您錯過了，實際上已經有比 Krokiet 更新的應用程式了，它叫做 Cedinia，主要針對 Android 設備和觸控螢幕使用。
+
+        Czkawka GTK 為我們服務了很長一段時間，但它的壽命已經到了盡頭。.
+krokiet_promo_link_download = 下載 Krokiet/Cedinia
+krokiet_promo_link_project = 專案頁面
 
 # Settings
 
@@ -456,7 +456,7 @@ saving_loading_saving_success = 設定儲存到檔案 { $name }。.
 saving_loading_saving_failure = 失敗將配置資料存儲至檔案 { $name }，原因 { $reason }。.
 saving_loading_reset_configuration = 目前設定已被清除。.
 saving_loading_loading_success = 正確載入應用程式設定。.
-saving_loading_no_config_file = No configuration file found, using default settings.
+saving_loading_no_config_file = 未找到設定檔，將使用預設設定。.
 saving_loading_failed_to_create_config_file = 無法建立設定檔案 "{ $path }", 原因"{ $reason }".
 saving_loading_failed_to_read_config_file = 無法從 "{ $path }" 載入設定，因為它不存在或不是檔案。.
 saving_loading_failed_to_read_data_from_file = 無法從檔案讀取資料"{ $path }", 原因"{ $reason }".

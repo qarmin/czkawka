@@ -134,7 +134,7 @@ settings_music_bitrate = 位速率
 settings_music_approx = 近似标签比较
 settings_temporary_files_header = 临时文件
 settings_temporary_files_extensions_label = 过期的
-settings_temporary_files_extensions_placeholder = e.g. .tmp,.bak,~
+settings_temporary_files_extensions_placeholder = 例如：.tmp、.bak、~
 settings_temporary_files_reset = 重置为默认值
 settings_broken_files_header = 蓝色文件
 settings_broken_files_note = 资源密集扫描。为了最佳性能，请在桌面上使用 Krokiet。.
@@ -143,9 +143,9 @@ settings_broken_audio = 音频
 settings_broken_pdf = PDF
 settings_broken_archive = 存档
 settings_broken_image = 图片
-settings_broken_font = Font
-settings_broken_markup = Markup (JSON/XML/TOML)
-settings_similar_videos_header = SIMILAR VIDEOS (AUDIO)
+settings_broken_font = 字体
+settings_broken_markup = 标记语言 (JSON/XML/TOML)
+settings_similar_videos_header = 相关视频（音频）
 settings_similar_videos_audio_preset = 音频相似性预设
 settings_similar_videos_audio_preset_desc = 控制音频必须匹配的严格程度
 settings_bad_names_header = 备用名称
@@ -255,7 +255,7 @@ same_music_fingerprint_warning = 计算和比较音频指纹耗费大量资源�
 duplicates_group_header = { $count } 个文件 x { $per_file } / 个文件 = 共有 { $total } 个文件
 similar_images_group_header = { $count } 张相似图片
 same_music_group_header = { $count } 首相似歌曲
-similar_videos_group_header = { $count } similar videos
+similar_videos_group_header = { $count } 个相似视频
 # Rename confirmation
 confirm_rename_items = 您确定要重命名所选中的 { $n } 个文件吗？
 # Combo-box option labels (translatable display names)
@@ -310,10 +310,10 @@ dir_open_folder = 打开文件夹
 # Compare view
 compare_label = 比较
 compare_loading = 加载图像…
-compare_cancelling = Cancelling…
-compare_computing = Computing diff…
+compare_cancelling = 正在取消…
+compare_computing = 正在计算差异…
 compare_mode_normal = 侧面
 compare_mode_split = 拆分
-compare_mode_overlay = Overlay
+compare_mode_overlay = 叠加层。
 compare_mode_diff = 差异
 compare_res_mismatch = 不同的分辨率-差异可能不正确

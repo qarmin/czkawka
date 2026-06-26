@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = Cedinia
+app_name = سيْدِنيَا
 tool_duplicate_files = التكرارات
 tool_empty_folders = مجلدات فارغة
 tool_similar_images = صور مشابهة
@@ -134,7 +134,7 @@ settings_music_bitrate = معدل
 settings_music_approx = مقارنة الوسوم التقريبية
 settings_temporary_files_header = ثغرات مؤقتة
 settings_temporary_files_extensions_label = خواص
-settings_temporary_files_extensions_placeholder = e.g. .tmp,.bak,~
+settings_temporary_files_extensions_placeholder = مثال: .tmp، .bak، ~
 settings_temporary_files_reset = إعادة التعيين إلى الافتراضي
 settings_broken_files_header = الحفلات المدفوعه
 settings_broken_files_note = المسح الكثيف للموارد. للحصول على أفضل أداء استخدم Krokiet على سطح المكتب.
@@ -143,8 +143,8 @@ settings_broken_audio = الصوت
 settings_broken_pdf = ملف PDF
 settings_broken_archive = أرشيف
 settings_broken_image = صورة
-settings_broken_font = Font
-settings_broken_markup = Markup (JSON/XML/TOML)
+settings_broken_font = الخط
+settings_broken_markup = علامات التنسيق (JSON/XML/TOML)
 settings_similar_videos_header = بيانات SIMILAR (AUDIO)
 settings_similar_videos_audio_preset = ضبط مسبقاً لتشابه الصوت
 settings_similar_videos_audio_preset_desc = التحكم في مدى دقة الصوت يجب أن يتطابق
@@ -314,6 +314,6 @@ compare_cancelling = إلغاء…
 compare_computing = جاري حوسبة الفجوة…
 compare_mode_normal = جانب
 compare_mode_split = تقسيم
-compare_mode_overlay = Overlay
+compare_mode_overlay = تراكب
 compare_mode_diff = فرق
 compare_res_mismatch = قرارات مختلفة - قد تكون الفجوة غير دقيقة

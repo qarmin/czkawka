@@ -142,9 +142,9 @@ stage_checking_empty_files_content = Checking content of { $items_stats } files 
 # File operations (delete/rename/move/...); the "no_size" variant is used when no byte total is known
 stage_deleting_files = Deleting { $items_stats } file ({ $size_stats})
 stage_deleting_no_size_files = 削除{ $items_stats } ファイル
-stage_renaming_files = Renaming { $items_stats } file
+stage_renaming_files = ファイル名 { $items_stats } を変更しています。
 stage_moving_files = Moving { $items_stats } file ({ $size_stats})
-stage_moving_no_size_files = Moving { $items_stats } file
+stage_moving_no_size_files = { $items_stats } ファイルを移動しています。
 stage_hardlinking_files = ハードリンク { $items_stats } ファイル ({ $size_stats })
 stage_hardlinking_no_size_files = ハードリンク { $items_stats } ファイル
 stage_symlinking_files = シンボリックリンク { $items_stats } ファイル ({ $size_stats })
