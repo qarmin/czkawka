@@ -310,7 +310,7 @@ about_translation_button = ترجمه:
 # Header
 header_setting_button_tooltip = دیالوگ تنظیمات را باز می‌کند.
 header_about_button_tooltip = پنجره دیالوگ با اطلاعات دربارهٔ اپ را باز می‌کند.
-header_krokiet_button_tooltip = کروکیِت را امتحان کنید – نسخه جدید و بهبود یافته آن!
+header_krokiet_button_tooltip = کروکیِت را امتحان کنید - نسخه جدید و بهبود یافته آن!
 # Krokiet promo dialog
 krokiet_promo_title = با کروکیِت آشنا شوید!
 krokiet_promo_message = 

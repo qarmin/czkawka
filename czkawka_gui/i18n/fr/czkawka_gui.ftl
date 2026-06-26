@@ -311,7 +311,7 @@ krokiet_promo_title = Rencontrez Krokiet!
 krokiet_promo_message = 
         Bonjour, utilisateur courageux de Czkawka !
 
-        La Force est manifestement avec vous, mais Krokiet ne l'est pas – un outil de nettoyage de doublons plus récent, plus rapide, plus léger et, disons-le, significativement plus attrayant (si l'on peut parler d'attrait chez les applications).
+        La Force est manifestement avec vous, mais Krokiet ne l'est pas - un outil de nettoyage de doublons plus récent, plus rapide, plus léger et, disons-le, significativement plus attrayant (si l'on peut parler d'attrait chez les applications).
 
         Krokiet inclut tout ce que les gens appréciaient chez Czkawka. Il est totalement gratuit, open source, possède une interface utilisateur unique et simple (à la fois encensée et critiquée par beaucoup), introduit de nombreuses nouvelles fonctionnalités, utilise moins de dépendances et fonctionne de manière beaucoup plus fiable sur différentes plateformes.
 
