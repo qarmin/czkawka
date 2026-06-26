@@ -11,7 +11,7 @@ use rayon::prelude::*;
 use rusty_chromaprint::{Configuration, match_fingerprints};
 use similario_core::SignatureConfig;
 use similario_core::compare::{CompareConfig, find_similar};
-use similario_core::visual::VideoSignature;
+use similario_core::visual::{FfmpegTimeout, VideoSignature};
 
 use crate::common::audio_fingerprint::calc_fingerprint_and_duration;
 use crate::common::cache::{CACHE_VERSION, CACHE_VIDEO_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
@@ -47,12 +47,13 @@ impl SimilarVideos {
             window_secs: f64::from(self.params.duration),
             cropdetect: self.params.crop_detect,
             audio_fingerprint: false,
+            ffmpeg_timeout: FfmpegTimeout::default(), // TODO - in future, this may be configurable
         }
     }
 
     fn compare_config(&self) -> CompareConfig {
         // Map czkawka tolerance (0..=20) to similario_core tolerance (0.0..=0.5).
-        // Tolerance 0 → very strict; 20 → very loose.
+        // Tolerance 0 -> very strict; 20 -> very loose.
         let tolerance = (self.params.tolerance as f32) / 40.0;
         CompareConfig {
             tolerance,
@@ -126,11 +127,9 @@ impl SimilarVideos {
         }
     }
 
-    fn check_video_file_entry(&self, mut file_entry: VideosEntry, stop_flag: &AtomicBool) -> VideosEntry {
+    fn check_video_file_entry(&self, mut file_entry: VideosEntry, stop_flag: &Arc<AtomicBool>) -> VideosEntry {
         let sig_config = self.signature_config();
         let path = file_entry.path.to_string_lossy().to_string();
-        // Visual hashing runs in-process and cannot be interrupted, so a watchdog at least logs a
-        // warning if a single file keeps hashing for very long (likely a hang) instead of freezing silently.
         let signature = run_with_long_operation_warnings("similar_videos_hash_calculation", &path, || {
             VideoSignature::from_path(&file_entry.path, &sig_config, stop_flag)
         });
