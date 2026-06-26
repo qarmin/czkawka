@@ -13,6 +13,7 @@ tool_bad_extensions = Ekstensi yang Buruk
 tool_same_music = Duplikat Musik
 tool_bad_names = Nama yang Buruk
 tool_exif_remover = Data EXIF
+tool_similar_videos = Similar Videos (Audio)
 tool_directories = Direktori
 tool_settings = Pengaturan
 # Home screen tool card descriptions
@@ -27,6 +28,7 @@ home_bad_extensions_description = Berkas dengan ekstensi yang tidak valid
 home_same_music_description = File audio serupa berdasarkan tag
 home_bad_names_description = Berkas dengan karakter yang bermasalah dalam namanya
 home_exif_description = Gambar dengan metadata EXIF
+home_similar_videos_description = Find videos with similar audio (no FFmpeg needed)
 # Results list
 scanning = Proses pemindaian sedang berlangsung...
 stopping = Berhenti...
@@ -63,9 +65,9 @@ delete_errors_title = Gagal menghapus beberapa file:
 ok = OK
 # Stopping overlay
 stopping_overlay_title = Berhenti
-stopping_overlay_body = 
-        Penyelesaian pemindaian sedang berlangsung...
-        Mohon tunggu.
+stopping_overlay_body =
+    Penyelesaian pemindaian sedang berlangsung...
+    Mohon tunggu.
 # Permission popup
 permission_title = Akses File
 permission_body = Untuk memindai berkas, aplikasi memerlukan akses ke penyimpanan perangkat. Tanpa izin ini, proses pemindaian tidak akan dapat dilakukan.
@@ -113,6 +115,7 @@ settings_hash_size = Ukuran hash
 settings_hash_size_desc = Ukuran yang lebih besar cenderung menghasilkan lebih sedikit hasil positif palsu, tetapi juga menemukan lebih sedikit gambar yang serupa
 settings_hash_alg = Algoritma hash
 settings_image_filter = Ubah ukuran filter
+settings_geometric_invariance = Geometric invariance
 settings_ignore_same_size = Abaikan gambar-gambar dengan dimensi yang sama
 settings_gallery_image_fit_cover = Galeri: potong menjadi bentuk persegi
 settings_gallery_image_fit_cover_desc = Isi seluruh area gambar; nonaktifkan fitur ini untuk mempertahankan rasio aspek asli
@@ -129,6 +132,10 @@ settings_music_length = Panjang
 settings_music_genre = Genre
 settings_music_bitrate = Bitrate
 settings_music_approx = Perbandingan tag perkiraan
+settings_temporary_files_header = TEMPORARY FILES
+settings_temporary_files_extensions_label = EXTENSIONS
+settings_temporary_files_extensions_placeholder = e.g. .tmp,.bak,~
+settings_temporary_files_reset = Reset to defaults
 settings_broken_files_header = FILE RUSAK
 settings_broken_files_note = Pemindaian membutuhkan banyak sumber daya. Untuk performa terbaik, gunakan Krokiet di desktop.
 settings_broken_files_types_label = JENIS YANG TELAH DIPERIKSA
@@ -136,6 +143,11 @@ settings_broken_audio = Audio
 settings_broken_pdf = PDF
 settings_broken_archive = Arsip
 settings_broken_image = Gambar
+settings_broken_font = Font
+settings_broken_markup = Markup (JSON/XML/TOML)
+settings_similar_videos_header = SIMILAR VIDEOS (AUDIO)
+settings_similar_videos_audio_preset = Audio similarity preset
+settings_similar_videos_audio_preset_desc = Controls how strictly audio must match
 settings_bad_names_header = NAMA YANG BURUK
 settings_bad_names_checks_label = CEK
 settings_bad_names_uppercase_ext = Ekstensi huruf kapital
@@ -143,6 +155,11 @@ settings_bad_names_emoji = Emoji dalam nama
 settings_bad_names_space = Spasi di awal/akhir
 settings_bad_names_non_ascii = Karakter non-ASCII
 settings_bad_names_duplicated = Karakter yang berulang
+settings_ignore_same_resolution = Ignore images with the same resolution
+# Settings - Appearance section
+settings_appearance_label = APPEARANCE
+settings_dark_theme = Tema gelap
+settings_dark_theme_desc = Use dark colour scheme
 # Settings - Diagnostics tab
 diagnostics_header = DIAGNOSTIK
 diagnostics_thumbnails = Cache gambar mini
@@ -152,6 +169,11 @@ diagnostics_clear_thumbnails = Cuplikan (thumbnail) yang jelas
 diagnostics_open_thumbnails_folder = Buka folder
 diagnostics_clear_cache = Hapus cache
 diagnostics_open_cache_folder = Buka folder
+diagnostics_export_logs = Export logs
+logs_label = LOGS
+logs_export_title = Export logs
+logs_export_saved = Logs copied to:
+logs_export_failed = Could not export logs
 diagnostics_collect_test = Uji akses berkas
 diagnostics_collect_test_desc = Periksa berapa banyak berkas yang dapat diakses
 diagnostics_collect_test_run = Jalankan
@@ -204,6 +226,8 @@ renamed_errors_suffix = kesalahan
 cleaned_exif_prefix = Menghapus data EXIF dari
 cleaned_exif_suffix = berkas
 cleaned_exif_errors_suffix = kesalahan
+rename_error_read_file_name = Cannot read file name
+rename_error_read_directory = Cannot read directory
 and_more_prefix = ...dan
 and_more_suffix = lebih
 # Gallery / delete popups
@@ -212,7 +236,6 @@ gallery_back = Kembali
 gallery_confirm_delete = Ya, hapus
 deleting_files = Menghapus berkas...
 stop = Berhenti
-files_suffix = berkas
 scanning_fallback = Memindai...
 app_subtitle = Sebagai penghormatan kepada Pertempuran Cedynia (tahun 972 Masehi)
 app_license = Antarmuka pengguna untuk Czkawka Core - Lisensi GPL-3.0
@@ -228,38 +251,11 @@ gallery_confirm_delete_warning = Semua item telah dipilih dari { $unsafe_groups 
 # Settings - SameMusic fingerprint warning
 same_music_fingerprint_warning = Menghitung dan membandingkan sidik jari audio membutuhkan banyak sumber daya dan mungkin memerlukan waktu yang lama. Disarankan untuk menggunakan Krokiet pada sistem desktop untuk tugas ini.
 # Scan stage labels (shown during scan progress)
-stage_collecting_files = Mengumpulkan berkas
-stage_scanning_name = Pencarian berdasarkan nama
-stage_scanning_size_name = Pemindaian berdasarkan nama dan ukuran
-stage_scanning_size = Pemindaian berdasarkan ukuran
-stage_pre_hash = Pra-penghashan
-stage_full_hash = Hashing
-stage_loading_cache = Memuat cache
-stage_saving_cache = Menyimpan data sementara
-stage_calculating_image_hashes = Menghitung hash gambar
-stage_comparing_images = Membandingkan gambar
-stage_calculating_video_hashes = Menghitung hash video
-stage_checking_files = Memeriksa berkas
-stage_checking_extensions = Memeriksa ekstensi
-stage_checking_names = Memeriksa nama
-stage_reading_music_tags = Membaca tag musik
-stage_comparing_tags = Membandingkan tag
-stage_calculating_music_fingerprints = Menghitung sidik jari musik
-stage_comparing_fingerprints = Membandingkan sidik jari
-stage_extracting_exif = Membaca tag EXIF
-stage_creating_video_thumbnails = Membuat thumbnail video
-stage_processing_videos = Memproses video
-stage_deleting = Menghapus berkas
-stage_renaming = Mengganti nama file
-stage_moving = Memindahkan berkas
-stage_hardlinking = Membuat tautan keras
-stage_symlinking = Membuat symlink
-stage_optimizing_videos = Mengoptimalkan video
-stage_cleaning_exif = Membersihkan data EXIF
 # Group headers in scan results
 duplicates_group_header = { $count } berkas x { $per_file } / berkas = { $total } total
 similar_images_group_header = { $count } gambar serupa
 same_music_group_header = { $count } trek serupa
+similar_videos_group_header = { $count } similar videos
 # Rename confirmation
 confirm_rename_items = Apakah Anda yakin ingin mengubah nama { $n } berkas yang dipilih?
 # Combo-box option labels (translatable display names)
@@ -278,15 +274,10 @@ option_check_method_size = Ukuran
 option_music_method_tags = Tag
 option_music_method_audio = Audio
 option_min_size_none = Tidak ada
-option_min_size_1kb = 1 KB
-option_min_size_8kb = 8 KB
-option_min_size_64kb = 64 KB
-option_min_size_1mb = 1 MB
-option_max_size_16kb = 16 KB
-option_max_size_1mb = 1 MB
-option_max_size_10mb = 10 MB
-option_max_size_100mb = 100 MB
 option_max_size_unlimited = Tidak terbatas
+option_audio_preset_identical = Identical
+option_audio_preset_clip = Clip in longer
+option_audio_preset_similar = Similar
 # Volume labels (shown in the directories screen)
 volume_internal_storage = Penyimpanan Internal
 volume_sd_card = Kartu Memori (Kartu SD)
@@ -311,7 +302,18 @@ path_edit_placeholder = Masukkan jalur...
 path_edit_not_exists = Jalur tidak ditemukan
 path_edit_is_dir = Direktori
 path_edit_is_file = Berkas
-path_edit_no_newlines = Jalur tidak boleh mengandung baris baru - tombol Enter tidak diperbolehkan
+path_edit_no_newlines = Jalur tidak boleh mengandung baris baru — tombol Enter tidak diperbolehkan
 ctx_menu_title = Buka
 ctx_open_file = Item terbuka
 ctx_open_folder = Buka folder induk
+dir_open_folder = Buka folder
+# Compare view
+compare_label = Bandingkan
+compare_loading = Loading images…
+compare_cancelling = Cancelling…
+compare_computing = Computing diff…
+compare_mode_normal = Side
+compare_mode_split = Split
+compare_mode_overlay = Overlay
+compare_mode_diff = Diff
+compare_res_mismatch = Different resolutions - diff may be inaccurate

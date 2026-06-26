@@ -4,22 +4,18 @@ window_main_title = Czkawka
 window_progress_title = Skanowanie
 window_compare_images = Porównywanie Obrazów
 # General
-general_ok_button = Ok
+general_ok_button = OK
 general_close_button = Zamknij
 # Krokiet info dialog
-krokiet_info_title = Wprowadzamy Krokiet - Nowa wersja Czkawki
+krokiet_info_title = Deprecjacja powiadomienia
 krokiet_info_message =
-    Krokiet to nowa, ulepszona, szybsza i bardziej niezawodna wersja Czkawki GTK!
+    Czkawka GTK 12.0 jest ostatnią wersją. Nie planuje się dalszych aktualizacji, funkcji ani poprawek błędów.
     
-    Jest łatwiejszy w uruchomieniu i bardziej odporny na zmiany w systemie, ponieważ polega tylko na podstawowych bibliotekach dostępnych domyślnie na większości systemów.
+    Większość funkcji z czkawki GTK jest dostępna w Krokiet, zazwyczaj w prostszej, szybszej i bardziej stabilnej formie. Krokiet dodaje również nowe funkcje i ulepszenia, które nie były możliwe w wersji GTK.
     
-    Krokiet oferuje również funkcje, których brakuje Czkawce, w tym miniaturki w trybie porównania wideo, czyszczenie EXIF, wyświetlanie postępu kopiowania/przenoszenia/usuwania plików czy rozszerzone opcje sortowania.
+    Jeśli nadal używasz Czkawki GTK, przełączenie na Krokiet powinno być łatwe, ponieważ ma podobny interfejs, mniejszą zależność i lepsze wsparcie międzyplatformowe.
     
-    Wypróbuj go i zobacz różnicę!
-    
-    Czkawka będzie nadal otrzymywać poprawki błędów i drobne aktualizacje z mojej strony, ale wszystkie nowe funkcje będą rozwijane wyłącznie dla Krokieta, lecz zachęcam każdego chętnego by jeśli chce, to by implementował na własną rękę nowe funkcje czy brakujące tryby w Czkawce.
-    
-    PS: Ta wiadomość powinna pojawić się tylko raz. Jeśli pojawia się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną niepustą wartość.
+    PS: Ta wiadomość powinna pojawić się tylko raz. Jeśli pojawi się ponownie, ustaw zmienną środowiskową CZKAWKA_DONT_ANNOY_ME na dowolną niepustą wartość.
 # Main window
 music_title_checkbox = Tytuł
 music_artist_checkbox = Wykonawca
@@ -100,6 +96,7 @@ image_hash_alg_tooltip =
     Każdy ma zarówno mocniejsze jak i słabsze punkty i czasami daje lepsze a czasami gorsze wyniki dla różnych obrazów.
     
     Najlepiej jest samemu potestować jaki algorytm ma najlepsze wyniki(może to nie być zawsze dobrze widoczne).
+image_geometric_invariance_tooltip = Porównaj również opcje lustrzane/odwrócone i opcjonalnie obracane każdego obrazu. To poprawia dopasowanie, ale zwiększa czas haszowania.
 big_files_mode_combobox_tooltip = Pozwala na wyszukiwanie najmniejszych lub największych plików
 big_files_mode_label = Sprawdzane pliki
 big_files_mode_smallest_combo_box = Najmniejsze
@@ -139,6 +136,7 @@ main_tree_view_column_codec = Kodek
 main_label_check_method = Metoda sprawdzania
 main_label_hash_type = Typ hashu
 main_label_hash_size = Rozmiar hashu
+main_label_geometric_invariance = Inwigilacja geometryczna
 main_label_size_bytes = Rozmiar (bajty)
 main_label_min_size = Min
 main_label_max_size = Max
@@ -270,7 +268,7 @@ bottom_compare_button = Porównaj
 bottom_search_button_tooltip = Rozpocznij wyszukiwanie
 bottom_select_button_tooltip = Wybierz rekordy. Tylko wybrane pliki/foldery mogą być później przetwarzane.
 bottom_delete_button_tooltip = Usuń zaznaczone elementy.
-bottom_save_button_tooltip = Zapisz informacje o skanowaniu
+bottom_save_button_tooltip = Zapisz informacje o skanowaniu.
 bottom_symlink_button_tooltip =
     Utwórz linki symboliczne.
     Działa tylko wtedy, gdy co najmniej dwa wyniki w grupie są zaznaczone.
@@ -296,7 +294,7 @@ bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 progress_stop_button = Stop
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
-about_repository_button_tooltip = Link do repozytorium z kodem źródłowym.
+about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
 about_donation_button_tooltip = Link do strony z dotacjami.
 about_instruction_button_tooltip = Link do strony z instrukcją.
 about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficialnie wspierany jest język polski i angielski.
@@ -307,21 +305,20 @@ about_translation_button = Tłumaczenie
 # Header
 header_setting_button_tooltip = Otwórz okno z ustawieniami programu.
 header_about_button_tooltip = Otwórz okno z informacjami o programie.
-header_krokiet_button_tooltip = Wypróbuj Krokieta - nową, ulepszoną wersję!
-
+header_krokiet_button_tooltip = Wypróbuj Krokiet - nową i ulepszoną wersję!
 # Krokiet promo dialog
 krokiet_promo_title = Poznaj Krokieta!
 krokiet_promo_message =
-        Hej, dzielny użytkowniku Czkawki! 🦄
-
-        Czy wiesz, że istnieje nowa, lśniąca wersja tej aplikacji? Oto Krokiet - szybszy, lżejszy i znacznie przystojniejszy (o ile aplikacje mogą być przystojne).
-
-        Krokiet ma wszystko, co kochasz w Czkawce, plus masę nowych funkcji, mniej zależności i działa na większej liczbie platform (tak, nawet na telefonach!).
-
-        Czkawka GTK służyła nam wiernie, ale czas na nowy początek. Pomyśl o tym jak o przesiadce z roweru na jednorożca - ten sam kierunek, ale DUŻO więcej magii.
-
-        Daj mu szansę - Twoje zduplikowane pliki nie będą wiedzieć, co je trafiło!
-krokiet_promo_link_download = Pobierz Krokieta/Cedynię
+    Witaj, odważny użytkownik Czkawki!
+    
+    Siła jest z tobą wyraźna, ale Krokiet nie jest - nowszy, szybszy, lżejszy, i znacznie bardziej poręczne (zakładając, że aplikacje mogą być w rzeczywistości przydatne) zduplikowane do sprzątania.
+    
+    Krokiet zawiera wszystko, co lubią ludzie o Czkawce. Jest całkowicie darmowy, open source, posiada unikalny i prosty interfejs użytkownika (zarówno chwalony jak i nienawidzony przez wielu), wprowadza wiele nowych funkcji, używa mniej zależności i działa dużo bardziej niezawodnie na różnych platformach.
+    
+    I jeśli ktoś go przegapił, już istnieje jeszcze nowsza aplikacja niż Krokiet - Cedinia, zaprojektowane przede wszystkim dla urządzeń z systemem Android i użycia ekranu dotykowego.
+    
+    Czkawka GTK dobrze nam służyła, ale jego zegarek się skończył.
+krokiet_promo_link_download = Pobierz Krokiet/Cedinia
 krokiet_promo_link_project = Strona projektu
 
 # Settings
@@ -452,37 +449,6 @@ compute_found_invalid_symlinks = Znaleziono { $number_files } niepoprawnych syml
 compute_found_broken_files = Znaleziono { $number_files } uszkodzonych plików w { $time }
 compute_found_bad_extensions = Znaleziono { $number_files } plików z nieprawidłowymi rozszerzeniami w { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] Przeskanowano { $file_number } plik
-       *[other] Przeskanowano { $file_number } plików
-    }
-progress_scanning_extension_of_files = Sprawdzono rozszerzenie { $file_checked }/{ $all_files } plików
-progress_scanning_broken_files = Sprawdzono plik { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_video = Obliczono hashe dla { $file_checked }/{ $all_files } plików video
-progress_creating_video_thumbnails = Utworzone miniatury filmu { $file_checked }/{ $all_files }
-progress_scanning_image = Obliczono hashe dla { $file_checked }/{ $all_files } obrazów ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Porównano { $file_checked }/{ $all_files } hashy obrazów
-progress_scanning_music_tags_end = Porównano { $file_checked }/{ $all_files } tagów plików audio
-progress_scanning_music_tags = Odczytano tagi { $file_checked }/{ $all_files } plików audio
-progress_scanning_music_content_end = Porównano hashe { $file_checked }/{ $all_files } plików audio
-progress_scanning_music_content = Obliczono hash { $file_checked }/{ $all_files } plików audio ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] Przeskanowano { $folder_number } folder
-       *[other] Przeskanowano { $folder_number } folderów
-    }
-progress_scanning_size = Przeskano rozmiar { $file_number } plików
-progress_scanning_size_name = Sprawdzono rozmiar i nazwę { $file_number } plików
-progress_scanning_name = Sprawdzono nazwę { $file_number } plików
-progress_analyzed_partial_hash = Obliczono częściowy hash { $file_checked }/{ $all_files } plików ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Obliczono pełny hash { $file_checked }/{ $all_files } plików ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = Ładowanie pamięci podręcznej częściowego hashu
-progress_prehash_cache_saving = Zapisywanie pamięci podręcznej częściowego hashu
-progress_hash_cache_loading = Ładowanie pamięci podręcznej hash
-progress_hash_cache_saving = Zapisywanie pamięci podręcznej skrótu
-progress_cache_loading = Ładowanie pamięci podręcznej
-progress_cache_saving = Zapisywanie pamięci podręcznej
 progress_current_stage = Aktualny Etap:{ "  " }
 progress_all_stages = Wszystkie Etapy:{ "  " }
 # Saving loading 
@@ -490,6 +456,7 @@ saving_loading_saving_success = Zapisano konfigurację do pliku { $name }.
 saving_loading_saving_failure = Nie udało się zapisać danych konfiguracyjnych do pliku { $name }, powód { $reason }.
 saving_loading_reset_configuration = Przywrócono domyślą konfigurację.
 saving_loading_loading_success = Poprawnie załadowano ustawienia aplikacji.
+saving_loading_no_config_file = Nie znaleziono pliku konfiguracyjnego, używając ustawień domyślnych.
 saving_loading_failed_to_create_config_file = Nie udało się utworzyć pliku konfiguracyjnego "{ $path }", powód "{ $reason }".
 saving_loading_failed_to_read_config_file = Nie można załadować konfiguracji z "{ $path }" ponieważ nie istnieje lub nie jest plikiem.
 saving_loading_failed_to_read_data_from_file = Nie można odczytać danych z pliku "{ $path }", powód "{ $reason }".

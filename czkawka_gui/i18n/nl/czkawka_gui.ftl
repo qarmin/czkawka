@@ -4,22 +4,18 @@ window_main_title = Czkawka (Giechel)
 window_progress_title = Scannen
 window_compare_images = Vergelijk afbeeldingen
 # General
-general_ok_button = OK
+general_ok_button = Ok
 general_close_button = Afsluiten
 # Krokiet info dialog
-krokiet_info_title = Introductie van Krokiet - Nieuwe versie van Czkawka
+krokiet_info_title = Afscheidingsbericht
 krokiet_info_message =
-    Krokiet is de nieuwe, verbeterde, snellere en betrouwbaardere versie van de Czkawka GTK GUI!
+    Czkawka GTK 12.0 is de laatste versie. Er zijn geen updates, functies of bug fixes gepland.
     
-    Het is eenvoudiger te draaien en robuuster tegen systeemwijzigingen, omdat het alleen afhankelijk is van kernbibliotheken die standaard op de meeste systemen beschikbaar zijn.
+    De meeste functies uit de Czkawka GTK zijn beschikbaar in Krokiet, meestal in een eenvoudigere, snellere en stabielere vorm. Krokiet voegt ook nieuwe functies en verbeteringen toe die niet mogelijk waren in de GTK-versie.
     
-    Krokiet brengt ook functies die Czkawka mist, waaronder thumbnails in video vergelijking modus, een EXIF cleaner, bestand verplaatsen/kopieer/verwijderen voortgang of uitgebreide sorteeropties.
+    Als u nog steeds gebruik maakt van Czkawka GTK, moet het makkelijk zijn om naar Krokiet te overschakelen, omdat het een gelijksoortige interface heeft, minder afhankelijkheden en betere platformondersteuning.
     
-    Probeer het uit en zie het verschil!
-    
-    Czkawka zal blijven ontvangen bugfixes en kleine updates van mij, maar alle nieuwe functies zullen exclusief voor Krokiet worden ontwikkeld, en iedereen is vrij om nieuwe functies toe te voegen, ontbrekende modi uit te breiden of Czkawka verder te ontwikkelen.
-    
-    PS: Dit bericht zou alleen één keer moeten verschijnen. Als het weer verschijnt, stel dan de CZKAWKA_DONT_ANNOY_ME omgeving variabele in op een niet-lege waarde.
+    PS: Dit bericht mag slechts één keer verschijnen. Als het opnieuw verschijnt, stel de CZKA_DONT_ANNOY_ME omgevingsvariabele in op een niet-lege waarde.
 # Main window
 music_title_checkbox = Aanspreektitel
 music_artist_checkbox = Kunstenaar
@@ -100,6 +96,7 @@ image_hash_alg_tooltip =
     Elk van deze punten heeft sterke en zwakke punten en zal soms betere en soms slechtere resultaten opleveren voor verschillende afbeeldingen.
     
     Dus om het beste voor u te bepalen, is handmatige test vereist.
+image_geometric_invariance_tooltip = Vergelijk ook gespiegeld / gespiegeld en optioneel draaide varianten van elke afbeelding. Dit verbetert overeenkomende maar verhoogt hashingstijd.
 big_files_mode_combobox_tooltip = Maakt het mogelijk om naar kleinste/grootste bestanden te zoeken
 big_files_mode_label = Gecontroleerde bestanden
 big_files_mode_smallest_combo_box = De Kleinste
@@ -139,9 +136,10 @@ main_tree_view_column_codec = Codec
 main_label_check_method = Controleer methode
 main_label_hash_type = Soort hash
 main_label_hash_size = Hash grootte
+main_label_geometric_invariance = Geometrische beveiliging
 main_label_size_bytes = Grootte (bytes)
-main_label_min_size = Min
-main_label_max_size = Max
+main_label_min_size = Min.
+main_label_max_size = Max.
 main_label_shown_files = Aantal getoonde bestanden
 main_label_resize_algorithm = Algoritme aanpassen
 main_label_similarity = Similarity{ "   " }
@@ -307,6 +305,21 @@ about_translation_button = Vertaling
 # Header
 header_setting_button_tooltip = Opent instellingen dialoogvenster.
 header_about_button_tooltip = Opent dialoogvenster met info over app.
+header_krokiet_button_tooltip = Probeer Krokiet - de nieuwe en verbeterde versie!
+# Krokiet promo dialog
+krokiet_promo_title = Ontmoet Krokiet!
+krokiet_promo_message =
+    Hallo daar, dappere Czkawka gebruiker!
+    
+    De Kracht is duidelijk bij jou, maar Krokiet is niet - een nieuwer, sneller, lichter en aanzienlijk meer knappe (ervan uitgaande dat apps echt handzaam kunnen zijn) dupliceren schoner.
+    
+    Krokiet bevat alles wat mensen leuk vinden aan Czkawka. Het is volledig gratis, open source, heeft een unieke en eenvoudige UI (zowel geprezen als gehate door vellen), introduceer een heleboel nieuwe functies, gebruikt minder afhankelijkheden en werkt veel betrouwbaarder over verschillende platformen.
+    
+    En als je het op de een of andere manier gemist hebt, is er al een nog nieuwere app dan Krokiet - Cedinia, speciaal ontworpen voor Android-apparaten en touchscreen gebruik.
+    
+    Czkawka GTK heeft ons goed geholpen, maar het horloge is afgelopen.
+krokiet_promo_link_download = Krokiet/Cedinië downloaden
+krokiet_promo_link_project = Project pagina
 
 # Settings
 
@@ -436,37 +449,6 @@ compute_found_invalid_symlinks = Gevonden { $number_files } ongeldige symlinks i
 compute_found_broken_files = Gevonden { $number_files } gebroken bestanden in { $time }
 compute_found_bad_extensions = { $number_files } bestanden met ongeldige extensies gevonden in { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] Gescande { $file_number } bestand
-       *[other] Gescande { $file_number } bestanden
-    }
-progress_scanning_extension_of_files = Gecontroleerde extensie van { $file_checked }/{ $all_files } bestand
-progress_scanning_broken_files = Gecontroleerd { $file_checked }/{ $all_files } bestand ({ $data_checked }/{ $all_data })
-progress_scanning_video = Onderbroken van { $file_checked }/{ $all_files } video
-progress_creating_video_thumbnails = Gemaakte miniaturen van { $file_checked }/{ $all_files } video
-progress_scanning_image = Bevroren van { $file_checked }/{ $all_files } afbeelding ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Vergeleken { $file_checked }/{ $all_files } afbeelding hash
-progress_scanning_music_tags_end = Vergeleken tags van { $file_checked }/{ $all_files } muziekbestand
-progress_scanning_music_tags = Lees tags van { $file_checked }/{ $all_files } muziekbestand
-progress_scanning_music_content_end = Vergeleken vingerafdruk van { $file_checked }/{ $all_files } muziekbestand
-progress_scanning_music_content = Berekende vingerafdruk van { $file_checked }/{ $all_files } muziekbestand ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] Gescande { $folder_number } map
-       *[other] Gescande { $folder_number } mappen
-    }
-progress_scanning_size = Gescande grootte van { $file_number } bestand
-progress_scanning_size_name = Gescande naam en grootte van { $file_number } bestand
-progress_scanning_name = Gescande naam van { $file_number } bestand
-progress_analyzed_partial_hash = Geanalyseerde gedeeltelijke hash van { $file_checked }/{ $all_files } bestanden ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Volledige hash van { $file_checked }/{ $all_files } bestanden ({ $data_checked }/{ $all_data } ) geanalyseerd
-progress_prehash_cache_loading = Prehash cache laden
-progress_prehash_cache_saving = Opslaan van prehash cache
-progress_hash_cache_loading = hash-cache laden
-progress_hash_cache_saving = hash cache opslaan
-progress_cache_loading = Cache laden
-progress_cache_saving = Cache opslaan
 progress_current_stage = Current Stage:{ "  " }
 progress_all_stages = All Stages:{ "  " }
 # Saving loading 
@@ -474,6 +456,7 @@ saving_loading_saving_success = Configuratie opgeslagen in bestand { $name }.
 saving_loading_saving_failure = Kan de configuratiegegevens niet opslaan in het bestand { $name }, reden { $reason }.
 saving_loading_reset_configuration = Huidige configuratie is gewist.
 saving_loading_loading_success = Goed geladen app configuratie.
+saving_loading_no_config_file = Geen configuratiebestand gevonden, met behulp van standaardinstellingen.
 saving_loading_failed_to_create_config_file = Fout bij het aanmaken van het configuratiebestand "{ $path }", reden "{ $reason }".
 saving_loading_failed_to_read_config_file = Kan configuratie niet laden van "{ $path }" omdat deze niet bestaat of geen bestand is.
 saving_loading_failed_to_read_data_from_file = Kan gegevens niet lezen van bestand "{ $path }", reden "{ $reason }".

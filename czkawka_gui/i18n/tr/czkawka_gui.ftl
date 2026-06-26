@@ -1,25 +1,21 @@
 # Window titles
 window_settings_title = Ayarlar
 window_main_title = Czkawka (Hıçkırık)
-window_progress_title = Taranıyor
+window_progress_title = Taranıyor...
 window_compare_images = Resimleri Karşılaştır
 # General
 general_ok_button = Tamam
 general_close_button = Kapat
 # Krokiet info dialog
-krokiet_info_title = Krokiet - Yeni versiyon Czkawka
+krokiet_info_title = Deprecation Notice
 krokiet_info_message =
-    Krokiet, Czkawka GTK GUI’nin yeni, geliştirilmiş, daha hızlı ve daha güvenilir versiyonudur!
+    Czkawka GTK 12.0 is the final release. No further updates, features, or bug fixes are planned.
     
-    Çalıştırması daha kolay ve sistem değişikliklerine karşı daha dirençlidir, çünkü çoğu sistemde varsayılan olarak bulunan temel kütüphanelere dayanır.
+    Most features from Czkawka GTK are available in Krokiet, usually in a simpler, faster, and more stable form. Krokiet also adds new features and improvements that were not possible in the GTK version.
     
-    Krokiet ayrıca, Czkawka’da bulunmayan özellikler getirir, örneğin video karşılaştırma modunda alıştırmalar, bir EXIF temizleyici, dosya taşıma/kopyalama/silme ilerleme veya gelişmiş sıralama seçenekleri.
+    If you are still using Czkawka GTK, switching to Krokiet should be easy, since it has a similar interface, fewer dependencies, and better cross-platform support.
     
-    Deneyin ve farkı görün!
-    
-    Czkawka’nın benim tarafımdan düzeltmeler ve küçük güncellemeler almaya devam etmesi muhtemeldir, ancak tüm yeni özellikler yalnızca Krokiet için geliştirilecek ve herkes yeni özellikler eklemek, eksik modları tamamlamak veya Czkawka’yı daha da genişletmekten serbestçe yararlanabilir.
-    
-    PS: Bu mesaj yalnızca bir kez görünmelidir. Tekrar gösteriliyorsa, CZKAWKA_DONT_ANNOY_ME ortam değişkenini herhangi bir boş olmayan değere ayarlayın.
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = Başlık
 music_artist_checkbox = Sanatçı
@@ -113,6 +109,7 @@ image_hash_alg_tooltip =
     Her birinin hem güçlü hem de zayıf noktaları vardır ve farklı görüntüler için 
     bazen daha iyi, bazen daha kötü sonuçlar verir. Bu nedenle, size göre en iyisini belirlemek için 
     elle test gereklidir.
+image_geometric_invariance_tooltip = Also compare mirrored/flipped and optionally rotated variants of each image. This improves matching but increases hashing time.
 big_files_mode_combobox_tooltip = Boyut bakımından En Büyük/En Küçük dosyaları aramaya izin verir
 big_files_mode_label = Denetim şekli
 big_files_mode_smallest_combo_box = En Küçük
@@ -147,13 +144,14 @@ main_tree_view_column_destination_path = Hedef Yol
 main_tree_view_column_type_of_error = Hata türü
 main_tree_view_column_current_extension = Geçerli Uzantı
 main_tree_view_column_proper_extensions = Uygun Uzantı
-main_tree_view_column_fps = FPS
+main_tree_view_column_fps = FPS (Saniyedeki Kare Sayısı)
 main_tree_view_column_codec = KodçTürkçe: Kodç
 main_label_check_method = Denetim yöntemi:
 main_label_hash_type = SUÇ türü:
 main_label_hash_size = SURÇ boyutu:
+main_label_geometric_invariance = Geometric invariance
 main_label_size_bytes = Boyut (bayt):
-main_label_min_size = En az
+main_label_min_size = Min
 main_label_max_size = Maks
 main_label_shown_files = Gösterilecek Dosya Sayısı:
 main_label_resize_algorithm = Yeniden boyutlandırma algoritması:
@@ -326,6 +324,21 @@ about_translation_button = Çeviri
 # Header
 header_setting_button_tooltip = Ayarlar iletişim kutusunu açar.
 header_about_button_tooltip = Czkawka hakkında bilgi içeren iletişim kutusunu açar.
+header_krokiet_button_tooltip = Try Krokiet - the new and improved version!
+# Krokiet promo dialog
+krokiet_promo_title = Meet Krokiet!
+krokiet_promo_message =
+    Hello there, brave Czkawka user!
+    
+    The Force is clearly with you, but Krokiet is not - a newer, faster, lighter, and significantly more handsome (assuming apps can actually be handsome) duplicate cleaner.
+    
+    Krokiet includes everything people liked about Czkawka. It is completely free, open source, has a unique and simple UI (both praised and hated by many), introduces a lot of new features, uses fewer dependencies, and works far more reliably across different platforms.
+    
+    And if you somehow missed it, there is already an even newer app than Krokiet - Cedinia, designed primarily for Android devices and touchscreen usage.
+    
+    Czkawka GTK served us well, but its watch has ended.
+krokiet_promo_link_download = Download Krokiet/Cedinia
+krokiet_promo_link_project = Project page
 
 # Settings
 
@@ -469,37 +482,6 @@ compute_found_invalid_symlinks = { $number_files } geçerli olmayan simge bağla
 compute_found_broken_files = { $number_files } bozuk dosya bulundu { $time } içinde
 compute_found_bad_extensions = Geçersiz uzantılarla { $number_files } dosya { $time } içinde bulundu
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] { $file_number } dosya tarandı
-       *[other] { $file_number } dosya tarandı
-    }
-progress_scanning_extension_of_files = { $file_checked }/{ $all_files } dosyasını kontrol edildi
-progress_scanning_broken_files = Kontrol edilen { $file_checked }/{ $all_files } dosya ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hash işlemi uygulanmış { $file_checked }/{ $all_files } video
-progress_creating_video_thumbnails = Created thumbnails of { $file_checked }/{ $all_files } video
-progress_scanning_image = Hash işlemi uygulanmış { $file_checked }/{ $all_files } görsel ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = { $file_checked }/{ $all_files } görsel hash kaydı karşılaştırıldı
-progress_scanning_music_tags_end = Compared tags of { $file_checked }/{ $all_files } music file
-progress_scanning_music_tags = Read tags of { $file_checked }/{ $all_files } music file
-progress_scanning_music_content_end = Compared fingerprint of { $file_checked }/{ $all_files } music file
-progress_scanning_music_content = Calculated fingerprint of { $file_checked }/{ $all_files } music file ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] { $folder_number } klasör tarandı
-       *[other] { $folder_number } klasör tarandı
-    }
-progress_scanning_size = Taranan { $file_number } dosyasının boyutu
-progress_scanning_size_name = Scanned name and size of { $file_number } file
-progress_scanning_name = Scanned name of { $file_number } file
-progress_analyzed_partial_hash = Analyzed partial hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Analyzed full hash of { $file_checked }/{ $all_files } files ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = Prehash önbelleği yükleniyor
-progress_prehash_cache_saving = Prehash önbelleği kaydediliyor
-progress_hash_cache_loading = Hash önbelleği yükleniyor
-progress_hash_cache_saving = Hash önbelleği kaydediliyor
-progress_cache_loading = Önbellek yükleniyor
-progress_cache_saving = Önbellek kaydediliyor
 progress_current_stage = Geçerli Aşama: { " " }
 progress_all_stages = Tüm Aşamalar: { " " }
 # Saving loading 
@@ -507,6 +489,7 @@ saving_loading_saving_success = Yapılandırma { $name } dosyasına kaydedildi.
 saving_loading_saving_failure = Konfigürasyon verilerini dosya { $name }'a kaydetme başarısız oldu, sebep { $reason }.
 saving_loading_reset_configuration = Geçerli yapılandırma temizlendi.
 saving_loading_loading_success = Uygulama yapılandırması düzgünce yüklendi.
+saving_loading_no_config_file = No configuration file found, using default settings.
 saving_loading_failed_to_create_config_file = "{ $path }" dizininde yapılandırma dosyası oluşturulamadı, nedeni:  "{ $reason }".
 saving_loading_failed_to_read_config_file = "{ $path }" dizininden yapılandırma dosyası yüklenemiyor, böyle dosya yok ya da bir dosya değil.
 saving_loading_failed_to_read_data_from_file = "{ $path }" dosyasından veri okunamıyor, nedeni: "{ $reason }".

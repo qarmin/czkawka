@@ -13,6 +13,7 @@ tool_bad_extensions = 錯誤的副檔名
 tool_same_music = 音樂重複
 tool_bad_names = 糟糕的名字
 tool_exif_remover = EXIF 數據
+tool_similar_videos = Similar Videos (Audio)
 tool_directories = 目錄
 tool_settings = 設定
 # Home screen tool card descriptions
@@ -27,6 +28,7 @@ home_bad_extensions_description = 具有無效檔案擴充名的檔案。
 home_same_music_description = 依標籤搜尋的相似音訊檔案。
 home_bad_names_description = 檔案名稱含有問題字元。
 home_exif_description = 帶有 EXIF 原始數據的圖片。
+home_similar_videos_description = Find videos with similar audio (no FFmpeg needed)
 # Results list
 scanning = 掃描中...
 stopping = 暫停...
@@ -63,9 +65,9 @@ delete_errors_title = 刪除部分檔案失敗：
 ok = 好的。
 # Stopping overlay
 stopping_overlay_title = 暫停。
-stopping_overlay_body = 
-        掃描完成中...
-        請稍候。.
+stopping_overlay_body =
+    掃描完成中...
+    請稍候。.
 # Permission popup
 permission_title = 檔案存取權限
 permission_body = 為了掃描檔案，應用程式需要存取裝置儲存空間。若沒有此授權，將無法進行掃描。.
@@ -105,7 +107,7 @@ settings_check_method_label = 比較方法
 settings_check_method = 方法
 settings_hash_type_label = 雜湊類型
 settings_hash_type = 雜湊類型
-settings_hash_type_desc = Blake3 - 這是推薦的選項，CRC32 存在極小的誤判機率。
+settings_hash_type_desc = Blake3 – 這是推薦的選項，CRC32 存在極小的誤判機率。
 settings_similar_images_header = 相似圖片
 settings_similarity_preset = 相似度閾值
 settings_similarity_desc = 極高 = 僅接近完全相同。
@@ -113,6 +115,7 @@ settings_hash_size = 雜湊大小
 settings_hash_size_desc = 較大的尺寸，雖然能減少誤判的機率，但同時也可能找到的相似圖片數量較少。
 settings_hash_alg = 哈希算法
 settings_image_filter = 調整過濾器大小。
+settings_geometric_invariance = Geometric invariance
 settings_ignore_same_size = 忽略尺寸相同的圖片。
 settings_gallery_image_fit_cover = 相簿：裁剪至正方形。
 settings_gallery_image_fit_cover_desc = 填滿圖格；禁用此選項以保留原始比例。
@@ -129,6 +132,10 @@ settings_music_length = 長度
 settings_music_genre = 類型
 settings_music_bitrate = 位元率
 settings_music_approx = 近似標籤比較
+settings_temporary_files_header = TEMPORARY FILES
+settings_temporary_files_extensions_label = EXTENSIONS
+settings_temporary_files_extensions_placeholder = e.g. .tmp,.bak,~
+settings_temporary_files_reset = Reset to defaults
 settings_broken_files_header = 損毀檔案
 settings_broken_files_note = 資源佔用較高的掃描操作。如需最佳效能，請在桌面上使用 Krokiet。.
 settings_broken_files_types_label = 已選取的類型。
@@ -136,6 +143,11 @@ settings_broken_audio = 音訊
 settings_broken_pdf = PDF 文件。
 settings_broken_archive = 歸檔
 settings_broken_image = 影像
+settings_broken_font = Font
+settings_broken_markup = Markup (JSON/XML/TOML)
+settings_similar_videos_header = SIMILAR VIDEOS (AUDIO)
+settings_similar_videos_audio_preset = Audio similarity preset
+settings_similar_videos_audio_preset_desc = Controls how strictly audio must match
 settings_bad_names_header = 不良名稱
 settings_bad_names_checks_label = 支票
 settings_bad_names_uppercase_ext = 大寫延伸
@@ -143,6 +155,11 @@ settings_bad_names_emoji = 表情符號在名字裡
 settings_bad_names_space = 開頭/結尾的空格。
 settings_bad_names_non_ascii = 非ASCII字元
 settings_bad_names_duplicated = 重複字元
+settings_ignore_same_resolution = Ignore images with the same resolution
+# Settings - Appearance section
+settings_appearance_label = APPEARANCE
+settings_dark_theme = 深色主題
+settings_dark_theme_desc = Use dark colour scheme
 # Settings - Diagnostics tab
 diagnostics_header = 診斷儀器
 diagnostics_thumbnails = 縮圖快取。
@@ -152,6 +169,11 @@ diagnostics_clear_thumbnails = 清晰的縮圖。
 diagnostics_open_thumbnails_folder = 開啟資料夾
 diagnostics_clear_cache = 清除快取。
 diagnostics_open_cache_folder = 開啟資料夾
+diagnostics_export_logs = Export logs
+logs_label = LOGS
+logs_export_title = Export logs
+logs_export_saved = Logs copied to:
+logs_export_failed = Could not export logs
 diagnostics_collect_test = 檔案存取測試
 diagnostics_collect_test_desc = 請確認可以存取的檔案數量。
 diagnostics_collect_test_run = 執行。
@@ -204,6 +226,8 @@ renamed_errors_suffix = 錯誤。
 cleaned_exif_prefix = 已清除來自以下來源的 EXIF 資訊：
 cleaned_exif_suffix = 檔案
 cleaned_exif_errors_suffix = 錯誤。
+rename_error_read_file_name = Cannot read file name
+rename_error_read_directory = Cannot read directory
 and_more_prefix = ...以及
 and_more_suffix = 更多。
 # Gallery / delete popups
@@ -212,7 +236,6 @@ gallery_back = 返回
 gallery_confirm_delete = 是的，刪除。
 deleting_files = 正在刪除檔案...
 stop = 停止
-files_suffix = 檔案
 scanning_fallback = 掃描中...
 app_subtitle = 為紀念塞迪尼亞戰役 (西元 972 年) 而作。
 app_license = Czkawka Core 的前端 - GPL-3.0 协议。
@@ -228,38 +251,11 @@ gallery_confirm_delete_warning = 所有項目都已從 { $unsafe_groups } 個群
 # Settings - SameMusic fingerprint warning
 same_music_fingerprint_warning = 計算和比較音頻指紋需要消耗大量資源，而且可能需要很長時間。 建議在桌面系統上使用 Krokiet 來執行此項任務。.
 # Scan stage labels (shown during scan progress)
-stage_collecting_files = 收集檔案中
-stage_scanning_name = 按姓名掃描。
-stage_scanning_size_name = 以名稱和大小進行掃描。
-stage_scanning_size = 依尺寸掃描。
-stage_pre_hash = 預先哈希處理。
-stage_full_hash = 雜湊演算法 (Hashing)
-stage_loading_cache = 正在載入快取
-stage_saving_cache = 正在儲存快取
-stage_calculating_image_hashes = 計算影像的雜湊值。
-stage_comparing_images = 比較圖片。
-stage_calculating_video_hashes = 計算影片的雜湊值。
-stage_checking_files = 正在檢查檔案
-stage_checking_extensions = 正在檢查擴充功能。
-stage_checking_names = 檢查姓名。
-stage_reading_music_tags = 閱讀音樂標籤。
-stage_comparing_tags = 比較標籤。
-stage_calculating_music_fingerprints = 計算音樂指紋。
-stage_comparing_fingerprints = 比對指紋。
-stage_extracting_exif = 讀取 EXIF 標籤。
-stage_creating_video_thumbnails = 製作影片縮圖。
-stage_processing_videos = 正在處理影片。
-stage_deleting = 刪除檔案
-stage_renaming = 重新命名檔案
-stage_moving = 移動檔案
-stage_hardlinking = 建立硬連結。
-stage_symlinking = 建立符號連結。
-stage_optimizing_videos = 優化影片。
-stage_cleaning_exif = 清除 EXIF 資訊。
 # Group headers in scan results
 duplicates_group_header = { $count } 個檔案  x  { $per_file } / 個檔案  =  總計 { $total }
 similar_images_group_header = { $count } 張相似圖片
 same_music_group_header = { $count } 相似曲目
+similar_videos_group_header = { $count } similar videos
 # Rename confirmation
 confirm_rename_items = 您確定要將選取的 { $n } 個檔案重新命名嗎？
 # Combo-box option labels (translatable display names)
@@ -278,15 +274,10 @@ option_check_method_size = 大小
 option_music_method_tags = 標籤
 option_music_method_audio = 音訊
 option_min_size_none = 無。
-option_min_size_1kb = 1 KB
-option_min_size_8kb = 8 KB
-option_min_size_64kb = 64 KB
-option_min_size_1mb = 1 MB
-option_max_size_16kb = 16 KB
-option_max_size_1mb = 1 MB
-option_max_size_10mb = 10 MB
-option_max_size_100mb = 100 MB
 option_max_size_unlimited = 無限大。
+option_audio_preset_identical = Identical
+option_audio_preset_clip = Clip in longer
+option_audio_preset_similar = Similar
 # Volume labels (shown in the directories screen)
 volume_internal_storage = 內部儲存空間
 volume_sd_card = 記憶卡 (SD 卡)
@@ -311,7 +302,18 @@ path_edit_placeholder = 請輸入路徑...
 path_edit_not_exists = 路徑不存在。
 path_edit_is_dir = 目錄
 path_edit_is_file = 檔案
-path_edit_no_newlines = 路徑名稱中不能包含換行符號 - 不允許使用Enter鍵。
+path_edit_no_newlines = 路徑名稱中不能包含換行符號 — 不允許使用Enter鍵。
 ctx_menu_title = 開啟。
 ctx_open_file = 開啟項目。
 ctx_open_folder = 開啟父目錄。
+dir_open_folder = 開啟資料夾
+# Compare view
+compare_label = 比較
+compare_loading = Loading images…
+compare_cancelling = Cancelling…
+compare_computing = Computing diff…
+compare_mode_normal = Side
+compare_mode_split = Split
+compare_mode_overlay = Overlay
+compare_mode_diff = Diff
+compare_res_mismatch = Different resolutions - diff may be inaccurate

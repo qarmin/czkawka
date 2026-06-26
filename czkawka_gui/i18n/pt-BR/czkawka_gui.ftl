@@ -4,11 +4,18 @@ window_main_title = Czkawka (Soluço)
 window_progress_title = Verificando
 window_compare_images = Comparar as imagens
 # General
-general_ok_button = Ok
+general_ok_button = Certo
 general_close_button = Fechar
 # Krokiet info dialog
-krokiet_info_title = Apresento a você o Krokiet, a nova versão do Czkawka
-krokiet_info_message = O Krokiet (Croquete) é a nova versão aprimorada, mais rápida e confiável, que possui menos problemas ou falhas do que o Czkawka (Soluço), que possui a sua interface gráfica desenvolvida com o conjunto de ferramentas do GTK.
+krokiet_info_title = Aviso de desaprovação
+krokiet_info_message =
+    Czkawka GTK 12.0 is the final release. No further updates, features, or bug fixes are planned.
+    
+    Most features from Czkawka GTK are available in Krokiet, usually in a simpler, faster, and more stable form. Krokiet also adds new features and improvements that were not possible in the GTK version.
+    
+    If you are still using Czkawka GTK, switching to Krokiet should be easy, since it has a similar interface, fewer dependencies, and better cross-platform support.
+    
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista
@@ -91,6 +98,7 @@ image_hash_alg_tooltip =
     Cada um tem os seus pontos fortes e os seus pontos fracos, às vezes produzem resultados melhores e às vezes produzem resultados piores para imagens diferentes.
     
     É melhor testar qual algoritmo tem os melhores resultados para os diferentes tipos de arquivos, lembre-se de que, nem sempre é facilmente perceptível as diferenças dos resultados.
+image_geometric_invariance_tooltip = Também comparar variantes espelhadas/viradas e opcionalmente rotacionadas de cada imagem. Isto melhora a correspondência, mas aumenta o tempo de hashing.
 big_files_mode_combobox_tooltip = Permite pesquisar os arquivos menores ou maiores
 big_files_mode_label = Arquivos a serem verificados
 big_files_mode_smallest_combo_box = O arquivo menor
@@ -130,6 +138,7 @@ main_tree_view_column_codec = Codec
 main_label_check_method = Método de verificação
 main_label_hash_type = Tipo do ‘hash’
 main_label_hash_size = Tamanho do ‘hash’
+main_label_geometric_invariance = invariação geométrica
 main_label_size_bytes = Tamanho (em bytes)
 main_label_min_size = Mínimo
 main_label_max_size = Máximo
@@ -298,6 +307,21 @@ about_translation_button = Tradução
 # Header
 header_setting_button_tooltip = Abrir a janela das configurações do programa Czkawka.
 header_about_button_tooltip = Abrir a janela das informações sobre o programa Czkawka.
+header_krokiet_button_tooltip = Experimente o Krokiet - a versão nova e melhorada!
+# Krokiet promo dialog
+krokiet_promo_title = Conheça o Krokiet!
+krokiet_promo_message =
+    Olá, bravo usuário Czkawka!
+    
+    A Força está claramente com você, mas Krokiet não é - um mais novo, mais rápido e mais leve e significativamente mais bonito (assumindo que os aplicativos realmente podem ser bonitos) a limpeza duplicada.
+    
+    Krokiet inclui tudo o que as pessoas gostam de Czkawka. É completamente gratuito, de código aberto, tem uma interface de usuário única e simples (ambos elogiados e odiados por muitos), introduz um monte de novos recursos, usa menos dependências e trabalha de forma muito mais confiável em diferentes plataformas.
+    
+    E se você de alguma forma perdeu isso, já existe um aplicativo ainda mais recente que o Krokiet - Cedinia, Projetado principalmente para dispositivos Android e uso na tela.
+    
+    Czkawka GTK nos serviu bem, mas o seu relógio terminou.
+krokiet_promo_link_download = Baixar Krokiet/Cedinia
+krokiet_promo_link_project = Página do projeto
 
 # Settings
 
@@ -427,32 +451,6 @@ compute_found_invalid_symlinks = Foram encontradas ‘{ $number_files }’ liga�
 compute_found_broken_files = Foram encontrados ‘{ $number_files }’ arquivos corrompidos. A verificação durou ‘{ $time }’
 compute_found_bad_extensions = Foram encontrados ‘{ $number_files }’ arquivos com extensões que não são válidas. A verificação durou ‘{ $time }’
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] Foi verificado ‘{ $file_number }’ arquivo
-       *[other] Foram verificados ‘{ $file_number }’ arquivos
-    }
-progress_scanning_extension_of_files = Verificando ‘{ $file_checked }’ de ‘{ $all_files }’ por tipo da extensão dos arquivos
-progress_scanning_broken_files = Verificando ‘{ $file_checked }’ de ‘{ $all_files }’ arquivos ‘{ $data_checked }’ de ‘{ $all_data }’
-progress_scanning_video = Foram criados ‘{ $file_checked }’ de ‘{ $all_files }’ código do ‘hash’ dos arquivos de vídeo
-progress_creating_video_thumbnails = Foram criadas ‘{ $file_checked }’ de ‘{ $all_files }’ miniaturas de vídeo
-progress_scanning_image = Foram criados ‘{ $file_checked }’ de ‘{ $all_files }’ código do ‘hash’ dos arquivos de imagem ‘{ $data_checked }’ de ‘{ $all_data }’
-progress_comparing_image_hashes = Comparando ‘{ $file_checked }’ de ‘{ $all_files }’ código ‘hash’ dos arquivos de imagem
-progress_scanning_music_tags_end = Comparando ‘{ $file_checked }’ de ‘{ $all_files }’ informações dos arquivos de música
-progress_scanning_music_tags = Lendo ‘{ $file_checked }’ de ‘{ $all_files }’ informações dos arquivos de música
-progress_scanning_music_content_end = Comparando ‘{ $file_checked }’ de ‘{ $all_files }’ impressões digitais dos arquivos de música
-progress_scanning_music_content = Foram calculados ‘{ $file_checked }’ de ‘{ $all_files }’ impressões digitais dos arquivos de música e foi verificado ‘{ $data_checked }’ de ‘{ $all_data }’
-progress_scanning_size = Pesquisando por tamanho do arquivo nos ‘{ $file_number }’
-progress_scanning_size_name = Pesquisando por nome e por tamanho do arquivo nos ‘{ $file_number }’
-progress_scanning_name = Pesquisando por nome do arquivo nos ‘{ $file_number }’
-progress_analyzed_partial_hash = O ‘hash’ parcial foi analisado nos arquivos ‘{ $file_checked }’ de ‘{ $all_files }’ e foi verificado ‘{ $data_checked }’ de ‘{ $all_data }’
-progress_analyzed_full_hash = O ‘hash’ completo foi analisado nos arquivos ‘{ $file_checked }’ de ‘{ $all_files }’ e foi verificado ‘{ $data_checked }’ de ‘{ $all_data }’
-progress_prehash_cache_loading = Carregando o ‘hash’ parcial dos arquivos do ‘cache’
-progress_prehash_cache_saving = Salvando o ‘hash’ parcial dos arquivos no ‘cache’
-progress_hash_cache_loading = Carregando o ‘hash’ dos arquivos do ‘cache’
-progress_hash_cache_saving = Salvando o ‘hash’ dos arquivos no ‘cache’
-progress_cache_loading = Carregando as informações do ‘cache’
-progress_cache_saving = Salvando as informações no ‘cache’
 progress_current_stage = Estágio atual: { "  " }
 progress_all_stages = Todos os estágios: { "  " }
 # Saving loading 
@@ -460,6 +458,7 @@ saving_loading_saving_success = As configurações foram salvas no arquivo ‘{ 
 saving_loading_saving_failure = Ocorreu uma falha ao salvar os dados no arquivo de configurações ‘{ $name }’, por causa de ‘{ $reason }’.
 saving_loading_reset_configuration = As configurações padrão foram restauradas.
 saving_loading_loading_success = As configurações do programa foram carregadas com sucesso.
+saving_loading_no_config_file = Nenhum arquivo de configuração encontrado, utilizando as configurações padrão.
 saving_loading_failed_to_create_config_file = Ocorreu uma falha ao criar o arquivo de configurações no caminho ‘{ $path }’, por causa de ‘{ $reason }’.
 saving_loading_failed_to_read_config_file = Não foi possível carregar o arquivo de configurações do caminho ‘{ $path }’, porque o arquivo não existe ou porque não é um arquivo de configurações.
 saving_loading_failed_to_read_data_from_file = Não foi possível ler os dados do arquivo do caminho ‘{ $path }’, por causa de ‘{ $reason }’.

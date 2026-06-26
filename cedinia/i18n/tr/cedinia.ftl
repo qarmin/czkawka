@@ -13,6 +13,7 @@ tool_bad_extensions = Hatalı Uzantılar
 tool_same_music = Müzik Kopyaları
 tool_bad_names = Kötü İsimler
 tool_exif_remover = EXIF Verileri
+tool_similar_videos = Similar Videos (Audio)
 tool_directories = Klasörler
 tool_settings = Ayarlar
 # Home screen tool card descriptions
@@ -27,6 +28,7 @@ home_bad_extensions_description = Geçersiz uzantıya sahip dosyalar
 home_same_music_description = Etiketlere göre benzer ses dosyaları
 home_bad_names_description = İsimlerinde sorunlu karakterler içeren dosyalar
 home_exif_description = EXIF meta verisi içeren resimler
+home_similar_videos_description = Find videos with similar audio (no FFmpeg needed)
 # Results list
 scanning = Taramaya başlanıyor...
 stopping = Bekleniyor...
@@ -63,9 +65,9 @@ delete_errors_title = Bazı dosyaların silinmesi sırasında bir hata oluştu:
 ok = Tamam
 # Stopping overlay
 stopping_overlay_title = Duraklama
-stopping_overlay_body = 
-        Mevcut tarama işlemi tamamlanıyor...
-        Lütfen bekleyin.
+stopping_overlay_body =
+    Mevcut tarama işlemi tamamlanıyor...
+    Lütfen bekleyin.
 # Permission popup
 permission_title = Dosya Erişimi
 permission_body = Dosyaları taramak için, uygulamanın cihazınızın depolama alanına erişmesi gerekmektedir. Bu izne sahip olmadan, tarama işlemi mümkün olmayacaktır.
@@ -113,6 +115,7 @@ settings_hash_size = SURÇ boyutu:
 settings_hash_size_desc = Daha büyük boyutlardaki modeller, daha az yanlış pozitif sonuç üretir, ancak aynı zamanda daha az benzer görüntü bulur
 settings_hash_alg = Karma algoritması
 settings_image_filter = Boyutlandırma filtresi
+settings_geometric_invariance = Geometric invariance
 settings_ignore_same_size = Aynı boyutlara sahip resimleri görmezden gelin
 settings_gallery_image_fit_cover = Galeri: Kare formatına getirin
 settings_gallery_image_fit_cover_desc = Koyu rengi doldurun; orijinal oranları korumak için bu özelliği devre dışı bırakın
@@ -129,6 +132,10 @@ settings_music_length = Uzunluk
 settings_music_genre = Müzik Türü
 settings_music_bitrate = Bit Hızı
 settings_music_approx = Yaklaşık etiket karşılaştırması
+settings_temporary_files_header = TEMPORARY FILES
+settings_temporary_files_extensions_label = EXTENSIONS
+settings_temporary_files_extensions_placeholder = e.g. .tmp,.bak,~
+settings_temporary_files_reset = Reset to defaults
 settings_broken_files_header = BOZULMUŞ DOSYALAR
 settings_broken_files_note = Yüksek işlem gücü gerektiren bir tarama. En iyi performansı elde etmek için Krokiet'i masaüstü bilgisayarınızda kullanın.
 settings_broken_files_types_label = KONTROL EDİLEN TİPLER
@@ -136,6 +143,11 @@ settings_broken_audio = Ses
 settings_broken_pdf = PDF
 settings_broken_archive = Arşiv
 settings_broken_image = Görsel
+settings_broken_font = Font
+settings_broken_markup = Markup (JSON/XML/TOML)
+settings_similar_videos_header = SIMILAR VIDEOS (AUDIO)
+settings_similar_videos_audio_preset = Audio similarity preset
+settings_similar_videos_audio_preset_desc = Controls how strictly audio must match
 settings_bad_names_header = KÖTÜ İSİMLER
 settings_bad_names_checks_label = ÇEKLER
 settings_bad_names_uppercase_ext = BÜYÜK HARF EKLENTİSİ
@@ -143,6 +155,11 @@ settings_bad_names_emoji = Emoji'de isim
 settings_bad_names_space = Başlangıçta/sonunda boşluklar
 settings_bad_names_non_ascii = ASCII olmayan karakterler
 settings_bad_names_duplicated = Tekrarlayan karakterler
+settings_ignore_same_resolution = Ignore images with the same resolution
+# Settings - Appearance section
+settings_appearance_label = APPEARANCE
+settings_dark_theme = Karanlık thema
+settings_dark_theme_desc = Use dark colour scheme
 # Settings - Diagnostics tab
 diagnostics_header = TEŞHİS
 diagnostics_thumbnails = Küçük resim önbelleği
@@ -152,6 +169,11 @@ diagnostics_clear_thumbnails = Açık ve net önizlemeler
 diagnostics_open_thumbnails_folder = Klasörü aç
 diagnostics_clear_cache = Önbelleği temizle
 diagnostics_open_cache_folder = Klasörü aç
+diagnostics_export_logs = Export logs
+logs_label = LOGS
+logs_export_title = Export logs
+logs_export_saved = Logs copied to:
+logs_export_failed = Could not export logs
 diagnostics_collect_test = Dosya erişim testi
 diagnostics_collect_test_desc = Kontrol edin, kaç tane dosyanın erişilebilir olduğunu
 diagnostics_collect_test_run = Çalıştır
@@ -204,6 +226,8 @@ renamed_errors_suffix = hatalar
 cleaned_exif_prefix = EXIF verilerinden arındırıldı
 cleaned_exif_suffix = dosyalar
 cleaned_exif_errors_suffix = Hatalar
+rename_error_read_file_name = Cannot read file name
+rename_error_read_directory = Cannot read directory
 and_more_prefix = ...ve
 and_more_suffix = daha fazla
 # Gallery / delete popups
@@ -212,7 +236,6 @@ gallery_back = Geri
 gallery_confirm_delete = Evet, sil
 deleting_files = Dosyalar siliniyor...
 stop = Durdur
-files_suffix = dosyalar
 scanning_fallback = Taramaya başlanıyor...
 app_subtitle = 972 yılında gerçekleşen Cedynia Savaşı'nın anısına
 app_license = Czkawka Core için ön yüz - GPL-3.0
@@ -228,38 +251,11 @@ gallery_confirm_delete_warning = Tüm öğeler, { $unsafe_groups } gruplarından
 # Settings - SameMusic fingerprint warning
 same_music_fingerprint_warning = Ses parmak izlerini hesaplamak ve karşılaştırmak çok fazla kaynak gerektirir ve uzun sürebilir. Bu işlem için Krokiet'in masaüstü bir sistemde kullanılması önerilir.
 # Scan stage labels (shown during scan progress)
-stage_collecting_files = Dosyaları toplama işlemi
-stage_scanning_name = İsimle tarama
-stage_scanning_size_name = İsim ve boyuta göre tarama
-stage_scanning_size = Boyuta göre tarama
-stage_pre_hash = Önceden karma işlemi
-stage_full_hash = Karma Alma (veya Karma Fonksiyonları)
-stage_loading_cache = Önbellek yükleniyor
-stage_saving_cache = Önbellek kaydediliyor
-stage_calculating_image_hashes = Görüntü karmalarının hesaplanması
-stage_comparing_images = Resimleri karşılaştırma
-stage_calculating_video_hashes = Video dosyalarının hash değerlerini hesaplama
-stage_checking_files = Dosyaları kontrol ediliyor
-stage_checking_extensions = Uzantıların kontrolü
-stage_checking_names = İsimlerin kontrol edilmesi
-stage_reading_music_tags = Müzik etiketlerini okuma
-stage_comparing_tags = Etiketleri karşılaştırma
-stage_calculating_music_fingerprints = Müzik parmak izlerini hesaplama
-stage_comparing_fingerprints = Parmak izlerini karşılaştırma
-stage_extracting_exif = EXIF etiketlerini okuma
-stage_creating_video_thumbnails = Video önizleme resimleri oluşturma
-stage_processing_videos = Videolar işleniyor
-stage_deleting = Dosyaları silme
-stage_renaming = Dosya isimlerini değiştirme
-stage_moving = Öğeleri Taşı
-stage_hardlinking = Sabit bağlantılar oluşturma
-stage_symlinking = Sembolik bağlantılar oluşturma
-stage_optimizing_videos = Videoları optimize etme
-stage_cleaning_exif = EXIF verilerini temizleme
 # Group headers in scan results
 duplicates_group_header = { $count } dosya x { $per_file } / dosya = { $total } toplam
 similar_images_group_header = { $count } benzer resim
 same_music_group_header = { $count } benzer şarkı
+similar_videos_group_header = { $count } similar videos
 # Rename confirmation
 confirm_rename_items = Seçili olan { $n } dosyayı yeniden adlandırmak istediğinizden emin misiniz?
 # Combo-box option labels (translatable display names)
@@ -278,15 +274,10 @@ option_check_method_size = Boyut
 option_music_method_tags = Etiketler
 option_music_method_audio = Ses
 option_min_size_none = Çevrilecek metin bulunmamaktadır
-option_min_size_1kb = 1 KB
-option_min_size_8kb = 8 KB
-option_min_size_64kb = 64 KB
-option_min_size_1mb = 1 MB
-option_max_size_16kb = 16 KB
-option_max_size_1mb = 1 MB
-option_max_size_10mb = 10 MB
-option_max_size_100mb = 100 MB
 option_max_size_unlimited = Sınırsız
+option_audio_preset_identical = Identical
+option_audio_preset_clip = Clip in longer
+option_audio_preset_similar = Similar
 # Volume labels (shown in the directories screen)
 volume_internal_storage = İç Depolama Alanı
 volume_sd_card = Bellek Kartı (SD Kart)
@@ -311,7 +302,18 @@ path_edit_placeholder = Yol belirtin...
 path_edit_not_exists = Yol bulunamadı
 path_edit_is_dir = Dizin
 path_edit_is_file = Dosya
-path_edit_no_newlines = Yollar yeni satır karakterleri içermemelidir - Enter tuşunun kullanılmasına izin verilmez
+path_edit_no_newlines = Yollar yeni satır karakterleri içermemelidir — Enter tuşunun kullanılmasına izin verilmez
 ctx_menu_title = Açık
 ctx_open_file = Açık işlem
 ctx_open_folder = Üst klasörü aç
+dir_open_folder = Klasörü aç
+# Compare view
+compare_label = Karşılaştır
+compare_loading = Loading images…
+compare_cancelling = Cancelling…
+compare_computing = Computing diff…
+compare_mode_normal = Side
+compare_mode_split = Split
+compare_mode_overlay = Overlay
+compare_mode_diff = Diff
+compare_res_mismatch = Different resolutions - diff may be inaccurate

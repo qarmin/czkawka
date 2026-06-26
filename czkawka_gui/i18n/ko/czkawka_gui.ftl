@@ -4,22 +4,18 @@ window_main_title = Czkawka (구글ить)
 window_progress_title = 스캔중
 window_compare_images = 이미지 비교
 # General
-general_ok_button = 확인
+general_ok_button = 알겠습니다
 general_close_button = 닫기
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - 새로운 버전의 Czkawka
+krokiet_info_title = Deprecation Notice
 krokiet_info_message =
-    크로키트는 Czkawka GTK GUI의 새로운, 개선된, 더 빠르고 더 안정적인 버전입니다!
+    Czkawka GTK 12.0 is the final release. No further updates, features, or bug fixes are planned.
     
-    실행하기가 더 쉽고 시스템 변경에 더 강하며, 대부분의 시스템에서 기본적으로 사용 가능한 핵심 라이브러리에만 의존합니다.
+    Most features from Czkawka GTK are available in Krokiet, usually in a simpler, faster, and more stable form. Krokiet also adds new features and improvements that were not possible in the GTK version.
     
-    크로키트는 Czkawka에 없는 기능도 제공하며, 비디오 비교 모드에서 미리보기, EXIF 클리너, 파일 이동/복사/삭제 진행률 또는 확장된 정렬 옵션 등이 포함됩니다.
+    If you are still using Czkawka GTK, switching to Krokiet should be easy, since it has a similar interface, fewer dependencies, and better cross-platform support.
     
-    사용해 보고 차이점을 확인해 보세요!
-    
-    Czkawka는 저로부터 버그 수정 및 소규모 업데이트를 계속 받겠지만, 모든 새로운 기능은 크로키트에만 개발되며, 누구나 새로운 기능 추가, 누락된 모드 확장 또는 Czkawka 추가 확장을 자유롭게 기여할 수 있습니다.
-    
-    PS: 이 메시지는 한 번만 표시되어야 합니다. 다시 나타나면 CZKAWKA_DONT_ANNOY_ME 환경 변수를 비어 있는 값이 아닌 값으로 설정하십시오.
+    PS: This message should appear only once. If it shows up again, set the CZKAWKA_DONT_ANNOY_ME environment variable to any non-empty value.
 # Main window
 music_title_checkbox = 제목
 music_artist_checkbox = 아티스트
@@ -108,6 +104,7 @@ image_hash_alg_tooltip =
     각각의 알고리즘은 장단점이 있으므로, 경우마다 더 낫거나 더 나쁜 결과를 보여줄 수 있습니다.
     
     따라서 가장 좋은 알고리즘을 찾으려면 수동으로 테스트해 보는 것이 좋습니다.
+image_geometric_invariance_tooltip = Also compare mirrored/flipped and optionally rotated variants of each image. This improves matching but increases hashing time.
 big_files_mode_combobox_tooltip = 가장 큰 파일 또는 가장 작은 파일을 찾을 수 있습니다
 big_files_mode_label = 찾을 파일
 big_files_mode_smallest_combo_box = 작은 파일
@@ -147,6 +144,7 @@ main_tree_view_column_codec = 코덱
 main_label_check_method = 확인 방법
 main_label_hash_type = 해시 유형
 main_label_hash_size = 해시 크기
+main_label_geometric_invariance = Geometric invariance
 main_label_size_bytes = 파일 크기 (바이트)
 main_label_min_size = 최소
 main_label_max_size = 최대
@@ -160,7 +158,7 @@ main_check_box_broken_files_image = 이미지
 main_check_box_broken_files_video = 비디오
 main_check_box_broken_files_video_tooltip = ffmpeg/ffprobe를 사용하여 비디오 파일 유효성 검사합니다. 상당히 느리고 파일이 잘 재생되더라도 형식에 민감한 오류를 감지할 수 있습니다.
 check_button_general_same_size = 같은 파일크기 무시
-check_button_general_same_size_tooltip = 동일한 크기의 파일은 결과에서 제외합니다 - 대부분 1:1 중복일 가능성이 높습니다
+check_button_general_same_size_tooltip = 동일한 크기의 파일은 결과에서 제외합니다 – 대부분 1:1 중복일 가능성이 높습니다
 main_label_size_bytes_tooltip = 스캔할 파일의 크기입니다
 # Upper window
 upper_tree_view_included_folder_column_title = 검색할 폴더
@@ -315,6 +313,21 @@ about_translation_button = 번역
 # Header
 header_setting_button_tooltip = 설정창을 엽니다.
 header_about_button_tooltip = 이 앱에 대한 정보창을 엽니다.
+header_krokiet_button_tooltip = Try Krokiet - the new and improved version!
+# Krokiet promo dialog
+krokiet_promo_title = Meet Krokiet!
+krokiet_promo_message =
+    Hello there, brave Czkawka user!
+    
+    The Force is clearly with you, but Krokiet is not - a newer, faster, lighter, and significantly more handsome (assuming apps can actually be handsome) duplicate cleaner.
+    
+    Krokiet includes everything people liked about Czkawka. It is completely free, open source, has a unique and simple UI (both praised and hated by many), introduces a lot of new features, uses fewer dependencies, and works far more reliably across different platforms.
+    
+    And if you somehow missed it, there is already an even newer app than Krokiet - Cedinia, designed primarily for Android devices and touchscreen usage.
+    
+    Czkawka GTK served us well, but its watch has ended.
+krokiet_promo_link_download = Download Krokiet/Cedinia
+krokiet_promo_link_project = Project page
 
 # Settings
 
@@ -446,37 +459,6 @@ compute_found_invalid_symlinks = { $number_files }개의 유효하지 않은 심
 compute_found_broken_files = { $number_files }개의 봉인된 파일을 { $time }에 발견했습니다
 compute_found_bad_extensions = { $number_files } 확장자에 문제가 있는 파일을 { $time } 내로找到了
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] { $file_number }개 파일 스캔 완료
-       *[other] { $file_number }개 파일 스캔 완료
-    }
-progress_scanning_extension_of_files = { $file_checked }/{ $all_files }개의 파일 확장자 확인
-progress_scanning_broken_files = { $file_checked }/{ $all_files }개 파일 확인 (데이터: { $data_checked } / { $all_data })
-progress_scanning_video = { $file_checked }/{ $all_files }개의 비디오 해시 생성
-progress_creating_video_thumbnails = Created thumbnails of { $file_checked }/{ $all_files } video
-progress_scanning_image = { $file_checked }/{ $all_files }개의 이미지 해시 생성 (데이터: { $data_checked } / { $all_data })
-progress_comparing_image_hashes = { $file_checked }/{ $all_files }개의 이미지 해시 비교
-progress_scanning_music_tags_end = { $file_checked }/{ $all_files }개의 음악 파일 태그 비교 완료
-progress_scanning_music_tags = { $file_checked }/{ $all_files }개의 음악 파일 태그 읽는 중
-progress_scanning_music_content_end = { $file_checked }/{ $all_files }개의 음악 파일 지문 비교 완료
-progress_scanning_music_content = { $file_checked }/{ $all_files }개의 음악 파일 지문 계산 중 (데이터: { $data_checked } / { $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] { $folder_number }개 폴더 스캔 완료
-       *[other] { $folder_number }개 폴더 스캔 완료
-    }
-progress_scanning_size = { $file_number }개의 파일 크기 스캔 완료
-progress_scanning_size_name = { $file_number }개의 파일 이름 및 크기 스캔 완료
-progress_scanning_name = { $file_number }개의 파일 이름 스캔 완료
-progress_analyzed_partial_hash = { $file_checked }/{ $all_files }개 파일 부분 해시 분석 완료 (데이터: { $data_checked } / { $all_data })
-progress_analyzed_full_hash = { $file_checked }/{ $all_files }개 파일 전체 해시 분석 완료 (데이터: { $data_checked } / { $all_data })
-progress_prehash_cache_loading = PreHash 캐시 로드 중
-progress_prehash_cache_saving = PreHash 캐시 저장 중
-progress_hash_cache_loading = 해시 캐시 로드 중
-progress_hash_cache_saving = 해시 캐시 저장 중
-progress_cache_loading = 캐시 로드 중
-progress_cache_saving = 캐시 저장 중
 progress_current_stage = 현재 단계:{ "  " }
 progress_all_stages = 전체 단계:{ "  " }
 # Saving loading 
@@ -484,6 +466,7 @@ saving_loading_saving_success = 파일 { $name }에 설정 저장함.
 saving_loading_saving_failure = кон피그레이션 데이터를 파일 { $name }에 저장하지 못했습니다, 이유는 { $reason }입니다.
 saving_loading_reset_configuration = 현재 설정이 초기화됨.
 saving_loading_loading_success = 앱 설정 불러오기 성공.
+saving_loading_no_config_file = No configuration file found, using default settings.
 saving_loading_failed_to_create_config_file = "{ $path }" 파일에 설정을 저장할 수 없습니다. 이유: "{ $reason }".
 saving_loading_failed_to_read_config_file = "{ $path }" 파일에서 설정을 불러올 수 없습니다. 파일이 없거나, 파일이 아닙니다.
 saving_loading_failed_to_read_data_from_file = "{ $path }" 파일을 읽을 수 없습니다. 이유: "{ $reason }".
