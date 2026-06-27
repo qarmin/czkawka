@@ -14,7 +14,7 @@ use rayon::prelude::*;
 
 use crate::common::cache::{CACHE_BROKEN_FILES_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::consts::{
-    AUDIO_FILES_EXTENSIONS, BZ2_FILES_EXTENSIONS, FONT_FILES_EXTENSIONS, GZ_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, JSON_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS,
+    AUDIO_FILES_CONTENT_EXTENSIONS, BZ2_FILES_EXTENSIONS, FONT_FILES_EXTENSIONS, GZ_FILES_EXTENSIONS, IMAGE_RS_BROKEN_FILES_EXTENSIONS, JSON_FILES_EXTENSIONS, PDF_FILES_EXTENSIONS,
     SEVENZ_FILES_EXTENSIONS, SVG_FILES_EXTENSIONS, TAR_FILES_EXTENSIONS, TOML_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, XML_FILES_EXTENSIONS, XZ_FILES_EXTENSIONS,
     YAML_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS, ZST_FILES_EXTENSIONS,
 };
@@ -614,7 +614,7 @@ fn check_extension_availability(full_name: &Path) -> Option<TypeOfFile> {
         Some(TypeOfFile::ArchiveXz)
     } else if PDF_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
         Some(TypeOfFile::Pdf)
-    } else if AUDIO_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
+    } else if AUDIO_FILES_CONTENT_EXTENSIONS.contains(&extension_lowercase.as_str()) {
         Some(TypeOfFile::Audio)
     } else if VIDEO_FILES_EXTENSIONS.contains(&extension_lowercase.as_str()) {
         Some(TypeOfFile::Video)

@@ -2,7 +2,7 @@ use std::ffi::OsStr;
 
 use indexmap::IndexSet;
 
-use crate::common::consts::{AUDIO_FILES_EXTENSIONS, IMAGE_RS_EXTENSIONS, TEXT_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS};
+use crate::common::consts::{AUDIO_FILES_TAGS_EXTENSIONS, IMAGE_RS_EXTENSIONS, TEXT_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS};
 use crate::flc;
 use crate::helpers::messages::Messages;
 
@@ -25,7 +25,7 @@ impl Extensions {
             .flat_map(|e| match e.trim().trim_start_matches(".").to_lowercase().as_str() {
                 "image" => IMAGE_RS_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
                 "video" => VIDEO_FILES_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
-                "music" => AUDIO_FILES_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
+                "music" => AUDIO_FILES_TAGS_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
                 "text" => TEXT_FILES_EXTENSIONS.iter().map(|s| s.to_string()).collect(),
                 _ => vec![e],
             })

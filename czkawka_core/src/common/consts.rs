@@ -42,8 +42,38 @@ pub const YAML_FILES_EXTENSIONS: &[&str] = &["yaml", "yml"];
 pub const BZ2_FILES_EXTENSIONS: &[&str] = &["bz2", "tbz2", "tbz"];
 pub const XZ_FILES_EXTENSIONS: &[&str] = &["xz", "txz"];
 pub const PDF_FILES_EXTENSIONS: &[&str] = &["pdf"];
-pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
-    "mp3", "flac", "wav", "ogg", "m4a", "aac", "aiff", "pcm", "aif", "aifc", "m3a", "mp2", "mp4a", "mp2a", "mpga", "wave", "weba", "wma", "oga",
+// All extensions lofty-rs can read tags from (see lofty::file::EXTENSIONS).
+pub const AUDIO_FILES_TAGS_EXTENSIONS: &[&str] = &[
+    // Common formats
+    "mp3", "mp2", "mp1", "flac", "wav", "wave", "ogg", "oga", "opus", "aac", "wma",
+    // AIFF variants
+    "aiff", "aif", "afc", "aifc",
+    // MP4 audio containers
+    "m4a", "m4b", "m4p", "mp4a", "mp2a", "mpga", "m3a",
+    // Lossless / less common
+    "ape", "wv", "mpc", "spx",
+    // WebM audio
+    "weba",
+    // Raw PCM (not a tag format but consistent with old list)
+    "pcm",
+];
+// Extensions symphonia can decode (features = "all": formats ogg/isomp4/mkv/aiff/wav/caf; codecs aac/alac/flac/mp1-3/pcm/vorbis/adpcm).
+// No opus (codec not in symphonia), no wma (ASF format not in symphonia).
+pub const AUDIO_FILES_CONTENT_EXTENSIONS: &[&str] = &[
+    // MP3 family
+    "mp3", "mp2", "mp1", "mp2a", "mpga", "m3a",
+    // FLAC
+    "flac",
+    // WAV / PCM
+    "wav", "wave", "pcm",
+    // OGG Vorbis (ogg/oga may also contain Opus but symphonia probe returns UnsupportedCodec, not an error)
+    "ogg", "oga",
+    // AAC / ALAC in MP4 container
+    "aac", "m4a", "m4b", "m4p", "mp4a",
+    // AIFF
+    "aiff", "aif", "aifc",
+    // WebM audio (MKV format)
+    "weba",
 ];
 pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     "mp4", "m4v", "mkv", "avi", "mov", "webm", "flv", "wmv", // Popular
