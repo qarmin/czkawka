@@ -6,12 +6,12 @@ import { FontSizes } from "../globals/fonts.slint";
 
 struct OtherApp {
     name: string,
-    description: string,
     url: string,
 }
 
 component AppRow inherits Rectangle {
     in property <OtherApp> app;
+    in property <string> description;
 
     height: layout.preferred-height;
     border-radius: 6px;
@@ -34,7 +34,7 @@ component AppRow inherits Rectangle {
             }
 
             Text {
-                text: root.app.description;
+                text: root.description;
                 font-size: FontSizes.small;
                 wrap: word-wrap;
             }
@@ -56,36 +56,12 @@ export component PopupOtherApps inherits Rectangle {
     out property <length> popup_height: 420px;
 
     property <[OtherApp]> apps: [
-        {
-            name: "Szyszka",
-            description: "Fast and powerful file renamer.",
-            url: "https://github.com/qarmin/szyszka",
-        },
-        {
-            name: "Mykrut",
-            description: "Simple fast and opinionated Linux file manager.",
-            url: "https://github.com/qarmin/mykrut",
-        },
-        {
-            name: "Dcmki Viewer",
-            description: "Simple DICOM viewer.",
-            url: "https://github.com/qarmin/dcmki_viewer",
-        },
-        {
-            name: "Video Thumbnailer",
-            description: "Wrapper around the video thumbnail generator used in Czkawka.",
-            url: "https://github.com/qarmin/video_thumbnailer",
-        },
-        {
-            name: "Space Finder",
-            description: "Simple finder of the biggest files on your system.",
-            url: "https://github.com/qarmin/space_finder",
-        },
-        {
-            name: "System Info Collector",
-            description: "Collects RAM/CPU usage from the OS and shows it as graphs.",
-            url: "https://github.com/qarmin/system-info-collector",
-        },
+        { name: "Szyszka",               url: "https://github.com/qarmin/szyszka" },
+        { name: "Mykrut",                url: "https://github.com/qarmin/mykrut" },
+        { name: "Dcmki Viewer",          url: "https://github.com/qarmin/dcmki_viewer" },
+        { name: "Video Thumbnailer",     url: "https://github.com/qarmin/video_thumbnailer" },
+        { name: "Space Finder",          url: "https://github.com/qarmin/space_finder" },
+        { name: "System Info Collector", url: "https://github.com/qarmin/system-info-collector" },
     ];
 
     popup_window := PopupWindow {
@@ -105,13 +81,21 @@ export component PopupOtherApps inherits Rectangle {
             VerticalLayout {
                 Rectangle {
                     background: ColorPalette.popup_background_title_line;
-                    Text {
-                        vertical-stretch: 0.0;
-                        min-height: 30px;
-                        text <=> Translations.other_apps_title_text;
-                        vertical-alignment: center;
-                        horizontal-alignment: center;
-                        font-size: FontSizes.normal;
+                    VerticalLayout {
+                        padding: 6px;
+                        spacing: 2px;
+                        Text {
+                            text <=> Translations.other_apps_title_text;
+                            vertical-alignment: center;
+                            horizontal-alignment: center;
+                            font-size: FontSizes.normal;
+                        }
+                        Text {
+                            text <=> Translations.other_apps_open_source_note_text;
+                            vertical-alignment: center;
+                            horizontal-alignment: center;
+                            font-size: FontSizes.small;
+                        }
                     }
                 }
 
@@ -120,8 +104,9 @@ export component PopupOtherApps inherits Rectangle {
                         padding: 12px;
                         spacing: 8px;
 
-                        for app in root.apps: AppRow {
+                        for app[idx] in root.apps: AppRow {
                             app: app;
+                            description: Translations.other_apps_descriptions[idx];
                         }
 
                         Rectangle { }

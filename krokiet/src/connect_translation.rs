@@ -220,7 +220,16 @@ fn translate_items(app: &MainWindow) {
     translation.set_translation_text(flk!("translation").into());
     translation.set_other_apps_text(flk!("other_apps").into());
     translation.set_other_apps_title_text(flk!("other_apps_title").into());
+    translation.set_other_apps_open_source_note_text(flk!("other_apps_open_source_note").into());
     translation.set_other_apps_open_button_text(flk!("other_apps_open_button").into());
+    translation.set_other_apps_descriptions(ModelRc::new(VecModel::from(vec![
+        SharedString::from(flk!("other_apps_szyszka_desc")),
+        SharedString::from(flk!("other_apps_mykrut_desc")),
+        SharedString::from(flk!("other_apps_dcmki_viewer_desc")),
+        SharedString::from(flk!("other_apps_video_thumbnailer_desc")),
+        SharedString::from(flk!("other_apps_space_finder_desc")),
+        SharedString::from(flk!("other_apps_system_info_collector_desc")),
+    ])));
     translation.set_included_paths_text(flk!("included_paths").into());
     translation.set_excluded_paths_text(flk!("excluded_paths").into());
     translation.set_ref_text(flk!("ref").into());

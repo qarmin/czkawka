@@ -154,5 +154,6 @@ impl GuiAbout {
         self.button_krokiet.set_label("Krokiet");
         self.button_instruction.set_label(&flg!("about_instruction_button"));
         self.button_translation.set_label(&flg!("about_translation_button"));
+        self.button_other_apps.set_label(&flg!("about_other_apps_button"));
     }
 }

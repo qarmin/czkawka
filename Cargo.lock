@@ -4608,7 +4608,6 @@ dependencies = [
  "chrono",
  "crossbeam-channel",
  "czkawka_core",
- "fontique",
  "fs_extra",
  "home",
  "humansize",
