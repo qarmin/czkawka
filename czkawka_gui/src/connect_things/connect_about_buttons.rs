@@ -1,6 +1,7 @@
 use gtk4::prelude::*;
 use log::error;
 
+use crate::connect_things::connect_other_apps_dialog::show_other_apps_dialog;
 use crate::gui_structs::gui_data::GuiData;
 
 const SPONSOR_SITE: &str = "https://github.com/sponsors/qarmin";
@@ -43,5 +44,11 @@ pub(crate) fn connect_about_buttons(gui_data: &GuiData) {
         if let Err(e) = open::that(TRANSLATION_SITE) {
             error!("Failed to open translation site: {TRANSLATION_SITE}, reason {e}");
         }
+    });
+
+    let window_main = gui_data.window_main.clone();
+    let button_other_apps = gui_data.about.button_other_apps.clone();
+    button_other_apps.connect_clicked(move |_| {
+        show_other_apps_dialog(&window_main);
     });
 }

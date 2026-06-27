@@ -190,6 +190,10 @@ fn run_app_inner(
     let loaded_settings = load_settings();
     crate::localizer_cedinia::apply_language_preference(&loaded_settings.language);
     apply_settings_to_gui(&window, &loaded_settings);
+
+    #[cfg(target_os = "android")]
+    crate::file_picker_android::apply_theme_to_system_bars(loaded_settings.use_dark_theme);
+
     translate_items(&window);
     set_initial_gui_infos(&window);
     window.global::<AppState>().set_status_message(SharedString::from(crate::flc!("status_ready")));

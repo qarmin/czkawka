@@ -402,5 +402,8 @@ pub(crate) fn wire_save_settings_now(
         let settings = collect_settings_from_gui(&win);
         save_settings(&settings);
         crate::settings::save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow(), &referenced_dirs.borrow());
+
+        #[cfg(target_os = "android")]
+        crate::file_picker_android::apply_theme_to_system_bars(settings.use_dark_theme);
     });
 }

@@ -8,7 +8,7 @@ use image::{DynamicImage, ImageReader};
 use little_exif::exif_tag::ExifTag;
 use little_exif::ifd::ExifTagGroup;
 use little_exif::metadata::Metadata;
-use log::{error, trace, warn};
+use log::{error, trace};
 
 use crate::common::consts::{HEIC_EXTENSIONS, IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS};
 use crate::common::create_crash_message;
@@ -87,8 +87,10 @@ pub fn get_dynamic_image_from_path(path: &str, opts: Option<ImgResizeOptions>) -
     if let Ok(res) = res {
         match res {
             Ok((img, w, h)) => {
-                let rotation = get_rotation_from_exif(path).unwrap_or_else(|e| {
-                    warn!("Failed to read EXIF rotation from {path}: {e}");
+                let rotation = get_rotation_from_exif(path).unwrap_or({
+                    // TODO - library doesn't properly read some files
+                    // Also, even light problems, causes completely failing to read tags from file(e.g. invalid tag type)
+                    //warn!("Failed to read EXIF rotation from {path}: {e}");
                     None
                 });
                 let img_rotated = match rotation {

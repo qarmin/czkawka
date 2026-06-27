@@ -13,6 +13,7 @@ tool_bad_extensions = Extensões inválidas
 tool_same_music = Músicas duplicadas
 tool_bad_names = Nomes ruins
 tool_exif_remover = Dados EXIF
+tool_similar_videos = Vídeos similares (Áudio)
 tool_directories = Diretórios
 tool_settings = Confirgurações
 # Home screen tool card descriptions
@@ -27,6 +28,7 @@ home_bad_extensions_description = Arquivos com extensão inválida
 home_same_music_description = Arquivos de áudio similares por tags
 home_bad_names_description = Arquivos com caracteres problemáticos no nome
 home_exif_description = Imagens com metadados EXIF
+home_similar_videos_description = Encontrar vídeos com áudio similar (sem necessidade do FFmpeg)
 # Results list
 scanning = Verificando em andamento...
 stopping = Parando...
@@ -63,9 +65,9 @@ delete_errors_title = Falha ao excluir alguns arquivos:
 ok = Certo
 # Stopping overlay
 stopping_overlay_title = Parando
-stopping_overlay_body = 
-        Finalizando a varredura atual...
-        Por favor, aguarde.
+stopping_overlay_body =
+    Finalizando a varredura atual...
+    Por favor, aguarde.
 # Permission popup
 permission_title = Acesso ao arquivo
 permission_body = Para verificar arquivos, o app precisa de acesso ao armazenamento do dispositivo. Sem esta permissão, o escaneamento não será possível.
@@ -113,6 +115,7 @@ settings_hash_size = Tamanho do hash
 settings_hash_size_desc = Tamanho maior, tem menos falsos positivos, mas também encontra menos imagens semelhantes
 settings_hash_alg = Algoritmo de hash
 settings_image_filter = Redimensionar filtro
+settings_geometric_invariance = invariação geométrica
 settings_ignore_same_size = Ignorar imagens com as mesmas dimensões
 settings_gallery_image_fit_cover = Galeria: cortar para um quadrado
 settings_gallery_image_fit_cover_desc = Preencher o bloco; desativar para manter a proporção original
@@ -129,6 +132,10 @@ settings_music_length = Comprimento
 settings_music_genre = gênero
 settings_music_bitrate = Taxa de bits
 settings_music_approx = Comparação de tag aproximada
+settings_temporary_files_header = ARQUIVOS DO TEMPORÁRIO
+settings_temporary_files_extensions_label = EXTENSÕES
+settings_temporary_files_extensions_placeholder = Exemplos: .tmp, .bak, ~
+settings_temporary_files_reset = Restaurar padrões
 settings_broken_files_header = ARQUIVOS DE TREINO
 settings_broken_files_note = Varredura intensiva de recursos. Para obter melhor desempenho, use Krokiet no desktop.
 settings_broken_files_types_label = TIPOS DE ALTERAÇÃO
@@ -136,6 +143,11 @@ settings_broken_audio = Áudio
 settings_broken_pdf = Pdf
 settings_broken_archive = Arquivo
 settings_broken_image = Imagem:
+settings_broken_font = Fonte
+settings_broken_markup = Marcação (JSON/XML/TOML)
+settings_similar_videos_header = SIMILAR VÍDEOS (AUDIO)
+settings_similar_videos_audio_preset = Predefinição de similaridade de áudio
+settings_similar_videos_audio_preset_desc = Controla com que rigor o áudio deve corresponder
 settings_bad_names_header = NOMES DO BAD
 settings_bad_names_checks_label = CORAÇÕES
 settings_bad_names_uppercase_ext = Extensão maiúscula
@@ -143,6 +155,11 @@ settings_bad_names_emoji = Emoji em nome
 settings_bad_names_space = Espaços ao início/final
 settings_bad_names_non_ascii = Caracteres não ASCII
 settings_bad_names_duplicated = Caracteres repetidos
+settings_ignore_same_resolution = Ignorar imagens com a mesma resolução
+# Settings - Appearance section
+settings_appearance_label = APARÊNCIA
+settings_dark_theme = Tema escuro
+settings_dark_theme_desc = Use esquema de cores escuras
 # Settings - Diagnostics tab
 diagnostics_header = DIAGNOSTICAS
 diagnostics_thumbnails = Cache de miniaturas
@@ -152,6 +169,11 @@ diagnostics_clear_thumbnails = Limpar miniaturas
 diagnostics_open_thumbnails_folder = Abrir pasta
 diagnostics_clear_cache = Limpar cache
 diagnostics_open_cache_folder = Abrir pasta
+diagnostics_export_logs = Exportar logs
+logs_label = REGISTROS
+logs_export_title = Exportar logs
+logs_export_saved = Registros copiados para:
+logs_export_failed = Não foi possível exportar os logs
 diagnostics_collect_test = Teste de acesso a arquivos
 diagnostics_collect_test_desc = Verifique quantos arquivos estão acessíveis
 diagnostics_collect_test_run = Executar
@@ -204,6 +226,8 @@ renamed_errors_suffix = erros
 cleaned_exif_prefix = EXIF limpo de
 cleaned_exif_suffix = Arquivos
 cleaned_exif_errors_suffix = erros
+rename_error_read_file_name = Impossível ler nome do arquivo
+rename_error_read_directory = Impossível ler o diretório
 and_more_prefix = ...e
 and_more_suffix = Mais
 # Gallery / delete popups
@@ -212,7 +236,6 @@ gallery_back = Anterior
 gallery_confirm_delete = Sim, excluir
 deleting_files = Excluindo arquivos...
 stop = Interromper
-files_suffix = Arquivos
 scanning_fallback = Escaneando...
 app_subtitle = Em honra da Batalha de Cedynia (972 CE)
 app_license = Frontend para o Núcleo Czkawka - GPL-3.0
@@ -224,42 +247,15 @@ scan_completed_notification = Verificação concluída - { $file_count } itens e
 confirm_clean_exif = Tem certeza que deseja limpar as tags EXIF de { $n } arquivos selecionados?
 confirm_delete_items = Tem certeza que deseja excluir { $n } itens selecionados?
 gallery_confirm_delete_msg = Você está prestes a excluir { $total_images } imagens em { $total_groups } grupos.
-gallery_confirm_delete_warning = Todos os itens estão selecionados em grupos de { $unsafe_groups}!
+gallery_confirm_delete_warning = Todos os itens estão selecionados em grupos de { $unsafe_groups }!
 # Settings - SameMusic fingerprint warning
 same_music_fingerprint_warning = O cálculo e a comparação das impressões digitais de áudio é muito intenso em recursos e pode demorar muito tempo. É recomendado usar o Krokiet em um computador para esta tarefa.
 # Scan stage labels (shown during scan progress)
-stage_collecting_files = Coletando arquivos
-stage_scanning_name = Digitalização pelo nome
-stage_scanning_size_name = Digitalização por nome e tamanho
-stage_scanning_size = Escaneando por tamanho
-stage_pre_hash = Pré-hashing
-stage_full_hash = Hashing
-stage_loading_cache = Carregando cache
-stage_saving_cache = Salvando cache
-stage_calculating_image_hashes = Calculando hashes de imagem
-stage_comparing_images = Comparando imagens
-stage_calculating_video_hashes = Calculando hashes de vídeo
-stage_checking_files = Verificando arquivos
-stage_checking_extensions = Verificando extensões
-stage_checking_names = Verificando nomes
-stage_reading_music_tags = Lendo etiquetas de música
-stage_comparing_tags = Comparando tags
-stage_calculating_music_fingerprints = Calculando impressões digitais
-stage_comparing_fingerprints = Comparação de impressões digitais
-stage_extracting_exif = Lendo etiquetas EXIF
-stage_creating_video_thumbnails = Criando miniaturas de vídeo
-stage_processing_videos = Processando vídeos
-stage_deleting = Excluindo arquivos
-stage_renaming = Renomeando arquivos
-stage_moving = Movendo arquivos
-stage_hardlinking = Criando links físicos
-stage_symlinking = Criando links simbólicos
-stage_optimizing_videos = Otimizando vídeos
-stage_cleaning_exif = Limpando EXIF
 # Group headers in scan results
 duplicates_group_header = { $count } arquivos x { $per_file } / arquivo = { $total } no total
 similar_images_group_header = { $count } imagens semelhantes
 same_music_group_header = { $count } faixas semelhantes
+similar_videos_group_header = { $count } vídeos semelhantes
 # Rename confirmation
 confirm_rename_items = Tem certeza que deseja renomear { $n } arquivos selecionados?
 # Combo-box option labels (translatable display names)
@@ -278,15 +274,10 @@ option_check_method_size = Tamanho
 option_music_method_tags = Etiquetas
 option_music_method_audio = Áudio
 option_min_size_none = Nenhuma
-option_min_size_1kb = 1 KB
-option_min_size_8kb = 8 KB
-option_min_size_64kb = 64 KB
-option_min_size_1mb = 1 MB
-option_max_size_16kb = 16 KB
-option_max_size_1mb = 1 MB
-option_max_size_10mb = 10 MB
-option_max_size_100mb = 100 MB
 option_max_size_unlimited = Ilimitado
+option_audio_preset_identical = idêntico
+option_audio_preset_clip = Clipe mais longo
+option_audio_preset_similar = Parecido
 # Volume labels (shown in the directories screen)
 volume_internal_storage = Armazenamento Interno
 volume_sd_card = Cartão de memória (Cartão SD)
@@ -315,3 +306,14 @@ path_edit_no_newlines = Caminhos não podem conter novas linhas - Chave Enter n�
 ctx_menu_title = Abertas
 ctx_open_file = Abrir item
 ctx_open_folder = Abrir pasta pai
+dir_open_folder = Abrir pasta
+# Compare view
+compare_label = Comparar
+compare_loading = Carregando imagens…
+compare_cancelling = Cancelando…
+compare_computing = Calculando diff…
+compare_mode_normal = Lado
+compare_mode_split = Divisão
+compare_mode_overlay = Camada
+compare_mode_diff = SG
+compare_res_mismatch = Diferentes resoluções - a diferença pode estar imprecisa

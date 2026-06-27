@@ -4,22 +4,18 @@ window_main_title = Czkawka - (Hiccup)
 window_progress_title = 正在扫描
 window_compare_images = 比较图像
 # General
-general_ok_button = 确定
+general_ok_button = 好的
 general_close_button = 关闭
 # Krokiet info dialog
-krokiet_info_title = Introducing Krokiet - 新版本 Czkawka
-krokiet_info_message =
-    克罗基特是 Czkawka GTK GUI 的新、改进、更快、更可靠的版本！
+krokiet_info_title = 废弃通知
+krokiet_info_message = 
+    Czkawka GTK 12.0是最后版本。没有计划进一步更新、功能或错误修复。
     
-    它更易于运行，并且对系统更改更具弹性，因为它只依赖于大多数系统默认可用的核心库。
+    来自Czkawka GTK 的大多数功能都可以使用 Krokiet, 通常是更简单、更快和更稳定的形式。 Krokiet还在GTK版本中添加了新的功能和改进。
     
-    克罗基特还带来 Czkawka 缺乏的功能，包括视频比较模式下的缩略图、EXIF 清理器、文件移动/复制/删除进度或扩展排序选项。
+    如果您仍在使用Czkawka GTK, 则切换到 Krokiet 应该很容易， 因为它有一个相似的接口，依赖性减少，跨平台支持更好。
     
-    尝试一下并看看区别！
-    
-    Czkawka 将继续收到我提供的错误修复和小更新，但所有新功能都将专门为克罗基特开发，任何人都可以在添加新功能、添加缺失模式或进一步扩展 Czkawka 时自由贡献。
-    
-    PS：此消息只应出现一次。如果它再次出现，请将 CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。.
+    PS：此消息只能显示一次。如果它再次显示，请将CZKAWKA_DONT_ANNOY_ME 环境变量设置为任何非空值。.
 # Main window
 music_title_checkbox = 标题
 music_artist_checkbox = 艺人
@@ -100,6 +96,7 @@ image_hash_alg_tooltip =
     每种算法都有强项和弱项，对于不同的图像，有时结果更好，有时结果更差。
     
     因此，为了确定最适合你的算法，需要进行人工测试。.
+image_geometric_invariance_tooltip = 还比较每个图像的镜像/翻转和可选的旋转变体。这可以提高匹配性，但增加散列时间。.
 big_files_mode_combobox_tooltip = 允许搜索最小/最大的文件
 big_files_mode_label = 已检查的文件
 big_files_mode_smallest_combo_box = 最小的
@@ -139,6 +136,7 @@ main_tree_view_column_codec = 编解码器
 main_label_check_method = 检查方法
 main_label_hash_type = 哈希类型
 main_label_hash_size = 哈希大小
+main_label_geometric_invariance = 几何变化量
 main_label_size_bytes = 大小 (字节)
 main_label_min_size = 最小值
 main_label_max_size = 最大值
@@ -309,6 +307,21 @@ about_translation_button = 翻译
 # Header
 header_setting_button_tooltip = 打开设置对话框。.
 header_about_button_tooltip = 打开包含应用程序信息的对话框。.
+header_krokiet_button_tooltip = 尝试 Krokiet - 新的和改进的版本！
+# Krokiet promo dialog
+krokiet_promo_title = 会见Krokie！
+krokiet_promo_message = 
+    你好，勇敢的 Czkawka 用户！
+    
+    部队与你有明显的关系，但Krokiet不是一个新的、更快的、更轻松的部队。 并且更多的手动(假定应用程序可能实际上是手提的) 重复清洁器。
+    
+    Krokiet包含了所有喜欢Czkawka的人。 它是完全免费的，开放源码，具有独特和简单的UI(受到许多人的赞扬和憎恨)， 引入了许多新的功能，使用了较少的依赖，并且更可靠地在不同的平台上工作。
+    
+    如果您有些错过了它，则已经比Krokiet - Cedinia更新的应用了。 主要专为安卓设备和触摸屏使用。
+    
+    Czkawka GTK 对我们的服务很好，但它的观察已经结束。.
+krokiet_promo_link_download = 下载 Krokiet/Cedinia
+krokiet_promo_link_project = 项目页面
 
 # Settings
 
@@ -438,37 +451,6 @@ compute_found_invalid_symlinks = 找到了{ $number_files }个无效的符号链
 compute_found_broken_files = 在 { $time } 中找到了 { $number_files } 个损坏文件
 compute_found_bad_extensions = 在 { $number_files } 中发现无效扩展名的 { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] 已掃描 { $file_number } 個文件
-       *[other] 已掃描 { $file_number } 個文件
-    }
-progress_scanning_extension_of_files = 检查了 { $file_checked }/{ $all_files } 文件的扩展
-progress_scanning_broken_files = 签入 { $file_checked }/{ $all_files } 文件({ $data_checked }/{ $all_data })
-progress_scanning_video = 对 { $file_checked }/{ $all_files } 视频的哈希值
-progress_creating_video_thumbnails = 创建 { $file_checked }/{ $all_files } 视频的缩略图
-progress_scanning_image = 对 { $file_checked }/{ $all_files } 图像的哈希值({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = 比较 { $file_checked }/{ $all_files } 图像哈希
-progress_scanning_music_tags_end = 对比的 { $file_checked }/{ $all_files } 音乐文件标签
-progress_scanning_music_tags = 阅读 { $file_checked }/{ $all_files } 音乐文件的标签
-progress_scanning_music_content_end = 比较了 { $file_checked }/{ $all_files } 音乐文件的指纹
-progress_scanning_music_content = 计算的 { $file_checked }/{ $all_files } 音乐文件 ({ $data_checked }/{ $all_data } ) 的指纹
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] 已掃描 { $folder_number } 個資料夾
-       *[other] 已掃描 { $folder_number } 個資料夾
-    }
-progress_scanning_size = 扫描的 { $file_number } 文件大小
-progress_scanning_size_name = 扫描的 { $file_number } 文件的名称和大小
-progress_scanning_name = 扫描的 { $file_number } 文件名称
-progress_analyzed_partial_hash = 分析了 { $file_checked }/{ $all_files } 文件的部分哈希值({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = 分析了 { $file_checked }/{ $all_files } 文件的完整哈希值({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = 正在加载逮捕缓存
-progress_prehash_cache_saving = 正在保存抓取缓存
-progress_hash_cache_loading = 加载散列缓存
-progress_hash_cache_saving = 保存哈希缓存
-progress_cache_loading = 加载缓存
-progress_cache_saving = 正在保存缓存
 progress_current_stage = 当前阶段:{ "  " }
 progress_all_stages = 所有阶段:{ " " }
 # Saving loading 
@@ -476,6 +458,7 @@ saving_loading_saving_success = 配置保存到文件 { $name }。.
 saving_loading_saving_failure = 无法将配置数据保存到文件 { $name }, 原因 { $reason }.
 saving_loading_reset_configuration = 当前配置已被清除。.
 saving_loading_loading_success = 正确加载应用程序配置。.
+saving_loading_no_config_file = 未找到配置文件，使用默认设置。.
 saving_loading_failed_to_create_config_file = 无法创建配置文件 "{ $path }", 原因"{ $reason }".
 saving_loading_failed_to_read_config_file = 无法从 "{ $path }" 加载配置，因为它不存在或不是文件。.
 saving_loading_failed_to_read_data_from_file = 无法从文件读取数据"{ $path }", 原因"{ $reason }".

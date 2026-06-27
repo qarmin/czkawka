@@ -39,7 +39,7 @@ rust-embed = { version = "8.5", features = ["debug-embed"] }
 slint = { version = "1.15.0", default-features = false, features = [
     "std",
     "backend-winit",
-    "compat-1-2"
+    "compat-1-2",
 ] }
 
 rodio = { version = "0.22.0", default-features = false, features = ["playback", "symphonia-all"], optional = true }
@@ -47,7 +47,7 @@ notify-rust = { version = "4" }
 
 # Easier cross-compilation of app to e.g. 32 bit os, by using dlopen instead of linking libraries at compile time
 # Must match version used in slint
-fontique = { version = "=0.8.0", default-features = false, features = ["fontconfig-dlopen", "std"] }
+fontique = { version = "=0.10.0", default-features = false, features = ["fontconfig-dlopen", "std"] }
 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}

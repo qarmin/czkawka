@@ -174,6 +174,48 @@ public class CediniaFilePicker {
         });
     }
 
+    /**
+     * Match the system bar icon colour to Cedinia's own theme. The app theme is
+     * independent of the system dark/light setting, so dark icons must be requested
+     * whenever the app is light - otherwise light icons stay invisible on a light
+     * status bar (and vice-versa).
+     */
+    public static void applyThemeToSystemBars(final Activity activity, final boolean darkTheme) {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Light bars (light theme) need dark icons; dark bars need light icons.
+                final boolean darkIcons = !darkTheme;
+                if (Build.VERSION.SDK_INT >= 30) {
+                    android.view.WindowInsetsController controller =
+                            activity.getWindow().getInsetsController();
+                    if (controller != null) {
+                        int mask = android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                                 | android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                        controller.setSystemBarsAppearance(darkIcons ? mask : 0, mask);
+                        Log.i(TAG, "applyThemeToSystemBars: darkIcons=" + darkIcons + " (API 30+)");
+                    } else {
+                        Log.w(TAG, "applyThemeToSystemBars: InsetsController is null");
+                    }
+                } else {
+                    final View decorView = activity.getWindow().getDecorView();
+                    int flags = decorView.getSystemUiVisibility();
+                    int lightFlags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        lightFlags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+                    }
+                    if (darkIcons) {
+                        flags |= lightFlags;
+                    } else {
+                        flags &= ~lightFlags;
+                    }
+                    decorView.setSystemUiVisibility(flags);
+                    Log.i(TAG, "applyThemeToSystemBars: darkIcons=" + darkIcons + " (API < 30)");
+                }
+            }
+        });
+    }
+
     // called from Rust
 
     /** Open a URL in the system browser. */

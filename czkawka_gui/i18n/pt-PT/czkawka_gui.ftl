@@ -4,22 +4,18 @@ window_main_title = Czkawka (Soluço)
 window_progress_title = Escaneando
 window_compare_images = Comparar Imagens
 # General
-general_ok_button = Ok
+general_ok_button = Certo
 general_close_button = Fechar
 # Krokiet info dialog
-krokiet_info_title = Apresentando Krokiet - Nova versão do Czkawka
-krokiet_info_message =
-    Krokiet é a nova, melhorada, mais rápida e mais confiável versão da interface gráfica Czkawka GTK!
-    
-    É mais fácil de executar e mais resistente a alterações do sistema, pois depende apenas de bibliotecas principais disponíveis na maioria dos sistemas por padrão.
-    
-    Krokiet também traz recursos que a Czkawka não possui, incluindo miniaturas no modo de comparação de vídeo, um limpador EXIF, opções de progresso de mover/copiar/excluir arquivos ou opções de classificação estendidas.
-    
-    Experimente e veja a diferença!
-    
-    A Czkawka continuará a receber correções de bugs e atualizações menores de mim, mas todos os novos recursos serão desenvolvidos exclusivamente para o Krokiet e qualquer pessoa é livre para contribuir com novos recursos, adicionar modos ausentes ou estender ainda mais a Czkawka.
-    
-    PS: Esta mensagem deve aparecer apenas uma vez. Se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME para qualquer valor não vazio.
+krokiet_info_title = Aviso de desaprovação
+krokiet_info_message = 
+        Czkawka GTK 12.0 é a versão final. Não estão planejadas atualizações, recursos ou correções de bugs adicionais.
+
+        A maioria dos recursos do Czkawka GTK está disponível no Krokiet, geralmente em uma forma mais simples, rápida e estável. O Krokiet também adiciona novos recursos e melhorias que não eram possíveis na versão GTK.
+
+        Se você ainda está usando o Czkawka GTK, a transição para o Krokiet deve ser fácil, já que ele possui uma interface semelhante, menos dependências e melhor suporte para diferentes plataformas.
+
+        P.S.: Esta mensagem deve aparecer apenas uma vez. Se ela aparecer novamente, defina a variável de ambiente CZKAWKA_DONT_ANNOY_ME para qualquer valor não vazio.
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista
@@ -98,6 +94,7 @@ image_hash_alg_tooltip =
     Cada um tem pontos fortes e fracos e por vezes darão resultados melhores e por vezes piores para imagens diferentes.
     
     Logo, para determinar o melhor para você, são precisos testes manuais.
+image_geometric_invariance_tooltip = Também comparar variantes espelhadas/viradas e opcionalmente rotacionadas de cada imagem. Isto melhora a correspondência, mas aumenta o tempo de hashing.
 big_files_mode_combobox_tooltip = Permite a busca de arquivos menores/maiores
 big_files_mode_label = Arquivos verificados
 big_files_mode_smallest_combo_box = O Menor
@@ -137,6 +134,7 @@ main_tree_view_column_codec = Codificador
 main_label_check_method = Método de verificação
 main_label_hash_type = Tipo de hash
 main_label_hash_size = Tamanho do hash
+main_label_geometric_invariance = invariação geométrica
 main_label_size_bytes = Tamanho (bytes)
 main_label_min_size = Mínimo
 main_label_max_size = Máximo
@@ -304,6 +302,21 @@ about_translation_button = Tradução
 # Header
 header_setting_button_tooltip = Abre diálogo de configurações.
 header_about_button_tooltip = Abre diálogo com informações sobre o aplicativo.
+header_krokiet_button_tooltip = Experimente o Krokiet - a versão nova e melhorada!
+# Krokiet promo dialog
+krokiet_promo_title = Conheça o Krokiet!
+krokiet_promo_message =
+    Olá, bravo usuário Czkawka!
+    
+    A Força está claramente com você, mas Krokiet não é - um mais novo, mais rápido e mais leve e significativamente mais bonito (assumindo que os aplicativos realmente podem ser bonitos) a limpeza duplicada.
+    
+    Krokiet inclui tudo o que as pessoas gostam de Czkawka. É completamente gratuito, de código aberto, tem uma interface de usuário única e simples (ambos elogiados e odiados por muitos), introduz um monte de novos recursos, usa menos dependências e trabalha de forma muito mais confiável em diferentes plataformas.
+    
+    E se você de alguma forma perdeu isso, já existe um aplicativo ainda mais recente que o Krokiet - Cedinia, Projetado principalmente para dispositivos Android e uso na tela.
+    
+    Czkawka GTK nos serviu bem, mas o seu relógio terminou.
+krokiet_promo_link_download = Baixar Krokiet/Cedinia
+krokiet_promo_link_project = Página do projeto
 
 # Settings
 
@@ -433,37 +446,6 @@ compute_found_invalid_symlinks = Encontrado { $number_files } links simbólicos 
 compute_found_broken_files = Encontrados { $number_files } arquivos quebrados em { $time }
 compute_found_bad_extensions = Encontrados { $number_files } arquivos com extensões inválidas em { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] Verificado { $file_number } arquivo
-       *[other] Escaneado { $file_number } arquivos
-    }
-progress_scanning_extension_of_files = Extensão marcada do arquivo { $file_checked }/{ $all_files }
-progress_scanning_broken_files = Verificado { $file_checked }/{ $all_files } arquivo ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hash de { $file_checked }/{ $all_files } de vídeo
-progress_creating_video_thumbnails = Miniaturas criadas de { $file_checked }/{ $all_files } de vídeo
-progress_scanning_image = Hash de { $file_checked }/{ $all_files } imagem ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Comparado a { $file_checked }/{ $all_files } hash de imagem
-progress_scanning_music_tags_end = Etiquetas comparadas de { $file_checked }/{ $all_files } arquivo de música
-progress_scanning_music_tags = Ler etiquetas de { $file_checked }/{ $all_files } arquivo de música
-progress_scanning_music_content_end = Impressão digital comparada de { $file_checked }/{ $all_files } arquivo de música
-progress_scanning_music_content = Calculada impressão digital de { $file_checked }/ arquivo de música{ $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] Pasta { $folder_number } escaneada
-       *[other] Escaneado { $folder_number } pastas
-    }
-progress_scanning_size = Tamanho digitalizado do arquivo { $file_number }
-progress_scanning_size_name = Nome digitalizado e tamanho do arquivo { $file_number }
-progress_scanning_name = Nome digitalizado do arquivo { $file_number }
-progress_analyzed_partial_hash = Hash parcial analisado de arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Hash completo analisado de arquivos { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = Carregando cache de pré-hash
-progress_prehash_cache_saving = Salvando cache pré-hash
-progress_hash_cache_loading = Carregando cache de hash
-progress_hash_cache_saving = Salvando cache de hash
-progress_cache_loading = Carregando cache
-progress_cache_saving = Salvando cache
 progress_current_stage = Estágio atual:{ " " }
 progress_all_stages = Todo estágio:{ " " }
 # Saving loading 
@@ -471,6 +453,7 @@ saving_loading_saving_success = Configuração guardada no arquivo { $name }.
 saving_loading_saving_failure = Falhou na salvaguarda dos dados de configuração no arquivo { $name }, motivo { $reason }.
 saving_loading_reset_configuration = A configuração atual foi limpa.
 saving_loading_loading_success = Configuração de aplicativo devidamente carregada.
+saving_loading_no_config_file = Nenhum arquivo de configuração encontrado, utilizando as configurações padrão.
 saving_loading_failed_to_create_config_file = Falha ao criar o arquivo de configuração "{ $path }", razão "{ $reason }".
 saving_loading_failed_to_read_config_file = Não se pode carregar a configuração de "{ $path }", pois ela não existe ou não é um arquivo.
 saving_loading_failed_to_read_data_from_file = Não se pode ler dados do arquivo "{ $path }", razão "{ $reason }".

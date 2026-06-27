@@ -7,19 +7,15 @@ window_compare_images = Porovnat obrázky
 general_ok_button = OK
 general_close_button = Zavřít
 # Krokiet info dialog
-krokiet_info_title = Představujeme Krokiet - novou verzi Czkawky
+krokiet_info_title = Oznámení o zrušení
 krokiet_info_message =
-    Krokiet je nová, vylepšená, rychlejší a spolehlivější verze Czkawky (původní GTK GUI)!
+    Czkawka GTK 12.0 je finální vydání. Nejsou naplánovány žádné další aktualizace, funkce ani opravy chyb.
     
-    Je snáze provozovatelná a odolnější změnám v systému, protože závisí pouze na základních knihovnách, které jsou standardně dostupné na většině systémů.
+    Většina funkcí z Czkawka GTK je k dispozici v Krokiet, obvykle ve jednodušší, rychlejší a stabilnější formě. Krokiet také přidává nové funkce a vylepšení, které ve verzi GTK nebyly možné.
     
-    Krokiet také přináší funkce, které Czkawka postrádá - včetně náhledů v režimu porovnávání videí, nástroje pro čištění EXIF, ukazatele průběhu přesouvání/kopírování/mazání souborů nebo rozšířených možností třídění.
+    Pokud stále používáte Czkawka GTK, přechod na Krokiet by měl být snadný, protože má podobné rozhraní, méně závislostí a lepší podporu napříč platformami.
     
-    Vyzkoušejte a uvidíte rozdíl!
-    
-    Czkawka ode mne bude nadále dostávat opravy chyb a drobné aktualizace, ale všechny nové funkce budou vyvíjeny výhradně pro Krokiet. Nicméně pokud by někdo chtěl, samozřejmě může do Czkawky přispívat novými funkcemi, přidávat chybějící režimy a nadále ji rozvíjet.
-    
-    PS: Tato zpráva by se měla zobrazit pouze jednou. Pokud se tak stane znovu, nastavte si proměnnou prostředí CZKAWKA_DONT_ANNOY_ME (na libovolnou neprázdnou hodnotu).
+    PS: Tato zpráva by se měla zobrazovat pouze jednou. Pokud se znovu objeví, nastavte proměnnou prostředí CZKAWKA_DONT_ANNOY_ME na libovolnou neprázdnou hodnotu.
 # Main window
 music_title_checkbox = Název
 music_artist_checkbox = Umělec
@@ -100,6 +96,7 @@ image_hash_alg_tooltip =
     Každý má silné a slabší stránky a někdy přinese lepší a někdy zase horší výsledky pro různé obrázky.
     
     Takže k určení nejlepšího pro vás je zapotřebí ruční zkoušení.
+image_geometric_invariance_tooltip = Porovnejte také zrcadlé/překlopené a volitelně otočené varianty každého obrázku. To zlepšuje shodu, ale zvyšuje hashovací čas.
 big_files_mode_combobox_tooltip = Umožňuje vyhledávat nejmenší / největší soubory
 big_files_mode_label = Zaškrtnuté soubory
 big_files_mode_smallest_combo_box = Nejmenší
@@ -139,6 +136,7 @@ main_tree_view_column_codec = Kodek
 main_label_check_method = Metoda kontroly
 main_label_hash_type = Typ otisku
 main_label_hash_size = Velikost otisku
+main_label_geometric_invariance = Geometrická invariance
 main_label_size_bytes = Velikost (bajty)
 main_label_min_size = Min
 main_label_max_size = Max
@@ -307,6 +305,21 @@ about_translation_button = Překlad
 # Header
 header_setting_button_tooltip = Otevře dialogové okno nastavení.
 header_about_button_tooltip = Otevře dialog s informacemi o aplikaci.
+header_krokiet_button_tooltip = Zkuste Krokiet - novou a vylepšenou verzi!
+# Krokiet promo dialog
+krokiet_promo_title = Seznamte se s Krokietem!
+krokiet_promo_message =
+    Ahoj, odvážný uživatel Czkawka!
+    
+    Síla je s vámi, ale Krokiet není - novější, rychlejší, lehčí a výrazně více ručního (za předpokladu, že aplikace mohou být ve skutečnosti rukovité) duplikovat čistší prostředek.
+    
+    Krokiet zahrnuje všechno, co se líbí o Czkawce. Je zcela zdarma, open source, má unikátní a jednoduché uživatelské rozhraní (mnozí chválí i nenávistí), zavádí mnoho nových funkcí, používá méně závislostí a pracuje mnohem spolehlivěji na různých platformách.
+    
+    A pokud jste nějak zmeškali, existuje ještě novější aplikace než Krokiet - Cedinia, určené především pro zařízení Android a využití dotykové obrazovky.
+    
+    Czkawka GTK nám dobře posloužila, ale její hodinky skončily.
+krokiet_promo_link_download = Stáhnout Krokiet/Cedinia
+krokiet_promo_link_project = Stránka projektu
 
 # Settings
 
@@ -436,37 +449,6 @@ compute_found_invalid_symlinks = Nalezeno { $number_files } neplatných symbolic
 compute_found_broken_files = Nalezeno { $number_files } rozbitých souborů v { $time }
 compute_found_bad_extensions = Nalezeno { $number_files } souborů s nesprávnými příponami za { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] Naskenovaný { $file_number } soubor
-       *[other] Skenované { $file_number } soubory
-    }
-progress_scanning_extension_of_files = Kontrola přípony { $file_checked }/{ $all_files } souboru
-progress_scanning_broken_files = Kontrola { $file_checked }/{ $all_files } soubor ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hashováno { $file_checked }/{ $all_files } videa
-progress_creating_video_thumbnails = Vytvořeny náhledy { $file_checked }/{ $all_files } videí
-progress_scanning_image = Vytvořen otisk pro { $file_checked }/{ $all_files } obrázek ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Porovnáno { $file_checked }/{ $all_files } otisků obrázků
-progress_scanning_music_tags_end = Porovnávané štítky hudebního souboru { $file_checked }/{ $all_files }
-progress_scanning_music_tags = Číst štížky { $file_checked }/{ $all_files } hudebního souboru
-progress_scanning_music_content_end = Porovnávaný otisk souboru s hudbou { $file_checked }/{ $all_files }
-progress_scanning_music_content = Vypočítaný otisk hudby { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] Naskenovaná složka { $folder_number }
-       *[other] Naskenované { $folder_number } složky
-    }
-progress_scanning_size = Naskenovaná velikost souboru { $file_number }
-progress_scanning_size_name = Naskenovaný název a velikost { $file_number } souboru
-progress_scanning_name = Naskenován název { $file_number } souboru
-progress_analyzed_partial_hash = Analyzováno částečný otisk souborů { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Analyzováno plné hash souborů { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = Načítání mezipaměti rozpoznání
-progress_prehash_cache_saving = Ukládání mezipaměti rozpoznání
-progress_hash_cache_loading = Načítání mezipaměti otisků
-progress_hash_cache_saving = Ukládání mezipaměti otisků
-progress_cache_loading = Načítání mezipaměti
-progress_cache_saving = Ukládání mezipaměti
 progress_current_stage = Aktuální fáze: { " " }
 progress_all_stages = Všechny etapy: { " " }
 # Saving loading 
@@ -474,6 +456,7 @@ saving_loading_saving_success = Nastavení uložena do souboru { $name }.
 saving_loading_saving_failure = Nepodařilo se uložit data nastavení do souboru { $name } - důvod: { $reason }.
 saving_loading_reset_configuration = Stávající nastavení byla vymazána.
 saving_loading_loading_success = Nastavení aplikace v pořádku načtena.
+saving_loading_no_config_file = Nenalezen žádný konfigurační soubor, pomocí výchozího nastavení.
 saving_loading_failed_to_create_config_file = Nepodařilo se vytvořit soubor s nastaveními „{ $path }“ - důvod: „{ $reason }“.
 saving_loading_failed_to_read_config_file = Nebylo možné načíst nastavení z „{ $path }“, protože neexistuje nebo to není soubor.
 saving_loading_failed_to_read_data_from_file = Nebylo možné načíst data ze souboru „{ $path }“ - důvod: „{ $reason }“.
