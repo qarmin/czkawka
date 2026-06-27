@@ -535,7 +535,7 @@ This tool detects corrupted or invalid files that cannot be properly opened.
 
 **Supported file types**
 - Images - jpg, jpeg, png, tiff, tif, tga, gif, bmp, ico, jfif, webp, exr, avif, and others
-- Audio - mp3, flac, wav, ogg, m4a, aac, and others
+- Audio - mp3, flac, wav, ogg, opus, m4a, aac, and others
 - Video - mp4, mkv, avi, mov, webm, and others
 - Archives - zip, jar
 - Documents - pdf
