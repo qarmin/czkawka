@@ -4,22 +4,18 @@ window_main_title = Czkawka (Хълцук)
 window_progress_title = Сканиране
 window_compare_images = Сравни изображения
 # General
-general_ok_button = Ок
+general_ok_button = Добре
 general_close_button = Затвори
 # Krokiet info dialog
-krokiet_info_title = Представяме ви Krokiet - Нова версия на Czkawka
-krokiet_info_message =
-    Krokiet е новата, подобрена, по-бърза и по-надеждна версия на Czkawka GTK GUI!
-    
-    По-лесно се изпълнява и е по-устойчив на системни промени, тъй като разчита само на основни библиотеки, налични по подразбиране на повечето системи.
-    
-    Krokiet също така предлага функции, които Czkawka няма, включително миниатюри в режим на сравнение на видео, EXIF почистване, прогрес при преместване/копиране/изтриване на файлове или разширени опции за сортиране.
-    
-    Опитайте го и вижте разликата!
-    
-    Czkawka ще продължи да получава поправки на грешки и малки актуализации от мен, но всички нови функции ще бъдат разработени изключително за Krokiet, а всеки е свободен да допринася с нови функции, да добавя липсващи режими или да разширява Czkawka допълнително.
-    
-    ПС: Това съобщение трябва да се появи само веднъж. Ако се появи отново, задайте променливата на средата CZKAWKA_DONT_ANNOY_ME на всяка непразна стойност.
+krokiet_info_title = Забележка за прекратяване на поддръжката
+krokiet_info_message = 
+        Czkawka GTK 12.0 е последната версия. Не са планирани допълнителни актуализации, нови функции или поправки на бъгове.
+
+        Повечето функции на Czkawka GTK са достъпни в Krokiet, обикновено в по-опростен, бърз и стабилен вид. Krokiet също така добавя нови функции и подобрения, които не бяха възможни във версията с GTK.
+
+        Ако все още използвате Czkawka GTK, преминаването към Krokiet трябва да бъде лесно, тъй като има подобен интерфейс, по-малко зависимости и по-добра крос-платформена поддръжка.
+
+        P.S.: Това съобщение трябва да се появява само веднъж. Ако се появи отново, задайте променливата на средата CZKAWKA_DONT_ANNOY_ME на произволна стойност, която не е празна.
 # Main window
 music_title_checkbox = Заглавие
 music_artist_checkbox = Изпълнител
@@ -100,6 +96,7 @@ image_hash_alg_tooltip =
     Всеки от тях има както силни, така и слаби страни и понякога дава по-добри, а понякога по-лоши резултати за различни изображения.
     
     Затова, за да определите най-добрия за вас, е необходимо ръчно тестване.
+image_geometric_invariance_tooltip = Също така, сравнете огледални/обърнати и, по желание, завъртени варианти на всяко изображение. Това подобрява съвпадението, но увеличава времето за хеширане.
 big_files_mode_combobox_tooltip = Позволява търсене на най-малките/най-големите файлове
 big_files_mode_label = Проверени файлове
 big_files_mode_smallest_combo_box = Най-малкия
@@ -139,6 +136,7 @@ main_tree_view_column_codec = Кодек
 main_label_check_method = Провери метод
 main_label_hash_type = Хеш тип
 main_label_hash_size = Хеш размер
+main_label_geometric_invariance = Геометрична инвариантност
 main_label_size_bytes = Размер (байтове)
 main_label_min_size = Мин
 main_label_max_size = Макс
@@ -307,6 +305,21 @@ about_translation_button = Преводи
 # Header
 header_setting_button_tooltip = Отваря диалогов прозорец за настройки.
 header_about_button_tooltip = Отваря диалогов прозорец с информация за приложението.
+header_krokiet_button_tooltip = Опитайте Krokiet - новата и подобрена версия!
+# Krokiet promo dialog
+krokiet_promo_title = Запознайте се с Krokiet!
+krokiet_promo_message = 
+        Здравей, смел потребителю на Czkawka!
+
+        Ясно е, че Силата е с теб, но Krokiet не е - по-нов, по-бърз, по-лек и значително по-привлекателен (ако приложенията могат да бъдат привлекателни) инструмент за почистване на дубликати.
+
+        Krokiet включва всичко, което хората харесаха в Czkawka. Той е напълно безплатен, с отворен код, има уникален и прост интерфейс (който е едновременно хвален и критикуван от много), предлага много нови функции, използва по-малко зависимости и работи много по-надеждно на различни платформи.
+
+        И ако сте пропуснали това, вече има още едно приложение, което е по-ново от Krokiet - Cedinia, което е предназначено предимно за Android устройства и работа със тъчскрийн.
+
+        Czkawka GTK ни служи добре, но неговият период на действие приключи.
+krokiet_promo_link_download = Изтеглете Krokiet/Cedinia
+krokiet_promo_link_project = Страница на проекта
 
 # Settings
 
@@ -436,37 +449,6 @@ compute_found_invalid_symlinks = Намерени { $number_files } невали
 compute_found_broken_files = Намерих { $number_files } повредени файла в { $time }
 compute_found_bad_extensions = Намерени са { $number_files } файла с невалидни разширения за { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] Сканиран { $file_number } файл
-       *[other] Сканирани { $file_number } файлове
-    }
-progress_scanning_extension_of_files = Проверено разширение на { $file_checked }/{ $all_files } файла
-progress_scanning_broken_files = Проверени { $file_checked }/{ $all_files } файла от ({ $data_checked }/{ $all_data })
-progress_scanning_video = Хеширани { $file_checked }/{ $all_files } видеа
-progress_creating_video_thumbnails = Created thumbnails of { $file_checked }/{ $all_files } video
-progress_scanning_image = Хеширани { $file_checked }/{ $all_files } изображения ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Сравнени { $file_checked }/{ $all_files } хешове на изображения
-progress_scanning_music_tags_end = Сравнени тагове на { $file_checked }/{ $all_files } музикални файла
-progress_scanning_music_tags = Прочетени { $file_checked }/{ $all_files } тага на музикални файла
-progress_scanning_music_content_end = Сравнени { $file_checked }/{ $all_files } отпечатъка на музикални файла
-progress_scanning_music_content = Изчислени { $file_checked }/{ $all_files } отпечатъка на музикални файла ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] Сканирана { $folder_number } папка
-       *[other] Сканирани { $folder_number } папки
-    }
-progress_scanning_size = Сканиран размер на { $file_number } файла
-progress_scanning_size_name = Сканиран име и размер на { $file_number } файла
-progress_scanning_name = Сканиран име на { $file_number } файла
-progress_analyzed_partial_hash = Анализиран частичен хеш на { $file_checked }/{ $all_files } файла ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Анализиран пълен хеш на { $file_checked }/{ $all_files } файла ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = Зареждане на prehash кеш
-progress_prehash_cache_saving = Запис на prehash кеш
-progress_hash_cache_loading = Зареждане на hash кеш
-progress_hash_cache_saving = Запис на hash кеш
-progress_cache_loading = Зарежда кеш
-progress_cache_saving = Запазва кеш
 progress_current_stage = Текущ етап:{ " " }
 progress_all_stages = Всички етапи:{ " " }
 # Saving loading 
@@ -474,6 +456,7 @@ saving_loading_saving_success = Запазване на конфигурация
 saving_loading_saving_failure = Неуспешно спъжаване на конфигурационните данни в файл { $name }, причина { $reason }.
 saving_loading_reset_configuration = Текущата конфигурация е изтрита.
 saving_loading_loading_success = Правилно заредена конфигурация на приложението.
+saving_loading_no_config_file = Не е намерен конфигурационен файл, използва се конфигурация по подразбиране.
 saving_loading_failed_to_create_config_file = Неуспешно създаване на конфигурационен файл "{ $path }", причина "{ $reason }".
 saving_loading_failed_to_read_config_file = Не може да се зареди конфигурация от "{ $path }", защото тя не съществува или не е файл.
 saving_loading_failed_to_read_data_from_file = Не може да се прочетат данни от файл "{ $path }", причина "{ $reason }".

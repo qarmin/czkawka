@@ -615,7 +615,7 @@ pub(crate) fn scan_similar_videos<H: ScanResultHandler>(
         10,    // thumbnail_video_percentage_from_start
         false, // generate_thumbnail_grid_instead_of_single
         2,     // thumbnail_grid_tiles_per_side
-        true,  // check_audio_content – audio-only mode, no FFmpeg needed
+        true,  // check_audio_content - audio-only mode, no FFmpeg needed
         audio_similarity_percent,
         audio_maximum_difference,
         audio_length_ratio,

@@ -129,7 +129,7 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
                         for use_prehash in [true, false] {
                             for type_of_hash in [HashType::Xxh3, HashType::Blake3, HashType::Crc32] {
                                 let file_name = get_duplicate_cache_file(type_of_hash, use_prehash);
-                                let (mut messages, loaded_items) = load_cache_from_file_generalized_by_size::<DuplicateEntry>(&file_name, true, &Default::default());
+                                let (mut cache_messages, loaded_items) = load_cache_from_file_generalized_by_size::<DuplicateEntry>(&file_name, true, &Default::default());
 
                                 if let Some(cache_entries) = loaded_items {
                                     let mut hashmap_to_save: BTreeMap<String, DuplicateEntry> = Default::default();
@@ -142,13 +142,14 @@ pub(crate) fn connect_settings(gui_data: &GuiData) {
                                     let minimal_cache_size = entry_settings_cache_file_minimal_size.text().as_str().parse::<u64>().unwrap_or(2 * 1024 * 1024);
 
                                     let save_messages = save_cache_to_file_generalized(&file_name, &hashmap_to_save, false, minimal_cache_size);
-                                    messages.extend_with_another_messages(save_messages);
+                                    cache_messages.extend_with_another_messages(save_messages);
                                 }
+                                messages.extend_with_another_messages(cache_messages);
                             }
-
-                            messages.messages.push(flg!("cache_properly_cleared"));
-                            text_view_errors.buffer().set_text(messages.create_messages_text(MessageLimit::NoLimit).as_str());
                         }
+
+                        messages.messages.push(flg!("cache_properly_cleared"));
+                        text_view_errors.buffer().set_text(messages.create_messages_text(MessageLimit::NoLimit).as_str());
                     }
                     dialog.close();
                 });

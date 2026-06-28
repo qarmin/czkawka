@@ -17,7 +17,7 @@ use crate::common::directories::Directories;
 use crate::common::extensions::Extensions;
 use crate::common::items::ExcludedItems;
 use crate::common::model::{CheckingMethod, FileEntry, ToolType};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::CommonToolData;
 use crate::flc;
@@ -44,13 +44,13 @@ pub struct DirTraversalBuilder<'b, F> {
     progress_sender: Option<&'b Sender<ProgressData>>,
     minimal_file_size: Option<u64>,
     maximal_file_size: Option<u64>,
-    checking_method: CheckingMethod,
     collect: Collect,
     recursive_search: bool,
     directories: Option<Directories>,
     excluded_items: Option<ExcludedItems>,
     extensions: Option<Extensions>,
     tool_type: ToolType,
+    checking_method: CheckingMethod,
 }
 
 #[derive(Debug)]
@@ -66,8 +66,8 @@ pub struct DirTraversal<'b, F> {
     extensions: Extensions,
     minimal_file_size: u64,
     maximal_file_size: u64,
-    checking_method: CheckingMethod,
     tool_type: ToolType,
+    checking_method: CheckingMethod,
     collect: Collect,
 }
 
@@ -85,7 +85,6 @@ impl DirTraversalBuilder<'_, ()> {
             root_files: Vec::new(),
             stop_flag: None,
             progress_sender: None,
-            checking_method: CheckingMethod::None,
             minimal_file_size: None,
             maximal_file_size: None,
             collect: Collect::Files,
@@ -94,6 +93,7 @@ impl DirTraversalBuilder<'_, ()> {
             extensions: None,
             excluded_items: None,
             tool_type: ToolType::None,
+            checking_method: CheckingMethod::None,
         }
     }
 }
@@ -122,11 +122,6 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
         self
     }
 
-    pub(crate) fn checking_method(mut self, checking_method: CheckingMethod) -> Self {
-        self.checking_method = checking_method;
-        self
-    }
-
     pub(crate) fn minimal_file_size(mut self, minimal_file_size: u64) -> Self {
         self.minimal_file_size = Some(minimal_file_size);
         self
@@ -139,6 +134,13 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
 
     pub(crate) fn collect(mut self, collect: Collect) -> Self {
         self.collect = collect;
+        self
+    }
+
+    /// Lets a tool tag the file-collecting stage with its checking method, so the
+    /// progress label can read e.g. "Scanning size of N file" instead of the generic text.
+    pub(crate) fn checking_method(mut self, checking_method: CheckingMethod) -> Self {
+        self.checking_method = checking_method;
         self
     }
 
@@ -159,8 +161,8 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
             maximal_file_size: self.maximal_file_size,
             minimal_file_size: self.minimal_file_size,
             collect: self.collect,
-            checking_method: self.checking_method,
             tool_type: self.tool_type,
+            checking_method: self.checking_method,
         }
     }
 
@@ -171,7 +173,6 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
             root_files: self.root_files,
             stop_flag: self.stop_flag.expect("Stop flag must be always initialized"),
             progress_sender: self.progress_sender,
-            checking_method: self.checking_method,
             minimal_file_size: self.minimal_file_size.unwrap_or(0),
             maximal_file_size: self.maximal_file_size.unwrap_or(u64::MAX),
             collect: self.collect,
@@ -180,6 +181,7 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
             extensions: self.extensions.unwrap_or_default(),
             recursive_search: self.recursive_search,
             tool_type: self.tool_type,
+            checking_method: self.checking_method,
         }
     }
 }
@@ -220,7 +222,12 @@ where
         let mut folders_to_check: Vec<PathBuf> = self.root_dirs.clone();
         let mut files_to_check: Vec<PathBuf> = self.root_files.clone();
 
-        let progress_handler = prepare_thread_handler_common(self.progress_sender, CurrentStage::CollectingFiles, 0, (self.tool_type, self.checking_method), 0);
+        let collect_stage = if self.tool_type == ToolType::EmptyFolders {
+            ToolStage::CollectingFolders
+        } else {
+            ToolStage::CollectingFiles(self.checking_method)
+        };
+        let progress_handler = prepare_thread_handler_common(self.progress_sender, collect_stage, 0, 0);
 
         let DirTraversal {
             collect,

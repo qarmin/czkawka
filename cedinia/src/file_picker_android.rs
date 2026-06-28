@@ -55,8 +55,7 @@ unsafe extern "system" fn Java_CediniaFilePicker_onDirectoryPicked(mut unowned: 
 
 pub fn init(app: &AndroidApp) {
     log::info!("file_picker_android::init: starting");
-    // Always update APP_HANDLE so that after Activity recreation the new
-    // AndroidApp (with a valid vm_as_ptr) replaces the stale one.
+    // Replaces a stale AndroidApp after Activity recreation (process is reused, vm_as_ptr changes).
     *APP_HANDLE.lock().expect("APP_HANDLE mutex poisoned") = Some(app.clone());
 
     let vm = try_jvm(app).expect("init: vm_as_ptr is null at app startup");
@@ -143,8 +142,7 @@ pub fn init(app: &AndroidApp) {
     .expect("init JNI attachment failed");
 }
 
-// These are behind Mutex<Option<...>> so they can be updated each time the
-// Android Activity is recreated (process is reused but Activity restarts).
+// Mutex<Option<...>> so each can be replaced when the Activity is recreated mid-process.
 static APP_HANDLE: Mutex<Option<AndroidApp>> = Mutex::new(None);
 static DEX_LOADER_REF: Mutex<Option<Arc<Global<JObject<'static>>>>> = Mutex::new(None);
 static ACTIVITY_GLOBAL_REF: Mutex<Option<Arc<Global<JObject<'static>>>>> = Mutex::new(None);
@@ -161,12 +159,9 @@ fn get_loader() -> Option<Arc<Global<JObject<'static>>>> {
     DEX_LOADER_REF.lock().ok()?.clone()
 }
 
-/// Returns `Some(JavaVM)` if the VM pointer is still valid, or `None` when the
-/// Android activity is paused / stopped and `vm_as_ptr()` has become null.
-///
-/// All JNI calls that may run from a Slint timer (rather than a direct user
-/// interaction) must use this guard to avoid the
-/// `assertion failed: !ptr.is_null()` panic inside `jni::JavaVM::from_raw`.
+/// `None` when the Activity is paused/stopped and `vm_as_ptr()` is null. JNI calls made
+/// from a Slint timer (not a direct user interaction) must go through this guard to avoid
+/// the `assertion failed: !ptr.is_null()` panic in `jni::JavaVM::from_raw`.
 pub fn try_jvm(app: &AndroidApp) -> Option<jni::JavaVM> {
     let ptr = app.vm_as_ptr();
     if ptr.is_null() {
@@ -394,6 +389,49 @@ pub fn setup_nav_bar() {
         Ok(())
     })
     .unwrap_or_else(|e| log::error!("setup_nav_bar: JNI failed: {:?}", e));
+}
+
+// Cedinia's theme is independent of the system dark/light setting, so the status/nav bar
+// icon colour must be driven from the app theme or it can turn invisible (light icons on a
+// light bar). Java side hops to the UI thread, which the bar appearance API requires.
+pub fn apply_theme_to_system_bars(dark_theme: bool) {
+    let Some(app) = get_android_app() else {
+        log::error!("apply_theme_to_system_bars: AndroidApp not initialised");
+        return;
+    };
+    let Some(loader_ref) = get_loader() else {
+        log::error!("apply_theme_to_system_bars: DEX loader not initialised");
+        return;
+    };
+    let Some(activity_ref) = get_activity_global_ref() else {
+        log::error!("apply_theme_to_system_bars: activity global ref not initialised");
+        return;
+    };
+
+    let Some(vm) = try_jvm(&app) else {
+        return;
+    };
+    vm.attach_current_thread(|env| -> jni::errors::Result<()> {
+        let native_activity = activity_ref.as_obj();
+        let class_name = env.new_string("CediniaFilePicker")?;
+        let picker_class_obj = env
+            .call_method(
+                loader_ref.as_obj(),
+                jni_str!("findClass"),
+                jni_sig!((name: java.lang.String) -> java.lang.Class),
+                &[JValue::Object(&class_name)],
+            )?
+            .l()?;
+        let picker_class: JClass = unsafe { JClass::from_raw(env, picker_class_obj.as_raw()) };
+        env.call_static_method(
+            &picker_class,
+            jni_str!("applyThemeToSystemBars"),
+            jni_sig!((activity: android.app.Activity, darkTheme: boolean) -> void),
+            &[JValue::Object(&native_activity), JValue::Bool(dark_theme)],
+        )?;
+        Ok(())
+    })
+    .unwrap_or_else(|e| log::error!("apply_theme_to_system_bars: JNI failed: {:?}", e));
 }
 
 pub fn acquire_wakelock() {

@@ -304,7 +304,6 @@ fn send_notification(title: &str, body: &str) {
             let sig_bool = RuntimeMethodSignature::from_str("(Z)Landroid/app/Notification$Builder;").unwrap();
             env.call_method(&builder, jni_str!("setAutoCancel"), &sig_bool.method_signature(), &[JValue::Bool(true)])?;
 
-            // Attach a PendingIntent so tapping the notification brings the app to the foreground.
             let pm: JObject = env
                 .call_method(&activity, jni_str!("getPackageManager"), jni_sig!(() -> android.content.pm.PackageManager), &[])?
                 .l()?;
@@ -318,22 +317,30 @@ fn send_notification(title: &str, body: &str) {
                 )?
                 .l()?;
             if !launch_intent.is_null() {
-                // FLAG_ACTIVITY_SINGLE_TOP (0x20000000) | FLAG_ACTIVITY_CLEAR_TOP (0x04000000):
-                // bring the existing Activity to front instead of creating a new instance.
+                const FLAG_ACTIVITY_SINGLE_TOP: i32 = 0x2000_0000;
+                const FLAG_ACTIVITY_CLEAR_TOP: i32 = 0x0400_0000;
+                // PendingIntent flag required on Android 12+ (API 31+); same numeric value as
+                // FLAG_ACTIVITY_CLEAR_TOP above but belongs to a different flag namespace.
+                const PENDING_INTENT_FLAG_IMMUTABLE: i32 = 0x0400_0000;
+
                 env.call_method(
                     &launch_intent,
                     jni_str!("addFlags"),
                     jni_sig!((flags: int) -> android.content.Intent),
-                    &[JValue::Int(0x2000_0000 | 0x0400_0000)],
+                    &[JValue::Int(FLAG_ACTIVITY_SINGLE_TOP | FLAG_ACTIVITY_CLEAR_TOP)],
                 )?;
-                // FLAG_IMMUTABLE (0x04000000) is required on Android 12+ (API 31+).
                 let sig_pending = RuntimeMethodSignature::from_str("(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;").unwrap();
                 let pending_intent: JObject = env
                     .call_static_method(
                         jni_str!("android/app/PendingIntent"),
                         jni_str!("getActivity"),
                         &sig_pending.method_signature(),
-                        &[JValue::Object(&activity), JValue::Int(0), JValue::Object(&launch_intent), JValue::Int(0x0400_0000)],
+                        &[
+                            JValue::Object(&activity),
+                            JValue::Int(0),
+                            JValue::Object(&launch_intent),
+                            JValue::Int(PENDING_INTENT_FLAG_IMMUTABLE),
+                        ],
                     )?
                     .l()?;
                 if !pending_intent.is_null() {

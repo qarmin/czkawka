@@ -8,7 +8,7 @@ Core scanning library shared by Czkawka GUI, Czkawka CLI, Krokiet, and Cedinia.
 
 ## Requirements
 
-The base build has no mandatory native dependencies – it is pure Rust.
+The base build has no mandatory native dependencies - it is pure Rust.
 
 Optional features require additional native libraries:
 

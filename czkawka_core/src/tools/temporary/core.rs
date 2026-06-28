@@ -10,10 +10,10 @@ use rayon::prelude::*;
 use crate::common::dir_traversal::{common_read_dir, get_modified_time};
 use crate::common::directories::Directories;
 use crate::common::items::ExcludedItems;
-use crate::common::model::{ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::model::{CheckingMethod, ToolType, WorkContinueStatus};
+use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
-use crate::common::tool_data::{CommonData, CommonToolData};
+use crate::common::tool_data::CommonToolData;
 use crate::tools::temporary::{Info, Temporary, TemporaryFileEntry, TemporaryParameters};
 
 impl Temporary {
@@ -35,7 +35,7 @@ impl Temporary {
 
         let mut folders_to_check: Vec<PathBuf> = self.common_data.directories.included_directories.clone();
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::CollectingFiles, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::CollectingFiles(CheckingMethod::None), 0, 0);
 
         while !folders_to_check.is_empty() {
             if check_if_stop_received(stop_flag) {

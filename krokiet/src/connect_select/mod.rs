@@ -102,11 +102,12 @@ pub(crate) fn connect_select(app: &MainWindow, shared_models: &Arc<Mutex<SharedM
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let model = app.global::<GuiState>().get_custom_select_columns();
         let idx = idx as usize;
-        if let Some(mut col) = model.row_data(idx) {
-            col.enabled = enabled;
-            col.filter_value = filter_value;
-            model.set_row_data(idx, col);
-        }
+        let mut col = model
+            .row_data(idx)
+            .unwrap_or_else(|| panic!("Custom select column idx={idx} out of bounds (row_count={})", model.row_count()));
+        col.enabled = enabled;
+        col.filter_value = filter_value;
+        model.set_row_data(idx, col);
     });
 
     let a = app.as_weak();
@@ -611,9 +612,9 @@ mod tests {
 
         assert_eq!(checked_items, 2);
         assert_eq!(unchecked_items, 0);
-        assert!(new_model.row_data(1).unwrap().checked); // 100 – selected
-        assert!(new_model.row_data(2).unwrap().checked); // 200 – selected
-        assert!(!new_model.row_data(3).unwrap().checked); // 300 – spared (biggest)
+        assert!(new_model.row_data(1).unwrap().checked); // 100 - selected
+        assert!(new_model.row_data(2).unwrap().checked); // 200 - selected
+        assert!(!new_model.row_data(3).unwrap().checked); // 300 - spared (biggest)
     }
 
     #[test]
@@ -628,15 +629,15 @@ mod tests {
 
         assert_eq!(checked_items, 2);
         assert_eq!(unchecked_items, 0);
-        assert!(!new_model.row_data(1).unwrap().checked); // 100 – spared (smallest)
-        assert!(new_model.row_data(2).unwrap().checked); // 200 – selected
-        assert!(new_model.row_data(3).unwrap().checked); // 300 – selected
+        assert!(!new_model.row_data(1).unwrap().checked); // 100 - spared (smallest)
+        assert!(new_model.row_data(2).unwrap().checked); // 200 - selected
+        assert!(new_model.row_data(3).unwrap().checked); // 300 - selected
     }
 
     #[test]
     fn select_all_except_operates_independently_per_group() {
-        // Group 1: [header, 100, 300]  – spare 300 (biggest) / spare 100 (smallest)
-        // Group 2: [header, 50, 150]   – spare 150 (biggest) / spare 50  (smallest)
+        // Group 1: [header, 100, 300]  - spare 300 (biggest) / spare 100 (smallest)
+        // Group 2: [header, 50, 150]   - spare 150 (biggest) / spare 50  (smallest)
         let mut h1 = crate::test_common::get_main_list_model();
         h1.header_row = true;
         let mut h2 = crate::test_common::get_main_list_model();
@@ -653,10 +654,10 @@ mod tests {
 
         let (_checked, _unchecked, new_model) = select_all_except_by_property(&model, ActiveTab::DuplicateFiles, Property::Size, true);
 
-        assert!(new_model.row_data(1).unwrap().checked); // 100 – selected
-        assert!(!new_model.row_data(2).unwrap().checked); // 300 – spared (biggest in group 1)
-        assert!(new_model.row_data(4).unwrap().checked); // 50 – selected
-        assert!(!new_model.row_data(5).unwrap().checked); // 150 – spared (biggest in group 2)
+        assert!(new_model.row_data(1).unwrap().checked); // 100 - selected
+        assert!(!new_model.row_data(2).unwrap().checked); // 300 - spared (biggest in group 1)
+        assert!(new_model.row_data(4).unwrap().checked); // 50 - selected
+        assert!(!new_model.row_data(5).unwrap().checked); // 150 - spared (biggest in group 2)
     }
 
     #[test]
@@ -726,9 +727,9 @@ mod tests {
 
         let (_checked, _unchecked, new_model) = select_all_except_by_property(&model, ActiveTab::DuplicateFiles, Property::PathLength, true);
 
-        assert!(new_model.row_data(1).unwrap().checked); // short – selected
-        assert!(new_model.row_data(2).unwrap().checked); // medium – selected
-        assert!(!new_model.row_data(3).unwrap().checked); // long – spared (longest)
+        assert!(new_model.row_data(1).unwrap().checked); // short - selected
+        assert!(new_model.row_data(2).unwrap().checked); // medium - selected
+        assert!(!new_model.row_data(3).unwrap().checked); // long - spared (longest)
     }
 
     #[test]
@@ -746,9 +747,9 @@ mod tests {
 
         let (_checked, _unchecked, new_model) = select_all_except_by_property(&model, ActiveTab::DuplicateFiles, Property::PathLength, false);
 
-        assert!(!new_model.row_data(1).unwrap().checked); // short – spared (shortest)
-        assert!(new_model.row_data(2).unwrap().checked); // medium – selected
-        assert!(new_model.row_data(3).unwrap().checked); // long – selected
+        assert!(!new_model.row_data(1).unwrap().checked); // short - spared (shortest)
+        assert!(new_model.row_data(2).unwrap().checked); // medium - selected
+        assert!(new_model.row_data(3).unwrap().checked); // long - selected
     }
 
     #[test]
@@ -767,7 +768,7 @@ mod tests {
 
         let (_checked, _unchecked, new_model) = select_all_except_by_property(&model, ActiveTab::DuplicateFiles, Property::PathLength, false);
 
-        assert!(!new_model.row_data(1).unwrap().checked); // IMG_0001.JPG – spared (shortest)
+        assert!(!new_model.row_data(1).unwrap().checked); // IMG_0001.JPG - spared (shortest)
         assert!(new_model.row_data(2).unwrap().checked);
         assert!(new_model.row_data(3).unwrap().checked);
     }
@@ -790,7 +791,7 @@ mod tests {
 
         let (_checked, _unchecked, new_model) = select_all_except_by_property(&model, ActiveTab::DuplicateFiles, Property::PathLength, false);
 
-        assert!(!new_model.row_data(1).unwrap().checked); // shorter dir – spared
-        assert!(new_model.row_data(2).unwrap().checked); // longer dir – selected
+        assert!(!new_model.row_data(1).unwrap().checked); // shorter dir - spared
+        assert!(new_model.row_data(2).unwrap().checked); // longer dir - selected
     }
 }

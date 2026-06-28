@@ -2,11 +2,12 @@ use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
-use log::{error, warn};
+use log::error;
 
 use crate::flc;
+use crate::helpers::long_operation_watcher::LongOperationWatcher;
 
 #[cfg_attr(not(target_os = "windows"), expect(clippy::needless_pass_by_ref_mut))]
 pub fn disable_windows_console_window(command: &mut Command) {
@@ -78,23 +79,14 @@ pub fn run_command_interruptible(mut command: Command, stop_flag: &Arc<AtomicBoo
         }
     });
 
-    let start_time = Instant::now();
-    let warning_steps = [50, 250, 1250, 6000];
-    let mut next_warning_idx = 0;
+    // pid is unique only while the child is alive, which is exactly the watcher's lifetime here.
+    let _watch = LongOperationWatcher::watch(&format!("command {command:?}"), &child.id().to_string());
 
     loop {
         if stop_flag.load(Ordering::Relaxed) {
             let _ = child.kill();
             let _ = child.wait();
             break;
-        }
-
-        let elapsed_secs = start_time.elapsed().as_secs();
-        if let Some(warning_time) = warning_steps.get(next_warning_idx)
-            && elapsed_secs >= *warning_time
-        {
-            warn!("Command is still running after {warning_time} seconds, for command: {command:?}");
-            next_warning_idx += 1;
         }
 
         match child.try_wait() {

@@ -7,19 +7,15 @@ window_compare_images = Porovnat obrázky
 general_ok_button = OK
 general_close_button = Zavřít
 # Krokiet info dialog
-krokiet_info_title = Představujeme Krokiet – novou verzi Czkawky
+krokiet_info_title = Oznámení o zrušení
 krokiet_info_message =
-    Krokiet je nová, vylepšená, rychlejší a spolehlivější verze Czkawky (původní GTK GUI)!
+    Czkawka GTK 12.0 je finální vydání. Nejsou naplánovány žádné další aktualizace, funkce ani opravy chyb.
     
-    Je snáze provozovatelná a odolnější změnám v systému, protože závisí pouze na základních knihovnách, které jsou standardně dostupné na většině systémů.
+    Většina funkcí z Czkawka GTK je k dispozici v Krokiet, obvykle ve jednodušší, rychlejší a stabilnější formě. Krokiet také přidává nové funkce a vylepšení, které ve verzi GTK nebyly možné.
     
-    Krokiet také přináší funkce, které Czkawka postrádá – včetně náhledů v režimu porovnávání videí, nástroje pro čištění EXIF, ukazatele průběhu přesouvání/kopírování/mazání souborů nebo rozšířených možností třídění.
+    Pokud stále používáte Czkawka GTK, přechod na Krokiet by měl být snadný, protože má podobné rozhraní, méně závislostí a lepší podporu napříč platformami.
     
-    Vyzkoušejte a uvidíte rozdíl!
-    
-    Czkawka ode mne bude nadále dostávat opravy chyb a drobné aktualizace, ale všechny nové funkce budou vyvíjeny výhradně pro Krokiet. Nicméně pokud by někdo chtěl, samozřejmě může do Czkawky přispívat novými funkcemi, přidávat chybějící režimy a nadále ji rozvíjet.
-    
-    PS: Tato zpráva by se měla zobrazit pouze jednou. Pokud se tak stane znovu, nastavte si proměnnou prostředí CZKAWKA_DONT_ANNOY_ME (na libovolnou neprázdnou hodnotu).
+    PS: Tato zpráva by se měla zobrazovat pouze jednou. Pokud se znovu objeví, nastavte proměnnou prostředí CZKAWKA_DONT_ANNOY_ME na libovolnou neprázdnou hodnotu.
 # Main window
 music_title_checkbox = Název
 music_artist_checkbox = Umělec
@@ -65,7 +61,7 @@ duplicate_mode_hash_combo_box = Otisk
 duplicate_hash_type_tooltip =
     Czkawka nabízí 3 typy otisků:
     
-    Blake3 – kryptografická funkce pro spočítání otisku. Toto je výchozí, protože je velmi rychlé.
+    Blake3 - kryptografická funkce pro spočítání otisku. Toto je výchozí, protože je velmi rychlé.
     
     CRC32 - jednoduchá funkce pro spočítání otisku. Toto by mělo být rychlejší než Blake3, ale může docházet (byť jen zřídka) k tomu, že různá data budou mít stejný otisk.
     
@@ -73,11 +69,11 @@ duplicate_hash_type_tooltip =
 duplicate_check_method_tooltip =
     Pro tuto chvíli Czkawka nabízí tři typy metod pro vyhledávání duplicitních souborů:
     
-    Název – hledá soubory, které mají stejný název.
+    Název - hledá soubory, které mají stejný název.
     
-    Velikost – hledá soubory, které mají stejnou velikost.
+    Velikost - hledá soubory, které mají stejnou velikost.
     
-    Otisk – hledá soubory, které mají stejný obsah. V tomto režimu je u každého souboru vypočítán jeho otisk, a následně jejich porovnáním jsou hledány duplicity. Tento režim je nejbezpečnějším způsobem, jak hledat duplicity. Aplikace používá mezipaměť, takže druhé a další skenování stejných dat by mělo být mnohem rychlejší než to první.
+    Otisk - hledá soubory, které mají stejný obsah. V tomto režimu je u každého souboru vypočítán jeho otisk, a následně jejich porovnáním jsou hledány duplicity. Tento režim je nejbezpečnějším způsobem, jak hledat duplicity. Aplikace používá mezipaměť, takže druhé a další skenování stejných dat by mělo být mnohem rychlejší než to první.
 image_hash_size_tooltip =
     Pro každý z kontrolovaných obrázků je vytvořen zvlášť otisk, které je mezi sebou možné porovnávat. Malý rozdíl mezi nimi znamená, že obrázky jsou si podobné.
     
@@ -100,6 +96,7 @@ image_hash_alg_tooltip =
     Každý má silné a slabší stránky a někdy přinese lepší a někdy zase horší výsledky pro různé obrázky.
     
     Takže k určení nejlepšího pro vás je zapotřebí ruční zkoušení.
+image_geometric_invariance_tooltip = Porovnejte také zrcadlé/překlopené a volitelně otočené varianty každého obrázku. To zlepšuje shodu, ale zvyšuje hashovací čas.
 big_files_mode_combobox_tooltip = Umožňuje vyhledávat nejmenší / největší soubory
 big_files_mode_label = Zaškrtnuté soubory
 big_files_mode_smallest_combo_box = Nejmenší
@@ -139,6 +136,7 @@ main_tree_view_column_codec = Kodek
 main_label_check_method = Metoda kontroly
 main_label_hash_type = Typ otisku
 main_label_hash_size = Velikost otisku
+main_label_geometric_invariance = Geometrická invariance
 main_label_size_bytes = Velikost (bajty)
 main_label_min_size = Min
 main_label_max_size = Max
@@ -152,7 +150,7 @@ main_check_box_broken_files_image = Obrázek
 main_check_box_broken_files_video = Video
 main_check_box_broken_files_video_tooltip = Pro ověření videosouborů používá ffmpeg/ffprobe. Docela pomalé a může detekovat pedantické chyby i když se soubor přehrává v pořádku.
 check_button_general_same_size = Ignorovat stejnou velikost
-check_button_general_same_size_tooltip = Ignorovat ve výsledcích soubory se stejnou velikostí – obvykle se jedná o duplicity 1:1
+check_button_general_same_size_tooltip = Ignorovat ve výsledcích soubory se stejnou velikostí - obvykle se jedná o duplicity 1:1
 main_label_size_bytes_tooltip = Velikost souborů, které budou použity při skenování
 # Upper window
 upper_tree_view_included_folder_column_title = Složky k prohledání
@@ -189,7 +187,7 @@ upper_allowed_extensions_tooltip =
     
     Jsou také k dispozici následující makra, která přidávají více rozšíření najednou: IMAGE, VIDEO, MUSIC, TEXT.
     
-    Příklad použití „.exe, IMAGE, VIDEO, .rar, 7z“ – toto znamená, že budou skenovány obrázky (např. jpg, png), videa (např. avi, mp4), exe, rar a 7z soubory.
+    Příklad použití „.exe, IMAGE, VIDEO, .rar, 7z“ - toto znamená, že budou skenovány obrázky (např. jpg, png), videa (např. avi, mp4), exe, rar a 7z soubory.
 upper_excluded_extensions_tooltip =
     Seznam zakázaných souborů, které budou při skenování ignorovány.
     
@@ -307,6 +305,21 @@ about_translation_button = Překlad
 # Header
 header_setting_button_tooltip = Otevře dialogové okno nastavení.
 header_about_button_tooltip = Otevře dialog s informacemi o aplikaci.
+header_krokiet_button_tooltip = Zkuste Krokiet - novou a vylepšenou verzi!
+# Krokiet promo dialog
+krokiet_promo_title = Seznamte se s Krokietem!
+krokiet_promo_message =
+    Ahoj, odvážný uživatel Czkawka!
+    
+    Síla je s vámi, ale Krokiet není - novější, rychlejší, lehčí a výrazně více ručního (za předpokladu, že aplikace mohou být ve skutečnosti rukovité) duplikovat čistší prostředek.
+    
+    Krokiet zahrnuje všechno, co se líbí o Czkawce. Je zcela zdarma, open source, má unikátní a jednoduché uživatelské rozhraní (mnozí chválí i nenávistí), zavádí mnoho nových funkcí, používá méně závislostí a pracuje mnohem spolehlivěji na různých platformách.
+    
+    A pokud jste nějak zmeškali, existuje ještě novější aplikace než Krokiet - Cedinia, určené především pro zařízení Android a využití dotykové obrazovky.
+    
+    Czkawka GTK nám dobře posloužila, ale její hodinky skončily.
+krokiet_promo_link_download = Stáhnout Krokiet/Cedinia
+krokiet_promo_link_project = Stránka projektu
 
 # Settings
 
@@ -321,7 +334,7 @@ settings_use_rust_preview_tooltip =
     
     Pokud máte problémy s načítáním náhledů, je možné vyzkoušet změnu tohoto nastavení.
     
-    Na jiných systémech, než jsou ty linuxové, je doporučeno tuto volbu použít, protože gtk-pixbuf nebývá vždy k dispozici – takže (při vypnutí této volby) by nebyly načítány náhledy některých obrázků.
+    Na jiných systémech, než jsou ty linuxové, je doporučeno tuto volbu použít, protože gtk-pixbuf nebývá vždy k dispozici - takže (při vypnutí této volby) by nebyly načítány náhledy některých obrázků.
 settings_label_restart = Aby byla nastavení uplatněna, je třeba aplikaci restartovat!
 settings_ignore_other_filesystems = Nepřekračovat na ostatní souborové systémy (pouze v Linuxu)
 settings_ignore_other_filesystems_tooltip =
@@ -436,47 +449,17 @@ compute_found_invalid_symlinks = Nalezeno { $number_files } neplatných symbolic
 compute_found_broken_files = Nalezeno { $number_files } rozbitých souborů v { $time }
 compute_found_bad_extensions = Nalezeno { $number_files } souborů s nesprávnými příponami za { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] Naskenovaný { $file_number } soubor
-       *[other] Skenované { $file_number } soubory
-    }
-progress_scanning_extension_of_files = Kontrola přípony { $file_checked }/{ $all_files } souboru
-progress_scanning_broken_files = Kontrola { $file_checked }/{ $all_files } soubor ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hashováno { $file_checked }/{ $all_files } videa
-progress_creating_video_thumbnails = Vytvořeny náhledy { $file_checked }/{ $all_files } videí
-progress_scanning_image = Vytvořen otisk pro { $file_checked }/{ $all_files } obrázek ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Porovnáno { $file_checked }/{ $all_files } otisků obrázků
-progress_scanning_music_tags_end = Porovnávané štítky hudebního souboru { $file_checked }/{ $all_files }
-progress_scanning_music_tags = Číst štížky { $file_checked }/{ $all_files } hudebního souboru
-progress_scanning_music_content_end = Porovnávaný otisk souboru s hudbou { $file_checked }/{ $all_files }
-progress_scanning_music_content = Vypočítaný otisk hudby { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] Naskenovaná složka { $folder_number }
-       *[other] Naskenované { $folder_number } složky
-    }
-progress_scanning_size = Naskenovaná velikost souboru { $file_number }
-progress_scanning_size_name = Naskenovaný název a velikost { $file_number } souboru
-progress_scanning_name = Naskenován název { $file_number } souboru
-progress_analyzed_partial_hash = Analyzováno částečný otisk souborů { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Analyzováno plné hash souborů { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = Načítání mezipaměti rozpoznání
-progress_prehash_cache_saving = Ukládání mezipaměti rozpoznání
-progress_hash_cache_loading = Načítání mezipaměti otisků
-progress_hash_cache_saving = Ukládání mezipaměti otisků
-progress_cache_loading = Načítání mezipaměti
-progress_cache_saving = Ukládání mezipaměti
 progress_current_stage = Aktuální fáze: { " " }
 progress_all_stages = Všechny etapy: { " " }
 # Saving loading 
 saving_loading_saving_success = Nastavení uložena do souboru { $name }.
-saving_loading_saving_failure = Nepodařilo se uložit data nastavení do souboru { $name } – důvod: { $reason }.
+saving_loading_saving_failure = Nepodařilo se uložit data nastavení do souboru { $name } - důvod: { $reason }.
 saving_loading_reset_configuration = Stávající nastavení byla vymazána.
 saving_loading_loading_success = Nastavení aplikace v pořádku načtena.
-saving_loading_failed_to_create_config_file = Nepodařilo se vytvořit soubor s nastaveními „{ $path }“ – důvod: „{ $reason }“.
+saving_loading_no_config_file = Nenalezen žádný konfigurační soubor, pomocí výchozího nastavení.
+saving_loading_failed_to_create_config_file = Nepodařilo se vytvořit soubor s nastaveními „{ $path }“ - důvod: „{ $reason }“.
 saving_loading_failed_to_read_config_file = Nebylo možné načíst nastavení z „{ $path }“, protože neexistuje nebo to není soubor.
-saving_loading_failed_to_read_data_from_file = Nebylo možné načíst data ze souboru „{ $path }“ – důvod: „{ $reason }“.
+saving_loading_failed_to_read_data_from_file = Nebylo možné načíst data ze souboru „{ $path }“ - důvod: „{ $reason }“.
 # Other
 selected_all_reference_folders = Hledání nelze spustit, pokud jsou všechny adresáře nastaveny jako referenční složky
 searching_for_data = Vyhledávání dat může chvíli trvat, prosím čekejte...
@@ -487,7 +470,7 @@ about_window_motto = Tuto aplikaci je možné bezplatně používat (nyní i v b
 krokiet_new_app = Czkawka je v režimu údržby, což znamená, že budou opraveny pouze kritické chyby a nebudou přidány žádné nové funkce. Pro nové funkce si prosím přečtěte novou aplikaci Krokiet , která je stabilnější a výkonnější a je stále v aktivním vývoji.
 # Various dialog
 dialogs_ask_next_time = Zeptat se příště
-symlink_failed = Nepodařilo se vytvořit symbolický odkaz { $name } na { $target } – důvod: { $reason }
+symlink_failed = Nepodařilo se vytvořit symbolický odkaz { $name } na { $target } - důvod: { $reason }
 delete_title_dialog = Potvrzení odstranění
 delete_question_label = Opravdu chcete soubory smazat?
 delete_all_files_in_group_title = Potvrzení odstranění všech souborů ve skupině
@@ -502,10 +485,10 @@ hard_sym_invalid_selection_label_2 = Aby bylo možné tyto soubory propojit s pe
 hard_sym_invalid_selection_label_3 = První ve skupině je uznána jako původní a není změněna, ale druhá a později jsou upraveny.
 hard_sym_link_title_dialog = Potvrzení odkazu
 hard_sym_link_label = Opravdu chcete tyto soubory propojit?
-move_folder_failed = Nepodařilo se přesunout složku { $name } – důvod: { $reason }
-move_file_failed = Nepodařilo se přesunout soubor { $name } – důvod: { $reason }
+move_folder_failed = Nepodařilo se přesunout složku { $name } - důvod: { $reason }
+move_file_failed = Nepodařilo se přesunout soubor { $name } - důvod: { $reason }
 move_files_title_dialog = Vyberte složku, do které chcete přesunout duplicitní soubory
-move_files_choose_more_than_1_path = Aby bylo možné zkopírovat jejich duplikované soubory, lze vybrat pouze jeden popis umístnění – nyní ale vybráno { $path_number }.
+move_files_choose_more_than_1_path = Aby bylo možné zkopírovat jejich duplikované soubory, lze vybrat pouze jeden popis umístnění - nyní ale vybráno { $path_number }.
 move_stats = { $num_files }/{ $all_files } položek v pořádku přesunuto
 save_results_to_file = Výsledky uloženy jako txt i json soubory do složky „{ $name }“.
 search_not_choosing_any_music = CHYBA: je třeba vybrat alespoň jednu zaškrtávací kolonku typu vyhledávání hudby.
@@ -523,7 +506,7 @@ cache_clear_message_label_3 = Toto může mírně urychlit načítání/ukládá
 cache_clear_message_label_4 = VAROVÁNÍ: Operace odstraní z mezipaměti vše co se týká dat na v tuto chíli nepřipojených externích discích. V budoucnu tak případně bude potřeba otisky z nich znovu spočítat.
 # Show preview
 preview_image_resize_failure = Nepodařilo se změnit rozlišení obrázku { $name }.
-preview_image_opening_failure = Nepodařilo se otevřít obrázek { $name } – důvod: { $reason }
+preview_image_opening_failure = Nepodařilo se otevřít obrázek { $name } - důvod: { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
 compare_groups_number = Skupina { $current_group }/{ $all_groups } ({ $images_in_group } obrázků)
 compare_move_left_button = L

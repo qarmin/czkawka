@@ -175,12 +175,12 @@ fn popover_all_except_oldest_newest(
                 let modification = model.get::<u64>(&iter, column_modification_as_secs);
                 let current_file_length = model.get::<String>(&iter, column_file_name).len();
                 if except_oldest {
-                    if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
+                    if modification < modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
                         file_length = current_file_length;
                         modification_time_min_max = modification;
                         used_index = Some(current_index);
                     }
-                } else if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length < file_length) {
+                } else if modification > modification_time_min_max || (modification == modification_time_min_max && current_file_length > file_length) {
                     file_length = current_file_length;
                     modification_time_min_max = modification;
                     used_index = Some(current_index);

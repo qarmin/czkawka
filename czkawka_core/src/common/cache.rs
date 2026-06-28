@@ -275,7 +275,7 @@ where
             deleting_start_time.elapsed()
         );
 
-        text_messages.messages.push(format!("Properly loaded {} cache entries.", vec_loaded_entries.len()));
+        text_messages.messages.push(flc!("core_properly_loaded_cache_entries", count = vec_loaded_entries.len()));
 
         debug!(
             "Loaded cache from file {cache_file_name} (or json alternative) - {} results - size {}",

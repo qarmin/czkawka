@@ -4,11 +4,11 @@ Czkawka GUI is a graphical user interface for Czkawka Core, built with GTK 4.
 
 ![Screenshot from 2023-11-26 12-43-32](https://github.com/qarmin/czkawka/assets/41945903/722ed490-0be1-4dac-bcfc-182a4d0787dc)
 
-## Maintenance Mode
+## Deprecation Notice - 12.0 is the Last Version
 
-Czkawka GTK is currently in maintenance mode.  
-This means that new features will be kept to an absolute minimum, and only critical bugs will be fixed.  Compatibility updates with the Czkawka core package will still be provided to ensure that the application continues to compile correctly.  
-Active development is now focused on the Krokiet GUI.
+**Version 12.0 is the last released version of Czkawka GTK.** No new binaries will be provided. All users are encouraged to migrate to [Krokiet](../krokiet/README.md), the new Slint-based GUI.
+
+The source code remains in the repository and compatibility with `czkawka_core` will be maintained for some time, so the application can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds such as Debian or Docker packages.
 
 ## Requirements
 

@@ -7,7 +7,7 @@
 //!   * putting the file into TestFiles.zip, **or**
 //!   * appending an entry to `add_synthetic_entries()` below.
 //!
-//! Rust decides which files go where – no external tooling is required.
+//! Rust decides which files go where - no external tooling is required.
 //!
 //! # File-size and mtime contract
 //!
@@ -105,7 +105,7 @@ fn load_zip(zip_path: &str) -> Vec<TestFileEntry> {
             zf.read_to_end(&mut data).unwrap();
             entries.push(TestFileEntry { path, kind: EntryKind::Symlink, data, mtime_unix_secs });
         } else if zf.is_dir() {
-            entries.push(TestFileEntry { path, kind: EntryKind::Dir, data: vec![], mtime_unix_secs });
+            entries.push(TestFileEntry { path, kind: EntryKind::Dir, data: Vec::new(), mtime_unix_secs });
         } else {
             let mut data = Vec::new();
             zf.read_to_end(&mut data).unwrap();
@@ -197,7 +197,7 @@ fn validate_known_file_sizes(entries: &[TestFileEntry]) {
         });
         assert_eq!(
             actual, expected_size,
-            "TestFiles.zip: '{path}' has size {actual} B but expected {expected_size} B – wrong zip version?"
+            "TestFiles.zip: '{path}' has size {actual} B but expected {expected_size} B - wrong zip version?"
         );
     }
 }
@@ -212,11 +212,11 @@ fn add_synthetic_entries(entries: &mut Vec<TestFileEntry>) {
     // BadNames/photo.JPG disappears from the directory tree.
     //
     // mtime_unix_secs = None so the file gets the current timestamp, which is
-    // fine – bad-names checks the *name*, not the modification time.
+    // fine - bad-names checks the *name*, not the modification time.
     entries.push(TestFileEntry {
         path: "BadNames".to_string(),
         kind: EntryKind::Dir,
-        data: vec![],
+        data: Vec::new(),
         mtime_unix_secs: None,
     });
     entries.push(TestFileEntry {

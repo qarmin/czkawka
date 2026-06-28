@@ -34,7 +34,7 @@ lofty = "0.24"
 
 # Needed by broken files
 zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
-lopdf = "0.40.0"
+lopdf = "0.42.0"
 sevenz-rust2 = "0.21.0"
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 tar = { version = "0.4", default-features = false }
@@ -59,7 +59,7 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 tempfile = "3.13"
 
 # Video Duplicates
-similario_core = "0.1.0"
+similario_core = "0.2.0"
 filetime = "0.2.26"
 
 # For extracting video properties using ffprobe CLI
@@ -99,7 +99,7 @@ os_info = { version = "3", default-features = false }
 log = "0.4.22"
 handsome_logger = "0.9"
 fun_time = { version = "0.3", features = ["log"] }
-itertools = "0.14"
+itertools = "0.15"
 static_assertions = "1.1.0"
 file-rotate = "0.8.0"
 

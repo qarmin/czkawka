@@ -95,8 +95,8 @@ impl PrintResults for VideoOptimizer {
 
                 for entry in &self.video_crop_result_entries {
                     if !entry.codec.is_empty() {
-                        let (lt, rt, rb, lb) = entry.new_image_dimensions;
-                        let new_image_dimensions = format!("  New dimensions: LT:{lt}, RT:{rt}, RB:{rb}, LB:{lb}");
+                        let (left, top, right, bottom) = entry.new_image_dimensions;
+                        let new_image_dimensions = format!("  Crop: left={left}, top={top}, right={right}, bottom={bottom}");
                         writeln!(
                             writer,
                             "\"{}\" - Codec: {} - Dimensions: {}x{} - Size: {}{new_image_dimensions}",

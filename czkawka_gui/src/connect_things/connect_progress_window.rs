@@ -1,20 +1,11 @@
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
 use std::time::Duration;
 
 use crossbeam_channel::Receiver;
-use czkawka_core::common::model::ToolType;
-use czkawka_core::common::progress_data::{CurrentStage, ProgressData};
+use czkawka_core::common::progress_data::{ProgressData, ProgressDisplay};
 use glib::MainContext;
-use gtk4::ProgressBar;
 use gtk4::prelude::*;
-use humansize::{BINARY, format_size};
 
-use crate::flg;
 use crate::gui_structs::gui_data::GuiData;
-use crate::localizer_core::generate_translation_hashmap;
-use crate::taskbar_progress::TaskbarProgress;
 use crate::taskbar_progress::tbp_flags::TBPF_INDETERMINATE;
 
 pub(crate) fn connect_progress_window(gui_data: &GuiData, progress_receiver: Receiver<ProgressData>) {
@@ -25,19 +16,8 @@ pub(crate) fn connect_progress_window(gui_data: &GuiData, progress_receiver: Rec
 
     let future = async move {
         loop {
-            loop {
-                let item = progress_receiver.try_recv();
-                if let Ok(item) = item {
-                    if item.current_stage_idx == 0 {
-                        progress_collect_items(&gui_data, &item, item.tool_type != ToolType::EmptyFolders);
-                    } else if item.sstage.check_if_loading_saving_cache() {
-                        progress_save_load_cache(&gui_data, &item);
-                    } else {
-                        progress_default(&gui_data, &item);
-                    }
-                } else {
-                    break;
-                }
+            while let Ok(item) = progress_receiver.try_recv() {
+                set_progress(&gui_data, &item.to_display());
             }
             glib::timeout_future(Duration::from_millis(300)).await;
         }
@@ -46,159 +26,29 @@ pub(crate) fn connect_progress_window(gui_data: &GuiData, progress_receiver: Rec
     main_context.spawn_local(future);
 }
 
-fn progress_save_load_cache(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
+fn set_progress(gui_data: &GuiData, display: &ProgressDisplay) {
+    let label_stage = &gui_data.progress_window.label_stage;
+    let progress_bar_current_stage = &gui_data.progress_window.progress_bar_current_stage;
+    let progress_bar_all_stages = &gui_data.progress_window.progress_bar_all_stages;
+    let taskbar_state = gui_data.taskbar_state.borrow();
 
-    progress_bar_current_stage.set_visible(false);
-    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
+    label_stage.set_text(&display.label);
 
-    let text = match item.sstage {
-        CurrentStage::SameMusicCacheLoadingFingerprints | CurrentStage::SameMusicCacheLoadingTags | CurrentStage::SimilarVideosAudioCacheLoading => {
-            flg!("progress_cache_loading")
-        }
-        CurrentStage::SameMusicCacheSavingFingerprints | CurrentStage::SameMusicCacheSavingTags | CurrentStage::SimilarVideosAudioCacheSaving => {
-            flg!("progress_cache_saving")
-        }
-        CurrentStage::DuplicateCacheLoading => {
-            flg!("progress_hash_cache_loading")
-        }
-        CurrentStage::DuplicateCacheSaving => {
-            flg!("progress_hash_cache_saving")
-        }
-        CurrentStage::DuplicatePreHashCacheLoading => {
-            flg!("progress_prehash_cache_loading")
-        }
-        CurrentStage::DuplicatePreHashCacheSaving => {
-            flg!("progress_prehash_cache_saving")
-        }
-        CurrentStage::ExifRemoverCacheLoading | CurrentStage::ExifRemoverCacheSaving | CurrentStage::ExifRemoverExtractingTags | CurrentStage::CleaningExif => {
-            panic!("Exif remover not implemented in gtk version")
-        }
-        _ => panic!("Invalid stage {:?}", item.sstage),
-    };
-
-    label_stage.set_text(&text);
-}
-
-fn progress_collect_items(gui_data: &GuiData, item: &ProgressData, files: bool) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    progress_bar_current_stage.set_visible(false);
-    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-
-    match item.sstage {
-        CurrentStage::DuplicateScanningName => {
-            label_stage.set_text(&flg!("progress_scanning_name", file_number_tm(item)));
-        }
-        CurrentStage::DuplicateScanningSizeName => {
-            label_stage.set_text(&flg!("progress_scanning_size_name", file_number_tm(item)));
-        }
-        CurrentStage::DuplicateScanningSize => {
-            label_stage.set_text(&flg!("progress_scanning_size", file_number_tm(item)));
-        }
-        _ => {
-            if files {
-                label_stage.set_text(&flg!("progress_scanning_general_file", file_number_tm(item)));
-            } else {
-                label_stage.set_text(&flg!("progress_scanning_empty_folders", folder_number = item.entries_checked));
-            }
-        }
-    }
-}
-
-fn progress_default(gui_data: &GuiData, item: &ProgressData) {
-    let label_stage = gui_data.progress_window.label_stage.clone();
-    let progress_bar_current_stage = gui_data.progress_window.progress_bar_current_stage.clone();
-    let progress_bar_all_stages = gui_data.progress_window.progress_bar_all_stages.clone();
-    let taskbar_state = gui_data.taskbar_state.clone();
-
-    progress_bar_current_stage.set_visible(true);
-    common_set_data(item, &progress_bar_all_stages, &progress_bar_current_stage, &taskbar_state);
-    taskbar_state.borrow().set_progress_state(TBPF_INDETERMINATE);
-
-    match item.sstage {
-        CurrentStage::SameMusicReadingTags => {
-            label_stage.set_text(&flg!("progress_scanning_music_tags", progress_ratio_tm(item)));
-        }
-        CurrentStage::SameMusicComparingTags => {
-            label_stage.set_text(&flg!("progress_scanning_music_tags_end", progress_ratio_tm(item)));
-        }
-        CurrentStage::SameMusicCalculatingFingerprints | CurrentStage::SameMusicComparingFingerprints | CurrentStage::SimilarVideosAudioComparingFingerprints => {
-            label_stage.set_text(&flg!("progress_scanning_music_content_end", progress_ratio_tm(item)));
-        }
-        CurrentStage::SimilarImagesCalculatingHashes => {
-            label_stage.set_text(&flg!("progress_scanning_image", progress_ratio_tm(item)));
-        }
-        CurrentStage::SimilarImagesComparingHashes => {
-            label_stage.set_text(&flg!("progress_comparing_image_hashes", progress_ratio_tm(item)));
-        }
-        CurrentStage::SimilarVideosCalculatingHashes => {
-            label_stage.set_text(&flg!("progress_scanning_video", progress_ratio_tm(item)));
-        }
-        CurrentStage::SimilarVideosCreatingThumbnails => {
-            label_stage.set_text(&flg!("progress_creating_video_thumbnails", progress_ratio_tm(item)));
-        }
-        CurrentStage::SimilarVideosAudioCalculatingFingerprints => {
-            label_stage.set_text(&flg!("progress_scanning_music_content", progress_ratio_tm(item)));
-        }
-        CurrentStage::BrokenFilesChecking => {
-            label_stage.set_text(&flg!("progress_scanning_broken_files", progress_ratio_tm(item)));
-        }
-        CurrentStage::BadExtensionsChecking => {
-            label_stage.set_text(&flg!("progress_scanning_extension_of_files", progress_ratio_tm(item)));
-        }
-        CurrentStage::DuplicatePreHashing => {
-            label_stage.set_text(&flg!("progress_analyzed_partial_hash", progress_ratio_tm(item)));
-        }
-        CurrentStage::DuplicateFullHashing => {
-            label_stage.set_text(&flg!("progress_analyzed_full_hash", progress_ratio_tm(item)));
-        }
-        CurrentStage::DuplicateHidingHardLinks | CurrentStage::SimilarImagesHidingHardLinks | CurrentStage::SimilarVideosHidingHardLinks => {
-            label_stage.set_text(&flg!("progress_hiding_hard_link", progress_ratio_tm(item)));
-        }
-        _ => unreachable!("Invalid stage {:?}", item.sstage),
-    }
-}
-
-fn common_set_data(item: &ProgressData, progress_bar_all_stages: &ProgressBar, progress_bar_current_stage: &ProgressBar, taskbar_state: &Rc<RefCell<TaskbarProgress>>) {
-    let (current_items_checked, current_stage_items_to_check) = if item.bytes_to_check > 0 {
-        (item.bytes_checked, item.bytes_to_check)
+    if let Some(current) = display.current_progress {
+        progress_bar_current_stage.set_visible(true);
+        let fraction = display.current_progress_size.unwrap_or(current) as f64 / 100.0;
+        progress_bar_current_stage.set_fraction(fraction);
+        let overall = if display.all_progress >= 0 { display.all_progress } else { current };
+        taskbar_state.set_progress_value(overall as u64, 100);
     } else {
-        (item.entries_checked as u64, item.entries_to_check as u64)
-    };
+        progress_bar_current_stage.set_visible(false);
+        taskbar_state.set_progress_state(TBPF_INDETERMINATE);
+    }
 
-    if item.entries_to_check != 0 {
-        let all_stages = (item.current_stage_idx as f64 + current_items_checked as f64 / current_stage_items_to_check as f64) / (item.max_stage_idx + 1) as f64;
-        let all_stages = all_stages.min(0.99);
-        progress_bar_all_stages.set_fraction(all_stages);
-        progress_bar_current_stage.set_fraction(current_items_checked as f64 / current_stage_items_to_check as f64);
-
-        taskbar_state.borrow().set_progress_value(
-            (item.current_stage_idx as u64) * current_stage_items_to_check + current_items_checked,
-            current_stage_items_to_check * (item.max_stage_idx + 1) as u64,
-        );
+    if display.all_progress >= 0 {
+        progress_bar_all_stages.set_visible(true);
+        progress_bar_all_stages.set_fraction(display.all_progress as f64 / 100.0);
     } else {
-        let all_stages = (item.current_stage_idx as f64) / (item.max_stage_idx + 1) as f64;
-        let all_stages = all_stages.min(0.99);
-        progress_bar_all_stages.set_fraction(all_stages);
-        progress_bar_current_stage.set_fraction(0f64);
-        taskbar_state.borrow().set_progress_value(item.current_stage_idx as u64, 1 + item.max_stage_idx as u64);
+        progress_bar_all_stages.set_visible(false);
     }
-}
-
-fn file_number_tm(item: &ProgressData) -> HashMap<&'static str, String> {
-    generate_translation_hashmap(vec![("file_number", item.entries_checked.to_string())])
-}
-
-fn progress_ratio_tm(item: &ProgressData) -> HashMap<&'static str, String> {
-    let mut v = vec![("file_checked", item.entries_checked.to_string()), ("all_files", item.entries_to_check.to_string())];
-    if item.bytes_to_check != 0 {
-        v.push(("data_checked", format_size(item.bytes_checked, BINARY)));
-        v.push(("all_data", format_size(item.bytes_to_check, BINARY)));
-    }
-    generate_translation_hashmap(v)
 }

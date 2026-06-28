@@ -27,13 +27,13 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Set up Java (required by Android SDK)
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install Android NDK, platforms and Rust targets
         run: |
@@ -46,13 +46,28 @@ jobs:
             "build-tools;${TARGET_SDK_VERSION}.0.0"
           echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/${NDK_VERSION}" >> $GITHUB_ENV
 
-      - name: Generate keystores
+      - name: Restore signing keystore from secrets
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
-          sudo apt update || true
-          sudo apt install -y just
+          set -euo pipefail
+          mkdir -p cedinia/android/keystore
 
-          echo "123456" > keystore_pass
-          just gen_keystores
+          if [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEYSTORE_B64" ]; then
+            printf '%s' "$KEYSTORE_PASSWORD" > keystore_pass
+            # Same key for every signing profile (dev/rdebug/release) so all APKs share one signature.
+            printf '%s' "$KEYSTORE_B64" | base64 -d > cedinia/android/keystore/release.keystore
+            cp cedinia/android/keystore/release.keystore cedinia/android/keystore/rdebug.keystore
+            cp cedinia/android/keystore/release.keystore cedinia/android/keystore/debug.keystore
+          else
+            echo "::warning::Android signing secrets (ANDROID_KEYSTORE_PASSWORD / ANDROID_KEYSTORE_B64) not set - generating a fresh throwaway keystore. The resulting APK will NOT be upgrade-compatible with official releases; set the secrets in this repo to get stable signing."
+            sudo apt update || true
+            sudo apt install -y just
+            echo "123456" > keystore_pass
+            just gen_keystores
+          fi
+
           PASS=$(cat keystore_pass)
           sed -i "s|TO_REPLACE_KEYSTORE_PASSWORD|$PASS|g" cedinia/Cargo.toml
 
@@ -81,26 +96,25 @@ jobs:
           cargo apk build -p cedinia --lib --target aarch64-linux-android
           mv target/debug/apk/cedinia.apk cedinia.apk
 
-      - name: Set up Gradle for AAB build
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.9'
+      # - name: Set up Gradle for AAB build
+      #   uses: gradle/actions/setup-gradle@v3
+      #   with:
+      #     gradle-version: '8.9'
 
-      - name: Build AAB
-        run: |
-          mkdir -p cedinia/android/app/src/main/jniLibs/arm64-v8a
-          cp target/aarch64-linux-android/${{ env.VERS }}/libcedinia.so \
-             cedinia/android/app/src/main/jniLibs/arm64-v8a/
-          cd cedinia/android
-          gradle bundleRelease
-          mv app/build/outputs/bundle/release/app-release.aab ../../cedinia.aab
+      # - name: Build AAB
+      #   run: |
+      #     mkdir -p cedinia/android/app/src/main/jniLibs/arm64-v8a
+      #     cp target/aarch64-linux-android/${{ env.VERS }}/libcedinia.so \
+      #        cedinia/android/app/src/main/jniLibs/arm64-v8a/
+      #     cd cedinia/android
+      #     gradle bundleRelease
+      #     mv app/build/outputs/bundle/release/app-release.aab ../../cedinia.aab
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
         with:
           name: cedinia-${{ env.VERS }}-apk
           path: |
-            cedinia.aab
             cedinia.apk
 
       - name: Release
@@ -110,5 +124,4 @@ jobs:
           tag_name: "Nightly"
           files: |
             cedinia.apk
-            cedinia.aab
           token: ${{ secrets.PAT_REPOSITORY }}

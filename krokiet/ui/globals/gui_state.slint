@@ -115,6 +115,8 @@ export global GuiState {
     in-out property <image> compare_right_image;
     // Flat index of the header row for the currently displayed group (for group navigation)
     in-out property <int> compare_current_group_header_flat_idx: -1;
+    in-out property <bool> compare_has_next_group: false;
+    in-out property <bool> compare_has_prev_group: false;
 
     // Loading overlay: shown while thumbnails are being prepared
     in-out property <bool> compare_loading: false;

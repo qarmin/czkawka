@@ -12,7 +12,7 @@ use rayon::prelude::*;
 use crate::common::cache::{CACHE_DUPLICATE_PREHASH_VERSION, CACHE_DUPLICATE_VERSION, load_and_split_cache_generalized_by_size, save_cache_to_file_generalized};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult};
 use crate::common::model::{CheckingMethod, FileEntry, HashType, ToolType, WorkContinueStatus};
-use crate::common::progress_data::{CurrentStage, ProgressData};
+use crate::common::progress_data::{CacheLoadPhase, DuplicateStage, ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::common::traits::ResultEntry;
@@ -60,9 +60,9 @@ impl DuplicateFinder {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(group_by_func)
+            .checking_method(CheckingMethod::Name)
             .stop_flag(stop_flag)
             .progress_sender(progress_sender)
-            .checking_method(CheckingMethod::Name)
             .build()
             .run();
 
@@ -143,9 +143,9 @@ impl DuplicateFinder {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(group_by_func)
+            .checking_method(CheckingMethod::SizeName)
             .stop_flag(stop_flag)
             .progress_sender(progress_sender)
-            .checking_method(CheckingMethod::SizeName)
             .build()
             .run();
 
@@ -205,9 +205,9 @@ impl DuplicateFinder {
         let result = DirTraversalBuilder::new()
             .common_data(&self.common_data)
             .group_by(|fe| fe.size)
+            .checking_method(CheckingMethod::Size)
             .stop_flag(stop_flag)
             .progress_sender(progress_sender)
-            .checking_method(self.get_params().check_method)
             .build()
             .run();
 
@@ -225,7 +225,7 @@ impl DuplicateFinder {
                     .map(|(_size, vec)| if vec.len() > 1 { vec.len() as u64 } else { 0 })
                     .sum::<u64>();
 
-                let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateHidingHardLinks, grouped_file_entries.len(), self.get_test_type(), 0);
+                let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::Duplicate(DuplicateStage::HidingHardLinks), grouped_file_entries.len(), 0);
                 self.files_with_identical_size = grouped_file_entries
                     .into_par_iter()
                     .with_max_len(rayon_max_len)
@@ -370,7 +370,7 @@ impl DuplicateFinder {
         }
 
         let check_type = self.get_params().hash_type;
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheLoading, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::Duplicate(DuplicateStage::LoadingPreHashCache(CacheLoadPhase::Loading)), 0, 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.prehash_load_cache_at_start();
 
@@ -380,9 +380,8 @@ impl DuplicateFinder {
         }
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::DuplicatePreHashing,
+            ToolStage::Duplicate(DuplicateStage::PreHashing),
             non_cached_files_to_check.values().map(Vec::len).sum(),
-            self.get_test_type(),
             non_cached_files_to_check
                 .iter()
                 .map(|(&size, items)| {
@@ -432,7 +431,7 @@ impl DuplicateFinder {
         progress_handler.join_thread();
 
         // Saving into cache
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicatePreHashCacheSaving, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::Duplicate(DuplicateStage::SavingPreHashCache), 0, 0);
 
         // Merge cached and freshly-computed entries into (size -> hash -> files) groups,
         // then only pass groups with >1 file to full hashing.  Merging is required so that
@@ -549,7 +548,7 @@ impl DuplicateFinder {
             return WorkContinueStatus::Continue;
         }
 
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheLoading, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::Duplicate(DuplicateStage::LoadingHashCache(CacheLoadPhase::Loading)), 0, 0);
 
         let (loaded_hash_map, records_already_cached, non_cached_files_to_check) = self.full_hashing_load_cache_at_start(pre_checked_map);
 
@@ -560,9 +559,8 @@ impl DuplicateFinder {
 
         let progress_handler = prepare_thread_handler_common(
             progress_sender,
-            CurrentStage::DuplicateFullHashing,
+            ToolStage::Duplicate(DuplicateStage::FullHashing),
             non_cached_files_to_check.values().map(Vec::len).sum(),
-            self.get_test_type(),
             non_cached_files_to_check.iter().map(|(size, items)| (*size) * items.len() as u64).sum::<u64>(),
         );
 
@@ -611,7 +609,7 @@ impl DuplicateFinder {
         // Even if clicked stop, save items to cache and show results
 
         progress_handler.join_thread();
-        let progress_handler = prepare_thread_handler_common(progress_sender, CurrentStage::DuplicateCacheSaving, 0, self.get_test_type(), 0);
+        let progress_handler = prepare_thread_handler_common(progress_sender, ToolStage::Duplicate(DuplicateStage::SavingHashCache), 0, 0);
 
         self.full_hashing_save_cache_at_exit(records_already_cached, &mut full_hash_results, loaded_hash_map);
 

@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = Cedinia
+app_name = سيْدِنيَا
 tool_duplicate_files = التكرارات
 tool_empty_folders = مجلدات فارغة
 tool_similar_images = صور مشابهة
@@ -13,6 +13,7 @@ tool_bad_extensions = ملحقات سيئة
 tool_same_music = مكرر الموسيقى
 tool_bad_names = أسماء سيئة
 tool_exif_remover = بيانات EXIF
+tool_similar_videos = فيديوهات مشابهة (صوت)
 tool_directories = المجلدات
 tool_settings = الإعدادات
 # Home screen tool card descriptions
@@ -27,6 +28,7 @@ home_bad_extensions_description = ملفات ذات ملحق غير صالح
 home_same_music_description = ملفات صوتية مشابهة بواسطة العلامات
 home_bad_names_description = الملفات ذات الأحرف الإشكالية في الاسم
 home_exif_description = صور مع بيانات التعريف EXIF
+home_similar_videos_description = العثور على مقاطع فيديو ذات صوت مشابه (لا حاجة لـ FFmpeg)
 # Results list
 scanning = جاري الفحص...
 stopping = التوقف...
@@ -63,9 +65,9 @@ delete_errors_title = فشل في حذف بعض الملفات:
 ok = حسناً
 # Stopping overlay
 stopping_overlay_title = التوقف
-stopping_overlay_body = 
-        جارٍ إنهاء الفحص الحالي...
-        الرجاء الانتظار.
+stopping_overlay_body =
+    جارٍ إنهاء الفحص الحالي...
+    الرجاء الانتظار.
 # Permission popup
 permission_title = الوصول إلى الملف
 permission_body = للمسح الضوئي للملفات، يحتاج التطبيق إلى الوصول إلى تخزين الجهاز. بدون هذا الإذن، لن يكون المسح الضوئي ممكنا.
@@ -113,6 +115,7 @@ settings_hash_size = حجم التجزئة
 settings_hash_size_desc = أحجام أكبر، لها إيجابيات خاطئة أقل، ولكنها أيضا تجد صورا أقل تشابه
 settings_hash_alg = خوارزمية التجزئة
 settings_image_filter = تغيير حجم الفلتر
+settings_geometric_invariance = دعوة هندسية
 settings_ignore_same_size = تجاهل الصور ذات الأبعاد نفسها
 settings_gallery_image_fit_cover = المعرض: محصول إلى مربع
 settings_gallery_image_fit_cover_desc = ملء الرتبة؛ تعطيل للحفاظ على نسبة العرض الأصلية
@@ -129,6 +132,10 @@ settings_music_length = طول
 settings_music_genre = النوع
 settings_music_bitrate = معدل
 settings_music_approx = مقارنة الوسوم التقريبية
+settings_temporary_files_header = ثغرات مؤقتة
+settings_temporary_files_extensions_label = خواص
+settings_temporary_files_extensions_placeholder = مثال: .tmp، .bak، ~
+settings_temporary_files_reset = إعادة التعيين إلى الافتراضي
 settings_broken_files_header = الحفلات المدفوعه
 settings_broken_files_note = المسح الكثيف للموارد. للحصول على أفضل أداء استخدم Krokiet على سطح المكتب.
 settings_broken_files_types_label = التحقق من اللعبة
@@ -136,6 +143,11 @@ settings_broken_audio = الصوت
 settings_broken_pdf = ملف PDF
 settings_broken_archive = أرشيف
 settings_broken_image = صورة
+settings_broken_font = الخط
+settings_broken_markup = علامات التنسيق (JSON/XML/TOML)
+settings_similar_videos_header = بيانات SIMILAR (AUDIO)
+settings_similar_videos_audio_preset = ضبط مسبقاً لتشابه الصوت
+settings_similar_videos_audio_preset_desc = التحكم في مدى دقة الصوت يجب أن يتطابق
 settings_bad_names_header = أسماء العملاء
 settings_bad_names_checks_label = التدوين
 settings_bad_names_uppercase_ext = ملحق الحالة العلوية
@@ -143,6 +155,11 @@ settings_bad_names_emoji = الرموز التعبيرية باسم
 settings_bad_names_space = المسافات عند البدء/النهاية
 settings_bad_names_non_ascii = الأحرف غير المستخدمة في معيار ASCII
 settings_bad_names_duplicated = أحرف متكررة
+settings_ignore_same_resolution = تجاهل الصور بنفس الدقة
+# Settings - Appearance section
+settings_appearance_label = امكانية
+settings_dark_theme = السمة المظلمة
+settings_dark_theme_desc = استخدام نظام الألوان المظلم
 # Settings - Diagnostics tab
 diagnostics_header = الأجهزة،
 diagnostics_thumbnails = ذاكرة تخزين مؤقت للصور المصغرة
@@ -152,6 +169,11 @@ diagnostics_clear_thumbnails = مسح الصور المصغرة
 diagnostics_open_thumbnails_folder = فتح المجلد
 diagnostics_clear_cache = مسح ذاكرة التخزين المؤقت
 diagnostics_open_cache_folder = فتح المجلد
+diagnostics_export_logs = تصدير السجلات
+logs_label = سجلات
+logs_export_title = تصدير السجلات
+logs_export_saved = تم نسخ السجلات إلى:
+logs_export_failed = تعذر تصدير السجلات
 diagnostics_collect_test = اختبار الوصول إلى الملف
 diagnostics_collect_test_desc = تحقق من عدد الملفات التي يمكن الوصول إليها
 diagnostics_collect_test_run = تشغيل
@@ -204,6 +226,8 @@ renamed_errors_suffix = أخطاء
 cleaned_exif_prefix = مسح EXIF من
 cleaned_exif_suffix = الملفات
 cleaned_exif_errors_suffix = أخطاء
+rename_error_read_file_name = لا يمكن قراءة اسم الملف
+rename_error_read_directory = لا يمكن قراءة الدليل
 and_more_prefix = ...و
 and_more_suffix = المزيد
 # Gallery / delete popups
@@ -212,7 +236,6 @@ gallery_back = الرجوع
 gallery_confirm_delete = نعم، حذف
 deleting_files = حذف الملفات...
 stop = توقف
-files_suffix = الملفات
 scanning_fallback = جارٍ الفحص...
 app_subtitle = تكريما لمعركة سيدينيا (972 CE)
 app_license = الواجهة لنواة Czkawka - GPL-3.0
@@ -221,45 +244,18 @@ cache_label = التوقف
 # Notification
 scan_completed_notification = تم مسح العناصر - { $file_count } الموجودة
 # Confirm popups (set from Rust)
-confirm_clean_exif = هل أنت متأكد من أنك تريد تنظيف وسوم EXIF من الملفّات المختارة{ $n}؟
+confirm_clean_exif = هل أنت متأكد من أنك تريد تنظيف وسوم EXIF من الملفّات المختارة{ $n }؟
 confirm_delete_items = هل أنت متأكد من أنك تريد حذف { $n } العناصر المحددة؟
-gallery_confirm_delete_msg = أنت على وشك حذف صور { $total_images } في مجموعات { $total_groups}.
-gallery_confirm_delete_warning = تم تحديد جميع العناصر في مجموعة { $unsafe_groups}!
+gallery_confirm_delete_msg = أنت على وشك حذف صور { $total_images } في مجموعات { $total_groups }.
+gallery_confirm_delete_warning = تم تحديد جميع العناصر في مجموعة { $unsafe_groups }!
 # Settings - SameMusic fingerprint warning
 same_music_fingerprint_warning = إن حساب ومقارنة بصمات الصوت كثيف الموارد وقد يستغرق وقتا طويلا. ويوصى باستخدام كروكييت على نظام حاسوب مكتبي لهذه المهمة.
 # Scan stage labels (shown during scan progress)
-stage_collecting_files = جمع الملفات
-stage_scanning_name = البحث عن طريق الاسم
-stage_scanning_size_name = البحث حسب الاسم والحجم
-stage_scanning_size = البحث حسب الحجم
-stage_pre_hash = التجزئة السابقة
-stage_full_hash = التجزئة
-stage_loading_cache = تحميل ذاكرة التخزين المؤقت
-stage_saving_cache = حفظ ذاكرة التخزين المؤقت
-stage_calculating_image_hashes = حساب تجزئة الصور
-stage_comparing_images = مقارنة الصور
-stage_calculating_video_hashes = حساب تجزئة الفيديو
-stage_checking_files = التحقق من الملفات
-stage_checking_extensions = التحقق من الإضافات
-stage_checking_names = التحقق من الأسماء
-stage_reading_music_tags = قراءة علامات الموسيقى
-stage_comparing_tags = مقارنة العلامات
-stage_calculating_music_fingerprints = حساب بصمات الموسيقى
-stage_comparing_fingerprints = مقارنة بصمات الأصابع
-stage_extracting_exif = قراءة علامات EXIF
-stage_creating_video_thumbnails = إنشاء مصغرات الفيديو
-stage_processing_videos = معالجة الفيديوهات
-stage_deleting = حذف الملفات
-stage_renaming = إعادة تسمية الملفات
-stage_moving = نقل الملفات
-stage_hardlinking = إنشاء روابط صلبة
-stage_symlinking = إنشاء الروابط الرمزية
-stage_optimizing_videos = تحسين الفيديوهات
-stage_cleaning_exif = تنظيف EXIF
 # Group headers in scan results
 duplicates_group_header = { $count } ملفات x { $per_file } / الملف = { $total } المجموع
 similar_images_group_header = { $count } صور مشابهة
 same_music_group_header = { $count } مسارات مشابهة
+similar_videos_group_header = { $count } مقاطع فيديو مشابهة
 # Rename confirmation
 confirm_rename_items = هل أنت متأكد من أنك تريد إعادة تسمية { $n } من الملفات المحددة؟
 # Combo-box option labels (translatable display names)
@@ -278,15 +274,10 @@ option_check_method_size = الحجم
 option_music_method_tags = الوسوم
 option_music_method_audio = الصوت
 option_min_size_none = لا
-option_min_size_1kb = 1 كيلوبايت
-option_min_size_8kb = 8 كيلوبايت
-option_min_size_64kb = 64 كيلوبايت
-option_min_size_1mb = 1 ميغابايت
-option_max_size_16kb = 16 كيلوبايت
-option_max_size_1mb = 1 ميغابايت
-option_max_size_10mb = 10 ميغابايت
-option_max_size_100mb = 100 ميغابايت
 option_max_size_unlimited = غير محدود
+option_audio_preset_identical = معرف
+option_audio_preset_clip = كسر أطول
+option_audio_preset_similar = مشابه
 # Volume labels (shown in the directories screen)
 volume_internal_storage = التخزين الداخلي
 volume_sd_card = بطاقة الذاكرة (بطاقة SD)
@@ -311,7 +302,18 @@ path_edit_placeholder = أدخل المسار...
 path_edit_not_exists = المسار غير موجود
 path_edit_is_dir = دليل
 path_edit_is_file = ملف
-path_edit_no_newlines = المسارات لا يمكن أن تحتوي على خطوط جديدة — مفتاح الإدخال غير مسموح به
+path_edit_no_newlines = المسارات لا يمكن أن تحتوي على خطوط جديدة - مفتاح الإدخال غير مسموح به
 ctx_menu_title = فتح
 ctx_open_file = فتح العنصر
 ctx_open_folder = فتح المجلد الأصل
+dir_open_folder = فتح المجلد
+# Compare view
+compare_label = قارن
+compare_loading = تحميل الصور…
+compare_cancelling = إلغاء…
+compare_computing = جاري حوسبة الفجوة…
+compare_mode_normal = جانب
+compare_mode_split = تقسيم
+compare_mode_overlay = تراكب
+compare_mode_diff = فرق
+compare_res_mismatch = قرارات مختلفة - قد تكون الفجوة غير دقيقة

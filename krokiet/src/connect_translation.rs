@@ -446,6 +446,10 @@ fn translate_items(app: &MainWindow) {
     translation.set_popup_save_title_text(flk!("popup_save_title").into());
     translation.set_popup_save_message_text(flk!("popup_save_message").into());
     translation.set_popup_rename_title_text(flk!("popup_rename_title").into());
+    translation.set_popup_rename_single_title_text(flk!("popup_rename_single_title").into());
+    translation.set_popup_rename_single_same_name_text(flk!("popup_rename_single_same_name").into());
+    translation.set_popup_rename_single_target_exists_text(flk!("popup_rename_single_target_exists").into());
+    translation.set_popup_error_title_text(flk!("popup_error_title").into());
     translation.set_popup_new_directories_title_text(flk!("popup_new_paths_title").into());
     translation.set_popup_move_title_text(flk!("popup_move_title").into());
     translation.set_popup_move_copy_checkbox_text(flk!("popup_move_copy_checkbox").into());
@@ -549,6 +553,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_context_menu_copy_file_name_text(flk!("context_menu_copy_file_name_text").into());
     translation.set_context_menu_copy_parent_folder_path_text(flk!("context_menu_copy_parent_folder_path_text").into());
     translation.set_context_menu_copy_full_path_text(flk!("context_menu_copy_full_path_text").into());
+    translation.set_context_menu_rename_text(flk!("context_menu_rename_text").into());
 
     let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),

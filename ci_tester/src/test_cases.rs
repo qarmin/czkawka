@@ -1,7 +1,7 @@
 pub struct TestCase {
     pub name: &'static str,
     /// Args passed to czkawka. Use the literal string `"TestFiles"` as the
-    /// directory placeholder – it will be replaced with the actual per-test
+    /// directory placeholder - it will be replaced with the actual per-test
     /// unique directory at runtime.
     pub args: &'static [&'static str],
     pub expected_files: &'static [&'static str],

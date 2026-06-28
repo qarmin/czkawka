@@ -7,19 +7,15 @@ window_compare_images = مقارنة الصور
 general_ok_button = حسناً
 general_close_button = أغلق
 # Krokiet info dialog
-krokiet_info_title = تقديم Krokiet - نسخة جديدة من Czkawka
+krokiet_info_title = إشعار الإلغاء
 krokiet_info_message =
-    كروكيت هو الإصدار الجديد والمحسّن والأسرع والأكثر موثوقية لـ Czkawka GTK GUI!
+    Czkawka GTK 12.0 هو الإصدار النهائي. لا مزيد من التحديثات أو الميزات أو إصلاحات الأخطاء.
     
-    إنه أسهل في التشغيل وأكثر مقاومة للتغييرات في النظام، لأنه يعتمد فقط على المكتبات الأساسية المتاحة افتراضيًا على معظم الأنظمة.
+    معظم الميزات من Czkawka GTK متوفرة في Krokiet، عادة بشكل أبسط وأسرع وأكثر استقرارا. ويضيف كروكييت أيضاً ميزات وتحسينات جديدة لم يكن من الممكن إدخالها على نسخة GTK.
     
-    كروكيت أيضًا يقدم ميزات يفتقر إليها Czkawka، بما في ذلك الصور المصغرة في وضع مقارنة الفيديو، ومسحّف EXIF، وخيارات تقدم نقل/نسخ/حذف الملفات أو ترتيب موسع.
+    إذا كنت لا تزال تستخدم Czkawka GTK، يجب أن يكون التبديل إلى Krokiet سهلاً، حيث أن لها واجهة مماثلة، وتبعيات أقل، ودعم أفضل عبر المنصات.
     
-    جربه بنفسك وشاهد الفرق!
-    
-    ستواصل Czkawka تلقي إصلاحات الأخطاء والتحديثات الصغيرة مني، ولكن جميع الميزات الجديدة ستتم تطويرها حصريًا لكروكيت، وأي شخص حر في المساهمة بميزات جديدة أو إضافة أوضاع مفقودة أو توسيع Czkawka بشكل أكبر.
-    
-    ملاحظة: يجب أن يظهر هذا الرسالة مرة واحدة فقط. إذا ظهر مرة أخرى، قم بتعيين متغير البيئة CZKAWKA_DONT_ANNOY_ME إلى أي قيمة غير فارغة.
+    PS: يجب أن تظهر هذه الرسالة مرة واحدة فقط. إذا ظهرت مرة أخرى، قم بتعيين متغير بيئة CZKAWKA_DONT_ANNOY_ME لأي قيمة غير فارغة.
 # Main window
 music_title_checkbox = العنوان
 music_artist_checkbox = الفنان
@@ -100,6 +96,7 @@ image_hash_alg_tooltip =
     لكل منها نقاط قوية وأضعف وسوف تعطي أحيانا نتائج أفضل وأحيانا أسوأ لصور مختلفة.
     
     لذلك ، لتحديد أفضل واحد لك، يتطلب الاختبار اليدوي.
+image_geometric_invariance_tooltip = قارن أيضا المتغيرات المنعكسة/المنقلبة واختياريا المتداولة لكل صورة. هذا يحسن المطابقة ولكنه يزيد من وقت التجزئة.
 big_files_mode_combobox_tooltip = يسمح بالبحث عن ملفات أصغر/أكبر
 big_files_mode_label = الملفات المحددة
 big_files_mode_smallest_combo_box = الأصغر حجماً
@@ -139,6 +136,7 @@ main_tree_view_column_codec = ترميز
 main_label_check_method = طريقة التحقق
 main_label_hash_type = نوع التجزئة
 main_label_hash_size = حجم التجزئة
+main_label_geometric_invariance = دعوة هندسية
 main_label_size_bytes = الحجم (بايت)
 main_label_min_size = الحد الأدنى
 main_label_max_size = الحد الأقصى
@@ -307,6 +305,21 @@ about_translation_button = الترجمة
 # Header
 header_setting_button_tooltip = فتح مربع حوار الإعدادات.
 header_about_button_tooltip = فتح مربع الحوار مع معلومات حول التطبيق.
+header_krokiet_button_tooltip = جرب Krokiet - النسخة الجديدة والمحسنة!
+# Krokiet promo dialog
+krokiet_promo_title = تقابل كروكييت!
+krokiet_promo_message = 
+        مرحباً أيها المستخدم الشجاع لـ Czkawka!
+
+        من الواضح أن القوة معك، ولكن Krokiet ليس هنا - إنه بديل أحدث وأسرع وأخف وزناً وأكثر جاذبية بشكل ملحوظ (بافتراض أن التطبيقات يمكن أن تكون جذابة)، وهو برنامج لتنظيف الملفات المكررة.
+
+        يتضمن Krokiet كل ما أعجب فيه الناس في Czkawka. إنه مجاني تماماً، ومصدر مفتوح، ويتميز بواجهة مستخدم فريدة وبسيطة (التي أشاد بها وكرهها الكثيرون)، ويقدم العديد من الميزات الجديدة، ويستخدم عددًا أقل من الاعتمادات، ويعمل بشكل أكثر موثوقية عبر منصات مختلفة.
+
+        وإذا فاتك ذلك، فهناك تطبيق أحدث حتى من Krokiet - وهو Cedinia، المصمم بشكل أساسي لأجهزة Android والاستخدام باللمس.
+
+        لقد خدمنا تطبيق Czkawka GTK جيدًا، ولكن وقته قد انتهى.
+krokiet_promo_link_download = تحميل Krokiet/Cedinia
+krokiet_promo_link_project = صفحة المشروع
 
 # Settings
 
@@ -436,37 +449,6 @@ compute_found_invalid_symlinks = تم العثور على { $number_files } رو
 compute_found_broken_files = تم العثور على { $number_files } ملفات مكسورة في { $time }
 compute_found_bad_extensions = تم العثور على { $number_files } ملفات ذات ملحقات غير صالحة في { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] تم فحص ملف { $file_number }
-       *[other] تم فحص { $file_number } ملفًا
-    }
-progress_scanning_extension_of_files = تم التحقق من ملحق من ملف { $file_checked }/{ $all_files }
-progress_scanning_broken_files = تم التحقق من الملف { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_video = تم تجزئة فيديو { $file_checked }/{ $all_files }
-progress_creating_video_thumbnails = تم إنشاء مصغرات للفيديو { $file_checked }/{ $all_files }
-progress_scanning_image = تجزئة من { $file_checked }/{ $all_files } صورة ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = مقارنة { $file_checked }/{ $all_files } هاش الصورة
-progress_scanning_music_tags_end = مقارنة العلامات { $file_checked }/{ $all_files } ملف الموسيقى
-progress_scanning_music_tags = قراءة العلامات { $file_checked }/{ $all_files } ملف الموسيقى
-progress_scanning_music_content_end = مقارنة بصمة الإصبع من { $file_checked }/{ $all_files } ملف موسيقي
-progress_scanning_music_content = تم حساب بصمة الإصبع { $file_checked }/{ $all_files } ملف موسيقي ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] تم فحص مجلد { $folder_number }
-       *[other] تم فحص { $folder_number } مجلدًا
-    }
-progress_scanning_size = حجم ملف { $file_number } المسح الضوئي
-progress_scanning_size_name = اسم وحجم الملف { $file_number } الذي تم فحصه
-progress_scanning_name = تم فحص اسم الملف { $file_number }
-progress_analyzed_partial_hash = تم تحليل التجزئة الجزئية ل { $file_checked }/{ $all_files } ملفات ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = تم تحليل التجزئة الكاملة من ملفات { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = تحميل ذاكرة التخزين المؤقت
-progress_prehash_cache_saving = حفظ ذاكرة التخزين المؤقت
-progress_hash_cache_loading = تحميل ذاكرة التخزين المؤقت للتجزئة
-progress_hash_cache_saving = حفظ ذاكرة التخزين المؤقت
-progress_cache_loading = تحميل ذاكرة التخزين المؤقت
-progress_cache_saving = حفظ ذاكرة التخزين المؤقت
 progress_current_stage = المرحلة الحالية:{ "" }
 progress_all_stages = جميع المراحل:{ " " }
 # Saving loading 
@@ -474,6 +456,7 @@ saving_loading_saving_success = حفظ التكوين إلى ملف { $name }.
 saving_loading_saving_failure = فشل في حفظ بيانات التكوين إلى الملف { $name }، السبب { $reason }.
 saving_loading_reset_configuration = تم مسح التكوين الحالي.
 saving_loading_loading_success = تم تحميل إعدادات التطبيق بشكل صحيح.
+saving_loading_no_config_file = لم يتم العثور على ملف الإعدادات، باستخدام الإعدادات الافتراضية.
 saving_loading_failed_to_create_config_file = فشل في إنشاء ملف الإعداد"{ $path }"، السبب"{ $reason }".
 saving_loading_failed_to_read_config_file = لا يمكن تحميل التكوين من "{ $path }" لأنه غير موجود أو ليس ملفا.
 saving_loading_failed_to_read_data_from_file = لا يمكن قراءة البيانات من الملف"{ $path }"، السبب"{ $reason }".

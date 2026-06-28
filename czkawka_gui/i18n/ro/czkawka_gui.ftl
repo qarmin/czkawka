@@ -7,19 +7,15 @@ window_compare_images = Compară imaginile
 general_ok_button = Ok
 general_close_button = Inchide
 # Krokiet info dialog
-krokiet_info_title = Introducerea lui Krokiet - Noua versiune a Czkawka
+krokiet_info_title = Aviz de dezaprobare
 krokiet_info_message =
-    Krokiet este noua, îmbunătățită, mai rapidă și mai fiabilă versiune a Czkawka GTK GUI!
+    Czkawka GTK 12.0 este versiunea finală. Nu sunt planificate alte actualizări, caracteristici sau remedieri ale erorilor.
     
-    Este mai ușor de rulat și mai rezistent la modificările sistemului, deoarece depinde doar de bibliotecile de bază disponibile pe majoritatea sistemelor implicit.
+    Cele mai multe caracteristici de la Czkawka GTK sunt disponibile în Krokiet, de obicei într-o formă mai simplă, mai rapidă și mai stabilă. De asemenea, Krokiet adaugă noi caracteristici și îmbunătățiri care nu au fost posibile în versiunea GTK.
     
-    Krokiet aduce, de asemenea, funcții pe care Czkawka nu le are, inclusiv miniaturile în modul de comparare video, un curățător EXIF, progresul mutării/copierii/ștergerii fișierelor sau opțiuni extinse de sortare.
+    Dacă încă utilizaţi Czkawka GTK, trecerea la Krokiet ar trebui să fie uşoară, deoarece are o interfață similară, mai puține dependențe și un sprijin mai bun între platforme.
     
-    Îl testează și vezi diferența!
-    
-    Czkawka va continua să primească corecții de erori și actualizări minore de la mine, dar toate noile funcții vor fi dezvoltate exclusiv pentru Krokiet, iar oricine este liber să contribuie cu noi funcții, să adauge moduri lipsă sau să extindă Czkawka în continuare.
-    
-    PS: Acest mesaj ar trebui să apară doar o dată. Dacă apare din nou, setați variabila de mediu CZKAWKA_DONT_ANNOY_ME la orice valoare non-goalomptă.
+    PS: Acest mesaj ar trebui să apară o singură dată. Dacă apare din nou, setează mediu CZKAWKA_DONT_ANNOY_ME la orice valoare necompletată.
 # Main window
 music_title_checkbox = Titlu
 music_artist_checkbox = Artist
@@ -100,6 +96,7 @@ image_hash_alg_tooltip =
     Fiecare are atât puncte puternice, cât şi puncte mai slabe şi va da uneori rezultate mai bune şi uneori mai proaste pentru imagini diferite.
     
     Deci, pentru a determina cel mai bun dintre voi, este necesară testarea manuală.
+image_geometric_invariance_tooltip = Compară, de asemenea, variantele oglindă/flipuită și cele cu rotație opțională ale fiecărei imagini. Acest lucru îmbunătățește potrivirea dar crește timpul de hashing.
 big_files_mode_combobox_tooltip = Permite căutarea celor mai mici/mai mari fişiere
 big_files_mode_label = Fișiere verificate
 big_files_mode_smallest_combo_box = Cel mai mic
@@ -139,6 +136,7 @@ main_tree_view_column_codec = Codecul
 main_label_check_method = Metoda de verificare
 main_label_hash_type = Tip hash
 main_label_hash_size = Dimensiune hash
+main_label_geometric_invariance = Inventariere geometrică
 main_label_size_bytes = Dimensiune (octeți)
 main_label_min_size = Minim
 main_label_max_size = Maxim
@@ -307,6 +305,21 @@ about_translation_button = Traducere
 # Header
 header_setting_button_tooltip = Deschide dialogul de setări.
 header_about_button_tooltip = Deschide dialogul cu informații despre aplicație.
+header_krokiet_button_tooltip = Încercați Krokiet - versiunea nouă și îmbunătățită!
+# Krokiet promo dialog
+krokiet_promo_title = Întâlnește-te cu Krokiet!
+krokiet_promo_message =
+    Bună ziua aici, utilizator curajos!
+    
+    Forţa este clar cu tine, dar Krokiet nu este - un mai nou, mai rapid, mai uşor, şi semnificativ mai uşor (presupunând că aplicaţiile pot fi de fapt superficiale) duplică mai curat.
+    
+    Krokiet include tot ceea ce le place oamenilor de Czkawka. este complet gratuit, open source, are o interfață unică și simplă (atât lăudată, cât și urată de mulți), introduce multe caracteristici noi, utilizează mai puține dependențe și funcționează mult mai fiabil pe diferite platforme.
+    
+    Și dacă ți-ai pierdut cumva ceva, există deja o aplicație și mai nouă decât Krokiet - Cedinia, proiectat în principal pentru dispozitive Android și utilizarea touchscreen-ului.
+    
+    Czkawka GTK ne-a servit bine, dar ceasul său s-a încheiat.
+krokiet_promo_link_download = Descarcă Krokiet/Cedinia
+krokiet_promo_link_project = Pagina proiectului
 
 # Settings
 
@@ -436,37 +449,6 @@ compute_found_invalid_symlinks = { $number_files } link-uri simboluri invalide g
 compute_found_broken_files = Fișiere defecte { $number_files } găsite în { $time }
 compute_found_bad_extensions = Fișiere { $number_files } cu extensii invalide în { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] a scanat { $file_number } fişierul
-       *[other] Scanat { $file_number } fişiere
-    }
-progress_scanning_extension_of_files = S-a verificat extensia fișierului { $file_checked }/{ $all_files }
-progress_scanning_broken_files = Fişier verificat { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_video = Hashed of { $file_checked }/{ $all_files } video
-progress_creating_video_thumbnails = Pictograme video create de { $file_checked }/{ $all_files }
-progress_scanning_image = Hashed of { $file_checked }/{ $all_files } image ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Imaginea a fost comparată { $file_checked }/{ $all_files }
-progress_scanning_music_tags_end = Tag-uri comparate ale fișierului de muzică { $file_checked }/{ $all_files }
-progress_scanning_music_tags = Citește etichetele fișierului de muzică { $file_checked }/{ $all_files }
-progress_scanning_music_content_end = Față de amprenta fișierului de muzică { $file_checked }/{ $all_files }
-progress_scanning_music_content = Amprenta calculată a fișierului de muzică { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] Dosar Scanat { $folder_number }
-       *[other] Scanat { $folder_number } dosare
-    }
-progress_scanning_size = Dimensiune scanată pentru fişierul { $file_number }
-progress_scanning_size_name = Numele scanat şi dimensiunea fişierului { $file_number }
-progress_scanning_name = Numele scanat al fişierului { $file_number }
-progress_analyzed_partial_hash = S-a analizat hash parțial al fișierelor { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = S-a analizat hash complet al fişierelor { $file_checked }/{ $all_files } ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = Se încarcă cache-ul prehash
-progress_prehash_cache_saving = Salvare cache prehash
-progress_hash_cache_loading = Încărcare cache hash
-progress_hash_cache_saving = Salvare cache hash
-progress_cache_loading = Se încarcă geocutia
-progress_cache_saving = Salvare geocutie
 progress_current_stage = Current Stage:{ "  " }
 progress_all_stages = All Stages:{ "  " }
 # Saving loading 
@@ -474,6 +456,7 @@ saving_loading_saving_success = Configurație salvată în fișierul { $name }.
 saving_loading_saving_failure = Salvarea datelor de configurare a eșuat în fișierul { $name }, motivul { $reason }.
 saving_loading_reset_configuration = Configurația curentă a fost ștearsă.
 saving_loading_loading_success = Configurare aplicație încărcată corespunzător.
+saving_loading_no_config_file = Nu a fost găsit niciun fișier de configurare, folosind setările implicite.
 saving_loading_failed_to_create_config_file = Nu s-a putut crea fișierul de configurare "{ $path }", motivul "{ $reason }".
 saving_loading_failed_to_read_config_file = Nu se poate încărca configurația din "{ $path }" deoarece nu există sau nu este un fișier.
 saving_loading_failed_to_read_data_from_file = Datele din fişierul "{ $path }", motivul "{ $reason }".

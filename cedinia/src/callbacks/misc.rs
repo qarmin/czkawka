@@ -92,8 +92,8 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
                 let start = std::time::Instant::now();
                 let volumes = detect_storage_volumes();
                 let volume_count = volumes.len() as i32;
-                let mut total_files: i32 = 0;
-                let mut total_folders: i32 = 0;
+                let mut total_files: u64 = 0;
+                let mut total_folders: u64 = 0;
                 let mut stopped = false;
                 'outer: for vol in &volumes {
                     let canonical = std::fs::canonicalize(vol.path.as_str()).unwrap_or_else(|_| std::path::PathBuf::from(vol.path.as_str()));
@@ -107,8 +107,8 @@ pub(crate) fn wire_collect_test(window: &MainWindow) {
                 let elapsed_time = format_duration_ms(start.elapsed().as_millis());
                 let result = CollectTestResult {
                     volumes: volume_count,
-                    files: total_files,
-                    folders: total_folders,
+                    files: total_files.min(i32::MAX as u64) as i32,
+                    folders: total_folders.min(i32::MAX as u64) as i32,
                     elapsed_time,
                 };
                 let _ = slint::invoke_from_event_loop(move || {
@@ -236,6 +236,113 @@ fn open_dir(path: &Path) {
     }
 }
 
+fn collect_log_files() -> Vec<PathBuf> {
+    let Some(ccp) = czkawka_core::common::config_cache_path::get_config_cache_path() else {
+        return Vec::new();
+    };
+    let mut files = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(&ccp.cache_folder) {
+        for entry in entries.flatten() {
+            // Picks up "cedinia.log" plus the file_rotate suffixes ("cedinia.log.<timestamp>").
+            if entry.file_name().to_string_lossy().starts_with("cedinia.log") {
+                files.push(entry.path());
+            }
+        }
+    }
+    files
+}
+
+fn downloads_dir() -> Option<PathBuf> {
+    #[cfg(target_os = "android")]
+    {
+        Some(PathBuf::from("/sdcard/Download"))
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let home = std::env::var_os("HOME")?;
+        let downloads = Path::new(&home).join("Downloads");
+        Some(if downloads.is_dir() { downloads } else { PathBuf::from(home) })
+    }
+}
+
+// Backup alongside cedinia.log: logd already filters logcat to our own UID.
+#[cfg(target_os = "android")]
+fn dump_logcat(dest: &Path) -> bool {
+    let Ok(output) = std::process::Command::new("/system/bin/logcat").args(["-d", "-v", "threadtime"]).output() else {
+        return false;
+    };
+    if output.stdout.is_empty() {
+        return false;
+    }
+    std::fs::write(dest, &output.stdout).is_ok()
+}
+
+fn export_logs_to_downloads() -> std::io::Result<PathBuf> {
+    log::logger().flush();
+
+    let downloads = downloads_dir().ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "no downloads directory"))?;
+    let dest = downloads.join("cedinia_logs");
+    std::fs::create_dir_all(&dest)?;
+
+    let mut exported = 0;
+
+    for f in collect_log_files() {
+        if std::fs::metadata(&f).map_or(true, |m| m.len() == 0) {
+            continue;
+        }
+        if let Some(name) = f.file_name()
+            && std::fs::copy(&f, dest.join(name)).is_ok()
+        {
+            exported += 1;
+        }
+    }
+
+    #[cfg(target_os = "android")]
+    if dump_logcat(&dest.join("cedinia-logcat.txt")) {
+        exported += 1;
+    }
+
+    if exported == 0 {
+        return Err(std::io::Error::new(std::io::ErrorKind::NotFound, "no log content to export"));
+    }
+    log::info!("export_logs: exported {exported} log file(s) to \"{}\"", dest.to_string_lossy());
+    Ok(dest)
+}
+
+pub(crate) fn wire_export_logs(window: &MainWindow) {
+    let weak = window.as_weak();
+    window.global::<AppState>().on_export_logs(move || {
+        let win = weak.upgrade().expect("Failed to upgrade app :(");
+        if win.global::<AppState>().get_log_export_running() {
+            return;
+        }
+        win.global::<AppState>().set_log_export_running(true);
+
+        let weak2 = win.as_weak();
+        std::thread::spawn(move || {
+            let result = export_logs_to_downloads();
+            let _ = slint::invoke_from_event_loop(move || {
+                if let Some(win) = weak2.upgrade() {
+                    let st = win.global::<AppState>();
+                    st.set_log_export_running(false);
+                    match result {
+                        Ok(dest) => {
+                            st.set_log_export_ok(true);
+                            st.set_log_export_result(dest.to_string_lossy().to_string().into());
+                        }
+                        Err(e) => {
+                            log::error!("export_logs: failed: {e}");
+                            st.set_log_export_ok(false);
+                            st.set_log_export_result(slint::SharedString::new());
+                        }
+                    }
+                    st.set_log_export_done(true);
+                }
+            });
+        });
+    });
+}
+
 pub(crate) fn wire_language_change(window: &MainWindow) {
     let weak = window.as_weak();
     window.global::<AppState>().on_apply_language_change(move || {
@@ -295,5 +402,8 @@ pub(crate) fn wire_save_settings_now(
         let settings = collect_settings_from_gui(&win);
         save_settings(&settings);
         crate::settings::save_dirs(&included_dirs.borrow(), &excluded_dirs.borrow(), &referenced_dirs.borrow());
+
+        #[cfg(target_os = "android")]
+        crate::file_picker_android::apply_theme_to_system_bars(settings.use_dark_theme);
     });
 }

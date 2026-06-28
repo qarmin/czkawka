@@ -109,6 +109,62 @@ export component SettingsScreen {
         }
     }
 
+    if AppState.log_export_done : ScrimDialog {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 100;
+        bordered: true;
+        dismissed => { AppState.log_export_done = false; }
+
+        Text {
+            text: Translations.logs_export_title_text;
+            color: AppState.log_export_ok ? CediniaColors.accent_light : CediniaColors.danger;
+            font-size: Fonts.title_lg;
+            font-weight: Fonts.bold;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
+
+        Rectangle { height: 1px; background: CediniaColors.divider; }
+
+        Text {
+            text: AppState.log_export_ok ? Translations.logs_export_saved_text : Translations.logs_export_failed_text;
+            color: CediniaColors.text_secondary;
+            font-size: Fonts.subtitle;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            wrap: word-wrap;
+        }
+
+        if AppState.log_export_ok : Text {
+            text: AppState.log_export_result;
+            color: CediniaColors.text_primary;
+            font-size: Fonts.body;
+            font-weight: Fonts.semibold;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            wrap: word-wrap;
+        }
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            if AppState.log_export_ok : TouchButton {
+                label: Translations.diagnostics_open_cache_folder_text;
+                horizontal-stretch: 1.0;
+                bg: CediniaColors.bg_elevated;
+                fg: CediniaColors.text_secondary;
+                clicked => { AppState.open_parent_folder(AppState.log_export_result); }
+            }
+
+            TouchButton {
+                label: Translations.ok_text;
+                horizontal-stretch: 1.0;
+                bg: CediniaColors.accent;
+                fg: CediniaColors.fg_on_accent;
+                clicked => { AppState.log_export_done = false; }
+            }
+        }
+    }
+
 
     property <SettingsTab> active_tab: SettingsTab.General;
     property <DiagConfirm> diag_confirm_action: DiagConfirm.None;
@@ -773,6 +829,30 @@ export component SettingsScreen {
                                 bg: CediniaColors.danger.with-alpha(0.5);
                                 fg: CediniaColors.fg_on_danger;
                                 clicked => { diag_confirm_action = DiagConfirm.Cache; }
+                            }
+                        }
+                    }
+
+
+                    CategoryLabel { label: Translations.logs_label_text; }
+
+                    Rectangle {
+                        height: 56px;
+                        background: CediniaColors.bg_surface;
+                        HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 8px;
+                            padding-bottom: 8px;
+
+                            TouchButton {
+                                label: Translations.diagnostics_export_logs_text;
+                                horizontal-stretch: 1.0;
+                                min_h: 40px;
+                                enabled: !AppState.log_export_running;
+                                bg: CediniaColors.accent;
+                                fg: CediniaColors.fg_on_accent;
+                                clicked => { AppState.export_logs(); }
                             }
                         }
                     }

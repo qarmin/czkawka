@@ -364,7 +364,8 @@ impl ActiveTab {
                 StrDataEmptyFiles::Size => SortIdx::IntIdxPair(IntDataEmptyFiles::SizePart1 as i32, IntDataEmptyFiles::SizePart2 as i32),
             },
             Self::SimilarImages => match StrDataSimilarImages::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for SimilarImages")) {
-                StrDataSimilarImages::Similarity | StrDataSimilarImages::Name | StrDataSimilarImages::Path => SortIdx::StrIdx(str_idx),
+                StrDataSimilarImages::Name | StrDataSimilarImages::Path => SortIdx::StrIdx(str_idx),
+                StrDataSimilarImages::Similarity => SortIdx::IntIdx(IntDataSimilarImages::SimilarityValue as i32),
                 StrDataSimilarImages::ModificationDate => {
                     SortIdx::IntIdxPair(IntDataSimilarImages::ModificationDatePart1 as i32, IntDataSimilarImages::ModificationDatePart2 as i32)
                 }

@@ -11,15 +11,27 @@ use symphonia::core::io::MediaSourceStream;
 
 use crate::common::progress_stop_handler::check_if_stop_received;
 
-pub fn parse_audio_file(file_handler: File, stop_flag: &Arc<AtomicBool>) -> Result<Option<()>, Error> {
+#[derive(Debug)]
+pub enum AudioCheckError {
+    UnsupportedCodec,
+    Other(String),
+}
+
+impl AudioCheckError {
+    fn other(err: &Error) -> Self {
+        Self::Other(err.to_string())
+    }
+}
+
+pub fn parse_audio_file(file_handler: File, stop_flag: &Arc<AtomicBool>) -> Result<Option<()>, AudioCheckError> {
     let mss = MediaSourceStream::new(Box::new(file_handler), Default::default());
 
     let Ok(mut format) = symphonia::default::get_probe().probe(&Default::default(), mss, Default::default(), Default::default()) else {
-        return Err(Error::Unsupported("probe info not available/file not recognized"));
+        return Err(AudioCheckError::Other("probe info not available/file not recognized".to_string()));
     };
 
     let Some(track) = format.tracks().iter().find(|t| matches!(t.codec_params.as_ref(), Some(CodecParameters::Audio(_)))) else {
-        return Err(Error::Unsupported("not supported audio track"));
+        return Err(AudioCheckError::Other("not supported audio track".to_string()));
     };
 
     let audio_params = match track.codec_params.as_ref() {
@@ -28,7 +40,7 @@ pub fn parse_audio_file(file_handler: File, stop_flag: &Arc<AtomicBool>) -> Resu
     };
 
     let Ok(mut decoder) = symphonia::default::get_codecs().make_audio_decoder(&audio_params, &AudioDecoderOptions::default()) else {
-        return Err(Error::Unsupported("not supported codec"));
+        return Err(AudioCheckError::UnsupportedCodec);
     };
 
     loop {
@@ -39,8 +51,8 @@ pub fn parse_audio_file(file_handler: File, stop_flag: &Arc<AtomicBool>) -> Resu
         let packet = match format.next_packet() {
             Ok(Some(p)) => p,
             Ok(None) => return Ok(Some(())),
-            Err(Error::ResetRequired) => {
-                return Err(Error::ResetRequired);
+            Err(err @ Error::ResetRequired) => {
+                return Err(AudioCheckError::other(&err));
             }
             Err(err) => {
                 if let IoError(ref er) = err
@@ -48,10 +60,12 @@ pub fn parse_audio_file(file_handler: File, stop_flag: &Arc<AtomicBool>) -> Resu
                 {
                     return Ok(Some(()));
                 }
-                return Err(err);
+                return Err(AudioCheckError::other(&err));
             }
         };
 
-        decoder.decode(&packet)?;
+        if let Err(err) = decoder.decode(&packet) {
+            return Err(AudioCheckError::other(&err));
+        }
     }
 }

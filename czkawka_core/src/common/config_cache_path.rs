@@ -176,7 +176,11 @@ pub(crate) fn open_cache_folder(
 ) -> Option<((Option<File>, PathBuf), (Option<File>, PathBuf))> {
     let cache_dir = get_config_cache_path()?.cache_folder;
     let cache_file = cache_dir.join(cache_file_name);
-    let cache_file_json = cache_dir.join(cache_file_name.replace(".bin", ".json"));
+    let json_file_name = match cache_file_name.strip_suffix(".bin") {
+        Some(stem) => format!("{stem}.json"),
+        None => format!("{cache_file_name}.json"),
+    };
+    let cache_file_json = cache_dir.join(json_file_name);
 
     let mut file_handler_default = None;
     let mut file_handler_json = None;

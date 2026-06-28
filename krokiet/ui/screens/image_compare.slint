@@ -204,6 +204,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 colorize-icon: true;
                 text: Translations.compare_prev_group_text;
                 height: parent.height;
+                enabled: GuiState.compare_has_prev_group;
                 clicked => { Callabler.compare_prev_group(); }
             }
 
@@ -282,6 +283,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 colorize-icon: true;
                 text: Translations.compare_next_group_text;
                 height: parent.height;
+                enabled: GuiState.compare_has_next_group;
                 clicked => { Callabler.compare_next_group(); }
             }
         }
@@ -404,7 +406,7 @@ export component ImageCompareOverlay inherits Rectangle {
                         Button {
                             x: parent.width - self.width - 6px;
                             y: parent.height - self.height - 6px;
-                            width: 32px; height: 28px;
+                            width: 38px; height: 34px;
                             text: (left_valid && GuiState.compare_images[GuiState.compare_left_idx].checked) ? "✓" : "□";
                             checked: left_valid && GuiState.compare_images[GuiState.compare_left_idx].checked;
                             clicked => { Callabler.compare_toggle_checkbox(GuiState.compare_left_idx); }
@@ -437,7 +439,7 @@ export component ImageCompareOverlay inherits Rectangle {
                         Button {
                             x: 6px;
                             y: parent.height - self.height - 6px;
-                            width: 32px; height: 28px;
+                            width: 38px; height: 34px;
                             text: (right_valid && GuiState.compare_images[GuiState.compare_right_idx].checked) ? "✓" : "□";
                             checked: right_valid && GuiState.compare_images[GuiState.compare_right_idx].checked;
                             clicked => { Callabler.compare_toggle_checkbox(GuiState.compare_right_idx); }
@@ -519,6 +521,12 @@ export component ImageCompareOverlay inherits Rectangle {
                             clicked => { Callabler.compare_set_left(idx); }
                         }
                         Button {
+                            width: 38px; height: parent.height;
+                            text: img.checked ? "✓" : "□";
+                            checked: img.checked;
+                            clicked => { Callabler.compare_toggle_checkbox(idx); }
+                        }
+                        Button {
                             text: "→"; height: parent.height; horizontal-stretch: 1;
                             checked: idx == GuiState.compare_right_idx;
                             enabled: idx != GuiState.compare_left_idx;
@@ -526,21 +534,13 @@ export component ImageCompareOverlay inherits Rectangle {
                         }
                     }
 
-                    HorizontalLayout {
-                        height: 22px; spacing: 3px; alignment: center;
-                        Button {
-                            width: 38px; height: parent.height;
-                            text: img.checked ? "✓" : "□";
-                            checked: img.checked;
-                            clicked => { Callabler.compare_toggle_checkbox(idx); }
-                        }
-                        Text {
-                            text: img.name;
-                            font-size: FontSizes.small;
-                            overflow: elide;
-                            vertical-alignment: center;
-                            horizontal-stretch: 1;
-                        }
+                    Text {
+                        height: 28px;
+                        text: img.name;
+                        font-size: FontSizes.small;
+                        overflow: elide;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
                     }
                 }
             }

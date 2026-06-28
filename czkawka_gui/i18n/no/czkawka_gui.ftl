@@ -7,19 +7,15 @@ window_compare_images = Sammenlign bilder
 general_ok_button = Ok
 general_close_button = Lukk
 # Krokiet info dialog
-krokiet_info_title = Introduserer Krokiet - Ny versjon av Czkawka
+krokiet_info_title = Foreldelse varsel
 krokiet_info_message =
-    Krokiet er den nye, forbedrede, raskere og mer pålitelige versjonen av Czkawka GTK GUI!
+    Tsjekkka GTK 12.0 er den endelige versjonen. Ingen flere oppdateringer, funksjoner eller feilrettinger er planlagt.
     
-    Det er lettere å kjøre og mer motstandsdyktig mot systemendringer, siden det bare er avhengig av kjernelibbrer som er tilgjengelige på de fleste systemer som standard.
+    De fleste elementene fra Czkawka GTK er tilgjengelige i Krokiet, vanligvis i en enklere og mer stabil form. Krokiet legger også til nye funksjoner og forbedringer som ikke var mulig i GTK-versjonen.
     
-    Krokiet bringer også funksjoner som Czkawka mangler, inkludert forhåndsvisninger i videoj sammenligningsmodus, en EXIF-renser, fil flytt/kopier/slett fremdrift eller utvidede sorteringsalternativer.
+    Hvis du fortsatt bruker Czkawka GTK, bør det være enkelt å bytte til Krokiet siden det har et lignende grensesnitt og færre avhengigheter og bedre støtte på tvers av plattformer.
     
-    Prøv det og se forskjellen!
-    
-    Czkawka vil fortsette å motta feilrettinger og mindre oppdateringer fra meg, men alle nye funksjoner vil bli utviklet eksklusivt for Krokiet, og alle er fri til å bidra med nye funksjoner, legge til manglende moduser eller utvide Czkawka videre.
-    
-    PS: Denne meldingen skal bare vises én gang. Hvis den dukker opp igjen, sett CZKAWKA_DONT_ANNOY_ME miljøvariabelen til en hvilken som helst ikke-tom verdi.
+    PS: Denne meldingen skal bare vises én gang. Hvis den vises igjen, sett CZKAWKA_DONT_ANNOY_ME miljøvariabelen til en ikke-tom verdi.
 # Main window
 music_title_checkbox = Tittel
 music_artist_checkbox = Kunstner
@@ -100,6 +96,7 @@ image_hash_alg_tooltip =
     Hver har både sterke og svakere poeng, og vil noen ganger gi bedre og noen ganger verre resultater for ulike bilder.
     
     Så for å bestemme det beste for deg, kreves manuell testing.
+image_geometric_invariance_tooltip = Sammenlign også speilet/flørtet og eventuelt roterte varianter av hvert bilde. Dette forbedrer matching, men øker hashingtiden.
 big_files_mode_combobox_tooltip = Lar deg søke etter minste/største filer
 big_files_mode_label = Avmerkede filer
 big_files_mode_smallest_combo_box = Den minste
@@ -139,6 +136,7 @@ main_tree_view_column_codec = Kodek
 main_label_check_method = Sjekkmetode
 main_label_hash_type = Type hash
 main_label_hash_size = Størrelse på hash
+main_label_geometric_invariance = Geometrisk invarians
 main_label_size_bytes = Størrelse (bytes)
 main_label_min_size = Min
 main_label_max_size = Maks
@@ -307,6 +305,21 @@ about_translation_button = Oversettelse
 # Header
 header_setting_button_tooltip = Åpner dialogboksen for innstillinger.
 header_about_button_tooltip = Åpner dialog med info om app.
+header_krokiet_button_tooltip = Prøv Krokiet - den nye og forbedrede versjonen!
+# Krokiet promo dialog
+krokiet_promo_title = Møt Krokiet!
+krokiet_promo_message =
+    Hei der, modig Tsjekkawka-bruker!
+    
+    Force er åpenbart hos deg, men Krokiet er ikke - en nyere, raskere, lysere og betydelig mer håndtak (forutsetter at apper faktisk kan være flittig) duplisert renere.
+    
+    Krokiet inneholder alt som liker å snakke med Tsjekkiska. Det er helt gratis, åpen kildekode, har et unikt og enkelt brukergrensesnitt (både skrøpelig og hatet av mange), introduserer mange nye funksjoner, bruker færre avhengigheter og fungerer langt mer pålitelig på tvers av ulike plattformer.
+    
+    Og hvis du har gått glipp av det, så er det allerede en enda nyere app enn Krokiet - Cedinia, designet først og fremst for Android-enheter og berøringsskjerm.
+    
+    Tsjekkia GTK har tjent oss bra, men klokken har avsluttet.
+krokiet_promo_link_download = Last ned Krokiet/Cedinia
+krokiet_promo_link_project = Prosjektets side
 
 # Settings
 
@@ -436,37 +449,6 @@ compute_found_invalid_symlinks = Fant { $number_files } ugyldige symlinker i { $
 compute_found_broken_files = Fant { $number_files } ødelagte filer i { $time }
 compute_found_bad_extensions = Fant { $number_files } filer med ugyldige utvidelser i { $time }
 # Progress window
-progress_scanning_general_file =
-    { $file_number ->
-        [one] Skannet { $file_number } fil
-       *[other] Skannet { $file_number } filer
-    }
-progress_scanning_extension_of_files = Merket utvidelse av { $file_checked }/{ $all_files } -filen
-progress_scanning_broken_files = Merket { $file_checked }/{ $all_files } fil ({ $data_checked }/{ $all_data })
-progress_scanning_video = Kastet av { $file_checked }/{ $all_files } video
-progress_creating_video_thumbnails = Lagede miniatyrbilder av { $file_checked }/{ $all_files } video
-progress_scanning_image = Kastet av { $file_checked }/{ $all_files } bilde ({ $data_checked }/{ $all_data })
-progress_comparing_image_hashes = Sammenlignet { $file_checked }/{ $all_files } bilde-hash
-progress_scanning_music_tags_end = Sammenligne tagger med { $file_checked }/{ $all_files } musikkfil
-progress_scanning_music_tags = Les tagger for { $file_checked }/{ $all_files } musikkfil
-progress_scanning_music_content_end = Sammenlignet fingeravtrykk av { $file_checked }/{ $all_files } musikkfil
-progress_scanning_music_content = Beregnet fingeravtrykk på { $file_checked }/{ $all_files } musikkfil ({ $data_checked }/{ $all_data })
-progress_scanning_empty_folders =
-    { $folder_number ->
-        [one] Skannet { $folder_number } mappe
-       *[other] Skannet { $folder_number } mapper
-    }
-progress_scanning_size = Skannet størrelse på { $file_number } fil
-progress_scanning_size_name = { $file_number } fil skannet navn og størrelse
-progress_scanning_name = { $file_number } fil skannet navn
-progress_analyzed_partial_hash = Analyserte delvis hash av { $file_checked }/{ $all_files } filer ({ $data_checked }/{ $all_data })
-progress_analyzed_full_hash = Analysert full hash av { $file_checked }/{ $all_files } filer ({ $data_checked }/{ $all_data })
-progress_prehash_cache_loading = Laster prehash cache
-progress_prehash_cache_saving = Lagrer prehash-cache
-progress_hash_cache_loading = Laster hash-cache
-progress_hash_cache_saving = Lagrer hurtigbufferen for hash
-progress_cache_loading = Laster cache
-progress_cache_saving = Lagrer cachen
 progress_current_stage = Gjeldende trinn: { " " }
 progress_all_stages = Alle stadier:{ " " }
 # Saving loading 
@@ -474,6 +456,7 @@ saving_loading_saving_success = Lagret konfigurasjon til filen { $name }.
 saving_loading_saving_failure = Kunne ikke lagre konfigurasjonsdata som filen { $name }, grunn { $reason }.
 saving_loading_reset_configuration = Gjeldende konfigurasjon ble fjernet.
 saving_loading_loading_success = Godt lastet applikasjonskonfigurasjon.
+saving_loading_no_config_file = Fant ingen konfigurasjonsfil ved å bruke standardinnstillinger.
 saving_loading_failed_to_create_config_file = Kunne ikke opprette konfigurasjonsfilen{ $path }", grunn "{ $reason }".
 saving_loading_failed_to_read_config_file = Kan ikke laste konfigurasjonen fra "{ $path }" fordi den ikke eksisterer eller ikke er en fil.
 saving_loading_failed_to_read_data_from_file = Kan ikke lese data fra filen{ $path }", grunn "{ $reason }".
