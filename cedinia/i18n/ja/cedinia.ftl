@@ -28,7 +28,7 @@ home_bad_extensions_description = 無効な拡張子を持つファイル
 home_same_music_description = タグによる類似のオーディオ ファイル
 home_bad_names_description = 名前に問題のある文字を含むファイル
 home_exif_description = EXIF メタデータを持つ画像
-home_similar_videos_description = 同様の音声で動画を検索する（FFmpegは必要ありません）
+home_similar_videos_description = 同様の音声で動画を検索する
 # Results list
 scanning = スキャン中...
 stopping = 停止中...
