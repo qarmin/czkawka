@@ -118,7 +118,7 @@ jobs:
             cedinia.apk
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
         with:
           tag_name: "Nightly"

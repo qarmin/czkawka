@@ -1,6 +1,6 @@
 [package]
 name = "cedinia"
-version = "11.0.1"
+version = "12.0.0"
 authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
 edition = "2024"
 rust-version = "1.94.1"
@@ -17,7 +17,7 @@ crate-type = ["cdylib", "rlib"]
 
 
 [dependencies]
-czkawka_core = { version = "11.0.1", path = "../czkawka_core" }
+czkawka_core = { version = "12.0.0", path = "../czkawka_core" }
 crossbeam-channel = "0.5"
 log = "0.4"
 humansize = "2.1"

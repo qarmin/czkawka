@@ -1073,7 +1073,7 @@ dependencies = [
 
 [[package]]
 name = "cedinia"
-version = "11.0.1"
+version = "12.0.0"
 dependencies = [
  "android-activity 0.6.1",
  "android-build",
@@ -1713,7 +1713,7 @@ checksum = "f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f"
 
 [[package]]
 name = "czkawka_cli"
-version = "11.0.1"
+version = "12.0.0"
 dependencies = [
  "clap",
  "crossbeam-channel",
@@ -1726,7 +1726,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_core"
-version = "11.0.1"
+version = "12.0.0"
 dependencies = [
  "ashpd",
  "bincode 1.3.3",
@@ -1798,7 +1798,7 @@ dependencies = [
 
 [[package]]
 name = "czkawka_gui"
-version = "11.0.1"
+version = "12.0.0"
 dependencies = [
  "chrono",
  "crossbeam-channel",
@@ -4602,7 +4602,7 @@ checksum = "e2db585e1d738fc771bf08a151420d3ed193d9d895a36df7f6f8a9456b911ddc"
 
 [[package]]
 name = "krokiet"
-version = "11.0.1"
+version = "12.0.0"
 dependencies = [
  "arboard",
  "chrono",
