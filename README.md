@@ -49,9 +49,9 @@ Changelog about each version can be found in [CHANGELOG.md](Changelog.md).
 
 New releases can be found in [Github releases](https://github.com/qarmin/czkawka/releases) and nightly builds also in [Nightly releases](https://github.com/qarmin/czkawka/releases/tag/Nightly)
 
-You can read more about the 11.0.0 release, its new features, and the issues that were fixed in the following articles:
-- English article - https://medium.com/@qarmin/czkawka-krokiet-11-0-0f6cea385934
-- Polish article - https://medium.com/@qarmin/czkawka-krokiet-11-0-c95ee35eccc2
+You can read more about the 12.0.0 release, its new features, and the issues that were fixed in the following articles:
+- English article - https://medium.com/@qarmin/krokiet-czkawka-12-0-6fa09c43c3b9
+- Polish article - https://medium.com/@qarmin/krokiet-czkawka-12-0-c5dad2116793
 
 ## Usage, installation, compilation, requirements, license
 
