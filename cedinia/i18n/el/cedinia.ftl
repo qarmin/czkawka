@@ -37,7 +37,7 @@ press_start = Πατήστε ΕΝΑΡΞΗ για σάρωση
 select_label = Επιλογή.
 deselect_label = Desel.
 list_label = Λίστα
-gallery_label = Γκαλ.
+gallery_label = Γκαλ
 # Selection popup
 selection_popup_title = Επιλογή
 select_all = Επιλογή όλων
@@ -266,7 +266,7 @@ option_similarity_high = Υψηλή
 option_similarity_medium = Μεσαίο
 option_similarity_low = Χαμηλή
 option_similarity_very_low = V. Πολύ χαμηλό
-option_similarity_minimal = Ελάχ.
+option_similarity_minimal = Ελάχ
 option_check_method_hash = Κατακερματισμός
 option_check_method_name = Όνομα
 option_check_method_size_and_name = Μέγεθος+Όνομα

@@ -37,7 +37,7 @@ press_start = Натиснете START, за да сканирате
 select_label = Изберете.
 deselect_label = Desel.
 list_label = Списък
-gallery_label = Гал.
+gallery_label = Гал
 # Selection popup
 selection_popup_title = Избери
 select_all = Избери всички
@@ -266,7 +266,7 @@ option_similarity_high = Високо
 option_similarity_medium = Средно
 option_similarity_low = Ниско
 option_similarity_very_low = Много ниско
-option_similarity_minimal = Мин.
+option_similarity_minimal = Мин
 option_check_method_hash = Хеш
 option_check_method_name = Име
 option_check_method_size_and_name = Размер + Име

@@ -307,7 +307,7 @@ header_setting_button_tooltip = Открыть окно настроек.
 header_about_button_tooltip = Открыть окно с информацией о приложении.
 header_krokiet_button_tooltip = Попробуйте Krokiet - новую и улучшенную версию!
 # Krokiet promo dialog
-krokiet_promo_title =
+krokiet_promo_title = 
     Встретьтесь с Крокитом!
     krokiet_promo_message =
            Приветствую вас, отважный пользователь Czkawka!
@@ -318,7 +318,7 @@ krokiet_promo_title =
     
            И если вы каким-то образом пропустили, уже существует еще одно, более новое приложение, чем Krokiet - Cedinia, предназначенное в первую очередь для устройств Android и работы с сенсорным экраном.
     
-           Czkawka GTK хорошо нам служил, но его срок службы подошел к концу.
+           Czkawka GTK хорошо нам служил, но его срок службы подошел к концу
 krokiet_promo_message =
     Hello there, brave Czkawka user!
     

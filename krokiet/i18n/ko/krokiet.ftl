@@ -130,7 +130,7 @@ rename_button = 이름 바꾸기
 motto =
     이 프로그램은 무료로 사용할 수 있으며 항상如此翻译结果：
     这个程序是免费使用的，而且将会一直如此。
-    请参见MIT/MPL许可证以获取详细信息。.
+    请参见MIT/MPL许可证以获取详细信息。
 unicorn = 🦄을 보지 못하더라도 Unicorn은 항상 당신을 바라봅니다.
 repository = 리포지토리
 instruction = 사용방법

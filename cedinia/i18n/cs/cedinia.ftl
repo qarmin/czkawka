@@ -37,7 +37,7 @@ press_start = Stiskněte START pro skenování
 select_label = Vybráno.
 deselect_label = Desel.
 list_label = Seznam
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Vybrat
 select_all = Vybrat vše
@@ -266,7 +266,7 @@ option_similarity_high = Vysoká
 option_similarity_medium = Střední
 option_similarity_low = Nízká
 option_similarity_very_low = V.Nízká
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hash
 option_check_method_name = Název
 option_check_method_size_and_name = Velikost + název

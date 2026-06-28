@@ -37,7 +37,7 @@ press_start = Druk op START om te scannen
 select_label = Zel.
 deselect_label = Desel.
 list_label = Klantenlijst
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Selecteren
 select_all = Alles selecteren
@@ -266,7 +266,7 @@ option_similarity_high = hoog
 option_similarity_medium = Middelgroot
 option_similarity_low = laag
 option_similarity_very_low = V.Laag
-option_similarity_minimal = min.
+option_similarity_minimal = min
 option_check_method_hash = Toegangssleutel
 option_check_method_name = naam
 option_check_method_size_and_name = Grootte+Naam

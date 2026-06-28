@@ -219,11 +219,11 @@ popover_custom_path_check_button_entry_tooltip =
     
     示例用法：
     /home/pimpek/rzecz.txt 可以通过 /home/pim* 找到
-popover_custom_name_check_button_entry_tooltip =
+popover_custom_name_check_button_entry_tooltip = 
     按文件名选择记录。
     
     示例用法：
-    /usr/ping/pong.txt 可以通过 *ong* 找到。
+    /usr/ping/pong.txt 可以通过 *ong* 找到
 popover_custom_regex_check_button_entry_tooltip =
     按指定的正则表达式选择记录。
     

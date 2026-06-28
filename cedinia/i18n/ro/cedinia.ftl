@@ -37,7 +37,7 @@ press_start = Apăsați START pentru a scana
 select_label = Sel.
 deselect_label = Desel.
 list_label = Listă
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Selectare
 select_all = Selectează tot
@@ -266,7 +266,7 @@ option_similarity_high = Ridicat
 option_similarity_medium = Medie
 option_similarity_low = scazut
 option_similarity_very_low = V. Foarte scăzut
-option_similarity_minimal = Minim.
+option_similarity_minimal = Minim
 option_check_method_hash = Hash
 option_check_method_name = Nume
 option_check_method_size_and_name = Dimensiune+Nume

@@ -34,7 +34,7 @@ scanning = 正在扫描...
 stopping = 正在停止...
 no_results = 没有结果
 press_start = 点击开始扫描
-select_label = 出售。.
+select_label = 出售。
 deselect_label = Desel.
 list_label = 列表
 gallery_label = 图库
@@ -67,10 +67,10 @@ ok = 好的
 stopping_overlay_title = 正在停止
 stopping_overlay_body =
     正在完成当前扫描...
-    请稍候。.
+    请稍候。
 # Permission popup
 permission_title = 文件访问权限
-permission_body = 要扫描文件，应用程序需要访问设备存储。没有此权限，扫描将无法进行。.
+permission_body = 要扫描文件，应用程序需要访问设备存储。没有此权限，扫描将无法进行。
 grant = 授权
 no_permission_scan_warning = 没有文件访问权限 - 允许扫描
 # Settings screen tabs
@@ -137,7 +137,7 @@ settings_temporary_files_extensions_label = 过期的
 settings_temporary_files_extensions_placeholder = 例如：.tmp、.bak、~
 settings_temporary_files_reset = 重置为默认值
 settings_broken_files_header = 蓝色文件
-settings_broken_files_note = 资源密集扫描。为了最佳性能，请在桌面上使用 Krokiet。.
+settings_broken_files_note = 资源密集扫描。为了最佳性能，请在桌面上使用 Krokiet。
 settings_broken_files_types_label = 选择类型
 settings_broken_audio = 音频
 settings_broken_pdf = PDF
@@ -242,14 +242,14 @@ app_license = Czkawka Core - GPL-3.0 的前端
 about_app_label = 关于
 cache_label = 缓存
 # Notification
-scan_completed_notification = 扫描完成 - 找到 { $file_count } 个文件。
+scan_completed_notification = 扫描完成 - 找到 { $file_count } 个文件
 # Confirm popups (set from Rust)
 confirm_clean_exif = 您确定要从 { $n } 个选定的文件中清除 EXIF 标签吗？
 confirm_delete_items = 您确定要删除 { $n } 个选中的项目吗？
-gallery_confirm_delete_msg = 您即将删除 { $total_images } 张图片，这些图片位于 { $total_groups } 个分组中。.
+gallery_confirm_delete_msg = 您即将删除 { $total_images } 张图片，这些图片位于 { $total_groups } 个分组中。
 gallery_confirm_delete_warning = 所有商品均已从 { $unsafe_groups } 个组别中挑选！
 # Settings - SameMusic fingerprint warning
-same_music_fingerprint_warning = 计算和比较音频指纹耗费大量资源，可能需要很长时间。 建议在桌面系统上使用Krokiet来完成这项任务。.
+same_music_fingerprint_warning = 计算和比较音频指纹耗费大量资源，可能需要很长时间。 建议在桌面系统上使用Krokiet来完成这项任务。
 # Scan stage labels (shown during scan progress)
 # Group headers in scan results
 duplicates_group_header = { $count } 个文件 x { $per_file } / 个文件 = 共有 { $total } 个文件
@@ -314,6 +314,6 @@ compare_cancelling = 正在取消…
 compare_computing = 正在计算差异…
 compare_mode_normal = 侧面
 compare_mode_split = 拆分
-compare_mode_overlay = 叠加层。
+compare_mode_overlay = 叠加层
 compare_mode_diff = 差异
 compare_res_mismatch = 不同的分辨率-差异可能不正确

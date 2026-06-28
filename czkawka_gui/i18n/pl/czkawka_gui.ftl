@@ -268,7 +268,7 @@ bottom_compare_button = Porównaj
 bottom_search_button_tooltip = Rozpocznij wyszukiwanie
 bottom_select_button_tooltip = Wybierz rekordy. Tylko wybrane pliki/foldery mogą być później przetwarzane.
 bottom_delete_button_tooltip = Usuń zaznaczone elementy.
-bottom_save_button_tooltip = Zapisz informacje o skanowaniu.
+bottom_save_button_tooltip = Zapisz informacje o skanowaniu
 bottom_symlink_button_tooltip =
     Utwórz linki symboliczne.
     Działa tylko wtedy, gdy co najmniej dwa wyniki w grupie są zaznaczone.
@@ -294,7 +294,7 @@ bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 progress_stop_button = Stop
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
-about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
+about_repository_button_tooltip = Link do repozytorium z kodem źródłowym.
 about_donation_button_tooltip = Link do strony z dotacjami.
 about_instruction_button_tooltip = Link do strony z instrukcją.
 about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficialnie wspierany jest język polski i angielski.

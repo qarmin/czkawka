@@ -37,7 +37,7 @@ press_start = Trykk på START for å skanne
 select_label = Selv.
 deselect_label = Desel.
 list_label = Liste
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Velg
 select_all = Velg alle
@@ -266,7 +266,7 @@ option_similarity_high = Høy
 option_similarity_medium = Middels
 option_similarity_low = Lav
 option_similarity_very_low = V.Lav
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hash
 option_check_method_name = Navn
 option_check_method_size_and_name = Størrelse+Navn

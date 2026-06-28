@@ -37,7 +37,7 @@ press_start = START बटन दबाकर स्कैन करें
 select_label = चयनित.
 deselect_label = डीसेल.
 list_label = सूची
-gallery_label = गल.
+gallery_label = गल
 # Selection popup
 selection_popup_title = चुनें।
 select_all = सब कुछ चुनें

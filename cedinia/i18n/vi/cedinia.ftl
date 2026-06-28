@@ -37,7 +37,7 @@ press_start = Nhấn nút BẮT ĐẦU để quét
 select_label = Chọn.
 deselect_label = Desel.
 list_label = Danh sách
-gallery_label = Ga-la.
+gallery_label = Ga-la
 # Selection popup
 selection_popup_title = Chọn
 select_all = Chọn tất cả

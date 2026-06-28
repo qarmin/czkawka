@@ -37,7 +37,7 @@ press_start = TARAMAYA başlamak için START düğmesine basın
 select_label = Selam.
 deselect_label = Desel.
 list_label = Liste
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Seç
 select_all = Tümünü Seç
@@ -266,7 +266,7 @@ option_similarity_high = Yüksek
 option_similarity_medium = Orta
 option_similarity_low = Düşük
 option_similarity_very_low = Çok Düşük
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Karma
 option_check_method_name = Ad Karşılaştırma
 option_check_method_size_and_name = Beden+İsim

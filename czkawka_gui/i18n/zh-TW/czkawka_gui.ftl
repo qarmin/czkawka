@@ -4,10 +4,10 @@ window_main_title = Czkawka (打嗝)
 window_progress_title = 掃描中
 window_compare_images = 比較影像
 # General
-general_ok_button = 好的。
+general_ok_button = 好的
 general_close_button = 關閉
 # Krokiet info dialog
-krokiet_info_title = 已過時提示。
+krokiet_info_title = 已過時提示
 krokiet_info_message =
     Czkawka GTK 12.0 是最终版本。未来不会有任何更新、新功能或错误修复。
     
@@ -50,10 +50,10 @@ music_comparison_checkbox_tooltip =
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 duplicate_case_sensitive_name = 區分大小寫
-duplicate_case_sensitive_name_tooltip =
+duplicate_case_sensitive_name_tooltip = 
     啟用後，只有在檔案名稱完全相同的情況下才會將其分組，例如 Żołd <-> Żołd。
     
-    停用這個選項則會在不檢查每個字母大小是否相同的情況下進行分組，例如 żoŁD <-> Żołd。
+    停用這個選項則會在不檢查每個字母大小是否相同的情況下進行分組，例如 żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = 大小和名稱
 duplicate_mode_name_combo_box = 名稱
 duplicate_mode_size_combo_box = 大小
@@ -136,7 +136,7 @@ main_tree_view_column_codec = 編碼解碼器
 main_label_check_method = 檢查方法
 main_label_hash_type = 雜湊類型
 main_label_hash_size = 雜湊大小
-main_label_geometric_invariance = 幾何不變性。
+main_label_geometric_invariance = 幾何不變性
 main_label_size_bytes = 大小（位元組）
 main_label_min_size = 最小
 main_label_max_size = 最大
@@ -217,11 +217,11 @@ popover_custom_path_check_button_entry_tooltip =
     
     範例用法：
     /home/pimpek/rzecz.txt 可以透過 /home/pim* 找到
-popover_custom_name_check_button_entry_tooltip =
+popover_custom_name_check_button_entry_tooltip = 
     透過檔名選擇記錄。
     
     範例用法：
-    /usr/ping/pong.txt 可以在 *ong* 中找到。
+    /usr/ping/pong.txt 可以在 *ong* 中找到
 popover_custom_regex_check_button_entry_tooltip =
     透過指定的正規表達式（Regex）來選擇記錄。
     

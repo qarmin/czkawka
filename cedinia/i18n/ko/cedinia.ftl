@@ -37,7 +37,7 @@ press_start = START 버튼을 눌러 스캔을 시작합니다
 select_label = 선택.
 deselect_label = Desel.
 list_label = 목록
-gallery_label = 갈.
+gallery_label = 갈
 # Selection popup
 selection_popup_title = 선택
 select_all = 전체 선택
@@ -266,7 +266,7 @@ option_similarity_high = 높음
 option_similarity_medium = 보통
 option_similarity_low = 낮음
 option_similarity_very_low = V. 매우 낮음
-option_similarity_minimal = 최소.
+option_similarity_minimal = 최소
 option_check_method_hash = 해시
 option_check_method_name = 파일명
 option_check_method_size_and_name = 사이즈 + 이름

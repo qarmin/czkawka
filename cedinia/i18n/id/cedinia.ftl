@@ -37,7 +37,7 @@ press_start = Tekan MULAI untuk memulai pemindaian
 select_label = Pilih.
 deselect_label = Desel.
 list_label = Daftar
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Pilih
 select_all = Pilih Semua
@@ -266,7 +266,7 @@ option_similarity_high = Tinggi
 option_similarity_medium = Sedang
 option_similarity_low = Rendah
 option_similarity_very_low = Sangat Rendah
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hash
 option_check_method_name = Nama
 option_check_method_size_and_name = Ukuran + Nama

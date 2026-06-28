@@ -37,7 +37,7 @@ press_start = Tryck på START för att skanna
 select_label = Mark.
 deselect_label = Avmark.
 list_label = Lista
-gallery_label = Gall.
+gallery_label = Gall
 # Selection popup
 selection_popup_title = Markera
 select_all = Markera alla
@@ -266,7 +266,7 @@ option_similarity_high = Hög
 option_similarity_medium = Medel
 option_similarity_low = Låg
 option_similarity_very_low = V.Låg
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hash
 option_check_method_name = Namn
 option_check_method_size_and_name = Storlek+namn

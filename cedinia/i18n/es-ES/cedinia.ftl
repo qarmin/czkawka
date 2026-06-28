@@ -37,7 +37,7 @@ press_start = Presione START para escanear
 select_label = Sel.
 deselect_label = Desel.
 list_label = Lista
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Seleccionar
 select_all = Seleccionar todo
@@ -266,7 +266,7 @@ option_similarity_high = Alta
 option_similarity_medium = Medio
 option_similarity_low = Baja
 option_similarity_very_low = V.Muy bajo
-option_similarity_minimal = Mín.
+option_similarity_minimal = Mín
 option_check_method_hash = Hash
 option_check_method_name = Nombre
 option_check_method_size_and_name = Tamaño+Nombre

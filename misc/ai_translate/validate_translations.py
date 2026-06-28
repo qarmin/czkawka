@@ -18,6 +18,15 @@ class Colors:
     BOLD = "\033[1m"
 
 
+# CJK full stop (U+3002) is the Chinese/Japanese/Korean equivalent of ASCII "."
+SENTENCE_END_CHARS = {".", "。"}
+
+
+def ends_with_period(text: str) -> bool:
+    stripped = text.strip()
+    return any(stripped.endswith(c) for c in SENTENCE_END_CHARS)
+
+
 def extract_placeholders(text: str) -> Set[str]:
     pattern = re.compile(r"{\s*\$[\w-]+\s*}")
     matches = pattern.findall(text)
@@ -65,8 +74,8 @@ def validate_translation(base_value: str, translated_value: str, key: str) -> Li
                 )
 
     # New: validate trailing dot presence/absence consistency
-    base_has_dot = base_value.strip().endswith(".")
-    translated_has_dot = translated_value.strip().endswith(".")
+    base_has_dot = ends_with_period(base_value)
+    translated_has_dot = ends_with_period(translated_value)
 
     if base_has_dot != translated_has_dot:
         if base_has_dot:
@@ -206,15 +215,16 @@ def fix_trailing_dots_in_language_file(
                     text = m.group(1)  # type: ignore
                     trailing_spaces = m.group(2)  # type: ignore
 
-                    base_has_dot = base_entries[key].strip().endswith(".")
-                    trans_has_dot = text.endswith(".")
+                    base_has_dot = ends_with_period(base_entries[key])
+                    trans_has_dot = ends_with_period(text)
 
                     new_text = text
                     if base_has_dot and not trans_has_dot:
+                        # only add ASCII "." when translation doesn't already end with any sentence-ending char
                         new_text = text + "."
                     elif not base_has_dot and trans_has_dot:
-                        # remove all trailing dots from the textual end
-                        new_text = re.sub(r"\.+$", "", text)
+                        # remove trailing sentence-end chars (ASCII "." and CJK "。")
+                        new_text = re.sub(r"[.。]+$", "", text)
 
                     if new_text != text:
                         # replace last content part while keeping other parts intact
