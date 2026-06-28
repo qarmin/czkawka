@@ -37,11 +37,20 @@ pub const CLAP_STYLING: Styles = Styles::styled()
     .valid(AnsiColor::Green.on_default().bold())
     .invalid(AnsiColor::Yellow.on_default().bold());
 
+const LONG_VERSION: &str = concat!(
+    env!("CARGO_PKG_VERSION"),
+    "\ncommit: ",
+    env!("CZKAWKA_CLI_BUILD_COMMIT"),
+    "\ndate:   ",
+    env!("CZKAWKA_CLI_BUILD_DATE"),
+);
+
 #[derive(clap::Parser)]
 #[clap(
     name = "czkawka",
     help_template = HELP_TEMPLATE,
     version = CZKAWKA_VERSION,
+    long_version = LONG_VERSION,
 )]
 #[cfg_attr(not(feature = "no_colors"), clap(styles = CLAP_STYLING))]
 pub struct Args {

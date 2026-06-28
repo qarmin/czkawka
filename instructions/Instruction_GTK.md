@@ -90,21 +90,17 @@ Settings are opened via button **7**. Key options:
 
 ## Tips and Tricks
 
+For cross-frontend tips (cache management, prehash, partial scans, native CPU build) see [Tips, Tricks and Known Bugs in the main guide](Instruction.md#tips-tricks-and-known-bugs).
+
+Note: prehash cache must be explicitly enabled in GTK Settings - it is not on by default (unlike Krokiet where it is enabled by default).
+
 - **Manually editing directories** - You can directly edit the config file `czkawka_gui_config.txt` to add, remove, or change directories. Reload the config after editing.
 
-- **Column visibility** - Some columns (modification date, file size) may not be visible if others are too wide. Workarounds:
-  - Scroll the results list horizontally using the scrollbar
-  - Narrow other columns by dragging their dividers
-
-- **Slow cache loading** - If cache loading is slow (large collections scanned previously), rename or delete the relevant `cache_similar_image_*.bin` file. The cache regenerates on the next scan with only the currently scanned files.
-
-- **Partial scanning** - You can stop a scan mid-way; all computed hashes are already saved to cache and speed up the next run.
-
-- **Prehash cache** - Enable "Use prehash cache" in Settings when repeatedly scanning large collections. Partial hashes (first and last 4 KB) are cached, cutting re-scan time significantly. Must be explicitly enabled - not on by default in the GTK frontend.
-
-- **Permanent cache for removable drives** - Disable "Delete outdated cache entries automatically" when scanning external drives that you regularly unplug. Use the "Remove outdated results" button to clean stale entries manually instead.
+- **Column visibility** - Some columns (modification date, file size) may not be visible if others are too wide. Scroll the results list horizontally or narrow other columns by dragging their dividers.
 
 ## Config and Cache File Locations
+
+For default cache paths, env var overrides, and portable-drive setup see [Config/Cache files in the main guide](Instruction.md#configcache-files).
 
 Configuration files (GTK-specific):
 
@@ -115,19 +111,4 @@ Configuration files (GTK-specific):
 | macOS | `~/Library/Application Support/pl.Qarmin.Czkawka/` |
 | Windows | `C:\Users\<user>\AppData\Roaming\Qarmin\Czkawka\config\` |
 
-Cache files (shared across all frontends):
-
-| OS | Path |
-|----|------|
-| Linux | `~/.cache/czkawka/` |
-| Linux Flatpak | `~/.var/app/com.github.qarmin.czkawka/cache/czkawka/` |
-| macOS | `~/Library/Caches/pl.Qarmin.Czkawka/` |
-| Windows | `C:\Users\<user>\AppData\Local\Qarmin\Czkawka\cache\` |
-
-Override locations:
-
-```shell
-CZKAWKA_CONFIG_PATH="/media/rafal/Ventoy/config" \
-CZKAWKA_CACHE_PATH="/media/rafal/Ventoy/cache" \
-czkawka_gui
-```
+Cache is shared with Krokiet and CLI (`~/.cache/czkawka/` on Linux; Flatpak: `~/.var/app/com.github.qarmin.czkawka/cache/czkawka/`).

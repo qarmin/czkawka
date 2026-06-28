@@ -8,14 +8,14 @@ general_ok_button = 好的。
 general_close_button = 關閉
 # Krokiet info dialog
 krokiet_info_title = 已過時提示。
-krokiet_info_message = 
-        Czkawka GTK 12.0 是最终版本。未来不会有任何更新、新功能或错误修复。
-
-        Czkawka GTK 的大部分功能都已在 Krokiet 中实现，通常以更简单、更快、更稳定的形式提供。此外，Krokiet 还增加了在 GTK 版本中无法实现的新功能和改进。
-
-        如果您仍在使用 Czkawka GTK，切换到 Krokiet 应该会很简单，因为它具有相似的界面、更少的依赖项以及更好的跨平台支持。
-
-        P.S. 此消息应只显示一次。如果再次出现，请将环境变量 CZKAWKA_DONT_ANNOY_ME 设置为任何非空值。.
+krokiet_info_message =
+    Czkawka GTK 12.0 是最终版本。未来不会有任何更新、新功能或错误修复。
+    
+    Czkawka GTK 的大部分功能都已在 Krokiet 中实现，通常以更简单、更快、更稳定的形式提供。此外，Krokiet 还增加了在 GTK 版本中无法实现的新功能和改进。
+    
+    如果您仍在使用 Czkawka GTK，切换到 Krokiet 应该会很简单，因为它具有相似的界面、更少的依赖项以及更好的跨平台支持。
+    
+    P.S. 此消息应只显示一次。如果再次出现，请将环境变量 CZKAWKA_DONT_ANNOY_ME 设置为任何非空值。.
 # Main window
 music_title_checkbox = 標題
 music_artist_checkbox = 藝人
@@ -308,16 +308,16 @@ header_about_button_tooltip = 開啟包含應用程式資訊的對話方塊。.
 header_krokiet_button_tooltip = 試試 Krokiet，全新且更優化的版本！
 # Krokiet promo dialog
 krokiet_promo_title = 來認識一下 Krokiet 吧！
-krokiet_promo_message = 
-        親愛的勇敢的 Czkawka 用戶，您好！
-
-        顯然，原力與您同在，但 Krokiet 並不在。它是一款更新、更快、更輕巧，而且（假設應用程式也能擁有美貌的話）更具吸引力的重複文件清理工具。
-
-        Krokiet 包含了人們喜歡 Czkawka 的所有優點。它完全免費、開源，擁有獨特且簡潔的介面（深受許多人的讚賞，但也同樣受到一些人的批評），引入了許多新功能，減少了依賴項，並且在不同平台上運作得更加穩定。
-
-        如果您錯過了，實際上已經有比 Krokiet 更新的應用程式了，它叫做 Cedinia，主要針對 Android 設備和觸控螢幕使用。
-
-        Czkawka GTK 為我們服務了很長一段時間，但它的壽命已經到了盡頭。.
+krokiet_promo_message =
+    親愛的勇敢的 Czkawka 用戶，您好！
+    
+    顯然，原力與您同在，但 Krokiet 並不在。它是一款更新、更快、更輕巧，而且（假設應用程式也能擁有美貌的話）更具吸引力的重複文件清理工具。
+    
+    Krokiet 包含了人們喜歡 Czkawka 的所有優點。它完全免費、開源，擁有獨特且簡潔的介面（深受許多人的讚賞，但也同樣受到一些人的批評），引入了許多新功能，減少了依賴項，並且在不同平台上運作得更加穩定。
+    
+    如果您錯過了，實際上已經有比 Krokiet 更新的應用程式了，它叫做 Cedinia，主要針對 Android 設備和觸控螢幕使用。
+    
+    Czkawka GTK 為我們服務了很長一段時間，但它的壽命已經到了盡頭。.
 krokiet_promo_link_download = 下載 Krokiet/Cedinia
 krokiet_promo_link_project = 專案頁面
 

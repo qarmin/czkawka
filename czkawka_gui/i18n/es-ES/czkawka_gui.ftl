@@ -8,14 +8,14 @@ general_ok_button = Ok
 general_close_button = Cerrar
 # Krokiet info dialog
 krokiet_info_title = Aviso de Deprecación
-krokiet_info_message = 
-        Czkawka GTK 12.0 es la versión final. No se planean más actualizaciones, funciones ni correcciones de errores.
-
-        La mayoría de las funciones de Czkawka GTK están disponibles en Krokiet, generalmente en una forma más simple, rápida y estable. Krokiet también agrega nuevas funciones y mejoras que no eran posibles en la versión GTK.
-
-        Si todavía está utilizando Czkawka GTK, cambiar a Krokiet debería ser fácil, ya que tiene una interfaz similar, menos dependencias y un mejor soporte multiplataforma.
-
-        PD: Este mensaje solo debe aparecer una vez. Si vuelve a aparecer, establezca la variable de entorno CZKAWKA_DONT_ANNOY_ME con cualquier valor que no esté vacío.
+krokiet_info_message =
+    Czkawka GTK 12.0 es la versión final. No se planean más actualizaciones, funciones ni correcciones de errores.
+    
+    La mayoría de las funciones de Czkawka GTK están disponibles en Krokiet, generalmente en una forma más simple, rápida y estable. Krokiet también agrega nuevas funciones y mejoras que no eran posibles en la versión GTK.
+    
+    Si todavía está utilizando Czkawka GTK, cambiar a Krokiet debería ser fácil, ya que tiene una interfaz similar, menos dependencias y un mejor soporte multiplataforma.
+    
+    PD: Este mensaje solo debe aparecer una vez. Si vuelve a aparecer, establezca la variable de entorno CZKAWKA_DONT_ANNOY_ME con cualquier valor que no esté vacío.
 # Main window
 music_title_checkbox = Título
 music_artist_checkbox = Artista

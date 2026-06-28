@@ -1,21 +1,21 @@
 # Window titles
 window_settings_title = Ayarlar
 window_main_title = Czkawka (Hıçkırık)
-window_progress_title = Taranıyor
+window_progress_title = Taranıyor...
 window_compare_images = Resimleri Karşılaştır
 # General
 general_ok_button = Tamam
 general_close_button = Kapat
 # Krokiet info dialog
 krokiet_info_title = Eski Versiyon Bildirimi
-krokiet_info_message = 
-        Czkawka GTK 12.0, son sürümdür. Daha fazla güncelleme, özellik veya hata düzeltmesi planlanmamaktadır.
-
-        Czkawka GTK'deki çoğu özellik, genellikle daha basit, daha hızlı ve daha kararlı bir şekilde Krokiet'te mevcuttur. Krokiet ayrıca, GTK sürümünde mümkün olmayan yeni özellikler ve geliştirmeler de sunmaktadır.
-
-        Eğer hala Czkawka GTK kullanıyorsanız, benzer bir arayüze, daha az bağımlılığa ve daha iyi platformlar arası desteğe sahip olduğu için Krokiet'e geçmek kolay olmalıdır.
-
-        Not: Bu mesaj yalnızca bir kez görünmelidir. Eğer tekrar görünüyorsa, `CZKAWKA_DONT_ANNOY_ME` ortam değişkenini herhangi bir boş olmayan bir değerle ayarlayın.
+krokiet_info_message =
+    Czkawka GTK 12.0, son sürümdür. Daha fazla güncelleme, özellik veya hata düzeltmesi planlanmamaktadır.
+    
+    Czkawka GTK'deki çoğu özellik, genellikle daha basit, daha hızlı ve daha kararlı bir şekilde Krokiet'te mevcuttur. Krokiet ayrıca, GTK sürümünde mümkün olmayan yeni özellikler ve geliştirmeler de sunmaktadır.
+    
+    Eğer hala Czkawka GTK kullanıyorsanız, benzer bir arayüze, daha az bağımlılığa ve daha iyi platformlar arası desteğe sahip olduğu için Krokiet'e geçmek kolay olmalıdır.
+    
+    Not: Bu mesaj yalnızca bir kez görünmelidir. Eğer tekrar görünüyorsa, `CZKAWKA_DONT_ANNOY_ME` ortam değişkenini herhangi bir boş olmayan bir değerle ayarlayın.
 # Main window
 music_title_checkbox = Başlık
 music_artist_checkbox = Sanatçı
@@ -151,7 +151,7 @@ main_label_hash_type = SUÇ türü:
 main_label_hash_size = SURÇ boyutu:
 main_label_geometric_invariance = Geometrik değişmezlik
 main_label_size_bytes = Boyut (bayt):
-main_label_min_size = En az
+main_label_min_size = Min
 main_label_max_size = Maks
 main_label_shown_files = Gösterilecek Dosya Sayısı:
 main_label_resize_algorithm = Yeniden boyutlandırma algoritması:
@@ -327,16 +327,16 @@ header_about_button_tooltip = Czkawka hakkında bilgi içeren iletişim kutusunu
 header_krokiet_button_tooltip = Krokiet'i deneyin - yeni ve geliştirilmiş versiyonunu!
 # Krokiet promo dialog
 krokiet_promo_title = Krokiet ile tanışın!
-krokiet_promo_message = 
-        Merhaba cesur Czkawka kullanıcısı!
-
-        Gücün kesinlikle sizinle, ancak Krokiet maalesef değil - daha yeni, daha hızlı, daha hafif ve önemli ölçüde daha çekici (eğer uygulamaların çekici olabilmesi mümkünse) bir uygulama temizleyici.
-
-        Krokiet, insanların Czkawka'da beğendiği her şeyi içeriyor. Tamamen ücretsiz, açık kaynaklıdır, benzersiz ve basit bir kullanıcı arayüzüne (hem övülen hem de birçok kişi tarafından eleştirilen) sahiptir, birçok yeni özellik sunar, daha az bağımlılık kullanır ve farklı platformlarda çok daha güvenilir bir şekilde çalışır.
-
-        Eğer bir şekilde kaçırdıysanız, Krokiet'ten bile daha yeni bir uygulama var: Cedinia, öncelikle Android cihazlar ve dokunmatik ekran kullanımı için tasarlanmıştır.
-
-        Czkawka GTK bize iyi hizmet etti, ancak artık kullanım ömrünün sonuna geldi.
+krokiet_promo_message =
+    Merhaba cesur Czkawka kullanıcısı!
+    
+    Gücün kesinlikle sizinle, ancak Krokiet maalesef değil - daha yeni, daha hızlı, daha hafif ve önemli ölçüde daha çekici (eğer uygulamaların çekici olabilmesi mümkünse) bir uygulama temizleyici.
+    
+    Krokiet, insanların Czkawka'da beğendiği her şeyi içeriyor. Tamamen ücretsiz, açık kaynaklıdır, benzersiz ve basit bir kullanıcı arayüzüne (hem övülen hem de birçok kişi tarafından eleştirilen) sahiptir, birçok yeni özellik sunar, daha az bağımlılık kullanır ve farklı platformlarda çok daha güvenilir bir şekilde çalışır.
+    
+    Eğer bir şekilde kaçırdıysanız, Krokiet'ten bile daha yeni bir uygulama var: Cedinia, öncelikle Android cihazlar ve dokunmatik ekran kullanımı için tasarlanmıştır.
+    
+    Czkawka GTK bize iyi hizmet etti, ancak artık kullanım ömrünün sonuna geldi.
 krokiet_promo_link_download = Krokiet/Cedinia'yı indirin
 krokiet_promo_link_project = Proje sayfası
 

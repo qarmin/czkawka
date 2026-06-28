@@ -233,6 +233,23 @@ jobs:
             echo 'It offers better performance, more features, improved Windows/macOS support compared to the legacy GTK GUI.'
             echo ''
             echo 'More information: https://github.com/qarmin/czkawka'
+            echo ''
+            echo '## Switching graphics backend'
+            echo ''
+            echo 'If the app window does not appear or rendering looks wrong, open one of the .bat files'
+            echo 'to launch with a different graphics backend:'
+            echo ''
+            echo 'Krokiet:'
+            echo '  krokiet_winit_femtovg.bat      - OpenGL via femtovg (default)'
+            echo '  krokiet_winit_skia_opengl.bat  - Skia with OpenGL'
+            echo '  krokiet_winit_skia_vulkan.bat  - Skia with Vulkan'
+            echo '  krokiet_winit_software.bat     - CPU software rendering (slowest, most compatible)'
+            echo '  krokiet_femtovg_wgpu.bat       - femtovg with wgpu'
+            echo ''
+            echo 'Czkawka GTK (legacy):'
+            echo '  czkawka_gui_cairo_renderer.bat   - Cairo renderer'
+            echo '  czkawka_gui_opengl_renderer.bat  - OpenGL renderer'
+            echo '  czkawka_gui_vulkan_renderer.bat  - Vulkan renderer'
           } > package/README.md
           echo "Really use Krokiet" > package/USE_KROKIET_INSTEAD_CZKAWKA_GTK.txt
           echo "I'm not joking, just use Krokiet" > package/USE_KROKIET_JUST_USE_IT.txt

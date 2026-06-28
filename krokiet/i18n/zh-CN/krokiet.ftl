@@ -1,13 +1,13 @@
 # In Rust translations
 rust_init_error_title = 应用启动时发生严重错误
-rust_init_error_message = 
+rust_init_error_message =
     在启动应用程序时发生了一个严重错误：
     
     { $error_message }
     
     这可能是由于缺少或损坏的 OpenGL/Vulkan 驱动程序、在虚拟机中运行应用程序或 Krokiet 或其库中的错误所致。
     
-    您可以尝试运行不同的构建（skia_opengl、skia_vulkan、femtovg_opengl - 默认）或使用软件渲染器，看看是否可以解决问题。.
+    您可以尝试运行不同的构建（skia_opengl、skia_vulkan、femtovg_opengl - 默认）或使用软件渲染器，看看是否可以解决问题。
 rust_loaded_preset = 已加载预设 { $preset_idx }
 rust_file_already_exists = 文件 "{ $file }" 已存在，不会被覆盖
 rust_error_removing_file_after_copy = 删除文件 "{ $file }" 时出错（复制到不同分区后），原因：{ $reason }
