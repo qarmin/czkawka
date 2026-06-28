@@ -28,7 +28,7 @@ home_bad_extensions_description = Soubory s neplatnou příponou
 home_same_music_description = Podobné zvukové soubory pomocí štítků
 home_bad_names_description = Soubory s problematickými znaky v názvu
 home_exif_description = Obrázky s EXIF metadaty
-home_similar_videos_description = Najít videa s podobným zvukem (bez FFmpeg potřeba)
+home_similar_videos_description = Najít videa s podobným zvukem
 # Results list
 scanning = Probíhá vyhledávání...
 stopping = Zastavování...

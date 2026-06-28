@@ -28,7 +28,7 @@ home_bad_extensions_description = Αρχεία με μη έγκυρη επέκτ
 home_same_music_description = Παρόμοια αρχεία ήχου από ετικέτες
 home_bad_names_description = Αρχεία με προβληματικούς χαρακτήρες στο όνομα
 home_exif_description = Εικόνες με μεταδεδομένα EXIF
-home_similar_videos_description = Βρείτε βίντεο με παρόμοιο ήχο (δεν απαιτείται FFmpeg)
+home_similar_videos_description = Βρείτε βίντεο με παρόμοιο ήχο
 # Results list
 scanning = Σάρωση σε εξέλιξη...
 stopping = Διακοπή...

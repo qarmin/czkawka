@@ -28,7 +28,7 @@ home_bad_extensions_description = Filer med ugyldig utvidelse
 home_same_music_description = Lignende lydfiler etter koder
 home_bad_names_description = Filer med problematiske tegn i navn
 home_exif_description = Bilder med EXIF metadata
-home_similar_videos_description = Finn videoer med lignende lyd (ingen FFmpeg trengst)
+home_similar_videos_description = Finn videoer med lignende lyd
 # Results list
 scanning = Skanning pågår...
 stopping = Stopper...

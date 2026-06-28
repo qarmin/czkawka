@@ -28,7 +28,7 @@ home_bad_extensions_description = 유효하지 않은 확장자를 가진 파일
 home_same_music_description = 태그를 기준으로 한 유사 오디오 파일
 home_bad_names_description = 이름에 문제가 있는 문자가 포함된 파일
 home_exif_description = EXIF 메타데이터가 포함된 이미지
-home_similar_videos_description = 비슷한 오디오를 가진 동영상을 찾아보세요 (FFmpeg 불필요)
+home_similar_videos_description = 비슷한 오디오를 가진 동영상을 찾아보세요
 # Results list
 scanning = 스캔 진행 중...
 stopping = 정지 중...

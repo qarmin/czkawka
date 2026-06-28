@@ -28,7 +28,7 @@ home_bad_extensions_description = Filer med ogiltig filändelse
 home_same_music_description = Liknande ljudfiler med taggar
 home_bad_names_description = Filer med problematiska tecken i namnet
 home_exif_description = Bilder med EXIF-metadata
-home_similar_videos_description = Hitta videor med liknande ljud (ingen FFmpeg behövs)
+home_similar_videos_description = Hitta videor med liknande ljud
 # Results list
 scanning = Skanning pågår….
 stopping = Stoppar...

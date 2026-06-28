@@ -28,7 +28,7 @@ home_bad_extensions_description = Berkas dengan ekstensi yang tidak valid
 home_same_music_description = File audio serupa berdasarkan tag
 home_bad_names_description = Berkas dengan karakter yang bermasalah dalam namanya
 home_exif_description = Gambar dengan metadata EXIF
-home_similar_videos_description = Temukan video dengan audio yang serupa (tidak memerlukan FFmpeg)
+home_similar_videos_description = Temukan video dengan audio yang serupa
 # Results list
 scanning = Proses pemindaian sedang berlangsung...
 stopping = Berhenti...

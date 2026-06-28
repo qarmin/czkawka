@@ -28,7 +28,7 @@ home_bad_extensions_description = 具有無效檔案擴充名的檔案。
 home_same_music_description = 依標籤搜尋的相似音訊檔案。
 home_bad_names_description = 檔案名稱含有問題字元。
 home_exif_description = 帶有 EXIF 原始數據的圖片。
-home_similar_videos_description = 尋找音訊相似的影片 (無需使用 FFmpeg)。
+home_similar_videos_description = 尋找音訊相似的影片
 # Results list
 scanning = 掃描中...
 stopping = 暫停...

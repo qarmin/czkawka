@@ -28,7 +28,7 @@ home_bad_extensions_description = Fișiere cu extensie invalidă
 home_same_music_description = Fişiere audio similare după etichete
 home_bad_names_description = Fișiere cu caractere problematice în nume
 home_exif_description = Imagini cu metadate EXIF
-home_similar_videos_description = Găsiți videoclipuri cu audio similar (nu este nevoie de FFmpeg)
+home_similar_videos_description = Găsiți videoclipuri cu audio similar
 # Results list
 scanning = Scanare în curs...
 stopping = Oprire...

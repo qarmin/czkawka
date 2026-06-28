@@ -28,7 +28,7 @@ home_bad_extensions_description = 无效扩展名的文件
 home_same_music_description = 按标签显示类似的音频文件
 home_bad_names_description = 有问题字符名称的文件
 home_exif_description = 使用 EXIF 元数据的图像
-home_similar_videos_description = 找到具有相似音频的视频 (无需FFmpeg )
+home_similar_videos_description = 找到具有相似音频的视频
 # Results list
 scanning = 正在扫描...
 stopping = 正在停止...

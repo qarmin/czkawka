@@ -28,7 +28,7 @@ home_bad_extensions_description = Geçersiz uzantıya sahip dosyalar
 home_same_music_description = Etiketlere göre benzer ses dosyaları
 home_bad_names_description = İsimlerinde sorunlu karakterler içeren dosyalar
 home_exif_description = EXIF meta verisi içeren resimler
-home_similar_videos_description = Benzer ses içeriğine sahip videoları bulun (FFmpeg'e gerek yok)
+home_similar_videos_description = Benzer ses içeriğine sahip videoları bulun
 # Results list
 scanning = Taramaya başlanıyor...
 stopping = Bekleniyor...

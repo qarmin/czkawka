@@ -28,7 +28,7 @@ home_bad_extensions_description = Fichiers avec extension invalide
 home_same_music_description = Fichiers audio similaires par tags
 home_bad_names_description = Fichiers avec des caractères problématiques dans le nom
 home_exif_description = Images avec métadonnées EXIF
-home_similar_videos_description = Trouver des vidéos avec un son similaire (FFmpeg non nécessaire)
+home_similar_videos_description = Trouver des vidéos avec un son similaire
 # Results list
 scanning = Analyse en cours...
 stopping = Arrêt...

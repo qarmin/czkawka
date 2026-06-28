@@ -10,12 +10,30 @@ struct OtherApp {
 }
 
 const OTHER_APPS: &[OtherApp] = &[
-    OtherApp { name: "Szyszka",               url: "https://github.com/qarmin/szyszka" },
-    OtherApp { name: "Mykrut",                url: "https://github.com/qarmin/mykrut" },
-    OtherApp { name: "Dcmki Viewer",          url: "https://github.com/qarmin/dcmki_viewer" },
-    OtherApp { name: "Video Thumbnailer",      url: "https://github.com/qarmin/video_thumbnailer" },
-    OtherApp { name: "Space Finder",           url: "https://github.com/qarmin/space_finder" },
-    OtherApp { name: "System Info Collector",  url: "https://github.com/qarmin/system-info-collector" },
+    OtherApp {
+        name: "Szyszka",
+        url: "https://github.com/qarmin/szyszka",
+    },
+    OtherApp {
+        name: "Mykrut",
+        url: "https://github.com/qarmin/mykrut",
+    },
+    OtherApp {
+        name: "Dcmki Viewer",
+        url: "https://github.com/qarmin/dcmki_viewer",
+    },
+    OtherApp {
+        name: "Video Thumbnailer",
+        url: "https://github.com/qarmin/video_thumbnailer",
+    },
+    OtherApp {
+        name: "Space Finder",
+        url: "https://github.com/qarmin/space_finder",
+    },
+    OtherApp {
+        name: "System Info Collector",
+        url: "https://github.com/qarmin/system-info-collector",
+    },
 ];
 
 fn app_descriptions() -> Vec<String> {

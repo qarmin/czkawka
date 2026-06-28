@@ -28,7 +28,7 @@ home_bad_extensions_description = Các tệp có phần mở rộng không hợp
 home_same_music_description = Các tệp âm thanh tương tự theo thẻ
 home_bad_names_description = Các tệp có chứa các ký tự không hợp lệ trong tên
 home_exif_description = Hình ảnh có siêu dữ liệu EXIF
-home_similar_videos_description = Tìm kiếm các video có âm thanh tương tự (không cần sử dụng FFmpeg)
+home_similar_videos_description = Tìm kiếm các video có âm thanh tương tự
 # Results list
 scanning = Đang quét...
 stopping = Đang dừng...

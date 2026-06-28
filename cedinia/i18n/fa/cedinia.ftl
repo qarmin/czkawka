@@ -28,7 +28,7 @@ home_bad_extensions_description = فایل‌هایی با پسوند نامعت
 home_same_music_description = فایل‌های صوتی مشابه، بر اساس برچسب‌ها
 home_bad_names_description = فایل‌هایی که نام آن‌ها شامل کاراکترهای مشکل‌ساز است
 home_exif_description = تصاویر دارای اطلاعات EXIF
-home_similar_videos_description = ویدیوهایی با صدای مشابه را پیدا کنید (بدون نیاز به FFmpeg)
+home_similar_videos_description = ویدیوهایی با صدای مشابه را پیدا کنید
 # Results list
 scanning = اسکن در حال انجام است...
 stopping = در حال توقف...

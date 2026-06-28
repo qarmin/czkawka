@@ -305,7 +305,7 @@ about_translation_button = Terjemahan
 # Header
 header_setting_button_tooltip = Membuka dialog pengaturan.
 header_about_button_tooltip = Membuka dialog yang berisi informasi tentang aplikasi.
-header_krokiet_button_tooltip = Coba Krokiet sekarang – versi terbaru dan lebih baik!
+header_krokiet_button_tooltip = Coba Krokiet sekarang - versi terbaru dan lebih baik!
 # Krokiet promo dialog
 krokiet_promo_title = Kenalan dengan Krokiet!
 krokiet_promo_message =

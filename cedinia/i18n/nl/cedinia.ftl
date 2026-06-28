@@ -28,7 +28,7 @@ home_bad_extensions_description = Bestanden met ongeldige extensie
 home_same_music_description = Vergelijkbare audiobestanden via tags
 home_bad_names_description = Bestanden met problematische tekens in naam
 home_exif_description = Afbeeldingen met EXIF metadata
-home_similar_videos_description = Vind video's met een vergelijkbaar audio (geen FFmpeg nodig)
+home_similar_videos_description = Vind video's met een vergelijkbaar audio
 # Results list
 scanning = Scannen in uitvoering...
 stopping = Stoppen...

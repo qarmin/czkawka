@@ -311,11 +311,11 @@ krokiet_promo_title = Gặp gỡ Krokiet!
 krokiet_promo_message =
     Xin chào, người dùng Czkawka dũng cảm!
     
-    Có vẻ như "Lực" đang đồng hành cùng bạn, nhưng Krokiet thì không – một ứng dụng làm sạch trùng lặp mới hơn, nhanh hơn, nhẹ hơn và đáng chú ý là đẹp hơn (giả sử các ứng dụng có thể đẹp).
+    Có vẻ như "Lực" đang đồng hành cùng bạn, nhưng Krokiet thì không - một ứng dụng làm sạch trùng lặp mới hơn, nhanh hơn, nhẹ hơn và đáng chú ý là đẹp hơn (giả sử các ứng dụng có thể đẹp).
     
     Krokiet bao gồm tất cả những điều mà mọi người thích ở Czkawka. Nó hoàn toàn miễn phí, mã nguồn mở, có giao diện người dùng độc đáo và đơn giản (vừa được nhiều người khen ngợi vừa bị nhiều người ghét), giới thiệu rất nhiều tính năng mới, sử dụng ít phần phụ thuộc hơn và hoạt động đáng tin cậy hơn trên nhiều nền tảng khác nhau.
     
-    Và nếu bạn vô tình bỏ lỡ, đã có một ứng dụng mới hơn cả Krokiet – Cedinia, được thiết kế chủ yếu cho các thiết bị Android và sử dụng màn hình cảm ứng.
+    Và nếu bạn vô tình bỏ lỡ, đã có một ứng dụng mới hơn cả Krokiet - Cedinia, được thiết kế chủ yếu cho các thiết bị Android và sử dụng màn hình cảm ứng.
     
     Czkawka GTK đã phục vụ chúng ta rất tốt, nhưng thời gian của nó đã kết thúc.
 krokiet_promo_link_download = Tải xuống Krokiet/Cedinia
