@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Caratteri non-ASCII
 settings_bad_names_duplicated = Caratteri ripetuti
 settings_ignore_same_resolution = Ignora le immagini con la stessa risoluzione
 # Settings - Appearance section
-settings_appearance_label = RIPETENZIONE
+settings_appearance_label = ASPETTO
 settings_dark_theme = Tema scuro
 settings_dark_theme_desc = Usa lo schema di colori scuri
 # Settings - Diagnostics tab

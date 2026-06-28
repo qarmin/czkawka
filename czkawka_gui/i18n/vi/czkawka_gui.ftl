@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Cài đặt
-window_main_title = Czkawka (Hiccup)
+window_main_title = Czkawka (Nấc cụt)
 window_progress_title = Đang quét
 window_compare_images = So sánh hình ảnh
 # General

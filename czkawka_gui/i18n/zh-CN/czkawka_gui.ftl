@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = 设定
-window_main_title = Czkawka - (Hiccup)
+window_main_title = Czkawka (打嗝)
 window_progress_title = 正在扫描
 window_compare_images = 比较图像
 # General

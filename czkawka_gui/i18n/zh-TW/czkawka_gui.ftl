@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = 設定
-window_main_title = Czkawka
+window_main_title = Czkawka (打嗝)
 window_progress_title = 掃描中
 window_compare_images = 比較影像
 # General

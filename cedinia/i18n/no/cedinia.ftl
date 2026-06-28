@@ -108,7 +108,7 @@ settings_check_method = Metode
 settings_hash_type_label = HASH-TYPE
 settings_hash_type = Type hash
 settings_hash_type_desc = Blake3 - anbefales alternativ, CRC32 har liten sjanse for falske positiver
-settings_similar_images_header = SIMILAR BILDER
+settings_similar_images_header = LIGNENDE BILDER
 settings_similarity_preset = Likhetsterskel
 settings_similarity_desc = Svært høy = bare nær-identisk
 settings_hash_size = Størrelse på hash
@@ -183,7 +183,7 @@ diag_confirm_clear_thumbnails = Slett alt av miniatyrbilde-mellomlager?
 diag_confirm_clear_cache = Tømme alle appens hurtiglager?
 about_repo = Kodelager
 about_translate = Oversettelser
-about_donate = Brukerstøtte
+about_donate = Doner
 # Collect-test result popup
 collect_test_title = Prøvingsresultater
 collect_test_volumes = Volumer:

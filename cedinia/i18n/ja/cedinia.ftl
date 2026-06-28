@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = セディニア
+app_name = Cedinia
 tool_duplicate_files = 重複
 tool_empty_folders = 空のフォルダ
 tool_similar_images = 類似の画像
@@ -37,7 +37,7 @@ press_start = STARTを押してスキャンします
 select_label = セル。.
 deselect_label = Desel.
 list_label = リスト
-gallery_label = ガール。.
+gallery_label = ギャラ.
 # Selection popup
 selection_popup_title = 選択
 select_all = すべて選択
@@ -145,7 +145,7 @@ settings_broken_archive = アーカイブ
 settings_broken_image = 画像
 settings_broken_font = フォント
 settings_broken_markup = マークアップ (JSON/XML/TOML)
-settings_similar_videos_header = SIMILAR ビデオ (AUDIO)
+settings_similar_videos_header = 類似動画 (音声)
 settings_similar_videos_audio_preset = オーディオの類似性プリセット
 settings_similar_videos_audio_preset_desc = オーディオがどの程度一致しなければならないかをコントロールします
 settings_bad_names_header = Bad Name
@@ -183,7 +183,7 @@ diag_confirm_clear_thumbnails = サムネイルキャッシュをすべて消去
 diag_confirm_clear_cache = アプリのキャッシュをすべてクリアしますか？
 about_repo = リポジトリ
 about_translate = 翻訳
-about_donate = サポート
+about_donate = 寄付
 # Collect-test result popup
 collect_test_title = テスト結果
 collect_test_volumes = ボリューム:
@@ -266,7 +266,7 @@ option_similarity_high = 高い
 option_similarity_medium = ミディアム
 option_similarity_low = 低い
 option_similarity_very_low = V. Low
-option_similarity_minimal = 分.
+option_similarity_minimal = 最小
 option_check_method_hash = ハッシュ
 option_check_method_name = 名前
 option_check_method_size_and_name = サイズ+名前

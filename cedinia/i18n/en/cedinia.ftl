@@ -117,12 +117,12 @@ settings_check_method_label = COMPARISON METHOD
 settings_check_method = Method
 settings_hash_type_label = HASH TYPE
 settings_hash_type = Hash type
-settings_hash_type_desc = Blake3 - is recommended option, CRC32 have small chance of false positives
+settings_hash_type_desc = Blake3 is the recommended option; CRC32 has a small chance of false positives
 settings_similar_images_header = SIMILAR IMAGES
 settings_similarity_preset = Similarity threshold
 settings_similarity_desc = Very High = only near-identical
 settings_hash_size = Hash size
-settings_hash_size_desc = Larger sizes, have less false positives, but also finds less similar images
+settings_hash_size_desc = Larger size means fewer false positives but also fewer results
 settings_hash_alg = Hash algorithm
 settings_image_filter = Resize filter
 settings_geometric_invariance = Geometric invariance
@@ -195,7 +195,7 @@ diag_confirm_clear_thumbnails = Clear all thumbnail cache?
 diag_confirm_clear_cache = Clear all app cache?
 about_repo = Repository
 about_translate = Translations
-about_donate = Support
+about_donate = Donate
 
 # Collect-test result popup
 collect_test_title = Test results

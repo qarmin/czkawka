@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Pengaturan
-window_main_title = Czwakwa (Hiccup)
+window_main_title = Czkawka (Cegukan)
 window_progress_title = Memindai
 window_compare_images = Bandingkan Gambar
 # General

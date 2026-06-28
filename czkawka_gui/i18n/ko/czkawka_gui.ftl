@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = 설정
-window_main_title = Czkawka (구글ить)
+window_main_title = Czkawka (딸꾹질)
 window_progress_title = 스캔중
 window_compare_images = 이미지 비교
 # General

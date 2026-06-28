@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Innstillinger
-window_main_title = Czkawka (Hikkup)
+window_main_title = Czkawka (Hikke)
 window_progress_title = Skanner
 window_compare_images = Sammenlign bilder
 # General

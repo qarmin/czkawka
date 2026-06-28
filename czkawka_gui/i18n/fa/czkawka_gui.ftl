@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = تنظیمات
-window_main_title = چکاواک (همیپ)
+window_main_title = Czkawka (سکسکه)
 window_progress_title = سkenنگ
 window_compare_images = مقایسه تصاویر
 # General

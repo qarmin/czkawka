@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = سدینیا
+app_name = Cedinia
 tool_duplicate_files = 副本
 tool_empty_folders = _folders تهی завدهندی
 tool_similar_images = تصویرهای مشابه
@@ -266,7 +266,7 @@ option_similarity_high = ارتفاع
 option_similarity_medium = میانبر
 option_similarity_low = پایین
 option_similarity_very_low = بسیار پایین
-option_similarity_minimal = من.
+option_similarity_minimal = حداقل
 option_check_method_hash = هش
 option_check_method_name = نام
 option_check_method_size_and_name = اندازه + نام

@@ -115,7 +115,7 @@ settings_hash_size = Dimensiune hash
 settings_hash_size_desc = Mărimile mai mari au mai puține rezultate pozitive false, dar găsesc și imagini mai puțin similare
 settings_hash_alg = Algoritm hash
 settings_image_filter = Redimensionare filtru
-settings_geometric_invariance = Inventariere geometrică
+settings_geometric_invariance = Invarianță geometrică
 settings_ignore_same_size = Ignoră imaginile cu aceleași dimensiuni
 settings_gallery_image_fit_cover = Galerie: recoltă în pătrat
 settings_gallery_image_fit_cover_desc = Umpleți dala; dezactivați pentru a păstra raportul original de aspect
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Caractere non-ASCII
 settings_bad_names_duplicated = Caractere repetate
 settings_ignore_same_resolution = Ignoră imaginile cu aceeași rezoluție
 # Settings - Appearance section
-settings_appearance_label = APARANȚĂ
+settings_appearance_label = APARENȚĂ
 settings_dark_theme = Temă întunecată
 settings_dark_theme_desc = Utilizaţi o schemă de culori întunecată
 # Settings - Diagnostics tab

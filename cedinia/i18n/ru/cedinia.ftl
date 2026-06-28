@@ -115,7 +115,7 @@ settings_hash_size = Размер хэша
 settings_hash_size_desc = Большие размеры, имеют меньше ложных срабатываний, но и находят менее похожие изображения
 settings_hash_alg = Алгоритм хеша
 settings_image_filter = Изменить размер фильтра
-settings_geometric_invariance = Геометрическое инвертирование
+settings_geometric_invariance = Геометрическая инвариантность
 settings_ignore_same_size = Игнорировать изображения с одинаковыми размерами
 settings_gallery_image_fit_cover = Галерея: обрезать на квадрат
 settings_gallery_image_fit_cover_desc = Заполните плитку; отключите для сохранения оригинального соотношения сторон
@@ -145,7 +145,7 @@ settings_broken_archive = Архивировать
 settings_broken_image = Изображение
 settings_broken_font = Шрифт
 settings_broken_markup = Разметка (JSON/XML/TOML)
-settings_similar_videos_header = СИЛИЛАР ВИДЕОНОВ (AUDIO)
+settings_similar_videos_header = ПОХОЖИЕ ВИДЕО (АУДИО)
 settings_similar_videos_audio_preset = Предустановка сходства аудио
 settings_similar_videos_audio_preset_desc = Управляет, насколько строго звук должен соответствовать
 settings_bad_names_header = НАЗВАНИЯ BAD
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Не ASCII символы
 settings_bad_names_duplicated = Повторяющиеся символы
 settings_ignore_same_resolution = Игнорировать изображения с тем же разрешением
 # Settings - Appearance section
-settings_appearance_label = ПРИВЕДЕНИЕ
+settings_appearance_label = ВНЕШНИЙ ВИД
 settings_dark_theme = Тёмная тема
 settings_dark_theme_desc = Использовать темную цветовую схему
 # Settings - Diagnostics tab

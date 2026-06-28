@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Karakter non-ASCII
 settings_bad_names_duplicated = Karakter yang berulang
 settings_ignore_same_resolution = Abaikan gambar-gambar dengan resolusi yang sama
 # Settings - Appearance section
-settings_appearance_label = PENAMPAKAN
+settings_appearance_label = TAMPILAN
 settings_dark_theme = Tema gelap
 settings_dark_theme_desc = Gunakan tema warna gelap
 # Settings - Diagnostics tab

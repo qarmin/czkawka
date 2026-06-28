@@ -108,7 +108,7 @@ settings_check_method = Método
 settings_hash_type_label = TIPO HASH
 settings_hash_type = Tipo de Hash
 settings_hash_type_desc = Blake3 - es la opción recomendada, CRC32 tiene pequeñas probabilidades de falsos positivos
-settings_similar_images_header = IMÁGENES DE SIMILAR
+settings_similar_images_header = IMÁGENES SIMILARES
 settings_similarity_preset = Umbral de similitud
 settings_similarity_desc = Muy alto = sólo casi idéntico
 settings_hash_size = Tamaño hash
@@ -145,7 +145,7 @@ settings_broken_archive = Archivar
 settings_broken_image = Imagen
 settings_broken_font = Fuente
 settings_broken_markup = Marcado (JSON/XML/TOML)
-settings_similar_videos_header = VIDEOS DE SIMILAR (AUDI)?
+settings_similar_videos_header = VÍDEOS SIMILARES (AUDIO)
 settings_similar_videos_audio_preset = Preset de similitud de audio
 settings_similar_videos_audio_preset_desc = Controla cómo debe coincidir estrictamente el audio
 settings_bad_names_header = NOMBRES DE BAD
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Caracteres no ASCII
 settings_bad_names_duplicated = Caracteres repetidos
 settings_ignore_same_resolution = Ignorar imágenes con la misma resolución
 # Settings - Appearance section
-settings_appearance_label = APARECER
+settings_appearance_label = APARIENCIA
 settings_dark_theme = Tema oscuro
 settings_dark_theme_desc = Usar esquema de color oscuro
 # Settings - Diagnostics tab
@@ -183,7 +183,7 @@ diag_confirm_clear_thumbnails = ¿Borrar todos los cachés en miniatura?
 diag_confirm_clear_cache = ¿Borrar todo el caché de aplicaciones?
 about_repo = Repositorio
 about_translate = Traducciones
-about_donate = Soporte
+about_donate = Donar
 # Collect-test result popup
 collect_test_title = Resultados de la prueba
 collect_test_volumes = Volúmenes:

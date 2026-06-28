@@ -145,7 +145,7 @@ settings_broken_archive = Arkiv
 settings_broken_image = Bild
 settings_broken_font = Typsnitt
 settings_broken_markup = Markup (JSON/XML/TOML)
-settings_similar_videos_header = SIMILARA VIDEOR (AUDIO)
+settings_similar_videos_header = LIKNANDE VIDEOR (LJUD)
 settings_similar_videos_audio_preset = Förinställning för ljudets likhet
 settings_similar_videos_audio_preset_desc = Kontrollerar hur strikt ljud måste matcha
 settings_bad_names_header = FELAKTIGA NAMN
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Tecken som inte är ASCII
 settings_bad_names_duplicated = Upprepade tecken
 settings_ignore_same_resolution = Ignorera bilder med samma upplösning
 # Settings - Appearance section
-settings_appearance_label = APPEARANS
+settings_appearance_label = UTSEENDE
 settings_dark_theme = Mörkt tema
 settings_dark_theme_desc = Använd mörk färgschema
 # Settings - Diagnostics tab

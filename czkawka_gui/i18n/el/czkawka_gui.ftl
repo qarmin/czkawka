@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Ρυθμίσεις
-window_main_title = Czkawka (Ήκουψ)
+window_main_title = Czkawka (λόξιγκας)
 window_progress_title = Σάρωση
 window_compare_images = Σύγκριση Εικόνων
 # General

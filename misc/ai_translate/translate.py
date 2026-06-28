@@ -23,6 +23,7 @@ IGNORED_KEYS = [
     "compare_move_right_button",
     "ok_button",
     "ref",
+    "app_name",
 ]
 
 

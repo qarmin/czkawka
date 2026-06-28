@@ -145,7 +145,7 @@ settings_broken_archive = Archiv
 settings_broken_image = Obrázek
 settings_broken_font = Písmo
 settings_broken_markup = Značkování (JSON/XML/TOML)
-settings_similar_videos_header = SIMILÁRNÍ VIDEA (AUDIO)
+settings_similar_videos_header = PODOBNÁ VIDEA (ZVUK)
 settings_similar_videos_audio_preset = Předvolba podobnosti zvuku
 settings_similar_videos_audio_preset_desc = Určuje, jak přesně se zvuk musí shodovat
 settings_bad_names_header = Příloha V část 2 odst
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Znaky mimo sadu ASCII
 settings_bad_names_duplicated = Opakované znaky
 settings_ignore_same_resolution = Ignorovat obrázky se stejným rozlišením
 # Settings - Appearance section
-settings_appearance_label = ODKAZY
+settings_appearance_label = VZHLED
 settings_dark_theme = Tmavý vzhled
 settings_dark_theme_desc = Použít tmavé barevné schéma
 # Settings - Diagnostics tab

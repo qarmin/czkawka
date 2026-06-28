@@ -37,7 +37,7 @@ press_start = Натисніть СТАРТ для сканування
 select_label = Від.
 deselect_label = Desel.
 list_label = Список
-gallery_label = Галь.
+gallery_label = Гал.
 # Selection popup
 selection_popup_title = Вибрати
 select_all = Виділити все
@@ -115,7 +115,7 @@ settings_hash_size = Розмір хешу
 settings_hash_size_desc = Великі розміри мають менше помилкових додатніх, але також менш схожі зображення
 settings_hash_alg = Алгоритм хеша
 settings_image_filter = Змінити розмір фільтру
-settings_geometric_invariance = Геометрична інваріант
+settings_geometric_invariance = Геометрична інваріантність
 settings_ignore_same_size = Ігнорувати зображення з такими ж розмірами
 settings_gallery_image_fit_cover = Галерея: обрізати в квадрат
 settings_gallery_image_fit_cover_desc = Заповніть плитку; вимкнути щоб зберегти оригінальне співвідношення сторін
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Не-ASCII символи
 settings_bad_names_duplicated = Символи, що повторюються
 settings_ignore_same_resolution = Ігнорувати зображення з тією ж роздільною здатністю
 # Settings - Appearance section
-settings_appearance_label = ЗОВНІЙ ВИГЛЯД
+settings_appearance_label = ЗОВНІШНІЙ ВИГЛЯД
 settings_dark_theme = Темна тема
 settings_dark_theme_desc = Використовувати темну колірну схему
 # Settings - Diagnostics tab

@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Nicht-ASCII-Zeichen
 settings_bad_names_duplicated = Wiederholte Zeichen
 settings_ignore_same_resolution = Bilder mit der gleichen Auflösung ignorieren
 # Settings - Appearance section
-settings_appearance_label = APPEARANZ
+settings_appearance_label = AUSSEHEN
 settings_dark_theme = Dunkles Design
 settings_dark_theme_desc = Dunkles Farbschema verwenden
 # Settings - Diagnostics tab

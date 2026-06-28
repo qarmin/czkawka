@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = الإعدادات
-window_main_title = Czkawka
+window_main_title = Czkawka (فواق)
 window_progress_title = المسح
 window_compare_images = مقارنة الصور
 # General

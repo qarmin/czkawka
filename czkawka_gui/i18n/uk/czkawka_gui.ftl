@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Налаштування
-window_main_title = Czkawka («Гикавка»)
+window_main_title = Czkawka (Гикавка)
 window_progress_title = Сканування
 window_compare_images = Порівняння зображень
 # General

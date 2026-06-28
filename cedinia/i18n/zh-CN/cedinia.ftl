@@ -37,7 +37,7 @@ press_start = 点击开始扫描
 select_label = 出售。.
 deselect_label = Desel.
 list_label = 列表
-gallery_label = 加拉太书。.
+gallery_label = 图库
 # Selection popup
 selection_popup_title = 选择
 select_all = 选择所有
@@ -115,7 +115,7 @@ settings_hash_size = 哈希大小
 settings_hash_size_desc = 较大的尺寸，较小的正直性，但也发现较不相似的图像
 settings_hash_alg = 哈希算法
 settings_image_filter = 调整滤镜大小
-settings_geometric_invariance = 几何变化量
+settings_geometric_invariance = 几何不变性
 settings_ignore_same_size = 忽略同一尺寸的图像
 settings_gallery_image_fit_cover = 相册：裁剪到正方形
 settings_gallery_image_fit_cover_desc = 填充电量；禁用以保持原始宽高比
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = 非ASCII字符
 settings_bad_names_duplicated = 重复字符
 settings_ignore_same_resolution = 忽略具有相同分辨率的图像
 # Settings - Appearance section
-settings_appearance_label = 应用
+settings_appearance_label = 外观
 settings_dark_theme = 暗色主题
 settings_dark_theme_desc = 使用暗色方案
 # Settings - Diagnostics tab
@@ -266,7 +266,7 @@ option_similarity_high = 高
 option_similarity_medium = 中
 option_similarity_low = 低
 option_similarity_very_low = 低
-option_similarity_minimal = 最小值.
+option_similarity_minimal = 最小值
 option_check_method_hash = 哈希
 option_check_method_name = 名称
 option_check_method_size_and_name = 大小+名称

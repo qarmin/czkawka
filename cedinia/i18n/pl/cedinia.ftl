@@ -37,7 +37,7 @@ press_start = Naciśnij START, aby rozpocząć skanowanie
 select_label = Zazn.
 deselect_label = Odzn.
 list_label = Lista
-gallery_label = Galeria.
+gallery_label = Galeria
 # Selection popup
 selection_popup_title = Wybór
 select_all = Zaznacz wszystko
@@ -115,7 +115,7 @@ settings_hash_size = Rozmiar hashu
 settings_hash_size_desc = Większy = mniej błędów, ale mniej wyników
 settings_hash_alg = Algorytm haszowania
 settings_image_filter = Filtr skalowania
-settings_geometric_invariance = Inwigilacja geometryczna
+settings_geometric_invariance = Niezmienność geometryczna
 settings_ignore_same_size = Ignoruj obrazy o tych samych wymiarach
 settings_gallery_image_fit_cover = Galeria: przycinanie do kwadratu
 settings_gallery_image_fit_cover_desc = Wypełnia kafelek; wyłącz, aby zachować proporcje
@@ -145,7 +145,7 @@ settings_broken_archive = Archiwum
 settings_broken_image = Obraz
 settings_broken_font = Czcionka
 settings_broken_markup = Pliki tekstowe (JSON/XML/TOML)
-settings_similar_videos_header = WIDEOS SIMILAR (AUDIO)
+settings_similar_videos_header = PODOBNE FILMY (AUDIO)
 settings_similar_videos_audio_preset = Ustawienia podobieństwa dźwięku
 settings_similar_videos_audio_preset_desc = Kontroluje jak ściśle dźwięk musi się zgadzać
 settings_bad_names_header = NIEPOPRAWNE NAZWY
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Znaki spoza ASCII
 settings_bad_names_duplicated = Powtarzające się znaki
 settings_ignore_same_resolution = Ignoruj obrazy o tej samej rozdzielczości
 # Settings - Appearance section
-settings_appearance_label = OŚWIADCZENIE
+settings_appearance_label = WYGLĄD
 settings_dark_theme = Ciemny motyw
 settings_dark_theme_desc = Użyj ciemnego schematu kolorów
 # Settings - Diagnostics tab
@@ -183,7 +183,7 @@ diag_confirm_clear_thumbnails = Wyczyścić cache miniatur?
 diag_confirm_clear_cache = Wyczyścić cache aplikacji?
 about_repo = Repozytorium
 about_translate = Tłumaczenia
-about_donate = Wsparcie
+about_donate = Wesprzyj
 # Collect-test result popup
 collect_test_title = Wyniki testu
 collect_test_volumes = Wolumeny:
@@ -255,7 +255,7 @@ same_music_fingerprint_warning = Obliczanie i porównywanie odcisków audio jest
 duplicates_group_header = { $count } plików x { $per_file } / plik = { $total } łącznie
 similar_images_group_header = { $count } podobnych obrazów
 same_music_group_header = { $count } podobnych utworów
-similar_videos_group_header = { $count } podobne filmy
+similar_videos_group_header = { $count } podobnych filmów
 # Rename confirmation
 confirm_rename_items = Czy na pewno chcesz zmienić nazwę { $n } wybranych plików?
 # Combo-box option labels (translatable display names)
@@ -266,7 +266,7 @@ option_similarity_high = Wysoki
 option_similarity_medium = Średni
 option_similarity_low = Niski
 option_similarity_very_low = Bardzo niski
-option_similarity_minimal = Minimalny.
+option_similarity_minimal = Minimalny
 option_check_method_hash = Hash
 option_check_method_name = Nazwa
 option_check_method_size_and_name = Rozmiar + nazwa
@@ -316,4 +316,4 @@ compare_mode_normal = Bok
 compare_mode_split = Podziel
 compare_mode_overlay = Nakładka
 compare_mode_diff = Różnica
-compare_res_mismatch = Różne rozdzielczość - różnica może być niedokładna
+compare_res_mismatch = Różna rozdzielczość - różnica może być niedokładna
