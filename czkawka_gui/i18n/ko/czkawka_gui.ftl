@@ -457,7 +457,7 @@ compute_found_videos = { $number_files } 개의 비슷한 동영상을 { $number
 compute_found_music = { $number_files }개의 비슷한 음악 파일을 { $number_groups } 그룹에서 { $time } 내에 찾았습니다
 compute_found_invalid_symlinks = { $number_files }개의 유효하지 않은 심볼릭 링크를 { $time }에서 찾았습니다
 compute_found_broken_files = { $number_files }개의 봉인된 파일을 { $time }에 발견했습니다
-compute_found_bad_extensions = { $number_files } 확장자에 문제가 있는 파일을 { $time } 내로找到了
+compute_found_bad_extensions = { $number_files } 확장자에 문제가 있는 파일을 { $time } 내에 찾았습니다
 # Progress window
 progress_current_stage = 현재 단계:{ "  " }
 progress_all_stages = 전체 단계:{ "  " }
@@ -477,7 +477,7 @@ text_view_messages = 알림
 text_view_warnings = 경고
 text_view_errors = 오류
 about_window_motto = 이 프로그램은 무료이며, 앞으로도 항상 그럴 것이다.
-krokiet_new_app = 'Czkawka'는 유지보수 모드에 있습니다,这意味着仅会修复关键错误且不会添加新功能。对于新功能，请查看新的Krokiet应用，该应用更加稳定性能更强并且仍在积极开发中。.
+krokiet_new_app = 'Czkawka'는 유지 관리 모드에 있으며, 중요한 버그만 수정되고 새로운 기능은 추가되지 않습니다. 새 기능은 더 안정적이고 적극적으로 개발 중인 Krokiet 앱을 참조하세요.
 # Various dialog
 dialogs_ask_next_time = 다음에도 묻기
 symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
