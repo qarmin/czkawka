@@ -1,4 +1,4 @@
-## Version 12.0 - ??.??.????
+## Version 12.0 - 28.06.2026r
 
 ### Czkawka GTK Deprecation Notice
 **Version 12.0 is the last released version of Czkawka GTK.** No new binaries will be provided from this point on. All users are encouraged to migrate to Krokiet, the new Slint-based GUI frontend.
