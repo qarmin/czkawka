@@ -2,6 +2,8 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    emit_build_info();
+
     slint_build::compile_with_config("ui/main_window.slint", slint_build::CompilerConfiguration::new().with_style("material".into()))
         .expect("Unable to compile Slint UI files for Cedinia");
 
@@ -10,6 +12,24 @@ fn main() {
     if env::var("TARGET").unwrap_or_default().contains("android") {
         compile_android_java();
     }
+}
+
+fn emit_build_info() {
+    let commit = git_output(["rev-parse", "--short", "HEAD"]);
+    let date = git_output(["log", "-1", "--format=%cd", "--date=format:%d-%m-%Y"]);
+    println!("cargo:rustc-env=CEDINIA_BUILD_COMMIT={commit}");
+    println!("cargo:rustc-env=CEDINIA_BUILD_DATE={date}");
+    println!("cargo:rerun-if-changed=.git/HEAD");
+}
+
+fn git_output<const N: usize>(args: [&str; N]) -> String {
+    std::process::Command::new("git")
+        .args(args)
+        .output()
+        .ok()
+        .filter(|o| o.status.success())
+        .and_then(|o| String::from_utf8(o.stdout).ok())
+        .map_or_else(|| "unknown".to_string(), |s| s.trim().to_string())
 }
 
 fn compile_android_java() {

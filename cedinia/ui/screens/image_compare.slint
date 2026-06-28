@@ -7,7 +7,6 @@ import { ScrollView, Slider } from "std-widgets.slint";
 
 enum CompareMode { Normal, Split, Overlay, Diff }
 
-// A single icon-button used in the top action bar.
 component CompareIconBtn inherits Rectangle {
     in property <image>  icon;
     in property <bool>   active:  false;
@@ -43,7 +42,6 @@ component CompareIconBtn inherits Rectangle {
     }
 }
 
-// Main overlay component
 export component ImageCompareOverlay inherits Rectangle {
 
     private property <CompareMode> compare_mode: CompareMode.Normal;

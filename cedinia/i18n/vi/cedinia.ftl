@@ -28,7 +28,7 @@ home_bad_extensions_description = Các tệp có phần mở rộng không hợp
 home_same_music_description = Các tệp âm thanh tương tự theo thẻ
 home_bad_names_description = Các tệp có chứa các ký tự không hợp lệ trong tên
 home_exif_description = Hình ảnh có siêu dữ liệu EXIF
-home_similar_videos_description = Tìm kiếm các video có âm thanh tương tự (không cần sử dụng FFmpeg)
+home_similar_videos_description = Tìm kiếm các video có âm thanh tương tự
 # Results list
 scanning = Đang quét...
 stopping = Đang dừng...
@@ -37,7 +37,7 @@ press_start = Nhấn nút BẮT ĐẦU để quét
 select_label = Chọn.
 deselect_label = Desel.
 list_label = Danh sách
-gallery_label = Ga-la.
+gallery_label = Ga-la
 # Selection popup
 selection_popup_title = Chọn
 select_all = Chọn tất cả
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Ký tự không thuộc bảng ASCII
 settings_bad_names_duplicated = Ký tự lặp lại
 settings_ignore_same_resolution = Bỏ qua các hình ảnh có cùng độ phân giải
 # Settings - Appearance section
-settings_appearance_label = HIỆN TƯỢNG
+settings_appearance_label = GIAO DIỆN
 settings_dark_theme = Chủ đề tối
 settings_dark_theme_desc = Sử dụng giao diện màu tối
 # Settings - Diagnostics tab
@@ -266,7 +266,7 @@ option_similarity_high = Cao
 option_similarity_medium = Trung bình
 option_similarity_low = Thấp
 option_similarity_very_low = Rất thấp
-option_similarity_minimal = Tối thiểu.
+option_similarity_minimal = Tối thiểu
 option_check_method_hash = Mã băm
 option_check_method_name = Tên
 option_check_method_size_and_name = Kích thước + Tên

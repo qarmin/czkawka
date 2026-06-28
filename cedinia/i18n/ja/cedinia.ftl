@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = セディニア
+app_name = Cedinia
 tool_duplicate_files = 重複
 tool_empty_folders = 空のフォルダ
 tool_similar_images = 類似の画像
@@ -28,16 +28,16 @@ home_bad_extensions_description = 無効な拡張子を持つファイル
 home_same_music_description = タグによる類似のオーディオ ファイル
 home_bad_names_description = 名前に問題のある文字を含むファイル
 home_exif_description = EXIF メタデータを持つ画像
-home_similar_videos_description = 同様の音声で動画を検索する（FFmpegは必要ありません）
+home_similar_videos_description = 同様の音声で動画を検索する
 # Results list
 scanning = スキャン中...
 stopping = 停止中...
 no_results = 結果がありません
 press_start = STARTを押してスキャンします
-select_label = セル。.
+select_label = セル。
 deselect_label = Desel.
 list_label = リスト
-gallery_label = ガール。.
+gallery_label = ギャラ
 # Selection popup
 selection_popup_title = 選択
 select_all = すべて選択
@@ -62,15 +62,15 @@ delete = 削除
 rename = 名前の変更
 # Delete errors popup
 delete_errors_title = いくつかのファイルを削除できませんでした:
-ok = 了解。
+ok = 了解
 # Stopping overlay
 stopping_overlay_title = 停止中
 stopping_overlay_body =
     現在のスキャンを完了しています...
-    お待ちください。.
+    お待ちください。
 # Permission popup
 permission_title = ファイルアクセス
-permission_body = ファイルをスキャンするには、アプリがデバイスのストレージにアクセスする必要があります。この許可がないとスキャンはできません。.
+permission_body = ファイルをスキャンするには、アプリがデバイスのストレージにアクセスする必要があります。この許可がないとスキャンはできません。
 grant = 許可
 no_permission_scan_warning = ファイルへのアクセス権限がありません - スキャンする権限を付与します
 # Settings screen tabs
@@ -81,7 +81,7 @@ settings_tab_diagnostics = 情報
 settings_use_cache = キャッシュを使用
 settings_use_cache_desc = その後のスキャン速度を上げる（ハッシュ/イメージ）
 settings_ignore_hidden = 隠しファイルを無視
-settings_ignore_hidden_desc = '.'で始まるファイルとフォルダ。
+settings_ignore_hidden_desc = '.'で始まるファイルとフォルダ
 settings_show_notification = スキャン終了時に通知する
 settings_show_notification_desc = スキャン完了時にシステム通知を表示する
 settings_notify_only_background = バックグラウンドでのみ有効
@@ -137,7 +137,7 @@ settings_temporary_files_extensions_label = 拡張
 settings_temporary_files_extensions_placeholder = 例：.tmp、.bak、~
 settings_temporary_files_reset = 既定にリセット
 settings_broken_files_header = ブロックファイル
-settings_broken_files_note = リソース集約的なスキャン。最高のパフォーマンスを得るためにデスクトップでKrokietを使用してください。.
+settings_broken_files_note = リソース集約的なスキャン。最高のパフォーマンスを得るためにデスクトップでKrokietを使用してください。
 settings_broken_files_types_label = チェックした種類
 settings_broken_audio = オーディオ
 settings_broken_pdf = PDF
@@ -145,7 +145,7 @@ settings_broken_archive = アーカイブ
 settings_broken_image = 画像
 settings_broken_font = フォント
 settings_broken_markup = マークアップ (JSON/XML/TOML)
-settings_similar_videos_header = SIMILAR ビデオ (AUDIO)
+settings_similar_videos_header = 類似動画 (音声)
 settings_similar_videos_audio_preset = オーディオの類似性プリセット
 settings_similar_videos_audio_preset_desc = オーディオがどの程度一致しなければならないかをコントロールします
 settings_bad_names_header = Bad Name
@@ -183,7 +183,7 @@ diag_confirm_clear_thumbnails = サムネイルキャッシュをすべて消去
 diag_confirm_clear_cache = アプリのキャッシュをすべてクリアしますか？
 about_repo = リポジトリ
 about_translate = 翻訳
-about_donate = サポート
+about_donate = 寄付
 # Collect-test result popup
 collect_test_title = テスト結果
 collect_test_volumes = ボリューム:
@@ -195,11 +195,11 @@ licenses_label = ライセンス
 third_party_licenses = サードパーティのライセンス
 licenses_popup_title = サードパーティライセンス
 # Directories screen
-directories_include_header = 含む。
+directories_include_header = 含む
 directories_included = 含む
 directories_exclude_header = 除外
 directories_excluded_header = 除外
-directories_add = 含める。
+directories_add = 含める
 no_paths = パスなし - 以下に追加
 directories_volume_header = ボリューム
 directories_volume_refresh = 更新
@@ -223,7 +223,7 @@ deleted_errors_suffix = エラー
 renamed_prefix = 名前を変更
 renamed_files_suffix = ファイル
 renamed_errors_suffix = エラー
-cleaned_exif_prefix = EXIF情報を削除しました。
+cleaned_exif_prefix = EXIF情報を削除しました
 cleaned_exif_suffix = ファイル
 cleaned_exif_errors_suffix = エラー
 rename_error_read_file_name = ファイル名を読み取ることができません
@@ -246,10 +246,10 @@ scan_completed_notification = スキャンが完了しました - { $file_count 
 # Confirm popups (set from Rust)
 confirm_clean_exif = 選択した { $n } からの EXIF タグを削除してもよろしいですか？
 confirm_delete_items = 選択したアイテムを削除してもよろしいですか？ { $n }
-gallery_confirm_delete_msg = これから、{ $total_groups } のグループにある { $total_images } 枚の画像を削除します。.
-gallery_confirm_delete_warning = すべての項目は { $unsafe_groups } グループで選択されます。
+gallery_confirm_delete_msg = これから、{ $total_groups } のグループにある { $total_images } 枚の画像を削除します。
+gallery_confirm_delete_warning = すべての項目は { $unsafe_groups } グループで選択されます
 # Settings - SameMusic fingerprint warning
-same_music_fingerprint_warning = オーディオフィンガープリントの計算と比較は非常にリソースがかかるため、時間がかかる場合があります。 このタスクにはデスクトップシステムで Krokiet を使用することをお勧めします。.
+same_music_fingerprint_warning = オーディオフィンガープリントの計算と比較は非常にリソースがかかるため、時間がかかる場合があります。 このタスクにはデスクトップシステムで Krokiet を使用することをお勧めします。
 # Scan stage labels (shown during scan progress)
 # Group headers in scan results
 duplicates_group_header = { $count } files x { $per_file } / file = { $total } total
@@ -266,7 +266,7 @@ option_similarity_high = 高い
 option_similarity_medium = ミディアム
 option_similarity_low = 低い
 option_similarity_very_low = V. Low
-option_similarity_minimal = 分.
+option_similarity_minimal = 最小
 option_check_method_hash = ハッシュ
 option_check_method_name = 名前
 option_check_method_size_and_name = サイズ+名前
@@ -315,5 +315,5 @@ compare_computing = 差分を計算中…
 compare_mode_normal = サイド
 compare_mode_split = 分割
 compare_mode_overlay = オーバーレイ
-compare_mode_diff = 差分。
+compare_mode_diff = 差分
 compare_res_mismatch = 異なる解像度 - 差分が不正確である可能性があります

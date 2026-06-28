@@ -28,7 +28,7 @@ home_bad_extensions_description = Fișiere cu extensie invalidă
 home_same_music_description = Fişiere audio similare după etichete
 home_bad_names_description = Fișiere cu caractere problematice în nume
 home_exif_description = Imagini cu metadate EXIF
-home_similar_videos_description = Găsiți videoclipuri cu audio similar (nu este nevoie de FFmpeg)
+home_similar_videos_description = Găsiți videoclipuri cu audio similar
 # Results list
 scanning = Scanare în curs...
 stopping = Oprire...
@@ -37,7 +37,7 @@ press_start = Apăsați START pentru a scana
 select_label = Sel.
 deselect_label = Desel.
 list_label = Listă
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Selectare
 select_all = Selectează tot
@@ -115,7 +115,7 @@ settings_hash_size = Dimensiune hash
 settings_hash_size_desc = Mărimile mai mari au mai puține rezultate pozitive false, dar găsesc și imagini mai puțin similare
 settings_hash_alg = Algoritm hash
 settings_image_filter = Redimensionare filtru
-settings_geometric_invariance = Inventariere geometrică
+settings_geometric_invariance = Invarianță geometrică
 settings_ignore_same_size = Ignoră imaginile cu aceleași dimensiuni
 settings_gallery_image_fit_cover = Galerie: recoltă în pătrat
 settings_gallery_image_fit_cover_desc = Umpleți dala; dezactivați pentru a păstra raportul original de aspect
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Caractere non-ASCII
 settings_bad_names_duplicated = Caractere repetate
 settings_ignore_same_resolution = Ignoră imaginile cu aceeași rezoluție
 # Settings - Appearance section
-settings_appearance_label = APARANȚĂ
+settings_appearance_label = APARENȚĂ
 settings_dark_theme = Temă întunecată
 settings_dark_theme_desc = Utilizaţi o schemă de culori întunecată
 # Settings - Diagnostics tab
@@ -266,7 +266,7 @@ option_similarity_high = Ridicat
 option_similarity_medium = Medie
 option_similarity_low = scazut
 option_similarity_very_low = V. Foarte scăzut
-option_similarity_minimal = Minim.
+option_similarity_minimal = Minim
 option_check_method_hash = Hash
 option_check_method_name = Nume
 option_check_method_size_and_name = Dimensiune+Nume

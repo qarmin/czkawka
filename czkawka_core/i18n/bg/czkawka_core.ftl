@@ -99,7 +99,7 @@ core_cannot_set_config_cache_path = Не може да се зададе път 
 core_invalid_extension_contains_space = { $extension } не е валиден разширение, защото съдържа празно пространство вътре
 core_invalid_extension_contains_dot = { $extension } не е валиден разширение, защото съдържа точка вътре
 core_ffmpeg_unknown_encoder = Не може да се кодира файлът { $file } с кодировчика { $encoder }. Текущата версия на FFmpeg не поддържа този кодировач. Използвайте друга версия на FFmpeg с поддръжка на необходимия кодек или изберете друг кодировач.
-core_ffmpeg_error = Грешка при обработката на файла { $file} с FFmpeg, код на грешката: { $code }, причина: { $reason }
+core_ffmpeg_error = Грешка при обработката на файла { $file } с FFmpeg, код на грешката: { $code }, причина: { $reason }
 core_custom_command_missing_path_placeholder = Custom FFmpeg command must contain { "{PATH}" } as input file placeholder
 core_custom_command_empty = Персонализираната команда за FFmpeg не може да бъде празна
 # Scan stage labels

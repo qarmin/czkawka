@@ -28,16 +28,16 @@ home_bad_extensions_description = 无效扩展名的文件
 home_same_music_description = 按标签显示类似的音频文件
 home_bad_names_description = 有问题字符名称的文件
 home_exif_description = 使用 EXIF 元数据的图像
-home_similar_videos_description = 找到具有相似音频的视频 (无需FFmpeg )
+home_similar_videos_description = 找到具有相似音频的视频
 # Results list
 scanning = 正在扫描...
 stopping = 正在停止...
 no_results = 没有结果
 press_start = 点击开始扫描
-select_label = 出售。.
+select_label = 出售。
 deselect_label = Desel.
 list_label = 列表
-gallery_label = 加拉太书。.
+gallery_label = 图库
 # Selection popup
 selection_popup_title = 选择
 select_all = 选择所有
@@ -67,10 +67,10 @@ ok = 好的
 stopping_overlay_title = 正在停止
 stopping_overlay_body =
     正在完成当前扫描...
-    请稍候。.
+    请稍候。
 # Permission popup
 permission_title = 文件访问权限
-permission_body = 要扫描文件，应用程序需要访问设备存储。没有此权限，扫描将无法进行。.
+permission_body = 要扫描文件，应用程序需要访问设备存储。没有此权限，扫描将无法进行。
 grant = 授权
 no_permission_scan_warning = 没有文件访问权限 - 允许扫描
 # Settings screen tabs
@@ -115,7 +115,7 @@ settings_hash_size = 哈希大小
 settings_hash_size_desc = 较大的尺寸，较小的正直性，但也发现较不相似的图像
 settings_hash_alg = 哈希算法
 settings_image_filter = 调整滤镜大小
-settings_geometric_invariance = 几何变化量
+settings_geometric_invariance = 几何不变性
 settings_ignore_same_size = 忽略同一尺寸的图像
 settings_gallery_image_fit_cover = 相册：裁剪到正方形
 settings_gallery_image_fit_cover_desc = 填充电量；禁用以保持原始宽高比
@@ -137,7 +137,7 @@ settings_temporary_files_extensions_label = 过期的
 settings_temporary_files_extensions_placeholder = 例如：.tmp、.bak、~
 settings_temporary_files_reset = 重置为默认值
 settings_broken_files_header = 蓝色文件
-settings_broken_files_note = 资源密集扫描。为了最佳性能，请在桌面上使用 Krokiet。.
+settings_broken_files_note = 资源密集扫描。为了最佳性能，请在桌面上使用 Krokiet。
 settings_broken_files_types_label = 选择类型
 settings_broken_audio = 音频
 settings_broken_pdf = PDF
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = 非ASCII字符
 settings_bad_names_duplicated = 重复字符
 settings_ignore_same_resolution = 忽略具有相同分辨率的图像
 # Settings - Appearance section
-settings_appearance_label = 应用
+settings_appearance_label = 外观
 settings_dark_theme = 暗色主题
 settings_dark_theme_desc = 使用暗色方案
 # Settings - Diagnostics tab
@@ -242,14 +242,14 @@ app_license = Czkawka Core - GPL-3.0 的前端
 about_app_label = 关于
 cache_label = 缓存
 # Notification
-scan_completed_notification = 扫描完成 - 找到 { $file_count } 个文件。
+scan_completed_notification = 扫描完成 - 找到 { $file_count } 个文件
 # Confirm popups (set from Rust)
 confirm_clean_exif = 您确定要从 { $n } 个选定的文件中清除 EXIF 标签吗？
 confirm_delete_items = 您确定要删除 { $n } 个选中的项目吗？
-gallery_confirm_delete_msg = 您即将删除 { $total_images } 张图片，这些图片位于 { $total_groups } 个分组中。.
+gallery_confirm_delete_msg = 您即将删除 { $total_images } 张图片，这些图片位于 { $total_groups } 个分组中。
 gallery_confirm_delete_warning = 所有商品均已从 { $unsafe_groups } 个组别中挑选！
 # Settings - SameMusic fingerprint warning
-same_music_fingerprint_warning = 计算和比较音频指纹耗费大量资源，可能需要很长时间。 建议在桌面系统上使用Krokiet来完成这项任务。.
+same_music_fingerprint_warning = 计算和比较音频指纹耗费大量资源，可能需要很长时间。 建议在桌面系统上使用Krokiet来完成这项任务。
 # Scan stage labels (shown during scan progress)
 # Group headers in scan results
 duplicates_group_header = { $count } 个文件 x { $per_file } / 个文件 = 共有 { $total } 个文件
@@ -266,7 +266,7 @@ option_similarity_high = 高
 option_similarity_medium = 中
 option_similarity_low = 低
 option_similarity_very_low = 低
-option_similarity_minimal = 最小值.
+option_similarity_minimal = 最小值
 option_check_method_hash = 哈希
 option_check_method_name = 名称
 option_check_method_size_and_name = 大小+名称
@@ -314,6 +314,6 @@ compare_cancelling = 正在取消…
 compare_computing = 正在计算差异…
 compare_mode_normal = 侧面
 compare_mode_split = 拆分
-compare_mode_overlay = 叠加层。
+compare_mode_overlay = 叠加层
 compare_mode_diff = 差异
 compare_res_mismatch = 不同的分辨率-差异可能不正确

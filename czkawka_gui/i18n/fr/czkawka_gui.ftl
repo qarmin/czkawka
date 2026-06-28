@@ -8,14 +8,14 @@ general_ok_button = Ok
 general_close_button = Fermer
 # Krokiet info dialog
 krokiet_info_title = Avis de dépréciation
-krokiet_info_message = 
-        Czkawka GTK 12.0 est la dernière version. Aucune mise à jour, fonctionnalité ou correction de bugs supplémentaires n'est prévue.
-
-        La plupart des fonctionnalités de Czkawka GTK sont disponibles dans Krokiet, généralement sous une forme plus simple, plus rapide et plus stable. Krokiet ajoute également de nouvelles fonctionnalités et améliorations qui n'étaient pas possibles dans la version GTK.
-
-        Si vous utilisez encore Czkawka GTK, la transition vers Krokiet devrait être facile, car il possède une interface similaire, moins de dépendances et une meilleure prise en charge multiplateforme.
-
-        P.S. : Ce message ne doit apparaître qu'une seule fois. Si vous le voyez réapparaître, définissez la variable d'environnement CZKAWKA_DONT_ANNOY_ME sur une valeur non vide.
+krokiet_info_message =
+    Czkawka GTK 12.0 est la dernière version. Aucune mise à jour, fonctionnalité ou correction de bugs supplémentaires n'est prévue.
+    
+    La plupart des fonctionnalités de Czkawka GTK sont disponibles dans Krokiet, généralement sous une forme plus simple, plus rapide et plus stable. Krokiet ajoute également de nouvelles fonctionnalités et améliorations qui n'étaient pas possibles dans la version GTK.
+    
+    Si vous utilisez encore Czkawka GTK, la transition vers Krokiet devrait être facile, car il possède une interface similaire, moins de dépendances et une meilleure prise en charge multiplateforme.
+    
+    P.S. : Ce message ne doit apparaître qu'une seule fois. Si vous le voyez réapparaître, définissez la variable d'environnement CZKAWKA_DONT_ANNOY_ME sur une valeur non vide.
 # Main window
 music_title_checkbox = Titre de la page
 music_artist_checkbox = Artiste
@@ -308,16 +308,16 @@ header_about_button_tooltip = Ouvre la boîte de dialogue contenant les informat
 header_krokiet_button_tooltip = Essayez Krokiet - la nouvelle version améliorée!
 # Krokiet promo dialog
 krokiet_promo_title = Rencontrez Krokiet!
-krokiet_promo_message = 
-        Bonjour, utilisateur courageux de Czkawka !
-
-        La Force est manifestement avec vous, mais Krokiet ne l'est pas - un outil de nettoyage de doublons plus récent, plus rapide, plus léger et, disons-le, significativement plus attrayant (si l'on peut parler d'attrait chez les applications).
-
-        Krokiet inclut tout ce que les gens appréciaient chez Czkawka. Il est totalement gratuit, open source, possède une interface utilisateur unique et simple (à la fois encensée et critiquée par beaucoup), introduit de nombreuses nouvelles fonctionnalités, utilise moins de dépendances et fonctionne de manière beaucoup plus fiable sur différentes plateformes.
-
-        Et si vous l'avez manqué, il existe déjà une application encore plus récente que Krokiet : Cedinia, conçue principalement pour les appareils Android et l'utilisation tactile.
-
-        Czkawka GTK nous a bien servis, mais son temps est révolu.
+krokiet_promo_message =
+    Bonjour, utilisateur courageux de Czkawka !
+    
+    La Force est manifestement avec vous, mais Krokiet ne l'est pas - un outil de nettoyage de doublons plus récent, plus rapide, plus léger et, disons-le, significativement plus attrayant (si l'on peut parler d'attrait chez les applications).
+    
+    Krokiet inclut tout ce que les gens appréciaient chez Czkawka. Il est totalement gratuit, open source, possède une interface utilisateur unique et simple (à la fois encensée et critiquée par beaucoup), introduit de nombreuses nouvelles fonctionnalités, utilise moins de dépendances et fonctionne de manière beaucoup plus fiable sur différentes plateformes.
+    
+    Et si vous l'avez manqué, il existe déjà une application encore plus récente que Krokiet : Cedinia, conçue principalement pour les appareils Android et l'utilisation tactile.
+    
+    Czkawka GTK nous a bien servis, mais son temps est révolu.
 krokiet_promo_link_download = Télécharger Krokiet/Cedinia
 krokiet_promo_link_project = Page du projet
 

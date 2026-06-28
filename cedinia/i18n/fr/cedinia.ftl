@@ -28,7 +28,7 @@ home_bad_extensions_description = Fichiers avec extension invalide
 home_same_music_description = Fichiers audio similaires par tags
 home_bad_names_description = Fichiers avec des caractères problématiques dans le nom
 home_exif_description = Images avec métadonnées EXIF
-home_similar_videos_description = Trouver des vidéos avec un son similaire (FFmpeg non nécessaire)
+home_similar_videos_description = Trouver des vidéos avec un son similaire
 # Results list
 scanning = Analyse en cours...
 stopping = Arrêt...
@@ -37,7 +37,7 @@ press_start = Appuyez sur START pour analyser
 select_label = Sel.
 deselect_label = Desel.
 list_label = Liste
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Sélectionner
 select_all = Tout sélectionner
@@ -266,7 +266,7 @@ option_similarity_high = Élevé
 option_similarity_medium = Moyenne
 option_similarity_low = Bas
 option_similarity_very_low = V.Très faible
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hachage
 option_check_method_name = Nom
 option_check_method_size_and_name = Taille+Nom

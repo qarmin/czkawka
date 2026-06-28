@@ -29,7 +29,7 @@ home_bad_extensions_description = Files with invalid extension
 home_same_music_description = Similar audio files by tags
 home_bad_names_description = Files with problematic characters in name
 home_exif_description = Images with EXIF metadata
-home_similar_videos_description = Find videos with similar audio (no FFmpeg needed)
+home_similar_videos_description = Find videos with similar audio
 
 # Results list
 scanning = Scanning in progress...
@@ -39,7 +39,7 @@ press_start = Press START to scan
 select_label = Sel.
 deselect_label = Desel.
 list_label = List
-gallery_label = Gal.
+gallery_label = Gal
 
 # Selection popup
 selection_popup_title = Select
@@ -117,12 +117,12 @@ settings_check_method_label = COMPARISON METHOD
 settings_check_method = Method
 settings_hash_type_label = HASH TYPE
 settings_hash_type = Hash type
-settings_hash_type_desc = Blake3 - is recommended option, CRC32 have small chance of false positives
+settings_hash_type_desc = Blake3 is the recommended option; CRC32 has a small chance of false positives
 settings_similar_images_header = SIMILAR IMAGES
 settings_similarity_preset = Similarity threshold
 settings_similarity_desc = Very High = only near-identical
 settings_hash_size = Hash size
-settings_hash_size_desc = Larger sizes, have less false positives, but also finds less similar images
+settings_hash_size_desc = Larger size means fewer false positives but also fewer results
 settings_hash_alg = Hash algorithm
 settings_image_filter = Resize filter
 settings_geometric_invariance = Geometric invariance
@@ -195,7 +195,7 @@ diag_confirm_clear_thumbnails = Clear all thumbnail cache?
 diag_confirm_clear_cache = Clear all app cache?
 about_repo = Repository
 about_translate = Translations
-about_donate = Support
+about_donate = Donate
 
 # Collect-test result popup
 collect_test_title = Test results
@@ -290,7 +290,7 @@ option_similarity_high = High
 option_similarity_medium = Medium
 option_similarity_low = Low
 option_similarity_very_low = V.Low
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hash
 option_check_method_name = Name
 option_check_method_size_and_name = Size+Name

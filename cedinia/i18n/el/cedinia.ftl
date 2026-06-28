@@ -28,7 +28,7 @@ home_bad_extensions_description = Αρχεία με μη έγκυρη επέκτ
 home_same_music_description = Παρόμοια αρχεία ήχου από ετικέτες
 home_bad_names_description = Αρχεία με προβληματικούς χαρακτήρες στο όνομα
 home_exif_description = Εικόνες με μεταδεδομένα EXIF
-home_similar_videos_description = Βρείτε βίντεο με παρόμοιο ήχο (δεν απαιτείται FFmpeg)
+home_similar_videos_description = Βρείτε βίντεο με παρόμοιο ήχο
 # Results list
 scanning = Σάρωση σε εξέλιξη...
 stopping = Διακοπή...
@@ -37,7 +37,7 @@ press_start = Πατήστε ΕΝΑΡΞΗ για σάρωση
 select_label = Επιλογή.
 deselect_label = Desel.
 list_label = Λίστα
-gallery_label = Γαλάτες.
+gallery_label = Γκαλ
 # Selection popup
 selection_popup_title = Επιλογή
 select_all = Επιλογή όλων
@@ -115,7 +115,7 @@ settings_hash_size = Μέγεθος κατακερματισμού
 settings_hash_size_desc = Μεγαλύτερα μεγέθη, έχουν λιγότερο ψευδείς θετικές, αλλά βρίσκει και λιγότερο παρόμοιες εικόνες
 settings_hash_alg = Αλγόριθμος κατακερματισμού
 settings_image_filter = Αλλαγή μεγέθους φίλτρου
-settings_geometric_invariance = Γεωμετρικό σιδηρόδρομο
+settings_geometric_invariance = Γεωμετρική αναλλοίωτη
 settings_ignore_same_size = Παράβλεψη εικόνων με τις ίδιες διαστάσεις
 settings_gallery_image_fit_cover = Συλλογή: περικοπή σε τετράγωνο
 settings_gallery_image_fit_cover_desc = Συμπληρώστε το πλακίδιο; απενεργοποιήστε για να κρατήσετε την αρχική αναλογία διαστάσεων
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Χαρακτήρες που δεν ανήκουν
 settings_bad_names_duplicated = Επαναλαμβανόμενοι χαρακτήρες
 settings_ignore_same_resolution = Παράβλεψη εικόνων με την ίδια ανάλυση
 # Settings - Appearance section
-settings_appearance_label = ΕΦΑΡΜΟΓΗ
+settings_appearance_label = ΕΜΦΑΝΙΣΗ
 settings_dark_theme = Σκοτεινό θέμα
 settings_dark_theme_desc = Χρήση σκούρου συνδυασμού χρωμάτων
 # Settings - Diagnostics tab
@@ -266,7 +266,7 @@ option_similarity_high = Υψηλή
 option_similarity_medium = Μεσαίο
 option_similarity_low = Χαμηλή
 option_similarity_very_low = V. Πολύ χαμηλό
-option_similarity_minimal = Ελάχ.
+option_similarity_minimal = Ελάχ
 option_check_method_hash = Κατακερματισμός
 option_check_method_name = Όνομα
 option_check_method_size_and_name = Μέγεθος+Όνομα

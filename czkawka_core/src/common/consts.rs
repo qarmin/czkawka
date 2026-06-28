@@ -42,8 +42,17 @@ pub const YAML_FILES_EXTENSIONS: &[&str] = &["yaml", "yml"];
 pub const BZ2_FILES_EXTENSIONS: &[&str] = &["bz2", "tbz2", "tbz"];
 pub const XZ_FILES_EXTENSIONS: &[&str] = &["xz", "txz"];
 pub const PDF_FILES_EXTENSIONS: &[&str] = &["pdf"];
-pub const AUDIO_FILES_EXTENSIONS: &[&str] = &[
-    "mp3", "flac", "wav", "ogg", "opus", "m4a", "aac", "aiff", "pcm", "aif", "aifc", "m3a", "mp2", "mp4a", "mp2a", "mpga", "wave", "weba", "wma", "oga",
+// Extensions lofty-rs can read tags from (see lofty::file::EXTENSIONS).
+pub const AUDIO_FILES_TAGS_EXTENSIONS: &[&str] = &[
+    "mp3", "mp2", "mp1", "flac", "wav", "wave", "ogg", "oga", "opus", "aac", "wma", "aiff", "aif", "afc", "aifc", "m4a", "m4b", "m4p", "mp4a", "mp2a", "mpga", "m3a", "ape", "wv",
+    "mpc", "spx", "weba", "pcm",
+];
+// Extensions symphonia can decode (features = "all": ogg/isomp4/mkv/aiff/wav/caf; codecs aac/alac/flac/mp1-3/pcm/vorbis).
+// No opus (codec absent), no wma (ASF format absent - files would be falsely flagged as broken).
+pub const AUDIO_FILES_CONTENT_EXTENSIONS: &[&str] = &[
+    "mp3", "mp2", "mp1", "mp2a", "mpga", "m3a", "flac", "wav", "wave", "pcm", "ogg",
+    "oga", // Vorbis works; OGG Opus returns UnsupportedCodec which broken_files treats as not-broken
+    "aac", "m4a", "m4b", "m4p", "mp4a", "aiff", "aif", "aifc", "weba",
 ];
 pub const VIDEO_FILES_EXTENSIONS: &[&str] = &[
     "mp4", "m4v", "mkv", "avi", "mov", "webm", "flv", "wmv", // Popular

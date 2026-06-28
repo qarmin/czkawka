@@ -260,6 +260,8 @@ export global AppState {
     callback confirm_popup_cancel();
 
 
+    in property  <string> build_info: "";
+
     in-out property <bool>   licenses_popup_visible: false;
     in-out property <string> licenses_text: "";
     callback show_third_party_licenses();

@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = 설정
-window_main_title = Czkawka (구글ить)
+window_main_title = Czkawka (딸꾹질)
 window_progress_title = 스캔중
 window_compare_images = 이미지 비교
 # General
@@ -8,14 +8,14 @@ general_ok_button = 알겠습니다
 general_close_button = 닫기
 # Krokiet info dialog
 krokiet_info_title = 사용 중단 알림
-krokiet_info_message = 
-        Czkawka GTK 12.0은 최종 버전입니다. 더 이상 업데이트, 기능 추가, 또는 버그 수정은 예정되어 있지 않습니다.
-
-        Czkawka GTK의 대부분의 기능은 Krokiet에서 사용할 수 있으며, 일반적으로 더 단순하고 빠르며 안정적인 형태로 제공됩니다. 또한 Krokiet은 GTK 버전에서는 불가능했던 새로운 기능과 개선 사항을 추가합니다.
-
-        만약 아직 Czkawka GTK를 사용하고 계시다면, Krokiet으로 전환하는 것은 비교적 간단할 것입니다. Krokiet은 유사한 인터페이스를 가지고 있으며, 더 적은 의존성을 가지며, 더 나은 크로스 플랫폼 지원을 제공합니다.
-
-        참고: 이 메시지는 한 번만 표시되어야 합니다. 만약 이 메시지가 다시 나타난다면, CZKAWKA_DONT_ANNOY_ME 환경 변수를 비어 있지 않은 값으로 설정하십시오.
+krokiet_info_message =
+    Czkawka GTK 12.0은 최종 버전입니다. 더 이상 업데이트, 기능 추가, 또는 버그 수정은 예정되어 있지 않습니다.
+    
+    Czkawka GTK의 대부분의 기능은 Krokiet에서 사용할 수 있으며, 일반적으로 더 단순하고 빠르며 안정적인 형태로 제공됩니다. 또한 Krokiet은 GTK 버전에서는 불가능했던 새로운 기능과 개선 사항을 추가합니다.
+    
+    만약 아직 Czkawka GTK를 사용하고 계시다면, Krokiet으로 전환하는 것은 비교적 간단할 것입니다. Krokiet은 유사한 인터페이스를 가지고 있으며, 더 적은 의존성을 가지며, 더 나은 크로스 플랫폼 지원을 제공합니다.
+    
+    참고: 이 메시지는 한 번만 표시되어야 합니다. 만약 이 메시지가 다시 나타난다면, CZKAWKA_DONT_ANNOY_ME 환경 변수를 비어 있지 않은 값으로 설정하십시오.
 # Main window
 music_title_checkbox = 제목
 music_artist_checkbox = 아티스트
@@ -316,16 +316,16 @@ header_about_button_tooltip = 이 앱에 대한 정보창을 엽니다.
 header_krokiet_button_tooltip = 크로키엣을 사용해보세요! 새롭고 개선된 버전입니다!
 # Krokiet promo dialog
 krokiet_promo_title = 크로키에트를 소개합니다!
-krokiet_promo_message = 
-        안녕하세요, 용감한 Czkawka 사용자 여러분!
-
-        포스가 분명히 당신과 함께 있지만, Krokiet은 그렇지 않습니다. Krokiet은 Czkawka의 후속작으로, 더 빠르고 가벼우며, 훨씬 더 멋진(앱이 실제로 멋있을 수 있다고 가정한다면) 중복 파일 정리 프로그램입니다.
-
-        Krokiet은 Czkawka에서 사람들이 좋아했던 모든 기능을 포함하고 있습니다. 완전 무료이며, 오픈 소스이며, 독특하고 단순한 UI(많은 사람들에게 칭찬받기도 하고 비판받기도 하는)를 가지고 있으며, 많은 새로운 기능을 제공하고, 더 적은 의존성을 사용하며, 다양한 플랫폼에서 훨씬 더 안정적으로 작동합니다.
-
-        혹시 놓치셨을 수도 있지만, Krokiet보다 훨씬 더 새로운 앱인 Cedinia가 이미 출시되었습니다. Cedinia는 주로 Android 기기 및 터치스크린 사용을 위해 설계되었습니다.
-
-        Czkawka GTK는 우리에게 많은 도움을 주었지만, 이제 그 시대는 끝났습니다.
+krokiet_promo_message =
+    안녕하세요, 용감한 Czkawka 사용자 여러분!
+    
+    포스가 분명히 당신과 함께 있지만, Krokiet은 그렇지 않습니다. Krokiet은 Czkawka의 후속작으로, 더 빠르고 가벼우며, 훨씬 더 멋진(앱이 실제로 멋있을 수 있다고 가정한다면) 중복 파일 정리 프로그램입니다.
+    
+    Krokiet은 Czkawka에서 사람들이 좋아했던 모든 기능을 포함하고 있습니다. 완전 무료이며, 오픈 소스이며, 독특하고 단순한 UI(많은 사람들에게 칭찬받기도 하고 비판받기도 하는)를 가지고 있으며, 많은 새로운 기능을 제공하고, 더 적은 의존성을 사용하며, 다양한 플랫폼에서 훨씬 더 안정적으로 작동합니다.
+    
+    혹시 놓치셨을 수도 있지만, Krokiet보다 훨씬 더 새로운 앱인 Cedinia가 이미 출시되었습니다. Cedinia는 주로 Android 기기 및 터치스크린 사용을 위해 설계되었습니다.
+    
+    Czkawka GTK는 우리에게 많은 도움을 주었지만, 이제 그 시대는 끝났습니다.
 krokiet_promo_link_download = Krokiet/Cedinia 다운로드
 krokiet_promo_link_project = 프로젝트 페이지
 
@@ -457,7 +457,7 @@ compute_found_videos = { $number_files } 개의 비슷한 동영상을 { $number
 compute_found_music = { $number_files }개의 비슷한 음악 파일을 { $number_groups } 그룹에서 { $time } 내에 찾았습니다
 compute_found_invalid_symlinks = { $number_files }개의 유효하지 않은 심볼릭 링크를 { $time }에서 찾았습니다
 compute_found_broken_files = { $number_files }개의 봉인된 파일을 { $time }에 발견했습니다
-compute_found_bad_extensions = { $number_files } 확장자에 문제가 있는 파일을 { $time } 내로找到了
+compute_found_bad_extensions = { $number_files } 확장자에 문제가 있는 파일을 { $time } 내에 찾았습니다
 # Progress window
 progress_current_stage = 현재 단계:{ "  " }
 progress_all_stages = 전체 단계:{ "  " }
@@ -477,7 +477,7 @@ text_view_messages = 알림
 text_view_warnings = 경고
 text_view_errors = 오류
 about_window_motto = 이 프로그램은 무료이며, 앞으로도 항상 그럴 것이다.
-krokiet_new_app = 'Czkawka'는 유지보수 모드에 있습니다,这意味着仅会修复关键错误且不会添加新功能。对于新功能，请查看新的Krokiet应用，该应用更加稳定性能更强并且仍在积极开发中。.
+krokiet_new_app = 'Czkawka'는 유지 관리 모드에 있으며, 중요한 버그만 수정되고 새로운 기능은 추가되지 않습니다. 새 기능은 더 안정적이고 적극적으로 개발 중인 Krokiet 앱을 참조하세요.
 # Various dialog
 dialogs_ask_next_time = 다음에도 묻기
 symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }

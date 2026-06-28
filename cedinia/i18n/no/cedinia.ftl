@@ -28,7 +28,7 @@ home_bad_extensions_description = Filer med ugyldig utvidelse
 home_same_music_description = Lignende lydfiler etter koder
 home_bad_names_description = Filer med problematiske tegn i navn
 home_exif_description = Bilder med EXIF metadata
-home_similar_videos_description = Finn videoer med lignende lyd (ingen FFmpeg trengst)
+home_similar_videos_description = Finn videoer med lignende lyd
 # Results list
 scanning = Skanning pågår...
 stopping = Stopper...
@@ -37,7 +37,7 @@ press_start = Trykk på START for å skanne
 select_label = Selv.
 deselect_label = Desel.
 list_label = Liste
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Velg
 select_all = Velg alle
@@ -108,7 +108,7 @@ settings_check_method = Metode
 settings_hash_type_label = HASH-TYPE
 settings_hash_type = Type hash
 settings_hash_type_desc = Blake3 - anbefales alternativ, CRC32 har liten sjanse for falske positiver
-settings_similar_images_header = SIMILAR BILDER
+settings_similar_images_header = LIGNENDE BILDER
 settings_similarity_preset = Likhetsterskel
 settings_similarity_desc = Svært høy = bare nær-identisk
 settings_hash_size = Størrelse på hash
@@ -183,7 +183,7 @@ diag_confirm_clear_thumbnails = Slett alt av miniatyrbilde-mellomlager?
 diag_confirm_clear_cache = Tømme alle appens hurtiglager?
 about_repo = Kodelager
 about_translate = Oversettelser
-about_donate = Brukerstøtte
+about_donate = Doner
 # Collect-test result popup
 collect_test_title = Prøvingsresultater
 collect_test_volumes = Volumer:
@@ -266,7 +266,7 @@ option_similarity_high = Høy
 option_similarity_medium = Middels
 option_similarity_low = Lav
 option_similarity_very_low = V.Lav
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hash
 option_check_method_name = Navn
 option_check_method_size_and_name = Størrelse+Navn

@@ -122,7 +122,7 @@ stage_saving_fingerprints_cache = Parmak izi önbelleği kaydediliyor
 stage_loading_exif_cache = Yükleniyor EXIF önbelleği
 stage_saving_exif_cache = EXIF önbelleğini kaydetme
 # Per-tool work stages - items_stats holds "checked/total", size_stats holds the byte sizes
-stage_hiding_links = Gizli bağlantıları ({$items_stats}) gizle
+stage_hiding_links = Gizli bağlantıları ({ $items_stats }) gizle
 stage_analyzed_partial_hash = { $items_stats } dosyanın kısmi hash’i analiz edildi ({ $size_stats })
 stage_analyzed_full_hash = { $items_stats } dosyanın tam hash’i analiz edildi ({ $size_stats })
 stage_checked_tags = { $items_stats } öğesinin etiketleri kontrol edildi

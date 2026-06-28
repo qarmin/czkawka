@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = 设定
-window_main_title = Czkawka - (Hiccup)
+window_main_title = Czkawka (打嗝)
 window_progress_title = 正在扫描
 window_compare_images = 比较图像
 # General
@@ -8,7 +8,7 @@ general_ok_button = 好的
 general_close_button = 关闭
 # Krokiet info dialog
 krokiet_info_title = 废弃通知
-krokiet_info_message = 
+krokiet_info_message =
     Czkawka GTK 12.0是最后版本。没有计划进一步更新、功能或错误修复。
     
     来自Czkawka GTK 的大多数功能都可以使用 Krokiet, 通常是更简单、更快和更稳定的形式。 Krokiet还在GTK版本中添加了新的功能和改进。
@@ -219,11 +219,11 @@ popover_custom_path_check_button_entry_tooltip =
     
     示例用法：
     /home/pimpek/rzecz.txt 可以通过 /home/pim* 找到
-popover_custom_name_check_button_entry_tooltip =
+popover_custom_name_check_button_entry_tooltip = 
     按文件名选择记录。
     
     示例用法：
-    /usr/ping/pong.txt 可以通过 *ong* 找到。
+    /usr/ping/pong.txt 可以通过 *ong* 找到
 popover_custom_regex_check_button_entry_tooltip =
     按指定的正则表达式选择记录。
     
@@ -310,7 +310,7 @@ header_about_button_tooltip = 打开包含应用程序信息的对话框。.
 header_krokiet_button_tooltip = 尝试 Krokiet - 新的和改进的版本！
 # Krokiet promo dialog
 krokiet_promo_title = 会见Krokie！
-krokiet_promo_message = 
+krokiet_promo_message =
     你好，勇敢的 Czkawka 用户！
     
     部队与你有明显的关系，但Krokiet不是一个新的、更快的、更轻松的部队。 并且更多的手动(假定应用程序可能实际上是手提的) 重复清洁器。

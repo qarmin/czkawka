@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Ρυθμίσεις
-window_main_title = Czkawka (Ήκουψ)
+window_main_title = Czkawka (λόξιγκας)
 window_progress_title = Σάρωση
 window_compare_images = Σύγκριση Εικόνων
 # General
@@ -363,9 +363,9 @@ settings_use_trash_button = Μετακίνηση διαγραμμένων αρχ
 settings_language_label = Γλώσσα
 settings_multiple_delete_outdated_cache_checkbutton = Αυτόματη διαγραφή ξεπερασμένων καταχωρήσεων cache
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
-    Στρεμώστε τα αποσκευάκημα πλήρωμα που καθυστερούν και δείχνουν ότι συνδέονται με αρχεία που δεν υπάρχουν.
-    
-    Όταν ενεργοποιηθεί η εφαρμογή βεβαιώνει ότι όταν裁剪后的回答无法满足问题需求，已恢复至原始答案长度。.
+    Αφαιρεί τις παλιές καταχωρήσεις cache που δείχνουν ότι συνδέονται με αρχεία που δεν υπάρχουν πλέον.
+
+    Όταν ενεργοποιηθεί, η εφαρμογή βεβαιώνει ότι φορτώνει cache χρησιμοποιώντας μόνο αρχεία που υπάρχουν στον δίσκο.
 settings_notebook_general = Γενικά
 settings_notebook_duplicates = Διπλότυπα
 settings_notebook_images = Παρόμοιες Εικόνες

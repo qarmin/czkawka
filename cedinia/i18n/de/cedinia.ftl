@@ -28,7 +28,7 @@ home_bad_extensions_description = Dateien mit ungültiger Erweiterung
 home_same_music_description = Ähnliche Audiodateien nach Tags
 home_bad_names_description = Dateien mit problematischen Zeichen im Namen
 home_exif_description = Bilder mit EXIF-Metadaten
-home_similar_videos_description = Finde Videos mit ähnlicher Audio (kein FFmpeg benötigt)
+home_similar_videos_description = Finde Videos mit ähnlicher Audio
 # Results list
 scanning = Scanne läuft...
 stopping = Beenden...
@@ -37,7 +37,7 @@ press_start = Zum Scannen START drücken
 select_label = Auswahl.
 deselect_label = Desel.
 list_label = Liste
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Auswählen
 select_all = Alles auswählen
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Nicht-ASCII-Zeichen
 settings_bad_names_duplicated = Wiederholte Zeichen
 settings_ignore_same_resolution = Bilder mit der gleichen Auflösung ignorieren
 # Settings - Appearance section
-settings_appearance_label = APPEARANZ
+settings_appearance_label = AUSSEHEN
 settings_dark_theme = Dunkles Design
 settings_dark_theme_desc = Dunkles Farbschema verwenden
 # Settings - Diagnostics tab
@@ -266,7 +266,7 @@ option_similarity_high = Hoch
 option_similarity_medium = Mittel
 option_similarity_low = Niedrig
 option_similarity_very_low = V.Niedrig
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hash
 option_check_method_name = Name
 option_check_method_size_and_name = Größe+Name

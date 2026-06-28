@@ -1,21 +1,21 @@
 # Window titles
 window_settings_title = 設定
-window_main_title = Czkawka
+window_main_title = Czkawka (打嗝)
 window_progress_title = 掃描中
 window_compare_images = 比較影像
 # General
-general_ok_button = 好的。
+general_ok_button = 好的
 general_close_button = 關閉
 # Krokiet info dialog
-krokiet_info_title = 已過時提示。
-krokiet_info_message = 
-        Czkawka GTK 12.0 是最终版本。未来不会有任何更新、新功能或错误修复。
-
-        Czkawka GTK 的大部分功能都已在 Krokiet 中实现，通常以更简单、更快、更稳定的形式提供。此外，Krokiet 还增加了在 GTK 版本中无法实现的新功能和改进。
-
-        如果您仍在使用 Czkawka GTK，切换到 Krokiet 应该会很简单，因为它具有相似的界面、更少的依赖项以及更好的跨平台支持。
-
-        P.S. 此消息应只显示一次。如果再次出现，请将环境变量 CZKAWKA_DONT_ANNOY_ME 设置为任何非空值。.
+krokiet_info_title = 已過時提示
+krokiet_info_message =
+    Czkawka GTK 12.0 是最终版本。未来不会有任何更新、新功能或错误修复。
+    
+    Czkawka GTK 的大部分功能都已在 Krokiet 中实现，通常以更简单、更快、更稳定的形式提供。此外，Krokiet 还增加了在 GTK 版本中无法实现的新功能和改进。
+    
+    如果您仍在使用 Czkawka GTK，切换到 Krokiet 应该会很简单，因为它具有相似的界面、更少的依赖项以及更好的跨平台支持。
+    
+    P.S. 此消息应只显示一次。如果再次出现，请将环境变量 CZKAWKA_DONT_ANNOY_ME 设置为任何非空值。.
 # Main window
 music_title_checkbox = 標題
 music_artist_checkbox = 藝人
@@ -50,10 +50,10 @@ music_comparison_checkbox_tooltip =
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 duplicate_case_sensitive_name = 區分大小寫
-duplicate_case_sensitive_name_tooltip =
+duplicate_case_sensitive_name_tooltip = 
     啟用後，只有在檔案名稱完全相同的情況下才會將其分組，例如 Żołd <-> Żołd。
     
-    停用這個選項則會在不檢查每個字母大小是否相同的情況下進行分組，例如 żoŁD <-> Żołd。
+    停用這個選項則會在不檢查每個字母大小是否相同的情況下進行分組，例如 żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = 大小和名稱
 duplicate_mode_name_combo_box = 名稱
 duplicate_mode_size_combo_box = 大小
@@ -136,7 +136,7 @@ main_tree_view_column_codec = 編碼解碼器
 main_label_check_method = 檢查方法
 main_label_hash_type = 雜湊類型
 main_label_hash_size = 雜湊大小
-main_label_geometric_invariance = 幾何不變性。
+main_label_geometric_invariance = 幾何不變性
 main_label_size_bytes = 大小（位元組）
 main_label_min_size = 最小
 main_label_max_size = 最大
@@ -217,11 +217,11 @@ popover_custom_path_check_button_entry_tooltip =
     
     範例用法：
     /home/pimpek/rzecz.txt 可以透過 /home/pim* 找到
-popover_custom_name_check_button_entry_tooltip =
+popover_custom_name_check_button_entry_tooltip = 
     透過檔名選擇記錄。
     
     範例用法：
-    /usr/ping/pong.txt 可以在 *ong* 中找到。
+    /usr/ping/pong.txt 可以在 *ong* 中找到
 popover_custom_regex_check_button_entry_tooltip =
     透過指定的正規表達式（Regex）來選擇記錄。
     
@@ -308,16 +308,16 @@ header_about_button_tooltip = 開啟包含應用程式資訊的對話方塊。.
 header_krokiet_button_tooltip = 試試 Krokiet，全新且更優化的版本！
 # Krokiet promo dialog
 krokiet_promo_title = 來認識一下 Krokiet 吧！
-krokiet_promo_message = 
-        親愛的勇敢的 Czkawka 用戶，您好！
-
-        顯然，原力與您同在，但 Krokiet 並不在。它是一款更新、更快、更輕巧，而且（假設應用程式也能擁有美貌的話）更具吸引力的重複文件清理工具。
-
-        Krokiet 包含了人們喜歡 Czkawka 的所有優點。它完全免費、開源，擁有獨特且簡潔的介面（深受許多人的讚賞，但也同樣受到一些人的批評），引入了許多新功能，減少了依賴項，並且在不同平台上運作得更加穩定。
-
-        如果您錯過了，實際上已經有比 Krokiet 更新的應用程式了，它叫做 Cedinia，主要針對 Android 設備和觸控螢幕使用。
-
-        Czkawka GTK 為我們服務了很長一段時間，但它的壽命已經到了盡頭。.
+krokiet_promo_message =
+    親愛的勇敢的 Czkawka 用戶，您好！
+    
+    顯然，原力與您同在，但 Krokiet 並不在。它是一款更新、更快、更輕巧，而且（假設應用程式也能擁有美貌的話）更具吸引力的重複文件清理工具。
+    
+    Krokiet 包含了人們喜歡 Czkawka 的所有優點。它完全免費、開源，擁有獨特且簡潔的介面（深受許多人的讚賞，但也同樣受到一些人的批評），引入了許多新功能，減少了依賴項，並且在不同平台上運作得更加穩定。
+    
+    如果您錯過了，實際上已經有比 Krokiet 更新的應用程式了，它叫做 Cedinia，主要針對 Android 設備和觸控螢幕使用。
+    
+    Czkawka GTK 為我們服務了很長一段時間，但它的壽命已經到了盡頭。.
 krokiet_promo_link_download = 下載 Krokiet/Cedinia
 krokiet_promo_link_project = 專案頁面
 

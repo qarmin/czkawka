@@ -57,14 +57,6 @@ just android_run            # launch on connected device
 just setup_sanitizer_android   # one-time: nightly + aarch64 target + llvm-tools
 just android_asan              # build (nightly+ASan) -> install -> launch + auto-logcat
 just android_asan smoke        # same, but deliberately heap-overflows at startup
-                               # -> confirms ASan is active (look for AddressSanitizer)
-# Requires ANDROID_NDK_HOME and an arm64 device/emulator. The instrumented
-# libcedinia.so is packaged by Gradle (assembleDebug) with the NDK ASan runtime
-# and a wrap.sh; only the debug build is affected, release/AAB is untouched.
-# After launch it streams logcat through ndk-stack (Ctrl-C to stop), which adds
-# function + file:line to backtraces from the unstripped local .so. The on-device
-# ASan symbolizer only shows names; file:line comes from ndk-stack.
-just android_symbolize target/cedinia-asan-logcat.txt  # re-symbolize a saved dump
 
 #  Logs & diagnostics 
 just android_log            # logcat: Rust stdout/stderr only

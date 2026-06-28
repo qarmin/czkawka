@@ -196,6 +196,9 @@ fn run_app_inner(
 
     translate_items(&window);
     set_initial_gui_infos(&window);
+    window
+        .global::<AppState>()
+        .set_build_info(SharedString::from(concat!("Build ", env!("CEDINIA_BUILD_DATE"), ", commit ", env!("CEDINIA_BUILD_COMMIT"))));
     window.global::<AppState>().set_status_message(SharedString::from(crate::flc!("status_ready")));
 
     let bot_lp = inset_bottom_px / scale;

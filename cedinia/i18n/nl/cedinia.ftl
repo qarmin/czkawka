@@ -28,7 +28,7 @@ home_bad_extensions_description = Bestanden met ongeldige extensie
 home_same_music_description = Vergelijkbare audiobestanden via tags
 home_bad_names_description = Bestanden met problematische tekens in naam
 home_exif_description = Afbeeldingen met EXIF metadata
-home_similar_videos_description = Vind video's met een vergelijkbaar audio (geen FFmpeg nodig)
+home_similar_videos_description = Vind video's met een vergelijkbaar audio
 # Results list
 scanning = Scannen in uitvoering...
 stopping = Stoppen...
@@ -37,7 +37,7 @@ press_start = Druk op START om te scannen
 select_label = Zel.
 deselect_label = Desel.
 list_label = Klantenlijst
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Selecteren
 select_all = Alles selecteren
@@ -108,14 +108,14 @@ settings_check_method = Methode
 settings_hash_type_label = HASH TYPE
 settings_hash_type = Soort hash
 settings_hash_type_desc = Blake3 - wordt aangeraden optie, CRC32 hebben een kleine kans op valse positieven
-settings_similar_images_header = SIMILAR AFBEELDINGEN
+settings_similar_images_header = VERGELIJKBARE AFBEELDINGEN
 settings_similarity_preset = Drempelwaarde gelijkwaardigheid
 settings_similarity_desc = Zeer Hoog = alleen bijna identiek
 settings_hash_size = Hash grootte
 settings_hash_size_desc = Grotere formaten, hebben minder valse positieven, maar vinden ook minder gelijksoortige afbeeldingen
 settings_hash_alg = Hash algoritme
 settings_image_filter = Filter aanpassen
-settings_geometric_invariance = Geometrische beveiliging
+settings_geometric_invariance = Geometrische invariantie
 settings_ignore_same_size = Negeer afbeeldingen met dezelfde afmetingen
 settings_gallery_image_fit_cover = Galerij: bijsnijden tot vierkant
 settings_gallery_image_fit_cover_desc = Vul de tegel; schakel uit om de originele hoogte-breedteverhouding te behouden
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Niet-ASCII-tekens
 settings_bad_names_duplicated = Herhaalde tekens
 settings_ignore_same_resolution = Negeer afbeeldingen met dezelfde resolutie
 # Settings - Appearance section
-settings_appearance_label = APPEARANTIE
+settings_appearance_label = UITERLIJK
 settings_dark_theme = Donker thema
 settings_dark_theme_desc = Donker kleurenschema gebruiken
 # Settings - Diagnostics tab
@@ -266,7 +266,7 @@ option_similarity_high = hoog
 option_similarity_medium = Middelgroot
 option_similarity_low = laag
 option_similarity_very_low = V.Laag
-option_similarity_minimal = min.
+option_similarity_minimal = min
 option_check_method_hash = Toegangssleutel
 option_check_method_name = naam
 option_check_method_size_and_name = Grootte+Naam

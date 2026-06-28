@@ -28,7 +28,7 @@ home_bad_extensions_description = Filer med ogiltig filändelse
 home_same_music_description = Liknande ljudfiler med taggar
 home_bad_names_description = Filer med problematiska tecken i namnet
 home_exif_description = Bilder med EXIF-metadata
-home_similar_videos_description = Hitta videor med liknande ljud (ingen FFmpeg behövs)
+home_similar_videos_description = Hitta videor med liknande ljud
 # Results list
 scanning = Skanning pågår….
 stopping = Stoppar...
@@ -37,7 +37,7 @@ press_start = Tryck på START för att skanna
 select_label = Mark.
 deselect_label = Avmark.
 list_label = Lista
-gallery_label = Gall.
+gallery_label = Gall
 # Selection popup
 selection_popup_title = Markera
 select_all = Markera alla
@@ -145,7 +145,7 @@ settings_broken_archive = Arkiv
 settings_broken_image = Bild
 settings_broken_font = Typsnitt
 settings_broken_markup = Markup (JSON/XML/TOML)
-settings_similar_videos_header = SIMILARA VIDEOR (AUDIO)
+settings_similar_videos_header = LIKNANDE VIDEOR (LJUD)
 settings_similar_videos_audio_preset = Förinställning för ljudets likhet
 settings_similar_videos_audio_preset_desc = Kontrollerar hur strikt ljud måste matcha
 settings_bad_names_header = FELAKTIGA NAMN
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Tecken som inte är ASCII
 settings_bad_names_duplicated = Upprepade tecken
 settings_ignore_same_resolution = Ignorera bilder med samma upplösning
 # Settings - Appearance section
-settings_appearance_label = APPEARANS
+settings_appearance_label = UTSEENDE
 settings_dark_theme = Mörkt tema
 settings_dark_theme_desc = Använd mörk färgschema
 # Settings - Diagnostics tab
@@ -266,7 +266,7 @@ option_similarity_high = Hög
 option_similarity_medium = Medel
 option_similarity_low = Låg
 option_similarity_very_low = V.Låg
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hash
 option_check_method_name = Namn
 option_check_method_size_and_name = Storlek+namn

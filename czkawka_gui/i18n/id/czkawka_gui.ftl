@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Pengaturan
-window_main_title = Czwakwa (Hiccup)
+window_main_title = Czkawka (Cegukan)
 window_progress_title = Memindai
 window_compare_images = Bandingkan Gambar
 # General
@@ -8,14 +8,14 @@ general_ok_button = OK
 general_close_button = Tutup
 # Krokiet info dialog
 krokiet_info_title = Pemberitahuan Penghapusan Fitur
-krokiet_info_message = 
-        Czkawka GTK 12.0 adalah rilis terakhir. Tidak ada pembaruan, fitur, atau perbaikan bug lebih lanjut yang direncanakan.
-
-        Sebagian besar fitur dari Czkawka GTK tersedia di Krokiet, biasanya dalam bentuk yang lebih sederhana, lebih cepat, dan lebih stabil. Krokiet juga menambahkan fitur dan peningkatan baru yang tidak mungkin dilakukan pada versi GTK.
-
-        Jika Anda masih menggunakan Czkawka GTK, beralih ke Krokiet seharusnya mudah, karena memiliki antarmuka yang serupa, lebih sedikit dependensi, dan dukungan lintas platform yang lebih baik.
-
-        PS: Pesan ini seharusnya hanya muncul sekali. Jika muncul lagi, atur variabel lingkungan CZKAWKA_DONT_ANNOY_ME ke nilai apa pun yang tidak kosong.
+krokiet_info_message =
+    Czkawka GTK 12.0 adalah rilis terakhir. Tidak ada pembaruan, fitur, atau perbaikan bug lebih lanjut yang direncanakan.
+    
+    Sebagian besar fitur dari Czkawka GTK tersedia di Krokiet, biasanya dalam bentuk yang lebih sederhana, lebih cepat, dan lebih stabil. Krokiet juga menambahkan fitur dan peningkatan baru yang tidak mungkin dilakukan pada versi GTK.
+    
+    Jika Anda masih menggunakan Czkawka GTK, beralih ke Krokiet seharusnya mudah, karena memiliki antarmuka yang serupa, lebih sedikit dependensi, dan dukungan lintas platform yang lebih baik.
+    
+    PS: Pesan ini seharusnya hanya muncul sekali. Jika muncul lagi, atur variabel lingkungan CZKAWKA_DONT_ANNOY_ME ke nilai apa pun yang tidak kosong.
 # Main window
 music_title_checkbox = Judul
 music_artist_checkbox = Artis
@@ -308,16 +308,16 @@ header_about_button_tooltip = Membuka dialog yang berisi informasi tentang aplik
 header_krokiet_button_tooltip = Coba Krokiet sekarang - versi terbaru dan lebih baik!
 # Krokiet promo dialog
 krokiet_promo_title = Kenalan dengan Krokiet!
-krokiet_promo_message = 
-        Halo, pengguna Czkawka yang hebat!
-
-        Jelas sekali, kekuatan ada di pihak Anda, tetapi Krokiet tidak - sebuah aplikasi pembersih duplikat yang lebih baru, lebih cepat, lebih ringan, dan secara signifikan lebih menarik (dengan asumsi aplikasi bisa terlihat menarik).
-
-        Krokiet mencakup semua hal yang disukai orang dari Czkawka. Aplikasi ini sepenuhnya gratis, *open source*, memiliki antarmuka pengguna (UI) yang unik dan sederhana (yang dipuji dan dikritik oleh banyak orang), memperkenalkan banyak fitur baru, menggunakan lebih sedikit dependensi, dan bekerja jauh lebih andal di berbagai platform.
-
-        Dan jika Anda mungkin melewatkannya, sudah ada aplikasi yang lebih baru lagi dari Krokiet, yaitu Cedinia, yang dirancang terutama untuk perangkat Android dan penggunaan layar sentuh.
-
-        Czkawka GTK telah memberikan banyak manfaat bagi kita, tetapi masa pakainya telah berakhir.
+krokiet_promo_message =
+    Halo, pengguna Czkawka yang hebat!
+    
+    Jelas sekali, kekuatan ada di pihak Anda, tetapi Krokiet tidak - sebuah aplikasi pembersih duplikat yang lebih baru, lebih cepat, lebih ringan, dan secara signifikan lebih menarik (dengan asumsi aplikasi bisa terlihat menarik).
+    
+    Krokiet mencakup semua hal yang disukai orang dari Czkawka. Aplikasi ini sepenuhnya gratis, *open source*, memiliki antarmuka pengguna (UI) yang unik dan sederhana (yang dipuji dan dikritik oleh banyak orang), memperkenalkan banyak fitur baru, menggunakan lebih sedikit dependensi, dan bekerja jauh lebih andal di berbagai platform.
+    
+    Dan jika Anda mungkin melewatkannya, sudah ada aplikasi yang lebih baru lagi dari Krokiet, yaitu Cedinia, yang dirancang terutama untuk perangkat Android dan penggunaan layar sentuh.
+    
+    Czkawka GTK telah memberikan banyak manfaat bagi kita, tetapi masa pakainya telah berakhir.
 krokiet_promo_link_download = Unduh Krokiet/Cedinia
 krokiet_promo_link_project = Halaman proyek
 

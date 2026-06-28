@@ -30,6 +30,8 @@ Czkawka CLI is a terminal frontend for `czkawka_core` that exposes all scanning 
 
 ## Glossary
 
+For shared concepts (reference paths, cache, prehash, hard links) see [Terminology in the main guide](Instruction.md#terminology-shared-across-all-frontends). CLI-specific terms below.
+
 | Term | Definition |
 |------|------------|
 | **Included directory** (`-d`) | Directory to scan. Required for all tools. Multiple values can be listed. |
@@ -38,10 +40,6 @@ Czkawka CLI is a terminal frontend for `czkawka_core` that exposes all scanning 
 | **Reference directory** (`-r`) | A directory whose files appear in results for comparison only. Files inside are never deleted or modified by `--delete-method`. Available for: `dup`, `image`, `video`, `music`. |
 | **Delete method** (`-D`) | Selects which file in each group is kept and which are removed. Codes: AEN, AEO, AEB, AES, ON, OO, OB, OS, HARD, NONE. See the [dup section](#dup---duplicate-files) for details. |
 | **Dry run** (`-Q`) | Shows what operations would be performed without executing them. Always use before a real deletion run. |
-| **Prehash** | A fast partial hash of the beginning and end of a file, used to rule out non-duplicates early. Enabled with `--use-prehash-cache`. |
-| **Perceptual hash** | A hash of visual or audio content, designed so similar media produces similar hashes. Used by `image`, `video`, `music`. |
-| **Cache** | Computed hashes and metadata saved to the shared czkawka cache directory on disk. Reused across CLI and GUI frontends automatically. |
-| **Hard link** | A filesystem feature where two filenames reference the same inode. By default, hard-linked files are detected and counted only once to prevent false duplicates. |
 | **Extension macros** | Shorthand groups for `-x`/`-P`: `IMAGE` (jpg,kra,gif,png,bmp,tiff,...), `VIDEO` (mp4,flv,mkv,webm,...), `MUSIC` (mp3,flac,ogg,...), `TEXT` (txt,doc,docx,...). |
 
 ---
@@ -73,7 +71,8 @@ cargo build --release --bin czkawka_cli --features "heif,libraw,libavif"
 
 ## Quick Start
 
-[[[Image: Terminal window showing "czkawka_cli --help" output - colorized help listing all subcommand names (dup, empty-folders, big, empty-files, temp, image, music, symlinks, broken, video, ext, bad-names, video-optimizer, exif-remover) with their one-line descriptions and the EXAMPLES block at the bottom]]]
+<img width="600" alt="Screenshot From 2026-06-28 07-19-24" src="https://github.com/user-attachments/assets/4a98567a-68b1-4be9-a6de-e7eb5f9d9ca3" />
+
 
 ```shell
 # List all tools
@@ -183,7 +182,8 @@ Use `-W` / `--ignore-error-code-on-found` in CI/scripts where "files found" is n
 czkawka_cli dup -d <dirs> [options]
 ```
 
-[[[Image: Terminal showing "czkawka_cli dup --help" output - colorized, showing all flags with their short forms, defaults, and descriptions, with the EXAMPLE line at the bottom showing the full example command]]]
+
+<img width="600" alt="Screenshot From 2026-06-28 07-19-24" src="https://github.com/user-attachments/assets/138148f4-e360-45d7-9adc-810c6f2b6605" />
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -522,8 +522,6 @@ Requires **ffmpeg** at runtime when using `-F` to actually process videos.
 #### transcode
 
 Identifies videos using inefficient codecs.
-
-[[[Image: Terminal showing "czkawka_cli video-optimizer -d /home transcode -c h265,av1 -f results.txt" output - a list of video file paths with their detected codec in parentheses, followed by a summary line showing how many files were found]]]
 
 | Flag | Default | Description |
 |------|---------|-------------|

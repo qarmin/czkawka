@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = Setări
-window_main_title = Czkawka (Sufletăciune)
+window_main_title = Czkawka (Sughiț)
 window_progress_title = Scanare
 window_compare_images = Compară imaginile
 # General

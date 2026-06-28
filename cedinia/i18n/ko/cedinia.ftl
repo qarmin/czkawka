@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = 세디니아
+app_name = Cedinia
 tool_duplicate_files = 중복 파일
 tool_empty_folders = 비어있는 폴더들
 tool_similar_images = 유사한 이미지
@@ -28,7 +28,7 @@ home_bad_extensions_description = 유효하지 않은 확장자를 가진 파일
 home_same_music_description = 태그를 기준으로 한 유사 오디오 파일
 home_bad_names_description = 이름에 문제가 있는 문자가 포함된 파일
 home_exif_description = EXIF 메타데이터가 포함된 이미지
-home_similar_videos_description = 비슷한 오디오를 가진 동영상을 찾아보세요 (FFmpeg 불필요)
+home_similar_videos_description = 비슷한 오디오를 가진 동영상을 찾아보세요
 # Results list
 scanning = 스캔 진행 중...
 stopping = 정지 중...
@@ -37,7 +37,7 @@ press_start = START 버튼을 눌러 스캔을 시작합니다
 select_label = 선택.
 deselect_label = Desel.
 list_label = 목록
-gallery_label = 갈.
+gallery_label = 갈
 # Selection popup
 selection_popup_title = 선택
 select_all = 전체 선택
@@ -266,7 +266,7 @@ option_similarity_high = 높음
 option_similarity_medium = 보통
 option_similarity_low = 낮음
 option_similarity_very_low = V. 매우 낮음
-option_similarity_minimal = 최소.
+option_similarity_minimal = 최소
 option_check_method_hash = 해시
 option_check_method_name = 파일명
 option_check_method_size_and_name = 사이즈 + 이름

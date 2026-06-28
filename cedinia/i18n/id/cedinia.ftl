@@ -28,7 +28,7 @@ home_bad_extensions_description = Berkas dengan ekstensi yang tidak valid
 home_same_music_description = File audio serupa berdasarkan tag
 home_bad_names_description = Berkas dengan karakter yang bermasalah dalam namanya
 home_exif_description = Gambar dengan metadata EXIF
-home_similar_videos_description = Temukan video dengan audio yang serupa (tidak memerlukan FFmpeg)
+home_similar_videos_description = Temukan video dengan audio yang serupa
 # Results list
 scanning = Proses pemindaian sedang berlangsung...
 stopping = Berhenti...
@@ -37,7 +37,7 @@ press_start = Tekan MULAI untuk memulai pemindaian
 select_label = Pilih.
 deselect_label = Desel.
 list_label = Daftar
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Pilih
 select_all = Pilih Semua
@@ -157,7 +157,7 @@ settings_bad_names_non_ascii = Karakter non-ASCII
 settings_bad_names_duplicated = Karakter yang berulang
 settings_ignore_same_resolution = Abaikan gambar-gambar dengan resolusi yang sama
 # Settings - Appearance section
-settings_appearance_label = PENAMPAKAN
+settings_appearance_label = TAMPILAN
 settings_dark_theme = Tema gelap
 settings_dark_theme_desc = Gunakan tema warna gelap
 # Settings - Diagnostics tab
@@ -266,7 +266,7 @@ option_similarity_high = Tinggi
 option_similarity_medium = Sedang
 option_similarity_low = Rendah
 option_similarity_very_low = Sangat Rendah
-option_similarity_minimal = Min.
+option_similarity_minimal = Min
 option_check_method_hash = Hash
 option_check_method_name = Nama
 option_check_method_size_and_name = Ukuran + Nama
