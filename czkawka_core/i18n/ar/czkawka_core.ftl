@@ -45,7 +45,7 @@ core_failed_to_execute_ffmpeg = فشل تنفيذ ffmpeg: { $reason }
 core_ffmpeg_failed_with_status = فشل ffmpeg مع الحالة { $status }: { $stderr } (الأمر: { $command })
 core_failed_to_load_image_frame = فشل تحميل إطار الصورة: { $reason }
 core_failed_to_extract_frame = فشل استخراج الإطار في { $time } ثانية من "{ $file }": { $reason }
-core_failed_to_save_thumbnail = فشل حفظ썸 فين لـ "{ $file }": { $reason }
+core_failed_to_save_thumbnail = فشل حفظ الصورة المصغرة لـ "{ $file }": { $reason }
 core_failed_get_frame_at_timestamp = فشل في الحصول على الإطار في الطابع الزمني { $timestamp } من "{ $file }": { $reason }
 core_failed_get_frame_from_file = فشل في الحصول على الإطار من "{ $file }" في الطابع الزمني { $timestamp }: { $reason }
 core_invalid_crop_rectangle = غير صالح مستطيل المحصول: يسار={ $left }، أعلى={ $top }، يمين={ $right }، أسفل={ $bottom }

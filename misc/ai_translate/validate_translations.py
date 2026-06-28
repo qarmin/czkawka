@@ -18,8 +18,8 @@ class Colors:
     BOLD = "\033[1m"
 
 
-# CJK full stop (U+3002) is the Chinese/Japanese/Korean equivalent of ASCII "."
-SENTENCE_END_CHARS = {".", "。"}
+# U+3002 is CJK full stop; U+06D4 is Urdu/Arabic full stop - both count as sentence-end
+SENTENCE_END_CHARS = {".", "。", "۔"}
 
 
 def ends_with_period(text: str) -> bool:
@@ -224,7 +224,7 @@ def fix_trailing_dots_in_language_file(
                         new_text = text + "."
                     elif not base_has_dot and trans_has_dot:
                         # remove trailing sentence-end chars (ASCII "." and CJK "。")
-                        new_text = re.sub(r"[.。]+$", "", text)
+                        new_text = re.sub(r"[.。۔]+$", "", text)
 
                     if new_text != text:
                         # replace last content part while keeping other parts intact
