@@ -21,7 +21,6 @@ directories-next = "2.0"
 open = "5.3"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
 regex = "1.11"
-fs_extra = "1.3"
 
 i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.10"
