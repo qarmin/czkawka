@@ -177,6 +177,12 @@ fn main() {
     // This is simpler solution, than setting sizes of popups manually for each language
     app.invoke_initialize_popup_sizes();
 
+    // Periodic autosave bounds worst-case loss when the process exits without
+    // `app.run()` returning — notably macOS Cmd+Q, which goes through
+    // `NSApplication.terminate:` and hard-exits before the post-run save below
+    // can fire. See https://github.com/qarmin/czkawka/issues/1942.
+    let _autosave_timer = start_settings_autosave(&app, original_preset_idx);
+
     match app.run() {
         Ok(()) => {
             save_all_settings_to_file(&app, original_preset_idx);
@@ -186,6 +192,16 @@ fn main() {
             show_critical_error(e.to_string());
         }
     }
+}
+
+fn start_settings_autosave(app: &MainWindow, original_preset_idx: i32) -> slint::Timer {
+    let timer = slint::Timer::default();
+    let app_weak = app.as_weak();
+    timer.start(slint::TimerMode::Repeated, std::time::Duration::from_secs(5), move || {
+        let app = app_weak.upgrade().expect("MainWindow dropped while autosave timer is still live");
+        save_all_settings_to_file(&app, original_preset_idx);
+    });
+    timer
 }
 
 pub fn show_critical_error(error: String) {
