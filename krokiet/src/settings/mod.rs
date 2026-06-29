@@ -62,6 +62,10 @@ pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
                 error!("Failed to save preset - {e}");
             }
         }
+        // Also persist base settings (preset names, default preset, window prefs).
+        // Without this, renaming a preset only takes effect after a clean app exit,
+        // and is lost if the on-exit save path doesn't run.
+        save_base_settings_to_file(&app, current_item);
     });
     let a = app.as_weak();
     app.global::<Callabler>().on_reset_current_preset(move || {
@@ -1018,5 +1022,35 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         select_show_except_biggest_resolution: settings.get_select_show_except_biggest_resolution(),
         select_show_except_shortest_path: settings.get_select_show_except_shortest_path(),
         select_show_except_longest_path: settings.get_select_show_except_longest_path(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::{load_data_from_file, save_data_to_file};
+    use crate::settings::model::BasicSettings;
+
+    // The bug fixed in `on_save_current_preset` (writing base settings on Save click) relies
+    // on this round-trip: edit preset_names in memory → save_data_to_file → load_data_from_file
+    // must return the edited names. Without it, renaming a preset cannot survive a restart.
+    #[test]
+    fn basic_settings_round_trips_renamed_preset_names() {
+        let mut path: PathBuf = std::env::temp_dir();
+        path.push(format!("krokiet_test_basic_settings_round_trip_{}.json", std::process::id()));
+
+        let mut settings = BasicSettings::default();
+        settings.preset_names[0] = "Photos 2024".to_string();
+        settings.preset_names[1] = "Backup".to_string();
+
+        save_data_to_file(Some(path.clone()), &settings).expect("save_data_to_file should succeed for a temp path");
+        let loaded: BasicSettings = load_data_from_file(Some(path.clone())).expect("load_data_from_file should succeed for the file we just wrote");
+
+        let _ = std::fs::remove_file(&path);
+
+        assert_eq!(loaded.preset_names[0], "Photos 2024");
+        assert_eq!(loaded.preset_names[1], "Backup");
+        assert_eq!(loaded.preset_names.len(), settings.preset_names.len());
     }
 }
