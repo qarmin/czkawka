@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::localizer_core::LANGUAGE_LIST;
 use czkawka_core::re_exported::HashAlg;
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::GeometricInvariance;
@@ -10,7 +11,6 @@ use image::imageops::FilterType;
 use log::warn;
 use slint::SharedString;
 
-use crate::connect_translation::LANGUAGE_LIST;
 use crate::localizer_krokiet::LANGUAGE_LOADER_KROKIET;
 
 #[expect(dead_code)]

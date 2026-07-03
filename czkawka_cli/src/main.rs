@@ -52,6 +52,7 @@ pub struct CliOutput {
 
 fn main() {
     register_image_decoding_hooks();
+    czkawka_core::common::build_runtime_info::BuildRuntimeInfo::get();
     if cfg!(debug_assertions) {
         use clap::CommandFactory;
         Args::command().debug_assert();

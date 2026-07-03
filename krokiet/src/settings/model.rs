@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use czkawka_core::common::items::{DEFAULT_EXCLUDED_DIRECTORIES, DEFAULT_EXCLUDED_ITEMS};
 use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::localizer_core::LANGUAGE_LIST;
 use czkawka_core::re_exported::HashAlg;
 use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::GeometricInvariance;
@@ -18,7 +19,7 @@ use home::home_dir;
 use image::imageops::FilterType;
 use serde::{Deserialize, Serialize};
 
-use crate::connect_translation::{LANGUAGE_LIST, find_the_closest_language_idx_to_system};
+use crate::connect_translation::find_the_closest_language_idx_to_system;
 use crate::settings::combo_box::StringComboBoxItem;
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;

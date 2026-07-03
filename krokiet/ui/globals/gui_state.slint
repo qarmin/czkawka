@@ -15,6 +15,20 @@ export global GuiState {
     in-out property <bool> audio_feature_enabled: false;
     in-out property <bool> notifications_feature_enabled: false;
 
+    in-out property <bool> build_info_heif_build: false;
+    in-out property <bool> build_info_libraw_build: false;
+    in-out property <bool> build_info_libavif_build: false;
+    in-out property <bool> build_info_heif_runtime_hevc: false;
+    in-out property <bool> build_info_heif_runtime_av1: false;
+    in-out property <bool> build_info_libraw_runtime: false;
+    in-out property <bool> build_info_libavif_runtime: false;
+    in-out property <bool> build_info_ffmpeg_runtime: false;
+    in-out property <bool> build_info_ffprobe_runtime: false;
+    in-out property <string> build_info_diagnostic_text: "";
+    in-out property <bool> build_info_refresh_running: false;
+    in-out property <bool> build_info_test_file_running: false;
+    in-out property <string> build_info_test_file_result: "";
+    in-out property <bool> build_info_test_file_ok: false;
 
     in-out property <float> maximum_threads: 40;
 

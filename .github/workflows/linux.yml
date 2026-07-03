@@ -1,9 +1,11 @@
 name: 🐧 Linux
+
 on:
   push:
+    branches: [ master, main ]
   pull_request:
-  schedule:
-    - cron: '0 0 * * 2'
+    branches: [ master, main ]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -25,7 +27,7 @@ jobs:
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg p7zip-full -y
+        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg libgtk-4-dev p7zip-full -y
 
       - name: Setup rust version
         run: rustup default 1.94.1
@@ -35,11 +37,12 @@ jobs:
         run: |
           sed -i 's/#lto = /lto = /g' Cargo.toml
           sed -i 's/#codegen-units /codegen-units /g' Cargo.toml
-
+          
           echo "VERS=release" >> $GITHUB_ENV
-
-          cargo build --release --workspace --exclude czkawka_gui
+          
+          cargo build --release
           mv target/release/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
           mv target/release/krokiet linux_krokiet_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
           mv target/release/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
@@ -59,9 +62,10 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           
           echo "VERS=debug" >> $GITHUB_ENV
-
-          cargo build --profile fastci --workspace --exclude czkawka_gui
+          
+          cargo build --profile fastci
           mv target/fastci/czkawka_cli linux_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/fastci/czkawka_gui linux_czkawka_gui_${{ env.ARCHNAME }}
           mv target/fastci/krokiet linux_krokiet_${{ env.ARCHNAME }}
           cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software" --profile fastci
           mv target/fastci/krokiet linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
@@ -82,6 +86,7 @@ jobs:
           # So looks that -mx=3 is the best option
           time 7z a -t7z -mx=3 czkawka_all.7z \
             linux_czkawka_cli_${{ env.ARCHNAME }} \
+            linux_czkawka_gui_${{ env.ARCHNAME }} \
             linux_krokiet_${{ env.ARCHNAME }} \
             linux_krokiet_skia_opengl_${{ env.ARCHNAME }} \
             linux_krokiet_skia_vulkan_${{ env.ARCHNAME }} \
@@ -102,6 +107,7 @@ jobs:
           tag_name: "Nightly"
           files: |
             linux_czkawka_cli_${{ env.ARCHNAME }}
+            linux_czkawka_gui_${{ env.ARCHNAME }}
             linux_krokiet_${{ env.ARCHNAME }}
             linux_krokiet_skia_opengl_${{ env.ARCHNAME }}
             linux_krokiet_skia_vulkan_${{ env.ARCHNAME }}
@@ -125,7 +131,7 @@ jobs:
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev libavif-dev libdav1d-dev ffmpeg p7zip-full -y
+        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev libavif-dev libdav1d-dev ffmpeg libgtk-4-dev p7zip-full -y
 
       - name: Setup rust version
         run: rustup default 1.94.1
@@ -138,8 +144,9 @@ jobs:
 
           echo "VERS=release" >> $GITHUB_ENV
 
-          cargo build --release --workspace --exclude czkawka_gui --features "heif,libraw,libavif"
+          cargo build --release --features "heif,libraw,libavif"
           mv target/release/czkawka_cli linux_czkawka_cli_heif_raw_avif_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui linux_czkawka_gui_heif_raw_avif_${{ env.ARCHNAME }}
           mv target/release/krokiet linux_krokiet_heif_raw_avif_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software,heif,libraw,libavif"
           mv target/release/krokiet linux_krokiet_heif_raw_avif_skia_opengl_${{ env.ARCHNAME }}
@@ -160,8 +167,9 @@ jobs:
 
           echo "VERS=debug" >> $GITHUB_ENV
 
-          cargo build --workspace --exclude czkawka_gui --features "heif,libraw,libavif" --profile fastci
+          cargo build --features "heif,libraw,libavif" --profile fastci
           mv target/fastci/czkawka_cli linux_czkawka_cli_heif_raw_avif_${{ env.ARCHNAME }}
+          mv target/fastci/czkawka_gui linux_czkawka_gui_heif_raw_avif_${{ env.ARCHNAME }}
           mv target/fastci/krokiet linux_krokiet_heif_raw_avif_${{ env.ARCHNAME }}
           cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software,heif,libraw,libavif" --profile fastci
           mv target/fastci/krokiet linux_krokiet_heif_raw_avif_skia_opengl_${{ env.ARCHNAME }}
@@ -182,6 +190,7 @@ jobs:
           # So looks that -mx=3 is the best option
           time 7z a -t7z -mx=3 czkawka_all.7z \
             linux_czkawka_cli_heif_raw_avif_${{ env.ARCHNAME }} \
+            linux_czkawka_gui_heif_raw_avif_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_avif_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_avif_skia_opengl_${{ env.ARCHNAME }} \
             linux_krokiet_heif_raw_avif_skia_vulkan_${{ env.ARCHNAME }} \
@@ -202,6 +211,7 @@ jobs:
           tag_name: "Nightly"
           files: |
             linux_czkawka_cli_heif_raw_avif_${{ env.ARCHNAME }}
+            linux_czkawka_gui_heif_raw_avif_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_avif_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_avif_skia_opengl_${{ env.ARCHNAME }}
             linux_krokiet_heif_raw_avif_skia_vulkan_${{ env.ARCHNAME }}
@@ -263,7 +273,7 @@ jobs:
 
   ### Below, builds that do not produce artifacts
 
-  ### 32 bit CLI and Krokiet Release and Debug - TODO would be good to test libraw and heif
+  ### 32 bit CLI and Krokiet Release and Debug - TODO test also gtk gui but it requires gtk4:i386 and also would be good to test libraw and heif
   linux-all-debug-32bit:
     if: ${{ github.ref != 'refs/heads/master' }}
     runs-on: ubuntu-22.04
@@ -303,7 +313,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
 
       - name: Setup rust version
         run: rustup default 1.94.1
@@ -311,23 +321,27 @@ jobs:
       - name: Build packages
         run: |
           rm -rf target || true
-          cargo build --workspace --exclude czkawka_gui --features "heif,libraw"
+          cargo build --features "heif,libraw"
           mv target/debug/czkawka_cli czkawka_cli_debug_1
+          mv target/debug/czkawka_gui czkawka_gui_debug_1
           mv target/debug/krokiet krokiet_debug_1
-
+          
           rm -rf target || true
-          cargo build --release --workspace --exclude czkawka_gui --features "heif,libraw"
+          cargo build --release --features "heif,libraw"
           mv target/release/czkawka_cli czkawka_cli_release_1
+          mv target/release/czkawka_gui czkawka_gui_release_1
           mv target/release/krokiet krokiet_release_1
-
+          
           rm -rf target || true
-          cargo build --workspace --exclude czkawka_gui --features "heif,libraw"
+          cargo build --features "heif,libraw"
           mv target/debug/czkawka_cli czkawka_cli_debug_2
+          mv target/debug/czkawka_gui czkawka_gui_debug_2
           mv target/debug/krokiet krokiet_debug_2
-
+          
           rm -rf target || true
-          cargo build --release --workspace --exclude czkawka_gui --features "heif,libraw"
+          cargo build --release --features "heif,libraw"
           mv target/release/czkawka_cli czkawka_cli_release_2
+          mv target/release/czkawka_gui czkawka_gui_release_2
           mv target/release/krokiet krokiet_release_2
           
           bash misc/compare_files.sh
@@ -338,7 +352,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
 
       - name: Setup rust version
         run: rustup default 1.94.1
@@ -347,10 +361,7 @@ jobs:
         run: |
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
-          cargo test --workspace --exclude czkawka_gui
-
-      - name: Clippy czkawka_gui
-        run: cargo clippy -p czkawka_gui
+          xvfb-run cargo test
 
   linux-regression-tests-on-minimal-rust-version:
     runs-on: ubuntu-22.04
@@ -358,7 +369,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libheif-dev libraw-dev ffmpeg -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev ffmpeg -y
 
       - name: Setup rust version
         run: rustup default 1.94.1

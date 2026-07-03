@@ -8,6 +8,7 @@ dependencies = [
     "ty==0.0.26",
     "pandas-stubs",
     "fluent.syntax",
-    "ollama"
+    "ollama",
+    "fonttools>=4.55.0",
 ]
 

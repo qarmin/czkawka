@@ -31,6 +31,21 @@ export global ColorPalette {
     in-out property <color> compare_info_background: Settings.dark_theme ? #222222 : #d8d8d8;
     in-out property <color> compare_info_border: Settings.dark_theme ? #444444 : #bbbbbb;
     in-out property <color> compare_loading_card_background: Settings.dark_theme ? #2a2a2a : #f4f4f4;
+    in-out property <color> compare_main_background: Settings.dark_theme ? #181818 : #ebebeb;
+    in-out property <color> compare_title_color: Settings.dark_theme ? #f0f0f0 : #111111;
+    in-out property <color> compare_resolution_mismatch_background: #ff880033;
+    in-out property <color> compare_diff_background: #000000;
+    in-out property <color> compare_image_panel_background: Settings.dark_theme ? #0e0e0e : #e0e0e0;
+    in-out property <color> compare_split_divider_color: Settings.dark_theme ? #ffffff80 : #00000080;
+    in-out property <color> compare_thumbnail_background: Settings.dark_theme ? #222222 : #d4d4d4;
+
+    in-out property <color> error_text_color: #e74c3c;
+
+    in-out property <color> scrim_background_color: #808080cc;
+    in-out property <color> scrim_text_color: #ffffff;
+
+    in-out property <color> feature_ok_color: #22aa22;
+    in-out property <color> feature_fail_color: #cc2222;
 
     public pure function get_listview_color(selected: bool, hovered: bool) -> color {
         if (selected) {

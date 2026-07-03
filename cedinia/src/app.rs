@@ -106,6 +106,7 @@ impl ScanResultHandler for GuiHandler {
                     let pd = ProgressData {
                         step_name: SharedString::from(p.step_name),
                         all_progress: p.all_progress,
+                        current_progress: p.current_progress,
                         is_indeterminate: p.is_indeterminate,
                     };
                     win.global::<AppState>().set_progress(pd);
@@ -196,9 +197,6 @@ fn run_app_inner(
 
     translate_items(&window);
     set_initial_gui_infos(&window);
-    window
-        .global::<AppState>()
-        .set_build_info(SharedString::from(concat!("Build ", env!("CEDINIA_BUILD_DATE"), ", commit ", env!("CEDINIA_BUILD_COMMIT"))));
     window.global::<AppState>().set_status_message(SharedString::from(crate::flc!("status_ready")));
 
     let bot_lp = inset_bottom_px / scale;
@@ -348,6 +346,7 @@ pub(crate) fn setup_logger_cache() {
     }
 
     register_image_decoding_hooks();
+    czkawka_core::common::build_runtime_info::BuildRuntimeInfo::get();
     let config_cache_path_set_result = set_config_cache_path("cedinia", "cedinia");
 
     #[cfg(not(target_os = "android"))]
@@ -373,11 +372,12 @@ impl log::Log for DualLogger {
     }
 
     fn log(&self, record: &log::Record) {
-        // logcat gets everything (AndroidLogger applies its own level); the file is filtered
-        // to match the desktop logger so the exported log stays on-topic.
+        if !filtering_messages(record) {
+            return;
+        }
         self.android.log(record);
 
-        if !self.enabled(record.metadata()) || !filtering_messages(record) {
+        if !self.enabled(record.metadata()) {
             return;
         }
         if let Ok(mut guard) = self.file.lock()

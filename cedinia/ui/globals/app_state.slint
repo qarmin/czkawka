@@ -124,7 +124,7 @@ export global AppState {
 
     in-out property <ActiveTool> last_scan_tool: ActiveTool.DuplicateFiles;
     in-out property <ScanState>  scan_state:  ScanState.Idle;
-    in-out property <ProgressData> progress: { step_name: "", all_progress: 0, is_indeterminate: false };
+    in-out property <ProgressData> progress: { step_name: "", all_progress: 0, current_progress: 0, is_indeterminate: false };
     in-out property <string>     status_message: "Gotowy / Ready";
     in-out property <bool>       show_included_dirs: false;
     in-out property <bool>       show_excluded_dirs: false;
@@ -260,7 +260,6 @@ export global AppState {
     callback confirm_popup_cancel();
 
 
-    in property  <string> build_info: "";
 
     in-out property <bool>   licenses_popup_visible: false;
     in-out property <string> licenses_text: "";

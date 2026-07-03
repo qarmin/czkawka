@@ -85,6 +85,7 @@ core_failed_to_generate_thumbnail = Failed to generate thumbnail for "{ $file }"
 core_failed_to_extract_frame_at_seek_time = Failed to extract frame at { $time } seconds from "{ $file }": { $reason }
 core_video_file_does_not_exist = Video file does not exist (could be removed between scan/later steps): "{ $path }"
 core_image_too_large = Image is too large ({ $width }x{ $height }) - more than supported { $max } pixels
+core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Failed to get video metadata for file "{ $file }": { $reason }
 core_failed_to_get_video_codec = Failed to get video codec for file "{ $file }"
 core_failed_to_get_video_duration = Failed to get video duration for file "{ $file }"

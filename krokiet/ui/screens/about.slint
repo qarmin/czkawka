@@ -1,11 +1,183 @@
-import { Button } from "std-widgets.slint";
+import { Button, TextEdit } from "std-widgets.slint";
 import { Callabler } from "../globals/callabler.slint";
 import { Translations } from "../globals/translations.slint";
 import { FontSizes } from "../globals/fonts.slint";
+import { GuiState } from "../globals/gui_state.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+
+// One row in the feature table: label | build | runtime
+component FeatureRow {
+    in property <string> label;
+    // When false, the build column shows "-" and runtime color uses simpler logic (FFmpeg/FFprobe).
+    in property <bool> has-build: true;
+    in property <bool> build-ok: false;
+    in property <bool> runtime-ok: false;
+
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: center;
+
+        Text {
+            text: root.label;
+            min-width: 80px;
+            font-size: FontSizes.normal;
+        }
+
+        Text {
+            text: root.has-build ? (root.build-ok ? Translations.yes_text : Translations.no_text) : "-";
+            min-width: 70px;
+            horizontal-alignment: center;
+            font-size: FontSizes.normal;
+            color: root.has-build
+                ? (root.build-ok ? ColorPalette.feature_ok_color : ColorPalette.hint_color)
+                : ColorPalette.hint_color;
+        }
+
+        Text {
+            text: root.runtime-ok ? Translations.yes_text : Translations.no_text;
+            min-width: 70px;
+            horizontal-alignment: center;
+            font-size: FontSizes.normal;
+            color: root.runtime-ok
+                ? ColorPalette.feature_ok_color
+                : (root.has-build && root.build-ok ? ColorPalette.feature_fail_color : ColorPalette.hint_color);
+        }
+    }
+}
 
 export component About inherits VerticalLayout {
     preferred-height: 300px;
     preferred-width: 400px;
+
+    // Diagnostic popup
+    diagnostic_popup := PopupWindow {
+        x: 40px;
+        y: 40px;
+        width: root.width - 80px;
+        height: root.height - 80px;
+        close-policy: PopupClosePolicy.no-auto-close;
+
+        Rectangle {
+            background: ColorPalette.popup_background;
+            border-radius: 8px;
+            border-color: ColorPalette.popup_border_color;
+            border-width: 2px;
+            clip: true;
+
+            VerticalLayout {
+                Rectangle {
+                    background: ColorPalette.popup_background_title_line;
+                    Text {
+                        min-height: 30px;
+                        text <=> Translations.build_info_diagnostic_title_text;
+                        vertical-alignment: center;
+                        horizontal-alignment: center;
+                        font-size: FontSizes.normal;
+                    }
+                }
+
+                TextEdit {
+                    vertical-stretch: 1.0;
+                    text: GuiState.build_info_diagnostic_text;
+                    font-size: FontSizes.small;
+                }
+
+                VerticalLayout {
+                    spacing: 4px;
+                    padding: 6px;
+
+                    // Header row
+                    HorizontalLayout {
+                        spacing: 8px;
+                        alignment: center;
+                        Text { text: ""; min-width: 80px; font-size: FontSizes.normal; font-weight: FontSizes.bold_weight; }
+                        Text { text <=> Translations.build_info_build_text; min-width: 70px; horizontal-alignment: center; font-size: FontSizes.normal; font-weight: FontSizes.bold_weight; }
+                        Text { text <=> Translations.build_info_runtime_text; min-width: 70px; horizontal-alignment: center; font-size: FontSizes.normal; font-weight: FontSizes.bold_weight; }
+                    }
+
+                    FeatureRow {
+                        label: "HEIF HEVC";
+                        has-build: true;
+                        build-ok: GuiState.build_info_heif_build;
+                        runtime-ok: GuiState.build_info_heif_runtime_hevc;
+                    }
+
+                    FeatureRow {
+                        label: "HEIF AV1";
+                        has-build: true;
+                        build-ok: GuiState.build_info_heif_build;
+                        runtime-ok: GuiState.build_info_heif_runtime_av1;
+                    }
+
+                    FeatureRow {
+                        label: "LibRAW";
+                        has-build: true;
+                        build-ok: GuiState.build_info_libraw_build;
+                        runtime-ok: GuiState.build_info_libraw_runtime;
+                    }
+
+                    FeatureRow {
+                        label: "AVIF";
+                        has-build: true;
+                        build-ok: GuiState.build_info_libavif_build;
+                        runtime-ok: GuiState.build_info_libavif_runtime;
+                    }
+
+                    FeatureRow {
+                        label: "FFmpeg";
+                        has-build: false;
+                        runtime-ok: GuiState.build_info_ffmpeg_runtime;
+                    }
+
+                    FeatureRow {
+                        label: "FFprobe";
+                        has-build: false;
+                        runtime-ok: GuiState.build_info_ffprobe_runtime;
+                    }
+
+                    Text {
+                        text <=> Translations.build_info_library_restart_hint_text;
+                        font-size: FontSizes.small;
+                        color: ColorPalette.hint_color;
+                        wrap: word-wrap;
+                    }
+
+                    if GuiState.build_info_test_file_result != "" : Text {
+                        text: GuiState.build_info_test_file_result;
+                        font-size: FontSizes.small;
+                        color: GuiState.build_info_test_file_ok ? ColorPalette.feature_ok_color : ColorPalette.feature_fail_color;
+                        wrap: word-wrap;
+                    }
+                }
+
+                HorizontalLayout {
+                    padding: 8px;
+                    spacing: 8px;
+                    Button {
+                        text <=> Translations.build_info_refresh_text;
+                        enabled: !GuiState.build_info_refresh_running;
+                        clicked => {
+                            Callabler.refresh_process_probes();
+                        }
+                    }
+                    Button {
+                        text <=> Translations.build_info_test_file_text;
+                        enabled: !GuiState.build_info_test_file_running;
+                        clicked => {
+                            Callabler.test_image_file();
+                        }
+                    }
+                    Button {
+                        text <=> Translations.ok_button_text;
+                        primary: true;
+                        clicked => {
+                            diagnostic_popup.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     img := Image {
         source: @image-url("../../icons/krokiet_logo_flag_name_vertical.png"); // TODO simplify svg, to be able to use here svg version with text
@@ -42,41 +214,62 @@ export component About inherits VerticalLayout {
 
     callback other_apps_clicked();
 
-    HorizontalLayout {
+    VerticalLayout {
         spacing: 5px;
-        Button {
-            text <=> Translations.repository_text;
-            clicked => {
-                Callabler.open_link("https://github.com/qarmin/czkawka");
+
+        HorizontalLayout {
+            spacing: 5px;
+            Button {
+                width: (root.width - 10px) / 3;
+                text <=> Translations.repository_text;
+                clicked => {
+                    Callabler.open_link("https://github.com/qarmin/czkawka");
+                }
+            }
+
+            Button {
+                width: (root.width - 10px) / 3;
+                text <=> Translations.instruction_text;
+                clicked => {
+                    Callabler.open_link("https://github.com/qarmin/czkawka/blob/master/instructions/Instruction.md");
+                }
+            }
+
+            Button {
+                width: (root.width - 10px) / 3;
+                text <=> Translations.donation_text;
+                clicked => {
+                    Callabler.open_link("https://github.com/sponsors/qarmin");
+                }
             }
         }
 
-        Button {
-            text <=> Translations.instruction_text;
-            clicked => {
-                Callabler.open_link("https://github.com/qarmin/czkawka/blob/master/instructions/Instruction.md");
+        HorizontalLayout {
+            spacing: 5px;
+            Button {
+                width: (root.width - 10px) / 3;
+                text <=> Translations.translation_text;
+                clicked => {
+                    Callabler.open_link("https://crowdin.com/project/czkawka");
+                }
             }
-        }
 
-        Button {
-            text <=> Translations.donation_text;
-            clicked => {
-                Callabler.open_link("https://github.com/sponsors/qarmin");
+            Button {
+                width: (root.width - 10px) / 3;
+                text <=> Translations.other_apps_text;
+                clicked => {
+                    root.other_apps_clicked();
+                }
             }
-        }
 
-        Button {
-            text <=> Translations.translation_text;
-            clicked => {
-                Callabler.open_link("https://crowdin.com/project/czkawka");
-            }
-        }
-
-        Button {
-            text <=> Translations.other_apps_text;
-            clicked => {
-                root.other_apps_clicked();
+            Button {
+                width: (root.width - 10px) / 3;
+                text <=> Translations.build_info_diagnostic_button_text;
+                clicked => {
+                    diagnostic_popup.show();
+                }
             }
         }
     }
+
 }

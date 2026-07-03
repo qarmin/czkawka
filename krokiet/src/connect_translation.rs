@@ -1,4 +1,5 @@
 use czkawka_core::TOOLS_NUMBER;
+use czkawka_core::localizer_core::LANGUAGE_LIST;
 use i18n_embed::DesktopLanguageRequester;
 use i18n_embed::unic_langid::LanguageIdentifier;
 use log::{error, info};
@@ -6,122 +7,6 @@ use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::settings::combo_box::{SimilarVideosAudioPreset, SimilarVideosVisualPreset, StringComboBoxItems};
 use crate::{ActiveTab, Callabler, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
-
-pub struct Language {
-    pub long_name: &'static str,
-    pub short_name: &'static str,
-}
-
-pub const LANGUAGE_LIST: &[Language] = &[
-    Language {
-        long_name: "English",
-        short_name: "en",
-    },
-    Language {
-        long_name: "Polski (Polish)",
-        short_name: "pl",
-    },
-    Language {
-        long_name: "Français (French)",
-        short_name: "fr",
-    },
-    Language {
-        long_name: "Italiano (Italian)",
-        short_name: "it",
-    },
-    Language {
-        long_name: "Русский (Russian)",
-        short_name: "ru",
-    },
-    Language {
-        long_name: "український (Ukrainian)",
-        short_name: "uk",
-    },
-    Language {
-        long_name: "한국어 (Korean)",
-        short_name: "ko",
-    },
-    Language {
-        long_name: "Česky (Czech)",
-        short_name: "cs",
-    },
-    Language {
-        long_name: "Deutsch (German)",
-        short_name: "de",
-    },
-    Language {
-        long_name: "日本語 (Japanese)",
-        short_name: "ja",
-    },
-    Language {
-        long_name: "Português (Portuguese)",
-        short_name: "pt-PT",
-    },
-    Language {
-        long_name: "Português Brasileiro (Brazilian Portuguese)",
-        short_name: "pt-BR",
-    },
-    Language {
-        long_name: "简体中文 (Simplified Chinese)",
-        short_name: "zh-CN",
-    },
-    Language {
-        long_name: "繁體中文 (Traditional Chinese)",
-        short_name: "zh-TW",
-    },
-    Language {
-        long_name: "Español (Spanish)",
-        short_name: "es-ES",
-    },
-    Language {
-        long_name: "Norsk (Norwegian)",
-        short_name: "no",
-    },
-    Language {
-        long_name: "Svenska (Swedish)",
-        short_name: "sv-SE",
-    },
-    Language {
-        long_name: "العربية (Arabic)",
-        short_name: "ar",
-    },
-    Language {
-        long_name: "Български (Bulgarian)",
-        short_name: "bg",
-    },
-    Language {
-        long_name: "Ελληνικά (Greek)",
-        short_name: "el",
-    },
-    Language {
-        long_name: "Nederlands (Dutch)",
-        short_name: "nl",
-    },
-    Language {
-        long_name: "Română (Romanian)",
-        short_name: "ro",
-    },
-    Language {
-        long_name: "Türkçe (Turkish)",
-        short_name: "tr",
-    },
-    Language {
-        long_name: "فارسی (Persian)",
-        short_name: "fa",
-    },
-    Language {
-        long_name: "हिंदी (Hindi)",
-        short_name: "hi",
-    },
-    Language {
-        long_name: "Bahasa Indonesia (Indonesian)",
-        short_name: "id",
-    },
-    Language {
-        long_name: "Tiếng Việt (Vietnamese)",
-        short_name: "vi",
-    },
-];
 
 pub(crate) fn connect_translations(app: &MainWindow) {
     change_language(app);
@@ -147,28 +32,10 @@ pub(crate) fn connect_translations(app: &MainWindow) {
 
 pub fn find_the_closest_language_idx_to_system() -> usize {
     let requested_languages = DesktopLanguageRequester::requested_languages();
-
     if let Some(language) = requested_languages.first() {
-        let system_language_full = language.to_string();
-        info!("System language: {system_language_full}");
-
-        // Pass 1: exact match (e.g. "pt-BR" matches the "pt-BR" entry, not "pt-PT").
-        for (idx, lang) in LANGUAGE_LIST.iter().enumerate() {
-            info!("Language: {}", lang.short_name);
-            if system_language_full.eq_ignore_ascii_case(lang.short_name) {
-                return idx;
-            }
-        }
-
-        // Pass 2: language-only fallback (e.g. "en-US" → first "en*" entry).
-        let strip_function = |s: &str| s.chars().take_while(|c| c.is_ascii_alphabetic()).collect::<String>();
-        let system_language = strip_function(&system_language_full);
-        for (idx, lang) in LANGUAGE_LIST.iter().enumerate() {
-            let lang_short = strip_function(lang.short_name);
-            if system_language == lang_short {
-                return idx;
-            }
-        }
+        let tag = language.to_string();
+        info!("System language: {tag}");
+        return czkawka_core::localizer_core::find_language_idx(&tag);
     }
     0
 }
@@ -200,6 +67,8 @@ fn translate_items(app: &MainWindow) {
 
     translation.set_ok_button_text(flk!("ok_button").into());
     translation.set_cancel_button_text(flk!("cancel_button").into());
+    translation.set_yes_text(flk!("yes_text").into());
+    translation.set_no_text(flk!("no_text").into());
     translation.set_do_you_want_to_continue_text(flk!("do_you_want_to_continue").into());
     translation.set_main_window_title_text(flk!("main_window_title").into());
     translation.set_file_dialog_open_text(flk!("file_dialog_open").into());
@@ -219,6 +88,13 @@ fn translate_items(app: &MainWindow) {
     translation.set_donation_text(flk!("donation").into());
     translation.set_translation_text(flk!("translation").into());
     translation.set_other_apps_text(flk!("other_apps").into());
+    translation.set_build_info_build_text(flk!("build_info_build").into());
+    translation.set_build_info_runtime_text(flk!("build_info_runtime").into());
+    translation.set_build_info_refresh_text(flk!("build_info_refresh").into());
+    translation.set_build_info_diagnostic_button_text(flk!("build_info_diagnostic_button").into());
+    translation.set_build_info_diagnostic_title_text(flk!("build_info_diagnostic_title").into());
+    translation.set_build_info_library_restart_hint_text(flk!("build_info_library_restart_hint").into());
+    translation.set_build_info_test_file_text(flk!("build_info_test_file").into());
     translation.set_other_apps_title_text(flk!("other_apps_title").into());
     translation.set_other_apps_open_source_note_text(flk!("other_apps_open_source_note").into());
     translation.set_other_apps_open_button_text(flk!("other_apps_open_button").into());

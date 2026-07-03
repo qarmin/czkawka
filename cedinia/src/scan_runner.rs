@@ -143,6 +143,7 @@ pub enum ScanRequest {
 pub struct ProgressUpdate {
     pub step_name: String,
     pub all_progress: i32,
+    pub current_progress: i32,
     pub is_indeterminate: bool,
     pub scan_id: u32,
 }
@@ -393,6 +394,7 @@ pub(crate) fn spawn_progress_forwarder<H: ScanResultHandler + Sync>(handler: Arc
             let update = ProgressUpdate {
                 step_name: display.label,
                 all_progress: display.all_progress.max(0),
+                current_progress: display.current_progress.unwrap_or(0),
                 is_indeterminate: display.current_progress.is_none(),
                 scan_id,
             };

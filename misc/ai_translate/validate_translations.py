@@ -73,7 +73,7 @@ def validate_translation(base_value: str, translated_value: str, key: str) -> Li
                     f"  {Colors.RED}Wrong occurrence count for {placeholder}:{Colors.RESET} expected {base_count}, found {translated_count}"
                 )
 
-    # New: validate trailing dot presence/absence consistency
+    # Validate trailing dot presence/absence consistency
     base_has_dot = ends_with_period(base_value)
     translated_has_dot = ends_with_period(translated_value)
 
@@ -86,6 +86,13 @@ def validate_translation(base_value: str, translated_value: str, key: str) -> Li
             errors.append(
                 f"  {Colors.RED}Trailing dot mismatch:{Colors.RESET} source does not end with a dot but translation does"
             )
+
+    # Detect literal \n (two chars: backslash + n) inserted by AI translators.
+    # Fluent does not interpret \n as a newline; it renders as the two raw characters.
+    if r"\n" in translated_value:
+        errors.append(
+            f"  {Colors.RED}Literal \\n sequence:{Colors.RESET} translation contains '\\n' which Fluent renders as raw text, not a newline"
+        )
 
     return errors
 
@@ -146,6 +153,42 @@ def fix_language_file(lang_file: pathlib.Path, keys_to_remove: Set[str]) -> int:
 
     lang_file.write_text("\n".join(result_lines), encoding="utf-8")
     return removed_count
+
+
+def fix_literal_newlines_in_language_file(lang_file: pathlib.Path, keys_to_fix: Set[str]) -> int:
+    """Replace literal \\n sequences in the given keys with a space."""
+    content = lang_file.read_text(encoding="utf-8")
+    lines = content.split("\n")
+    result_lines: List[str] = []
+    i = 0
+    modified_count = 0
+
+    while i < len(lines):
+        line = lines[i]
+        key_match = re.match(r"^([\w][\w-]*)\s*=", line)
+
+        if key_match and key_match.group(1) in keys_to_fix:
+            # Collect the full block (first line + indented continuation lines)
+            block: List[str] = [line]
+            j = i + 1
+            while j < len(lines) and lines[j].startswith(" "):
+                block.append(lines[j])
+                j += 1
+
+            new_block = [bl.replace(r"\n", " ") for bl in block]
+            if new_block != block:
+                modified_count += 1
+            result_lines.extend(new_block)
+            i = j
+            continue
+
+        result_lines.append(line)
+        i += 1
+
+    if modified_count > 0:
+        lang_file.write_text("\n".join(result_lines), encoding="utf-8")
+
+    return modified_count
 
 
 def fix_trailing_dots_in_language_file(
@@ -274,6 +317,14 @@ def validate_i18n_folder(
     base_entries = parse_ftl_file(en_file)
     print(f"Found {len(base_entries)} entries in base file\n")
 
+    source_newline_keys = [k for k, v in base_entries.items() if r"\n" in v]
+    if source_newline_keys:
+        print(
+            f"{Colors.RED}ERROR: English source contains literal \\n in keys: {', '.join(source_newline_keys)}{Colors.RESET}"
+        )
+        print("Fix the English source file before running validation on translations.\n")
+        return 1
+
     lang_folders = [f for f in i18n_path.iterdir() if f.is_dir() and f.name != "en"]
     lang_folders.sort()
 
@@ -320,6 +371,7 @@ def validate_i18n_folder(
             # classify keys by type of error
             keys_to_remove: Set[str] = set()
             keys_to_fix_dots: Set[str] = set()
+            keys_to_fix_newlines: Set[str] = set()
 
             for key, msgs in data["errors"].items():
                 combined = "\n".join(msgs)
@@ -331,12 +383,15 @@ def validate_i18n_folder(
                     keys_to_remove.add(key)
                 elif "Trailing dot mismatch" in combined:
                     keys_to_fix_dots.add(key)
+                elif "Literal \\n sequence" in combined:
+                    keys_to_fix_newlines.add(key)
                 else:
                     # default to removal if unknown error
                     keys_to_remove.add(key)
 
             removed = 0
             fixed = 0
+            fixed_newlines = 0
 
             if keys_to_remove:
                 removed = fix_language_file(lang_file, keys_to_remove)
@@ -344,10 +399,15 @@ def validate_i18n_folder(
             if keys_to_fix_dots:
                 fixed = fix_trailing_dots_in_language_file(lang_file, base_entries, keys_to_fix_dots)
 
-            total_removed += removed
-            total_fixed += fixed
+            if keys_to_fix_newlines:
+                fixed_newlines = fix_literal_newlines_in_language_file(lang_file, keys_to_fix_newlines)
 
-            print(f"{lang_code:8} ({data['name']:25}) - removed {removed:3} entry(ies), fixed {fixed:3} entry(ies)")
+            total_removed += removed
+            total_fixed += fixed + fixed_newlines
+
+            print(
+                f"{lang_code:8} ({data['name']:25}) - removed {removed:3} entry(ies), fixed {fixed + fixed_newlines:3} entry(ies)"
+            )
 
         print(
             f"\n{Colors.GREEN}Fixed! Removed {total_removed} entry(ies) and updated {total_fixed} translation(s) with trailing-dot mismatches{Colors.RESET}"

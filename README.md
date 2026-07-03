@@ -20,7 +20,7 @@
 - **Cache support** - second and further scans should be much faster than the first one
 - **Easy to run, easy to compile** - minimal runtime and build dependencies, portable version available
 - **CLI frontend** - for easy automation
-- **GUI frontend** - uses Slint framework
+- **GUI frontend** - uses Slint or GTK 4 frameworks
 - **Core library** - allows to reuse functionality in other apps
 - **Android app** - touch-friendly frontend for Android devices
 - **No spying** - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
@@ -58,6 +58,7 @@ You can read more about the 12.0.0 release, its new features, and the issues tha
 Each tool uses different technologies, so you can find instructions for each of them in the appropriate file:
 
 - [Krokiet GUI (Slint frontend)](krokiet/README.md)</br>
+- [Czkawka GUI (GTK frontend)](czkawka_gui/README.md)</br>
 - [Czkawka CLI](czkawka_cli/README.md)</br>
 - [Czkawka Core](czkawka_core/README.md)</br>
 - [Cedinia](cedinia/README.md)</br>

@@ -74,6 +74,7 @@ pub const CZKAWKA_GTK_TOOL_NUMBER: usize = TOOLS_NUMBER - 3; // Missing exif, vi
 
 fn main() {
     register_image_decoding_hooks();
+    czkawka_core::common::build_runtime_info::BuildRuntimeInfo::get();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Czkawka");
 
     // To remove info dialog about deprecated czkawka, remove exists_krokiet_info_file and set needs_to_open_dialog_about_krokiet to false
@@ -108,6 +109,7 @@ fn main() {
         setup_logger(false, "czkawka_gui", filtering_messages);
         print_version_mode("Czkawka gtk");
         print_infos_and_warnings(config_cache_path_set_result.infos.clone(), config_cache_path_set_result.warnings.clone());
+        czkawka_core::common::build_runtime_info::BuildRuntimeInfo::get().log_runtime_summary();
         build_ui(app, cli_args.as_ref(), needs_to_open_dialog_about_krokiet);
         ExitCode::new(0)
     });

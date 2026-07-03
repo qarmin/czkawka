@@ -23,63 +23,71 @@ pub(crate) fn localizer_cedinia() -> Box<dyn Localizer> {
     Box::from(DefaultLocalizer::new(&*LANGUAGE_LOADER_CEDINIA, &Localizations))
 }
 
-pub const LANGUAGE_LIST: &[(&str, &str)] = &[
-    ("en", "English"),
-    ("pl", "Polski (Polish)"),
-    ("fr", "Français (French)"),
-    ("it", "Italiano (Italian)"),
-    ("ru", "Русский (Russian)"),
-    ("uk", "український (Ukrainian)"),
-    ("ko", "한국어 (Korean)"),
-    ("cs", "Česky (Czech)"),
-    ("de", "Deutsch (German)"),
-    ("ja", "日本語 (Japanese)"),
-    ("pt-PT", "Português (Portuguese)"),
-    ("pt-BR", "Português Brasileiro (Brazilian Portuguese)"),
-    ("zh-CN", "简体中文 (Simplified Chinese)"),
-    ("zh-TW", "繁體中文 (Traditional Chinese)"),
-    ("es-ES", "Español (Spanish)"),
-    ("no", "Norsk (Norwegian)"),
-    ("sv-SE", "Svenska (Swedish)"),
-    ("ar", "العربية (Arabic)"),
-    ("bg", "Български (Bulgarian)"),
-    ("el", "Ελληνικά (Greek)"),
-    ("nl", "Nederlands (Dutch)"),
-    ("ro", "Română (Romanian)"),
-    ("tr", "Türkçe (Turkish)"),
-    ("fa", "فارسی (Persian)"),
-    ("hi", "हिंदी (Hindi)"),
-    ("id", "Bahasa Indonesia (Indonesian)"),
-    ("vi", "Tiếng Việt (Vietnamese)"),
-];
+// CJK languages are excluded from auto-detection; the user must select them manually.
+const CJK_CODES: &[&str] = &["ko", "ja", "zh-CN", "zh-TW"];
 
 pub(crate) fn detect_os_language_idx() -> i32 {
     #[cfg(not(target_os = "android"))]
     {
         let requested = i18n_embed::DesktopLanguageRequester::requested_languages();
         if let Some(lang) = requested.first() {
-            let short = lang.language.as_str();
-            for (idx, &(code, _)) in LANGUAGE_LIST.iter().enumerate() {
-                if short == code {
-                    return idx as i32;
-                }
-            }
+            let tag = lang.to_string();
+            log::debug!("detect_os_language_idx: OS language tag={tag}");
+            return matched_non_cjk_idx(&tag);
         }
+    }
+    #[cfg(target_os = "android")]
+    {
+        if let Some(tag) = crate::file_picker_android::get_android_language_tag() {
+            log::debug!("detect_os_language_idx: Android language tag={tag}");
+            return matched_non_cjk_idx(&tag);
+        }
+        log::debug!("detect_os_language_idx: could not get Android language, falling back to English");
     }
     0
 }
 
+fn matched_non_cjk_idx(tag: &str) -> i32 {
+    let idx = czkawka_core::localizer_core::find_language_idx(tag);
+    let code = czkawka_core::localizer_core::LANGUAGE_LIST.get(idx).map_or("en", |l| l.short_name);
+    if CJK_CODES.contains(&code) {
+        log::debug!("detect_os_language_idx: CJK language '{code}' excluded from auto-detection, falling back to English");
+        return 0;
+    }
+    log::debug!("detect_os_language_idx: matched '{code}' at index {idx}");
+    idx as i32
+}
+
 pub(crate) fn apply_language_preference(lang: &str) {
     let localizer = localizer_cedinia();
-    if LANGUAGE_LIST.iter().any(|&(code, _)| code == lang) {
+    let core_localizer = czkawka_core::localizer_core::localizer_core();
+    if czkawka_core::localizer_core::LANGUAGE_LIST.iter().any(|l| l.short_name == lang) {
+        log::debug!("apply_language_preference: applying saved language '{lang}'");
         if let Ok(lang_id) = lang.parse::<i18n_embed::unic_langid::LanguageIdentifier>() {
-            let _ = localizer.select(&[lang_id]);
+            let _ = localizer.select(std::slice::from_ref(&lang_id));
+            let _ = core_localizer.select(&[lang_id]);
         }
     } else {
+        log::debug!("apply_language_preference: '{lang}' not in list, detecting OS language");
         #[cfg(not(target_os = "android"))]
         {
             let requested = i18n_embed::DesktopLanguageRequester::requested_languages();
             let _ = localizer.select(&requested);
+            let _ = core_localizer.select(&requested);
+        }
+        #[cfg(target_os = "android")]
+        {
+            if let Some(tag) = crate::file_picker_android::get_android_language_tag() {
+                let idx = czkawka_core::localizer_core::find_language_idx(&tag);
+                let lang_code = czkawka_core::localizer_core::LANGUAGE_LIST.get(idx).map(|l| l.short_name).unwrap_or("en");
+                log::debug!("apply_language_preference: Android tag={tag}, applying '{lang_code}'");
+                if let Ok(lang_id) = lang_code.parse::<i18n_embed::unic_langid::LanguageIdentifier>() {
+                    let _ = localizer.select(std::slice::from_ref(&lang_id));
+                    let _ = core_localizer.select(&[lang_id]);
+                }
+            } else {
+                log::debug!("apply_language_preference: could not get Android language, staying with English");
+            }
         }
     }
 }

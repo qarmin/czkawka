@@ -31,6 +31,7 @@ import { PopupOtherApps } from "popups/popup_other_apps.slint";
 import { ToolSettings } from "screens/tool_settings.slint";
 import { Translations } from "globals/translations.slint";
 import { ImageCompareOverlay } from "screens/image_compare.slint";
+import { ColorPalette } from "globals/color_palette.slint";
 
 export {Settings, Callabler, GuiState, Translations, Palette}
 
@@ -438,7 +439,7 @@ export component MainWindow inherits Window {
         y: 0;
         width: root.width;
         height: root.height;
-        background: #808080cc;
+        background: ColorPalette.scrim_background_color;
         z: 1000;
 
         // Absorb all keyboard events so nothing behind the overlay can be triggered
@@ -464,7 +465,7 @@ export component MainWindow inherits Window {
             height: parent.height;
             text: Translations.file_dialog_open_text;
             font-size: FontSizes.header;
-            color: #ffffff;
+            color: ColorPalette.scrim_text_color;
             vertical-alignment: center;
             horizontal-alignment: center;
             wrap: TextWrap.word-wrap;

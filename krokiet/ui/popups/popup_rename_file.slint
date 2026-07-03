@@ -2,6 +2,7 @@ import { LineEdit } from "std-widgets.slint";
 import { Callabler } from "../globals/callabler.slint";
 import { Translations } from "../globals/translations.slint";
 import { FontSizes } from "../globals/fonts.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
 import { PopupBase } from "../components/popup_base.slint";
 
 export component PopupRenameFile inherits Rectangle {
@@ -40,7 +41,7 @@ export component PopupRenameFile inherits Rectangle {
             Text {
                 text: warning_text;
                 visible: warning_text != "";
-                color: #e74c3c;
+                color: ColorPalette.error_text_color;
                 font-size: FontSizes.normal;
                 wrap: word-wrap;
                 horizontal-alignment: center;

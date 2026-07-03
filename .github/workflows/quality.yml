@@ -1,9 +1,11 @@
 name: 🧹 Quality
+
 on:
   push:
+    branches: [ master, main ]
   pull_request:
-  schedule:
-    - cron: '0 0 * * 2'
+    branches: [ master, main ]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always

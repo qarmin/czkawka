@@ -1,5 +1,6 @@
 pub mod audio_fingerprint;
 pub mod basic_gui_cli;
+pub mod build_runtime_info;
 pub mod cache;
 pub mod config_cache_path;
 pub mod consts;

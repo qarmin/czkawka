@@ -35,6 +35,8 @@ charts*
 result
 .direnv
 cedinia/android/keystore/*.keystore
+cedinia/ui/fonts/.cache/
+cedinia/ui/fonts/*.ttf
 cedinia/android/app/build/
 cedinia/android/app/src/main/jniLibs/
 cedinia/android/.gradle/

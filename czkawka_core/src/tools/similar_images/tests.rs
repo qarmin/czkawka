@@ -281,3 +281,50 @@ fn test_similar_images_reference_mode_deletes_only_non_reference() {
     assert!(reference.exists(), "Reference image must be kept");
     assert!(!duplicate.exists(), "Non-reference duplicate must be deleted (#1643)");
 }
+
+#[cfg(feature = "libavif")]
+fn get_heif_images_path() -> PathBuf {
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources").join("heif_images");
+    assert!(path.exists(), "HEIF test resources not found at \"{}\"", path.to_string_lossy());
+    path
+}
+
+#[cfg(feature = "libavif")]
+#[test]
+fn test_similar_images_avif_files_are_found() {
+    let test_path = get_heif_images_path();
+
+    let params = SimilarImagesParameters::new(30, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false, GeometricInvariance::Off);
+    let mut finder = SimilarImages::new(params);
+    finder.set_included_paths(vec![test_path]);
+    finder.set_recursive_search(false);
+    finder.set_use_cache(false);
+
+    let stop_flag = Arc::new(AtomicBool::new(false));
+    finder.search(&stop_flag, None);
+
+    let info = finder.get_information();
+    assert_eq!(info.initial_found_files, 3, "Should find all 3 AVIF test files");
+}
+
+#[cfg(feature = "libavif")]
+#[test]
+fn test_similar_images_avif_solid_colors_are_all_similar_under_gradient_hash() {
+    // Gradient hash of solid-color images is all-zeros regardless of color,
+    // so all three solid-color AVIF test images hash identically and land in one group.
+    let test_path = get_heif_images_path();
+
+    let params = SimilarImagesParameters::new(0, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false, GeometricInvariance::Off);
+    let mut finder = SimilarImages::new(params);
+    finder.set_included_paths(vec![test_path]);
+    finder.set_recursive_search(false);
+    finder.set_use_cache(false);
+
+    let stop_flag = Arc::new(AtomicBool::new(false));
+    finder.search(&stop_flag, None);
+
+    let info = finder.get_information();
+    assert_eq!(info.initial_found_files, 3);
+    assert_eq!(info.number_of_groups, 1, "All solid-color AVIFs should be one group under gradient hash");
+    assert_eq!(info.number_of_duplicates, 2);
+}

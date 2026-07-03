@@ -88,7 +88,7 @@ pub fn filtering_messages(record: &Record) -> bool {
 #[allow(unfulfilled_lint_expectations)] // Happens only on release build
 #[expect(clippy::vec_init_then_push)]
 #[expect(unused_mut)]
-pub fn print_version_mode(app: &str) {
+pub fn format_version_string(app: &str) -> String {
     let rust_version = env!("RUST_VERSION_INTERNAL");
     let debug_release = if cfg!(debug_assertions) { "debug" } else { "release" };
 
@@ -142,17 +142,10 @@ pub fn print_version_mode(app: &str) {
         let libc_versions_str = match glibc_musl_version::get_os_libc_versions() {
             Ok(libc_versions) => {
                 let libc_versions_str = libc_versions.to_string();
-
                 match option_env!("CZKAWKA_LIBC_VERSIONS") {
-                    Some(env) if env == libc_versions_str => {
-                        format!(" [build + runtime ({libc_versions_str})]")
-                    }
-                    Some(env) => {
-                        format!(" [build ({env}), runtime ({libc_versions_str})]")
-                    }
-                    None => {
-                        format!(" [build (unknown), runtime ({libc_versions_str})]")
-                    }
+                    Some(env) if env == libc_versions_str => format!(" [build + runtime ({libc_versions_str})]"),
+                    Some(env) => format!(" [build ({env}), runtime ({libc_versions_str})]"),
+                    None => format!(" [build (unknown), runtime ({libc_versions_str})]"),
                 }
             }
             Err(e) => {
@@ -166,14 +159,10 @@ pub fn print_version_mode(app: &str) {
     };
 
     let git_commit = env!("CZKAWKA_GIT_COMMIT_SHORT");
-    let official_build = if env!("CZKAWKA_OFFICIAL_BUILD") == "1" {
-        "O" // Official build
-    } else {
-        "U" // Unofficial build
-    };
+    let official_build = if env!("CZKAWKA_OFFICIAL_BUILD") == "1" { "O" } else { "U" };
     let git_date = env!("CZKAWKA_GIT_COMMIT_DATE");
 
-    info!(
+    format!(
         "{app} version: {CZKAWKA_VERSION}({git_commit} {official_build} {git_date}), {debug_release} mode, rust {rust_version}, os {} {} ({} {}), {processors} cpu/threads, features({}): [{}], app cpu version: {app_cpu_version}, os cpu version: {os_cpu_version}{musl_or_glibc}",
         info.os_type(),
         info.version(),
@@ -181,15 +170,17 @@ pub fn print_version_mode(app: &str) {
         info.bitness(),
         features.len(),
         features.join(", "),
-    );
+    )
+}
+
+pub fn print_version_mode(app: &str) {
+    info!("{}", format_version_string(app));
     if cfg!(debug_assertions) {
         warn!("You are running debug version of app which is a lot of slower than release version.");
     }
-
     if option_env!("USING_CRANELIFT").is_some() {
         warn!("You are running app with cranelift which is intended only for fast compilation, not runtime performance.");
     }
-
     if cfg!(panic = "abort") {
         warn!("You are running app compiled with panic='abort', which may cause panics when processing untrusted data.");
     }

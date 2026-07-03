@@ -1,9 +1,11 @@
 name: 🍎 MacOS
+
 on:
   push:
+    branches: [ master, main ]
   pull_request:
-  schedule:
-    - cron: '0 0 * * 2'
+    branches: [ master, main ]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -30,10 +32,11 @@ jobs:
       - name: Install Homebrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-      - name: Install libraries
+      - name: Install GTK4
         run: |
           brew link --overwrite python@3.13
-          brew install libheif libavif dav1d || true
+          brew install gtk4 libheif libavif dav1d || true
+          # brew link --overwrite python@3.13
 
       - name: Build Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -46,8 +49,9 @@ jobs:
           
           export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           
-          cargo build --release --workspace --exclude czkawka_gui
+          cargo build --release
           mv target/release/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui mac_czkawka_gui_${{ env.ARCHNAME }}
           mv target/release/krokiet mac_krokiet_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/release/krokiet mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
@@ -55,9 +59,10 @@ jobs:
           mv target/release/krokiet mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu"
           mv target/release/krokiet mac_krokiet_all_backends_${{ env.ARCHNAME }}
-
-          cargo build --release --workspace --exclude czkawka_gui --features "heif,libavif"
+          
+          cargo build --release --features "heif,libavif"
           mv target/release/czkawka_cli mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
+          mv target/release/czkawka_gui mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
           mv target/release/krokiet mac_krokiet_heif_avif_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libavif"
           mv target/release/krokiet mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
@@ -77,8 +82,9 @@ jobs:
           
           export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
           
-          cargo build --profile fastci --workspace --exclude czkawka_gui
+          cargo build --profile fastci
           mv target/fastci/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
+          mv target/fastci/czkawka_gui mac_czkawka_gui_${{ env.ARCHNAME }}
           mv target/fastci/krokiet mac_krokiet_${{ env.ARCHNAME }}
           cargo build --profile fastci --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
           mv target/fastci/krokiet mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
@@ -86,9 +92,10 @@ jobs:
           mv target/fastci/krokiet mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
           cargo build --profile fastci --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu"
           mv target/fastci/krokiet mac_krokiet_all_backends_${{ env.ARCHNAME }}
-
-          cargo build --profile fastci --workspace --exclude czkawka_gui --features "heif,libavif"
+          
+          cargo build --profile fastci --features "heif,libavif"
           mv target/fastci/czkawka_cli mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
+          mv target/fastci/czkawka_gui mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
           mv target/fastci/krokiet mac_krokiet_heif_avif_${{ env.ARCHNAME }}
           cargo build --profile fastci --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software,heif,libavif"
           mv target/fastci/krokiet mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
@@ -109,10 +116,12 @@ jobs:
           path: |
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
+            mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_${{ env.ARCHNAME }}
+            mac_czkawka_gui_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
@@ -126,10 +135,12 @@ jobs:
           files: |
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
+            mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_${{ env.ARCHNAME }}
+            mac_czkawka_gui_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}

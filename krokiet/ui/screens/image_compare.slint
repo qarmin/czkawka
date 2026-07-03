@@ -4,7 +4,6 @@ import { FontSizes } from "../globals/fonts.slint";
 import { GuiState } from "../globals/gui_state.slint";
 import { Callabler } from "../globals/callabler.slint";
 import { Preview } from "../components/preview.slint";
-import { Settings } from "../globals/settings.slint";
 import { Translations } from "../globals/translations.slint";
 
 component CompareInfoBar inherits Rectangle {
@@ -110,7 +109,7 @@ export component ImageCompareOverlay inherits Rectangle {
 
     private property <bool> resolution_mismatch: left_valid && right_valid && GuiState.compare_images[GuiState.compare_left_idx].resolution != GuiState.compare_images[GuiState.compare_right_idx].resolution;
 
-    background: Settings.dark_theme ? #181818 : #ebebeb;
+    background: ColorPalette.compare_main_background;
 
     TouchArea { width: parent.width; height: parent.height; }
 
@@ -130,7 +129,7 @@ export component ImageCompareOverlay inherits Rectangle {
     if GuiState.compare_loading: Rectangle {
         z: 100;
         width: parent.width; height: parent.height;
-        background: Settings.dark_theme ? #181818 : #ebebeb;
+        background: ColorPalette.compare_main_background;
 
         // Block all pointer events so buttons behind the overlay cannot be clicked
         TouchArea { width: parent.width; height: parent.height; }
@@ -162,7 +161,7 @@ export component ImageCompareOverlay inherits Rectangle {
                         ? Translations.compare_cancelling_text
                         : Translations.compare_loading_title_text;
                     font-size: FontSizes.header;
-                    color: Settings.dark_theme ? #f0f0f0 : #111111;
+                    color: ColorPalette.compare_title_color;
                     horizontal-alignment: center;
                 }
                 Text {
@@ -290,7 +289,7 @@ export component ImageCompareOverlay inherits Rectangle {
 
         if resolution_mismatch && diff_mode: Rectangle {
             height: 22px;
-            background: #ff880033;
+            background: ColorPalette.compare_resolution_mismatch_background;
             border-radius: 4px;
             Text {
                 text: Translations.compare_resolution_mismatch_text;
@@ -308,7 +307,7 @@ export component ImageCompareOverlay inherits Rectangle {
 
             if diff_mode: Rectangle {
                 width: parent.width; height: parent.height;
-                background: #000000; border-radius: 4px; clip: true;
+                background: ColorPalette.compare_diff_background; border-radius: 4px; clip: true;
                 Image {
                     width: parent.width; height: parent.height;
                     source: GuiState.compare_diff_image;
@@ -326,7 +325,7 @@ export component ImageCompareOverlay inherits Rectangle {
 
             if split_mode && !diff_mode: Rectangle {
                 width: parent.width; height: parent.height;
-                background: Settings.dark_theme ? #0e0e0e : #e0e0e0;
+                background: ColorPalette.compare_image_panel_background;
                 border-radius: 4px; clip: true;
 
                 // Left clip: shows left portion of the left image
@@ -363,13 +362,13 @@ export component ImageCompareOverlay inherits Rectangle {
                 Rectangle {
                     x: main-image-area.width * overlay_split_pos - 1px; y: 0px;
                     width: 2px; height: main-image-area.height;
-                    background: #ffffff80;
+                    background: ColorPalette.compare_split_divider_color;
                 }
             }
 
             if transparent_mode && !diff_mode && !split_mode: Rectangle {
                 width: parent.width; height: parent.height;
-                background: Settings.dark_theme ? #0e0e0e : #e0e0e0;
+                background: ColorPalette.compare_image_panel_background;
                 border-radius: 4px; clip: true;
                 Image {
                     width: parent.width; height: parent.height;
@@ -395,7 +394,7 @@ export component ImageCompareOverlay inherits Rectangle {
                         vertical-stretch: 1.0;
                         Rectangle {
                             width: parent.width; height: parent.height;
-                            background: Settings.dark_theme ? #0e0e0e : #e0e0e0;
+                            background: ColorPalette.compare_image_panel_background;
                             border-radius: 4px; clip: true;
                             Preview {
                                 width: parent.width; height: parent.height;
@@ -428,7 +427,7 @@ export component ImageCompareOverlay inherits Rectangle {
                         vertical-stretch: 1.0;
                         Rectangle {
                             width: parent.width; height: parent.height;
-                            background: Settings.dark_theme ? #0e0e0e : #e0e0e0;
+                            background: ColorPalette.compare_image_panel_background;
                             border-radius: 4px; clip: true;
                             Preview {
                                 width: parent.width; height: parent.height;
@@ -501,7 +500,7 @@ export component ImageCompareOverlay inherits Rectangle {
                         border-color:
                             idx == GuiState.compare_left_idx  ? ColorPalette.compare_left_value_color :
                             idx == GuiState.compare_right_idx ? ColorPalette.compare_right_value_color : transparent;
-                        background: Settings.dark_theme ? #222222 : #d4d4d4;
+                        background: ColorPalette.compare_thumbnail_background;
                         clip: true;
                         Image {
                             x: 2px; y: 2px;

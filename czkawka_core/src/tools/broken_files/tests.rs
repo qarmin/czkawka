@@ -370,3 +370,49 @@ fn test_move_cached_video_entries_promotes_only_entries_missing_required_checks(
     assert!(promoted.errors.contains_key(&CheckedTypesSingle::VideoFfprobe));
     assert!(!promoted.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg));
 }
+
+#[cfg(feature = "libavif")]
+fn get_heif_images_path() -> std::path::PathBuf {
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources").join("heif_images");
+    assert!(path.exists(), "HEIF test resources not found at \"{}\"", path.to_string_lossy());
+    path
+}
+
+#[cfg(feature = "libavif")]
+#[test]
+fn test_valid_avif_not_flagged_as_broken() {
+    let temp_dir = TempDir::new().unwrap();
+    let src = get_heif_images_path().join("small_red.avif");
+    fs::copy(&src, temp_dir.path().join("small_red.avif")).unwrap();
+
+    let results = run_check(&temp_dir, CheckedTypes::IMAGE);
+    assert_eq!(results.len(), 0, "Valid AVIF should not be flagged as broken");
+}
+
+#[cfg(feature = "libavif")]
+#[test]
+fn test_corrupt_avif_is_flagged_as_broken() {
+    let temp_dir = TempDir::new().unwrap();
+    let src = get_heif_images_path().join("small_red.avif");
+    let dest = temp_dir.path().join("broken.avif");
+    corrupt_file(&src, &dest, 20);
+
+    let results = run_check(&temp_dir, CheckedTypes::IMAGE);
+    assert_eq!(results.len(), 1, "Corrupt AVIF should be detected as broken");
+    assert!(results[0].has_errors(), "Broken AVIF entry should have errors");
+}
+
+#[cfg(feature = "libavif")]
+#[test]
+fn test_multiple_avif_valid_and_broken() {
+    let temp_dir = TempDir::new().unwrap();
+    let heif_path = get_heif_images_path();
+
+    fs::copy(heif_path.join("large_red.avif"), temp_dir.path().join("valid.avif")).unwrap();
+    fs::copy(heif_path.join("small_blue.avif"), temp_dir.path().join("valid2.avif")).unwrap();
+    corrupt_file(&heif_path.join("small_red.avif"), &temp_dir.path().join("broken.avif"), 20);
+
+    let results = run_check(&temp_dir, CheckedTypes::IMAGE);
+    assert_eq!(results.len(), 1, "Only the corrupted AVIF should be detected");
+    assert!(results[0].has_errors());
+}

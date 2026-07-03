@@ -1,9 +1,11 @@
 name: 🏁 Windows
+
 on:
   push:
+    branches: [ master, main ]
   pull_request:
-  schedule:
-    - cron: '0 0 * * 2'
+    branches: [ master, main ]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -144,6 +146,147 @@ jobs:
             windows_krokiet_on_windows_femtovg_wgpu.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
+  container_4_12:
+    needs: krokiet-compiled-on-windows
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/mglolenstine/gtk4-cross:gtk-4.12
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download Krokiet (skia opengl) artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: krokiet-windows-on-windows-${{ github.sha }}
+      - name: Install additional dependencies
+        # gio is for the build script
+        run: |
+          dnf install curl wget2 wget unzip mingw64-bzip2.noarch mingw64-poppler mingw64-poppler-glib mingw32-python3 rust-gio-devel adwaita-icon-theme wine -y && dnf clean all -y
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source "$HOME/.cargo/env"
+          rustup default 1.94.1
+          rustup target add x86_64-pc-windows-gnu
+          
+          mkdir -p package
+          curl -L https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -o rcedit-x64.exe
+
+      - name: Cross compile for Windows - Release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          source "$HOME/.cargo/env"
+          export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
+          cargo build --target=x86_64-pc-windows-gnu --release --locked -p czkawka_gui -p czkawka_cli
+          cp target/x86_64-pc-windows-gnu/release/czkawka_gui.exe package/
+          cp target/x86_64-pc-windows-gnu/release/czkawka_cli.exe package/
+          
+          export WINEPREFIX=$(mktemp -d)
+          wine rcedit-x64.exe package/czkawka_gui.exe --set-icon czkawka_gui/icons/icon.ico
+
+      - name: Cross compile for Windows - Debug
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: |
+          source "$HOME/.cargo/env"
+          export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/usr/share/pkgconfig:$MINGW_PREFIX/lib/pkgconfig/:/usr/x86_64-w64-mingw32/lib/pkgconfig/
+          cargo build --target=x86_64-pc-windows-gnu --locked --profile fastci -p czkawka_gui -p czkawka_cli
+          cp target/x86_64-pc-windows-gnu/fastci/czkawka_gui.exe package/
+          cp target/x86_64-pc-windows-gnu/fastci/czkawka_cli.exe package/
+          
+          export WINEPREFIX=$(mktemp -d)
+          wine rcedit-x64.exe package/czkawka_gui.exe --set-icon czkawka_gui/icons/icon.ico
+
+      - name: Package
+        run: |
+          #!/bin/bash
+          set -euo pipefail
+          cp -t package $(pds -vv -f package/*.exe)
+          # Add gdbus which is recommended on Windows (why?)
+          cp $MINGW_PREFIX/bin/gdbus.exe package
+          # Handle the glib schema compilation as well
+          glib-compile-schemas $MINGW_PREFIX/share/glib-2.0/schemas/
+          mkdir -p package/share/glib-2.0/schemas/
+          cp -T $MINGW_PREFIX/share/glib-2.0/schemas/gschemas.compiled package/share/glib-2.0/schemas/gschemas.compiled
+          # Pixbuf stuff, in order to get SVGs (scalable icons) to load
+          mkdir -p package/lib/gdk-pixbuf-2.0
+          cp -rT $MINGW_PREFIX/lib/gdk-pixbuf-2.0 package/lib/gdk-pixbuf-2.0
+          cp -f -t package $(pds -vv -f $MINGW_PREFIX/lib/gdk-pixbuf-2.0/2.10.0/loaders/*)
+          find package -iname "*.dll" -or -iname "*.exe" -type f -exec mingw-strip {} +
+
+          cd package/share
+          wget2 https://github.com/qarmin/czkawka/files/10832192/gtk4_theme.zip
+          unzip gtk4_theme.zip
+          rm gtk4_theme.zip
+          cd ../..
+          
+          wget2 https://github.com/qarmin/Automated-Fuzzer/releases/download/test/libGL.zip
+          unzip libGL.zip
+          mv libEGL.dll package/
+          mv libGLESv2.dll package/
+
+          unzip windows_krokiet_on_windows_all_backends.zip -d package/
+
+          {
+            echo '# Czkawka'
+            echo ''
+            echo 'This package includes the legacy GTK 4 GUI (czkawka_gui.exe), which is now deprecated.'
+            echo ''
+            echo 'The recommended successor is Krokiet.'
+            echo ''
+            echo '**krokiet.exe** (also included in this package) is a new application created by the author of Czkawka.'
+            echo 'It offers better performance, more features, improved Windows/macOS support compared to the legacy GTK GUI.'
+            echo ''
+            echo 'More information: https://github.com/qarmin/czkawka'
+            echo ''
+            echo '## Switching graphics backend'
+            echo ''
+            echo 'If the app window does not appear or rendering looks wrong, open one of the .bat files'
+            echo 'to launch with a different graphics backend:'
+            echo ''
+            echo 'Krokiet:'
+            echo '  krokiet_winit_femtovg.bat      - OpenGL via femtovg (default)'
+            echo '  krokiet_winit_skia_opengl.bat  - Skia with OpenGL'
+            echo '  krokiet_winit_skia_vulkan.bat  - Skia with Vulkan'
+            echo '  krokiet_winit_software.bat     - CPU software rendering (slowest, most compatible)'
+            echo '  krokiet_femtovg_wgpu.bat       - femtovg with wgpu'
+            echo ''
+            echo 'Czkawka GTK (legacy):'
+            echo '  czkawka_gui_cairo_renderer.bat   - Cairo renderer'
+            echo '  czkawka_gui_opengl_renderer.bat  - OpenGL renderer'
+            echo '  czkawka_gui_vulkan_renderer.bat  - Vulkan renderer'
+          } > package/README.md
+          echo "Really use Krokiet" > package/USE_KROKIET_INSTEAD_CZKAWKA_GTK.txt
+          echo "I'm not joking, just use Krokiet" > package/USE_KROKIET_JUST_USE_IT.txt
+          echo "Seriously, Czkawka GUI is deprecated, use Krokiet" > package/USE_KROKIET_SERIOUSLY.txt
+
+          # czkawka_gui renderer launcher scripts (GSK_RENDERER)
+          printf '@echo off\r\nset GSK_RENDERER=cairo\r\n"%%~dp0czkawka_gui.exe" %%*\r\n' > package/czkawka_gui_cairo_renderer.bat
+          printf '@echo off\r\nset GSK_RENDERER=opengl\r\n"%%~dp0czkawka_gui.exe" %%*\r\n' > package/czkawka_gui_opengl_renderer.bat
+          printf '@echo off\r\nset GSK_RENDERER=vulkan\r\n"%%~dp0czkawka_gui.exe" %%*\r\n' > package/czkawka_gui_vulkan_renderer.bat
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: czkawka-windows-${{ github.sha }}-4.12
+          path: |
+            ./package
+          if-no-files-found: error
+
+      - name: Prepare files to release
+        run: |
+          cd package
+          zip -r ../windows_czkawka_gui_gtk_412.zip .
+          cd ..
+
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
+        with:
+          tag_name: "Nightly"
+          files: |
+            windows_czkawka_gui_gtk_412.zip
+          token: ${{ secrets.PAT_REPOSITORY }}
+
+
+
   windows-tests:
     runs-on: windows-latest
     steps:
@@ -153,7 +296,7 @@ jobs:
         run: |
           rustup default 1.94.1
 
-      # Additional features are non-testable due really complicated setup of environment on Windows
+      # Both additional features and gtk gui are non-testable due really complicated setup of environment on Windows
       - name: Test
         run: |
           cargo test -p czkawka_core -p krokiet

@@ -311,9 +311,9 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     win.global::<GeneralSettings>().set_min_file_size_idx(min_idx as i32);
     let max_idx = StringComboBoxItems::idx_from_config_name(&s.max_file_size, &items.max_file_size);
     win.global::<GeneralSettings>().set_max_file_size_idx(max_idx as i32);
-    let lang_idx = crate::localizer_cedinia::LANGUAGE_LIST
+    let lang_idx = czkawka_core::localizer_core::LANGUAGE_LIST
         .iter()
-        .position(|&(code, _)| code == s.language.as_str())
+        .position(|l| l.short_name == s.language.as_str())
         .unwrap_or_else(|| crate::localizer_cedinia::detect_os_language_idx() as usize) as i32;
     win.global::<GeneralSettings>().set_language_idx(lang_idx);
     win.global::<GeneralSettings>().set_excluded_items(s.excluded_items.clone().into());
@@ -413,9 +413,9 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         notify_only_background: g.get_notify_only_background(),
         min_file_size: StringComboBoxItems::config_name_from_idx(&items.min_file_size, g.get_min_file_size_idx(), "none"),
         max_file_size: StringComboBoxItems::config_name_from_idx(&items.max_file_size, g.get_max_file_size_idx(), "unlimited"),
-        language: crate::localizer_cedinia::LANGUAGE_LIST
+        language: czkawka_core::localizer_core::LANGUAGE_LIST
             .get(g.get_language_idx() as usize)
-            .map_or_else(|| "en".to_string(), |&(code, _)| code.to_string()),
+            .map_or_else(|| "en".to_string(), |l| l.short_name.to_string()),
         excluded_items: g.get_excluded_items().to_string(),
         allowed_extensions: g.get_allowed_extensions().to_string(),
         excluded_extensions: g.get_excluded_extensions().to_string(),

@@ -475,6 +475,23 @@ pub fn acquire_wakelock() {
     .unwrap_or_else(|e| log::error!("acquire_wakelock: JNI failed: {:?}", e));
 }
 
+pub(crate) fn get_android_language_tag() -> Option<String> {
+    let app = get_android_app()?;
+    let vm = try_jvm(&app)?;
+    vm.attach_current_thread(|env| -> jni::errors::Result<String> {
+        let locale_class = env.find_class(jni_str!("java/util/Locale"))?;
+        let locale_obj = env.call_static_method(&locale_class, jni_str!("getDefault"), jni_sig!(() -> java.util.Locale), &[])?.l()?;
+        let tag_obj = env.call_method(&locale_obj, jni_str!("toLanguageTag"), jni_sig!(() -> java.lang.String), &[])?.l()?;
+        let tag_str: JString = env.cast_local::<JString>(tag_obj)?;
+        tag_str.try_to_string(env)
+    })
+    .map_err(|e| {
+        log::warn!("get_android_language_tag: JNI error: {:?}", e);
+        e
+    })
+    .ok()
+}
+
 pub fn release_wakelock() {
     let Some(app) = get_android_app() else {
         log::error!("release_wakelock: AndroidApp not initialised");

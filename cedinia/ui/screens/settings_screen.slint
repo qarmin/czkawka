@@ -900,18 +900,6 @@ export component SettingsScreen {
                             }
                         }
                     }
-                    Rectangle {
-                        height: build_info_text.preferred-height + 16px;
-                        background: CediniaColors.bg_surface;
-                        build_info_text := Text {
-                            x: 0; y: 8px;
-                            width: parent.width;
-                            text: AppState.build_info;
-                            color: CediniaColors.text_disabled;
-                            font-size: Fonts.caption;
-                            horizontal-alignment: TextHorizontalAlignment.center;
-                        }
-                    }
                 }
             }
         }
