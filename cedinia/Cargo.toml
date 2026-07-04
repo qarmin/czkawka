@@ -43,8 +43,8 @@ slint = { version = "1.15.0", default-features = false, features = [
     "backend-android-activity-06",
 ] }
 android-activity = { version = "0.6", features = ["native-activity"] }
-# JNI bindings needed by file_picker_android.rs
-jni = { version = "0.22.1", default-features = false }
+# jnihigh replaces all raw JNI usage in cedinia (file_picker_android.rs, notifications.rs, lib.rs)
+jnihigh = { path = "../../jnihigh/crates/jnihigh", features = ["native-activity"] }
 # Log to Android logcat
 android_logger = "0.15.1"
 

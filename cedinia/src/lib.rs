@@ -33,31 +33,15 @@ pub fn android_cache_path() -> Option<&'static str> {
 
 #[cfg(target_os = "android")]
 fn setup_android_paths(android_app: &slint::android::AndroidApp) {
-    use jni::objects::{JObject, JString};
-    use jni::{jni_sig, jni_str};
-
-    let vm = unsafe { jni::JavaVM::from_raw(android_app.vm_as_ptr() as *mut _) };
-    let _ = vm.attach_current_thread(|env| -> jni::errors::Result<()> {
-        let activity_raw = unsafe { JObject::from_raw(env, android_app.activity_as_ptr() as *mut _) };
-
-        let files_dir: JObject = env.call_method(&activity_raw, jni_str!("getFilesDir"), jni_sig!(() -> java.io.File), &[])?.l()?;
-        let files_path_obj = env.call_method(&files_dir, jni_str!("getAbsolutePath"), jni_sig!(() -> java.lang.String), &[])?.l()?;
-        let files_path: JString = env.cast_local::<JString>(files_path_obj)?;
-        let files_str: String = files_path.try_to_string(env)?;
-
-        let cache_dir: JObject = env.call_method(&activity_raw, jni_str!("getCacheDir"), jni_sig!(() -> java.io.File), &[])?.l()?;
-        let cache_path_obj = env.call_method(&cache_dir, jni_str!("getAbsolutePath"), jni_sig!(() -> java.lang.String), &[])?.l()?;
-        let cache_path: JString = env.cast_local::<JString>(cache_path_obj)?;
-        let cache_str: String = cache_path.try_to_string(env)?;
-
-        let _ = ANDROID_FILES_PATH.set(files_str.clone());
-        let _ = ANDROID_CACHE_PATH.set(cache_str.clone());
-
-        unsafe { std::env::set_var("DATA_DIR", &files_str) };
-
-        eprintln!("setup_android_paths: config='{}' cache='{}'", files_str, cache_str);
-        Ok(())
-    });
+    match jnihigh::android::activity::app_dirs(android_app) {
+        Ok(dirs) => {
+            let _ = ANDROID_FILES_PATH.set(dirs.files_dir.clone());
+            let _ = ANDROID_CACHE_PATH.set(dirs.cache_dir);
+            unsafe { std::env::set_var("DATA_DIR", &dirs.files_dir) };
+            eprintln!("setup_android_paths: config='{}'", dirs.files_dir);
+        }
+        Err(e) => eprintln!("setup_android_paths: {e:?}"),
+    }
 }
 
 #[cfg(target_os = "android")]
@@ -70,9 +54,10 @@ fn android_main(android_app: slint::android::AndroidApp) {
     asan_smoketest_if_requested();
     let scale = android_app.config().density().unwrap_or(160) as f32 / 160.0;
     log::info!("android_main: display scale={:.2}", scale);
-    log::info!("android_main: initialising file picker (JNI + DEX)");
-    file_picker_android::init(&android_app);
-    log::info!("android_main: file picker initialised");
+    log::info!("android_main: initialising jnihigh context");
+    jnihigh::AndroidContext::init(android_app.clone());
+    file_picker_android::init();
+    log::info!("android_main: jnihigh context ready");
     slint::android::init(android_app.clone()).expect("Failed to initialise Slint Android backend");
     log::info!("android_main: Slint backend initialised");
     file_picker_android::setup_nav_bar();
