@@ -533,6 +533,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_music_sub_approximate_comparison(custom_settings.similar_music_sub_approximate_comparison);
     settings.set_similar_music_sub_title(custom_settings.similar_music_sub_title);
     settings.set_similar_music_sub_artist(custom_settings.similar_music_sub_artist);
+    settings.set_similar_music_sub_album(custom_settings.similar_music_sub_album);
     settings.set_similar_music_sub_year(custom_settings.similar_music_sub_year);
     settings.set_similar_music_sub_bitrate(custom_settings.similar_music_sub_bitrate);
     settings.set_similar_music_sub_genre(custom_settings.similar_music_sub_genre);
@@ -619,7 +620,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_big_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "big_files"));
         settings.set_similar_images_column_size(fnm(&[sel_px, 80.0, 80.0, 80.0, name_px, path_px, mod_px], "similar_images"));
         settings.set_similar_videos_column_size(fnm(&[sel_px, size_px, name_px, path_px, 80.0, 80.0, 80.0, 80.0, 80.0, mod_px], "similar_videos"));
-        settings.set_similar_music_column_size(fnm(&[sel_px, size_px, name_px, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, path_px, mod_px], "similar_music"));
+        settings.set_similar_music_column_size(fnm(&[sel_px, size_px, name_px, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, path_px, mod_px], "similar_music"));
         settings.set_invalid_symlink_column_size(fnm(&[sel_px, name_px, path_px, path_px, mod_px], "invalid_symlink"));
         settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
         settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
@@ -718,6 +719,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_music_sub_approximate_comparison = settings.get_similar_music_sub_approximate_comparison();
     let similar_music_sub_title = settings.get_similar_music_sub_title();
     let similar_music_sub_artist = settings.get_similar_music_sub_artist();
+    let similar_music_sub_album = settings.get_similar_music_sub_album();
     let similar_music_sub_year = settings.get_similar_music_sub_year();
     let similar_music_sub_bitrate = settings.get_similar_music_sub_bitrate();
     let similar_music_sub_genre = settings.get_similar_music_sub_genre();
@@ -855,6 +857,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_music_compare_fingerprints_only_with_similar_titles,
         similar_music_sub_title,
         similar_music_sub_artist,
+        similar_music_sub_album,
         similar_music_sub_year,
         similar_music_sub_bitrate,
         similar_music_sub_genre,

@@ -120,6 +120,8 @@ pub struct CediniaSettings {
     pub same_music_title: bool,
     #[serde(default = "ttrue")]
     pub same_music_artist: bool,
+    #[serde(default = "ttrue")]
+    pub same_music_album: bool,
     #[serde(default)]
     pub same_music_year: bool,
     #[serde(default)]
@@ -461,6 +463,7 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
             .map_or_else(|| panic!("Invalid count_idx {} in GUI", bfiles.get_count_idx()), |e| e.config_name.clone()),
         same_music_title: sm.get_title(),
         same_music_artist: sm.get_artist(),
+        same_music_album: sm.get_album(),
         same_music_year: sm.get_year(),
         same_music_length: sm.get_length(),
         same_music_genre: sm.get_genre(),

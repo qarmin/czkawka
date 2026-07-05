@@ -128,6 +128,8 @@ pub struct SettingsCustom {
     pub similar_music_sub_title: bool,
     #[serde(default = "ttrue")]
     pub similar_music_sub_artist: bool,
+    #[serde(default = "ttrue")]
+    pub similar_music_sub_album: bool,
     #[serde(default)]
     pub similar_music_sub_year: bool,
     #[serde(default)]

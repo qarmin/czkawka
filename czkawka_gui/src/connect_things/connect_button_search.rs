@@ -397,6 +397,7 @@ fn same_music_search(
 
     let check_button_music_artist: gtk4::CheckButton = gui_data.main_notebook.check_button_music_artist.clone();
     let check_button_music_title: gtk4::CheckButton = gui_data.main_notebook.check_button_music_title.clone();
+    let check_button_music_album: gtk4::CheckButton = gui_data.main_notebook.check_button_music_album.clone();
     let check_button_music_year: gtk4::CheckButton = gui_data.main_notebook.check_button_music_year.clone();
     let check_button_music_genre: gtk4::CheckButton = gui_data.main_notebook.check_button_music_genre.clone();
     let check_button_music_length: gtk4::CheckButton = gui_data.main_notebook.check_button_music_length.clone();
@@ -419,6 +420,9 @@ fn same_music_search(
     }
     if check_button_music_artist.is_active() {
         music_similarity |= MusicSimilarity::TRACK_ARTIST;
+    }
+    if check_button_music_album.is_active() {
+        music_similarity |= MusicSimilarity::TRACK_ALBUM;
     }
     if check_button_music_year.is_active() {
         music_similarity |= MusicSimilarity::YEAR;

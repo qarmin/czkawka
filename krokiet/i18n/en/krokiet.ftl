@@ -107,6 +107,7 @@ column_dimensions = Dimensions
 column_new_dimensions = New Dimensions
 column_title = Title
 column_artist = Artist
+column_album = Album
 column_year = Year
 column_bitrate = Bitrate
 column_length = Length

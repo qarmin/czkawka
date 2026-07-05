@@ -487,6 +487,7 @@ fn translate_items(app: &MainWindow) {
     let dimensions = flk!("column_dimensions");
     let title = flk!("column_title");
     let artist = flk!("column_artist");
+    let album = flk!("column_album");
     let year = flk!("column_year");
     let bitrate = flk!("column_bitrate");
     let length = flk!("column_length");
@@ -516,7 +517,9 @@ fn translate_items(app: &MainWindow) {
     settings.set_big_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_similar_images_column_name(fnm(&[&selection, &similarity, &size, &dimensions, &file_name, &path, &mod_date]));
     settings.set_similar_videos_column_name(fnm(&[&selection, &size, &file_name, &path, &dimensions, &duration, &bitrate, &fps, &codec, &mod_date]));
-    settings.set_similar_music_column_name(fnm(&[&selection, &size, &file_name, &title, &artist, &year, &bitrate, &length, &genre, &path, &mod_date]));
+    settings.set_similar_music_column_name(fnm(&[
+        &selection, &size, &file_name, &title, &artist, &album, &year, &bitrate, &length, &genre, &path, &mod_date,
+    ]));
     settings.set_invalid_symlink_column_name(fnm(&[&selection, &symlink_name, &symlink_folder, &destination_path, &mod_date]));
     settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));
     settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
