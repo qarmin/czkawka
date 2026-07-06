@@ -16,6 +16,21 @@ pub(crate) fn connect_build_info(app: &MainWindow) {
     connect_test_image_file(app);
 }
 
+/// Spawns the background probe thread and updates all build-info properties in the UI
+/// once detection finishes.  Call this after `apply_build_info` so defaults are visible
+/// immediately while the slower probes run in the background.
+pub(crate) fn start_build_info_background_probes(app: &MainWindow) {
+    let weak = app.as_weak();
+    BuildRuntimeInfo::start_background_probes(move || {
+        let info = BuildRuntimeInfo::get();
+        info.log_runtime_summary();
+        weak.upgrade_in_event_loop(move |app| {
+            set_all_build_info_properties(&app.global::<GuiState>(), &info);
+        })
+        .expect("MainWindow dropped while build info probes were running");
+    });
+}
+
 fn connect_refresh_probes(app: &MainWindow) {
     let weak = app.as_weak();
     app.global::<Callabler>().on_refresh_process_probes(move || {
@@ -30,14 +45,16 @@ fn connect_refresh_probes(app: &MainWindow) {
         std::thread::spawn(move || {
             BuildRuntimeInfo::refresh_process_probes();
             let info = BuildRuntimeInfo::get();
-            weak2.upgrade_in_event_loop(move |app| {
-                let gs = app.global::<GuiState>();
-                // Only process probes can change at runtime; update just those two.
-                gs.set_build_info_ffmpeg_runtime(info.ffmpeg_runtime);
-                gs.set_build_info_ffprobe_runtime(info.ffprobe_runtime);
-                gs.set_build_info_diagnostic_text(info.format_diagnostic_text("Krokiet").into());
-                gs.set_build_info_refresh_running(false);
-            }).expect("MainWindow dropped while callback is still live");
+            weak2
+                .upgrade_in_event_loop(move |app| {
+                    let gs = app.global::<GuiState>();
+                    // Only process probes can change at runtime; update just those two.
+                    gs.set_build_info_ffmpeg_runtime(info.ffmpeg_runtime);
+                    gs.set_build_info_ffprobe_runtime(info.ffprobe_runtime);
+                    gs.set_build_info_diagnostic_text(info.format_diagnostic_text("Krokiet").into());
+                    gs.set_build_info_refresh_running(false);
+                })
+                .expect("MainWindow dropped while callback is still live");
         });
     });
 }
@@ -56,17 +73,22 @@ fn connect_test_image_file(app: &MainWindow) {
 
         let weak2 = weak.clone();
         std::thread::spawn(move || {
-            let directory = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("/"));
-            let picked = FileDialog::new().set_directory(directory).pick_file();
+            let mut dialog = FileDialog::new();
+            if let Ok(dir) = std::env::current_dir() {
+                dialog = dialog.set_directory(dir);
+            }
+            let picked = dialog.pick_file();
 
             hide_file_dialog_overlay(&weak2);
 
             let (result, is_ok) = match picked {
                 None => {
                     // User cancelled - restore previous state without overwriting result
-                    weak2.upgrade_in_event_loop(move |app| {
-                        app.global::<GuiState>().set_build_info_test_file_running(false);
-                    }).expect("MainWindow dropped while callback is still live");
+                    weak2
+                        .upgrade_in_event_loop(move |app| {
+                            app.global::<GuiState>().set_build_info_test_file_running(false);
+                        })
+                        .expect("MainWindow dropped while callback is still live");
                     return;
                 }
                 Some(path) => {
@@ -76,6 +98,8 @@ fn connect_test_image_file(app: &MainWindow) {
                         if cfg!(feature = "libraw") { "LibRAW" } else { "rawler" }
                     } else if HEIC_EXTENSIONS.contains(&ext.as_str()) {
                         "libheif"
+                    } else if ext == "avif" {
+                        if cfg!(feature = "libavif") { "libavif" } else { "image-rs" }
                     } else {
                         "image-rs"
                     };
@@ -95,12 +119,14 @@ fn connect_test_image_file(app: &MainWindow) {
                 }
             };
 
-            weak2.upgrade_in_event_loop(move |app| {
-                let gs = app.global::<GuiState>();
-                gs.set_build_info_test_file_result(result.into());
-                gs.set_build_info_test_file_ok(is_ok);
-                gs.set_build_info_test_file_running(false);
-            }).expect("MainWindow dropped while callback is still live");
+            weak2
+                .upgrade_in_event_loop(move |app| {
+                    let gs = app.global::<GuiState>();
+                    gs.set_build_info_test_file_result(result.into());
+                    gs.set_build_info_test_file_ok(is_ok);
+                    gs.set_build_info_test_file_running(false);
+                })
+                .expect("MainWindow dropped while callback is still live");
         });
     });
 }
@@ -115,5 +141,6 @@ fn set_all_build_info_properties(gs: &GuiState, info: &BuildRuntimeInfo) {
     gs.set_build_info_libavif_runtime(info.libavif_runtime);
     gs.set_build_info_ffmpeg_runtime(info.ffmpeg_runtime);
     gs.set_build_info_ffprobe_runtime(info.ffprobe_runtime);
+    gs.set_build_info_probes_complete(info.probes_complete);
     gs.set_build_info_diagnostic_text(info.format_diagnostic_text("Krokiet").into());
 }

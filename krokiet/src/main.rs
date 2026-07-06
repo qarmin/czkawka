@@ -26,7 +26,7 @@ use log::{error, info};
 use slint::VecModel;
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
-use crate::connect_build_info::{apply_build_info, connect_build_info};
+use crate::connect_build_info::{apply_build_info, connect_build_info, start_build_info_background_probes};
 use crate::connect_clean_cache::connect_clean_cache;
 use crate::connect_compare::connect_compare;
 use crate::connect_directories_changes::connect_add_remove_directories;
@@ -94,7 +94,6 @@ pub use ui::*;
 
 fn main() {
     register_image_decoding_hooks();
-    czkawka_core::common::build_runtime_info::BuildRuntimeInfo::get();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
 
@@ -111,7 +110,6 @@ fn main() {
     print_version_mode("Krokiet");
     print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
     print_krokiet_features();
-    czkawka_core::common::build_runtime_info::BuildRuntimeInfo::get().log_runtime_summary();
 
     create_default_settings_files();
 
@@ -148,6 +146,7 @@ fn main() {
     update_available_hardware_encoders(&app);
     apply_build_info(&app);
     connect_build_info(&app);
+    start_build_info_background_probes(&app);
 
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_trash_button(&app, progress_sender.clone(), stop_flag.clone());

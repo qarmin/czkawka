@@ -381,12 +381,15 @@ def validate_i18n_folder(
                     or "Wrong occurrence count" in combined
                 ):
                     keys_to_remove.add(key)
-                elif "Trailing dot mismatch" in combined:
+                    continue
+                has_known_fix = False
+                if "Trailing dot mismatch" in combined:
                     keys_to_fix_dots.add(key)
-                elif "Literal \\n sequence" in combined:
+                    has_known_fix = True
+                if "Literal \\n sequence" in combined:
                     keys_to_fix_newlines.add(key)
-                else:
-                    # default to removal if unknown error
+                    has_known_fix = True
+                if not has_known_fix:
                     keys_to_remove.add(key)
 
             removed = 0

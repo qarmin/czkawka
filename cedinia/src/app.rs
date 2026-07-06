@@ -372,12 +372,9 @@ impl log::Log for DualLogger {
     }
 
     fn log(&self, record: &log::Record) {
-        if !filtering_messages(record) {
-            return;
-        }
         self.android.log(record);
 
-        if !self.enabled(record.metadata()) {
+        if !self.enabled(record.metadata()) || !filtering_messages(record) {
             return;
         }
         if let Ok(mut guard) = self.file.lock()

@@ -171,7 +171,8 @@ pub fn find_language_idx(tag: &str) -> usize {
     }
 
     for (idx, lang) in LANGUAGE_LIST.iter().enumerate() {
-        if lang_only.eq_ignore_ascii_case(lang.short_name) {
+        let name_lang = lang.short_name.split('-').next().unwrap_or(lang.short_name);
+        if lang_only.eq_ignore_ascii_case(name_lang) {
             return idx;
         }
     }
