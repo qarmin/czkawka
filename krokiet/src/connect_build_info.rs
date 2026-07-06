@@ -30,14 +30,14 @@ fn connect_refresh_probes(app: &MainWindow) {
         std::thread::spawn(move || {
             BuildRuntimeInfo::refresh_process_probes();
             let info = BuildRuntimeInfo::get();
-            let _ = weak2.upgrade_in_event_loop(move |app| {
+            weak2.upgrade_in_event_loop(move |app| {
                 let gs = app.global::<GuiState>();
                 // Only process probes can change at runtime; update just those two.
                 gs.set_build_info_ffmpeg_runtime(info.ffmpeg_runtime);
                 gs.set_build_info_ffprobe_runtime(info.ffprobe_runtime);
                 gs.set_build_info_diagnostic_text(info.format_diagnostic_text("Krokiet").into());
                 gs.set_build_info_refresh_running(false);
-            });
+            }).expect("MainWindow dropped while callback is still live");
         });
     });
 }
@@ -64,9 +64,9 @@ fn connect_test_image_file(app: &MainWindow) {
             let (result, is_ok) = match picked {
                 None => {
                     // User cancelled - restore previous state without overwriting result
-                    let _ = weak2.upgrade_in_event_loop(move |app| {
+                    weak2.upgrade_in_event_loop(move |app| {
                         app.global::<GuiState>().set_build_info_test_file_running(false);
-                    });
+                    }).expect("MainWindow dropped while callback is still live");
                     return;
                 }
                 Some(path) => {
@@ -95,12 +95,12 @@ fn connect_test_image_file(app: &MainWindow) {
                 }
             };
 
-            let _ = weak2.upgrade_in_event_loop(move |app| {
+            weak2.upgrade_in_event_loop(move |app| {
                 let gs = app.global::<GuiState>();
                 gs.set_build_info_test_file_result(result.into());
                 gs.set_build_info_test_file_ok(is_ok);
                 gs.set_build_info_test_file_running(false);
-            });
+            }).expect("MainWindow dropped while callback is still live");
         });
     });
 }

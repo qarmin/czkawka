@@ -1,3 +1,18 @@
+## Version 12.0.1 - 06.07.2026r
+
+### Core
+- Fixed problem with showing console windows on Windows, when running ffmpeg internally - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Added `BuildRuntimeInfo` - a new module that probes compile-time features (HEIF, LibRAW, AVIF) and runtime availability (FFmpeg, FFprobe) at startup, with support for re-probing process-based tools without restarting the app - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Added a 500 MB size guard for image loading to prevent out-of-memory crashes on unexpectedly large files - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+
+### Krokiet
+- Added a new "About / Diagnostics" panel, to check for build/runtime features and to test if certain image files are recognizable - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Added a "Test image file" button in the diagnostics view to verify that a user selected file can actually be decoded - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+
+### Cedinia
+- Fix invalid status in progress bar - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Fixed auto selection of language on first run - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+
 ## Version 12.0 - 28.06.2026r
 
 ### Czkawka GTK Deprecation Notice
