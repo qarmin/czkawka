@@ -30,8 +30,8 @@ home_bad_names_description = Filer med problematiska tecken i namnet
 home_exif_description = Bilder med EXIF-metadata
 home_similar_videos_description = Hitta videor med liknande ljud
 # Results list
-scanning = Skanning pågår….
-stopping = Stoppar….
+scanning = Skanning pågår...
+stopping = Stoppar...
 no_results = Inga resultat
 press_start = Tryck på START för att skanna
 select_label = Mark.
@@ -66,7 +66,7 @@ ok = OK
 # Stopping overlay
 stopping_overlay_title = Stoppar
 stopping_overlay_body =
-    Slutför aktuell skanning…
+    Slutför aktuell skanning...
     Vänta.
 # Permission popup
 permission_title = Åtkomst till fil
@@ -228,15 +228,15 @@ cleaned_exif_suffix = filer
 cleaned_exif_errors_suffix = fel
 rename_error_read_file_name = Kan inte läsa filnamnet
 rename_error_read_directory = Kan inte läsa mapp
-and_more_prefix = …och
+and_more_prefix = ...och
 and_more_suffix = mer
 # Gallery / delete popups
 gallery_delete_button = Ta bort
 gallery_back = Tillbaka
 gallery_confirm_delete = Ja, ta bort
-deleting_files = Tar bort filer….
+deleting_files = Tar bort filer...
 stop = Stoppa
-scanning_fallback = Skannar….
+scanning_fallback = Skannar...
 app_subtitle = För att hedra slaget vid Cedynia (972 e.Kr.)
 app_license = Gränssnitt för Czkawka Core - GPL-3.0
 about_app_label = OM
@@ -294,11 +294,11 @@ directories_check_label_excluded = Exkluderade sökvägar:
 directories_check_label_referenced = Referenssökvägar:
 directories_check_label_would_scan = Filer att skanna:
 directories_check_label_processable = Filer som kan bearbetas:
-directories_check_scanning = Skannar….
+directories_check_scanning = Skannar...
 directories_check_warning_no_processable = Inga filer som kan bearbetas hittades. Kontrollera vilka mappar som har inkluderats eller exkluderats
 path_edit_title_include = Lägg till bland inkluderade
 path_edit_title_exclude = Lägg till bland exkluderade
-path_edit_placeholder = Ange sökväg….
+path_edit_placeholder = Ange sökväg...
 path_edit_not_exists = Sökvägen finns inte
 path_edit_is_dir = Mapp
 path_edit_is_file = Fil
@@ -309,9 +309,9 @@ ctx_open_folder = Öppna överordnad mapp
 dir_open_folder = Öppna mapp
 # Compare view
 compare_label = Jämför
-compare_loading = Laddar bilder…
-compare_cancelling = Avbryter…
-compare_computing = Beräknar skillnad…
+compare_loading = Laddar bilder...
+compare_cancelling = Avbryter...
+compare_computing = Beräknar skillnad...
 compare_mode_normal = Sida
 compare_mode_split = Dela
 compare_mode_overlay = Överlagring

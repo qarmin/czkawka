@@ -153,3 +153,5 @@ stage_optimizing_videos = Βελτιστοποιημένο { $items_stats } βί
 stage_optimizing_no_size_videos = Βελτιστοποιημένο { $items_stats } βίντεο
 stage_cleaning_exif = Καθαρισμός EXIF από το { $items_stats } αρχείο ({ $size_stats })
 stage_cleaning_no_size_exif = Καθαρισμός EXIF από το { $items_stats } αρχείο
+
+core_image_file_too_large = Το αρχείο εικόνας είναι πολύ μεγάλο ({$size} bytes) - υπερβαίνει το όριο των { $limit } MB

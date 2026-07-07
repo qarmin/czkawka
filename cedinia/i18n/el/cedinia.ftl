@@ -309,9 +309,9 @@ ctx_open_folder = Άνοιγμα γονικού φακέλου
 dir_open_folder = Άνοιγμα φακέλου
 # Compare view
 compare_label = Σύγκριση
-compare_loading = Φόρτωση εικόνων
-compare_cancelling = Ακύρωση…
-compare_computing = Υπολογισμός διαφορών
+compare_loading = Φόρτωση εικόνων.
+compare_cancelling = Ακύρωση...
+compare_computing = Υπολογισμός διαφορών.
 compare_mode_normal = Πλευρά
 compare_mode_split = Διαχωρισμός
 compare_mode_overlay = Επικάλυψη

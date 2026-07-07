@@ -80,6 +80,9 @@ Text to translate:
         if translated.startswith("'") and translated.endswith("'"):
             translated = translated[1:-1]
 
+        # Normalize Unicode ellipsis to three plain dots for consistency
+        translated = translated.replace("….", "...").replace("…", "...")
+
         return translated
 
     except Exception as e:

@@ -309,9 +309,9 @@ ctx_open_folder = मूल फ़ोल्डर खोलें
 dir_open_folder = फ़ोल्डर खोलें
 # Compare view
 compare_label = तुलना करें।
-compare_loading = चित्र लोड हो रहे हैं
-compare_cancelling = रद्द किया जा रहा है
-compare_computing = गणना जारी है
+compare_loading = चित्र लोड हो रहे हैं.
+compare_cancelling = रद्द किया जा रहा है.
+compare_computing = गणना जारी है.
 compare_mode_normal = साइड
 compare_mode_split = विभाजित करें।
 compare_mode_overlay = ओवरले (Overlay)

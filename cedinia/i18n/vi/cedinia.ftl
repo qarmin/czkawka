@@ -309,9 +309,9 @@ ctx_open_folder = Mở thư mục cha
 dir_open_folder = Mở thư mục
 # Compare view
 compare_label = So sánh
-compare_loading = Đang tải hình ảnh
-compare_cancelling = Đang hủy
-compare_computing = Đang tính toán sự khác biệt
+compare_loading = Đang tải hình ảnh.
+compare_cancelling = Đang hủy.
+compare_computing = Đang tính toán sự khác biệt.
 compare_mode_normal = Mặt
 compare_mode_split = Chia tách
 compare_mode_overlay = Lớp phủ
