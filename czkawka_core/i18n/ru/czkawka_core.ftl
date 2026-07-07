@@ -153,3 +153,5 @@ stage_optimizing_videos = Оптимизировано { $items_stats } виде
 stage_optimizing_no_size_videos = Оптимизировано { $items_stats } видео
 stage_cleaning_exif = Очистка EXIF из файла { $items_stats } ({ $size_stats })
 stage_cleaning_no_size_exif = Очистка EXIF из файла { $items_stats }
+
+core_image_file_too_large = Файл изображения слишком большой ({$size} байт) - превышает установленный лимит в { $limit } МБ

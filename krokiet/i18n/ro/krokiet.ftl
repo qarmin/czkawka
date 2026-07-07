@@ -443,7 +443,7 @@ optimize_max_height_text = Max înălțime:
 optimize_crf_hint = Valoare mai mică = calitate mai bună. 0 este aproape pierdută, 51 este cel mai rău. Recomandat: 18-28.
 optimize_noise_reduction_hint = Reducerea zgomotului poate creşte semnificativ timpul de codificare.
 optimize_noise_reduction_strength_hint = 1 = minim, 10 = reducerea maximă a zgomotului.
-hardlink_button_text = Hardlink
+hardlink_button_text = Link dur
 hardlink_text = Creează hardlink-uri
 hardlink_confirmation_text = Ești sigur că dorești să creezi hardlink-uri pentru elementele selectate?
 softlink_button_text = Softlink

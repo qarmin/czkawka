@@ -83,6 +83,13 @@ Text to translate:
         # Normalize Unicode ellipsis to three plain dots for consistency
         translated = translated.replace("….", "...").replace("…", "...")
 
+        # Strip trailing sentence-ending punctuation added by AI when source has none
+        sentence_end = (".", "。", "۔")
+        if not any(text.strip().endswith(c) for c in sentence_end) and any(
+            translated.endswith(c) for c in sentence_end
+        ):
+            translated = re.sub(r"[.。۔]+$", "", translated)
+
         return translated
 
     except Exception as e:
