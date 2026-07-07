@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = Cedinia
+
 tool_duplicate_files = Doublons
 tool_empty_folders = Dossiers vides
 tool_similar_images = Images similaires
@@ -34,7 +34,7 @@ scanning = Analyse en cours...
 stopping = Arrêt...
 no_results = Aucun résultat
 press_start = Appuyez sur START pour analyser
-select_label = Sel.
+select_label = Sel
 deselect_label = Desel.
 list_label = Liste
 gallery_label = Gal

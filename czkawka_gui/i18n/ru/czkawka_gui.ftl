@@ -46,14 +46,14 @@ same_music_tooltip =
     
     По умолчанию, каждый музыкальный файл сравнивается друг с другом, и это может занять много времени при тестировании множества файлов, поэтому обычно лучше использовать папки с эталонами и указать, какие файлы следует сравнивать друг с другом (одинаковое количество файлов, сравнение отпечатков будет быстрее по крайней мере на 4х, чем без папок с эталонами).
 music_comparison_checkbox_tooltip =
-    Ищет похожие музыкальные файлы с помощью ИИ, использующего машинное обучение для удаления скобок из фраз. Например, если эта опция включена, следующие файлы будут считаться дубликатами:
+    Ищет похожие музыкальные файлы с помощью ИИ, использующего машинное обучение для удаления скобок из фраз. Напр., если этот параметр включён, следующие файлы будут считаться дубликатами:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
 duplicate_case_sensitive_name = С учётом регистра
 duplicate_case_sensitive_name_tooltip =
     При включённой опции записи группируются, только если у них полностью совпадают имена с точностью до каждого символа. Например, «ХИТ Дискотека» не совпадёт с «хит дискотека».
     
-    При отключённой опции записи группируются вне зависимости от того, заглавные или строчные буквы использовались при написании. Например, «ХИТ Дискотека», «хит дискотека», «хИт ДиСкОтЕКа» будут эквивалентны
+    При отключённой опции записи группируются вне зависимости от того, заглавные или строчные буквы использовались при написании. Напр.,, «ХИТ Дискотека», «хит дискотека», «хИт ДиСкОтЕКа» будут эквивалентны
 duplicate_mode_size_name_combo_box = Размер и имя
 duplicate_mode_name_combo_box = Имя
 duplicate_mode_size_combo_box = Размер
@@ -302,12 +302,22 @@ about_repository_button = Репозиторий
 about_donation_button = Пожертвование
 about_instruction_button = Руководство
 about_translation_button = Перевод
+about_other_apps_button = Прочие приложения
+about_other_apps_dialog_title = Прочие приложения от qarmin
+about_other_apps_open_source_note = Все перечисленные приложения являются бесплатными и с открытым исходным кодом.
+about_other_apps_open_button = Открыть
+about_other_apps_szyszka_desc = Быстрый и мощный инструмент для переименования файлов.
+about_other_apps_mykrut_desc = Простой, быстрый и предсказуемый файловый менеджер для Linux.
+about_other_apps_dcmki_viewer_desc = Простой просмотрщик DICOM.
+about_other_apps_video_thumbnailer_desc = Обёртка для генератора миниатюр видео, применяемого в Czkawka.
+about_other_apps_space_finder_desc = Простой поисковик самых больших файлов в вашей системе.
+about_other_apps_system_info_collector_desc = Собирает данные об использовании ОЗУ и ЦП из ОС и отображает их в виде графиков.
 # Header
 header_setting_button_tooltip = Открыть окно настроек.
 header_about_button_tooltip = Открыть окно с информацией о приложении.
 header_krokiet_button_tooltip = Попробуйте Krokiet - новую и улучшенную версию!
 # Krokiet promo dialog
-krokiet_promo_title = 
+krokiet_promo_title =
     Встретьтесь с Крокитом!
     krokiet_promo_message =
            Приветствую вас, отважный пользователь Czkawka!
@@ -320,15 +330,15 @@ krokiet_promo_title =
     
            Czkawka GTK хорошо нам служил, но его срок службы подошел к концу
 krokiet_promo_message =
-    Hello there, brave Czkawka user!
+    Привет, отважный пользователь Czkawka!
     
-    The Force is clearly with you, but Krokiet is not - a newer, faster, lighter, and significantly more handsome (assuming apps can actually be handsome) duplicate cleaner.
+    Сила определённо с тобой, но Krokiet — нет. Krokiet — это более новый, быстрый, лёгкий и значительно более симпатичный (если приложения вообще могут быть симпатичными) инструмент для поиска дубликатов.
     
-    Krokiet includes everything people liked about Czkawka. It is completely free, open source, has a unique and simple UI (both praised and hated by many), introduces a lot of new features, uses fewer dependencies, and works far more reliably across different platforms.
+    Krokiet включает всё, что нравилось людям в Czkawka. Он полностью бесплатен, имеет открытый исходный код, обладает уникальным и простым интерфейсом (который многие хвалили и многие ненавидели), содержит множество новых функций, использует меньше зависимостей и работает гораздо надёжнее на разных платформах.
     
-    And if you somehow missed it, there is already an even newer app than Krokiet - Cedinia, designed primarily for Android devices and touchscreen usage.
+    И если вы вдруг пропустили, есть уже более новое приложение, чем Krokiet — Cedinia, созданное в первую очередь для устройств на Android и сенсорных экранов.
     
-    Czkawka GTK served us well, but its watch has ended.
+    Czkawka GTK сослужила нам хорошую службу, но её время прошло.
 krokiet_promo_link_download = Скачать Krokiet/Cedinia
 krokiet_promo_link_project = Страница проекта
 

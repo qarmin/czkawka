@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = Cedinia
+
 tool_duplicate_files = Дубликаты
 tool_empty_folders = Пустые папки
 tool_similar_images = Похожие изображения
@@ -96,11 +96,11 @@ settings_language = Язык
 settings_language_restart = Требуется перезапуск приложения
 settings_common_label = ОБЩИЕ НАСТРОЙКИ
 settings_excluded_items = ИСКЛЮЧЁННЫЕ ЭЛЕМЕНТЫ (шаблоны glob, разделённые запятой)
-settings_excluded_items_placeholder = например, *.tmp, */.git/*, */node_modules/*
+settings_excluded_items_placeholder = напр., *.tmp, */.git/*, */node_modules/*
 settings_allowed_extensions = РАЗРЕШЕННЫЕ ВЫХОДЫ (пусто = все)
 settings_allowed_extensions_placeholder = напр. jpg, png, mp4
 settings_excluded_extensions = РАСПРОСТРАНЕНИЕ ВЫШЕНИЙ
-settings_excluded_extensions_placeholder = например, bak, tmp, log
+settings_excluded_extensions_placeholder = напр., bak, tmp, log
 # Settings - Tools section labels
 settings_duplicates_header = ПОДРАЗУМЕВАНИЯ
 settings_check_method_label = МЕТОД КОМПАРИЗНА
@@ -134,7 +134,7 @@ settings_music_bitrate = Битрейт
 settings_music_approx = Приблизительное сравнение тегов
 settings_temporary_files_header = ТЕМПОРАЖЕНИЕ ФАЙЛОВ
 settings_temporary_files_extensions_label = РАССМОТРЕНИЕ
-settings_temporary_files_extensions_placeholder = например, .tmp, .bak, ~
+settings_temporary_files_extensions_placeholder = напр., .tmp, .bak, ~
 settings_temporary_files_reset = Сброс по умолчанию
 settings_broken_files_header = БРОКЕН ФАЙЛЫ
 settings_broken_files_note = Ресурсоемкое сканирование. Для оптимальной производительности используйте Krokiet на рабочем столе.

@@ -163,7 +163,7 @@ upper_remove_included_button = 削除
 upper_manual_add_excluded_button = 手動追加
 upper_add_excluded_button = 追加
 upper_remove_excluded_button = 削除
-upper_manual_add_included_button_tooltip = 
+upper_manual_add_included_button_tooltip =
     手動で検索するディレクトリ名を追加します。
     
     一度に複数のパスを追加するには、 ;
@@ -171,7 +171,7 @@ upper_manual_add_included_button_tooltip =
     /home/roman;/home/rozkazは/home/romanと/home/rozkazの2つのディレクトリを追加します
 upper_add_included_button_tooltip = 検索に新しいディレクトリを追加します。.
 upper_remove_included_button_tooltip = 検索からディレクトリを削除します。.
-upper_manual_add_excluded_button_tooltip = 
+upper_manual_add_excluded_button_tooltip =
     除外されたディレクトリ名を手動で追加します。
     
     一度に複数のパスを追加するには、 ;
@@ -302,6 +302,16 @@ about_repository_button = リポジトリ
 about_donation_button = 寄付
 about_instruction_button = 使い方
 about_translation_button = 翻訳
+about_other_apps_button = その他のアプリ
+about_other_apps_dialog_title = Qarminによる他のアプリケーション
+about_other_apps_open_source_note = リストされているすべてのアプリケーションは無料でオープンソースです。
+about_other_apps_open_button = 開く
+about_other_apps_szyszka_desc = 高速で強力なファイルのリネーム。
+about_other_apps_mykrut_desc = シンプルな高速で独自のLinuxファイルマネージャ。
+about_other_apps_dcmki_viewer_desc = シンプルなDICOMビューアー。
+about_other_apps_video_thumbnailer_desc = Czkawakaで使用されているビデオサムネイルジェネレータの周りのWrapper。
+about_other_apps_space_finder_desc = あなたのシステム上で最大のファイルのシンプルなファインダー。
+about_other_apps_system_info_collector_desc = OS から RAM / CPU 使用率を収集し、グラフとして表示します。
 # Header
 header_setting_button_tooltip = 設定ダイアログを開きます。.
 header_about_button_tooltip = アプリに関する情報を含むダイアログを開きます。.
@@ -337,7 +347,7 @@ settings_use_rust_preview_tooltip =
     Linux以外の環境では、gtk-pixbufが常に有効とは限らず、無効にすることによりいくらかの画像のプレビューが読み込まれないため、このオプションの使用が推奨される。.
 settings_label_restart = 設定を適用するにはアプリを再起動する必要があります！
 settings_ignore_other_filesystems = 他のファイルシステムを無視(Linuxのみ)
-settings_ignore_other_filesystems_tooltip = 
+settings_ignore_other_filesystems_tooltip =
     検索されたディレクトリと同じファイルシステムにないファイルを無視します。
     
     Linux の find コマンドで -xdev オプションのように動作します

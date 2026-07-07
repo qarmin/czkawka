@@ -76,6 +76,7 @@ core_failed_to_generate_thumbnail = Gagal membuat thumbnail untuk "{ $file }": {
 core_failed_to_extract_frame_at_seek_time = Gagal mengekstrak frame pada detik { $time } dari "{ $file }": { $reason }
 core_video_file_does_not_exist = Berkas video tidak ditemukan (mungkin telah dihapus antara proses pemindaian/langkah selanjutnya): "{ $path }"
 core_image_too_large = Gambar terlalu besar ({ $width }x{ $height }) - melebihi jumlah piksel yang didukung yaitu { $max }
+core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Gagal mendapatkan metadata video untuk file "{ $file }": { $reason }
 core_failed_to_get_video_codec = Gagal mendapatkan codec video untuk file "{ $file }"
 core_failed_to_get_video_duration = Gagal mendapatkan durasi video untuk file "{ $file }"

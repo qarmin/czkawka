@@ -76,6 +76,7 @@ core_failed_to_generate_thumbnail = Не удалось сгенерироват
 core_failed_to_extract_frame_at_seek_time = Не удалось извлечь кадр в { $time } секундах из «{ $file }»: { $reason }
 core_video_file_does_not_exist = Файл видео не существует (может быть удален между сканированием/поздними шагами): "{ $path }"
 core_image_too_large = Изображение слишком большое ({ $width }x{ $height }) - больше, чем поддерживаемые { $max } пикселей
+core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Не удалось получить метаданные видео для файла "{ $file }": { $reason }
 core_failed_to_get_video_codec = Не удалось получить видеокодек для файла "{ $file }"
 core_failed_to_get_video_duration = Не удалось получить длину видео для файла «{ $file }»

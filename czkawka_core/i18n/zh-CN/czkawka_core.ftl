@@ -9,7 +9,7 @@ core_similarity_minimal = 最小化
 core_cannot_open_dir = 无法打开目录 { $dir }，因为 { $reason }
 core_cannot_read_entry_dir = 无法在目录 { $dir } 中读取条目，因为 { $reason }
 core_cannot_read_metadata_dir = 无法读取目录 { $dir } 中的元数据，因为 { $reason }
-core_cannot_read_metadata_file = Cannot read metadata of file { $file }, reason { $reason }
+core_cannot_read_metadata_file = 无法读取文件 { $file } 的元数据，原因是 { $reason }
 core_file_modified_before_epoch = 文件 { $name } 似乎在Unix Epoch前被修改
 core_folder_modified_before_epoch = 文件夹 { $name } 似乎已在Unix Epoch前被修改
 core_file_no_modification_date = 无法从文件 { $name } 获取修改日期，因为 { $reason }
@@ -76,6 +76,7 @@ core_failed_to_generate_thumbnail = 未能生成缩略图“{ $file }”: { $rea
 core_failed_to_extract_frame_at_seek_time = 未能从 { $time } 秒的“{ $file }”中提取帧：{ $reason }
 core_video_file_does_not_exist = 视频文件不存在（可删除在扫描/后续步骤之间）："{ $path }"
 core_image_too_large = 图片太大 ({ $width }x{ $height }) - 超过支持的 { $max } 像素
+core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = 获取文件 "{ $file }" 的视频元数据失败：{ $reason }
 core_failed_to_get_video_codec = 无法获取文件“{ $file }”的视频编解码器
 core_failed_to_get_video_duration = 无法获取文件 "{ $file }" 的视频时长
@@ -100,7 +101,7 @@ core_invalid_extension_contains_space = { $extension } 不是一个有效的扩�
 core_invalid_extension_contains_dot = { $extension } 不是一个有效的扩展名，因为它包含在点内
 core_ffmpeg_unknown_encoder = 无法使用 { $encoder } 编码器对 { $file } 进行编码。当前的 FFmpeg 版本不支持此编码器。请使用支持所需编解码器的其他 FFmpeg 版本，或选择其他编码器。.
 core_ffmpeg_error = FFmpeg 处理文件 { $file } 时发生错误，状态码为 { $code }，原因：{ $reason }
-core_custom_command_missing_path_placeholder = Custom FFmpeg command must contain { "{PATH}" } as input file placeholder
+core_custom_command_missing_path_placeholder = 自定义 FFmpeg 命令必须包含 {"{PATH}"} 作为输入文件的占位符
 core_custom_command_empty = 自定义 FFmpeg 命令不能为空
 # Scan stage labels
 # Collecting / scanning files (the { $entries_checked } counter grows while the disk is walked)

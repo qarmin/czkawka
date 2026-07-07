@@ -302,6 +302,16 @@ about_repository_button = Репозиторій
 about_donation_button = Пожертва
 about_instruction_button = Інструкція
 about_translation_button = Переклад
+about_other_apps_button = Інші додатки
+about_other_apps_dialog_title = Інші додатки від qarmin
+about_other_apps_open_source_note = Всі перераховані програми є безкоштовними та з відкритим вихідним кодом.
+about_other_apps_open_button = Відкриті
+about_other_apps_szyszka_desc = Швидке та потужне перейменування файлів.
+about_other_apps_mykrut_desc = Простий швидкий та думка файлового менеджера Linux.
+about_other_apps_dcmki_viewer_desc = Простий глядач DICOM.
+about_other_apps_video_thumbnailer_desc = Обгортка навколо генератора мініатюр відео в Чкавці.
+about_other_apps_space_finder_desc = Простий пошук найбільших файлів у вашій системі.
+about_other_apps_system_info_collector_desc = Збирає використання RAM/CPU з ОС та показує його як графіки.
 # Header
 header_setting_button_tooltip = Відкриває вікно налаштувань.
 header_about_button_tooltip = Відкриває діалогове вікно з інформацією про додаток.

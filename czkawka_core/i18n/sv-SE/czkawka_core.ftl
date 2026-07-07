@@ -76,6 +76,7 @@ core_failed_to_generate_thumbnail = Det gick inte att generera miniatyrbild för
 core_failed_to_extract_frame_at_seek_time = Det gick inte att extrahera bildruta vid { $time } sekunder från "{ $file }": { $reason }
 core_video_file_does_not_exist = Videofilen finns inte (den kan ha tagits bort mellan skanningen och senare steg): "{ $path }"
 core_image_too_large = Bilden är för stor ({ $width }x{ $height }) - fler än de { $max } pixlar som stöds
+core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Det gick inte att hämta videodata för filen "{ $file }": { $reason }
 core_failed_to_get_video_codec = Det gick inte att hämta videokodek för filen "{ $file }"
 core_failed_to_get_video_duration = Det gick inte att hämta videolängden för filen "{ $file }"
@@ -98,9 +99,9 @@ core_cannot_create_or_open_cache_file = Det går inte att skapa eller öppna cac
 core_cannot_set_config_cache_path = Det går inte att ställa in sökvägen för konfiguration/cache - konfiguration och cache kommer inte att användas.
 core_invalid_extension_contains_space = { $extension } är inte en giltig filändelse eftersom den innehåller blanksteg
 core_invalid_extension_contains_dot = { $extension } är inte en giltig filändelse eftersom den innehåller en punkt
-core_ffmpeg_unknown_encoder = Kan inte koda { $file } med hjälp av { $encoder } kodaren. Den nuvarande FFmpeg bygget stöder inte denna kodare. Använd en annan FFmpeg version med stöd för codec eller välj en annan kodare.
-core_ffmpeg_error = FFmpeg error while processing { $file }, statuskod { $code }, reason { $reason }
-core_custom_command_missing_path_placeholder = Anpassat FFmpeg kommando måste innehålla { "{PATH}" } som indatafil platshållare
+core_ffmpeg_unknown_encoder = Kan inte koda { $file } med kodaren { $encoder }. Den aktuella FFmpeg-versionen stöder inte denna kodare. Använd en annan FFmpeg-version med stöd för den nödvändiga kodeken eller välj en annan kodare.
+core_ffmpeg_error = FFmpeg-fel vid bearbetning av { $file }, statuskod { $code }, orsak: { $reason }
+core_custom_command_missing_path_placeholder = Anpassat FFmpeg-kommando måste innehålla { "{PATH}" } som platshållare för indatafilen
 core_custom_command_empty = Anpassat FFmpeg kommando kan inte vara tomt
 # Scan stage labels
 # Collecting / scanning files (the { $entries_checked } counter grows while the disk is walked)
@@ -110,7 +111,7 @@ stage_scanning_name = Skannar namnet på { $entries_checked } filer
 stage_scanning_size_name = Skannar storlek och namn på { $entries_checked } filer
 stage_scanning_size = Skannar storlek för { $entries_checked } filer
 # Cache load/save (indeterminate, no counters)
-stage_filtering_outdated_cache = Filtrerar gamla cache-poster
+stage_filtering_outdated_cache = Filtrerar föråldrade cacheposter
 stage_loading_prehash_cache = Laddar prehash-cache
 stage_saving_prehash_cache = Sparar prehash-cache
 stage_loading_hash_cache = Laddar hash-cache

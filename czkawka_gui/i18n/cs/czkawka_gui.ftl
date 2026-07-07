@@ -302,6 +302,16 @@ about_repository_button = Repozitář
 about_donation_button = Darovat
 about_instruction_button = Pokyny
 about_translation_button = Překlad
+about_other_apps_button = Ostatní aplikace
+about_other_apps_dialog_title = Další aplikace qarmin
+about_other_apps_open_source_note = Všechny uvedené aplikace jsou zdarma a open source.
+about_other_apps_open_button = Otevřít
+about_other_apps_szyszka_desc = Rychlý a výkonný název souboru.
+about_other_apps_mykrut_desc = Jednoduchý rychlý a názorný správce souborů Linuxu.
+about_other_apps_dcmki_viewer_desc = Jednoduchý DICOM prohlížeč
+about_other_apps_video_thumbnailer_desc = Wrapper kolem generátoru video miniatury používaného v Czkawce.
+about_other_apps_space_finder_desc = Jednoduché hledání největších souborů ve vašem systému.
+about_other_apps_system_info_collector_desc = Sbírá využití RAM/CPU z OS a zobrazuje ho jako grafy.
 # Header
 header_setting_button_tooltip = Otevře dialogové okno nastavení.
 header_about_button_tooltip = Otevře dialog s informacemi o aplikaci.

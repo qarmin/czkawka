@@ -4,7 +4,7 @@ window_main_title = Czkawka (Cegukan)
 window_progress_title = Memindai
 window_compare_images = Bandingkan Gambar
 # General
-general_ok_button = OK
+general_ok_button = Oke
 general_close_button = Tutup
 # Krokiet info dialog
 krokiet_info_title = Pemberitahuan Penghapusan Fitur
@@ -302,6 +302,16 @@ about_repository_button = Repositori
 about_donation_button = Donasi
 about_instruction_button = Instruksi
 about_translation_button = Terjemahan
+about_other_apps_button = Aplikasi Lainnya
+about_other_apps_dialog_title = Aplikasi lain dari qarmin
+about_other_apps_open_source_note = All listed applications are free and open source.
+about_other_apps_open_button = Buka
+about_other_apps_szyszka_desc = Fast and powerful file renamer.
+about_other_apps_mykrut_desc = Simple fast and opinionated Linux file manager.
+about_other_apps_dcmki_viewer_desc = Simple DICOM viewer.
+about_other_apps_video_thumbnailer_desc = Wrapper around the video thumbnail generator used in Czkawka.
+about_other_apps_space_finder_desc = Simple finder of the biggest files on your system.
+about_other_apps_system_info_collector_desc = Collects RAM/CPU usage from the OS and shows it as graphs.
 # Header
 header_setting_button_tooltip = Membuka dialog pengaturan.
 header_about_button_tooltip = Membuka dialog yang berisi informasi tentang aplikasi.

@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = Cedinia
+
 tool_duplicate_files = Duplicados
 tool_empty_folders = Carpetas vacías
 tool_similar_images = Imágenes similares

@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = Cedinia
+
 tool_duplicate_files = Duplicados
 tool_empty_folders = Pastas vazias
 tool_similar_images = Imagens semelhantes
@@ -37,7 +37,7 @@ press_start = Pressione INICIAR para verificar
 select_label = Sel.
 deselect_label = Desel.
 list_label = Lista
-gallery_label = Gal
+gallery_label = Galeão
 # Selection popup
 selection_popup_title = Selecionar
 select_all = Selecionar todos
@@ -266,7 +266,7 @@ option_similarity_high = alta
 option_similarity_medium = Média
 option_similarity_low = baixa
 option_similarity_very_low = V.Baixa
-option_similarity_minimal = Min
+option_similarity_minimal = Mínimo
 option_check_method_hash = Hash
 option_check_method_name = Nome:
 option_check_method_size_and_name = Tamanho+Nome

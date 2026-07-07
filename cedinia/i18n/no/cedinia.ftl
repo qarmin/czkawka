@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = Cedinia
+
 tool_duplicate_files = Duplikater
 tool_empty_folders = Tomme mapper
 tool_similar_images = Lignende bilder
@@ -266,7 +266,7 @@ option_similarity_high = Høy
 option_similarity_medium = Middels
 option_similarity_low = Lav
 option_similarity_very_low = V.Lav
-option_similarity_minimal = Min
+option_similarity_minimal = Minimum
 option_check_method_hash = Hash
 option_check_method_name = Navn
 option_check_method_size_and_name = Størrelse+Navn

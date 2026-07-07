@@ -76,6 +76,7 @@ core_failed_to_generate_thumbnail = Faalde bij het genereren van miniaturen voor
 core_failed_to_extract_frame_at_seek_time = Faalde om frame te extraheren op { $time } seconden van "{ $file }": { $reason }
 core_video_file_does_not_exist = Bestand bestaat niet (kan worden verwijderd tussen scan/latere stappen): "{ $path }"
 core_image_too_large = Afbeelding is te groot ({ $width }x{ $height }) - meer dan ondersteund { $max } pixels
+core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Faalde bij het ophalen van videometadeta voor bestand "{ $file }": { $reason }
 core_failed_to_get_video_codec = Faalde bij het ophalen van de videocodec voor bestand "{ $file }"
 core_failed_to_get_video_duration = Kon geen duur van het bestand "{ $file }" ophalen

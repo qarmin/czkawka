@@ -6,7 +6,6 @@ use crate::{BigFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, Sa
 pub(crate) fn translate_items(app: &MainWindow) {
     let t = app.global::<Translations>();
 
-    t.set_app_name_text(flc!("app_name").into());
     t.set_tool_duplicate_files_text(flc!("tool_duplicate_files").into());
     t.set_tool_empty_folders_text(flc!("tool_empty_folders").into());
     t.set_tool_similar_images_text(flc!("tool_similar_images").into());

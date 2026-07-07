@@ -302,6 +302,16 @@ about_repository_button = Kho lưu trữ
 about_donation_button = Quyên góp
 about_instruction_button = Hướng dẫn
 about_translation_button = Dịch thuật
+about_other_apps_button = Các ứng dụng khác
+about_other_apps_dialog_title = Các ứng dụng khác của qarmin
+about_other_apps_open_source_note = All listed applications are free and open source.
+about_other_apps_open_button = Mở
+about_other_apps_szyszka_desc = Fast and powerful file renamer.
+about_other_apps_mykrut_desc = Simple fast and opinionated Linux file manager.
+about_other_apps_dcmki_viewer_desc = Simple DICOM viewer.
+about_other_apps_video_thumbnailer_desc = Wrapper around the video thumbnail generator used in Czkawka.
+about_other_apps_space_finder_desc = Simple finder of the biggest files on your system.
+about_other_apps_system_info_collector_desc = Collects RAM/CPU usage from the OS and shows it as graphs.
 # Header
 header_setting_button_tooltip = Mở hộp thoại cài đặt.
 header_about_button_tooltip = Mở hộp thoại hiển thị thông tin về ứng dụng.

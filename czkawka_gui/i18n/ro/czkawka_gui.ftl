@@ -302,6 +302,16 @@ about_repository_button = Depozit
 about_donation_button = Donație
 about_instruction_button = Instrucțiuni
 about_translation_button = Traducere
+about_other_apps_button = Alte aplicații
+about_other_apps_dialog_title = Alte aplicații ale qarmin
+about_other_apps_open_source_note = Toate aplicațiile listate sunt gratuite și cu sursă deschisă.
+about_other_apps_open_button = Deschideți
+about_other_apps_szyszka_desc = Redenumire de fișiere rapidă și puternică.
+about_other_apps_mykrut_desc = Manager de fişiere Linux simplu şi rapid.
+about_other_apps_dcmki_viewer_desc = Vizualizator DICOM simplu.
+about_other_apps_video_thumbnailer_desc = Wrapper în jurul generatorului de miniaturi video utilizat în Czkawka.
+about_other_apps_space_finder_desc = Găsire simplă a celor mai mari fișiere din sistemul dvs.
+about_other_apps_system_info_collector_desc = Colectează utilizarea RAM/CPU de pe OS și o afișează ca grafice.
 # Header
 header_setting_button_tooltip = Deschide dialogul de setări.
 header_about_button_tooltip = Deschide dialogul cu informații despre aplicație.

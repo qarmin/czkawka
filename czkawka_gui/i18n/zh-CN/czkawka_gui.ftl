@@ -1,6 +1,6 @@
 # Window titles
 window_settings_title = 设定
-window_main_title = Czkawka (打嗝)
+window_main_title = Czkawka - (Hiccup)
 window_progress_title = 正在扫描
 window_compare_images = 比较图像
 # General
@@ -219,7 +219,7 @@ popover_custom_path_check_button_entry_tooltip =
     
     示例用法：
     /home/pimpek/rzecz.txt 可以通过 /home/pim* 找到
-popover_custom_name_check_button_entry_tooltip = 
+popover_custom_name_check_button_entry_tooltip =
     按文件名选择记录。
     
     示例用法：
@@ -304,6 +304,16 @@ about_repository_button = 存储库
 about_donation_button = 捐助
 about_instruction_button = 说明
 about_translation_button = 翻译
+about_other_apps_button = 其他应用程序
+about_other_apps_dialog_title = 其他应用
+about_other_apps_open_source_note = 列出的所有应用程序都是免费和开源的。
+about_other_apps_open_button = 打开
+about_other_apps_szyszka_desc = 快速且强大的文件重命名。
+about_other_apps_mykrut_desc = 简单的快速和 opined Linux 文件管理器。
+about_other_apps_dcmki_viewer_desc = 简单的 DICOM 查看器。
+about_other_apps_video_thumbnailer_desc = 环绕Czkawka使用的视频缩略图生成器包机。
+about_other_apps_space_finder_desc = 您系统上最大文件的简单查找器。
+about_other_apps_system_info_collector_desc = 从操作系统中收集RAM/CPU的使用情况并将其显示为图表。
 # Header
 header_setting_button_tooltip = 打开设置对话框。.
 header_about_button_tooltip = 打开包含应用程序信息的对话框。.

@@ -301,6 +301,16 @@ about_repository_button = Repositorio
 about_donation_button = Donativo
 about_instruction_button = Instrucción
 about_translation_button = Traducción
+about_other_apps_button = Otras aplicaciones
+about_other_apps_dialog_title = Otras aplicaciones por qarmin
+about_other_apps_open_source_note = Todas las aplicaciones listadas son gratuitas y de código abierto.
+about_other_apps_open_button = Abrir
+about_other_apps_szyszka_desc = Rápido y poderoso renombrador de archivos.
+about_other_apps_mykrut_desc = Administrador de archivos de Linux simple y rápido y con opinión.
+about_other_apps_dcmki_viewer_desc = Visor DICOM simple.
+about_other_apps_video_thumbnailer_desc = Envoltura alrededor del generador de miniaturas de vídeo utilizado en el kawka.
+about_other_apps_space_finder_desc = Buscador simple de los archivos más grandes de su sistema.
+about_other_apps_system_info_collector_desc = Recoge el uso de RAM/CPU del sistema operativo y lo muestra como gráficos.
 # Header
 header_setting_button_tooltip = Abre el diálogo de ajustes.
 header_about_button_tooltip = Abre el diálogo con información sobre la aplicación.

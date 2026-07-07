@@ -302,6 +302,16 @@ about_repository_button = Pakkebrønn
 about_donation_button = Donasjon
 about_instruction_button = Instruksjon
 about_translation_button = Oversettelse
+about_other_apps_button = Andre apper
+about_other_apps_dialog_title = Andre bruksområder etter qarmin
+about_other_apps_open_source_note = Alle oppførte applikasjoner er gratis og åpen kildekode.
+about_other_apps_open_button = Åpne
+about_other_apps_szyszka_desc = Rask og kraftig filomdømme.
+about_other_apps_mykrut_desc = Enkel rask og opinionert Linux fil manager.
+about_other_apps_dcmki_viewer_desc = Enkel DICOM seer.
+about_other_apps_video_thumbnailer_desc = Wrapper around the video thumbnail generator used i Czkawka.
+about_other_apps_space_finder_desc = En enkel finner av de største filene på systemet ditt.
+about_other_apps_system_info_collector_desc = Samler RAM/CPU-bruken fra OS og viser den som grafer.
 # Header
 header_setting_button_tooltip = Åpner dialogboksen for innstillinger.
 header_about_button_tooltip = Åpner dialog med info om app.

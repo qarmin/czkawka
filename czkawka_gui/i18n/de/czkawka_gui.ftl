@@ -301,6 +301,16 @@ about_repository_button = Projektarchiv
 about_donation_button = Spende
 about_instruction_button = Anleitung
 about_translation_button = Übersetzung
+about_other_apps_button = Andere Apps
+about_other_apps_dialog_title = Andere Anwendungen von qarmin
+about_other_apps_open_source_note = Alle aufgeführten Anwendungen sind kostenlos und Open Source.
+about_other_apps_open_button = Öffnen
+about_other_apps_szyszka_desc = Schneller und leistungsstarker Dateiumbenenner.
+about_other_apps_mykrut_desc = Einfacher und schneller Linux Dateimanager.
+about_other_apps_dcmki_viewer_desc = Einfacher DICOM-Viewer.
+about_other_apps_video_thumbnailer_desc = Wrapper um den Video-Thumbnail-Generator in Czkawka verwendet.
+about_other_apps_space_finder_desc = Einfache Suche der größten Dateien auf Ihrem System.
+about_other_apps_system_info_collector_desc = Sammelt RAM/CPU-Auslastung vom Betriebssystem und zeigt sie als Graphen an.
 # Header
 header_setting_button_tooltip = Öffnet Einstellungsdialog.
 header_about_button_tooltip = Öffnet den Dialog mit Informationen über die App.

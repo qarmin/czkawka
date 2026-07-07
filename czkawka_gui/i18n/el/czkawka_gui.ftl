@@ -299,6 +299,16 @@ about_repository_button = Αποθετήριο
 about_donation_button = Δωρεά
 about_instruction_button = Οδηγίες
 about_translation_button = Μετάφραση
+about_other_apps_button = Άλλες Εφαρμογές
+about_other_apps_dialog_title = Άλλες εφαρμογές από την qarmin
+about_other_apps_open_source_note = Όλες οι εφαρμογές που παρατίθενται είναι δωρεάν και ανοιχτού κώδικα.
+about_other_apps_open_button = Άνοιγμα
+about_other_apps_szyszka_desc = Γρήγορη και ισχυρή μετονομασία αρχείων.
+about_other_apps_mykrut_desc = Απλή γρήγορη και γνώμη διαχειριστή αρχείων Linux.
+about_other_apps_dcmki_viewer_desc = Απλό πρόγραμμα προβολής DICOM.
+about_other_apps_video_thumbnailer_desc = Περιτύλιγμα γύρω από τη γεννήτρια μικρογραφιών βίντεο που χρησιμοποιείται στην Czkawka.
+about_other_apps_space_finder_desc = Απλός εντοπισμός των μεγαλύτερων αρχείων στο σύστημά σας.
+about_other_apps_system_info_collector_desc = Συλλέγει τη χρήση RAM/CPU από το λειτουργικό σύστημα και την εμφανίζει ως γραφήματα.
 # Header
 header_setting_button_tooltip = Άνοιγμα διαλόγου ρυθμίσεων.
 header_about_button_tooltip = Άνοιγμα διαλόγου με πληροφορίες σχετικά με την εφαρμογή.
@@ -364,7 +374,7 @@ settings_language_label = Γλώσσα
 settings_multiple_delete_outdated_cache_checkbutton = Αυτόματη διαγραφή ξεπερασμένων καταχωρήσεων cache
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     Αφαιρεί τις παλιές καταχωρήσεις cache που δείχνουν ότι συνδέονται με αρχεία που δεν υπάρχουν πλέον.
-
+    
     Όταν ενεργοποιηθεί, η εφαρμογή βεβαιώνει ότι φορτώνει cache χρησιμοποιώντας μόνο αρχεία που υπάρχουν στον δίσκο.
 settings_notebook_general = Γενικά
 settings_notebook_duplicates = Διπλότυπα

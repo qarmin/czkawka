@@ -76,6 +76,7 @@ core_failed_to_generate_thumbnail = Feilet med å generere miniatyrbilde for "{ 
 core_failed_to_extract_frame_at_seek_time = Klarte ikke å hente ut ramme ved { $time } sekunder fra "{ $file }": { $reason }
 core_video_file_does_not_exist = Video fil finnes ikke (kan fjernes mellom skanning/senere steg): "{ $path }"
 core_image_too_large = Bildet er for stort ({ $width }x{ $height }) - mer enn støttet { $max } piksler
+core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Klarte ikke å hente videometadata for fil "{ $file }": { $reason }
 core_failed_to_get_video_codec = Kunne ikke hente videocodec for fil "{ $file }"
 core_failed_to_get_video_duration = Kunne ikke hente videolengde for fil "{ $file }"

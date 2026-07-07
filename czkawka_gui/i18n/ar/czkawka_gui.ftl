@@ -302,6 +302,16 @@ about_repository_button = المستودع
 about_donation_button = تبرع
 about_instruction_button = تعليمات
 about_translation_button = الترجمة
+about_other_apps_button = تطبيقات أخرى
+about_other_apps_dialog_title = طلبات أخرى من قبل القارمين
+about_other_apps_open_source_note = جميع التطبيقات المدرجة في القائمة مجانية ومفتوحة المصدر.
+about_other_apps_open_button = فتح
+about_other_apps_szyszka_desc = إعادة تشغيل الملف بسرعة وقوة.
+about_other_apps_mykrut_desc = مدير ملفات لينكس سريع و مرؤوس.
+about_other_apps_dcmki_viewer_desc = عارض ديكوم بسيط.
+about_other_apps_video_thumbnailer_desc = تغليف حول مولد مصغرات الفيديو المستخدم في Czkawka.
+about_other_apps_space_finder_desc = الباحث البسيط عن أكبر الملفات على النظام الخاص بك.
+about_other_apps_system_info_collector_desc = يجمع استخدام RAM/CUPU من نظام التشغيل ويعرضها كرسوم بيانية.
 # Header
 header_setting_button_tooltip = فتح مربع حوار الإعدادات.
 header_about_button_tooltip = فتح مربع الحوار مع معلومات حول التطبيق.
@@ -391,7 +401,7 @@ settings_multiple_clear_cache_button = إزالة النتائج القديمة 
 
 settings_duplicates_hide_hard_link_button_tooltip =
     يخفي جميع الملفات إلا واحدًا، إذا كانت تشير إلى نفس البيانات (مرتبطة بشكل صلب).
-
+    
     مثال: إذا كانت هناك سبعة ملفات على القرص مرتبطة ببيانات معينة وملف مختلف يحتوي على نفس البيانات ولكن بـ inode مختلف، فسيتم عرض ملف واحد فريد وملف واحد من الروابط الصلبة فقط في مستعرض الملفات المكررة.
 settings_duplicates_minimal_size_entry_tooltip =
     الحد الأدنى لحجم الملف المراد حفظه في ذاكرة التخزين المؤقت.

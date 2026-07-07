@@ -268,7 +268,7 @@ bottom_compare_button = Porównaj
 bottom_search_button_tooltip = Rozpocznij wyszukiwanie
 bottom_select_button_tooltip = Wybierz rekordy. Tylko wybrane pliki/foldery mogą być później przetwarzane.
 bottom_delete_button_tooltip = Usuń zaznaczone elementy.
-bottom_save_button_tooltip = Zapisz informacje o skanowaniu
+bottom_save_button_tooltip = Zapisz informacje o skanowaniu.
 bottom_symlink_button_tooltip =
     Utwórz linki symboliczne.
     Działa tylko wtedy, gdy co najmniej dwa wyniki w grupie są zaznaczone.
@@ -294,7 +294,7 @@ bottom_show_upper_notebook_tooltip = Pokazuje/ukrywa górny panel.
 progress_stop_button = Stop
 progress_stop_additional_message = Przerywanie skanowania
 # About Window
-about_repository_button_tooltip = Link do repozytorium z kodem źródłowym.
+about_repository_button_tooltip = Link do repozytorium z kodem źródłowym
 about_donation_button_tooltip = Link do strony z dotacjami.
 about_instruction_button_tooltip = Link do strony z instrukcją.
 about_translation_button_tooltip = Link do strony Crowdin z tłumaczeniami aplikacji. Oficialnie wspierany jest język polski i angielski.
@@ -302,6 +302,16 @@ about_repository_button = Repozytorium
 about_donation_button = Dotacje
 about_instruction_button = Instrukcja(ENG)
 about_translation_button = Tłumaczenie
+about_other_apps_button = Inne aplikacje
+about_other_apps_dialog_title = Inne aplikacje qarmin
+about_other_apps_open_source_note = Wszystkie wymienione aplikacje są darmowe i open source.
+about_other_apps_open_button = Otwórz
+about_other_apps_szyszka_desc = Szybka i potężna zmiana pliku.
+about_other_apps_mykrut_desc = Prosty szybko i opiniowany menedżer plików Linux.
+about_other_apps_dcmki_viewer_desc = Prosta przeglądarka DICOM.
+about_other_apps_video_thumbnailer_desc = Wrapper wokół generatora miniatur wideo używanego w Czkawce.
+about_other_apps_space_finder_desc = Prosta wyszukiwarka największych plików w Twoim systemie.
+about_other_apps_system_info_collector_desc = Zbiera użycie pamięci RAM/CPU z systemu operacyjnego i pokazuje je jako wykresy.
 # Header
 header_setting_button_tooltip = Otwórz okno z ustawieniami programu.
 header_about_button_tooltip = Otwórz okno z informacjami o programie.

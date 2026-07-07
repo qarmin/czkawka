@@ -76,6 +76,7 @@ core_failed_to_generate_thumbnail = فشل إنشاء الصورة المصغر�
 core_failed_to_extract_frame_at_seek_time = فشل استخراج الإطار في { $time } ثانية من "{ $file }": { $reason }
 core_video_file_does_not_exist = الملف المرئي غير موجود (يمكن حذفه بين المسح/الخطوات اللاحقة): "{ $path }"
 core_image_too_large = الصورة كبيرة جداً ({ $width }x{ $height }) - أكثر من المدعوم { $max } بكسل
+core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = فشل الحصول على بيانات الفيديو للملف "{ $file }": { $reason }
 core_failed_to_get_video_codec = فشل الحصول على ترميز الفيديو للملف "{ $file }"
 core_failed_to_get_video_duration = تعذر الحصول على مدة الفيديو للملف "{ $file }"

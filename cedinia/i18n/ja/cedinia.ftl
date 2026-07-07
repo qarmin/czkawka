@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = Cedinia
+
 tool_duplicate_files = 重複
 tool_empty_folders = 空のフォルダ
 tool_similar_images = 類似の画像
@@ -34,7 +34,7 @@ scanning = スキャン中...
 stopping = 停止中...
 no_results = 結果がありません
 press_start = STARTを押してスキャンします
-select_label = セル。
+select_label = セル。.
 deselect_label = Desel.
 list_label = リスト
 gallery_label = ギャラ
@@ -67,10 +67,10 @@ ok = 了解
 stopping_overlay_title = 停止中
 stopping_overlay_body =
     現在のスキャンを完了しています...
-    お待ちください。
+    お待ちください。.
 # Permission popup
 permission_title = ファイルアクセス
-permission_body = ファイルをスキャンするには、アプリがデバイスのストレージにアクセスする必要があります。この許可がないとスキャンはできません。
+permission_body = ファイルをスキャンするには、アプリがデバイスのストレージにアクセスする必要があります。この許可がないとスキャンはできません。.
 grant = 許可
 no_permission_scan_warning = ファイルへのアクセス権限がありません - スキャンする権限を付与します
 # Settings screen tabs
@@ -137,7 +137,7 @@ settings_temporary_files_extensions_label = 拡張
 settings_temporary_files_extensions_placeholder = 例：.tmp、.bak、~
 settings_temporary_files_reset = 既定にリセット
 settings_broken_files_header = ブロックファイル
-settings_broken_files_note = リソース集約的なスキャン。最高のパフォーマンスを得るためにデスクトップでKrokietを使用してください。
+settings_broken_files_note = リソース集約的なスキャン。最高のパフォーマンスを得るためにデスクトップでKrokietを使用してください。.
 settings_broken_files_types_label = チェックした種類
 settings_broken_audio = オーディオ
 settings_broken_pdf = PDF
@@ -249,7 +249,7 @@ confirm_delete_items = 選択したアイテムを削除してもよろしいで
 gallery_confirm_delete_msg = これから、{ $total_groups } のグループにある { $total_images } 枚の画像を削除します。
 gallery_confirm_delete_warning = すべての項目は { $unsafe_groups } グループで選択されます
 # Settings - SameMusic fingerprint warning
-same_music_fingerprint_warning = オーディオフィンガープリントの計算と比較は非常にリソースがかかるため、時間がかかる場合があります。 このタスクにはデスクトップシステムで Krokiet を使用することをお勧めします。
+same_music_fingerprint_warning = オーディオフィンガープリントの計算と比較は非常にリソースがかかるため、時間がかかる場合があります。 このタスクにはデスクトップシステムで Krokiet を使用することをお勧めします。.
 # Scan stage labels (shown during scan progress)
 # Group headers in scan results
 duplicates_group_header = { $count } files x { $per_file } / file = { $total } total

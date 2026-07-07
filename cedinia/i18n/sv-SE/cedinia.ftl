@@ -1,7 +1,7 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-app_name = Cedinia
+
 tool_duplicate_files = Dubbletter
 tool_empty_folders = Tomma mappar
 tool_similar_images = Liknande bilder
@@ -30,8 +30,8 @@ home_bad_names_description = Filer med problematiska tecken i namnet
 home_exif_description = Bilder med EXIF-metadata
 home_similar_videos_description = Hitta videor med liknande ljud
 # Results list
-scanning = Skanning pågår….
-stopping = Stoppar...
+scanning = Skanning pågår…
+stopping = Stoppar…
 no_results = Inga resultat
 press_start = Tryck på START för att skanna
 select_label = Mark.
@@ -62,12 +62,12 @@ delete = Ta bort
 rename = Döp om
 # Delete errors popup
 delete_errors_title = Det gick inte att ta bort några filer:
-ok = Ok
+ok = OK
 # Stopping overlay
 stopping_overlay_title = Stoppar
 stopping_overlay_body =
-    Slutför aktuell skanning...
-    Vänligen vänta.
+    Slutför aktuell skanning…
+    Vänta.
 # Permission popup
 permission_title = Åtkomst till fil
 permission_body = För att skanna filer behöver appen åtkomst till enhetslagring. Utan denna behörighet kommer skanning inte att vara möjlig.
@@ -152,7 +152,7 @@ settings_bad_names_header = FELAKTIGA NAMN
 settings_bad_names_checks_label = KONTROLLER
 settings_bad_names_uppercase_ext = Filändelse med versaler
 settings_bad_names_emoji = Emoji i namn
-settings_bad_names_space = Mellanslag vid start/slut
+settings_bad_names_space = Mellanslag i början/slutet
 settings_bad_names_non_ascii = Tecken som inte är ASCII
 settings_bad_names_duplicated = Upprepade tecken
 settings_ignore_same_resolution = Ignorera bilder med samma upplösning
@@ -213,7 +213,7 @@ status_ready = Redo
 status_stopped = Stoppad
 status_no_results = Inga resultat
 status_deleted_selected = Tog bort markerade
-status_deleted_with_errors = Tog bort med fel
+status_deleted_with_errors = Borttagning slutförd med fel
 scan_not_started = Skanningen har inte startat
 found_items_prefix = Hittade
 found_items_suffix = objekt
@@ -227,18 +227,18 @@ cleaned_exif_prefix = Rensat EXIF från
 cleaned_exif_suffix = filer
 cleaned_exif_errors_suffix = fel
 rename_error_read_file_name = Kan inte läsa filnamnet
-rename_error_read_directory = Kan inte läsa katalog
-and_more_prefix = ...och
+rename_error_read_directory = Kan inte läsa mapp
+and_more_prefix = …och
 and_more_suffix = mer
 # Gallery / delete popups
 gallery_delete_button = Ta bort
 gallery_back = Tillbaka
 gallery_confirm_delete = Ja, ta bort
-deleting_files = Tar bort filer...
+deleting_files = Tar bort filer…
 stop = Stoppa
-scanning_fallback = Skannar...
-app_subtitle = För att hedra slaget vid Cedynia (972 CE)
-app_license = Frontend för Czkawka Core - GPL-3.0
+scanning_fallback = Skannar…
+app_subtitle = För att hedra slaget vid Cedynia (972 e.Kr.)
+app_license = Gränssnitt för Czkawka Core - GPL-3.0
 about_app_label = OM
 cache_label = CACHE
 # Notification
@@ -261,12 +261,12 @@ confirm_rename_items = Är du säker på att du vill byta namn på { $n } marker
 # Combo-box option labels (translatable display names)
 option_search_mode_biggest = Största
 option_search_mode_smallest = Minsta
-option_similarity_very_high = V.Hög
+option_similarity_very_high = Mkt hög
 option_similarity_high = Hög
 option_similarity_medium = Medel
 option_similarity_low = Låg
-option_similarity_very_low = V.Låg
-option_similarity_minimal = Min
+option_similarity_very_low = Mkt låg
+option_similarity_minimal = Min.
 option_check_method_hash = Hash
 option_check_method_name = Namn
 option_check_method_size_and_name = Storlek+namn
@@ -276,7 +276,7 @@ option_music_method_audio = Ljud
 option_min_size_none = Ingen
 option_max_size_unlimited = Obegränsad
 option_audio_preset_identical = Identisk
-option_audio_preset_clip = Klipp in längre
+option_audio_preset_clip = Klipp i längre spår
 option_audio_preset_similar = Liknande
 # Volume labels (shown in the directories screen)
 volume_internal_storage = Intern lagring
@@ -294,11 +294,11 @@ directories_check_label_excluded = Exkluderade sökvägar:
 directories_check_label_referenced = Referenssökvägar:
 directories_check_label_would_scan = Filer att skanna:
 directories_check_label_processable = Filer som kan bearbetas:
-directories_check_scanning = Skannar...
+directories_check_scanning = Skannar…
 directories_check_warning_no_processable = Inga filer som kan bearbetas hittades. Kontrollera vilka mappar som har inkluderats eller exkluderats
 path_edit_title_include = Lägg till bland inkluderade
 path_edit_title_exclude = Lägg till bland exkluderade
-path_edit_placeholder = Ange sökväg...
+path_edit_placeholder = Ange sökväg…
 path_edit_not_exists = Sökvägen finns inte
 path_edit_is_dir = Mapp
 path_edit_is_file = Fil
@@ -311,9 +311,9 @@ dir_open_folder = Öppna mapp
 compare_label = Jämför
 compare_loading = Laddar bilder…
 compare_cancelling = Avbryter…
-compare_computing = Beräknar diff…
+compare_computing = Beräknar skillnad…
 compare_mode_normal = Sida
 compare_mode_split = Dela
 compare_mode_overlay = Överlagring
 compare_mode_diff = Skillnad
-compare_res_mismatch = Olika resolutioner - diff kan vara felaktig
+compare_res_mismatch = Olika upplösningar - jämförelsen kan bli felaktig

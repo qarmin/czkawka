@@ -4,10 +4,10 @@ window_main_title = Czkawka (Hicka)
 window_progress_title = Skannar
 window_compare_images = Jämför bilder
 # General
-general_ok_button = Ok
+general_ok_button = OK
 general_close_button = Stäng
 # Krokiet info dialog
-krokiet_info_title = Avskrivningsmeddelande
+krokiet_info_title = Meddelande om utfasning
 krokiet_info_message =
     Czkawka GTK 12.0 är den slutliga utgåvan. Inga ytterligare uppdateringar, funktioner eller buggfixar planeras.
     
@@ -96,8 +96,8 @@ image_hash_alg_tooltip =
     Alla har både styrkor och svagheter och kan ge bättre eller sämre resultat för olika bilder.
     
     För att avgöra vilken som passar dig bäst krävs därför manuell testning.
-image_geometric_invariance_tooltip = Jämför också spegelvända/vända och valfritt roterade varianter av varje bild. Detta förbättrar matchningen men ökar hashtiden.
-big_files_mode_combobox_tooltip = Gör det möjligt att söka efter minsta/största filer
+image_geometric_invariance_tooltip = Jämför även speglade/vända och eventuellt roterade varianter av varje bild. Detta förbättrar matchningen men ökar tiden för hashning.
+big_files_mode_combobox_tooltip = Gör det möjligt att söka efter de minsta/största filerna
 big_files_mode_label = Markerade filer
 big_files_mode_smallest_combo_box = Den minsta
 big_files_mode_biggest_combo_box = Den största
@@ -127,7 +127,7 @@ main_tree_view_column_length = Längd
 main_tree_view_column_genre = Genre
 main_tree_view_column_symlink_file_name = Namn på symbolisk länk
 main_tree_view_column_symlink_folder = Mapp för symboliska länkar
-main_tree_view_column_destination_path = Målsökvägen
+main_tree_view_column_destination_path = Målsökväg
 main_tree_view_column_type_of_error = Typ av fel
 main_tree_view_column_current_extension = Nuvarande filändelse
 main_tree_view_column_proper_extensions = Korrekt filändelse
@@ -141,7 +141,7 @@ main_label_size_bytes = Storlek (bytes)
 main_label_min_size = Min
 main_label_max_size = Max
 main_label_shown_files = Antal visade filer
-main_label_resize_algorithm = Ändra storlek på algoritm
+main_label_resize_algorithm = Storleksändringsalgoritm
 main_label_similarity = Likhet{ "   " }
 main_check_box_broken_files_audio = Ljud
 main_check_box_broken_files_pdf = PDF
@@ -150,7 +150,7 @@ main_check_box_broken_files_image = Bild
 main_check_box_broken_files_video = Video
 main_check_box_broken_files_video_tooltip = Använder ffmpeg/ffprobe för att validera videofiler. Ganska långsam och kan detektera pedantiska fel även om filen spelas upp korrekt.
 check_button_general_same_size = Ignorera samma storlek
-check_button_general_same_size_tooltip = Ignorera filer med samma storlek i resultat - vanligtvis är dessa 1:1 dubbletter
+check_button_general_same_size_tooltip = Ignorera filer med identisk storlek i resultaten - vanligtvis är dessa 1:1-dubbletter
 main_label_size_bytes_tooltip = Storlek på filer som kommer att användas vid skanning
 # Upper window
 upper_tree_view_included_folder_column_title = Mappar att söka
@@ -302,6 +302,16 @@ about_repository_button = Källkodsarkiv
 about_donation_button = Donation
 about_instruction_button = Instruktion
 about_translation_button = Översättning
+about_other_apps_button = Andra appar
+about_other_apps_dialog_title = Andra program av qarmin
+about_other_apps_open_source_note = Alla listade program är fria och har öppen källkod.
+about_other_apps_open_button = Öppna
+about_other_apps_szyszka_desc = Snabbt och kraftfullt verktyg för att byta namn på filer.
+about_other_apps_mykrut_desc = Enkel, snabb och egensinnig filhanterare för Linux.
+about_other_apps_dcmki_viewer_desc = Enkel DICOM-visare.
+about_other_apps_video_thumbnailer_desc = Gränssnitt till videogeneratorn för miniatyrbilder som används i Czkawka.
+about_other_apps_space_finder_desc = Enkelt verktyg för att hitta de största filerna på systemet.
+about_other_apps_system_info_collector_desc = Samlar in RAM- och CPU-användning från operativsystemet och visar den som diagram.
 # Header
 header_setting_button_tooltip = Öppnar dialogrutan för inställningar.
 header_about_button_tooltip = Öppnar dialog med info om app.
@@ -309,17 +319,17 @@ header_krokiet_button_tooltip = Prova Krokiet - den nya och förbättrade versio
 # Krokiet promo dialog
 krokiet_promo_title = Möt Krokiet!
 krokiet_promo_message =
-    Hallå där, modiga Czkawka användare!
+    Hallå där, modiga Czkawka-användare!
     
-    Kraften är helt klart med dig, men Krokiet är inte - en nyare, snabbare, lättare, och betydligt mer stilig (förutsatt att appar faktiskt kan vara snygga) dubbla renare.
+    Kraften är helt klart med dig, men Krokiet är inte det - ett nyare, snabbare, lättare och betydligt snyggare verktyg för att rensa dubbletter (förutsatt att appar faktiskt kan vara snygga).
     
-    Krokiet innehåller allt folk gillade om Czkawka. Det är helt gratis, öppen källkod, har en unik och enkel UI (både prisas och hatas av många), introducerar en hel del nya funktioner, använder färre beroenden och fungerar mycket mer tillförlitligt över olika plattformar.
+    Krokiet innehåller allt som användarna uppskattade med Czkawka. Det är helt gratis, har öppen källkod, har ett unikt och enkelt användargränssnitt (både prisas och hatas av många), introducerar en hel del nya funktioner, använder färre beroenden och fungerar mycket mer tillförlitligt över olika plattformar.
     
-    Och om du på något sätt missade det, det finns redan en ännu nyare app än Krokiet - Cedinia, utformad främst för Android-enheter och pekskärmsanvändning.
+    Och om du på något sätt har missat det finns det redan en ännu nyare app än Krokiet - Cedinia, utformad främst för Android-enheter och pekskärmsanvändning.
     
-    Czkawka GTK betjänade oss väl, men dess klocka har upphört.
+    Czkawka GTK har tjänat oss väl, men dess tid är över.
 krokiet_promo_link_download = Ladda ner Krokiet/Cedinia
-krokiet_promo_link_project = Projekt sida
+krokiet_promo_link_project = Projektsida
 
 # Settings
 
@@ -330,11 +340,11 @@ settings_number_of_threads = Antal använda trådar
 settings_number_of_threads_tooltip = Antal trådar som används. 0 innebär att alla tillgängliga trådar används.
 settings_use_rust_preview = Använd externa bibliotek i stället för gtk för att läsa in förhandsgranskningar
 settings_use_rust_preview_tooltip =
-    Att använda gtk-förhandsvisningar kommer ibland att vara snabbare och stödja fler format, men ibland kan det vara precis tvärtom.
+    Att använda GTK-förhandsvisningar kan ibland vara snabbare och ge stöd för fler format, men ibland kan det vara tvärtom.
     
-    Om du har problem med att ladda förhandsvisningar, kan du försöka ändra den här inställningen.
+    Om du har problem med att läsa in förhandsvisningar kan du prova att ändra den här inställningen.
     
-    På icke-Linux-system rekommenderas att använda detta alternativ, eftersom gtk-pixbuf inte alltid är tillgänglig där så inaktivera detta alternativ kommer inte att ladda förhandsvisningar av vissa bilder.
+    På andra system än Linux rekommenderas detta alternativ, eftersom gtk-pixbuf inte alltid är tillgängligt där. Om alternativet inaktiveras kan förhandsvisningar av vissa bilder därför inte läsas in.
 settings_label_restart = Du måste starta om appen för att tillämpa inställningar!
 settings_ignore_other_filesystems = Ignorera andra filsystem (endast Linux)
 settings_ignore_other_filesystems_tooltip =
@@ -462,7 +472,7 @@ saving_loading_failed_to_read_config_file = Kan inte ladda konfiguration från "
 saving_loading_failed_to_read_data_from_file = Det går inte att läsa data från filen "{ $path }". Orsak: "{ $reason }".
 # Other
 selected_all_reference_folders = Det går inte att starta sökningen när alla mappar har angetts som referensmappar
-searching_for_data = Söker data, det kan ta en stund, vänta...
+searching_for_data = Söker data, det kan ta en stund, vänta…
 text_view_messages = MEDDELANDEN
 text_view_warnings = VARNINGAR
 text_view_errors = FEL
