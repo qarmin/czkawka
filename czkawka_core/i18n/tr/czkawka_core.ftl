@@ -153,3 +153,5 @@ stage_optimizing_videos = Optimize edilmiş { $items_stats } video ({ $size_stat
 stage_optimizing_no_size_videos = Optimize Edilmiş { $items_stats } videosu
 stage_cleaning_exif = Temizleme EXIF'i { $items_stats } dosyasından ({ $size_stats })
 stage_cleaning_no_size_exif = Temizleme EXIF'i { $items_stats } dosyasından
+
+core_image_file_too_large = Resim dosyası çok büyük ({$size} bayt) - { $limit } MB sınırı aşıyor

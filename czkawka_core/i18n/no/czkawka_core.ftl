@@ -153,3 +153,5 @@ stage_optimizing_videos = Optimalisert { $items_stats } video ({ $size_stats })
 stage_optimizing_no_size_videos = Optimalisert { $items_stats } video
 stage_cleaning_exif = Rens EXIF fra { $items_stats } filen ({ $size_stats })
 stage_cleaning_no_size_exif = Rens EXIF fra { $items_stats } fil
+
+core_image_file_too_large = Bildefilen er for stor ({$size} byte) – overskrider grensen på { $limit } MB

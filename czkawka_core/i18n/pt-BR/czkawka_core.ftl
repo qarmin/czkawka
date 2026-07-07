@@ -153,3 +153,5 @@ stage_optimizing_videos = Foram otimizados ‘{ $items_stats }’ vídeos de ‘
 stage_optimizing_no_size_videos = Foram otimizados ‘{ $items_stats }’ vídeos
 stage_cleaning_exif = Removendo o ‘EXIF’ dos ‘{ $items_stats }’ arquivos de ‘{ $size_stats }’ arquivos
 stage_cleaning_no_size_exif = Removendo o ‘EXIF’ do arquivo ‘{ $items_stats }’
+
+core_image_file_too_large = O arquivo de imagem é muito grande ({$size} bytes) e excede o limite de { $limit } MB

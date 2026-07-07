@@ -153,3 +153,5 @@ stage_optimizing_videos = Video optimizat { $items_stats } ({ $size_stats })
 stage_optimizing_no_size_videos = Video optimizat { $items_stats }
 stage_cleaning_exif = Curățare EXIF din fișierul { $items_stats } ({ $size_stats })
 stage_cleaning_no_size_exif = Curăță EXIF din fișierul { $items_stats }
+
+core_image_file_too_large = Fișierul imagine este prea mare ({$size} bytes) - depășește limita de { $limit } MB

@@ -153,3 +153,5 @@ stage_optimizing_videos = Optimalizováno { $items_stats } video ({ $size_stats 
 stage_optimizing_no_size_videos = Optimalizováno { $items_stats } video
 stage_cleaning_exif = Odstraňování EXIF ze souboru { $items_stats } ({ $size_stats })
 stage_cleaning_no_size_exif = Odstraňování EXIF ze souboru { $items_stats }
+
+core_image_file_too_large = Soubor s obrázkem je příliš velký ({$size} bajtů) – překračuje limit { $limit } MB

@@ -153,3 +153,5 @@ stage_optimizing_videos = 최적화됨 { $items_stats } 비디오 ({ $size_stats
 stage_optimizing_no_size_videos = 최적화된 { $items_stats } 비디오
 stage_cleaning_exif = Cleaning EXIF from { $items_stats } 파일 ({ $size_stats })
 stage_cleaning_no_size_exif = { $items_stats } 파일에서 EXIF 정리
+
+core_image_file_too_large = 이미지 파일 크기가 너무 큽니다 ({$size} 바이트) - {$limit} MB 제한을 초과합니다

@@ -153,3 +153,5 @@ stage_optimizing_videos = Đã tối ưu hóa video { $items_stats } ({ $size_st
 stage_optimizing_no_size_videos = Video được tối ưu hóa { $items_stats }
 stage_cleaning_exif = Xóa thông tin EXIF khỏi { $items_stats } tệp ({ $size_stats })
 stage_cleaning_no_size_exif = Loại bỏ thông tin EXIF khỏi { $items_stats } tập tin
+
+core_image_file_too_large = Tệp ảnh quá lớn ({$size} byte) - vượt quá giới hạn { $limit } MB

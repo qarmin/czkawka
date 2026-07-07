@@ -153,3 +153,5 @@ stage_optimizing_videos = Geoptimaliseerd { $items_stats } video ({ $size_stats 
 stage_optimizing_no_size_videos = Geoptimaliseerd { $items_stats } video
 stage_cleaning_exif = Reinigen EXIF van { $items_stats } bestand ({ $size_stats })
 stage_cleaning_no_size_exif = Reinigen EXIF van { $items_stats } bestand
+
+core_image_file_too_large = De afbeelding is te groot ({$size} bytes) - overschrijdt de limiet van { $limit } MB
