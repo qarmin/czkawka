@@ -47,7 +47,7 @@ export component MainWindow inherits Window {
         padding-bottom: max(AppState.inset_bottom, root.safe-area-insets.bottom);
 
         TopAppBar {
-            title: AppState.active_tool == ActiveTool.Home             ? Translations.app_name_text
+            title: AppState.active_tool == ActiveTool.Home             ? "Cedinia"
                  : AppState.active_tool == ActiveTool.DuplicateFiles   ? Translations.tool_duplicate_files_text
                  : AppState.active_tool == ActiveTool.EmptyFolders     ? Translations.tool_empty_folders_text
                  : AppState.active_tool == ActiveTool.SimilarImages    ? Translations.tool_similar_images_text
@@ -62,7 +62,7 @@ export component MainWindow inherits Window {
                  : AppState.active_tool == ActiveTool.SimilarVideos    ? Translations.tool_similar_videos_text
                  : AppState.active_tool == ActiveTool.Directories      ? Translations.tool_directories_text
                  : AppState.active_tool == ActiveTool.Settings         ? Translations.tool_settings_text
-                 : Translations.app_name_text;
+                 : "Cedinia";
         }
 
         ScanProgressBar {}

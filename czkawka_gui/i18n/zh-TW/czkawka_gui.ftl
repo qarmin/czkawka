@@ -312,17 +312,17 @@ about_other_apps_system_info_collector_desc = 從作業系統收集 RAM/CPU 使�
 # Header
 header_setting_button_tooltip = 開啟設定對話方塊。
 header_about_button_tooltip = 開啟包含應用程式資訊的對話方塊。
-header_krokiet_button_tooltip = 試試 Krokiet——全新且經過最佳化的版本！
+header_krokiet_button_tooltip = 試試 Krokiet-全新且經過最佳化的版本！
 # Krokiet promo dialog
 krokiet_promo_title = 來認識一下 Krokiet 吧！
 krokiet_promo_message =
     親愛的勇敢的 Czkawka 使用者，您好！
     
-    原力顯然與您同在，但 Krokiet 卻不在——它是一款更新、更快、更輕巧，而且（假設應用程式也能長得好看的話）更好看的重複檔案清理工具。
+    原力顯然與您同在，但 Krokiet 卻不在-它是一款更新、更快、更輕巧，而且（假設應用程式也能長得好看的話）更好看的重複檔案清理工具。
     
     Krokiet 保留了大家喜愛 Czkawka 的一切。它完全免費、開放原始碼，擁有獨特而簡潔的介面（有人稱讚也有人不喜歡），加入了許多新功能，相依套件更少，在不同平台上的運作也更加穩定可靠。
     
-    如果您還不知道，現在甚至已經有比 Krokiet 更新的應用程式——Cedinia，主要為 Android 裝置與觸控螢幕操作所設計。
+    如果您還不知道，現在甚至已經有比 Krokiet 更新的應用程式-Cedinia，主要為 Android 裝置與觸控螢幕操作所設計。
     
     Czkawka GTK 陪伴我們走過這段路，但它的任務已經結束。
 krokiet_promo_link_download = 下載 Krokiet/Cedinia

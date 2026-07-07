@@ -81,7 +81,7 @@ component DynamicToolItem {
       : t == ActiveTool.SameMusic        ? Translations.tool_same_music_text
       : t == ActiveTool.BadNames         ? Translations.tool_bad_names_text
       : t == ActiveTool.ExifRemover      ? Translations.tool_exif_remover_text
-      : Translations.app_name_text;
+      : "Cedinia";
 
     property <image> t_icon:
         t == ActiveTool.SimilarImages    ? @image-url("../../icons/cedinia_image.svg")
