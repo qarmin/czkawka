@@ -37,7 +37,7 @@ press_start = TARAMAYA başlamak için START düğmesine basın
 select_label = Selam.
 deselect_label = Desel.
 list_label = Liste
-gallery_label = Gal
+gallery_label = Galaksi
 # Selection popup
 selection_popup_title = Seç
 select_all = Tümünü Seç
