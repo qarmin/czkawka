@@ -76,7 +76,6 @@ core_failed_to_generate_thumbnail = Không thể tạo ảnh thu nhỏ cho "{ $f
 core_failed_to_extract_frame_at_seek_time = Không thể trích xuất khung tại giây { $time } từ "{ $file }": { $reason }
 core_video_file_does_not_exist = Tệp video không tồn tại (có thể đã bị xóa trong quá trình quét/các bước sau): "{ $path }"
 core_image_too_large = Hình ảnh quá lớn ({ $width }x{ $height }) - vượt quá giới hạn { $max } pixel được hỗ trợ
-core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Không thể lấy thông tin chi tiết của video cho tệp "{ $file }": { $reason }
 core_failed_to_get_video_codec = Không thể lấy được bộ mã hóa video cho file "{ $file }"
 core_failed_to_get_video_duration = Không thể lấy được thời lượng video cho tệp "{ $file }"

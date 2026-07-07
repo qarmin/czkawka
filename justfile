@@ -376,7 +376,6 @@ translate:
     uv run misc/ai_translate/translate.py czkawka_core/i18n
     uv run misc/ai_translate/translate.py krokiet/i18n
     uv run misc/ai_translate/translate.py cedinia/i18n
-    just pack_translations
 
 validate_translations *args: # Available --fix argument, which removes invalid translations
     uv run misc/ai_translate/validate_translations.py czkawka_gui/i18n {{args}}

@@ -76,7 +76,6 @@ core_failed_to_generate_thumbnail = "{ $file }" için önizlemeyi oluşturulamad
 core_failed_to_extract_frame_at_seek_time = { $time } saniyede kareyi "{ $file }" dosyasından çıkarılamadı: { $reason }
 core_video_file_does_not_exist = Video dosyası mevcut değil (tarama/daha sonra adımları arasında kaldırılabilir): "{ $path }"
 core_image_too_large = Görüntü çok büyü ({ $width }x{ $height }) - desteklenmeyen { $max } pikselden fazla
-core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Video meta verilerini dosyayı "{ $file }" için elde edilemedi: { $reason }
 core_failed_to_get_video_codec = Dosya "{ $file }" için video codec'i alınamadı
 core_failed_to_get_video_duration = Video süresini "{ $file }" dosyası için elde edilemedi

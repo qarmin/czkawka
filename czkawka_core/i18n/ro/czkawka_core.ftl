@@ -76,7 +76,6 @@ core_failed_to_generate_thumbnail = Eșec la generarea miniaturii pentru "{ $fil
 core_failed_to_extract_frame_at_seek_time = Eșec la extragerea cadrului la { $time } secunde din "{ $file }": { $reason }
 core_video_file_does_not_exist = Fișier video inexistent (poate fi eliminat între scanare/pașii ulteriori): "{ $path }"
 core_image_too_large = Imaginea este prea mare ({ $width }x{ $height }) - mai mult decât suportat { $max } pixeli
-core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Eșec la obținerea metadatelor video pentru fișierul "{ $file }": { $reason }
 core_failed_to_get_video_codec = Eșec la obținerea codec-ului video pentru fișierul "{ $file }"
 core_failed_to_get_video_duration = Nu s-a putut obține durata video pentru fișierul "{ $file }"

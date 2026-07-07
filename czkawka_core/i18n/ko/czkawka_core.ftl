@@ -76,7 +76,6 @@ core_failed_to_generate_thumbnail = "{ $file }": { $reason } 생성을 실패했
 core_failed_to_extract_frame_at_seek_time = 실패했습니다: { $time } 초에서 "{ $file }"에서 프레임을 추출하지 못했습니다: { $reason }
 core_video_file_does_not_exist = 비디오 파일이 존재하지 않습니다 (스캔/후속 단계 사이에 제거할 수 있음): "{ $path }"
 core_image_too_large = 이미지가 너무 큽니다 ({ $width }x{ $height }) - { $max } 픽셀 이상을 지원하지 않습니다
-core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = 파일 "{ $file }"의 비디오 메타데이터를 가져오지 못했습니다: { $reason }
 core_failed_to_get_video_codec = 파일 "{ $file }"의 비디오 코덱을 가져오지 못했습니다
 core_failed_to_get_video_duration = 파일 "{ $file }"의 비디오 길이 가져오기 실패

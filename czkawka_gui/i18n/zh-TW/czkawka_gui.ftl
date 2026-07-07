@@ -392,7 +392,7 @@ settings_multiple_image_preview_checkbutton = 顯示影像預覽
 settings_multiple_clear_cache_button_tooltip =
     手動清除過時項目的快取。
     僅在停用自動清除時才應使用。
-settings_multiple_clear_cache_button = 移除快取中的過時結果
+settings_multiple_clear_cache_button = 移除快取中的過時結果.
 
 ## Duplicates
 

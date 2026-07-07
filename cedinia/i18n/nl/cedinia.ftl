@@ -314,6 +314,6 @@ compare_cancelling = Annuleren…
 compare_computing = diff berekenen…
 compare_mode_normal = Zijde
 compare_mode_split = Opsplitsen
-compare_mode_overlay = Overlay
+compare_mode_overlay = Overlapping
 compare_mode_diff = Verschil
 compare_res_mismatch = Verschillende resoluties - diff is mogelijk inaccuraat

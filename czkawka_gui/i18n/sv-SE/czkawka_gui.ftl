@@ -472,7 +472,7 @@ saving_loading_failed_to_read_config_file = Kan inte ladda konfiguration från "
 saving_loading_failed_to_read_data_from_file = Det går inte att läsa data från filen "{ $path }". Orsak: "{ $reason }".
 # Other
 selected_all_reference_folders = Det går inte att starta sökningen när alla mappar har angetts som referensmappar
-searching_for_data = Söker data, det kan ta en stund, vänta…
+searching_for_data = Söker data, det kan ta en stund, vänta….
 text_view_messages = MEDDELANDEN
 text_view_warnings = VARNINGAR
 text_view_errors = FEL

@@ -34,8 +34,8 @@ scanning = 掃描中...
 stopping = 暫停...
 no_results = 沒有找到任何結果
 press_start = 請按「開始」按鈕以進行掃描
-select_label = 選取
-deselect_label = 取消選取
+select_label = 選取.
+deselect_label = 取消選取.
 list_label = 清單
 gallery_label = 圖庫
 # Selection popup

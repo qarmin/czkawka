@@ -76,7 +76,6 @@ core_failed_to_generate_thumbnail = Échec de la génération de miniature pour 
 core_failed_to_extract_frame_at_seek_time = Échec de l'extraction du cadre à { $time } secondes depuis "{ $file }": { $reason }
 core_video_file_does_not_exist = Fichier vidéo introuvable (peut être supprimé entre les étapes de numérisation/plus tard) : "{ $path }"
 core_image_too_large = L'image est trop grande ({ $width }x{ $height }) - plus que le supporté { $max } pixels
-core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Échec de récupération des métadonnées vidéo pour le fichier "{ $file }": { $reason }
 core_failed_to_get_video_codec = Échec de récupération du codec vidéo pour le fichier "{ $file }"
 core_failed_to_get_video_duration = Impossible d’obtenir la durée de la vidéo pour le fichier "{ $file }"

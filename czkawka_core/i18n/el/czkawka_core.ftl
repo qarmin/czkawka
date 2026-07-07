@@ -76,7 +76,6 @@ core_failed_to_generate_thumbnail = Αποτυχία δημιουργίας μι
 core_failed_to_extract_frame_at_seek_time = Αποτυχία εξαγωγής καρέ στις { $time } δευτερόλεπτα από το "{ $file }": { $reason }
 core_video_file_does_not_exist = Το αρχείο βίντεο δεν υπάρχει (μπορεί να αφαιρεθεί μεταξύ σάρωσης/μετέπειτα βημάτων): "{ $path }"
 core_image_too_large = Η εικόνα είναι πολύ μεγάλη ({ $width }x{ $height }) - περισσότερο από το υποστηριζόμενο { $max } pixels
-core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Αποτυχία ανάκτησης μεταδεδομένων βίντεο για το αρχείο "{ $file }": { $reason }
 core_failed_to_get_video_codec = Αποτυχία ανάκτησης του codec βίντεο για το αρχείο "{ $file }"
 core_failed_to_get_video_duration = Αποτυχία λήψης της διάρκειας βίντεο για το αρχείο "{ $file }"

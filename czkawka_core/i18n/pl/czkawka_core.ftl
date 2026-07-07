@@ -76,7 +76,6 @@ core_failed_to_generate_thumbnail = Nie udało się wygenerować miniaturki dla 
 core_failed_to_extract_frame_at_seek_time = Nie udało się wyodrębnić klatki o { $time } sekundach z "{ $file }": { $reason }
 core_video_file_does_not_exist = Plik wideo nie istnieje (można usunąć między skanowaniem/późniejszymi krokami): "{ $path }"
 core_image_too_large = Obraz jest zbyt duży ({ $width }x{ $height }) - więcej niż obsługiwane { $max } pikseli
-core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = Nie udało się uzyskać metadanych wideo dla pliku "{ $file }": { $reason }
 core_failed_to_get_video_codec = Nie udało się uzyskać kodeka wideo dla pliku "{ $file }"
 core_failed_to_get_video_duration = Nie udało się uzyskać długości wideo dla pliku "{ $file }"

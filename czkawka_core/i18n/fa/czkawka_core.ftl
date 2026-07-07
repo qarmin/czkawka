@@ -76,7 +76,6 @@ core_failed_to_generate_thumbnail = ناموفق بود ایجاد پیش‌نم
 core_failed_to_extract_frame_at_seek_time = ناموفق بود دریافت فریم در { $time } ثانیه از "{ $file }": { $reason }
 core_video_file_does_not_exist = فایل ویدیویی وجود ندارد (می‌توان آن را بین اسکن/مراحل بعدی حذف کرد): "{ $path }"
 core_image_too_large = تصویر خیلی بزرگ است ({ $width }x{ $height }) - بیش از حد مجاز { $max } پیکسل
-core_image_file_too_large = Image file is too large ({ $size } bytes) - exceeds the { $limit } MB limit
 core_failed_to_get_video_metadata = ناموفق بود دریافت اطلاعات ویدئویی برای فایل "{ $file }": { $reason }
 core_failed_to_get_video_codec = ناموفق بود دریافت کدک ویدیویی برای فایل "{ $file }"
 core_failed_to_get_video_duration = ناموفق بود دریافت مدت زمان ویدیو برای فایل "{ $file }"
