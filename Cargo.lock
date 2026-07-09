@@ -1048,7 +1048,7 @@ dependencies = [
  "i18n-embed",
  "i18n-embed-fl",
  "image",
- "jnihigh",
+ "jni-high",
  "log",
  "notify-rust",
  "rfd",
@@ -4233,6 +4233,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "jni-high"
+version = "0.1.0"
+dependencies = [
+ "android-activity 0.6.1",
+ "jni 0.22.4",
+ "jni-high-macros",
+ "log",
+]
+
+[[package]]
+name = "jni-high-macros"
+version = "0.1.0"
+dependencies = [
+ "heck 0.5.0",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.118",
+]
+
+[[package]]
 name = "jni-macros"
 version = "0.22.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4269,26 +4289,6 @@ version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38c0b942f458fe50cdac086d2f946512305e5631e720728f2a61aabcd47a6264"
 dependencies = [
- "quote",
- "syn 2.0.118",
-]
-
-[[package]]
-name = "jnihigh"
-version = "0.1.0"
-dependencies = [
- "android-activity 0.6.1",
- "jni 0.22.4",
- "jnihigh-macros",
- "log",
-]
-
-[[package]]
-name = "jnihigh-macros"
-version = "0.1.0"
-dependencies = [
- "heck 0.5.0",
- "proc-macro2",
  "quote",
  "syn 2.0.118",
 ]

@@ -1,4 +1,4 @@
-use jnihigh::{BridgeResultExt, android_bridge};
+use jni_high::{BridgeResultExt, android_bridge};
 
 android_bridge! {
     dex = include_bytes!(concat!(env!("OUT_DIR"), "/classes.dex")),
@@ -64,7 +64,7 @@ pub fn acquire_wakelock() {
 }
 
 pub(crate) fn get_android_language_tag() -> Option<String> {
-    jnihigh::android::locale::system_locale_tag()
+    jni_high::android::locale::system_locale_tag()
         .map_err(|e| {
             log::warn!("get_android_language_tag: JNI error: {:?}", e);
             e

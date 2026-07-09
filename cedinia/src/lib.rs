@@ -33,7 +33,7 @@ pub fn android_cache_path() -> Option<&'static str> {
 
 #[cfg(target_os = "android")]
 fn setup_android_paths(android_app: &slint::android::AndroidApp) {
-    match jnihigh::android::activity::app_dirs(android_app) {
+    match jni_high::android::activity::app_dirs(android_app) {
         Ok(dirs) => {
             let _ = ANDROID_FILES_PATH.set(dirs.files_dir.clone());
             let _ = ANDROID_CACHE_PATH.set(dirs.cache_dir);
@@ -54,10 +54,10 @@ fn android_main(android_app: slint::android::AndroidApp) {
     asan_smoketest_if_requested();
     let scale = android_app.config().density().unwrap_or(160) as f32 / 160.0;
     log::info!("android_main: display scale={:.2}", scale);
-    log::info!("android_main: initialising jnihigh context");
-    jnihigh::AndroidContext::init(android_app.clone());
+    log::info!("android_main: initialising jni_high context");
+    jni_high::AndroidContext::init(android_app.clone());
     file_picker_android::init();
-    log::info!("android_main: jnihigh context ready");
+    log::info!("android_main: jni_high context ready");
     slint::android::init(android_app.clone()).expect("Failed to initialise Slint Android backend");
     log::info!("android_main: Slint backend initialised");
     file_picker_android::setup_nav_bar();

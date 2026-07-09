@@ -10,7 +10,7 @@ pub fn send_scan_completed(file_count: usize, only_when_background: bool) {
 fn is_app_in_foreground() -> bool {
     #[cfg(target_os = "android")]
     {
-        jnihigh::android::activity::is_in_foreground().unwrap_or(false)
+        jni_high::android::activity::is_in_foreground().unwrap_or(false)
     }
     #[cfg(not(target_os = "android"))]
     {
@@ -21,7 +21,7 @@ fn is_app_in_foreground() -> bool {
 pub fn are_system_notifications_enabled() -> bool {
     #[cfg(target_os = "android")]
     {
-        jnihigh::android::notifications::are_enabled().unwrap_or(true)
+        jni_high::android::notifications::are_enabled().unwrap_or(true)
     }
     #[cfg(not(target_os = "android"))]
     {
@@ -32,7 +32,7 @@ pub fn are_system_notifications_enabled() -> bool {
 pub fn open_system_notification_settings() {
     #[cfg(target_os = "android")]
     {
-        if let Err(e) = jnihigh::android::notifications::open_settings() {
+        if let Err(e) = jni_high::android::notifications::open_settings() {
             log::warn!("open_system_notification_settings: {e:?}");
         }
     }
@@ -40,7 +40,7 @@ pub fn open_system_notification_settings() {
 
 #[cfg(target_os = "android")]
 fn send_notification(title: &str, body: &str) {
-    jnihigh::android::notifications::send(title, body, "cedinia_scan", "Scan notifications", 1);
+    jni_high::android::notifications::send(title, body, "cedinia_scan", "Scan notifications", 1);
 }
 
 #[cfg(not(target_os = "android"))]
