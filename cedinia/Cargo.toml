@@ -37,7 +37,7 @@ rust-embed = { version = "8.5", features = ["debug-embed"] }
 [target.'cfg(target_os = "android")'.dependencies]
 #slint = { path = "/home/rafal/test/slint/api/rs/slint/", default-features = false, features = [
 #slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = [
-slint = { version = "1.15.0", default-features = false, features = [
+slint = { version = "=1.17.0", default-features = false, features = [
     "std",
     "compat-1-2",
     "backend-android-activity-06",
@@ -54,7 +54,7 @@ trash = "5.2.5"
 notify-rust = "4"
 #slint = { path = "/home/rafal/test/slint/api/rs/slint/", default-features = false, features = [
 #slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = [
-slint = { version = "1.15.0", default-features = false, features = [
+slint = { version = "=1.17.0", default-features = false, features = [
     "std",
     "compat-1-2",
     "backend-winit",
@@ -65,7 +65,7 @@ slint = { version = "1.15.0", default-features = false, features = [
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
 #slint-build = { git = "https://github.com/slint-ui/slint.git" }
-slint-build = "1.15"
+slint-build = "=1.17.0"
 
 # Used by build.rs to compile Java helpers to DEX when cross-compiling for Android.
 # The build.rs itself guards on TARGET containing "android" so this is a no-op on desktop.

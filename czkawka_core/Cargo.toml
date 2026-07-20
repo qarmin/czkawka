@@ -34,7 +34,7 @@ lofty = "0.24"
 
 # Needed by broken files
 zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
-lopdf = "0.43.0"
+lopdf = "0.44.0"
 sevenz-rust2 = "0.21.0"
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 tar = { version = "0.4", default-features = false }
@@ -84,7 +84,7 @@ jxl-oxide = { version = "0.12.0", features = ["image"] }
 
 # Checking for invalid extensions
 mime_guess = "2.0"
-infer = "0.19"
+infer = "0.22"
 
 # Newer version of libheif-rs, which is not compatible with Ubuntu 22.04, and works only o
 libheif-rs = { version = "2", optional = true, default-features = false, features = ["v1_17", "image"] }
