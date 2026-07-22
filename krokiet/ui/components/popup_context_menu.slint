@@ -17,9 +17,28 @@ export component PopupContextMenu inherits Rectangle {
     callback copy_full_path();
     callback rename_item();
 
-    out property <length> popup_menu_width: 230px;
     private property <length> menu_item_height: 28px;
     private property <length> divider_height: 5px;
+
+    m_labels := VerticalLayout {
+        x: -10000px;
+        y: -10000px;
+        height: 0;
+        Button { text: Translations.context_menu_open_item_text; }
+        Button { text: Translations.context_menu_open_parent_text; }
+        Button { text: Translations.context_menu_remove_from_results_text; }
+        Button { text: Translations.context_menu_remove_all_from_folder_text; }
+        Button { text: Translations.context_menu_remove_all_from_folder_recursive_text; }
+        Button { text: Translations.context_menu_select_all_from_folder_text; }
+        Button { text: Translations.context_menu_select_all_from_folder_recursive_text; }
+        Button { text: Translations.context_menu_exclude_parent_folder_text; }
+        Button { text: Translations.context_menu_exclude_item_text; }
+        Button { text: Translations.context_menu_rename_text; }
+        Button { text: Translations.context_menu_copy_file_name_text; }
+        Button { text: Translations.context_menu_copy_parent_folder_path_text; }
+        Button { text: Translations.context_menu_copy_full_path_text; }
+    }
+    out property <length> popup_menu_width: max(230px, m_labels.preferred-width);
 
     callback show_popup();
 
@@ -35,6 +54,7 @@ export component PopupContextMenu inherits Rectangle {
             background: ColorPalette.popup_background;
             border-color: ColorPalette.popup_border_color;
             border-width: 1px;
+            clip: true;
 
             VerticalLayout {
                 Button {

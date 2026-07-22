@@ -11,11 +11,6 @@ pub(crate) fn set_initial_gui_infos(app: &MainWindow) {
     apply_combo_box_translations(app);
 }
 
-// Pushes freshly-translated display names into every ComboBox option list.
-// Called once at startup and again from `translate_items()` whenever the UI language changes,
-// so options like "The Biggest"/"The Smallest" (biggest_files_method) update immediately.
-// Lists built from `DisplaySpec::Const` (e.g. hash algorithm names) just get re-set with the
-// same text - not every combobox needs to be translatable, and that's fine.
 pub(crate) fn apply_combo_box_translations(app: &MainWindow) {
     let settings = app.global::<Settings>();
 

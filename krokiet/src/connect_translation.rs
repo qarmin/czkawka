@@ -56,7 +56,6 @@ pub(crate) fn change_language(app: &MainWindow) {
         }
     }
 
-    // Rebuild the cached ComboBox display names for the newly selected locale before using them.
     StringComboBoxItems::regenerate_and_set();
 
     translate_items(app);
