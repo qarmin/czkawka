@@ -56,6 +56,9 @@ pub(crate) fn change_language(app: &MainWindow) {
         }
     }
 
+    // Rebuild the cached ComboBox display names for the newly selected locale before using them.
+    StringComboBoxItems::regenerate_and_set();
+
     translate_items(app);
 }
 
@@ -521,6 +524,8 @@ fn translate_items(app: &MainWindow) {
     settings.set_exif_remover_column_name(fnm(&[&selection, &size, &file_name, &path, &exif_tags, &mod_date]));
     settings.set_video_optimizer_column_name(fnm(&[&selection, &size, &file_name, &path, &codec, &dimensions, &new_dimensions, &mod_date]));
     settings.set_bad_names_column_name(fnm(&[&selection, &file_name, &new_name, &path]));
+
+    crate::set_initial_gui_info::apply_combo_box_translations(app);
 }
 
 pub(crate) fn translate_select_mode(select_mode: SelectMode) -> SharedString {
