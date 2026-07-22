@@ -1,0 +1,42 @@
+import { ComboBox, Slider } from "std-widgets.slint";
+
+export component LabeledComboRow inherits VerticalLayout {
+    in-out property <string> label_text;
+    in-out property <[string]> model;
+    in-out property <int> current_index;
+    in-out property <string> current_value;
+    in-out property <bool> enabled: true;
+    spacing: 2px;
+    Text { text: root.label_text; wrap: TextWrap.word-wrap; }
+    ComboBox {
+        model <=> root.model;
+        current_index <=> root.current_index;
+        current_value <=> root.current_value;
+        enabled <=> root.enabled;
+    }
+}
+
+export component LabeledSliderRow inherits VerticalLayout {
+    in-out property <string> label_text;
+    in-out property <float> minimum;
+    in-out property <float> maximum;
+    in-out property <float> value;
+    in-out property <string> end_text;
+    in-out property <bool> enabled: true;
+    spacing: 2px;
+    Text { text: root.label_text; wrap: TextWrap.word-wrap; }
+    HorizontalLayout {
+        spacing: 5px;
+        Slider {
+            minimum <=> root.minimum;
+            maximum <=> root.maximum;
+            value <=> root.value;
+            enabled <=> root.enabled;
+        }
+        Text {
+            text: root.end_text;
+            vertical_alignment: TextVerticalAlignment.center;
+            min-width: 50px;
+        }
+    }
+}

@@ -1,19 +1,20 @@
 import { PopupBase } from "../components/popup_base.slint";
 import { Translations } from "../globals/translations.slint";
-import { Button, CheckBox, ComboBox, LineEdit, Slider } from "std-widgets.slint";
+import { Button, CheckBox, LineEdit, ScrollView } from "std-widgets.slint";
 import { Settings } from "../globals/settings.slint";
 import { PopupCenteredText } from "../components/popup_centered_text.slint";
 import { ColorPalette } from "../globals/color_palette.slint";
 import { FontSizes } from "../globals/fonts.slint";
 import { Callabler } from "../globals/callabler.slint";
+import { LabeledComboRow, LabeledSliderRow } from "../components/labeled_rows.slint";
 
 export component PopupReencodeVideo inherits Rectangle {
     in-out property <string> title_text;
 
     callback action_confirmed();
 
-    out property <length> popup_width: 440px;
-    out property <length> popup_height: 560px;
+    out property <length> popup_width: 460px;
+    out property <length> popup_height: 600px;
     callback show_popup();
 
     popup_window := PopupBase {
@@ -31,124 +32,104 @@ export component PopupReencodeVideo inherits Rectangle {
 
                 Rectangle { width: 8px; }
 
-                VerticalLayout {
-                    spacing: 8px;
+                ScrollView {
+                    vertical-stretch: 1.0;
 
-                    PopupCenteredText { text: Translations.optimize_confirmation_text; }
+                    VerticalLayout {
+                        spacing: 8px;
 
-                    HorizontalLayout {
-                        spacing: 5px;
-                        Text { text: Translations.subsettings_video_optimizer_video_codec_text; vertical_alignment: TextVerticalAlignment.center; }
-                        ComboBox {
+                        PopupCenteredText { text: Translations.optimize_confirmation_text; }
+
+                        LabeledComboRow {
+                            label_text: Translations.subsettings_video_optimizer_video_codec_text;
                             model <=> Settings.video_optimizer_sub_video_codec_config;
                             current_index <=> Settings.video_optimizer_sub_video_codec_index;
                             current_value <=> Settings.video_optimizer_sub_video_codec_value;
                             enabled: !Settings.video_optimizer_sub_use_custom_command;
                         }
-                    }
 
-                    HorizontalLayout {
-                        spacing: 5px;
-                        Text { text: Translations.subsettings_video_optimizer_hardware_encoder_text; vertical_alignment: TextVerticalAlignment.center; }
-                        ComboBox {
+                        LabeledComboRow {
+                            label_text: Translations.subsettings_video_optimizer_hardware_encoder_text;
                             model <=> Settings.video_optimizer_sub_hardware_encoder_config;
                             current_index <=> Settings.video_optimizer_sub_hardware_encoder_index;
                             current_value <=> Settings.video_optimizer_sub_hardware_encoder_value;
                             enabled: !Settings.video_optimizer_sub_use_custom_command;
                         }
-                    }
 
-                    HorizontalLayout {
-                        spacing: 5px;
-                        Text { text: Translations.subsettings_video_optimizer_video_quality_text; vertical_alignment: TextVerticalAlignment.center; }
-                        Slider { minimum: 0.0; maximum: 51.0; value <=> Settings.popup_reencode_video_quality; }
-                        Text {
-                            text: Math.round(Settings.popup_reencode_video_quality) + " / 51";
-                            vertical_alignment: TextVerticalAlignment.center;
-                            min-width: 50px;
+                        LabeledSliderRow {
+                            label_text: Translations.subsettings_video_optimizer_video_quality_text;
+                            minimum: 0.0;
+                            maximum: 51.0;
+                            value <=> Settings.popup_reencode_video_quality;
+                            end_text: Math.round(Settings.popup_reencode_video_quality) + " / 51";
                         }
-                    }
-
-                    Text {
-                        text: Translations.optimize_crf_hint_text;
-                        font-size: FontSizes.small;
-                        color: ColorPalette.hint_color;
-                        wrap: TextWrap.word-wrap;
-                    }
-
-                    HorizontalLayout {
-                        spacing: 5px;
-                        Text { text: Translations.subsettings_video_optimizer_noise_reduction_text; vertical_alignment: TextVerticalAlignment.center; }
-                        ComboBox {
-                            model <=> Settings.video_optimizer_sub_noise_reduction;
-                            current_index <=> Settings.video_optimizer_sub_noise_reduction_index;
-                            current_value <=> Settings.video_optimizer_sub_noise_reduction_value;
-                            enabled: !Settings.video_optimizer_sub_use_custom_command;
-                        }
-                    }
-
-                    if Settings.video_optimizer_sub_noise_reduction_index != 0: HorizontalLayout {
-                        spacing: 5px;
-                        Text { text: Translations.subsettings_video_optimizer_noise_reduction_strength_text; vertical_alignment: TextVerticalAlignment.center; }
-                        Slider {
-                            minimum: 1;
-                            maximum: 10;
-                            value <=> Settings.video_optimizer_sub_noise_reduction_strength;
-                            enabled: !Settings.video_optimizer_sub_use_custom_command;
-                        }
-                        Text {
-                            text: Math.round(Settings.video_optimizer_sub_noise_reduction_strength) + " / 10";
-                            vertical_alignment: TextVerticalAlignment.center;
-                            min-width: 40px;
-                        }
-                    }
-
-                    if Settings.video_optimizer_sub_noise_reduction_index != 0: Text {
-                        text: Translations.optimize_noise_reduction_strength_hint_text;
-                        font-size: FontSizes.small;
-                        color: ColorPalette.hint_color;
-                        wrap: TextWrap.word-wrap;
-                    }
-
-                    Text {
-                        text: Translations.optimize_noise_reduction_hint_text;
-                        font-size: FontSizes.small;
-                        color: ColorPalette.hint_color;
-                        wrap: TextWrap.word-wrap;
-                    }
-
-                    CheckBox { text: Translations.optimize_fail_if_bigger_text; checked <=> Settings.popup_reencode_video_fail_if_bigger; }
-                    CheckBox { text: Translations.optimize_overwrite_files_text; checked <=> Settings.popup_reencode_video_overwrite_files; }
-
-                    CheckBox { text: Translations.optimize_limit_video_size_text; checked <=> Settings.popup_reencode_video_limit_video_size; }
-
-                    HorizontalLayout {
-                        spacing: 5px;
-                        Text { text: Translations.optimize_max_width_text; vertical_alignment: TextVerticalAlignment.center; }
-                        LineEdit { text <=> Settings.popup_reencode_video_max_width; enabled: Settings.popup_reencode_video_limit_video_size; }
-                        Text { text: Translations.optimize_max_height_text; vertical_alignment: TextVerticalAlignment.center; }
-                        LineEdit { text <=> Settings.popup_reencode_video_max_height; enabled: Settings.popup_reencode_video_limit_video_size; }
-                    }
-
-                    CheckBox { text: Translations.subsettings_video_optimizer_use_custom_command_text; checked <=> Settings.video_optimizer_sub_use_custom_command; }
-
-                    if Settings.video_optimizer_sub_use_custom_command: VerticalLayout {
-                        spacing: 5px;
 
                         Text {
-                            text: Translations.subsettings_video_optimizer_custom_command_hint_text;
+                            text: Translations.optimize_crf_hint_text;
                             font-size: FontSizes.small;
                             color: ColorPalette.hint_color;
                             wrap: TextWrap.word-wrap;
                         }
 
-                        HorizontalLayout {
+                        LabeledComboRow {
+                            label_text: Translations.subsettings_video_optimizer_noise_reduction_text;
+                            model <=> Settings.video_optimizer_sub_noise_reduction;
+                            current_index <=> Settings.video_optimizer_sub_noise_reduction_index;
+                            current_value <=> Settings.video_optimizer_sub_noise_reduction_value;
+                            enabled: !Settings.video_optimizer_sub_use_custom_command;
+                        }
+
+                        if Settings.video_optimizer_sub_noise_reduction_index != 0: LabeledSliderRow {
+                            label_text: Translations.subsettings_video_optimizer_noise_reduction_strength_text;
+                            minimum: 1;
+                            maximum: 10;
+                            value <=> Settings.video_optimizer_sub_noise_reduction_strength;
+                            enabled: !Settings.video_optimizer_sub_use_custom_command;
+                            end_text: Math.round(Settings.video_optimizer_sub_noise_reduction_strength) + " / 10";
+                        }
+
+                        if Settings.video_optimizer_sub_noise_reduction_index != 0: Text {
+                            text: Translations.optimize_noise_reduction_strength_hint_text;
+                            font-size: FontSizes.small;
+                            color: ColorPalette.hint_color;
+                            wrap: TextWrap.word-wrap;
+                        }
+
+                        Text {
+                            text: Translations.optimize_noise_reduction_hint_text;
+                            font-size: FontSizes.small;
+                            color: ColorPalette.hint_color;
+                            wrap: TextWrap.word-wrap;
+                        }
+
+                        CheckBox { text: Translations.optimize_fail_if_bigger_text; checked <=> Settings.popup_reencode_video_fail_if_bigger; }
+                        CheckBox { text: Translations.optimize_overwrite_files_text; checked <=> Settings.popup_reencode_video_overwrite_files; }
+
+                        CheckBox { text: Translations.optimize_limit_video_size_text; checked <=> Settings.popup_reencode_video_limit_video_size; }
+
+                        VerticalLayout {
+                            spacing: 2px;
+                            Text { text: Translations.optimize_max_width_text; wrap: TextWrap.word-wrap; }
+                            LineEdit { text <=> Settings.popup_reencode_video_max_width; enabled: Settings.popup_reencode_video_limit_video_size; }
+                            Text { text: Translations.optimize_max_height_text; wrap: TextWrap.word-wrap; }
+                            LineEdit { text <=> Settings.popup_reencode_video_max_height; enabled: Settings.popup_reencode_video_limit_video_size; }
+                        }
+
+                        CheckBox { text: Translations.subsettings_video_optimizer_use_custom_command_text; checked <=> Settings.video_optimizer_sub_use_custom_command; }
+
+                        if Settings.video_optimizer_sub_use_custom_command: VerticalLayout {
                             spacing: 5px;
+
+                            Text {
+                                text: Translations.subsettings_video_optimizer_custom_command_hint_text;
+                                font-size: FontSizes.small;
+                                color: ColorPalette.hint_color;
+                                wrap: TextWrap.word-wrap;
+                            }
 
                             LineEdit {
                                 text <=> Settings.video_optimizer_sub_custom_command;
                                 font-size: FontSizes.normal;
-                                horizontal-stretch: 1.0;
                             }
 
                             Button {
@@ -156,9 +137,9 @@ export component PopupReencodeVideo inherits Rectangle {
                                 clicked => { Callabler.generate_video_optimizer_template(); }
                             }
                         }
-                    }
 
-                    Rectangle { height: 10px; }
+                        Rectangle { height: 10px; }
+                    }
                 }
 
                 Rectangle { width: 8px; }

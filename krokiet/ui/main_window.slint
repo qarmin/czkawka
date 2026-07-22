@@ -246,7 +246,7 @@ export component MainWindow inherits Window {
     select_popup_window := PopupSelectResults {
         property <length> x_offset: 0;
         property <length> y_offset: 0;
-        x: parent.x + x_offset - self.item_width / 2.0;
+        x: max(parent.x, parent.x + x_offset - self.item_width / 2.0);
         y: parent.y + y_offset - self.all_items_height - 5px;
         height: root.height;
         width: root.width;
@@ -329,7 +329,7 @@ export component MainWindow inherits Window {
     sort_popup_window := PopupSortResults {
         property <length> x_offset: 0;
         property <length> y_offset: 0;
-        x: parent.x + x_offset - self.item_width / 2.0;
+        x: max(parent.x, parent.x + x_offset - self.item_width / 2.0);
         y: parent.y + y_offset - self.all_items_height - 5px;
         height: root.height;
         width: root.width;
