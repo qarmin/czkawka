@@ -14,6 +14,15 @@ export component PopupCustomSelect inherits Rectangle {
     private property <bool> case_sensitive: false;
     private property <bool> leave_one_in_group: true;
 
+    m_column_names := VerticalLayout {
+        x: -10000px;
+        y: -10000px;
+        height: 0;
+        Text { text: Translations.popup_custom_column_name_header_text; font-size: FontSizes.small; }
+        for column in GuiState.custom_select_columns: Text { text: column.column_name; font-size: FontSizes.normal; }
+    }
+    private property <length> column_name_width: max(180px, m_column_names.preferred-width);
+
     popup_window := PopupWindow {
         width: popup_width;
         height: popup_height;
@@ -46,7 +55,7 @@ export component PopupCustomSelect inherits Rectangle {
                     spacing: 4px;
                     Rectangle { width: 32px; }
                     Text {
-                        width: 180px;
+                        width: column_name_width;
                         text: Translations.popup_custom_column_name_header_text;
                         font-size: FontSizes.small;
                         vertical-alignment: center;
@@ -80,7 +89,7 @@ export component PopupCustomSelect inherits Rectangle {
                                 }
                             }
                             Text {
-                                width: 180px;
+                                width: column_name_width;
                                 text: column.column_name;
                                 vertical-alignment: center;
                                 font-size: FontSizes.normal;
