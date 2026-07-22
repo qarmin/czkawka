@@ -12,17 +12,15 @@ export component PopupSelectResults inherits Rectangle {
     property <length> item_height: 30px;
     out property <length> all_items_height: item_height * model.length;
 
-    // Measure the widest button label off-screen so the popup is always wide enough.
     m_names := VerticalLayout {
         x: -10000px;
         y: -10000px;
         height: 0;
-        for i in model: Text {
+        for i in model: Button {
             text: i.name;
         }
     }
-    // Button widget adds padding on top of raw text width.
-    out property <length> item_width: m_names.preferred-width + 40px;
+    out property <length> item_width: m_names.preferred-width;
 
     popup_window := PopupWindow {
         width <=> item_width;
@@ -34,6 +32,7 @@ export component PopupSelectResults inherits Rectangle {
             height: parent.height;
             border-radius: 5px;
             background: ColorPalette.popup_background;
+            clip: true;
             VerticalLayout {
                 for i in model: Button {
                     text: i.name;

@@ -15,11 +15,11 @@ export component PopupSortResults inherits Rectangle {
         x: -10000px;
         y: -10000px;
         height: 0;
-        for i in model: Text {
+        for i in model: Button {
             text: i.name;
         }
     }
-    out property <length> item_width: m_names.preferred-width + 40px;
+    out property <length> item_width: m_names.preferred-width;
 
     popup_window := PopupWindow {
         width <=> item_width;
@@ -31,6 +31,7 @@ export component PopupSortResults inherits Rectangle {
             height: parent.height;
             border-radius: 5px;
             background: ColorPalette.popup_background;
+            clip: true;
             VerticalLayout {
                 for i in model: Button {
                     text: i.name;
