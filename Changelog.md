@@ -1,23 +1,21 @@
 ## Version 12.0.1 - 26.07.2026r
 
 ### Core
-- Fixed problem with showing console windows on Windows, when running ffmpeg internally - [#1989](https://github.com/qarmin/czkawka/pull/1989)
-- Added `BuildRuntimeInfo` - a new module that probes compile-time features (HEIF, LibRAW, AVIF) and runtime availability (FFmpeg, FFprobe) at startup, with support for re-probing process-based tools without restarting the app - [#1989](https://github.com/qarmin/czkawka/pull/1989)
-- Added a 500 MB size guard for image loading to prevent out-of-memory crashes on unexpectedly large files - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Fixed an issue where console windows appeared on Windows when running FFmpeg internally - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Added `BuildRuntimeInfo`, a new module that detects compile-time features (HEIF, LibRAW, AVIF) and runtime availability (FFmpeg, FFprobe) at startup - [#1989](https://github.com/qarmin/czkawka/pull/1989)
 
 ### Krokiet
-- Added a new "About / Diagnostics" panel, to check for build/runtime features and to test if certain image files are recognizable - [#1989](https://github.com/qarmin/czkawka/pull/1989)
-- Fixed the "Sort" popup showing no background - [#2011](https://github.com/qarmin/czkawka/pull/2011)
-- Fixed some text in popups that overflowed in some languages - [#2011](https://github.com/qarmin/czkawka/pull/2011)
-- Fixed the Video Optimizer "Optimize" confirmation popup content being cropped - [#2008](https://github.com/qarmin/czkawka/issues/2008), [#2011](https://github.com/qarmin/czkawka/pull/2011)
-- Added translations of settings dropdown options - [#2011](https://github.com/qarmin/czkawka/pull/2011)
-- Pinned Slint to 1.17.0, to avoid on Wayland bug(1.17.1 version), not properly restoring windows size at start - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Added a new "About / Diagnostics" panel to inspect build/runtime features and verify whether specific image files are recognized correctly - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Fixed the sor popup not displaying its background - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Fixed text overflowing in popups for some languages - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Fixed the Video Optimizer optimize confirmation popup content being cropped - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Added translations for settings dropdown options - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Pinned Slint to version 1.17.0 to avoid a Wayland bug introduced in 1.17.1 that prevented proper window size restoration on startup - [#2011](https://github.com/qarmin/czkawka/pull/2011)
 
 ### Cedinia
-- Fix invalid status in progress bar - [#1989](https://github.com/qarmin/czkawka/pull/1989)
-- Fixed auto selection of language on first run - [#1989](https://github.com/qarmin/czkawka/pull/1989)
-- Migrated all raw JNI usage (file picker, notifications, Android path setup) to the new `jni-high` crate to  - [#2011](https://github.com/qarmin/czkawka/pull/2011)
-- Bumped Slint from 1.15.0 to 1.17.0 (pinned) - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Fixed an invalid progress bar status - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Fixed automatic language selection on first launch - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Migrated all raw and unsafe JNI usage (file picker, notifications, Android path setup) to the new `jni-high` crate - [#2011](https://github.com/qarmin/czkawka/pull/2011)
 
 ## Version 12.0 - 28.06.2026r
 
