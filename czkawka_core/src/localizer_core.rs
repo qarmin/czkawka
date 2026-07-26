@@ -146,7 +146,7 @@ pub const LANGUAGE_LIST: &[Language] = &[
 
 /// Find the best-matching index in [`LANGUAGE_LIST`] for a BCP 47 tag.
 ///
-/// Pass 1: exact match (handles `pt-BR`, `pt-PT`, `es-ES`, `sv-SE`, …).
+/// Pass 1: exact match (handles `pt-BR`, `pt-PT`, `es-ES`, `sv-SE`, ...).
 /// Pass 2: Chinese script disambiguation (`zh-Hans-*` → `zh-CN`, `zh-Hant-*` → `zh-TW`).
 /// Pass 3: language subtag only (`pl-PL` → `pl`, `de-AT` → `de`).
 /// Returns 0 (English) if no match is found.

@@ -28,7 +28,7 @@ pub fn check_if_ffprobe_ffmpeg_exists() -> bool {
 
 /// Returns the subset of hardware encoders that actually work on this machine.
 /// Each candidate is tested by attempting a 1-frame encode; encoders that fail
-/// (missing driver, missing library like libcuda.so, unsupported GPU, …) are excluded.
+/// (missing driver, missing library like libcuda.so, unsupported GPU, ...) are excluded.
 pub fn get_working_hardware_encoders() -> Vec<HardwareEncoder> {
     HardwareEncoder::all_non_none().iter().copied().filter(|&enc| test_hardware_encoder(enc)).collect()
 }

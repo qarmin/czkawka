@@ -154,4 +154,4 @@ stage_optimizing_no_size_videos = Optimerar { $items_stats } videor
 stage_cleaning_exif = Rensar EXIF från { $items_stats } filer ({ $size_stats })
 stage_cleaning_no_size_exif = Rensar EXIF från { $items_stats } filer
 
-core_image_file_too_large = Bildfilen är för stor ({$size} byte) – överskrider gränsen på { $limit } MB
+core_image_file_too_large = Bildfilen är för stor ({$size} byte) - överskrider gränsen på { $limit } MB

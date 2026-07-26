@@ -243,14 +243,14 @@ fn connect_compare_compute_diff(app: &MainWindow) {
         let right_idx = gui_state.get_compare_right_idx() as usize;
         let images = gui_state.get_compare_images();
 
-        let left_path = images
-            .row_data(left_idx)
-            .map(|d| d.path.to_string())
-            .unwrap_or_else(|| panic!("compare_left_idx={left_idx} out of bounds (row_count={})", images.row_count()));
-        let right_path = images
-            .row_data(right_idx)
-            .map(|d| d.path.to_string())
-            .unwrap_or_else(|| panic!("compare_right_idx={right_idx} out of bounds (row_count={})", images.row_count()));
+        let left_path = images.row_data(left_idx).map_or_else(
+            || panic!("compare_left_idx={left_idx} out of bounds (row_count={})", images.row_count()),
+            |d| d.path.to_string(),
+        );
+        let right_path = images.row_data(right_idx).map_or_else(
+            || panic!("compare_right_idx={right_idx} out of bounds (row_count={})", images.row_count()),
+            |d| d.path.to_string(),
+        );
 
         if left_path.is_empty() || right_path.is_empty() {
             return;
