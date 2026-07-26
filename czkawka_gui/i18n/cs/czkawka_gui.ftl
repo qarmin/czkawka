@@ -26,8 +26,8 @@ music_length_checkbox = Délka
 music_comparison_checkbox = Přibližné porovnání
 music_checking_by_tags = Štítky
 music_checking_by_content = Obsah
-same_music_seconds_label = Minimální délka trvání druhého fragmentu
-same_music_similarity_label = Rozdíl nejvýše
+same_music_seconds_label = Minimální délka fragmentu (s)
+same_music_similarity_label = Maximální rozdíl
 music_compare_only_in_title_group = Porovnat v rámci skupin podobných názvů
 music_compare_only_in_title_group_tooltip =
     Pokud je zapnuto, soubory jsou seskupeny podle názvu a až poté vzájemně porovnávány.
@@ -49,9 +49,9 @@ music_comparison_checkbox_tooltip =
     Vyhledá podobné hudební soubory pomocí AI, která používá strojové učení k odstranění závorek z fráze. Například, pokud je tato možnost povolena, příslušné soubory budou považovány za duplicitní soubory:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
-duplicate_case_sensitive_name = Rozlišovat mezi malými a VELKÝMI písmeny
+duplicate_case_sensitive_name = Rozlišovat malá a velká písmena
 duplicate_case_sensitive_name_tooltip =
-    Pokud je povoleno, seskupit pouze záznamy, když mají přesně stejný název, např.Żołd <-> Żołd
+    Pokud je povoleno, seskupit pouze záznamy, když mají přesně stejný název, např. Żołd <-> Żołd
     
     Zakázání takové volby bude seskupovat názvy bez kontrolování, zda je každé písmeno stejné velikosti, např. żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = Velikost a název
@@ -96,7 +96,7 @@ image_hash_alg_tooltip =
     Každý má silné a slabší stránky a někdy přinese lepší a někdy zase horší výsledky pro různé obrázky.
     
     Takže k určení nejlepšího pro vás je zapotřebí ruční zkoušení.
-image_geometric_invariance_tooltip = Porovnejte také zrcadlé/překlopené a volitelně otočené varianty každého obrázku. To zlepšuje shodu, ale zvyšuje hashovací čas.
+image_geometric_invariance_tooltip = Porovnává také zrcadlové/překlopené a volitelně otočené varianty každého obrázku. To zlepšuje shodu, ale zvyšuje čas výpočtu otisku.
 big_files_mode_combobox_tooltip = Umožňuje vyhledávat nejmenší / největší soubory
 big_files_mode_label = Zaškrtnuté soubory
 big_files_mode_smallest_combo_box = Nejmenší
@@ -114,7 +114,7 @@ main_notebook_broken_files = Poškozené soubory
 main_notebook_bad_extensions = Nesprávné přípony
 main_tree_view_column_file_name = Název souboru
 main_tree_view_column_folder_name = Název složky
-main_tree_view_column_path = Popis umístění
+main_tree_view_column_path = Cesta
 main_tree_view_column_modification = Datum změny
 main_tree_view_column_size = Velikost
 main_tree_view_column_similarity = Podobnost
@@ -127,7 +127,7 @@ main_tree_view_column_length = Délka
 main_tree_view_column_genre = Žánr
 main_tree_view_column_symlink_file_name = Název souboru symbolického odkazu
 main_tree_view_column_symlink_folder = Složka symbolického odkazu
-main_tree_view_column_destination_path = Cílový popis umístění
+main_tree_view_column_destination_path = Cílová cesta
 main_tree_view_column_type_of_error = Typ chyby
 main_tree_view_column_current_extension = Stávající přípona
 main_tree_view_column_proper_extensions = Správná přípona
@@ -164,23 +164,23 @@ upper_manual_add_excluded_button = Ruční přidání
 upper_add_excluded_button = Přidat
 upper_remove_excluded_button = Odebrat
 upper_manual_add_included_button_tooltip =
-    Ručně přidat název složky pro prohledání.
+    Ručně přidat název vyloučeného adresáře.
     
-    Pokud chcete přidat vícero popisů umístění naráz, oddělujte je znakem ; (středník)
+    Chcete-li přidat více cest najednou, oddělte je znakem ; (středník)
     
-    /home/roman;/home/rozkaz přidá dvě složky: /home/roman a /home/rozkaz
+    /home/roman;/home/krokiet přidá dva adresáře /home/roman a /home/krokiet
 upper_add_included_button_tooltip = Přidat novou složku k prohledání.
 upper_remove_included_button_tooltip = Odstranit složku z prohledání.
 upper_manual_add_excluded_button_tooltip =
-    Přidejte ručně název vyloučené adresáře.
+    Ručně přidat název vyloučeného adresáře.
     
-    Chcete-li přidat více cest najednou, oddělte je od ;
+    Chcete-li přidat více cest najednou, oddělte je znakem ;
     
     /home/roman;/home/krokiet přidá dva adresáře /home/roman a /home/keokiet
-upper_add_excluded_button_tooltip = Přidat adresář, který bude při hledání vyloučen.
+upper_add_excluded_button_tooltip = Přidat složku, která bude při hledání vyloučena.
 upper_remove_excluded_button_tooltip = Odstranit adresář z vyloučení.
 upper_notebook_items_configuration = Nastavení položek
-upper_notebook_excluded_directories = Vynechané popisy umístění
+upper_notebook_excluded_directories = Vynechané cesty
 upper_notebook_included_directories = Zahrnuté cesty
 upper_allowed_extensions_tooltip =
     Je třeba, aby povolené přípony byly oddělované čárkou (ve výchozím nastavení jsou k dispozici všechny).
@@ -200,18 +200,18 @@ upper_allowed_extensions = Povolené přípony:
 upper_excluded_extensions = Zakázané přípony:
 # Popovers
 popover_select_all = Vybrat vše
-popover_unselect_all = Odznačit vše
+popover_unselect_all = Zrušit výběr
 popover_reverse = Reverzní výběr
 popover_select_all_except_shortest_path = Vyberte vše kromě nejkratší cesty
 popover_select_all_except_longest_path = Vyberte vše kromě nejdelší cesty
 popover_select_all_except_oldest = Vybrat vše kromě nejstarších
 popover_select_all_except_newest = Vybrat vše kromě nejnovějších
-popover_select_one_oldest = Vyberte jeden nejstarší
-popover_select_one_newest = Vyberte jeden nejnovější
+popover_select_one_oldest = Vybrat jeden nejstarší
+popover_select_one_newest = Vybrat jeden nejnovější
 popover_select_custom = Vybrat vlastní
 popover_unselect_custom = Zrušit výběr vlastních
 popover_select_all_images_except_biggest = Vybrat vše kromě největších
-popover_select_all_images_except_smallest = Vybrat všechny kromě nejmenších
+popover_select_all_images_except_smallest = Vybrat vše kromě nejmenších
 popover_custom_path_check_button_entry_tooltip =
     Vyberte záznamy podle cesty.
     
@@ -228,13 +228,10 @@ popover_custom_regex_check_button_entry_tooltip =
     S tímto režimem je vyhledávaná cesta se jménem.
     
     Příklad použití:
-    /usr/bin/ziemniak. xt lze nalézt pomocí /ziem[a-z]+
+    /usr/bin/ziemniak.txt lze nalézt pomocí /ziem[a-z]+
     
     Toto používá výchozí implementaci Rust regex. Více o tom si můžete přečíst zde: https://docs.rs/regex.
-popover_custom_case_sensitive_check_button_tooltip =
-    Umožňuje detekci citlivosti na malá a velká písmena.
-    
-    Pokud je vypnuta /doma/* nálezů jak /HoMe/roman tak /home/roman.
+popover_custom_case_sensitive_check_button_tooltip = Pokud je vypnuto, /home/* najde jak /HoMe/roman, tak /home/roman.
 popover_custom_not_all_check_button_tooltip =
     Zabraňuje výběru všech záznamů ve skupině.
     
@@ -243,14 +240,14 @@ popover_custom_not_all_check_button_tooltip =
     VAROVÁNÍ: Toto nastavení nefunguje, pokud jste již ručně vybrali všechny výsledky ve skupině.
 popover_custom_regex_path_label = Cesta
 popover_custom_regex_name_label = Název
-popover_custom_regex_regex_label = Regex cesta + Jméno
+popover_custom_regex_regex_label = Regex cesta + název
 popover_custom_case_sensitive_check_button = Rozlišit malá a velká písmena
-popover_custom_all_in_group_label = Nesbírat všechny záznamy ve skupině
+popover_custom_all_in_group_label = Nevybírat všechny záznamy ve skupině
 popover_custom_mode_unselect = Zrušit výběr vlastních
 popover_custom_mode_select = Vybrat vlastní
 popover_sort_file_name = Název souboru
-popover_sort_folder_name = Název adresáře
-popover_sort_full_name = Jméno a příjmení
+popover_sort_folder_name = Název složky
+popover_sort_full_name = Celý název
 popover_sort_size = Velikost
 popover_sort_selection = Výběr
 popover_invalid_regex = Regex je neplatný
@@ -258,7 +255,7 @@ popover_valid_regex = Regex je platný
 # Bottom buttons
 bottom_search_button = Hledat
 bottom_select_button = Vybrat
-bottom_delete_button = Vymazat
+bottom_delete_button = Odstranit
 bottom_save_button = Uložit
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Pevný odkaz
@@ -268,20 +265,16 @@ bottom_compare_button = Porovnat
 bottom_search_button_tooltip = Zahájit vyhledávání
 bottom_select_button_tooltip = Vyberte záznamy. Pouze vybrané soubory/složky mohou být později zpracovány.
 bottom_delete_button_tooltip = Odstranit vybrané soubory/složky.
-bottom_save_button_tooltip = Ukládat data o hledání do souboru
-bottom_symlink_button_tooltip =
-    Vytvořit symbolické odkazy.
-    Funguje pouze tehdy, pokud jsou vybrány alespoň dva výsledky ve skupině.
-    Nejprve je nezměněna a druhé a později jsou souvztažné s prvními.
+bottom_save_button_tooltip = Uložit data o hledání do souboru
+bottom_symlink_button_tooltip = První zůstává nezměněn a druhý a další jsou symbolicky odkazovány na první.
 bottom_hardlink_button_tooltip =
-    Vytvořit hardwarové odkazy.
+    Vytvořit pevné odkazy.
     Funguje pouze tehdy, pokud jsou vybrány alespoň dva výsledky ve skupině.
-    Nejprve je nezměněna a druhé a později jsou těžce propojeny s prvními.
+    První zůstává nezměněn a druhý a další jsou pevně odkazovány na první.
 bottom_hardlink_button_not_available_tooltip =
-    Vytvořit hardwarové odkazy.
-    Tlačítko je zakázáno, protože hardwarové odkazy nelze vytvořit.
-    Hardlinky fungují pouze s oprávněními administrátora v systému Windows, tak se ujistěte, že používáte aplikaci jako administrátora.
-    Pokud aplikace s takovými oprávněními již funguje, podívejte se na podobné problémy na Githubu.
+    Vytvořit pevné odkazy.
+    Tlačítko je zakázáno, protože pevné odkazy nelze vytvořit.
+    Hardlinky fungují pouze s oprávněními administrátora...
 bottom_move_button_tooltip =
     Přesune soubory do zvolené složky.
     Zkopíruje všechny soubory do složky (bez zachování stromu podsložek).
@@ -294,23 +287,23 @@ bottom_show_upper_notebook_tooltip = Zobrazit/skrýt horní panel karet.
 progress_stop_button = Zastavit
 progress_stop_additional_message = Vyžádáno zastavení
 # About Window
-about_repository_button_tooltip = Odkaz na stránku repositáře se zdrojovými kódy.
+about_repository_button_tooltip = Odkaz na stránku repozitáře se zdrojovými kódy.
 about_donation_button_tooltip = Odkaz na stránku s darováním.
 about_instruction_button_tooltip = Odkaz na stránku s pokyny.
-about_translation_button_tooltip = Odkaz na stránku Crowdin s překlady aplikace. Vývojář sám se soustřeďuje na polština a angličtinu.
+about_translation_button_tooltip = ...Vývojář sám se soustřeďuje na polštinu a angličtinu.
 about_repository_button = Repozitář
 about_donation_button = Darovat
 about_instruction_button = Pokyny
 about_translation_button = Překlad
 about_other_apps_button = Ostatní aplikace
-about_other_apps_dialog_title = Další aplikace qarmin
+about_other_apps_dialog_title = Další aplikace od qarmina
 about_other_apps_open_source_note = Všechny uvedené aplikace jsou zdarma a open source.
 about_other_apps_open_button = Otevřít
-about_other_apps_szyszka_desc = Rychlý a výkonný název souboru.
-about_other_apps_mykrut_desc = Jednoduchý rychlý a názorný správce souborů Linuxu.
+about_other_apps_szyszka_desc = Rychlý a výkonný nástroj pro přejmenování souborů.
+about_other_apps_mykrut_desc = Jednoduchý, rychlý a osobitý linuxový správce souborů.
 about_other_apps_dcmki_viewer_desc = Jednoduchý DICOM prohlížeč.
 about_other_apps_video_thumbnailer_desc = Wrapper kolem generátoru video miniatury používaného v Czkawce.
-about_other_apps_space_finder_desc = Jednoduché hledání největších souborů ve vašem systému.
+about_other_apps_space_finder_desc = Jednoduchý nástroj pro hledání největších souborů ve vašem systému.
 about_other_apps_system_info_collector_desc = Sbírá využití RAM/CPU z OS a zobrazuje ho jako grafy.
 # Header
 header_setting_button_tooltip = Otevře dialogové okno nastavení.
@@ -319,15 +312,15 @@ header_krokiet_button_tooltip = Zkuste Krokiet - novou a vylepšenou verzi!
 # Krokiet promo dialog
 krokiet_promo_title = Seznamte se s Krokietem!
 krokiet_promo_message =
-    Ahoj, odvážný uživatel Czkawka!
+    Ahoj, odvážný uživateli Czkawky!
     
-    Síla je s vámi, ale Krokiet není - novější, rychlejší, lehčí a výrazně více ručního (za předpokladu, že aplikace mohou být ve skutečnosti rukovité) duplikovat čistší prostředek.
+    Síla je zjevně s vámi, ale Krokiet ne - je to novější, rychlejší, lehčí a výrazně hezčí (za předpokladu, že aplikace mohou být vůbec hezké) nástroj na čištění duplicit.
     
-    Krokiet zahrnuje všechno, co se líbí o Czkawce. Je zcela zdarma, open source, má unikátní a jednoduché uživatelské rozhraní (mnozí chválí i nenávistí), zavádí mnoho nových funkcí, používá méně závislostí a pracuje mnohem spolehlivěji na různých platformách.
+    Krokiet zahrnuje vše, co se lidem líbilo na Czkawce. Je zcela zdarma, open source, má unikátní a jednoduché uživatelské rozhraní (mnohými chválené i nenáviděné), přináší spoustu nových funkcí, používá méně závislostí a funguje mnohem spolehlivěji na různých platformách.
     
-    A pokud jste nějak zmeškali, existuje ještě novější aplikace než Krokiet - Cedinia, určené především pro zařízení Android a využití dotykové obrazovky.
+    A pokud vám to nějak uniklo, existuje už i ještě novější aplikace než Krokiet - Cedinia, určená především pro zařízení s Androidem a ovládání dotykovou obrazovkou.
     
-    Czkawka GTK nám dobře posloužila, ale její hodinky skončily.
+    Czkawka GTK nám dobře posloužila, ale její služba skončila.
 krokiet_promo_link_download = Stáhnout Krokiet/Cedinia
 krokiet_promo_link_project = Stránka projektu
 
@@ -395,7 +388,7 @@ settings_multiple_image_preview_checkbutton = Zobrazovat náhled obrázku
 settings_multiple_clear_cache_button_tooltip =
     Ručně spustit vyčištění mezipaměť od už neaktuálních položek.
     Toto je zde pouze pro případy, kdy je vypnuté automatické čištění.
-settings_multiple_clear_cache_button = Odstranit už neaktuální výsledky z mezipaměti.
+settings_multiple_clear_cache_button = Odebrat už neaktuální výsledky z mezipaměti.
 
 ## Duplicates
 
@@ -415,16 +408,16 @@ settings_duplicates_prehash_checkbutton_tooltip =
     Doporučujeme jej použít při skenování stovek tisíc nebo miliónů souborů, protože může urychlit hledání několikrát.
 settings_duplicates_prehash_minimal_entry_tooltip = Minimální velikost položky v mezipaměti.
 settings_duplicates_hide_hard_link_button = Skrýt pevné odkazy
-settings_duplicates_prehash_checkbutton = Použít mezipaměť rozpoznávání
+settings_duplicates_prehash_checkbutton = Použít mezipaměť předotisků
 settings_duplicates_minimal_size_cache_label = Minimální velikost souborů (v bajtech) uložených do mezipaměti
-settings_duplicates_minimal_size_cache_prehash_label = Minimální velikost souborů (v bajtech) uložených pro zachycení keše
+settings_duplicates_minimal_size_cache_prehash_label = Minimální velikost souborů (v bajtech) uložených do mezipaměti pro předotisky
 
 ## Saving/Loading settings
 
 settings_saving_button_tooltip = Uložit stávající nastavení do souboru.
 settings_loading_button_tooltip = Načíst nastavení ze souboru a nahradit jimi ta stávající.
 settings_reset_button_tooltip = Vrátit stávající nastavení na výchozí hodnoty.
-settings_saving_button = Uložit konfiguraci
+settings_saving_button = Uložit nastavení
 settings_loading_button = Načíst nastavení
 settings_reset_button = Vrátit nastavení na výchozí hodnoty
 
@@ -433,11 +426,11 @@ settings_reset_button = Vrátit nastavení na výchozí hodnoty
 settings_folder_cache_open_tooltip =
     Otevře složku, ve které jsou uloženy txt soubory mezipaměti.
     
-    Úprava souborů může způsobit zobrazení neplatných výsledků. Nicméně upravení popisu umístění může ušetřit čas v případě přesunutí velkého množství souborů do jiného umístění.
+    Úprava souborů může způsobit zobrazení neplatných výsledků. Nicméně úprava cesty může ušetřit čas v případě přesunutí velkého množství souborů do jiného umístění.
     
     Tyto soubory je možné zkopírovat mezi počítači a ušetřit tak čas při opětovném skenování souborů (samozřejmě pokud mají podobnou adresářovou strukturu).
     
-    V případě problémů s mezipamětí je možné tyto soubory odstranit. Aplikace je automaticky znovu vytvořít.
+    V případě problémů s mezipamětí je možné tyto soubory odstranit. Aplikace je automaticky znovu vytvoří.
 settings_folder_settings_open_tooltip =
     Otevře složku, ve kterou jsou uložena nastavení pro Czkawku.
     
@@ -457,16 +450,16 @@ compute_found_videos = Nalezeno { $number_files } podobných videí v { $number_
 compute_found_music = Nalezeno { $number_files } podobných hudebních souborů v { $number_groups } skupinách v { $time }
 compute_found_invalid_symlinks = Nalezeno { $number_files } neplatných symbolických odkazů v { $time }
 compute_found_broken_files = Nalezeno { $number_files } rozbitých souborů v { $time }
-compute_found_bad_extensions = Nalezeno { $number_files } souborů s nesprávnými příponami za { $time }
+compute_found_bad_extensions = Nalezeno { $number_files } souborů s nesprávnými příponami v { $time }
 # Progress window
 progress_current_stage = Aktuální fáze: { " " }
-progress_all_stages = Všechny etapy: { " " }
+progress_all_stages = Všechny fáze: { " " }
 # Saving loading 
 saving_loading_saving_success = Nastavení uložena do souboru { $name }.
 saving_loading_saving_failure = Nepodařilo se uložit data nastavení do souboru { $name } - důvod: { $reason }.
 saving_loading_reset_configuration = Stávající nastavení byla vymazána.
 saving_loading_loading_success = Nastavení aplikace v pořádku načtena.
-saving_loading_no_config_file = Nenalezen žádný konfigurační soubor, pomocí výchozího nastavení.
+saving_loading_no_config_file = Nenalezen žádný konfigurační soubor, bude použito výchozí nastavení.
 saving_loading_failed_to_create_config_file = Nepodařilo se vytvořit soubor s nastaveními „{ $path }“ - důvod: „{ $reason }“.
 saving_loading_failed_to_read_config_file = Nebylo možné načíst nastavení z „{ $path }“, protože neexistuje nebo to není soubor.
 saving_loading_failed_to_read_data_from_file = Nebylo možné načíst data ze souboru „{ $path }“ - důvod: „{ $reason }“.
@@ -477,28 +470,28 @@ text_view_messages = ZPRÁVY
 text_view_warnings = VAROVÁNÍ
 text_view_errors = CHYBY
 about_window_motto = Tuto aplikaci je možné bezplatně používat (nyní i v budoucnu).
-krokiet_new_app = Czkawka je v režimu údržby, což znamená, že budou opraveny pouze kritické chyby a nebudou přidány žádné nové funkce. Pro nové funkce si prosím přečtěte novou aplikaci Krokiet , která je stabilnější a výkonnější a je stále v aktivním vývoji.
+krokiet_new_app = ...Pro nové funkce si prosím vyzkoušejte novou aplikaci Krokiet, která je stabilnější a výkonnější a je stále v aktivním vývoji.
 # Various dialog
 dialogs_ask_next_time = Zeptat se příště
 symlink_failed = Nepodařilo se vytvořit symbolický odkaz { $name } na { $target } - důvod: { $reason }
 delete_title_dialog = Potvrzení odstranění
-delete_question_label = Opravdu chcete soubory smazat?
+delete_question_label = Opravdu chcete soubory odstranit?
 delete_all_files_in_group_title = Potvrzení odstranění všech souborů ve skupině
 delete_all_files_in_group_label1 = V některých skupinách jsou vybrány všechny záznamy.
 delete_all_files_in_group_label2 = Jste si jisti, že je chcete odstranit?
-delete_items_label = { $items } souborů bude smazáno.
-delete_items_groups_label = { $items } souborů z { $groups } skupin bude smazáno.
-hardlink_failed = Nepodařilo se propojit { $name } na { $target }, důvod { $reason }
+delete_items_label = { $items } souborů bude odstraněno.
+delete_items_groups_label = { $items } souborů z { $groups } skupin bude odstraněno.
+hardlink_failed = Nepodařilo se vytvořit pevný odkaz { $name } na { $target } - důvod: { $reason }.
 hard_sym_invalid_selection_title_dialog = Neplatný výběr s některými skupinami
 hard_sym_invalid_selection_label_1 = V některých skupinách je vybrán pouze jeden záznam a bude ignorován.
-hard_sym_invalid_selection_label_2 = Aby bylo možné tyto soubory propojit s pevným/sym, je třeba vybrat alespoň dva výsledky ve skupině.
-hard_sym_invalid_selection_label_3 = První ve skupině je uznána jako původní a není změněna, ale druhá a později jsou upraveny.
+hard_sym_invalid_selection_label_2 = Aby bylo možné tyto soubory propojit pevným/symbolickým odkazem, je třeba vybrat alespoň dva výsledky ve skupině.
+hard_sym_invalid_selection_label_3 = První ve skupině je uznána jako původní a není změněna, ale druhá a další jsou upraveny.
 hard_sym_link_title_dialog = Potvrzení odkazu
 hard_sym_link_label = Opravdu chcete tyto soubory propojit?
 move_folder_failed = Nepodařilo se přesunout složku { $name } - důvod: { $reason }
 move_file_failed = Nepodařilo se přesunout soubor { $name } - důvod: { $reason }
 move_files_title_dialog = Vyberte složku, do které chcete přesunout duplicitní soubory
-move_files_choose_more_than_1_path = Aby bylo možné zkopírovat jejich duplikované soubory, lze vybrat pouze jeden popis umístnění - nyní ale vybráno { $path_number }.
+move_files_choose_more_than_1_path = Aby bylo možné zkopírovat jejich duplikované soubory, lze vybrat pouze jednu cestu - nyní ale vybráno { $path_number }.
 move_stats = { $num_files }/{ $all_files } položek v pořádku přesunuto
 save_results_to_file = Výsledky uloženy jako txt i json soubory do složky „{ $name }“.
 search_not_choosing_any_music = CHYBA: je třeba vybrat alespoň jednu zaškrtávací kolonku typu vyhledávání hudby.
@@ -513,7 +506,7 @@ cache_clear_similar_videos_title = Čištění mezipaměti podobných videí
 cache_clear_message_label_1 = Chcete z mezipaměti vyčistit už neaktuální položky?
 cache_clear_message_label_2 = Tato operace odstraní všechny položky mezipaměti, které odkazují na neplatné soubory.
 cache_clear_message_label_3 = Toto může mírně urychlit načítání/ukládání do mezipaměti.
-cache_clear_message_label_4 = VAROVÁNÍ: Operace odstraní z mezipaměti vše co se týká dat na v tuto chíli nepřipojených externích discích. V budoucnu tak případně bude potřeba otisky z nich znovu spočítat.
+cache_clear_message_label_4 = ...vše co se týká dat na v tuto chvíli nepřipojených externích discích...
 # Show preview
 preview_image_resize_failure = Nepodařilo se změnit rozlišení obrázku { $name }.
 preview_image_opening_failure = Nepodařilo se otevřít obrázek { $name } - důvod: { $reason }

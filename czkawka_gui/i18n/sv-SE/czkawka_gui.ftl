@@ -9,16 +9,16 @@ general_close_button = Stäng
 # Krokiet info dialog
 krokiet_info_title = Meddelande om utfasning
 krokiet_info_message =
-    Czkawka GTK 12.0 är den slutliga utgåvan. Inga ytterligare uppdateringar, funktioner eller buggfixar planeras.
+    Czkawka GTK 12.0 är den sista utgåvan. Inga fler uppdateringar, funktioner eller felrättningar planeras.
     
-    De flesta funktioner från Czkawka GTK finns i Krokiet, oftast i en enklare, snabbare och stabilare form. Krokiet lägger också till nya funktioner och förbättringar som inte var möjliga i GTK-versionen.
+    De flesta funktionerna i Czkawka GTK finns i Krokiet, oftast i en enklare, snabbare och stabilare form. Krokiet innehåller också nya funktioner och förbättringar som inte var möjliga i GTK-versionen.
     
-    Om du fortfarande använder Czkawka GTK, bör det vara lätt att byta till Krokiet, eftersom det har ett liknande gränssnitt, färre beroenden och bättre plattformsoberoende stöd.
+    Om du fortfarande använder Czkawka GTK bör det vara enkelt att byta till Krokiet, eftersom programmet har ett liknande gränssnitt, färre beroenden och bättre stöd på flera plattformar.
     
-    PS: Detta meddelande bör bara visas en gång. Om det dyker upp igen, sätt miljövariabeln CZKAWKA_DONT_ANNOY_ME till valfritt icke-tomt värde.
+    PS: Det här meddelandet ska endast visas en gång. Om det visas igen anger du miljövariabeln CZKAWKA_DONT_ANNOY_ME till valfritt värde som inte är tomt.
 # Main window
 music_title_checkbox = Titel
-music_artist_checkbox = Konstnär
+music_artist_checkbox = Artist
 music_year_checkbox = År
 music_bitrate_checkbox = Bithastighet
 music_genre_checkbox = Genre
@@ -27,24 +27,24 @@ music_comparison_checkbox = Ungefärlig jämförelse
 music_checking_by_tags = Taggar
 music_checking_by_content = Innehåll
 same_music_seconds_label = Minsta fragmentlängd i sekunder
-same_music_similarity_label = Maximal skillnad
+same_music_similarity_label = Största skillnad
 music_compare_only_in_title_group = Jämför inom grupper med liknande titlar
 music_compare_only_in_title_group_tooltip =
     När detta är aktiverat grupperas filerna efter titel och jämförs sedan med varandra.
     
     Med 10 000 filer blir det vanligtvis runt 20 000 jämförelser i stället för nästan 100 miljoner.
 same_music_tooltip =
-    Sökning efter liknande musikfiler genom deras innehåll kan konfigureras genom att ställa in:
+    Sökning efter liknande musikfiler utifrån innehållet kan konfigureras med:
     
-    - Minsta fragmenttid efter vilken musikfiler kan identifieras som liknande
-    - Maximal skillnad mellan två testade fragment
+    - minsta fragmentlängd för att musikfiler ska kunna identifieras som liknande
+    - största tillåtna skillnad mellan två testade fragment
     
-    Nyckeln till goda resultat är att hitta förnuftiga kombinationer av dessa parametrar, förutsatt att de är tillgängliga.
+    Bra resultat kräver en lämplig kombination av dessa parametrar.
     
-    Om den minsta tiden sätts till 5 s och den maximala skillnaden till 1,0 söker programmet efter nästan identiska fragment i filerna.
-    En tid på 20 s och en maximal skillnad på 6,0 fungerar däremot bra för att hitta remixer, liveversioner osv.
+    Om den minsta tiden anges till 5 s och den största skillnaden till 1,0 söker programmet efter nästan identiska fragment i filerna.
+    En tid på 20 s och en största skillnad på 6,0 fungerar däremot bra för att hitta remixer, liveversioner och liknande.
     
-    Som standard jämförs varje musikfil med alla andra. Det kan ta lång tid när många filer testas, så det är oftast bättre att använda referensmappar och ange vilka filer som ska jämföras med varandra (med samma antal filer går det minst 4 gånger snabbare att jämföra fingeravtryck med referensmappar än utan).
+    Som standard jämförs varje musikfil med alla andra. Det kan ta lång tid när många filer testas, så det är oftast bättre att använda referensmappar och ange vilka filer som ska jämföras med varandra. Med samma antal filer går jämförelsen av fingeravtryck minst fyra gånger snabbare med referensmappar än utan.
 music_comparison_checkbox_tooltip =
     Den söker efter liknande musikfiler med AI, som använder maskininlärning för att ta bort parenteser ur en fras. När det här alternativet är aktiverat betraktas till exempel följande filer som dubbletter:
     
@@ -120,7 +120,7 @@ main_tree_view_column_size = Storlek
 main_tree_view_column_similarity = Likhet
 main_tree_view_column_dimensions = Dimensioner
 main_tree_view_column_title = Titel
-main_tree_view_column_artist = Konstnär
+main_tree_view_column_artist = Artist
 main_tree_view_column_year = År
 main_tree_view_column_bitrate = Bithastighet
 main_tree_view_column_length = Längd
@@ -129,7 +129,7 @@ main_tree_view_column_symlink_file_name = Namn på symbolisk länk
 main_tree_view_column_symlink_folder = Mapp för symboliska länkar
 main_tree_view_column_destination_path = Målsökväg
 main_tree_view_column_type_of_error = Typ av fel
-main_tree_view_column_current_extension = Nuvarande filändelse
+main_tree_view_column_current_extension = Aktuell filändelse
 main_tree_view_column_proper_extensions = Korrekt filändelse
 main_tree_view_column_fps = FPS
 main_tree_view_column_codec = Kodek
@@ -288,44 +288,44 @@ bottom_move_button_tooltip =
     Om två filer med samma namn flyttas till samma mapp misslyckas den andra och ett fel visas.
 bottom_sort_button_tooltip = Sorterar filer/mappar enligt vald metod.
 bottom_compare_button_tooltip = Jämför bilder i gruppen.
-bottom_show_errors_tooltip = Visa/dölj undertextpanelen.
-bottom_show_upper_notebook_tooltip = Visa/dölj övre anteckningsbokspanelen.
+bottom_show_errors_tooltip = Visa/dölj den nedre textpanelen.
+bottom_show_upper_notebook_tooltip = Visa/dölj den övre flikpanelen.
 # Progress Window
 progress_stop_button = Stoppa
-progress_stop_additional_message = Stoppa begärd
+progress_stop_additional_message = Stopp begärt
 # About Window
-about_repository_button_tooltip = Länk till källkodsarkivet med källkod.
+about_repository_button_tooltip = Länk till projektets källkodsarkiv.
 about_donation_button_tooltip = Länk till donationssidan.
-about_instruction_button_tooltip = Länk till instruktionssidan.
-about_translation_button_tooltip = Länk till Crowdin sida med appöversättningar. Officiellt stöds polska och engelska.
+about_instruction_button_tooltip = Länk till sidan med anvisningar.
+about_translation_button_tooltip = Länk till Crowdin-sidan med appens översättningar. Polska och engelska stöds officiellt.
 about_repository_button = Källkodsarkiv
-about_donation_button = Donation
-about_instruction_button = Instruktion
+about_donation_button = Donera
+about_instruction_button = Anvisningar
 about_translation_button = Översättning
-about_other_apps_button = Andra appar
+about_other_apps_button = Andra program
 about_other_apps_dialog_title = Andra program av qarmin
 about_other_apps_open_source_note = Alla listade program är fria och har öppen källkod.
 about_other_apps_open_button = Öppna
 about_other_apps_szyszka_desc = Snabbt och kraftfullt verktyg för att byta namn på filer.
 about_other_apps_mykrut_desc = Enkel, snabb och egensinnig filhanterare för Linux.
 about_other_apps_dcmki_viewer_desc = Enkel DICOM-visare.
-about_other_apps_video_thumbnailer_desc = Gränssnitt till videogeneratorn för miniatyrbilder som används i Czkawka.
+about_other_apps_video_thumbnailer_desc = Gränssnitt till verktyget för att skapa videominiatyrer som används i Czkawka.
 about_other_apps_space_finder_desc = Enkelt verktyg för att hitta de största filerna på systemet.
 about_other_apps_system_info_collector_desc = Samlar in RAM- och CPU-användning från operativsystemet och visar den som diagram.
 # Header
 header_setting_button_tooltip = Öppnar dialogrutan för inställningar.
-header_about_button_tooltip = Öppnar dialog med info om app.
+header_about_button_tooltip = Öppnar en dialogruta med information om appen.
 header_krokiet_button_tooltip = Prova Krokiet - den nya och förbättrade versionen!
 # Krokiet promo dialog
-krokiet_promo_title = Möt Krokiet!
+krokiet_promo_title = Här är Krokiet!
 krokiet_promo_message =
     Hallå där, modiga Czkawka-användare!
     
-    Kraften är helt klart med dig, men Krokiet är inte det - ett nyare, snabbare, lättare och betydligt snyggare verktyg för att rensa dubbletter (förutsatt att appar faktiskt kan vara snygga).
+    Kraften är uppenbarligen med dig, men det är inte Krokiet – ett nyare, snabbare, lättare och betydligt snyggare verktyg för att rensa dubbletter (förutsatt att appar faktiskt kan vara snygga).
     
-    Krokiet innehåller allt som användarna uppskattade med Czkawka. Det är helt gratis, har öppen källkod, har ett unikt och enkelt användargränssnitt (både prisas och hatas av många), introducerar en hel del nya funktioner, använder färre beroenden och fungerar mycket mer tillförlitligt över olika plattformar.
+    Krokiet innehåller allt som användarna uppskattade med Czkawka. Det är helt kostnadsfritt, har öppen källkod och ett unikt och enkelt användargränssnitt (som både har hyllats och kritiserats av många). Programmet innehåller många nya funktioner, använder färre beroenden och fungerar betydligt tillförlitligare på olika plattformar.
     
-    Och om du på något sätt har missat det finns det redan en ännu nyare app än Krokiet - Cedinia, utformad främst för Android-enheter och pekskärmsanvändning.
+    Och om du på något sätt har missat det finns det redan en ännu nyare app än Krokiet – Cedinia, som främst är utformad för Android-enheter och pekskärmar.
     
     Czkawka GTK har tjänat oss väl, men dess tid är över.
 krokiet_promo_link_download = Ladda ner Krokiet/Cedinia
@@ -338,17 +338,17 @@ krokiet_promo_link_project = Projektsida
 
 settings_number_of_threads = Antal använda trådar
 settings_number_of_threads_tooltip = Antal trådar som används. 0 innebär att alla tillgängliga trådar används.
-settings_use_rust_preview = Använd externa bibliotek i stället för gtk för att läsa in förhandsgranskningar
+settings_use_rust_preview = Använd externa bibliotek i stället för GTK för att läsa in förhandsgranskningar
 settings_use_rust_preview_tooltip =
     Att använda GTK-förhandsvisningar kan ibland vara snabbare och ge stöd för fler format, men ibland kan det vara tvärtom.
     
     Om du har problem med att läsa in förhandsvisningar kan du prova att ändra den här inställningen.
     
     På andra system än Linux rekommenderas detta alternativ, eftersom gtk-pixbuf inte alltid är tillgängligt där. Om alternativet inaktiveras kan förhandsvisningar av vissa bilder därför inte läsas in.
-settings_label_restart = Du måste starta om appen för att tillämpa inställningar!
+settings_label_restart = Du måste starta om appen för att tillämpa inställningarna!
 settings_ignore_other_filesystems = Ignorera andra filsystem (endast Linux)
 settings_ignore_other_filesystems_tooltip =
-    ignorerar filer som inte finns på samma filsystem som de genomsökta mapparna.
+    Ignorerar filer som inte finns på samma filsystem som de genomsökta mapparna.
     
     Fungerar på samma sätt som alternativet -xdev i kommandot find på Linux
 settings_save_at_exit_button_tooltip = Spara konfigurationen till fil när appen stängs.
@@ -356,7 +356,7 @@ settings_load_at_start_button_tooltip =
     Ladda konfigurationen från fil när appen öppnas.
     
     Om funktionen inte är aktiverad används standardinställningarna.
-settings_confirm_deletion_button_tooltip = Visa bekräftelsedialog när du klickar på knappen ta bort.
+settings_confirm_deletion_button_tooltip = Visa en bekräftelsedialogruta när du klickar på knappen Ta bort.
 settings_confirm_link_button_tooltip = Visa en bekräftelsedialog när du klickar på knappen för hårdlänkar/symboliska länkar.
 settings_confirm_group_deletion_button_tooltip = Visa varningsdialog när du försöker ta bort alla poster från gruppen.
 settings_show_text_view_button_tooltip = Visa textpanelen längst ner i användargränssnittet.
@@ -369,7 +369,7 @@ settings_load_at_start_button = Ladda konfiguration när appen öppnas
 settings_confirm_deletion_button = Visa bekräftelsedialog vid borttagning av filer
 settings_confirm_link_button = Visa bekräftelsedialog när hårdlänkar/symboliska länkar skapas för filer
 settings_confirm_group_deletion_button = Visa bekräftelsedialog när alla filer tas bort i grupp
-settings_show_text_view_button = Visa längst ned textpanel
+settings_show_text_view_button = Visa den nedre textpanelen
 settings_use_cache_button = Använd cache
 settings_save_also_as_json_button = Spara även cache som JSON-fil
 settings_use_trash_button = Flytta borttagna filer till papperskorgen
@@ -404,16 +404,16 @@ settings_duplicates_hide_hard_link_button_tooltip =
     
     Exempel: Om det finns sju filer (på disken) som är hårdlänkade till samma data och en annan fil med samma data men en annan inode, visar dubblettsökaren bara två filer: den unika filen och en av de hårdlänkade filerna.
 settings_duplicates_minimal_size_entry_tooltip =
-    Ange minimal filstorlek som kommer att cachelagras.
+    Ange den minsta filstorlek som ska cachelagras.
     
-    Att välja ett mindre värde kommer att generera fler poster. Detta kommer att snabba upp sökningen, men göra cacheinläsning och cachesparande långsammare.
+    Ett lägre värde skapar fler poster. Det gör sökningen snabbare men inläsning och sparning av cachen långsammare.
 settings_duplicates_prehash_checkbutton_tooltip =
     Aktiverar cachelagring av prehash (en hash som beräknas från en liten del av filen), så att resultat som inte är dubbletter kan uteslutas tidigare.
     
     Det är inaktiverat som standard eftersom det kan orsaka prestandaförsämringar i vissa situationer.
     
     Det rekommenderas starkt när du genomsöker hundratusentals eller miljontals filer, eftersom det kan göra sökningen flera gånger snabbare.
-settings_duplicates_prehash_minimal_entry_tooltip = Minimal storlek på cachad post.
+settings_duplicates_prehash_minimal_entry_tooltip = Minsta storlek på en cachelagrad post.
 settings_duplicates_hide_hard_link_button = Dölj hårdlänkar
 settings_duplicates_prehash_checkbutton = Använd prehash-cache
 settings_duplicates_minimal_size_cache_label = Minsta storlek på filer (i byte) som sparas i cache
@@ -466,13 +466,13 @@ saving_loading_saving_success = Konfigurationen sparades till filen { $name }.
 saving_loading_saving_failure = Det gick inte att spara konfigurationsdata till filen { $name }. Orsak: { $reason }.
 saving_loading_reset_configuration = Aktuell konfiguration har rensats.
 saving_loading_loading_success = Programkonfigurationen lästes in.
-saving_loading_no_config_file = Ingen konfigurationsfil hittad, med standardinställningar.
+saving_loading_no_config_file = Ingen konfigurationsfil hittades. Standardinställningarna används.
 saving_loading_failed_to_create_config_file = Det gick inte att skapa konfigurationsfilen "{ $path }". Orsak: "{ $reason }".
 saving_loading_failed_to_read_config_file = Kan inte ladda konfiguration från "{ $path }" eftersom den inte finns eller inte är en fil.
 saving_loading_failed_to_read_data_from_file = Det går inte att läsa data från filen "{ $path }". Orsak: "{ $reason }".
 # Other
 selected_all_reference_folders = Det går inte att starta sökningen när alla mappar har angetts som referensmappar
-searching_for_data = Söker data, det kan ta en stund, vänta...
+searching_for_data = Söker data, det kan ta en stund, vänta…
 text_view_messages = MEDDELANDEN
 text_view_warnings = VARNINGAR
 text_view_errors = FEL

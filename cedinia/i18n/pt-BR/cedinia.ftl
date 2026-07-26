@@ -1,7 +1,6 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-
 tool_duplicate_files = Duplicados
 tool_empty_folders = Pastas vazias
 tool_similar_images = Imagens semelhantes
@@ -15,7 +14,7 @@ tool_bad_names = Nomes ruins
 tool_exif_remover = Dados EXIF
 tool_similar_videos = Vídeos similares (Áudio)
 tool_directories = Diretórios
-tool_settings = Confirgurações
+tool_settings = Configurações
 # Home screen tool card descriptions
 home_dup_description = Localizar arquivos com o mesmo conteúdo
 home_empty_folders_description = Diretórios sem conteúdo
@@ -37,7 +36,7 @@ press_start = Pressione INICIAR para verificar
 select_label = Sel.
 deselect_label = Desel.
 list_label = Lista
-gallery_label = Galeão
+gallery_label = Gal.
 # Selection popup
 selection_popup_title = Selecionar
 select_all = Selecionar todos
@@ -87,14 +86,14 @@ settings_show_notification_desc = Mostrar uma notificação do sistema na conclu
 settings_notify_only_background = Somente quando em segundo plano
 settings_notify_only_background_desc = Pular notificação se o aplicativo estiver visível
 notifications_disabled_banner = Notificações desativadas
-notifications_enable_button = Habilitado
-settings_scan_label = PROCURAR
+notifications_enable_button = Habilitar
+settings_scan_label = VERIFICAÇÃO
 settings_filters_label = FILTROS (algumas ferramentas)
 settings_min_file_size = Tamanho mínimo do arquivo
 settings_max_file_size = Tamanho máximo do arquivo
 settings_language = IDIOMA
 settings_language_restart = Requer reinicialização do aplicativo
-settings_common_label = CONFIGURAÇÕES COMUM
+settings_common_label = CONFIGURAÇÕES COMUNS
 settings_excluded_items = ITENS EXCLUÍDOS (padrões globas, separados por vírgula)
 settings_excluded_items_placeholder = ex.: *.tmp, */.git/*, */node_modules/*
 settings_allowed_extensions = EXTENSÕES PERMITIDAS (vazio = todos)
@@ -103,11 +102,11 @@ settings_excluded_extensions = EXTENSÕES EXCLUÍDAS
 settings_excluded_extensions_placeholder = por exemplo, bak, tmp, log
 # Settings - Tools section labels
 settings_duplicates_header = DUPLICADOS
-settings_check_method_label = MÉTODO DE COMPARISÃO
+settings_check_method_label = MÉTODO DE COMPARAÇÃO
 settings_check_method = Método
 settings_hash_type_label = TIPO DE HASH
 settings_hash_type = Tipo de hash
-settings_hash_type_desc = Blake3 - é recomendada opção, CRC32 têm uma pequena chance de falsos positivos
+settings_hash_type_desc = Blake3 é a opção recomendada; CRC32 tem uma pequena chance de falsos positivos
 settings_similar_images_header = IMAGENS SIMILARES
 settings_similarity_preset = Limite de similaridade
 settings_similarity_desc = Muito alta = apenas quase idêntica
@@ -127,32 +126,32 @@ settings_music_check_method = Modo de comparação
 settings_music_compare_tags_label = TAGS COMPARADAS
 settings_music_title = Título
 settings_music_artist = Artista
-settings_music_year = ano
+settings_music_year = Ano
 settings_music_length = Comprimento
-settings_music_genre = gênero
+settings_music_genre = Gênero
 settings_music_bitrate = Taxa de bits
 settings_music_approx = Comparação de tag aproximada
 settings_temporary_files_header = ARQUIVOS DO TEMPORÁRIO
 settings_temporary_files_extensions_label = EXTENSÕES
 settings_temporary_files_extensions_placeholder = Exemplos: .tmp, .bak, ~
 settings_temporary_files_reset = Restaurar padrões
-settings_broken_files_header = ARQUIVOS DE TREINO
+settings_broken_files_header = ARQUIVOS QUEBRADOS
 settings_broken_files_note = Varredura intensiva de recursos. Para obter melhor desempenho, use Krokiet no desktop.
-settings_broken_files_types_label = TIPOS DE ALTERAÇÃO
+settings_broken_files_types_label = TIPOS VERIFICADOS
 settings_broken_audio = Áudio
 settings_broken_pdf = Pdf
 settings_broken_archive = Arquivo
-settings_broken_image = Imagem:
+settings_broken_image = Imagem
 settings_broken_font = Fonte
 settings_broken_markup = Marcação (JSON/XML/TOML)
 settings_similar_videos_header = VÍDEOS SIMILARES (ÁUDIO)
 settings_similar_videos_audio_preset = Predefinição de similaridade de áudio
 settings_similar_videos_audio_preset_desc = Controla com que rigor o áudio deve corresponder
-settings_bad_names_header = NOMES DO BAD
-settings_bad_names_checks_label = CORAÇÕES
+settings_bad_names_header = NOMES RUINS
+settings_bad_names_checks_label = VERIFICAÇÕES
 settings_bad_names_uppercase_ext = Extensão maiúscula
 settings_bad_names_emoji = Emoji em nome
-settings_bad_names_space = Espaços ao início/final
+settings_bad_names_space = Espaços no início/fim
 settings_bad_names_non_ascii = Caracteres não ASCII
 settings_bad_names_duplicated = Caracteres repetidos
 settings_ignore_same_resolution = Ignorar imagens com a mesma resolução
@@ -161,7 +160,7 @@ settings_appearance_label = APARÊNCIA
 settings_dark_theme = Tema escuro
 settings_dark_theme_desc = Use esquema de cores escuras
 # Settings - Diagnostics tab
-diagnostics_header = DIAGNOSTICAS
+diagnostics_header = DIAGNÓSTICOS
 diagnostics_thumbnails = Cache de miniaturas
 diagnostics_app_cache = Cache do app
 diagnostics_refresh = atualizar
@@ -207,7 +206,7 @@ directories_volume_add = Adicionar
 # Bottom navigation
 nav_home = Iniciar
 nav_dirs = Diretórios
-nav_settings = Confirgurações
+nav_settings = Configurações
 # Status messages set from Rust
 status_ready = pronto
 status_stopped = Parado
@@ -240,7 +239,7 @@ scanning_fallback = Escaneando...
 app_subtitle = Em honra da Batalha de Cedynia (972 CE)
 app_license = Frontend para o Núcleo Czkawka - GPL-3.0
 about_app_label = SOBRE
-cache_label = CACHAR
+cache_label = CACHE
 # Notification
 scan_completed_notification = Verificação concluída - { $file_count } itens encontrados
 # Confirm popups (set from Rust)
@@ -261,14 +260,14 @@ confirm_rename_items = Tem certeza que deseja renomear { $n } arquivos seleciona
 # Combo-box option labels (translatable display names)
 option_search_mode_biggest = Maior
 option_search_mode_smallest = Menor
-option_similarity_very_high = Alto
-option_similarity_high = alta
+option_similarity_very_high = Muito Alta
+option_similarity_high = Alta
 option_similarity_medium = Média
 option_similarity_low = baixa
 option_similarity_very_low = V.Baixa
 option_similarity_minimal = Mínimo
 option_check_method_hash = Hash
-option_check_method_name = Nome:
+option_check_method_name = Nome
 option_check_method_size_and_name = Tamanho+Nome
 option_check_method_size = Tamanho
 option_music_method_tags = Etiquetas
@@ -291,7 +290,7 @@ directories_check_button = Analisar
 directories_check_popup_title = Estatísticas do diretório
 directories_check_label_included = Caminhos incluídos:
 directories_check_label_excluded = Caminhos excluídos:
-directories_check_label_referenced = Rotas de referência:
+directories_check_label_referenced = Caminhos de referência:
 directories_check_label_would_scan = Arquivos para verificar:
 directories_check_label_processable = Arquivos processáveis:
 directories_check_scanning = Escaneando...
@@ -303,7 +302,7 @@ path_edit_not_exists = Caminho não existe
 path_edit_is_dir = Diretório
 path_edit_is_file = Arquivo
 path_edit_no_newlines = Caminhos não podem conter novas linhas - Chave Enter não é permitida
-ctx_menu_title = Abertas
+ctx_menu_title = Abrir
 ctx_open_file = Abrir item
 ctx_open_folder = Abrir pasta pai
 dir_open_folder = Abrir pasta

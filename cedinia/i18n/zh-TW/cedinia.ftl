@@ -1,7 +1,6 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-
 tool_duplicate_files = 重複項目
 tool_empty_folders = 空資料夾
 tool_similar_images = 相似影像
@@ -310,7 +309,7 @@ dir_open_folder = 開啟資料夾
 # Compare view
 compare_label = 比較
 compare_loading = 正在載入圖片...
-compare_cancelling = 正在取消.
+compare_cancelling = Cancelling...
 compare_computing = 正在計算差異...
 compare_mode_normal = 側面
 compare_mode_split = 分割

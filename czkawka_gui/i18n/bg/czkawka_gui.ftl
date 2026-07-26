@@ -22,7 +22,7 @@ music_artist_checkbox = Изпълнител
 music_year_checkbox = Година
 music_bitrate_checkbox = Битрейт
 music_genre_checkbox = Жанр
-music_length_checkbox = Продължителност
+music_length_checkbox = Дължина
 music_comparison_checkbox = Приблизително сравнение
 music_checking_by_tags = Етикети
 music_checking_by_content = Съдържание
@@ -49,9 +49,9 @@ music_comparison_checkbox_tooltip =
     Програмата търси подобни музикални файлове с помощта на изкуствен интелект, който използва машинно обучение за премахване на скоби от фраза. Например, при активирана тази опция въпросните файлове ще се считат за дубликати:
     
     Świędziżłób --- Świędziżłób (Remix Lato 2021)
-duplicate_case_sensitive_name = Чувствително изписване
+duplicate_case_sensitive_name = Чувствителност към регистъра
 duplicate_case_sensitive_name_tooltip =
-    Когато е разрешено, групата записва само записи с едно и също име, напр. Żołd <-> Żołd
+    Когато е разрешено, се групират само записи с точно еднакво име, напр. Żołd <-> Żołd
     
     При деактивиране на тази опция имената ще се групират, без да се проверява дали всяка буква е с еднакъв размер, напр. żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = Размер и име
@@ -73,15 +73,8 @@ duplicate_check_method_tooltip =
     
     Размер - Намира файлове с еднакъв размер.
     
-    Hash - Намира файлове с еднакво съдържание. Този режим хешира файла и по-късно сравнява този хеш, за да намери дубликати. Този режим е най-сигурният начин за намиране на дубликати. Приложението използва силно кеша, така че второто и следващите сканирания на едни и същи данни би трябвало да са много по-бързи от първото.
-image_hash_size_tooltip =
-    Всяко сравнено изображение дава специален хеш, който може да бъде сравнен с другите и малка разлика между тях означава че изображенията са близки.
-    
-    Размер 8 хеш е сравнително добър за намиране на изображения, които са близки до оригинала. С по-голям набор изображения (>1000), това ще доведе до голяма бройка фалшиви позитивни, така че препоръчвам да се ползва по-голям размер на хеша в този случай.
-    
-    16 е размер по подразбиране, който е сравнително добър компромис между намиране на малки разлики в изображенията и имайки малко хеш колизии.
-    
-    32 и 64 хешове намират само много сходни изображения, но ще имат почти никакви фалшиви позитивни (с изключение на някой изображения с алфа канал).
+    Хеш - Намира файлове с еднакво съдържание. Този режим хешира файла и по-късно сравнява този хеш, за да намери дубликати. Този режим е най-сигурният начин за намиране на дубликати. Приложението използва силно кеша, така че второто и следващите сканирания на едни и същи данни би трябвало да са много по-бързи от първото.
+image_hash_size_tooltip = Размер 8 хеш е сравнително добър за намиране на изображения, които са само малко подобни на оригинала.
 image_resize_filter_tooltip =
     За да изчисли хеша на изображението, библиотеката трябва първо да го оразмери.
     
@@ -101,7 +94,7 @@ big_files_mode_combobox_tooltip = Позволява търсене на най-
 big_files_mode_label = Проверени файлове
 big_files_mode_smallest_combo_box = Най-малкия
 big_files_mode_biggest_combo_box = Най-големия
-main_notebook_duplicates = Повтарящи се файлове
+main_notebook_duplicates = Дублирани файлове
 main_notebook_empty_directories = Празни директории
 main_notebook_big_files = Големи файлове
 main_notebook_empty_files = Празни файлове
@@ -111,7 +104,7 @@ main_notebook_similar_videos = Подобни видеа
 main_notebook_same_music = Музикални дубликати
 main_notebook_symlinks = Невалидни симлинкове
 main_notebook_broken_files = Повредени файлове
-main_notebook_bad_extensions = Повредени разширения
+main_notebook_bad_extensions = Грешни разширения
 main_tree_view_column_file_name = Име на файла
 main_tree_view_column_folder_name = Име на папката
 main_tree_view_column_path = Път
@@ -129,11 +122,11 @@ main_tree_view_column_symlink_file_name = Име на файла на Symlink
 main_tree_view_column_symlink_folder = Symlink папка
 main_tree_view_column_destination_path = Път за местоположение
 main_tree_view_column_type_of_error = Тип на грешка
-main_tree_view_column_current_extension = Избрано разширение
+main_tree_view_column_current_extension = Текущо разширение
 main_tree_view_column_proper_extensions = Правилно разширение
-main_tree_view_column_fps = БПС
+main_tree_view_column_fps = Кадри/сек
 main_tree_view_column_codec = Кодек
-main_label_check_method = Провери метод
+main_label_check_method = Метод на проверка
 main_label_hash_type = Хеш тип
 main_label_hash_size = Хеш размер
 main_label_geometric_invariance = Геометрична инвариантност
@@ -141,7 +134,7 @@ main_label_size_bytes = Размер (байтове)
 main_label_min_size = Мин
 main_label_max_size = Макс
 main_label_shown_files = Брой на показани файлове
-main_label_resize_algorithm = Преоразмери алгоритъма
+main_label_resize_algorithm = Алгоритъм за преоразмеряване
 main_label_similarity = Сходство{ " " }
 main_check_box_broken_files_audio = Аудио
 main_check_box_broken_files_pdf = PDF
@@ -193,14 +186,14 @@ upper_excluded_extensions_tooltip =
     
     Когато се ползват едновременно включени и изключени разширения, този тук има по-голям приоритет и файла няма да бъде проверен.
 upper_excluded_items_tooltip =
-    Изключените елементи трябва да съдържат * wildcard и да бъдат разделени с ками.
+    Изключените елементи трябва да съдържат * wildcard и да бъдат разделени със запетаи.
     Това е по-бавно от Excluded Paths, така че използвайте внимателно.
 upper_excluded_items = Изключени елементи:
 upper_allowed_extensions = Разрешени разширения:
 upper_excluded_extensions = Изключени разширения:
 # Popovers
 popover_select_all = Избери всички
-popover_unselect_all = Размаркирайте всички
+popover_unselect_all = Размаркирай всички
 popover_reverse = Избери обратното
 popover_select_all_except_shortest_path = Изберете всички, освен най-краткия път
 popover_select_all_except_longest_path = Изберете всички, освен най-дълъг път
@@ -244,9 +237,9 @@ popover_custom_not_all_check_button_tooltip =
 popover_custom_regex_path_label = Път
 popover_custom_regex_name_label = Име
 popover_custom_regex_regex_label = Regex Път + Име
-popover_custom_case_sensitive_check_button = Чувствителност на буквите
+popover_custom_case_sensitive_check_button = Чувствителност към регистъра
 popover_custom_all_in_group_label = Да не се избират всички записи в групата
-popover_custom_mode_unselect = Премахване на избора по избор
+popover_custom_mode_unselect = Размаркирай по избор
 popover_custom_mode_select = Избери по избор
 popover_sort_file_name = Име на файла
 popover_sort_folder_name = Име на папката
@@ -292,7 +285,7 @@ bottom_show_errors_tooltip = Показване/скриване на долни
 bottom_show_upper_notebook_tooltip = Показване/скриване на горния панел на бележника.
 # Progress Window
 progress_stop_button = Спри
-progress_stop_additional_message = Спри избраните
+progress_stop_additional_message = Спирането е заявено
 # About Window
 about_repository_button_tooltip = Връзка към страницата на хранилището с изходния код.
 about_donation_button_tooltip = Връзка към страницата за дарения.
@@ -305,7 +298,7 @@ about_translation_button = Преводи
 about_other_apps_button = Други приложения
 about_other_apps_dialog_title = Други приложения от qarmin
 about_other_apps_open_source_note = Всички изброени приложения са безплатни и с отворен код.
-about_other_apps_open_button = Отворено
+about_other_apps_open_button = Отвори
 about_other_apps_szyszka_desc = Бърз и мощен инструмент за преименуване на файлове.
 about_other_apps_mykrut_desc = Прост, бърз и фокусиран файлов мениджър за Linux.
 about_other_apps_dcmki_viewer_desc = Прост прегледник на DICOM файлове.
@@ -328,7 +321,7 @@ krokiet_promo_message =
     И ако сте пропуснали това, вече има още едно приложение, което е по-ново от Krokiet - Cedinia, което е предназначено предимно за Android устройства и работа със тъчскрийн.
     
     Czkawka GTK ни служи добре, но неговият период на действие приключи.
-krokiet_promo_link_download = Изтеглете Krokiet/Cedinia
+krokiet_promo_link_download = Изтегли Krokiet/Cedinia
 krokiet_promo_link_project = Страница на проекта
 
 # Settings
@@ -357,7 +350,7 @@ settings_load_at_start_button_tooltip =
     
     Ако не е разрешено, ще се използват настройките по подразбиране.
 settings_confirm_deletion_button_tooltip = Показване на диалогов прозорец за потвърждение при натискане на бутона за изтриване.
-settings_confirm_link_button_tooltip = Показване на диалогов прозорец за потвърждение, когато щракнете върху бутона за твърда/симултанна връзка.
+settings_confirm_link_button_tooltip = Показване на диалогов прозорец за потвърждение, когато щракнете върху бутона за твърда/символна връзка.
 settings_confirm_group_deletion_button_tooltip = Показване на диалогов прозорец с предупреждение при опит за изтриване на всички записи от групата.
 settings_show_text_view_button_tooltip = Показване на текстовия панел в долната част на потребителския интерфейс.
 settings_use_cache_button_tooltip = Използвайте кеш за файлове.
@@ -367,7 +360,7 @@ settings_language_label_tooltip = Език за потребителски ин�
 settings_save_at_exit_button = Запазване на конфигурацията при затваряне на приложението
 settings_load_at_start_button = Зареждане на конфигурацията при отваряне на приложението
 settings_confirm_deletion_button = Показване на диалогов прозорец за потвърждение при изтриване на файлове
-settings_confirm_link_button = Показване на диалогов прозорец за потвърждение при твърди/симетрични връзки на файлове
+settings_confirm_link_button = Показване на диалогов прозорец за потвърждение при твърди/символни връзки на файлове
 settings_confirm_group_deletion_button = Показване на диалогов прозорец за потвърждение при изтриване на всички файлове в групата
 settings_show_text_view_button = Показване на долния текстов панел
 settings_use_cache_button = Използвай кеш
@@ -375,14 +368,7 @@ settings_save_also_as_json_button = Също запази леша като JSON
 settings_use_trash_button = Премести изтритите файлове в кошчето
 settings_language_label = Език
 settings_multiple_delete_outdated_cache_checkbutton = Автоматично изтриване на остарелите записи в кеша
-settings_multiple_delete_outdated_cache_checkbutton_tooltip =
-    Изтриване на остарелите резултати от кеша, които сочат към несъществуващи файлове.
-    
-    Когато е разрешено, приложението се уверява, че при зареждане на записи всички записи сочат към валидни файлове (повредените се игнорират).
-    
-    Деактивирането на тази функция ще помогне при сканиране на файлове на външни дискове, тъй като записите от кеша за тях няма да бъдат изчистени при следващото сканиране.
-    
-    В случай че имате стотици хиляди записи в кеша, предлагаме да включите тази опция, което ще ускори зареждането/спасяването на кеша в началото/края на сканирането.
+settings_multiple_delete_outdated_cache_checkbutton_tooltip = В случай че имате стотици хиляди записи в кеша, предлагаме да включите тази опция, което ще ускори зареждането/запазването на кеша в началото/края на сканирането.
 settings_notebook_general = Общи
 settings_notebook_duplicates = Дубликати
 settings_notebook_images = Сходни изображения
@@ -415,7 +401,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     Силно се препоръчва да се използва при сканиране на стотици хиляди или милиони файлове, защото може да ускори търсенето многократно.
 settings_duplicates_prehash_minimal_entry_tooltip = Минимален размер на записа в кеша.
 settings_duplicates_hide_hard_link_button = Скрий твърди връзки
-settings_duplicates_prehash_checkbutton = Използване на предварителен кеш
+settings_duplicates_prehash_checkbutton = Използване на кеш за предварителни хешове (prehash)
 settings_duplicates_minimal_size_cache_label = Минимален размер на файловете (в байтове), записани в кеша
 settings_duplicates_minimal_size_cache_prehash_label = Минимален размер на файловете (в байтове), които се записват в предварителния кеш
 
@@ -425,7 +411,7 @@ settings_saving_button_tooltip = Записване на текущата кон
 settings_loading_button_tooltip = Зареждане на настройките от файл и заместване на текущата конфигурация с тях.
 settings_reset_button_tooltip = Възстановяване на текущата конфигурация до тази по подразбиране.
 settings_saving_button = Запазване на конфигурацията
-settings_loading_button = Конфигурация за зареждане
+settings_loading_button = Зареждане на конфигурацията
 settings_reset_button = Нулиране на конфигурацията
 
 ## Opening cache/config folders
@@ -443,16 +429,16 @@ settings_folder_settings_open_tooltip =
     
     ПРЕДУПРЕЖДЕНИЕ: Ръчното модифициране на конфигурацията може да наруши работния ви процес.
 settings_folder_cache_open = Отворете папката с кеш
-settings_folder_settings_open = Отваряне на папката с настройки
+settings_folder_settings_open = Отворете папката с настройки
 # Compute results
 compute_stopped_by_user = Търсенето е спряно от потребител
 compute_found_duplicates_hash_size = Намерени са { $number_files } дубликати в { $number_groups } групи, които заемат { $size } за { $time }
-compute_found_duplicates_name = Намерих { $number_files } дублики в { $number_groups } групи за { $time }
-compute_found_empty_folders = Найдени са { $number_files } празни папки във { $time }
-compute_found_empty_files = Найдени са { $number_files } празни файлова обекта в { $time }
+compute_found_duplicates_name = Намерени са { $number_files } дубликати в { $number_groups } групи за { $time }
+compute_found_empty_folders = Намерени са { $number_files } празни папки в { $time }
+compute_found_empty_files = Намерени са { $number_files } празни файлове в { $time }
 compute_found_big_files = Намерих { $number_files } големи файла в { $time }
-compute_found_temporary_files = Найдени са { $number_files } временни файлъв в { $time }
-compute_found_images = Найшли се { $number_files } подобни изображения в { $number_groups } групи за { $time }
+compute_found_temporary_files = Намерени са { $number_files } временни файлове в { $time }
+compute_found_images = Намерени са { $number_files } подобни изображения в { $number_groups } групи за { $time }
 compute_found_videos = Намерил { $number_files } подобни видео файла в { $number_groups } групи за { $time }
 compute_found_music = Найдено { $number_files } подобни музикални файлове в { $number_groups } групи за { $time }
 compute_found_invalid_symlinks = Намерени { $number_files } невалидни символни връзки в { $time }
@@ -463,7 +449,7 @@ progress_current_stage = Текущ етап:{ " " }
 progress_all_stages = Всички етапи:{ " " }
 # Saving loading 
 saving_loading_saving_success = Запазване на конфигурацията във файл { $name }.
-saving_loading_saving_failure = Неуспешно спъжаване на конфигурационните данни в файл { $name }, причина { $reason }.
+saving_loading_saving_failure = Неуспешно запазване на конфигурационните данни в файл { $name }, причина { $reason }.
 saving_loading_reset_configuration = Текущата конфигурация е изтрита.
 saving_loading_loading_success = Правилно заредена конфигурация на приложението.
 saving_loading_no_config_file = Не е намерен конфигурационен файл, използва се конфигурация по подразбиране.
@@ -477,35 +463,35 @@ text_view_messages = СЪОБЩЕНИЯ
 text_view_warnings = ПРЕДУПРЕЖДЕНИЯ
 text_view_errors = ГРЕШКИ
 about_window_motto = Тази програма е безплатна за използване и винаги ще бъде такава.
-krokiet_new_app = Цквака е в режим на поддръжка, че се приемат само критични грешки и нито еднаnova функционалност ще бъде добавена. За nova функционалност моля проверете новата апликация Крочиец, която е по-стабилна и изтеглянечна и се развива все още активно.
+krokiet_new_app = Тази GTK версия на Czkawka вече не се разработва след версия 12. За нови функции и активна разработка, моля, използвайте Krokiet, който е по-стабилен и производителен.
 # Various dialog
 dialogs_ask_next_time = Попитайте следващия път
-symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+symlink_failed = Неуспешно създаване на символна връзка от { $name } към { $target }, причина { $reason }
 delete_title_dialog = Изтрий потвърждението
 delete_question_label = Сигурни ли сте, че искате да изтриете файловете?
 delete_all_files_in_group_title = Потвърждаване на изтриването на всички файлове в групата
 delete_all_files_in_group_label1 = В някои групи се избират всички записи.
 delete_all_files_in_group_label2 = Сигурни ли сте, че искате да ги изтриете?
-delete_items_label = { $items } файловете ще бъдат изтрити.
-delete_items_groups_label = { $items } Файловете от { $groups } групите ще бъдат изтрити.
+delete_items_label = { $items } файлове ще бъдат изтрити.
+delete_items_groups_label = { $items } файлове от { $groups } групи ще бъдат изтрити.
 hardlink_failed = Неуспех при създаване на твърд линк за { $name } в { $target }, причина { $reason }
 hard_sym_invalid_selection_title_dialog = Невалидна селекция при някои групи
 hard_sym_invalid_selection_label_1 = В някои групи е избран само един запис и той ще бъде пренебрегнат.
 hard_sym_invalid_selection_label_2 = За да можете да свържете тези файлове с твърда/симетрична връзка, трябва да изберете поне два резултата в групата.
 hard_sym_invalid_selection_label_3 = Първият в групата се признава за оригинален и не се променя, но вторият и следващите се променят.
 hard_sym_link_title_dialog = Потвърждаване на връзката
-hard_sym_link_label = Потвърждаване на връзкатаСигурни ли сте, че искате да свържете тези файлове?
+hard_sym_link_label = Сигурни ли сте, че искате да свържете тези файлове?
 move_folder_failed = Неуспешно преместване на папка { $name }, причина { $reason }
 move_file_failed = Неуспешно преместване на файл { $name }, причина { $reason }
 move_files_title_dialog = Изберете папката, в която искате да преместите дублираните файлове
-move_files_choose_more_than_1_path = Може да се избере само един път, за да може да се копират дублираните им файлове, selected { $path_number }.
+move_files_choose_more_than_1_path = Може да се избере само един път, за да може да се копират дублираните им файлове, избрани { $path_number }.
 move_stats = Правилно преместени { $num_files }/{ $all_files } елементи
 save_results_to_file = Запазени резултати едновременно към txt и json файлове в папка "{ $name }".
 search_not_choosing_any_music = ГРЕШКА: Трябва да изберете поне едно квадратче за отметка с типове търсене на музика.
 search_not_choosing_any_broken_files = ГРЕШКА: Трябва да изберете поне едно квадратче за отметка с тип на проверените счупени файлове.
 include_folders_dialog_title = Папки, които да се включват
 exclude_folders_dialog_title = Папки, които да се изключат
-include_manually_directories_dialog_title = Добаеви ръчно директория
+include_manually_directories_dialog_title = Добавяне на директория ръчно
 cache_properly_cleared = Правилно изчистен кеш
 cache_clear_duplicates_title = Изчистване на кеша за дубликати
 cache_clear_similar_images_title = Изчистване на кеша на подобни изображения

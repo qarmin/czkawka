@@ -4,27 +4,27 @@ window_main_title = Czkawka (Schluckauf)
 window_progress_title = Scannen
 window_compare_images = Bilder vergleichen
 # General
-general_ok_button = Ok
+general_ok_button = OK
 general_close_button = Schließen
 # Krokiet info dialog
-krokiet_info_title = Deprecation-Mitteilung
+krokiet_info_title = Hinweis zur Einstellung der Weiterentwicklung
 krokiet_info_message =
     Czkawka GTK 12.0 ist die finale Version. Es sind keine weiteren Updates, Funktionen oder Bugfixes geplant.
     
-    Die meisten Features von Czkawka GTK sind in Krokiet erhältlich, in der Regel in einfacher, schneller und stabiler. Krokiet fügt auch neue Funktionen und Verbesserungen hinzu, die in der GTK-Version nicht möglich waren.
+    Die meisten Features von Czkawka GTK sind auch in Krokiet verfügbar, in der Regel in einfacherer, schnellerer und stabilerer Form. Krokiet fügt zudem neue Funktionen und Verbesserungen hinzu, die in der GTK-Version nicht möglich waren.
     
-    Wenn Sie noch Czkawka GTK verwenden, sollte der Wechsel zu Krokiet einfach sein, da es eine ähnliche Schnittstelle, weniger Abhängigkeiten und bessere plattformübergreifende Unterstützung hat.
+    Wenn Sie noch Czkawka GTK verwenden, sollte der Wechsel zu Krokiet einfach sein, da es eine ähnliche Oberfläche, weniger Abhängigkeiten und eine bessere plattformübergreifende Unterstützung bietet.
     
-    PS: Diese Meldung sollte nur einmal angezeigt werden. Wenn sie erneut angezeigt wird, setzen Sie die Umgebungsvariable CZKAWKA_DONT_ANNOY_ME auf einen nicht-leeren Wert.
+    PS: Diese Meldung sollte nur einmal erscheinen. Falls sie erneut angezeigt wird, setzen Sie die Umgebungsvariable CZKAWKA_DONT_ANNOY_ME auf einen nicht-leeren Wert.
 # Main window
 music_title_checkbox = Titel
 music_artist_checkbox = Künstler
 music_year_checkbox = Jahr
-music_bitrate_checkbox = Bitraten
+music_bitrate_checkbox = Bitrate
 music_genre_checkbox = Genre
 music_length_checkbox = Dauer
 music_comparison_checkbox = Ungefährer Vergleich
-music_checking_by_tags = Schlagworte
+music_checking_by_tags = Tags
 music_checking_by_content = Inhalt
 same_music_seconds_label = Minimale Dauer des Fragments, in Sekunden
 same_music_similarity_label = Maximaler Unterschied
@@ -34,25 +34,25 @@ music_compare_only_in_title_group_tooltip =
     
     Mit 10000 Dateien, statt fast 100 Millionen Vergleiche wird es in der Regel rund 20000 Vergleiche geben.
 same_music_tooltip =
-    Die Suche nach ähnlichen Musikdateien nach dem Inhalt kann über die Einstellung konfiguriert werden:
+    Die Suche nach ähnlichen Musikdateien anhand ihres Inhalts kann über folgende Einstellungen konfiguriert werden:
     
-    - Die minimale Fragmentzeit, nach der Musikdateien als ähnlich identifiziert werden können
+    - Die minimale Fragmentdauer, ab der Musikdateien als ähnlich identifiziert werden können
     - Der maximale Unterschied zwischen zwei getesteten Fragmenten
     
-    Der Schlüssel zu guten Ergebnissen ist die Suche nach sinnvollen Kombinationen dieser Parameter. für bereitgestellt.
+    Der Schlüssel zu guten Ergebnissen ist es, sinnvolle Kombinationen dieser Parameter zu finden.
     
-    Wenn Sie die minimale Zeit auf 5 Sekunden und den maximalen Unterschied auf 1,0 setzen, werden fast identische Fragmente in den Dateien gesucht.
-    Eine Zeit von 20 Sekunden und ein maximaler Unterschied von 6.0 hingegen funktioniert gut um Remix/Live-Versionen zu finden.
+    Wenn Sie die minimale Zeit auf 5 Sekunden und den maximalen Unterschied auf 1,0 setzen, wird nach fast identischen Fragmenten in den Dateien gesucht.
+    Eine Zeit von 20 Sekunden und ein maximaler Unterschied von 6,0 funktionieren hingegen gut, um Remixe/Live-Versionen zu finden.
     
-    Standardmäßig wird jede Musikdatei miteinander verglichen, und dies kann viel Zeit in Anspruch nehmen, wenn viele Dateien getestet werden so ist es in der Regel besser, Referenzordner zu verwenden und festzulegen, welche Dateien miteinander verglichen werden sollen (mit gleicher Dateigröße Der Vergleich von Fingerabdrücken wird mindestens 4x schneller als ohne Referenzordner sein).
+    Standardmäßig wird jede Musikdatei mit jeder anderen verglichen, was bei vielen getesteten Dateien sehr viel Zeit in Anspruch nehmen kann. Daher ist es meist besser, Referenzordner zu verwenden und festzulegen, welche Dateien miteinander verglichen werden sollen (bei gleicher Anzahl an Dateien ist der Vergleich von Fingerabdrücken mindestens 4x schneller als ohne Referenzordner).
 music_comparison_checkbox_tooltip =
-    Mit Hilfe von einer KI, die maschinelles Lernen nutzt, um Klammern aus Sätzen zu entfernen, wird nach ähnlichen Musikdateien gesucht. Wenn die Option aktiviert ist, werden die folgenden Dateien zum Beispiel als Duplikate betrachtet:
+    Mit Hilfe von einer KI, die maschinelles Lernen nutzt, um Klammern aus einer Textzeile zu entfernen, wird nach ähnlichen Musikdateien gesucht. Wenn die Option aktiviert ist, werden die folgenden Dateien zum Beispiel als Duplikate betrachtet:
     
     Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
-duplicate_case_sensitive_name = Gross-/Kleinschreibung beachten
+duplicate_case_sensitive_name = Groß-/Kleinschreibung beachten
 duplicate_case_sensitive_name_tooltip =
-    Wenn aktiviert, gruppieren Sie nur Datensätze, wenn sie genau denselben Namen haben, z. żoŁD <-> Żołd
-    Deaktivieren dieser Option gruppiert Namen ohne zu überprüfen, ob jeder Buchstabe die gleiche Größe wie żoŁD <-> Żołd
+    Wenn aktiviert, gruppieren Sie nur Datensätze, wenn sie genau denselben Namen haben, z.B. Żołd <-> Żołd
+    Deaktivieren dieser Option gruppiert Namen, ohne zu überprüfen, ob jeder Buchstabe die gleiche Größe hat, z.B. żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = Größe und Name
 duplicate_mode_name_combo_box = Name
 duplicate_mode_size_combo_box = Größe
@@ -60,11 +60,11 @@ duplicate_mode_hash_combo_box = Hash
 duplicate_hash_type_tooltip =
     Czkawka bietet 3 Arten von Hashes an, die verwendet werden können:
     
-    Blake3 - kryptographische Hashfunktion. Wegen ihrer Geschwindikeit wird Sie als Standard-Hash-Algorithmus verwendet.
+    Blake3 - kryptographische Hashfunktion. Wegen ihrer Geschwindigkeit wird sie als Standard-Hash-Algorithmus verwendet.
     
     CRC32 - einfache Hash-Funktion. Sie sollte schneller sein als Blake3, könnte aber in seltenen Fällen Kollisionen haben.
     
-    XXH3 - bei Geschwindikeit und Hashqualität vergleichbar mit Blake3 (aber nicht kryptographisch). Beide Modi können somit leicht miteinander ausgetauscht werden.
+    XXH3 - bei Geschwindigkeit und Hashqualität vergleichbar mit Blake3 (aber nicht kryptographisch). Beide Modi können somit leicht miteinander ausgetauscht werden.
 duplicate_check_method_tooltip =
     Derzeit bietet Czkawka drei Methoden an, um Duplikate zu finden:
     
@@ -72,23 +72,23 @@ duplicate_check_method_tooltip =
     
     Größe - Findet Dateien mit gleicher Größe.
     
-    Hash - Findet Dateien mit dem gleichen Inhalt. Dieser Modus hasht die Datei und vergleicht diese Hashes, um Duplikate zu finden. Dieser Modus ist der sicherste Weg, um Duplikate zu finden. Das Tool verwendet einen Cache, daher sollten weiteren Scans der gleichen Dateien viel schneller sein als der erste.
+    Hash - Findet Dateien mit dem gleichen Inhalt. Dieser Modus hasht die Datei und vergleicht diese Hashes, um Duplikate zu finden. Dieser Modus ist der sicherste Weg, um Duplikate zu finden. Das Tool verwendet einen Cache, daher sollten weitere Scans der gleichen Dateien viel schneller sein als der erste.
 image_hash_size_tooltip =
-    Jedes geprüfte Bild erzeugt einen speziellen Hash, der miteinander verglichen werden kann und ein kleiner Unterschied zwischen ihnen bedeutet, dass diese Bilder ähnlich sind.
+    Jedes geprüfte Bild erzeugt einen speziellen Hash, der mit anderen verglichen werden kann; ein kleiner Unterschied zwischen ihnen bedeutet, dass diese Bilder ähnlich sind.
     
-    8 Hashgröße ist sehr gut, um Bilder zu finden, die dem Original nur ein wenig ähneln. Bei einer größeren Anzahl von Bildern (>1000), wird dies eine große Anzahl falscher Positives, also empfehle ich in diesem Fall eine größere Hashgröße.
+    Eine Hashgröße von 8 eignet sich sehr gut, um Bilder zu finden, die dem Original nur ein wenig ähneln. Bei einer größeren Anzahl von Bildern (>1000) erzeugt dies jedoch eine große Anzahl falsch positiver Ergebnisse, daher empfehle ich in diesem Fall eine größere Hashgröße.
     
-    16 ist die standardmäßige Hashgröße, die einen guten Kompromiss zwischen dem Finden von kleinen ähnlichen Bildern und einer geringen Anzahl von Hash-Kollisionen darstellt.
+    16 ist die standardmäßige Hashgröße, die einen guten Kompromiss zwischen dem Finden von auch nur wenig ähnlichen Bildern und einer geringen Anzahl von Hash-Kollisionen darstellt.
     
-    32 und 64 Hashes finden nur sehr ähnliche Bilder, sollten aber fast keine falschen positiven Bilder haben (vielleicht mit Ausnahme einiger Bilder mit Alphakanal).
+    32 und 64 Hashes finden nur sehr ähnliche Bilder, sollten aber fast keine falsch positiven Ergebnisse liefern (außer vielleicht bei einigen Bildern mit Alphakanal).
 image_resize_filter_tooltip =
-    Um Hash des Bildes zu berechnen, muss die Bibliothek zuerst die Größe des Hashs verändern.
+    Um den Hash eines Bildes zu berechnen, muss die Bibliothek zunächst dessen Größe ändern.
     
-    Abhängig vom gewählten Algorithmus sieht das resultierende Bild, das zur Hashberechnung verwendet wird, ein wenig anders aus.
+    Je nach gewähltem Algorithmus sieht das resultierende Bild, das zur Hashberechnung verwendet wird, ein wenig anders aus.
     
-    Der schnellste zu verwendende Algorithmus, aber auch der, der die schlechtesten Ergebnisse liefert, ist in der Nähe. Sie ist standardmäßig aktiviert, da sie mit 16x16 Hash-Größe nicht wirklich sichtbar ist.
+    Der schnellste verwendbare Algorithmus, der aber auch die schlechtesten Ergebnisse liefert, ist Nearest. Er ist standardmäßig aktiviert, da die geringere Qualität bei einer Hash-Größe von 16x16 kaum sichtbar ist.
     
-    Mit 8x8 Hashgröße wird empfohlen, einen anderen Algorithmus als nahe zu verwenden, um bessere Gruppen von Bildern zu haben.
+    Bei einer Hashgröße von 8x8 wird empfohlen, einen anderen Algorithmus als Nearest zu verwenden, um bessere Bildgruppen zu erhalten.
 image_hash_alg_tooltip =
     Benutzer können aus einem von vielen Algorithmen zur Berechnung des Hashs wählen.
     
@@ -100,14 +100,14 @@ big_files_mode_combobox_tooltip = Erlaubt die Suche nach kleinsten/größten Dat
 big_files_mode_label = Überprüfte Dateien
 big_files_mode_smallest_combo_box = Die kleinsten
 big_files_mode_biggest_combo_box = Die größten
-main_notebook_duplicates = Gleiche Dateien
+main_notebook_duplicates = Duplikate
 main_notebook_empty_directories = Leere Verzeichnisse
 main_notebook_big_files = Große Dateien
 main_notebook_empty_files = Leere Dateien
 main_notebook_temporary = Temporäre Dateien
 main_notebook_similar_images = Ähnliche Bilder
 main_notebook_similar_videos = Ähnliche Videos
-main_notebook_same_music = Gleiche Musik
+main_notebook_same_music = Musik-Duplikate
 main_notebook_symlinks = Ungültige Symlinks
 main_notebook_broken_files = Defekte Dateien
 main_notebook_bad_extensions = Falsche Erweiterungen
@@ -123,8 +123,8 @@ main_tree_view_column_artist = Künstler
 main_tree_view_column_year = Jahr
 main_tree_view_column_bitrate = Bitrate
 main_tree_view_column_length = Dauer
-main_tree_view_column_genre = Genretype
-main_tree_view_column_symlink_file_name = Symlink Dateiname
+main_tree_view_column_genre = Genre
+main_tree_view_column_symlink_file_name = Symlink-Dateiname
 main_tree_view_column_symlink_folder = Symlink-Ordner
 main_tree_view_column_destination_path = Zielpfad
 main_tree_view_column_type_of_error = Fehlertyp
@@ -133,16 +133,16 @@ main_tree_view_column_proper_extensions = Richtige Erweiterung
 main_tree_view_column_fps = FPS
 main_tree_view_column_codec = Codec
 main_label_check_method = Prüfmethode
-main_label_hash_type = Hash Typ
-main_label_hash_size = Hash Größe
+main_label_hash_type = Hash-Typ
+main_label_hash_size = Hash-Größe
 main_label_geometric_invariance = Geometrische Invarianz
 main_label_size_bytes = Größe (Bytes)
 main_label_min_size = Min
 main_label_max_size = Max
 main_label_shown_files = Anzahl der angezeigten Dateien
-main_label_resize_algorithm = Algorithmus skalieren
+main_label_resize_algorithm = Skalierungsalgorithmus
 main_label_similarity = Ähnlichkeit{ " " }
-main_check_box_broken_files_audio = Ton
+main_check_box_broken_files_audio = Audio
 main_check_box_broken_files_pdf = Pdf
 main_check_box_broken_files_archive = Archiv
 main_check_box_broken_files_image = Bild
@@ -157,10 +157,10 @@ upper_tree_view_included_reference_column_title = Referenzordner
 upper_recursive_button = Rekursiv
 upper_recursive_button_tooltip = Falls ausgewählt, suchen Sie auch nach Dateien, die nicht direkt unter den ausgewählten Ordnern platziert werden.
 upper_manual_add_included_button = Manuell hinzufügen
-upper_add_included_button = Neu
+upper_add_included_button = Hinzufügen
 upper_remove_included_button = Entfernen
 upper_manual_add_excluded_button = Manuell hinzufügen
-upper_add_excluded_button = Neu
+upper_add_excluded_button = Hinzufügen
 upper_remove_excluded_button = Entfernen
 upper_manual_add_included_button_tooltip =
     Verzeichnisname zur Suche per Hand hinzufügen.
@@ -177,7 +177,7 @@ upper_manual_add_excluded_button_tooltip =
     
     /home/roman;/home/krokiet wird zwei Verzeichnisse /home/roman und /home/keokiet hinzufügen
 upper_add_excluded_button_tooltip = Verzeichnis hinzufügen, das bei der Suche ausgeschlossen werden soll.
-upper_remove_excluded_button_tooltip = Ausgeschlossene Verzeichnisse löschen.
+upper_remove_excluded_button_tooltip = Verzeichnis von den Ausgeschlossenen löschen.
 upper_notebook_items_configuration = Suchbedingungen
 upper_notebook_excluded_directories = Ausgeschlossene Pfade
 upper_notebook_included_directories = Einbezogene Pfade
@@ -186,11 +186,11 @@ upper_allowed_extensions_tooltip =
     
     Folgende Makros, die mehrere Erweiterungen gleichzeitig hinzufügen, sind ebenfalls verfügbar: IMAGE, VIDEO, MUSIC, TEXT.
     
-    Nutzungsbeispiel ".exe, IMAGE, VIDEO, .rar, 7z" - bedeutet, dass Bilder (jpg, png ...), Videodateien (avi, mp4 ...), exe, rar und 7z gescannt werden.
+    Nutzungsbeispiel ".exe, IMAGE, VIDEO, .rar, 7z" - bedeutet, dass Bilder (z. B. jpg, png), Videodateien (z. B. avi, mp4), exe, rar und 7z gescannt werden.
 upper_excluded_extensions_tooltip =
     Liste der deaktivierten Dateien, die beim Scannen ignoriert werden.
     
-    Wenn sowohl erlaubte als auch deaktivierte Erweiterungen verwendet werden, hat diese eine höhere Priorität, so dass die Datei nicht ausgewählt wird.
+    Wenn sowohl erlaubte als auch deaktivierte Erweiterungen verwendet werden, hat diese eine höhere Priorität, sodass die Datei nicht geprüft wird.
 upper_excluded_items_tooltip =
     Ausgeschlossene Elemente müssen * Wildcard und durch Kommas getrennt enthalten.
     Dies ist langsamer als Exkludierte Pfade, also verwenden Sie es vorsichtig.
@@ -208,7 +208,7 @@ popover_select_all_except_newest = Alle außer Neuester auswählen
 popover_select_one_oldest = Älteste auswählen
 popover_select_one_newest = Neueste auswählen
 popover_select_custom = Individuell auswählen
-popover_unselect_custom = Individuell Auswahl aufheben
+popover_unselect_custom = Individuelle Auswahl aufheben
 popover_select_all_images_except_biggest = Alle außer Größter auswählen
 popover_select_all_images_except_smallest = Alle außer Kleinster auswählen
 popover_custom_path_check_button_entry_tooltip =
@@ -231,21 +231,21 @@ popover_custom_regex_check_button_entry_tooltip =
     
     Dies verwendet die Standard-Implementierung von Regex in Rust. Mehr dazu unter https://docs.rs/regex.
 popover_custom_case_sensitive_check_button_tooltip =
-    Aktiviert die Erkennung von Groß- und Kleinschreibungen.
+    Aktiviert die Erkennung von Groß- und Kleinschreibung.
     
-    Wenn /home/* deaktiviert ist, findet /hoMe/roman und /home/roman.
+    Wenn dies deaktiviert ist, findet /home/* sowohl /hoMe/roman als auch /home/roman.
 popover_custom_not_all_check_button_tooltip =
     Verhindert die Auswahl aller Elemente in der Gruppe.
     
     Dies ist standardmäßig aktiviert, da der Benutzer in den meisten Situationen nicht sowohl Originaldateien als auch Duplikate löschen möchte, sondern mindestens eine der Dateien behalten will.
     
-    Warnung: Diese Einstellung funktioniert nicht, wenn bereits alle Ergebnisse in der Gruppe manuell ausgewählt wurden.
+    WARNUNG: Diese Einstellung funktioniert nicht, wenn bereits alle Ergebnisse in der Gruppe manuell ausgewählt wurden.
 popover_custom_regex_path_label = Pfad
 popover_custom_regex_name_label = Name
 popover_custom_regex_regex_label = Regex Pfad + Name
 popover_custom_case_sensitive_check_button = Groß-/Kleinschreibung beachten
 popover_custom_all_in_group_label = Nicht alle Datensätze in der Gruppe auswählen
-popover_custom_mode_unselect = Eigene Abwählen
+popover_custom_mode_unselect = Eigene abwählen
 popover_custom_mode_select = Eigene auswählen
 popover_sort_file_name = Dateiname
 popover_sort_folder_name = Verzeichnisname
@@ -261,13 +261,13 @@ bottom_delete_button = Löschen
 bottom_save_button = Speichern
 bottom_symlink_button = Symlink
 bottom_hardlink_button = Hardlink
-bottom_move_button = Bewegen
-bottom_sort_button = Sortierung
+bottom_move_button = Verschieben
+bottom_sort_button = Sortieren
 bottom_compare_button = Vergleichen
 bottom_search_button_tooltip = Suche starten
 bottom_select_button_tooltip = Datensätze auswählen. Nur ausgewählte Dateien/Ordner können später verarbeitet werden.
 bottom_delete_button_tooltip = Ausgewählte Dateien/Ordner löschen.
-bottom_save_button_tooltip = Daten über die Suche in Datei speichern
+bottom_save_button_tooltip = Daten über die Suche in eine Datei speichern.
 bottom_symlink_button_tooltip =
     Erstelle symbolische Links.
     Funktioniert nur, wenn mindestens zwei Ergebnisse einer Gruppe ausgewählt sind.
@@ -288,16 +288,16 @@ bottom_move_button_tooltip =
 bottom_sort_button_tooltip = Sortiert Dateien/Ordner nach der gewählten Methode.
 bottom_compare_button_tooltip = Vergleiche Bilder in der Gruppe.
 bottom_show_errors_tooltip = Ein-/Ausblenden des unteren Textfeldes.
-bottom_show_upper_notebook_tooltip = Ein-/Ausblenden des oberen Notizbuch-Panels.
+bottom_show_upper_notebook_tooltip = Ein-/Ausblenden des oberen Registerkarten-Panels.
 # Progress Window
 progress_stop_button = Stoppen
 progress_stop_additional_message = Stopp angefordert
 # About Window
 about_repository_button_tooltip = Link zur Repository-Seite mit Quellcode.
 about_donation_button_tooltip = Link zur Spendenseite.
-about_instruction_button_tooltip = Link zur Anweisungsseite.
+about_instruction_button_tooltip = Link zur Anleitungsseite.
 about_translation_button_tooltip = Link zur Crowdin-Seite mit App-Übersetzungen. Offiziell werden Polnisch und Englisch unterstützt.
-about_repository_button = Projektarchiv
+about_repository_button = Repository
 about_donation_button = Spende
 about_instruction_button = Anleitung
 about_translation_button = Übersetzung
@@ -306,27 +306,27 @@ about_other_apps_dialog_title = Andere Anwendungen von qarmin
 about_other_apps_open_source_note = Alle aufgeführten Anwendungen sind kostenlos und Open Source.
 about_other_apps_open_button = Öffnen
 about_other_apps_szyszka_desc = Schneller und leistungsstarker Dateiumbenenner.
-about_other_apps_mykrut_desc = Einfacher und schneller Linux Dateimanager.
+about_other_apps_mykrut_desc = Einfacher, schneller und eigenwilliger Linux-Dateimanager.
 about_other_apps_dcmki_viewer_desc = Einfacher DICOM-Viewer.
-about_other_apps_video_thumbnailer_desc = Wrapper um den Video-Thumbnail-Generator in Czkawka verwendet.
+about_other_apps_video_thumbnailer_desc = Wrapper um den in Czkawka verwendeten Video-Thumbnail-Generator.
 about_other_apps_space_finder_desc = Einfache Suche der größten Dateien auf Ihrem System.
 about_other_apps_system_info_collector_desc = Sammelt RAM/CPU-Auslastung vom Betriebssystem und zeigt sie als Graphen an.
 # Header
-header_setting_button_tooltip = Öffnet Einstellungsdialog.
+header_setting_button_tooltip = Öffnet den Einstellungsdialog.
 header_about_button_tooltip = Öffnet den Dialog mit Informationen über die App.
 header_krokiet_button_tooltip = Testen Sie Krokiet - die neue und verbesserte Version!
 # Krokiet promo dialog
 krokiet_promo_title = Treffen Sie Krokiet!
 krokiet_promo_message =
-    Hallo da, mutiger Czkawka Benutzer!
+    Hallo, mutiger Czkawka-Nutzer!
     
-    Die Kraft ist klar bei dir, aber Krokiet ist nicht - neuer, schneller, leichter und wesentlich aufwändiger (vorausgesetzt Apps können tatsächlich gut sein) dupliziert werden.
+    Die Macht ist eindeutig mit dir, Krokiet aber nicht – ein neuerer, schnellerer, leichterer und deutlich gutaussehenderer (vorausgesetzt, Apps können tatsächlich gutaussehend sein) Duplikat-Bereiniger.
     
-    Krokiet umfasst alles, was Menschen über Czkawka mochten. Es ist völlig frei, Open Source, hat ein einzigartiges und einfaches UI (sowohl gelobt als auch gehasst von vielen) eine Menge neuer Features einführt, weniger Abhängigkeiten verwendet und arbeitet wesentlich zuverlässiger über verschiedene Plattformen.
+    Krokiet vereint alles, was die Menschen an Czkawka mochten. Es ist komplett kostenlos, Open Source, hat eine einzigartige und einfache Oberfläche (von vielen gleichermaßen gelobt wie kritisiert), führt zahlreiche neue Funktionen ein, kommt mit weniger Abhängigkeiten aus und funktioniert plattformübergreifend deutlich zuverlässiger.
     
-    Und wenn du es irgendwie verpasst hast, gibt es bereits eine neuere App als Krokiet - Cedinia, wurde in erster Linie für Android-Geräte und Touchscreen-Nutzung entwickelt.
+    Und falls du es irgendwie verpasst haben solltest: Es gibt bereits eine noch neuere App als Krokiet – Cedinia, die vor allem für Android-Geräte und die Touchscreen-Nutzung entwickelt wurde.
     
-    Czkawka GTK hat uns gut gedient, aber seine Uhr ist beendet.
+    Czkawka GTK hat uns gut gedient, aber seine Wache ist nun zu Ende.
 krokiet_promo_link_download = Krokiet/Cedinia herunterladen
 krokiet_promo_link_project = Projektseite
 
@@ -337,7 +337,7 @@ krokiet_promo_link_project = Projektseite
 
 settings_number_of_threads = Anzahl der verwendeten Threads
 settings_number_of_threads_tooltip = Anzahl der verwendeten Threads, 0 bedeutet, dass alle verfügbaren Threads verwendet werden.
-settings_use_rust_preview = Verwenden Sie stattdessen externe Bibliotheken gtk, um Vorschaubilder zu laden
+settings_use_rust_preview = Externe Bibliotheken anstelle von gtk verwenden, um Vorschaubilder zu laden
 settings_use_rust_preview_tooltip =
     Die Verwendung von gtk-Vorschauen ist manchmal schneller und unterstützt mehr Formate, aber manchmal kann dies genau das Gegenteil sein.
     
@@ -347,9 +347,9 @@ settings_use_rust_preview_tooltip =
 settings_label_restart = Sie müssen die App neu starten, um die Einstellungen anzuwenden!
 settings_ignore_other_filesystems = Andere Dateisysteme ignorieren (nur Linux)
 settings_ignore_other_filesystems_tooltip =
-    ignoriert Dateien, die nicht im selben Dateisystem sind wie durchsuchte Verzeichnisse.
+    Ignoriert Dateien, die nicht im selben Dateisystem sind wie die durchsuchten Verzeichnisse.
     
-    Funktioniert genauso wie die -xdev Option beim Finden des Befehls unter Linux
+    Funktioniert genauso wie die Option -xdev des Befehls find unter Linux.
 settings_save_at_exit_button_tooltip = Speichert die Konfiguration in einer Datei, wenn das Programm geschlossen wird.
 settings_load_at_start_button_tooltip =
     Konfiguration aus der Datei laden, wenn App geöffnet wird.
@@ -360,13 +360,13 @@ settings_confirm_link_button_tooltip = Bestätigungsdialog anzeigen, wenn auf de
 settings_confirm_group_deletion_button_tooltip = Warndialog anzeigen, wenn versucht wird, alle Datensätze aus einer Gruppe zu löschen.
 settings_show_text_view_button_tooltip = Textfenster am unteren Rand der Benutzeroberfläche anzeigen.
 settings_use_cache_button_tooltip = Datei-Cache verwenden.
-settings_save_also_as_json_button_tooltip = Cache im (menschlich lesbaren) JSON-Format speichern. Es ist möglich, den Inhalt zu ändern. Der Cache wird automatisch aus dieser Datei von der App gelesen, wenn der Binärformat-Cache (mit .bin Erweiterung) fehlt.
+settings_save_also_as_json_button_tooltip = Cache im (menschlich lesbaren) JSON-Format speichern. Es ist möglich, den Inhalt zu ändern. Der Cache wird automatisch aus dieser Datei von der App gelesen, wenn der Binärformat-Cache (mit .bin-Erweiterung) fehlt.
 settings_use_trash_button_tooltip = Wenn aktiviert, verschiebt Dateien in den Papierkorb, anstatt sie permanent zu löschen.
 settings_language_label_tooltip = Sprache der Benutzeroberfläche.
 settings_save_at_exit_button = Speichert die Konfiguration beim Schließen der App
 settings_load_at_start_button = Konfiguration beim Öffnen der App laden
 settings_confirm_deletion_button = Bestätigungsdialog beim Löschen von Dateien anzeigen
-settings_confirm_link_button = Bestätigungsdialog anzeigen, wenn Hard/Symlinks irgendwelche Dateien
+settings_confirm_link_button = Bestätigungsdialog beim Erstellen von Hard-/Symlinks für Dateien anzeigen
 settings_confirm_group_deletion_button = Bestätigungsdialog beim Löschen aller Dateien in der Gruppe anzeigen
 settings_show_text_view_button = Unteren Textbereich anzeigen
 settings_use_cache_button = Cache verwenden
@@ -377,7 +377,7 @@ settings_multiple_delete_outdated_cache_checkbutton = Veraltete Cache-Einträge 
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     Ermöglicht das Löschen veralteter Cache-Ergebnisse, die auf nicht existierende Dateien verweisen.
     
-    Wenn aktiviert, stellt das Programm sicher, dass beim Laden von Datensätzen alle auf gültige Dateien verweisen (kaputte Verweise werden ignorieren).
+    Wenn aktiviert, stellt das Programm sicher, dass beim Laden von Datensätzen alle auf gültige Dateien verweisen (kaputte Verweise werden ignoriert).
     
     Deaktivieren dieser Option wird helfen, Dateien auf externen Laufwerken zu scannen, so dass Cache-Einträge über diese nicht beim nächsten Scan gelöscht werden.
     
@@ -392,16 +392,16 @@ settings_notebook_videos = Ähnliches Video
 settings_multiple_image_preview_checkbutton_tooltip = Zeigt eine Vorschau auf der rechten Seite (bei der Auswahl einer Bilddatei).
 settings_multiple_image_preview_checkbutton = Bildvorschau anzeigen
 settings_multiple_clear_cache_button_tooltip =
-    Leere den Cache manuell aus veralteten Einträgen.
+    Entferne veraltete Einträge manuell aus dem Cache.
     Das sollte nur verwendet werden, wenn das automatische Löschen deaktiviert wurde.
 settings_multiple_clear_cache_button = Entferne veraltete Ergebnisse aus dem Cache.
 
 ## Duplicates
 
 settings_duplicates_hide_hard_link_button_tooltip =
-    Versteckt alle Dateien außer einem, wenn sie auf dieselben Daten (Hardlink) verweisen.
+    Versteckt alle Dateien außer einer, wenn sie auf dieselben Daten (Hardlink) verweisen.
     
-    Z.B. für den Fall, dass es (auf der Festplatte) sieben Dateien gibt, die an bestimmte Daten gelinkt sind und eine weiter Datei existiert mit denselben Daten, aber mit unterschiedlichem Inode, dann wird im Duplikatsucher nur eine Datei der sieben gelinkten und die seperate Datei sichtbar sein.
+    Z.B. für den Fall, dass es (auf der Festplatte) sieben Dateien gibt, die an bestimmte Daten gelinkt sind und eine weitere Datei existiert mit denselben Daten, aber mit unterschiedlichem Inode, dann wird im Duplikatsucher nur eine Datei der sieben gelinkten und die separate Datei sichtbar sein.
 settings_duplicates_minimal_size_entry_tooltip =
     Legen Sie die minimale Dateigröße fest, die zwischengespeichert wird.
     
@@ -413,7 +413,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     Es wird dringend empfohlen, es beim Scannen von Hunderttausenden oder Millionen Dateien zu verwenden, da es die Suche um ein Vielfaches beschleunigen kann.
 settings_duplicates_prehash_minimal_entry_tooltip = Minimale Größe des zwischengespeicherten Eintrags.
-settings_duplicates_hide_hard_link_button = Verstecke harte Links
+settings_duplicates_hide_hard_link_button = Verstecke Hardlinks
 settings_duplicates_prehash_checkbutton = Prehash-Cache verwenden
 settings_duplicates_minimal_size_cache_label = Minimale Dateigröße (in Bytes), die im Cache gespeichert wird
 settings_duplicates_minimal_size_cache_prehash_label = Minimale Dateigröße (in Bytes), die im Prehash-Cache gespeichert wird
@@ -432,7 +432,7 @@ settings_reset_button = Konfiguration zurücksetzen
 settings_folder_cache_open_tooltip =
     Öffnet den Ordner, in dem txt-Dateien mit Cache-Daten gespeichert sind.
     
-    Änderungen an den Cache-Dateien kann dazu führen, dass ungültige Ergebnisse angezeigt werden. Aber Modifikation des Pfades kann Zeit sparen, wenn eine große Anzahl von Dateien verschoben werden.
+    Änderungen an den Cache-Dateien können dazu führen, dass ungültige Ergebnisse angezeigt werden. Aber Modifikation des Pfades kann Zeit sparen, wenn eine große Anzahl von Dateien verschoben wird.
     
     Sie können diese Dateien zwischen Computern kopieren, um Zeit beim erneuten Scannen von Dateien zu sparen (natürlich nur, wenn diese eine ähnliche Verzeichnisstruktur haben).
     
@@ -458,25 +458,25 @@ compute_found_invalid_symlinks = { $number_files } ungültige Symlinks in { $tim
 compute_found_broken_files = { $number_files } fehlerhafte Dateien in { $time } gefunden
 compute_found_bad_extensions = { $number_files } Dateien mit ungültigen Endungen in { $time } gefunden
 # Progress window
-progress_current_stage = Aktueller Prozess:{ " " }
-progress_all_stages = Gesamtprozess:{ " " }
+progress_current_stage = Aktuelle Phase:{ " " }
+progress_all_stages = Alle Phasen:{ " " }
 # Saving loading 
 saving_loading_saving_success = Konfiguration in Datei { $name } gespeichert.
-saving_loading_saving_failure = Konfigurationsdaten konnten nicht in Datei { $name }gespeichert werden, Grund { $reason }.
+saving_loading_saving_failure = Konfigurationsdaten konnten nicht in Datei { $name } gespeichert werden, Grund { $reason }.
 saving_loading_reset_configuration = Aktuelle Konfiguration wurde gelöscht.
-saving_loading_loading_success = Richtig geladene App-Konfiguration.
-saving_loading_no_config_file = Keine Konfigurationsdatei gefunden, mit Standardeinstellungen.
+saving_loading_loading_success = Die App-Konfiguration wurde erfolgreich geladen.
+saving_loading_no_config_file = Keine Konfigurationsdatei gefunden, es werden Standardeinstellungen verwendet.
 saving_loading_failed_to_create_config_file = Fehler beim Erstellen der Konfigurationsdatei "{ $path }", Grund "{ $reason }".
 saving_loading_failed_to_read_config_file = Konfiguration kann nicht von "{ $path }" geladen werden, da sie nicht existiert oder keine Datei ist.
-saving_loading_failed_to_read_data_from_file = Daten von Datei "{ $path }" können nicht gelesen werden, Grund "{ $reason }".
+saving_loading_failed_to_read_data_from_file = Daten aus der Datei "{ $path }" können nicht gelesen werden, Grund "{ $reason }".
 # Other
 selected_all_reference_folders = Suche kann nicht gestartet werden, wenn alle Verzeichnisse als Referenzordner gesetzt sind
 searching_for_data = Suche nach Daten, es kann eine Weile dauern, bitte warten...
-text_view_messages = NACHRICHT
+text_view_messages = NACHRICHTEN
 text_view_warnings = WARNUNGEN
 text_view_errors = FEHLER
-about_window_motto = Dieses Programm ist kostenlos zu benutzen und wird immer frei sein.
-krokiet_new_app = Czkawka befindet sich im Wartungsmodus, was bedeutet, dass nur kritische Fehler behoben werden und keine neuen Features hinzugefügt werden. Für neue Funktionen schauen Sie sich bitte die neue Krokiet App an, die stabiler und leistungsfähiger ist und noch in aktiver Entwicklung ist.
+about_window_motto = Dieses Programm ist kostenlos zu benutzen und wird es immer sein.
+krokiet_new_app = Diese GTK-Version von Czkawka wird seit Version 12 nicht mehr weiterentwickelt. Für neue Funktionen und aktive Weiterentwicklung nutzen Sie bitte Krokiet, das stabiler und leistungsfähiger ist.
 # Various dialog
 dialogs_ask_next_time = Nächstes Mal fragen
 symlink_failed = Symlink { $name } zu { $target }, Grund { $reason } fehlgeschlagen
@@ -487,11 +487,11 @@ delete_all_files_in_group_label1 = In einigen Gruppen sind alle Datensätze ausg
 delete_all_files_in_group_label2 = Sind Sie sicher, dass Sie sie löschen möchten?
 delete_items_label = { $items } Dateien werden gelöscht.
 delete_items_groups_label = { $items } Dateien aus { $groups } Gruppen werden gelöscht.
-hardlink_failed = Fehler beim hardlink { $name } zu { $target }, Grund { $reason }
+hardlink_failed = Hardlink von { $name } zu { $target } fehlgeschlagen, Grund { $reason }
 hard_sym_invalid_selection_title_dialog = Ungültige Auswahl bei einigen Gruppen
 hard_sym_invalid_selection_label_1 = In einigen Gruppen ist nur ein Datensatz ausgewählt und dieser wird ignoriert.
 hard_sym_invalid_selection_label_2 = Um diese Dateien hart/symbolisch zu verlinken, müssen mindestens zwei Ergebnisse in der Gruppe ausgewählt werden.
-hard_sym_invalid_selection_label_3 = Erster der Gruppe als Original erkannt und nicht geändert, sondern zweiter und weitere modifiziert.
+hard_sym_invalid_selection_label_3 = Der Erste der Gruppe wird als Original erkannt und nicht geändert, der Zweite und die weiteren werden jedoch modifiziert.
 hard_sym_link_title_dialog = Link-Bestätigung
 hard_sym_link_label = Sind Sie sicher, dass Sie diese Dateien verknüpfen möchten?
 move_folder_failed = Fehler beim Verschieben des Ordners { $name }, Grund { $reason }
@@ -500,15 +500,15 @@ move_files_title_dialog = Wählen Sie den Ordner aus, in den Sie doppelte Dateie
 move_files_choose_more_than_1_path = Es darf nur ein Pfad ausgewählt sein, um Duplikate von dort kopieren zu können, ausgewählt sind { $path_number }.
 move_stats = { $num_files }/{ $all_files } Elemente korrekt verschoben
 save_results_to_file = Ergebnisse sowohl in txt als auch in json Dateien in den Ordner "{ $name }" gespeichert.
-search_not_choosing_any_music = FEHLER: Sie müssen mindestens ein Kontrollkästchen mit Art der Musiksuche auswählen.
+search_not_choosing_any_music = FEHLER: Sie müssen mindestens ein Kontrollkästchen für eine Art der Musiksuche auswählen.
 search_not_choosing_any_broken_files = FEHLER: Sie müssen mindestens ein Kontrollkästchen mit der Art der markierten fehlerhaften Dateien auswählen.
 include_folders_dialog_title = Einbezogene Ordner
 exclude_folders_dialog_title = Ausgeschlossene Ordner
 include_manually_directories_dialog_title = Verzeichnis manuell hinzufügen
-cache_properly_cleared = Cache vollständig geleert
+cache_properly_cleared = Cache wurde vollständig geleert.
 cache_clear_duplicates_title = Leere Duplikate-Cache
-cache_clear_similar_images_title = Leere Bilder-Cache
-cache_clear_similar_videos_title = Leere Video-Cache
+cache_clear_similar_images_title = Leere Cache für ähnliche Bilder
+cache_clear_similar_videos_title = Leere Cache für ähnliche Videos
 cache_clear_message_label_1 = Wollen Sie veraltete Einträge aus dem Cache löschen?
 cache_clear_message_label_2 = Dieser Vorgang entfernt alle Cache-Einträge, die auf ungültige Dateien verweisen.
 cache_clear_message_label_3 = Dies kann das Laden und Speichern zum Cache leicht beschleunigen.

@@ -76,6 +76,7 @@ core_failed_to_generate_thumbnail = Nie udało się wygenerować miniaturki dla 
 core_failed_to_extract_frame_at_seek_time = Nie udało się wyodrębnić klatki o { $time } sekundach z "{ $file }": { $reason }
 core_video_file_does_not_exist = Plik wideo nie istnieje (można usunąć między skanowaniem/późniejszymi krokami): "{ $path }"
 core_image_too_large = Obraz jest zbyt duży ({ $width }x{ $height }) - więcej niż obsługiwane { $max } pikseli
+core_image_file_too_large = Plik graficzny jest zbyt duży ({ $size } bajtów) - przekracza dozwolony limit { $limit } MB
 core_failed_to_get_video_metadata = Nie udało się uzyskać metadanych wideo dla pliku "{ $file }": { $reason }
 core_failed_to_get_video_codec = Nie udało się uzyskać kodeka wideo dla pliku "{ $file }"
 core_failed_to_get_video_duration = Nie udało się uzyskać długości wideo dla pliku "{ $file }"
@@ -153,5 +154,3 @@ stage_optimizing_videos = Optymalizacja wideo: { $items_stats } ({ $size_stats }
 stage_optimizing_no_size_videos = Optymalizacja wideo: { $items_stats }
 stage_cleaning_exif = Czyszczenie EXIF: { $items_stats } ({ $size_stats })
 stage_cleaning_no_size_exif = Czyszczenie EXIF: { $items_stats }
-
-core_image_file_too_large = Plik graficzny jest zbyt duży ({$size} bajtów) - przekracza dozwolony limit { $limit } MB

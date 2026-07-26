@@ -4,7 +4,7 @@ window_main_title = Czkawka (Nấc cụt)
 window_progress_title = Đang quét
 window_compare_images = So sánh hình ảnh
 # General
-general_ok_button = Được
+general_ok_button = Đồng ý
 general_close_button = Đóng
 # Krokiet info dialog
 krokiet_info_title = Thông báo về việc ngừng hỗ trợ
@@ -26,9 +26,9 @@ music_length_checkbox = Độ dài
 music_comparison_checkbox = So sánh tương đối
 music_checking_by_tags = Các thẻ
 music_checking_by_content = Nội dung
-same_music_seconds_label = Độ dài tối thiểu của đoạn thứ hai
+same_music_seconds_label = Thời lượng tối thiểu của đoạn (giây)
 same_music_similarity_label = Sự khác biệt lớn nhất
-music_compare_only_in_title_group = So sánh trong các nhóm sách có tựa đề tương tự
+music_compare_only_in_title_group = So sánh trong các nhóm có tựa đề tương tự
 music_compare_only_in_title_group_tooltip =
     Khi được kích hoạt, các tệp sẽ được nhóm theo tiêu đề và sau đó so sánh với nhau.
     
@@ -54,7 +54,7 @@ duplicate_case_sensitive_name_tooltip =
     Khi được bật, chỉ nhóm các bản ghi khi chúng có tên giống hệt nhau, ví dụ: Żołd <-> Żołd.
     
     Tắt tùy chọn này sẽ nhóm các tên mà không kiểm tra xem mỗi chữ có cùng kích thước hay không, ví dụ: żoŁD <-> Żołd
-duplicate_mode_size_name_combo_box = Kích thước và Tên
+duplicate_mode_size_name_combo_box = Kích thước và tên
 duplicate_mode_name_combo_box = Tên
 duplicate_mode_size_combo_box = Kích thước
 duplicate_mode_hash_combo_box = Mã băm
@@ -66,14 +66,7 @@ duplicate_hash_type_tooltip =
     CRC32: Hàm băm đơn giản. Hàm này có thể nhanh hơn Blake3, nhưng có thể rất hiếm khi xảy ra xung đột.
     
     XXH3: Hiệu suất và chất lượng băm tương tự như Blake3 (nhưng không phải là hàm băm mật mã). Do đó, các chế độ này có thể dễ dàng thay đổi cho nhau.
-duplicate_check_method_tooltip =
-    Hiện tại, Czkawka cung cấp ba loại phương pháp để tìm các bản sao trùng lặp:
-    
-    Tên: Tìm các tệp có cùng tên.
-    
-    Kích thước: Tìm các tệp có cùng kích thước.
-    
-    Hash: Tìm các tệp có cùng nội dung. Chế độ này tính toán giá trị hash của tệp và sau đó so sánh giá trị hash này để tìm các bản sao trùng lặp. Đây là cách an toàn nhất để tìm các bản sao trùng lặp. Ứng dụng sử dụng bộ nhớ đệm (cache) rất nhiều, vì vậy các lần quét tiếp theo của cùng một dữ liệu sẽ nhanh hơn đáng kể so với lần quét đầu tiên.
+duplicate_check_method_tooltip = Mã băm: Tìm các tệp có cùng nội dung...
 image_hash_size_tooltip =
     Mỗi ảnh được kiểm tra sẽ tạo ra một mã hash đặc biệt, có thể so sánh với nhau. Sự khác biệt nhỏ giữa các mã hash này cho thấy các ảnh đó tương tự nhau.
     
@@ -103,7 +96,7 @@ big_files_mode_smallest_combo_box = Nhỏ nhất
 big_files_mode_biggest_combo_box = Lớn nhất
 main_notebook_duplicates = Tệp trùng lặp
 main_notebook_empty_directories = Thư mục trống
-main_notebook_big_files = Các tập tin lớn
+main_notebook_big_files = Các tệp lớn
 main_notebook_empty_files = Các tệp trống
 main_notebook_temporary = Tệp tạm
 main_notebook_similar_images = Hình ảnh tương tự
@@ -111,10 +104,10 @@ main_notebook_similar_videos = Các video tương tự
 main_notebook_same_music = Bản sao nhạc
 main_notebook_symlinks = Liên kết tượng trưng không hợp lệ
 main_notebook_broken_files = Tệp tin bị lỗi
-main_notebook_bad_extensions = Các tiện ích mở rộng kém chất lượng
+main_notebook_bad_extensions = Phần mở rộng sai
 main_tree_view_column_file_name = Tên tệp
 main_tree_view_column_folder_name = Tên thư mục
-main_tree_view_column_path = Đường đi
+main_tree_view_column_path = Đường dẫn
 main_tree_view_column_modification = Ngày sửa đổi
 main_tree_view_column_size = Kích thước
 main_tree_view_column_similarity = Tính tương đồng
@@ -129,22 +122,22 @@ main_tree_view_column_symlink_file_name = Tên tệp liên kết tượng trưng
 main_tree_view_column_symlink_folder = Thư mục liên kết tượng trưng
 main_tree_view_column_destination_path = Đường dẫn đích
 main_tree_view_column_type_of_error = Loại lỗi
-main_tree_view_column_current_extension = Phiên bản mở rộng hiện tại
-main_tree_view_column_proper_extensions = Độ mở rộng phù hợp
+main_tree_view_column_current_extension = Phần mở rộng hiện tại
+main_tree_view_column_proper_extensions = Phần mở rộng đúng
 main_tree_view_column_fps = FPS
-main_tree_view_column_codec = Mã hóa/Giải mã
-main_label_check_method = Kiểm tra phương pháp
+main_tree_view_column_codec = Codec
+main_label_check_method = Phương pháp kiểm tra
 main_label_hash_type = Loại hàm băm
-main_label_hash_size = Kích thước hàm
+main_label_hash_size = Kích thước mã băm
 main_label_geometric_invariance = Tính bất biến hình học
 main_label_size_bytes = Kích thước (byte)
 main_label_min_size = Tối thiểu
 main_label_max_size = Tối đa
 main_label_shown_files = Số lượng tệp hiển thị
 main_label_resize_algorithm = Thuật toán thay đổi kích thước
-main_label_similarity = Similarity{ "   " }
+main_label_similarity = Độ tương tự{ "   " }
 main_check_box_broken_files_audio = Âm thanh
-main_check_box_broken_files_pdf = Tài liệu PDF
+main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Lưu trữ
 main_check_box_broken_files_image = Hình ảnh
 main_check_box_broken_files_video = Video
@@ -171,12 +164,7 @@ upper_manual_add_included_button_tooltip =
     /home/roman;/home/rozkaz sẽ thêm hai thư mục /home/roman và /home/rozkaz
 upper_add_included_button_tooltip = Thêm thư mục mới vào danh sách tìm kiếm.
 upper_remove_included_button_tooltip = Xóa thư mục khỏi kết quả tìm kiếm.
-upper_manual_add_excluded_button_tooltip =
-    Thêm tên thư mục bị loại trực tiếp.
-    
-    Để thêm nhiều đường dẫn cùng lúc, hãy phân tách chúng bằng dấu ";".
-    
-    Ví dụ: "/home/roman;/home/krokiet" sẽ thêm hai thư mục /home/roman và /home/keokiet
+upper_manual_add_excluded_button_tooltip = Thêm tên thư mục cần loại trừ theo cách thủ công.
 upper_add_excluded_button_tooltip = Thêm thư mục cần loại trừ khỏi quá trình tìm kiếm.
 upper_remove_excluded_button_tooltip = Xóa thư mục khỏi danh sách bị loại trừ.
 upper_notebook_items_configuration = Cấu hình mục
@@ -193,21 +181,22 @@ upper_excluded_extensions_tooltip =
     
     Khi sử dụng cả danh sách các phần mở rộng được phép và danh sách các phần mở rộng bị vô hiệu hóa, danh sách này (danh sách các phần mở rộng bị vô hiệu hóa) sẽ được ưu tiên hơn, do đó tệp sẽ không được kiểm tra.
 upper_excluded_items_tooltip =
-    Các mục bị loại trừ phải chứa ký tự "*wildcard*" và được phân tách bằng dấu phẩy.
-    Cách này chậm hơn so với "Excluded Paths", vì vậy hãy sử dụng nó một cách cẩn thận.
+    Các mục bị loại trừ phải chứa ký tự đại diện "*" và được phân tách bằng dấu phẩy.
+    
+    Cách này chậm hơn so với "Đường dẫn bị loại trừ", vì vậy hãy sử dụng nó một cách cẩn thận.
 upper_excluded_items = Các mục bị loại trừ:
-upper_allowed_extensions = Các định dạng tệp được phép:
-upper_excluded_extensions = Các tiện ích bị tắt:
+upper_allowed_extensions = Các phần mở rộng được phép:
+upper_excluded_extensions = Các phần mở rộng bị tắt:
 # Popovers
 popover_select_all = Chọn tất cả
 popover_unselect_all = Bỏ chọn tất cả
 popover_reverse = Chọn ngược
-popover_select_all_except_shortest_path = Chọn tất cả các tùy chọn, ngoại trừ "đường đi ngắn nhất"
+popover_select_all_except_shortest_path = Chọn tất cả các đường dẫn, ngoại trừ đường dẫn ngắn nhất
 popover_select_all_except_longest_path = Chọn tất cả các đường dẫn, ngoại trừ đường dẫn dài nhất
 popover_select_all_except_oldest = Chọn tất cả trừ mục cũ nhất
 popover_select_all_except_newest = Chọn tất cả trừ mục mới nhất
-popover_select_one_oldest = Chọn một sản phẩm lâu đời nhất
-popover_select_one_newest = Chọn một sản phẩm mới nhất
+popover_select_one_oldest = Chọn một mục cũ nhất
+popover_select_one_newest = Chọn một mục mới nhất
 popover_select_custom = Chọn tùy chỉnh
 popover_unselect_custom = Bỏ chọn tùy chỉnh
 popover_select_all_images_except_biggest = Chọn tất cả các mục trừ mục lớn nhất
@@ -247,7 +236,7 @@ popover_custom_regex_regex_label = Đường dẫn Regex + Tên
 popover_custom_case_sensitive_check_button = Phân biệt chữ hoa chữ thường
 popover_custom_all_in_group_label = Không chọn tất cả các bản ghi trong nhóm
 popover_custom_mode_unselect = Bỏ chọn "Tùy chỉnh"
-popover_custom_mode_select = Chọn Tùy chỉnh
+popover_custom_mode_select = Chọn tùy chỉnh
 popover_sort_file_name = Tên tệp
 popover_sort_folder_name = Tên thư mục
 popover_sort_full_name = Tên đầy đủ
@@ -259,8 +248,8 @@ popover_valid_regex = Biểu thức chính quy hợp lệ
 bottom_search_button = Tìm kiếm
 bottom_select_button = Chọn
 bottom_delete_button = Xóa
-bottom_save_button = Lưu lại
-bottom_symlink_button = Symlink
+bottom_save_button = Lưu
+bottom_symlink_button = Liên kết tượng trưng
 bottom_hardlink_button = Liên kết cứng
 bottom_move_button = Di chuyển
 bottom_sort_button = Sắp xếp
@@ -268,7 +257,7 @@ bottom_compare_button = So sánh
 bottom_search_button_tooltip = Bắt đầu tìm kiếm
 bottom_select_button_tooltip = Chọn các bản ghi. Chỉ các tệp/thư mục đã chọn mới có thể được xử lý sau.
 bottom_delete_button_tooltip = Xóa các tệp/thư mục đã chọn.
-bottom_save_button_tooltip = Lưu dữ liệu tìm kiếm vào file
+bottom_save_button_tooltip = Lưu dữ liệu tìm kiếm vào tệp
 bottom_symlink_button_tooltip =
     Tạo các liên kết tượng trưng.
     Chỉ hoạt động khi ít nhất hai kết quả trong một nhóm được chọn.
@@ -289,10 +278,10 @@ bottom_move_button_tooltip =
 bottom_sort_button_tooltip = Sắp xếp các tệp/thư mục theo phương pháp đã chọn.
 bottom_compare_button_tooltip = So sánh các hình ảnh trong nhóm.
 bottom_show_errors_tooltip = Hiện/Ẩn bảng điều khiển văn bản phía dưới.
-bottom_show_upper_notebook_tooltip = Hiện/Ẩn bảng điều khiển phía trên của sổ.
+bottom_show_upper_notebook_tooltip = Hiện/Ẩn bảng cấu hình phía trên.
 # Progress Window
 progress_stop_button = Dừng lại
-progress_stop_additional_message = Yêu cầu dừng đã được thực hiện
+progress_stop_additional_message = Đã gửi yêu cầu dừng
 # About Window
 about_repository_button_tooltip = Liên kết đến trang lưu trữ mã nguồn.
 about_donation_button_tooltip = Liên kết đến trang quyên góp.
@@ -306,11 +295,11 @@ about_other_apps_button = Các ứng dụng khác
 about_other_apps_dialog_title = Các ứng dụng khác của qarmin
 about_other_apps_open_source_note = Tất cả các ứng dụng được liệt kê đều miễn phí và có mã nguồn mở.
 about_other_apps_open_button = Mở
-about_other_apps_szyszka_desc = Phần mềm đổi tên file nhanh chóng và mạnh mẽ.
-about_other_apps_mykrut_desc = Trình quản lý file Linux đơn giản, nhanh chóng và tập trung vào những tính năng cần thiết.
+about_other_apps_szyszka_desc = Phần mềm đổi tên tệp nhanh chóng và mạnh mẽ.
+about_other_apps_mykrut_desc = Trình quản lý tệp Linux đơn giản, nhanh chóng và tập trung vào những tính năng cần thiết.
 about_other_apps_dcmki_viewer_desc = Trình xem DICOM đơn giản.
 about_other_apps_video_thumbnailer_desc = Lớp bọc (wrapper) cho trình tạo hình thu nhỏ video được sử dụng trong Czkawka.
-about_other_apps_space_finder_desc = Công cụ tìm kiếm đơn giản để xác định các file lớn nhất trong hệ thống của bạn.
+about_other_apps_space_finder_desc = Công cụ tìm kiếm đơn giản để xác định các tệp lớn nhất trong hệ thống của bạn.
 about_other_apps_system_info_collector_desc = Thu thập thông tin về mức sử dụng RAM/CPU từ hệ điều hành và hiển thị chúng dưới dạng biểu đồ.
 # Header
 header_setting_button_tooltip = Mở hộp thoại cài đặt.
@@ -383,7 +372,7 @@ settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     Tắt tính năng này sẽ hữu ích khi quét các tệp trên ổ đĩa ngoài, để các mục nhập lưu trữ liên quan đến chúng sẽ không bị xóa trong lần quét tiếp theo.
     
     Trong trường hợp có hàng trăm nghìn bản ghi trong bộ nhớ cache, nên bật tính năng này, điều này sẽ giúp tăng tốc độ tải/lưu bộ nhớ cache ở đầu/cuối quá trình quét.
-settings_notebook_general = Tổng quan
+settings_notebook_general = Chung
 settings_notebook_duplicates = Bản sao
 settings_notebook_images = Hình ảnh tương tự
 settings_notebook_videos = Video tương tự
@@ -415,7 +404,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     Nên bật tính năng này khi quét hàng trăm nghìn hoặc hàng triệu tệp, vì nó có thể tăng tốc độ tìm kiếm lên nhiều lần.
 settings_duplicates_prehash_minimal_entry_tooltip = Kích thước tối thiểu của mục được lưu trong bộ nhớ đệm.
 settings_duplicates_hide_hard_link_button = Ẩn các liên kết cứng
-settings_duplicates_prehash_checkbutton = Sử dụng bộ nhớ đệm trước khi tính toán hash
+settings_duplicates_prehash_checkbutton = Sử dụng bộ nhớ đệm giá trị prehash
 settings_duplicates_minimal_size_cache_label = Kích thước tối thiểu của các tệp (tính bằng byte) được lưu vào bộ nhớ cache
 settings_duplicates_minimal_size_cache_prehash_label = Kích thước tối thiểu của các tệp (tính bằng byte) được lưu vào bộ nhớ đệm trước khi tính toán hash
 
@@ -431,13 +420,13 @@ settings_reset_button = Đặt lại cấu hình
 ## Opening cache/config folders
 
 settings_folder_cache_open_tooltip =
-    Mở thư mục chứa các file txt cache.
+    Mở thư mục chứa các tệp txt cache.
     
-    Việc sửa đổi các file cache có thể gây ra kết quả không chính xác. Tuy nhiên, việc thay đổi đường dẫn có thể tiết kiệm thời gian khi di chuyển một lượng lớn file đến một vị trí khác.
+    Việc sửa đổi các tệp cache có thể gây ra kết quả không chính xác. Tuy nhiên, việc thay đổi đường dẫn có thể tiết kiệm thời gian khi di chuyển một lượng lớn tệp đến một vị trí khác.
     
-    Bạn có thể sao chép các file này giữa các máy tính để tiết kiệm thời gian khi phải quét lại các file (tất nhiên là nếu chúng có cấu trúc thư mục tương tự).
+    Bạn có thể sao chép các tệp này giữa các máy tính để tiết kiệm thời gian khi phải quét lại các tệp (tất nhiên là nếu chúng có cấu trúc thư mục tương tự).
     
-    Trong trường hợp có vấn đề với cache, bạn có thể xóa các file này. Ứng dụng sẽ tự động tạo lại chúng.
+    Trong trường hợp có vấn đề với cache, bạn có thể xóa các tệp này. Ứng dụng sẽ tự động tạo lại chúng.
 settings_folder_settings_open_tooltip =
     Mở thư mục chứa cấu hình của Czkawka.
     
@@ -459,28 +448,28 @@ compute_found_invalid_symlinks = Đã tìm thấy { $number_files } liên kết 
 compute_found_broken_files = Đã tìm thấy { $number_files } tệp bị lỗi trong { $time }
 compute_found_bad_extensions = Đã tìm thấy { $number_files } tệp có phần mở rộng không hợp lệ trong { $time }
 # Progress window
-progress_current_stage = Current Stage:{ "  " }
-progress_all_stages = All Stages:{ "  " }
+progress_current_stage = Giai đoạn hiện tại:{ "  " }
+progress_all_stages = Tất cả giai đoạn:{ "  " }
 # Saving loading 
-saving_loading_saving_success = Đã lưu cấu hình vào file { $name }.
+saving_loading_saving_success = Đã lưu cấu hình vào tệp { $name }.
 saving_loading_saving_failure = Không thể lưu dữ liệu cấu hình vào tệp { $name }, lý do: { $reason }.
 saving_loading_reset_configuration = Cấu hình hiện tại đã được xóa.
 saving_loading_loading_success = Cấu hình ứng dụng đã được tải đúng.
 saving_loading_no_config_file = Không tìm thấy tệp cấu hình, đang sử dụng các cài đặt mặc định.
-saving_loading_failed_to_create_config_file = Không thể tạo file cấu hình "{ $path }", lý do: "{ $reason }".
+saving_loading_failed_to_create_config_file = Không thể tạo tệp cấu hình "{ $path }", lý do: "{ $reason }".
 saving_loading_failed_to_read_config_file = Không thể tải cấu hình từ "{ $path }" vì nó không tồn tại hoặc không phải là một tệp.
 saving_loading_failed_to_read_data_from_file = Không thể đọc dữ liệu từ tệp "{ $path }", lý do: "{ $reason }".
 # Other
 selected_all_reference_folders = Không thể bắt đầu tìm kiếm nếu tất cả các thư mục được đặt làm thư mục tham chiếu
 searching_for_data = Đang tìm kiếm dữ liệu, quá trình này có thể mất một chút thời gian, vui lòng chờ...
-text_view_messages = TIN NHẮN
+text_view_messages = THÔNG BÁO
 text_view_warnings = CẢNH BÁO
 text_view_errors = LỖI
 about_window_motto = Chương trình này hoàn toàn miễn phí để sử dụng và sẽ luôn như vậy.
-krokiet_new_app = Czkawka hiện đang ở chế độ bảo trì, điều này có nghĩa là chỉ các lỗi nghiêm trọng mới được sửa và không có tính năng mới nào được thêm vào. Để trải nghiệm các tính năng mới, vui lòng sử dụng ứng dụng Krokiet mới, ứng dụng này ổn định và hiệu suất tốt hơn, đồng thời vẫn đang được phát triển tích cực.
+krokiet_new_app = Phiên bản GTK này của Czkawka không còn được phát triển kể từ bản 12. Để có các tính năng mới và được phát triển tích cực, vui lòng sử dụng Krokiet, ứng dụng ổn định và hiệu suất tốt hơn.
 # Various dialog
-dialogs_ask_next_time = Hỏi lần sau nhé
-symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+dialogs_ask_next_time = Hỏi lại vào lần sau
+symlink_failed = Không thể tạo liên kết tượng trưng từ { $name } đến { $target }, lý do: { $reason }
 delete_title_dialog = Xác nhận xóa
 delete_question_label = Bạn có chắc chắn rằng bạn muốn xóa các tệp này không?
 delete_all_files_in_group_title = Xác nhận xóa tất cả các tệp trong nhóm
@@ -495,12 +484,12 @@ hard_sym_invalid_selection_label_2 = Để có thể tạo liên kết cứng ho
 hard_sym_invalid_selection_label_3 = Trong một nhóm, phần tử đầu tiên được công nhận là bản gốc và không được thay đổi, nhưng các phần tử thứ hai trở đi sẽ được sửa đổi.
 hard_sym_link_title_dialog = Xác nhận liên kết
 hard_sym_link_label = Bạn có chắc chắn rằng bạn muốn liên kết các tệp này không?
-move_folder_failed = Failed to move folder { $name }, reason { $reason }
-move_file_failed = Failed to move file { $name }, reason { $reason }
-move_files_title_dialog = Chọn thư mục mà bạn muốn chuyển các tập tin trùng lặp đến
-move_files_choose_more_than_1_path = Only one path may be selected to be able to copy their duplicated files, selected { $path_number }.
-move_stats = Properly moved { $num_files }/{ $all_files } items
-save_results_to_file = Saved results both to txt and json files into "{ $name }" folder.
+move_folder_failed = Không thể di chuyển thư mục { $name }, lý do: { $reason }
+move_file_failed = Không thể di chuyển tệp { $name }, lý do: { $reason }
+move_files_title_dialog = Chọn thư mục mà bạn muốn chuyển các tệp trùng lặp đến
+move_files_choose_more_than_1_path = Chỉ có thể chọn một đường dẫn để sao chép các tệp trùng lặp của chúng, đã chọn { $path_number }.
+move_stats = Đã di chuyển thành công { $num_files }/{ $all_files } mục
+save_results_to_file = Đã lưu kết quả vào cả tệp txt và json trong thư mục "{ $name }".
 search_not_choosing_any_music = LỖI: Bạn phải chọn ít nhất một tùy chọn tìm kiếm nhạc.
 search_not_choosing_any_broken_files = LỖI: Bạn phải chọn ít nhất một ô kiểm với loại là các tệp bị lỗi.
 include_folders_dialog_title = Các thư mục cần đưa vào
@@ -515,9 +504,9 @@ cache_clear_message_label_2 = Thao tác này sẽ xóa tất cả các mục tro
 cache_clear_message_label_3 = Điều này có thể giúp tăng tốc độ tải/lưu vào bộ nhớ đệm một chút.
 cache_clear_message_label_4 = CẢNH BÁO: Quá trình này sẽ xóa tất cả dữ liệu đã được lưu trữ tạm thời trên các ổ đĩa ngoài không được kết nối. Do đó, mỗi giá trị băm (hash) sẽ cần được tạo lại.
 # Show preview
-preview_image_resize_failure = Failed to resize image { $name }.
-preview_image_opening_failure = Failed to open image { $name }, reason { $reason }
+preview_image_resize_failure = Không thể thay đổi kích thước ảnh { $name }.
+preview_image_opening_failure = Không thể mở ảnh { $name }, lý do: { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
 compare_groups_number = Nhóm { $current_group }/{ $all_groups } ({ $images_in_group } ảnh)
-compare_move_left_button = L
-compare_move_right_button = R
+compare_move_left_button = T
+compare_move_right_button = P

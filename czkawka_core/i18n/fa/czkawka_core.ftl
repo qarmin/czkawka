@@ -76,6 +76,7 @@ core_failed_to_generate_thumbnail = ناموفق بود ایجاد پیش‌نم
 core_failed_to_extract_frame_at_seek_time = ناموفق بود دریافت فریم در { $time } ثانیه از "{ $file }": { $reason }
 core_video_file_does_not_exist = فایل ویدیویی وجود ندارد (می‌توان آن را بین اسکن/مراحل بعدی حذف کرد): "{ $path }"
 core_image_too_large = تصویر خیلی بزرگ است ({ $width }x{ $height }) - بیش از حد مجاز { $max } پیکسل
+core_image_file_too_large = فایل تصویر بسیار بزرگ است ({ $size } بایت) و از محدودیت { $limit } مگابایت تجاوز می‌کند
 core_failed_to_get_video_metadata = ناموفق بود دریافت اطلاعات ویدئویی برای فایل "{ $file }": { $reason }
 core_failed_to_get_video_codec = ناموفق بود دریافت کدک ویدیویی برای فایل "{ $file }"
 core_failed_to_get_video_duration = ناموفق بود دریافت مدت زمان ویدیو برای فایل "{ $file }"
@@ -153,5 +154,3 @@ stage_optimizing_videos = بهینه‌سازی شده { $items_stats } ویدی
 stage_optimizing_no_size_videos = ویدیو بهینه‌سازی شده { $items_stats }
 stage_cleaning_exif = پاک‌سازی EXIF از فایل { $items_stats } ({ $size_stats })
 stage_cleaning_no_size_exif = پاک کردن EXIF از فایل { $items_stats }
-
-core_image_file_too_large = فایل تصویر بسیار بزرگ است ({$size} بایت) و از محدودیت { $limit } مگابایت تجاوز می‌کند

@@ -24,7 +24,7 @@ music_bitrate_checkbox = Taxa de bits
 music_genre_checkbox = Gênero
 music_length_checkbox = Comprimento
 music_comparison_checkbox = Comparação aproximada
-music_checking_by_tags = Informações do arquivo
+music_checking_by_tags = Tags
 music_checking_by_content = Conteúdo
 same_music_seconds_label = Duração mínima em segundos do fragmento
 same_music_similarity_label = Diferença máxima
@@ -33,22 +33,8 @@ music_compare_only_in_title_group_tooltip =
     Quando esta opção está ativada, os arquivos são agrupados por título, em seguida, são comparados entre si.
     
     Com 10.000 arquivos, em vez de se obter quase 100 milhões de comparações, normalmente, resultará em cerca de 20.000 comparações.
-same_music_tooltip =
-    A pesquisa dos arquivos de música equivalentes por seu conteúdo pode ser defininda por meio das configurações:
-    
-    - O tempo mínimo do fragmento após o qual os arquivos de música podem ser identificados como equivalentes
-    - A diferença máxima entre os dois fragmentos dos testes
-    
-    Para obter bons resultados forneça combinações razoáveis destes parâmetros em cada teste.
-    
-    Definir o tempo mínimo para 5s e a diferença máxima para 1.0, irá pesquisar fragmentos quase idênticos nos arquivos.
-    Um tempo de 20s e uma diferença máxima de 6.0, por outro lado, funciona bem para encontrar versões ao vivo, versões modificadas (remixadas), etc.
-    
-    Por padrão, cada arquivo de música é comparado entre si, o que pode levar muito tempo para testar vários arquivos. Portanto, é melhor utilizar as pastas de referência e especificar quais são os arquivos que devem ser comparados entre si. Com a mesma quantidade de arquivos, a comparação de impressões digitais será pelo menos quatro vezes mais rápida do que sem as pastas de referência.
-music_comparison_checkbox_tooltip =
-    Pesquisar os arquivos de música equivalentes utilizando a inteligência artificial (IA) que utiliza o aprendizado da máquina para remover os parênteses de uma frase. Por exemplo, com esta opção ativada, os arquivos em questão que serão tratados como duplicados:
-    
-    Świędziżłób     ---     Świędziżłób (Remix Lato 2021) (Santuário --- O santuário foi remixado no verão de 2021)
+same_music_tooltip = A pesquisa dos arquivos de música semelhantes por seu conteúdo pode ser definida por meio das configurações:\n\n- O tempo mínimo do fragmento após o qual os arquivos de música podem ser identificados como semelhantes\n- A diferença máxima entre os dois fragmentos dos testes\n\nPara obter bons resultados forneça combinações razoáveis destes parâmetros em cada teste.\n\nDefinir o tempo mínimo para 5s e a diferença máxima para 1.0, irá pesquisar fragmentos quase idênticos nos arquivos.\nUm tempo de 20s e uma diferença máxima de 6.0, por outro lado, funciona bem para encontrar versões ao vivo, versões modificadas (remixadas), etc.\n\nPor padrão, cada arquivo de música é comparado entre si, o que pode levar muito tempo para testar vários arquivos. Portanto, é melhor utilizar as pastas de referência e especificar quais são os arquivos que devem ser comparados entre si. Com a mesma quantidade de arquivos, a comparação de impressões digitais será pelo menos quatro vezes mais rápida do que sem as pastas de referência.
+music_comparison_checkbox_tooltip = Pesquisar os arquivos de música semelhantes utilizando a inteligência artificial (IA) que utiliza o aprendizado de máquina para remover os parênteses de uma frase. Por exemplo, com esta opção ativada, os arquivos em questão serão tratados como duplicados:\n\nŚwiędziżłób     ---     Świędziżłób (Remix Lato 2021)
 duplicate_case_sensitive_name = Diferenciar as letras maiúsculas das minúsculas
 duplicate_case_sensitive_name_tooltip =
     Quando esta opção está ativada, agrupa apenas os registros se eles tiverem exatamente o mesmo nome. Por exemplo, pagar <-> pagar.
@@ -57,7 +43,7 @@ duplicate_case_sensitive_name_tooltip =
 duplicate_mode_size_name_combo_box = Tamanho e nome
 duplicate_mode_name_combo_box = Nome
 duplicate_mode_size_combo_box = Tamanho
-duplicate_mode_hash_combo_box = Integridade do arquivo
+duplicate_mode_hash_combo_box = Hash
 duplicate_hash_type_tooltip =
     O Czkawka oferece três tipos de identificação pela integridade do arquivo por meio do código ‘hash’:
     
@@ -76,14 +62,7 @@ duplicate_check_method_tooltip =
     Por tamanho - Esta opção permite localizar os arquivos que têm o mesmo tamanho.
     
     Por integridade do arquivo - Esta opção permite localizar os arquivos que têm o mesmo conteúdo, ou seja, que possui o mesmo código ‘hash’ (o ‘hash’ de arquivo ou o valor do ‘hash’ de um arquivo é uma sequência de caracteres alfanuméricos distinta, trata-se de um valor único que corresponde ao conteúdo exato de um arquivo, permite verificar a integridade de um arquivo e é como se fosse a assinatura digital do arquivo). Este método cria a assinatura digital ou ‘hash’ do arquivo e, em seguida, compara o código da assinatura digital que foi criada para localizar os arquivos duplicados. Este método é a maneira mais segura e precisa para localizar os arquivos duplicados. O Czkawka utiliza a memória ‘cache’ (é um espaço de armazenamento das configurações, dos resultados das pesquisas, etc. que guarda os dados para que possam ser acessados mais rapidamente). Portanto, a segunda verificação e as subsequentes dos mesmos dados deverão ser muito mais rápidas do que na primeira vez.
-image_hash_size_tooltip =
-    A cada imagem que é verificada, um arquivo de assinatura digital ou ‘hash’ é criado e pode ser comparado entre si, e se uma pequena diferença entre as imagens for encontrada, então significa que as imagens são equivalentes.
-    
-    O ‘hash’ do tamanho 8 é muito bom para localizar as imagens que são apenas um pouco equivalentes às originais. Com uma quantidade maior de imagens, maior do que 1.000 imagens, irá produzir uma grande quantidade de falsos positivos, então é recomendado utilizar um tamanho maior do ‘hash’ nestes casos.
-    
-    O ‘hash’ do tamanho 16 é o tamanho padrão por ser uma boa referência entre localizar as imagens que são um pouco equivalentes e ter uma pequena quantidade de colisões do código ‘hash’.
-    
-    O ‘hash’ do tamanho 32 e 64 localizam as imagens muito equivalentes, mas quase não deverá ocorrer os falsos positivos, talvez, exceto algumas imagens que possuem o canal alfa.
+image_hash_size_tooltip = A cada imagem que é verificada, um arquivo de assinatura digital ou ‘hash’ é criado e pode ser comparado entre si, e se uma pequena diferença entre as imagens for encontrada, então significa que as imagens são semelhantes.\n\nO ‘hash’ do tamanho 8 é muito bom para localizar as imagens que são apenas um pouco semelhantes às originais. Com uma quantidade maior de imagens, maior do que 1.000 imagens, irá produzir uma grande quantidade de falsos positivos, então é recomendado utilizar um tamanho maior do ‘hash’ nestes casos.\n\nO ‘hash’ do tamanho 16 é o tamanho padrão por ser uma boa referência entre localizar as imagens que são um pouco semelhantes e ter uma pequena quantidade de colisões do código ‘hash’.\n\nO ‘hash’ do tamanho 32 e 64 localizam apenas as imagens muito semelhantes, mas quase não deverá ocorrer os falsos positivos, talvez, exceto algumas imagens que possuem o canal alfa.
 image_resize_filter_tooltip =
     Para calcular o ‘hash’ de uma imagem, a biblioteca deve ser primeiro dimensionada.
     
@@ -108,8 +87,8 @@ main_notebook_empty_directories = Diretórios vazios
 main_notebook_big_files = Arquivos grandes
 main_notebook_empty_files = Arquivos vazios
 main_notebook_temporary = Arquivos temporários
-main_notebook_similar_images = Imagens equivalentes
-main_notebook_similar_videos = Vídeos equivalentes
+main_notebook_similar_images = Imagens semelhantes
+main_notebook_similar_videos = Vídeos semelhantes
 main_notebook_same_music = Músicas duplicadas
 main_notebook_symlinks = Ligações simbólicas não válidas
 main_notebook_broken_files = Arquivos corrompidos
@@ -119,7 +98,7 @@ main_tree_view_column_folder_name = Nome da pasta
 main_tree_view_column_path = Caminho
 main_tree_view_column_modification = Data da modificação
 main_tree_view_column_size = Tamanho
-main_tree_view_column_similarity = Equivalentes
+main_tree_view_column_similarity = Similaridade
 main_tree_view_column_dimensions = Dimensões
 main_tree_view_column_title = Título
 main_tree_view_column_artist = Artista
@@ -143,8 +122,8 @@ main_label_size_bytes = Tamanho (em bytes)
 main_label_min_size = Mínimo
 main_label_max_size = Máximo
 main_label_shown_files = Quantidade de arquivos exibidos
-main_label_resize_algorithm = Redimensionar o algoritmo
-main_label_similarity = Equivalentes { "   " }
+main_label_resize_algorithm = Algoritmo de redimensionamento
+main_label_similarity = Similaridade{ "   " }
 main_check_box_broken_files_audio = Áudio
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Arquivo
@@ -263,7 +242,7 @@ bottom_select_button = Selecionar
 bottom_delete_button = Excluir
 bottom_save_button = Salvar
 bottom_symlink_button = Ligação simbólica
-bottom_hardlink_button = Ligação simbólica rígida
+bottom_hardlink_button = Vínculo físico
 bottom_move_button = Mover
 bottom_sort_button = Ordenar
 bottom_compare_button = Comparar
@@ -275,15 +254,8 @@ bottom_symlink_button_tooltip =
     Criar ligações simbólicas ou vínculos simbólicos (‘symbolic links’ ou ‘symlinks’ ou ‘soft links’) ou ‘atalho’ para um outro arquivo ou para um outro diretório (pasta).
     Esta opção só funciona se pelo menos dois resultados do grupo estiverem selecionados.
     O primeiro permanece inalterado, o segundo e os subsequentes estão vinculados ou ligados simbolicamente ao primeiro.
-bottom_hardlink_button_tooltip =
-    Criar ligações simbólicas rígidas ou vínculos simbólicos rígidos (‘hard links’ ou ‘hardlinks’) ou ‘atalho’ para um outro arquivo original ou para um outro diretório original (pasta).
-    Esta opção só funciona se pelo menos dois resultados do grupo estiverem selecionados.
-    O primeiro permanece inalterado, o segundo e os subsequentes estão vinculados ou ligados simbolicamente ao primeiro.
-bottom_hardlink_button_not_available_tooltip =
-    Criar ligações simbólicas rígidas ou vínculos simbólicos rígidos (‘hard links’ ou ‘hardlinks’) ou ‘atalho’ para um outro arquivo original ou para um outro diretório original.
-    O botão está desativado, porque as ligações simbólicas rígidas não podem ser criadas.
-    Este tipo de ligação simbólica só pode ser criada por um administrador no Windows, portanto, certifique-se de executar o programa com as permissões de administrador.
-    Se o programa estiver sendo executado com as permissões de administrador, verifique se existem problemas equivalentes no GitHub do Czkawka (https://github.com/qarmin/czkawka).
+bottom_hardlink_button_tooltip = Criar vínculos físicos (‘hard links’ ou ‘hardlinks’) para um outro arquivo original ou para um outro diretório original (pasta).\nEsta opção só funciona se pelo menos dois resultados do grupo estiverem selecionados.\nO primeiro permanece inalterado, o segundo e os subsequentes são vinculados ao primeiro.
+bottom_hardlink_button_not_available_tooltip = Criar vínculos físicos (‘hard links’ ou ‘hardlinks’) para um outro arquivo original ou para um outro diretório original.\nO botão está desativado, porque os vínculos físicos não podem ser criados.\nEste tipo de vínculo só pode ser criado por um administrador no Windows, portanto, certifique-se de executar o programa com as permissões de administrador.\nSe o programa já estiver sendo executado com as permissões de administrador, verifique se existem problemas semelhantes no GitHub do Czkawka (https://github.com/qarmin/czkawka).
 bottom_move_button_tooltip =
     Mover os arquivos para o diretório que foi selecionado.
     Esta opção permite copiar todos os arquivos para o diretório sem preservar a estrutura dos diretórios e dos arquivos.
@@ -359,7 +331,7 @@ settings_load_at_start_button_tooltip =
     
     Se esta opção não estiver ativada, as configurações padrão serão utilizadas.
 settings_confirm_deletion_button_tooltip = Exibir a janela de confirmação de exclusão ao clicar no botão ‘Excluir’.
-settings_confirm_link_button_tooltip = Exibir a janela de confirmação ao clicar no botão da ‘Ligação simbólica’.
+settings_confirm_link_button_tooltip = Exibir a janela de confirmação ao clicar no botão de vínculo físico ou de ligação simbólica.
 settings_confirm_group_deletion_button_tooltip = Exibir a janela de confirmação de exclusão ao tentar excluir todos os registros de um grupo.
 settings_show_text_view_button_tooltip = Exibir o painel de texto na parte inferior da interface gráfica do usuário.
 settings_use_cache_button_tooltip = Utilizar o arquivo de ‘cache’.
@@ -369,7 +341,7 @@ settings_language_label_tooltip = Idioma da interface gráfica do usuário.
 settings_save_at_exit_button = Salvar as configurações ao fechar o programa
 settings_load_at_start_button = Carregar as configurações ao abrir o programa
 settings_confirm_deletion_button = Exibir a janela de confirmação quando for excluir qualquer arquivo
-settings_confirm_link_button = Exibir a janela de confirmação quando for criar qualquer arquivo de ligação simbólica ou de vínculo simbólico
+settings_confirm_link_button = Exibir a janela de confirmação ao criar vínculos físicos (hardlinks) ou ligações simbólicas de qualquer arquivo
 settings_confirm_group_deletion_button = Exibir a janela de confirmação quando for excluir todos os arquivos do grupo
 settings_show_text_view_button = Exibir o painel de texto inferior
 settings_use_cache_button = Utilizar o arquivo de ‘cache’
@@ -387,8 +359,8 @@ settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     No caso de ter centenas de milhares de registros no arquivo de ‘cache’, recomenda-se que esta opção seja ativada, pois ela irá acelerar o carregamento ou o salvamento do ‘cache’ no início ou no fim da pesquisa.
 settings_notebook_general = Configurações gerais
 settings_notebook_duplicates = Arquivos duplicados
-settings_notebook_images = Imagens equivalentes
-settings_notebook_videos = Vídeos equivalentes
+settings_notebook_images = Imagens semelhantes
+settings_notebook_videos = Vídeo semelhante
 
 ## Multiple - settings used in multiple tabs
 
@@ -401,23 +373,15 @@ settings_multiple_clear_cache_button = Remover os resultados que estejam desatua
 
 ## Duplicates
 
-settings_duplicates_hide_hard_link_button_tooltip =
-    Ocultar todos os arquivos, exceto um, se todos eles apontarem para os mesmos dados, se são ligações simbólicas rígidas ou vínculos simbólicos rígidos (‘hard links’).
-    
-    Por exemplo, se houver no dispositivo de armazenamento sete arquivos de ligações simbólicas rígidas para dados específicos e um arquivo é diferente com os mesmos dados, então, o pesquisador de arquivos duplicados irá identificar apenas um arquivo exclusivo e será exibido um arquivo de ligação simbólica rígida.
+settings_duplicates_hide_hard_link_button_tooltip = Ocultar todos os arquivos, exceto um, se todos eles apontarem para os mesmos dados, ou seja, se forem vínculos físicos (‘hard links’).\n\nPor exemplo, se houver no dispositivo de armazenamento sete arquivos com vínculo físico para dados específicos e um arquivo diferente com os mesmos dados, então, o pesquisador de arquivos duplicados irá identificar apenas um arquivo exclusivo e um arquivo do grupo de vínculo físico.
 settings_duplicates_minimal_size_entry_tooltip =
     Configurar o tamanho mínimo do arquivo de ‘cache’ que será salvo no dispositivo de armazenamento.
     
     Se você definir um valor menor irá gerar mais registros, com isso, irá acelerar a pesquisa, mas irá tornar mais lento o carregamento ou o salvamento dos dados no arquivo de ‘cache’.
-settings_duplicates_prehash_checkbutton_tooltip =
-    Permite que os códigos de ‘hash’ (integridade do arquivo) parciais sejam salvos no arquivo de ‘cache’ (o ‘hash’ é calculado a partir de uma pequena parte do arquivo), permitindo que os arquivos únicos sejam descartados antecipadamente dos resultados da pesquisa dos arquivos que não são duplicados.
-    
-    Esta opção está ativada por padrão, pois pode causar lentidão em algumas situações.
-    
-    Recomenda-se utilizar esta opção ao fazer a pesquisa de centenas de milhares ou de milhões de arquivos, porque esta opção pode acelerar os resultados da pesquisa e você pode desativar esta opção ao fazer a pesquisa de uma pequena quantidade de arquivos.
+settings_duplicates_prehash_checkbutton_tooltip = Permite que os códigos de ‘hash’ (integridade do arquivo) parciais sejam salvos no arquivo de ‘cache’ (o ‘hash’ é calculado a partir de uma pequena parte do arquivo), permitindo que os arquivos únicos sejam descartados antecipadamente dos resultados da pesquisa dos arquivos que não são duplicados.\n\nEsta opção está desativada por padrão, pois pode causar lentidão em algumas situações.\n\nRecomenda-se utilizar esta opção ao fazer a pesquisa de centenas de milhares ou de milhões de arquivos, porque esta opção pode acelerar bastante os resultados da pesquisa.
 settings_duplicates_prehash_minimal_entry_tooltip = Tamanho mínimo do código ‘hash’ parcial que será gravado no arquivo de ‘cache’.
 settings_duplicates_hide_hard_link_button = Ocultar as ligações rígidas
-settings_duplicates_prehash_checkbutton = Utilizar o ‘hash’ parcial dos arquivo do ‘cache’
+settings_duplicates_prehash_checkbutton = Utilizar o ‘hash’ parcial dos arquivos do ‘cache’
 settings_duplicates_minimal_size_cache_label = Tamanho mínimo dos arquivos (em bytes) ao salvar o arquivo de ‘cache’
 settings_duplicates_minimal_size_cache_prehash_label = Tamanho mínimo dos arquivos (em bytes) ao salvar o ‘hash’ parcial no arquivo de ‘cache’
 
@@ -454,9 +418,9 @@ compute_found_empty_folders = Foram encontradas ‘{ $number_files }’ pastas v
 compute_found_empty_files = Foram encontrados ‘{ $number_files }’ arquivos vazios. A verificação durou ‘{ $time }’
 compute_found_big_files = Foram encontrados ‘{ $number_files }’ arquivos grandes. A verificação durou ‘{ $time }’
 compute_found_temporary_files = Foram encontrados ‘{ $number_files }’ arquivos temporários. A verificação durou ‘{ $time }’
-compute_found_images = Foram encontrados ‘{ $number_files }’ arquivos de imagens equivalentes nos ‘{ $number_groups }’ grupos. A verificação durou ‘{ $time }’
-compute_found_videos = Foram encontrados ‘{ $number_files }’ arquivos de vídeos equivalentes nos ‘{ $number_groups }’ grupos. A verificação durou ‘{ $time }’
-compute_found_music = Foram encontrados ‘{ $number_files }’ arquivos de músicas equivalentes nos ‘{ $number_groups }’ grupos. A verificação durou ‘{ $time }’
+compute_found_images = Foram encontrados ‘{ $number_files }’ arquivos de imagens semelhantes nos ‘{ $number_groups }’ grupos. A verificação durou ‘{ $time }’
+compute_found_videos = Foram encontrados ‘{ $number_files }’ arquivos de vídeos semelhantes nos ‘{ $number_groups }’ grupos. A verificação durou ‘{ $time }’
+compute_found_music = Foram encontrados ‘{ $number_files }’ arquivos de músicas semelhantes nos ‘{ $number_groups }’ grupos. A verificação durou ‘{ $time }’
 compute_found_invalid_symlinks = Foram encontradas ‘{ $number_files }’ ligações simbólicas que não são válidas. A verificação durou ‘{ $time }’
 compute_found_broken_files = Foram encontrados ‘{ $number_files }’ arquivos corrompidos. A verificação durou ‘{ $time }’
 compute_found_bad_extensions = Foram encontrados ‘{ $number_files }’ arquivos com extensões que não são válidas. A verificação durou ‘{ $time }’
@@ -475,10 +439,10 @@ saving_loading_failed_to_read_data_from_file = Não foi possível ler os dados d
 # Other
 selected_all_reference_folders = Não foi possível iniciar a pesquisa, porque se todas as pastas estiverem definidas como pastas de referência (ou pastas de origem)
 searching_for_data = Os dados estão sendo pesquisados. Esta ação pode demorar bastante tempo. Por favor, aguarde a finalização.
-text_view_messages = Exibir as mensagens
-text_view_warnings = Exibir os avisos
-text_view_errors = Exibir os erros
-about_window_motto = Este programa é e sempre será de código aberto e de uso gratuito.
+text_view_messages = MENSAGENS
+text_view_warnings = AVISOS
+text_view_errors = ERROS
+about_window_motto = Este programa é gratuito para uso e sempre será.
 krokiet_new_app = O Czkawka está em modo de manutenção, o que significa que somente os problemas críticos serão corrigidos e nenhuma nova funcionalidade será adicionada ao programa. Para obter as novas funcionalidades, por favor, confira o novo programa chamado de Krokiet (Croquete), que é mais estável, mais eficiente e ainda está em desenvolvimento ativo.
 # Various dialog
 dialogs_ask_next_time = Perguntar novamente na próxima vez que a janela for exibida
@@ -493,7 +457,7 @@ delete_items_groups_label = Os ‘{ $items }’ arquivos dos ‘{ $groups }’ g
 hardlink_failed = Ocorreu uma falha na ligação rígida ‘{ $name }’ para ‘{ $target }’, por causa de ‘{ $reason }’
 hard_sym_invalid_selection_title_dialog = Alguns grupos não são válidos para serem selecionados
 hard_sym_invalid_selection_label_1 = Em alguns grupos, existe apenas um registro que foi selecionado e será ignorado.
-hard_sym_invalid_selection_label_2 = Para criar uma ligação simbólica rígida dos arquivos, pelo menos dois registros de um grupo tem que estar selecionados.
+hard_sym_invalid_selection_label_2 = Para poder criar um vínculo físico ou uma ligação simbólica para estes arquivos, pelo menos dois registros de um grupo têm que estar selecionados.
 hard_sym_invalid_selection_label_3 = O primeiro registro no grupo é reconhecido como original e não é alterado, mas o segundo registro e os subsequentes são vinculados ou ligados ao primeiro.
 hard_sym_link_title_dialog = Confirmação da ligação simbólica
 hard_sym_link_label = Você tem certeza de que quer criar a ligação simbólica para estes arquivos?

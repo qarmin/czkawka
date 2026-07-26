@@ -5,28 +5,28 @@ window_progress_title = Scannen
 window_compare_images = Vergelijk afbeeldingen
 # General
 general_ok_button = Ok
-general_close_button = Afsluiten
+general_close_button = Sluiten
 # Krokiet info dialog
-krokiet_info_title = Afscheidingsbericht
+krokiet_info_title = Kennisgeving van uitfasering
 krokiet_info_message =
     Czkawka GTK 12.0 is de laatste versie. Er zijn geen updates, functies of bug fixes gepland.
     
     De meeste functies uit de Czkawka GTK zijn beschikbaar in Krokiet, meestal in een eenvoudigere, snellere en stabielere vorm. Krokiet voegt ook nieuwe functies en verbeteringen toe die niet mogelijk waren in de GTK-versie.
     
-    Als u nog steeds gebruik maakt van Czkawka GTK, moet het makkelijk zijn om naar Krokiet te overschakelen, omdat het een gelijksoortige interface heeft, minder afhankelijkheden en betere platformondersteuning.
+    Als u nog steeds gebruik maakt van Czkawka GTK, moet het makkelijk zijn om naar Krokiet te overschakelen, omdat het een vergelijkbare interface heeft, minder afhankelijkheden en betere platformondersteuning.
     
-    PS: Dit bericht mag slechts één keer verschijnen. Als het opnieuw verschijnt, stel de CZKA_DONT_ANNOY_ME omgevingsvariabele in op een niet-lege waarde.
+    PS: Dit bericht mag slechts één keer verschijnen. Als het opnieuw verschijnt, stel de CZKAWKA_DONT_ANNOY_ME omgevingsvariabele in op een niet-lege waarde.
 # Main window
-music_title_checkbox = Aanspreektitel
-music_artist_checkbox = Kunstenaar
-music_year_checkbox = jaar
+music_title_checkbox = Titel
+music_artist_checkbox = Artiest
+music_year_checkbox = Jaar
 music_bitrate_checkbox = Bitsnelheid
-music_genre_checkbox = genre
-music_length_checkbox = longueur
+music_genre_checkbox = Genre
+music_length_checkbox = Lengte
 music_comparison_checkbox = Geschatte vergelijking
 music_checking_by_tags = Labels
 music_checking_by_content = Inhoud
-same_music_seconds_label = Minimale fragment tweede duur
+same_music_seconds_label = Minimale fragmentduur (in seconden)
 same_music_similarity_label = Maximum verschil
 music_compare_only_in_title_group = Vergelijk binnen groepen van vergelijkbare titels
 music_compare_only_in_title_group_tooltip =
@@ -44,20 +44,20 @@ same_music_tooltip =
     Instelling van de minimale tijd op 5 en het maximale verschil op 1.0, zal zoeken naar bijna identieke fragmenten in de bestanden.
     Een tijd van 20 en een maximaal verschil van 6,0 werkt daarentegen goed voor het vinden van remixes/live versies, enz.
     
-    Standaard wordt elk muziekbestand met elkaar vergeleken en dit kan veel tijd in beslag nemen bij het testen van veel bestanden, dus is het meestal beter om referentie-mappen te gebruiken en aan te geven welke bestanden met elkaar moeten worden vergeleken (met dezelfde hoeveelheid bestanden, Het vergelijken van vingerafdrukken is sneller dan zonder referentiemateriaal).
+    Standaard wordt elk muziekbestand met elkaar vergeleken en dit kan veel tijd in beslag nemen bij het testen van veel bestanden, dus is het meestal beter om referentie-mappen te gebruiken en aan te geven welke bestanden met elkaar moeten worden vergeleken (met dezelfde hoeveelheid bestanden is het vergelijken van vingerafdrukken minstens 4x sneller dan zonder referentiemappen).
 music_comparison_checkbox_tooltip =
-    Het zoekt naar vergelijkbare muziekbestanden met behulp van AI, die machine-leren gebruikt om haakjes uit een zin te verwijderen. Bijvoorbeeld met deze optie ingeschakeld de bestanden in kwestie zullen als duplicaten worden beschouwd:
+    Het zoekt naar vergelijkbare muziekbestanden met behulp van AI, die machine-leren gebruikt om haakjes uit een zin te verwijderen. Bijvoorbeeld, als deze optie is ingeschakeld, zullen de volgende bestanden als duplicaten worden beschouwd:
     
-    SØ wieľdzizive b --- S000000wie.pldzizľb (Remix Lato 2021)
-duplicate_case_sensitive_name = Kist gevoelig
+    Świędziżłób     ---     Świędziżłób (Remix Lato 2021)
+duplicate_case_sensitive_name = Hoofdlettergevoelig
 duplicate_case_sensitive_name_tooltip =
-    Wanneer ingeschakeld, groep alleen records wanneer ze precies dezelfde naam hebben, b.v. Zit ołd <-> ZØ ołd
+    Wanneer ingeschakeld, groepeer alleen records wanneer ze precies dezelfde naam hebben, bijv. Żołd <-> Żołd
     
-    Uitschakelen van een dergelijke optie zal namen groeperen zonder te controleren of elke letter hetzelfde formaat heeft, bijv. zghaoŁD <-> Zit ołd
+    Uitschakelen van deze optie zal namen groeperen zonder te controleren of elke letter hetzelfde formaat heeft, bijv. żoŁD <-> Żołd
 duplicate_mode_size_name_combo_box = Grootte en naam
-duplicate_mode_name_combo_box = naam
+duplicate_mode_name_combo_box = Naam
 duplicate_mode_size_combo_box = Grootte
-duplicate_mode_hash_combo_box = Toegangssleutel
+duplicate_mode_hash_combo_box = Hash
 duplicate_hash_type_tooltip =
     Czkawka biedt 3 soorten hashes:
     
@@ -69,45 +69,45 @@ duplicate_hash_type_tooltip =
 duplicate_check_method_tooltip =
     Op dit moment biedt Czkawka drie soorten methode aan om duplicaten te vinden door:
     
-    Naam - Gevonden bestanden met dezelfde naam.
+    Naam - Vindt bestanden met dezelfde naam.
     
-    Grootte - Gevonden bestanden die dezelfde grootte hebben.
+    Grootte - Vindt bestanden die dezelfde grootte hebben.
     
-    Hash - Gevonden bestanden die dezelfde inhoud hebben. Deze modus hashet het bestand en vergelijkt deze hash later om duplicaten te vinden. Deze modus is de veiligste manier om duplicaten te vinden. App gebruikt zwaar cache, dus de tweede en verdere scans van dezelfde gegevens zou veel sneller moeten zijn dan de eerste.
+    Hash - Vindt bestanden die dezelfde inhoud hebben. Deze modus hashet het bestand en vergelijkt deze hash later om duplicaten te vinden. Deze modus is de veiligste manier om duplicaten te vinden. App maakt zwaar gebruik van cache, dus de tweede en volgende scans van dezelfde gegevens zouden veel sneller moeten zijn dan de eerste.
 image_hash_size_tooltip =
     Elke gecontroleerde afbeelding produceert een speciale hash die met elkaar kan worden vergeleken en een klein verschil tussen hen betekent dat deze afbeeldingen vergelijkbaar zijn.
     
     8 hash size is vrij goed om afbeeldingen te vinden die maar een beetje lijken op origineel. Met een grotere set afbeeldingen (>1000) levert dit een grote hoeveelheid valse positieven op. Dus ik raad in dit geval aan een grotere hashgrootte te gebruiken.
     
-    16 is de standaard hash-afmeting, wat een heel goed compromis is tussen het vinden van zelfs een beetje gelijksoortige afbeeldingen en het hebben van slechts een klein aantal hash-botsingen.
+    16 is de standaard hash-afmeting, wat een heel goed compromis is tussen het vinden van zelfs een beetje vergelijkbare afbeeldingen en het hebben van slechts een klein aantal hash-botsingen.
     
-    32 en 64 hashes vinden slechts zeer gelijksoortige afbeeldingen, maar zouden bijna geen valse positieve motieven moeten hebben (behalve sommige afbeeldingen met alpha kanaal).
+    32 en 64 hashes vinden slechts zeer vergelijkbare afbeeldingen, maar zouden bijna geen valse positieven moeten hebben (behalve sommige afbeeldingen met alfakanaal).
 image_resize_filter_tooltip =
     Om hash van de afbeelding te berekenen, moet de bibliotheek deze eerst grootschalen.
     
     Afhankelijk van het gekozen algoritme, zal de uiteindelijke afbeelding die gebruikt wordt om hash te berekenen er een beetje anders uitzien.
     
-    Het snelste algoritme te gebruiken, maar ook het algoritme dat de slechtste resultaten geeft, is het dichtstbijst. Het is standaard ingeschakeld, want met 16x16 hash grootte is het niet echt zichtbaar.
+    Het snelste algoritme te gebruiken, maar ook het algoritme dat de slechtste resultaten geeft, is Nearest. Het is standaard ingeschakeld, want met 16x16 hash grootte is het niet echt zichtbaar.
     
-    met 8x8 hash grootte is het raadzaam om een ander algoritme te gebruiken dan Nearest, om betere groepen afbeeldingen te hebben.
+    Met 8x8 hash grootte is het raadzaam om een ander algoritme te gebruiken dan Nearest, om betere groepen afbeeldingen te hebben.
 image_hash_alg_tooltip =
     Gebruikers kunnen kiezen uit een van de vele algoritmes om de hash te berekenen.
     
-    Elk van deze punten heeft sterke en zwakke punten en zal soms betere en soms slechtere resultaten opleveren voor verschillende afbeeldingen.
+    Elk algoritme heeft sterke en zwakke punten en zal soms betere en soms slechtere resultaten opleveren voor verschillende afbeeldingen.
     
     Dus om het beste voor u te bepalen, is handmatige test vereist.
-image_geometric_invariance_tooltip = Vergelijk ook gespiegeld / gespiegeld en optioneel draaide varianten van elke afbeelding. Dit verbetert overeenkomende maar verhoogt hashingstijd.
+image_geometric_invariance_tooltip = Vergelijk ook gespiegelde/omgedraaide en optioneel gedraaide varianten van elke afbeelding. Dit verbetert het matchen maar verhoogt de hashingtijd.
 big_files_mode_combobox_tooltip = Maakt het mogelijk om naar kleinste/grootste bestanden te zoeken
 big_files_mode_label = Gecontroleerde bestanden
 big_files_mode_smallest_combo_box = De Kleinste
 big_files_mode_biggest_combo_box = De Grootste
-main_notebook_duplicates = Dupliceer Bestanden
+main_notebook_duplicates = Dubbele bestanden
 main_notebook_empty_directories = Lege mappen
 main_notebook_big_files = Grote bestanden
 main_notebook_empty_files = Lege bestanden
 main_notebook_temporary = Tijdelijke bestanden
 main_notebook_similar_images = Vergelijkbare afbeeldingen
-main_notebook_similar_videos = Soortgelijke video's
+main_notebook_similar_videos = Vergelijkbare video's
 main_notebook_same_music = Muziek duplicaten
 main_notebook_symlinks = Ongeldige Symlinks
 main_notebook_broken_files = Kapotte Bestanden
@@ -118,42 +118,42 @@ main_tree_view_column_path = Pad
 main_tree_view_column_modification = Wijziging datum
 main_tree_view_column_size = Grootte
 main_tree_view_column_similarity = Vergelijkbaarheid
-main_tree_view_column_dimensions = Mål
-main_tree_view_column_title = Aanspreektitel
-main_tree_view_column_artist = Kunstenaar
-main_tree_view_column_year = jaar
+main_tree_view_column_dimensions = Afmetingen
+main_tree_view_column_title = Titel
+main_tree_view_column_artist = Artiest
+main_tree_view_column_year = Jaar
 main_tree_view_column_bitrate = Bitsnelheid
-main_tree_view_column_length = longueur
-main_tree_view_column_genre = genre
+main_tree_view_column_length = Lengte
+main_tree_view_column_genre = Genre
 main_tree_view_column_symlink_file_name = Symlink bestandsnaam
 main_tree_view_column_symlink_folder = Symlink map
 main_tree_view_column_destination_path = Bestemming pad
 main_tree_view_column_type_of_error = Type fout
 main_tree_view_column_current_extension = Huidige extensie
-main_tree_view_column_proper_extensions = Proper Extensie
+main_tree_view_column_proper_extensions = Juiste extensie
 main_tree_view_column_fps = FPS
 main_tree_view_column_codec = Codec
 main_label_check_method = Controleer methode
 main_label_hash_type = Soort hash
 main_label_hash_size = Hash grootte
-main_label_geometric_invariance = Geometrische beveiliging
+main_label_geometric_invariance = Geometrische invariantie
 main_label_size_bytes = Grootte (bytes)
-main_label_min_size = Min
-main_label_max_size = Max
+main_label_min_size = Min.
+main_label_max_size = Max.
 main_label_shown_files = Aantal getoonde bestanden
-main_label_resize_algorithm = Algoritme aanpassen
-main_label_similarity = Similarity{ "   " }
+main_label_resize_algorithm = Algoritme voor formaat wijzigen
+main_label_similarity = Vergelijkbaarheid{ "   " }
 main_check_box_broken_files_audio = Geluid
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Archief
 main_check_box_broken_files_image = Afbeelding
 main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Gebruikt ffmpeg/ffprobe om video bestanden te valideren. Zeer traag en kan pedantische fouten detecteren zelfs als de bestand goed afspeelt.
+main_check_box_broken_files_video_tooltip = Gebruikt ffmpeg/ffprobe om videobestanden te valideren. Vrij traag en kan pedantische fouten detecteren, zelfs als het bestand prima afspeelt.
 check_button_general_same_size = Negeer dezelfde grootte
 check_button_general_same_size_tooltip = Bestanden met identieke grootte in resultaten negeren - meestal zijn deze 1:1 duplicaten
 main_label_size_bytes_tooltip = Grootte van bestanden die zullen worden gebruikt in scan
 # Upper window
-upper_tree_view_included_folder_column_title = Mappen om te zoeken
+upper_tree_view_included_folder_column_title = Te doorzoeken mappen
 upper_tree_view_included_reference_column_title = Referentie Mappen
 upper_recursive_button = Recursief
 upper_recursive_button_tooltip = Indien geselecteerd, zoek ook naar bestanden die niet direct onder de gekozen mappen worden geplaatst.
@@ -166,90 +166,90 @@ upper_remove_excluded_button = Verwijderen
 upper_manual_add_included_button_tooltip =
     Voeg mapnaam toe om met de hand te zoeken.
     
-    Om meerdere paden tegelijk toe te voegen, scheiden ze met ;
+    Om meerdere paden tegelijk toe te voegen, scheid ze met ;
     
-    /home/roman;/home/rozkaz zal twee mappen / home/roman en /home/rozkaz toevoegen
+    /home/roman;/home/rozkaz zal twee mappen /home/roman en /home/rozkaz toevoegen
 upper_add_included_button_tooltip = Voeg nieuwe map toe om te zoeken.
 upper_remove_included_button_tooltip = Map verwijderen uit zoekopdracht.
 upper_manual_add_excluded_button_tooltip =
     Voeg uitgesloten mapnaam met de hand toe.
     
-    Om meerdere paden tegelijk toe te voegen, scheid ze met
+    Om meerdere paden tegelijk toe te voegen, scheid ze met ;
     
-    /home/roman;/home/krokiet zal twee mappen / home/roman en /home/keokiet toevoegen
+    /home/roman;/home/krokiet zal twee mappen /home/roman en /home/keokiet toevoegen
 upper_add_excluded_button_tooltip = Voeg map toe om uitgesloten te worden in zoekopdracht.
 upper_remove_excluded_button_tooltip = Verwijder map van uitgesloten.
-upper_notebook_items_configuration = Artikelen configuratie
+upper_notebook_items_configuration = Itemconfiguratie
 upper_notebook_excluded_directories = Uitgesloten Paden
-upper_notebook_included_directories = Inclusieve Paden
+upper_notebook_included_directories = Inbegrepen paden
 upper_allowed_extensions_tooltip =
     Toegestane extensies moeten door komma's gescheiden worden (standaard zijn alle beschikbaar).
     
     De volgende macro's die meerdere extensies in één keer toevoegen, zijn ook beschikbaar: IMAGE, VIDEO, MUSIC, TEXT.
     
-    Gebruiksgebruik voorbeeld ".exe, IMAGE, VIDEO, .rar, 7z" - dit betekent dat afbeeldingen (e. . jpg, png), video's (bijv. avi, mp4), exe, rr en 7z bestanden worden gescand.
+    Gebruiksvoorbeeld ".exe, IMAGE, VIDEO, .rar, 7z" - dit betekent dat afbeeldingen (bijv. jpg, png), video's (bijv. avi, mp4), exe, rar en 7z bestanden worden gescand.
 upper_excluded_extensions_tooltip =
     Lijst van uitgeschakelde bestanden die genegeerd zullen worden in scan.
     
     Wanneer gebruik wordt gemaakt van toegestane en uitgeschakelde extensies, heeft deze hogere prioriteit, dus het bestand zal niet worden gecontroleerd.
 upper_excluded_items_tooltip =
-    Uitsluitende items moeten * wildcard bevatten en moeten gescheiden worden door komma's.
+    Uitgesloten items moeten het jokerteken * bevatten en moeten door komma's gescheiden worden.
     Dit is langzamer dan Uitsluitingspaden, dus gebruik het voorzichtig.
-upper_excluded_items = Uitgesloten artikelen:
+upper_excluded_items = Uitgesloten items:
 upper_allowed_extensions = Toegestane extensies:
 upper_excluded_extensions = Uitgeschakelde extensies:
 # Popovers
 popover_select_all = Alles selecteren
 popover_unselect_all = Selectie ongedaan maken
 popover_reverse = Omgekeerde selectie
-popover_select_all_except_shortest_path = Selecteer alles behalve de kortste route
-popover_select_all_except_longest_path = Selecteer alles behalve de langste pad
+popover_select_all_except_shortest_path = Selecteer alles behalve het kortste pad
+popover_select_all_except_longest_path = Selecteer alles behalve het langste pad
 popover_select_all_except_oldest = Alles selecteren behalve oudste
-popover_select_all_except_newest = Selecteer alles behalve nieuwste
+popover_select_all_except_newest = Alles selecteren behalve nieuwste
 popover_select_one_oldest = Selecteer één oudste
-popover_select_one_newest = Selecteer een nieuwste
-popover_select_custom = Selecteer aangepaste
-popover_unselect_custom = Aangepaste deselecteer ongedaan maken
+popover_select_one_newest = Selecteer één nieuwste
+popover_select_custom = Selecteer aangepast
+popover_unselect_custom = Aangepast deselecteren
 popover_select_all_images_except_biggest = Alles selecteren behalve de grootste
-popover_select_all_images_except_smallest = Selecteer alles behalve de kleinste
+popover_select_all_images_except_smallest = Alles selecteren behalve de kleinste
 popover_custom_path_check_button_entry_tooltip =
     Records per pad selecteren.
     
     Voorbeeld gebruik:
     /home/pimpek/rzecz.txt kan worden gevonden met /home/pim*
 popover_custom_name_check_button_entry_tooltip =
-    Records selecteren op bestandnamen.
+    Records selecteren op bestandsnamen.
     
     Voorbeeld gebruik:
     /usr/ping/pong.txt kan worden gevonden met *ong*
 popover_custom_regex_check_button_entry_tooltip =
-    Select records by specified Regex.
+    Selecteer records met een opgegeven Regex.
     
-    In this mode is searched text Path with Name.
+    In deze modus wordt gezocht in Pad met Naam.
     
-    Voorbeeld use usage:
-    /usr/bin/ziemniak. xt kan gevonden worden met /ziem[a-z]+
+    Voorbeeld:
+    /usr/bin/ziemniak.txt kan gevonden worden met /ziem[a-z]+
     
-    Dit gebruikt de standaard Rust regex implementatie. Je kunt hier meer over lezen: https://docs.rs/regex.
+    Dit gebruikt de standaard Rust regex implementatie. U kunt hier meer over lezen: https://docs.rs/regex.
 popover_custom_case_sensitive_check_button_tooltip =
     Maakt hoofdlettergevoelige detectie mogelijk.
     
-    Wanneer uitgeschakeld /home/* vindt zowel /HoMe/roman en /home/roman.
+    Wanneer uitgeschakeld, vindt /home/* zowel /HoMe/roman als /home/roman.
 popover_custom_not_all_check_button_tooltip =
     Voorkomt dat alle records in de groep worden geselecteerd.
     
-    Dit is standaard ingeschakeld, omdat in de meeste situaties u wilt niet zowel origineel als duplicaten verwijderen, maar ten minste één bestand achterlaten.
+    Dit is standaard ingeschakeld, omdat u in de meeste situaties niet zowel het origineel als de duplicaten wilt verwijderen, maar ten minste één bestand wilt achterlaten.
     
-    WAARSCHUWING: Deze instelling werkt niet als je al handmatig alle resultaten hebt geselecteerd in een groep.
+    WAARSCHUWING: Deze instelling werkt niet als u al handmatig alle resultaten hebt geselecteerd in een groep.
 popover_custom_regex_path_label = Pad
-popover_custom_regex_name_label = naam
+popover_custom_regex_name_label = Naam
 popover_custom_regex_regex_label = Regex pad + naam
 popover_custom_case_sensitive_check_button = Hoofdletter gevoelig
 popover_custom_all_in_group_label = Niet alle records in groep selecteren
-popover_custom_mode_unselect = Aangepaste deselecteren
+popover_custom_mode_unselect = Aangepast deselecteren
 popover_custom_mode_select = Selecteer aangepast
-popover_sort_file_name = Bestandsnaam is vereist
-popover_sort_folder_name = Folder Name
+popover_sort_file_name = Bestandsnaam
+popover_sort_folder_name = Mapnaam
 popover_sort_full_name = Volledige naam
 popover_sort_size = Grootte
 popover_sort_selection = Selectie
@@ -272,24 +272,24 @@ bottom_save_button_tooltip = Gegevens opslaan van zoekopdracht naar bestand
 bottom_symlink_button_tooltip =
     Maak symbolische links.
     Werkt alleen wanneer ten minste twee resultaten in een groep zijn geselecteerd.
-    De eerste is ongewijzigd en de tweede is symgekoppeld naar eerst.
+    De eerste is ongewijzigd en de tweede en latere bestanden worden aan de eerste gekoppeld via een symlink.
 bottom_hardlink_button_tooltip =
     Maak hardlinks.
     Werkt alleen wanneer ten minste twee resultaten in een groep worden geselecteerd.
-    De eerste is ongewijzigd en de tweede keer en later zijn vastgekoppeld aan eerst.
+    De eerste is ongewijzigd en de tweede en latere bestanden worden via een hardlink aan de eerste gekoppeld.
 bottom_hardlink_button_not_available_tooltip =
     Maak hardlinks.
     Knop is uitgeschakeld, omdat hardlinks niet kunnen worden gemaakt.
-    Hardlinks werkt alleen met beheerdersrechten op Windows, dus zorg ervoor dat je de app als administrator gebruikt.
-    Als de app al werkt met dergelijke privileges controle op gelijksoortige issues op Github.
+    Hardlinks werken alleen met beheerdersrechten op Windows, dus zorg ervoor dat u de app als administrator gebruikt.
+    Als de app al met dergelijke rechten draait, controleer dan Github op vergelijkbare problemen.
 bottom_move_button_tooltip =
     Verplaatst bestanden naar de gekozen map.
     Het kopieert alle bestanden naar de map zonder de mapstructuur te bewaren.
-    Wanneer twee bestanden met dezelfde naam naar de map worden verplaatst, zal de tweede mislukt en de fout worden weergegeven.
+    Wanneer twee bestanden met dezelfde naam naar de map worden verplaatst, zal de tweede mislukken en wordt de fout weergegeven.
 bottom_sort_button_tooltip = Sorteert bestanden/mappen op de geselecteerde methode.
 bottom_compare_button_tooltip = Afbeeldingen in de groep vergelijken.
 bottom_show_errors_tooltip = Onderste tekstvenster tonen/verbergen.
-bottom_show_upper_notebook_tooltip = Toon/Verberg bovenste notitieboekpaneel.
+bottom_show_upper_notebook_tooltip = Toon/Verberg bovenste paneel.
 # Progress Window
 progress_stop_button = Stoppen
 progress_stop_additional_message = Stop aangevraagd
@@ -298,7 +298,7 @@ about_repository_button_tooltip = Link naar de repository pagina met broncode.
 about_donation_button_tooltip = Link naar donatie pagina.
 about_instruction_button_tooltip = Link naar instructiepagina.
 about_translation_button_tooltip = Link naar de Crowdin pagina met appvertalingen. Officieel worden Pools en Engels ondersteund.
-about_repository_button = Bewaarplaats
+about_repository_button = Repository
 about_donation_button = Donatie
 about_instruction_button = Instructie
 about_translation_button = Vertaling
@@ -307,9 +307,9 @@ about_other_apps_dialog_title = Andere toepassingen door qarmin
 about_other_apps_open_source_note = Alle getoonde toepassingen zijn gratis en open source.
 about_other_apps_open_button = Open
 about_other_apps_szyszka_desc = Snelle en krachtige bestandshernoemer.
-about_other_apps_mykrut_desc = Eenvoudige snelle en opinioneerde Linux bestandsbeheer.
+about_other_apps_mykrut_desc = Eenvoudige, snelle en eigenzinnige Linux-bestandsbeheerder.
 about_other_apps_dcmki_viewer_desc = Eenvoudige DICOM kijker.
-about_other_apps_video_thumbnailer_desc = Omloop de video-thumbnail generator die gebruikt wordt in Czkawka.
+about_other_apps_video_thumbnailer_desc = Wrapper rond de video-thumbnailgenerator die in Czkawka gebruikt wordt.
 about_other_apps_space_finder_desc = Eenvoudige zoeker van de grootste bestanden op uw systeem.
 about_other_apps_system_info_collector_desc = Verzamelt RAM/CPU-gebruik van het besturingssysteem en toont het als grafiek.
 # Header
@@ -321,14 +321,14 @@ krokiet_promo_title = Ontmoet Krokiet!
 krokiet_promo_message =
     Hallo daar, dappere Czkawka gebruiker!
     
-    De Kracht is duidelijk bij jou, maar Krokiet is niet - een nieuwer, sneller, lichter en aanzienlijk meer knappe (ervan uitgaande dat apps echt handzaam kunnen zijn) dupliceren schoner.
+    De Kracht is duidelijk bij u, maar Krokiet is niet - een nieuwere, snellere, lichtere en aanzienlijk knappere (ervan uitgaande dat apps daadwerkelijk knap kunnen zijn) duplicaatopschoner.
     
-    Krokiet bevat alles wat mensen leuk vinden aan Czkawka. Het is volledig gratis, open source, heeft een unieke en eenvoudige UI (zowel geprezen als gehate door vellen), introduceer een heleboel nieuwe functies, gebruikt minder afhankelijkheden en werkt veel betrouwbaarder over verschillende platformen.
+    Krokiet bevat alles wat mensen leuk vinden aan Czkawka. Het is volledig gratis, open source, heeft een unieke en eenvoudige UI (zowel geprezen als verguisd door velen), introduceert een heleboel nieuwe functies, gebruikt minder afhankelijkheden en werkt veel betrouwbaarder over verschillende platformen.
     
-    En als je het op de een of andere manier gemist hebt, is er al een nog nieuwere app dan Krokiet - Cedinia, speciaal ontworpen voor Android-apparaten en touchscreen gebruik.
+    En als u het op de een of andere manier gemist heeft, is er al een nog nieuwere app dan Krokiet - Cedinia, speciaal ontworpen voor Android-apparaten en touchscreen gebruik.
     
-    Czkawka GTK heeft ons goed geholpen, maar het horloge is afgelopen.
-krokiet_promo_link_download = Krokiet/Cedinië downloaden
+    Czkawka GTK heeft ons goed gediend, maar zijn tijd zit erop.
+krokiet_promo_link_download = Krokiet/Cedinia downloaden
 krokiet_promo_link_project = Project pagina
 
 # Settings
@@ -338,11 +338,11 @@ krokiet_promo_link_project = Project pagina
 
 settings_number_of_threads = Aantal gebruikte threads
 settings_number_of_threads_tooltip = Aantal gebruikte threads, 0 betekent dat alle beschikbare threads zullen worden gebruikt.
-settings_use_rust_preview = Gebruik externe bibliotheken in plaats daarvan om previews te laden
+settings_use_rust_preview = Gebruik externe bibliotheken in plaats van gtk om voorbeelden te laden
 settings_use_rust_preview_tooltip =
     Het gebruik van gtk previews zal soms sneller zijn en ondersteuning bieden voor meer formaten, maar soms kan het precies het tegenovergestelde zijn.
     
-    Als je problemen hebt met het laden van previews, kan je proberen deze instelling te veranderen.
+    Als u problemen heeft met het laden van previews, kunt u proberen deze instelling te veranderen.
     
     Op niet-linux systemen is het aangeraden om deze optie te gebruiken, omdat gtk-pixbuf niet altijd beschikbaar is, dus het uitschakelen van deze optie zal geen voorvertoningen van sommige afbeeldingen laden.
 settings_label_restart = U moet de app herstarten om de instellingen toe te passen!
@@ -350,7 +350,7 @@ settings_ignore_other_filesystems = Negeer andere bestandssystemen (alleen Linux
 settings_ignore_other_filesystems_tooltip =
     negeert bestanden die niet in hetzelfde bestandssysteem zitten als gezochte mappen.
     
-    Werkt dezelfde als -xdev optie in het zoekcommando voor Linux
+    Werkt hetzelfde als de -xdev optie in het find-commando op Linux.
 settings_save_at_exit_button_tooltip = Configuratie opslaan in bestand bij het sluiten van de app.
 settings_load_at_start_button_tooltip =
     Laad de configuratie van het bestand bij het openen van de app.
@@ -367,7 +367,7 @@ settings_language_label_tooltip = Taal voor de gebruikersinterface.
 settings_save_at_exit_button = Configuratie opslaan bij het sluiten van app
 settings_load_at_start_button = Laad configuratie bij het openen van app
 settings_confirm_deletion_button = Toon bevestigingsdialoog bij het verwijderen van bestanden
-settings_confirm_link_button = Melding bevestigen bij hard/symlinks van bestanden
+settings_confirm_link_button = Toon bevestigingsdialoog bij het hard/symlinken van bestanden
 settings_confirm_group_deletion_button = Toon het bevestigingsvenster bij het verwijderen van alle bestanden in de groep
 settings_show_text_view_button = Toon onderaan tekstpaneel
 settings_use_cache_button = Gebruik cache
@@ -382,11 +382,11 @@ settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     
     Dit uitschakelen zal helpen bij het scannen van bestanden op externe schijven, dus cache-items over deze zullen niet worden gewist in de volgende scan.
     
-    In het geval van honderdduizenden records in de cache, het wordt aangeraden om dit in te schakelen, dit zal de cache laden/opslaan aan het starten/einde van de scan versnellen.
+    In het geval van honderdduizenden records in de cache wordt het aangeraden om dit in te schakelen; dit zal het laden/opslaan van de cache bij het starten/einde van de scan versnellen.
 settings_notebook_general = Algemeen
 settings_notebook_duplicates = Duplicaten
 settings_notebook_images = Vergelijkbare afbeeldingen
-settings_notebook_videos = Gelijkaardige Video
+settings_notebook_videos = Vergelijkbare video
 
 ## Multiple - settings used in multiple tabs
 
@@ -406,14 +406,14 @@ settings_duplicates_hide_hard_link_button_tooltip =
 settings_duplicates_minimal_size_entry_tooltip =
     Stel de minimale bestandsgrootte in die gecached zal worden.
     
-    kiezen van een kleinere waarde zal meer records genereren. Dit zal het zoeken versnellen, maar de cache aan het laden/opslaan.
+    Kiezen van een kleinere waarde zal meer records genereren. Dit zal het zoeken versnellen, maar het laden/opslaan van de cache vertragen.
 settings_duplicates_prehash_checkbutton_tooltip =
     Hiermee kan het cachen van prehash (een hash berekend van een klein deel van het bestand) eerder verwijderen van niet-gedupliceerde resultaten.
     
     Het is standaard uitgeschakeld omdat het in sommige situaties vertraging kan veroorzaken.
     
     Het is sterk aanbevolen om het te gebruiken bij het scannen van honderdduizenden of miljoen bestanden, omdat het zoeken meerdere keren kan versnellen.
-settings_duplicates_prehash_minimal_entry_tooltip = Minimale grootte van gecachete invoer.
+settings_duplicates_prehash_minimal_entry_tooltip = Minimale grootte van een gecacht item.
 settings_duplicates_hide_hard_link_button = Verberg harde links
 settings_duplicates_prehash_checkbutton = Gebruik prehash cache
 settings_duplicates_minimal_size_cache_label = Minimale bestandsgrootte (in bytes) opgeslagen in de cache
@@ -435,13 +435,13 @@ settings_folder_cache_open_tooltip =
     
     Het wijzigen van de cachebestanden kan ervoor zorgen dat ongeldige resultaten worden getoond. Het wijzigen van een pad kan echter tijd besparen bij het verplaatsen van een grote hoeveelheid bestanden naar een andere locatie.
     
-    U kunt deze bestanden tussen computers kopiëren om tijd te besparen bij het scannen van bestanden (van natuurlijk als ze een vergelijkbare directory structuur hebben).
+    U kunt deze bestanden tussen computers kopiëren om tijd te besparen bij het opnieuw scannen van bestanden (natuurlijk alleen als ze een vergelijkbare mapstructuur hebben).
     
     In geval van problemen met de cache kunnen deze bestanden worden verwijderd. De app zal ze automatisch opnieuw genereren.
 settings_folder_settings_open_tooltip =
     Opent de map waar de Czkawka config is opgeslagen.
     
-    WAARSCHUWING: Handmatig wijzigen van de configuratie kan uw workflow verbreken.
+    WAARSCHUWING: Handmatig wijzigen van de configuratie kan uw workflow verstoren.
 settings_folder_cache_open = Open cachemap
 settings_folder_settings_open = Instellingenmap openen
 # Compute results
@@ -452,71 +452,71 @@ compute_found_empty_folders = Gevonden { $number_files } lege mappen in { $time 
 compute_found_empty_files = Gevonden { $number_files } lege bestanden in { $time }
 compute_found_big_files = Gevonden { $number_files } grote bestanden in { $time }
 compute_found_temporary_files = Gevonden { $number_files } tijdelijke bestanden in { $time }
-compute_found_images = { $number_files } soortgelijke afbeeldingen gevonden in { $number_groups } groepen in { $time }
-compute_found_videos = Gevonden { $number_files } soortgelijke video's in { $number_groups } groepen in { $time }
-compute_found_music = Gevonden { $number_files } soortgelijke muziekbestanden in { $number_groups } groepen in { $time }
+compute_found_images = Gevonden { $number_files } vergelijkbare afbeeldingen in { $number_groups } groepen in { $time }
+compute_found_videos = Gevonden { $number_files } vergelijkbare video's in { $number_groups } groepen in { $time }
+compute_found_music = Gevonden { $number_files } vergelijkbare muziekbestanden in { $number_groups } groepen in { $time }
 compute_found_invalid_symlinks = Gevonden { $number_files } ongeldige symlinks in { $time }
 compute_found_broken_files = Gevonden { $number_files } gebroken bestanden in { $time }
-compute_found_bad_extensions = { $number_files } bestanden met ongeldige extensies gevonden in { $time }
+compute_found_bad_extensions = Gevonden { $number_files } bestanden met ongeldige extensies in { $time }
 # Progress window
-progress_current_stage = Current Stage:{ "  " }
-progress_all_stages = All Stages:{ "  " }
+progress_current_stage = Huidige fase:{ "  " }
+progress_all_stages = Alle fases:{ "  " }
 # Saving loading 
 saving_loading_saving_success = Configuratie opgeslagen in bestand { $name }.
 saving_loading_saving_failure = Kan de configuratiegegevens niet opslaan in het bestand { $name }, reden { $reason }.
 saving_loading_reset_configuration = Huidige configuratie is gewist.
-saving_loading_loading_success = Goed geladen app configuratie.
+saving_loading_loading_success = App-configuratie succesvol geladen.
 saving_loading_no_config_file = Geen configuratiebestand gevonden, met behulp van standaardinstellingen.
 saving_loading_failed_to_create_config_file = Fout bij het aanmaken van het configuratiebestand "{ $path }", reden "{ $reason }".
-saving_loading_failed_to_read_config_file = Kan configuratie niet laden van "{ $path }" omdat deze niet bestaat of geen bestand is.
-saving_loading_failed_to_read_data_from_file = Kan gegevens niet lezen van bestand "{ $path }", reden "{ $reason }".
+saving_loading_failed_to_read_config_file = Kan configuratie niet laden uit "{ $path }" omdat deze niet bestaat of geen bestand is.
+saving_loading_failed_to_read_data_from_file = Kan gegevens niet lezen uit bestand "{ $path }", reden "{ $reason }".
 # Other
 selected_all_reference_folders = Kan zoeken niet starten, als alle mappen als referentie mappen zijn ingesteld
 searching_for_data = Gegevens zoeken, het kan een tijdje duren, even wachten...
 text_view_messages = BERICHTEN
-text_view_warnings = LET OP
+text_view_warnings = WAARSCHUWINGEN
 text_view_errors = FOUTEN
 about_window_motto = Dit programma is gratis te gebruiken en zal dat altijd zijn.
-krokiet_new_app = Czkawka is in onderhoudsmodus, wat betekent dat alleen kritieke bugs opgelost zullen worden en er geen nieuwe functies aan toegevoegd zullen worden. Voor nieuwe functies, bekijk de nieuwe Krokiet app, die stabieler en performanter is en nog in volle ontwikkeling is.
+krokiet_new_app = Deze GTK-versie van Czkawka wordt sinds versie 12 niet langer ontwikkeld. Gebruik voor nieuwe functies en actieve ontwikkeling Krokiet, dat stabieler en performanter is.
 # Various dialog
 dialogs_ask_next_time = Volgende keer vragen
-symlink_failed = symlink { $name } naar { $target }mislukt, reden { $reason }
+symlink_failed = Symlink { $name } naar { $target } mislukt, reden { $reason }
 delete_title_dialog = Bevestiging verwijderen
 delete_question_label = Weet u zeker dat u bestanden wilt verwijderen?
 delete_all_files_in_group_title = Bevestiging van het verwijderen van alle bestanden in groep
-delete_all_files_in_group_label1 = In sommige groepen worden alle records geselecteerd.
+delete_all_files_in_group_label1 = In sommige groepen zijn alle records geselecteerd.
 delete_all_files_in_group_label2 = Weet u zeker dat u deze wilt verwijderen?
 delete_items_label = { $items } bestanden worden verwijderd.
 delete_items_groups_label = { $items } bestanden van { $groups } groepen worden verwijderd.
-hardlink_failed = Mislukt om hardlink te maken { $name } naar { $target }, reden { $reason }
+hardlink_failed = Kon geen hardlink maken van { $name } naar { $target }, reden { $reason }
 hard_sym_invalid_selection_title_dialog = Ongeldige selectie met sommige groepen
 hard_sym_invalid_selection_label_1 = In sommige groepen is er slechts één record geselecteerd en zal worden genegeerd.
 hard_sym_invalid_selection_label_2 = Om deze bestanden hard/sym te kunnen koppelen, moeten ten minste twee resultaten in de groep worden geselecteerd.
-hard_sym_invalid_selection_label_3 = Eerst wordt de groep als origineel erkend en niet veranderd, en vervolgens worden de tweede wijzigingen aangebracht.
+hard_sym_invalid_selection_label_3 = Het eerste bestand in de groep wordt als origineel beschouwd en niet gewijzigd, maar het tweede en latere bestanden worden aangepast.
 hard_sym_link_title_dialog = Bevestiging link
 hard_sym_link_label = Weet u zeker dat u deze bestanden wilt koppelen?
-move_folder_failed = Map { $name }kon niet verplaatst worden, reden { $reason }
+move_folder_failed = Map { $name } kon niet verplaatst worden, reden { $reason }
 move_file_failed = Kon bestand niet verplaatsen { $name }, reden { $reason }
 move_files_title_dialog = Kies de map waarnaar u gedupliceerde bestanden wilt verplaatsen
 move_files_choose_more_than_1_path = Er kan slechts één pad geselecteerd zijn om hun gedupliceerde bestanden te kopiëren, geselecteerde { $path_number }.
-move_stats = Naar behoren verplaatst { $num_files }/{ $all_files } items
+move_stats = { $num_files }/{ $all_files } items succesvol verplaatst
 save_results_to_file = Opgeslagen resultaten zowel in txt als json bestanden in de "{ $name }" map.
-search_not_choosing_any_music = FOUT: U moet ten minste één selectievakje met muziekinstypes selecteren.
+search_not_choosing_any_music = FOUT: U moet ten minste één selectievakje met muziekzoektypes selecteren.
 search_not_choosing_any_broken_files = FOUT: U moet ten minste één selectievakje selecteren met type van aangevinkte bestanden.
 include_folders_dialog_title = Mappen om op te nemen
 exclude_folders_dialog_title = Mappen om uit te sluiten
 include_manually_directories_dialog_title = Voeg map handmatig toe
-cache_properly_cleared = Cache op juiste wijze gewist
+cache_properly_cleared = Cache succesvol gewist
 cache_clear_duplicates_title = Duplicaten cache wissen
-cache_clear_similar_images_title = Leeg soortgelijke afbeeldingen-cache
-cache_clear_similar_videos_title = Leeg soortgelijke video cache
+cache_clear_similar_images_title = Vergelijkbare afbeeldingencache wissen
+cache_clear_similar_videos_title = Vergelijkbare videocache wissen
 cache_clear_message_label_1 = Wilt u de cache van verouderde items wissen?
 cache_clear_message_label_2 = Deze actie zal alle cache-items verwijderen die naar ongeldige bestanden wijzen.
 cache_clear_message_label_3 = Dit kan de laden/opslaan enigszins versnellen.
 cache_clear_message_label_4 = WAARSCHUWING: De bewerking zal alle opgeslagen data van externe schijven verwijderen. Daarom zal elke hash opnieuw moeten worden gegenereerd.
 # Show preview
 preview_image_resize_failure = Formaat wijzigen van afbeelding { $name } is mislukt.
-preview_image_opening_failure = Kan afbeelding { $name }niet openen, reden { $reason }
+preview_image_opening_failure = Kan afbeelding { $name } niet openen, reden { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
 compare_groups_number = Groep { $current_group }/{ $all_groups } ({ $images_in_group } afbeeldingen)
 compare_move_left_button = L

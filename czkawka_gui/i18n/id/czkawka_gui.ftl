@@ -4,10 +4,10 @@ window_main_title = Czkawka (Cegukan)
 window_progress_title = Memindai
 window_compare_images = Bandingkan Gambar
 # General
-general_ok_button = Oke
+general_ok_button = OK
 general_close_button = Tutup
 # Krokiet info dialog
-krokiet_info_title = Pemberitahuan Penghapusan Fitur
+krokiet_info_title = Pemberitahuan Penghentian Dukungan
 krokiet_info_message =
     Czkawka GTK 12.0 adalah rilis terakhir. Tidak ada pembaruan, fitur, atau perbaikan bug lebih lanjut yang direncanakan.
     
@@ -26,13 +26,13 @@ music_length_checkbox = Panjang
 music_comparison_checkbox = Perbandingan Kasar
 music_checking_by_tags = Tag
 music_checking_by_content = Konten
-same_music_seconds_label = Fragmen minimal, durasi kedua
+same_music_seconds_label = Durasi minimal fragmen (detik)
 same_music_similarity_label = Perbedaan maksimum
 music_compare_only_in_title_group = Bandingkan berdasarkan kelompok judul yang serupa
 music_compare_only_in_title_group_tooltip =
-    Saat diaktifkan, berkas-berkas dikelompokkan berdasarkan judul, kemudian dibandingkan satu sama lain.
+    Saat diaktifkan, file-file dikelompokkan berdasarkan judul, kemudian dibandingkan satu sama lain.
     
-    Dengan 10.000 berkas, alih-alih hampir 100 juta perbandingan yang biasanya terjadi, akan ada sekitar 20.000 perbandingan.
+    Dengan 10.000 file, alih-alih hampir 100 juta perbandingan yang biasanya terjadi, akan ada sekitar 20.000 perbandingan.
 same_music_tooltip =
     Mencari file musik yang serupa berdasarkan isinya dapat dikonfigurasi dengan mengatur:
     
@@ -98,24 +98,24 @@ image_hash_alg_tooltip =
     Oleh karena itu, untuk menentukan algoritma yang paling sesuai untuk Anda, diperlukan pengujian manual.
 image_geometric_invariance_tooltip = Selain itu, bandingkan juga varian yang telah dicerminkan/dibalik dan, opsional, diputar dari setiap gambar. Hal ini meningkatkan akurasi pencocokan, tetapi memperpanjang waktu proses hashing.
 big_files_mode_combobox_tooltip = Memungkinkan untuk mencari file terkecil/terbesar
-big_files_mode_label = Berkas yang telah diperiksa
+big_files_mode_label = File yang telah diperiksa
 big_files_mode_smallest_combo_box = Yang Terkecil
 big_files_mode_biggest_combo_box = Yang Terbesar
-main_notebook_duplicates = Berkas Duplikat
+main_notebook_duplicates = File Duplikat
 main_notebook_empty_directories = Direktori Kosong
-main_notebook_big_files = Berkas Besar
-main_notebook_empty_files = Berkas Kosong
-main_notebook_temporary = Berkas Sementara
+main_notebook_big_files = File Besar
+main_notebook_empty_files = File Kosong
+main_notebook_temporary = File Sementara
 main_notebook_similar_images = Gambar Serupa
 main_notebook_similar_videos = Video Serupa
 main_notebook_same_music = Duplikat Musik
 main_notebook_symlinks = Tautan Simbolik Tidak Valid
-main_notebook_broken_files = Berkas Rusak
+main_notebook_broken_files = File Rusak
 main_notebook_bad_extensions = Ekstensi yang Buruk
-main_tree_view_column_file_name = Nama Berkas
+main_tree_view_column_file_name = Nama File
 main_tree_view_column_folder_name = Nama Folder
 main_tree_view_column_path = Jalur
-main_tree_view_column_modification = Tangga Modifikasi
+main_tree_view_column_modification = Tanggal Modifikasi
 main_tree_view_column_size = Ukuran
 main_tree_view_column_similarity = Kesamaan
 main_tree_view_column_dimensions = Dimensi
@@ -125,8 +125,8 @@ main_tree_view_column_year = Tahun
 main_tree_view_column_bitrate = Bitrate
 main_tree_view_column_length = Panjang
 main_tree_view_column_genre = Genre
-main_tree_view_column_symlink_file_name = Nama File Simbolik (Symlink)
-main_tree_view_column_symlink_folder = Simbolik Link Folder
+main_tree_view_column_symlink_file_name = Nama File Tautan Simbolik
+main_tree_view_column_symlink_folder = Folder Tautan Simbolik
 main_tree_view_column_destination_path = Jalur Tujuan
 main_tree_view_column_type_of_error = Jenis Kesalahan
 main_tree_view_column_current_extension = Ekstensi Saat Ini
@@ -140,18 +140,18 @@ main_label_geometric_invariance = Invarian geometri
 main_label_size_bytes = Ukuran (byte)
 main_label_min_size = Min
 main_label_max_size = Maks
-main_label_shown_files = Jumlah berkas yang ditampilkan
+main_label_shown_files = Jumlah file yang ditampilkan
 main_label_resize_algorithm = Algoritma perubahan ukuran
-main_label_similarity = Similarity{ "   " }
+main_label_similarity = Kesamaan{ "   " }
 main_check_box_broken_files_audio = Audio
 main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Arsip
 main_check_box_broken_files_image = Gambar
 main_check_box_broken_files_video = Video
-main_check_box_broken_files_video_tooltip = Menggunakan ffmpeg/ffprobe untuk memvalidasi berkas video. Prosesnya cukup lambat dan mungkin mendeteksi kesalahan-kesalahan kecil, bahkan jika berkas video tersebut dapat diputar dengan baik.
+main_check_box_broken_files_video_tooltip = Menggunakan ffmpeg/ffprobe untuk memvalidasi file video. Prosesnya cukup lambat dan mungkin mendeteksi kesalahan-kesalahan kecil, bahkan jika file video tersebut dapat diputar dengan baik.
 check_button_general_same_size = Abaikan ukuran sama
 check_button_general_same_size_tooltip = Abaikan file dengan ukuran yang sama dalam hasil pencarian - biasanya ini adalah duplikat yang identik
-main_label_size_bytes_tooltip = Ukuran berkas yang akan digunakan dalam proses pemindaian
+main_label_size_bytes_tooltip = Ukuran file yang akan digunakan dalam proses pemindaian
 # Upper window
 upper_tree_view_included_folder_column_title = Folder yang Akan Dicari
 upper_tree_view_included_reference_column_title = Folder Referensi
@@ -181,7 +181,7 @@ upper_add_excluded_button_tooltip = Tambahkan direktori yang akan dikecualikan d
 upper_remove_excluded_button_tooltip = Hapus direktori dari daftar yang dikecualikan.
 upper_notebook_items_configuration = Konfigurasi Item
 upper_notebook_excluded_directories = Jalur yang Dikecualikan
-upper_notebook_included_directories = Jalur yang Termasuk
+upper_notebook_included_directories = Jalur yang Disertakan
 upper_allowed_extensions_tooltip =
     Ekstensi yang diizinkan harus dipisahkan dengan koma (secara default, semua tersedia).
     
@@ -189,18 +189,18 @@ upper_allowed_extensions_tooltip =
     
     Contoh penggunaan: ".exe, IMAGE, VIDEO, .rar, 7z" - ini berarti bahwa file gambar (misalnya, jpg, png), video (misalnya, avi, mp4), file exe, rar, dan 7z akan dipindai.
 upper_excluded_extensions_tooltip =
-    Daftar berkas yang dinonaktifkan dan akan diabaikan selama pemindaian.
+    Daftar file yang dinonaktifkan dan akan diabaikan selama pemindaian.
     
-    Ketika menggunakan baik ekstensi yang diizinkan maupun yang dinonaktifkan, yang dinonaktifkan memiliki prioritas lebih tinggi, sehingga berkas tidak akan diperiksa.
+    Ketika menggunakan baik ekstensi yang diizinkan maupun yang dinonaktifkan, yang dinonaktifkan memiliki prioritas lebih tinggi, sehingga file tidak akan diperiksa.
 upper_excluded_items_tooltip =
-    Item-item yang dikecualikan harus mengandung karakter "*wildcard*" dan dipisahkan dengan koma.
-    Ini lebih lambat dibandingkan dengan "Excluded Paths", jadi gunakan dengan hati-hati.
-upper_excluded_items = Barang yang Tidak Termasuk:
+    Item yang dikecualikan harus mengandung wildcard * dan dipisahkan dengan koma.
+    Ini lebih lambat daripada "Jalur yang Dikecualikan", jadi gunakan dengan hati-hati.
+upper_excluded_items = Item yang Dikecualikan:
 upper_allowed_extensions = Ekstensi yang Diizinkan:
 upper_excluded_extensions = Ekstensi yang Dinonaktifkan:
 # Popovers
 popover_select_all = Pilih Semua
-popover_unselect_all = Batal Pilih
+popover_unselect_all = Batalkan semua pilihan
 popover_reverse = Seleksi Terbalik
 popover_select_all_except_shortest_path = Pilih semua kecuali jalur terpendek
 popover_select_all_except_longest_path = Pilih semua kecuali jalur terpanjang
@@ -209,7 +209,7 @@ popover_select_all_except_newest = Pilih semua kecuali yang terbaru
 popover_select_one_oldest = Pilih salah satu yang tertua
 popover_select_one_newest = Pilih salah satu yang terbaru
 popover_select_custom = Pilih kustom
-popover_unselect_custom = Batalkan pilihan khusus
+popover_unselect_custom = Batalkan pilihan kustom
 popover_select_all_images_except_biggest = Pilih semua kecuali yang terbesar
 popover_select_all_images_except_smallest = Pilih semua kecuali yang terkecil
 popover_custom_path_check_button_entry_tooltip =
@@ -266,8 +266,8 @@ bottom_move_button = Pindah
 bottom_sort_button = Urutkan
 bottom_compare_button = Bandingkan
 bottom_search_button_tooltip = Mulai pencarian
-bottom_select_button_tooltip = Pilih rekaman. Hanya berkas/folder yang dipilih yang dapat diproses selanjutnya.
-bottom_delete_button_tooltip = Hapus berkas/folder yang dipilih.
+bottom_select_button_tooltip = Pilih catatan. Hanya file/folder yang dipilih yang dapat diproses selanjutnya.
+bottom_delete_button_tooltip = Hapus file/folder yang dipilih.
 bottom_save_button_tooltip = Simpan data tentang pencarian ke dalam file
 bottom_symlink_button_tooltip =
     Buat tautan simbolik.
@@ -283,15 +283,15 @@ bottom_hardlink_button_not_available_tooltip =
     Tautan keras hanya berfungsi dengan hak administrator di Windows, jadi pastikan untuk menjalankan aplikasi sebagai administrator.
     Jika aplikasi sudah berjalan dengan hak tersebut, periksa masalah serupa di Github.
 bottom_move_button_tooltip =
-    Memindahkan berkas ke direktori yang dipilih.
-    Berkas-berkas tersebut disalin ke direktori tanpa mempertahankan struktur direktori aslinya.
-    Jika mencoba memindahkan dua berkas dengan nama yang sama ke folder, proses untuk berkas kedua akan gagal dan menampilkan pesan kesalahan.
-bottom_sort_button_tooltip = Mengurutkan berkas/folder berdasarkan metode yang dipilih.
+    Memindahkan file ke direktori yang dipilih.
+    File-file tersebut disalin ke direktori tanpa mempertahankan struktur direktori aslinya.
+    Jika mencoba memindahkan dua file dengan nama yang sama ke folder, proses untuk file kedua akan gagal dan menampilkan pesan kesalahan.
+bottom_sort_button_tooltip = Mengurutkan file/folder berdasarkan metode yang dipilih.
 bottom_compare_button_tooltip = Bandingkan gambar-gambar dalam grup ini.
 bottom_show_errors_tooltip = Tampilkan/Sembunyikan panel teks di bagian bawah.
 bottom_show_upper_notebook_tooltip = Tampilkan/Sembunyikan panel notebook atas.
 # Progress Window
-progress_stop_button = Berhenti
+progress_stop_button = Hentikan
 progress_stop_additional_message = Permintaan berhenti telah diterima
 # About Window
 about_repository_button_tooltip = Tautan ke halaman repositori yang berisi kode sumber.
@@ -306,9 +306,9 @@ about_other_apps_button = Aplikasi Lainnya
 about_other_apps_dialog_title = Aplikasi lain dari qarmin
 about_other_apps_open_source_note = Semua aplikasi yang terdaftar bersifat gratis dan sumber terbuka.
 about_other_apps_open_button = Buka
-about_other_apps_szyszka_desc = Pengganti nama file yang cepat dan bertenaga.
-about_other_apps_mykrut_desc = Manajer berkas Linux yang sederhana, cepat, dan memiliki preferensi bawaan.
-about_other_apps_dcmki_viewer_desc = Pemutar DICOM sederhana.
+about_other_apps_szyszka_desc = Pengganti nama file yang cepat dan kuat.
+about_other_apps_mykrut_desc = Manajer file Linux yang sederhana, cepat, dan memiliki preferensi bawaan.
+about_other_apps_dcmki_viewer_desc = Penampil DICOM sederhana.
 about_other_apps_video_thumbnailer_desc = Lapisan pembungkus (wrapper) untuk generator gambar mini (thumbnail) video yang digunakan dalam Czkawka.
 about_other_apps_space_finder_desc = Aplikasi sederhana untuk menemukan file-file terbesar di sistem Anda.
 about_other_apps_system_info_collector_desc = Mengumpulkan informasi penggunaan RAM/CPU dari sistem operasi dan menampilkannya dalam bentuk grafik.
@@ -319,15 +319,15 @@ header_krokiet_button_tooltip = Coba Krokiet sekarang - versi terbaru dan lebih 
 # Krokiet promo dialog
 krokiet_promo_title = Kenalan dengan Krokiet!
 krokiet_promo_message =
-    Halo, pengguna Czkawka yang hebat!
+    Halo, pengguna Czkawka yang pemberani!
     
-    Jelas sekali, kekuatan ada di pihak Anda, tetapi Krokiet tidak - sebuah aplikasi pembersih duplikat yang lebih baru, lebih cepat, lebih ringan, dan secara signifikan lebih menarik (dengan asumsi aplikasi bisa terlihat menarik).
+    Force jelas menyertai Anda, tetapi Krokiet belum - aplikasi pembersih duplikat yang lebih baru, lebih cepat, lebih ringan, dan jauh lebih tampan (dengan asumsi aplikasi memang bisa terlihat tampan).
     
-    Krokiet mencakup semua hal yang disukai orang dari Czkawka. Aplikasi ini sepenuhnya gratis, *open source*, memiliki antarmuka pengguna (UI) yang unik dan sederhana (yang dipuji dan dikritik oleh banyak orang), memperkenalkan banyak fitur baru, menggunakan lebih sedikit dependensi, dan bekerja jauh lebih andal di berbagai platform.
+    Krokiet mencakup semua hal yang disukai orang dari Czkawka. Aplikasi ini sepenuhnya gratis, open source, memiliki antarmuka pengguna (UI) yang unik dan sederhana (yang dipuji sekaligus dibenci banyak orang), memperkenalkan banyak fitur baru, menggunakan lebih sedikit dependensi, dan bekerja jauh lebih andal di berbagai platform.
     
-    Dan jika Anda mungkin melewatkannya, sudah ada aplikasi yang lebih baru lagi dari Krokiet, yaitu Cedinia, yang dirancang terutama untuk perangkat Android dan penggunaan layar sentuh.
+    Dan jika Anda melewatkannya, sudah ada aplikasi yang lebih baru lagi dari Krokiet - Cedinia, yang dirancang terutama untuk perangkat Android dan layar sentuh.
     
-    Czkawka GTK telah memberikan banyak manfaat bagi kita, tetapi masa pakainya telah berakhir.
+    Czkawka GTK telah melayani kita dengan baik, tetapi tugas jaganya telah berakhir.
 krokiet_promo_link_download = Unduh Krokiet/Cedinia
 krokiet_promo_link_project = Halaman proyek
 
@@ -346,9 +346,9 @@ settings_use_rust_preview_tooltip =
     
     Pada sistem non-Linux, disarankan untuk menggunakan opsi ini, karena gtk-pixbuf tidak selalu tersedia di sana, sehingga menonaktifkan opsi ini akan mencegah pemuatan pratinjau untuk beberapa gambar.
 settings_label_restart = Anda perlu memulai ulang aplikasi untuk menerapkan pengaturan!
-settings_ignore_other_filesystems = Abaikan sistem berkas lainnya (hanya untuk Linux)
+settings_ignore_other_filesystems = Abaikan sistem file lainnya (hanya untuk Linux)
 settings_ignore_other_filesystems_tooltip =
-    Mengabaikan berkas yang tidak berada dalam sistem berkas yang sama dengan direktori yang dicari.
+    Mengabaikan file yang tidak berada dalam sistem file yang sama dengan direktori yang dicari.
     
     Berfungsi sama seperti opsi -xdev pada perintah `find` di Linux
 settings_save_at_exit_button_tooltip = Simpan konfigurasi ke file saat aplikasi ditutup.
@@ -360,9 +360,9 @@ settings_confirm_deletion_button_tooltip = Tampilkan dialog konfirmasi saat tomb
 settings_confirm_link_button_tooltip = Tampilkan dialog konfirmasi saat tombol "hard link" atau "symlink" diklik.
 settings_confirm_group_deletion_button_tooltip = Tampilkan dialog peringatan ketika pengguna mencoba menghapus semua catatan dari grup tersebut.
 settings_show_text_view_button_tooltip = Tampilkan panel teks di bagian bawah antarmuka pengguna.
-settings_use_cache_button_tooltip = Gunakan *file cache*.
-settings_save_also_as_json_button_tooltip = Simpan *cache* ke dalam format JSON (yang mudah dibaca oleh manusia). Anda dapat memodifikasi isinya. *Cache* dari file ini akan dibaca secara otomatis oleh aplikasi jika *cache* dalam format biner (dengan ekstensi .bin) tidak tersedia.
-settings_use_trash_button_tooltip = Memindahkan berkas ke tempat sampah, bukan menghapusnya secara permanen.
+settings_use_cache_button_tooltip = Gunakan cache file.
+settings_save_also_as_json_button_tooltip = Simpan cache ke dalam format JSON (yang mudah dibaca oleh manusia). Anda dapat memodifikasi isinya. Cache dari file ini akan dibaca secara otomatis oleh aplikasi jika cache dalam format biner (dengan ekstensi .bin) tidak tersedia.
+settings_use_trash_button_tooltip = Memindahkan file ke tempat sampah, bukan menghapusnya secara permanen.
 settings_language_label_tooltip = Bahasa untuk antarmuka pengguna.
 settings_save_at_exit_button = Simpan konfigurasi saat aplikasi ditutup
 settings_load_at_start_button = Muat konfigurasi saat aplikasi dibuka
@@ -370,9 +370,9 @@ settings_confirm_deletion_button = Tampilkan kotak dialog konfirmasi saat mengha
 settings_confirm_link_button = Tampilkan dialog konfirmasi saat membuat tautan keras/simbolik ke file apa pun
 settings_confirm_group_deletion_button = Tampilkan dialog konfirmasi saat menghapus semua file dalam grup
 settings_show_text_view_button = Tampilkan panel teks bagian bawah
-settings_use_cache_button = Gunakan *cache*
+settings_use_cache_button = Gunakan cache
 settings_save_also_as_json_button = Simpan juga cache sebagai file JSON
-settings_use_trash_button = Pindahkan berkas yang dihapus ke tempat sampah
+settings_use_trash_button = Pindahkan file yang dihapus ke tempat sampah
 settings_language_label = Bahasa
 settings_multiple_delete_outdated_cache_checkbutton = Hapus entri cache yang sudah kedaluwarsa secara otomatis
 settings_multiple_delete_outdated_cache_checkbutton_tooltip =
@@ -390,32 +390,32 @@ settings_notebook_videos = Video Serupa
 
 ## Multiple - settings used in multiple tabs
 
-settings_multiple_image_preview_checkbutton_tooltip = Menampilkan pratinjau di sisi kanan (saat memilih berkas gambar).
+settings_multiple_image_preview_checkbutton_tooltip = Menampilkan pratinjau di sisi kanan (saat memilih file gambar).
 settings_multiple_image_preview_checkbutton = Tampilkan pratinjau gambar
 settings_multiple_clear_cache_button_tooltip =
     Bersihkan cache secara manual dari entri yang sudah kedaluwarsa.
     Ini hanya boleh digunakan jika penghapusan otomatis telah dinonaktifkan.
-settings_multiple_clear_cache_button = Hapus hasil yang sudah kedaluwarsa dari penyimpanan sementara.
+settings_multiple_clear_cache_button = Hapus hasil yang sudah kedaluwarsa dari cache.
 
 ## Duplicates
 
 settings_duplicates_hide_hard_link_button_tooltip =
-    Menyembunyikan semua berkas kecuali satu, jika semua berkas tersebut menunjuk ke data yang sama (melalui hard link).
+    Menyembunyikan semua file kecuali satu, jika semua file tersebut menunjuk ke data yang sama (melalui hard link).
     
-    Contoh: Jika terdapat tujuh berkas di disk yang memiliki hard link ke data yang sama, dan satu berkas lain dengan data yang sama tetapi inode yang berbeda, maka pada fitur pencari duplikat, hanya akan ditampilkan satu berkas unik dan satu berkas dari berkas-berkas yang memiliki hard link.
+    Contoh: Jika terdapat tujuh file di disk yang memiliki hard link ke data yang sama, dan satu file lain dengan data yang sama tetapi inode yang berbeda, maka pada fitur pencari duplikat, hanya akan ditampilkan satu file unik dan satu file dari file-file yang memiliki hard link.
 settings_duplicates_minimal_size_entry_tooltip =
     Atur ukuran file minimum yang akan disimpan dalam cache.
     
     Memilih nilai yang lebih kecil akan menghasilkan lebih banyak catatan. Hal ini akan mempercepat pencarian, tetapi memperlambat proses pemuatan/penyimpanan cache.
 settings_duplicates_prehash_checkbutton_tooltip =
-    Memungkinkan penyimpanan sementara (cache) dari *prehash* (sebuah nilai hash yang dihitung dari sebagian kecil file), yang memungkinkan penghapusan hasil yang tidak duplikat lebih cepat.
+    Memungkinkan penyimpanan sementara (cache) dari prehash (sebuah nilai hash yang dihitung dari sebagian kecil file), yang memungkinkan penghapusan hasil yang tidak duplikat lebih cepat.
     
     Fitur ini dinonaktifkan secara bawaan karena dapat menyebabkan perlambatan dalam beberapa situasi.
     
     Sangat disarankan untuk mengaktifkannya saat memindai ratusan ribu atau jutaan file, karena dapat mempercepat pencarian berkali-kali lipat.
 settings_duplicates_prehash_minimal_entry_tooltip = Ukuran minimal entri yang disimpan dalam cache.
 settings_duplicates_hide_hard_link_button = Sembunyikan tautan keras
-settings_duplicates_prehash_checkbutton = Gunakan *cache* pra-hash
+settings_duplicates_prehash_checkbutton = Gunakan cache pra-hash
 settings_duplicates_minimal_size_cache_label = Ukuran file terkecil (dalam byte) yang disimpan ke cache
 settings_duplicates_minimal_size_cache_prehash_label = Ukuran minimum file (dalam byte) yang disimpan ke cache pra-hash
 
@@ -449,24 +449,24 @@ compute_stopped_by_user = Pencarian dihentikan oleh pengguna
 compute_found_duplicates_hash_size = Ditemukan { $number_files } duplikat dalam { $number_groups } grup, yang memakan ruang sebesar { $size } dan membutuhkan waktu { $time }
 compute_found_duplicates_name = Ditemukan { $number_files } duplikat dalam { $number_groups } grup dalam waktu { $time }
 compute_found_empty_folders = Ditemukan { $number_files } folder kosong dalam waktu { $time }
-compute_found_empty_files = Ditemukan { $number_files } berkas kosong dalam { $time }
-compute_found_big_files = Ditemukan { $number_files } berkas besar dalam waktu { $time }
-compute_found_temporary_files = Ditemukan { $number_files } berkas sementara dalam { $time }
+compute_found_empty_files = Ditemukan { $number_files } file kosong dalam { $time }
+compute_found_big_files = Ditemukan { $number_files } file besar dalam waktu { $time }
+compute_found_temporary_files = Ditemukan { $number_files } file sementara dalam { $time }
 compute_found_images = Ditemukan { $number_files } gambar serupa dalam { $number_groups } kelompok dalam waktu { $time }
 compute_found_videos = Ditemukan { $number_files } video serupa dalam { $number_groups } grup, dalam waktu { $time }
 compute_found_music = Ditemukan { $number_files } file musik serupa dalam { $number_groups } kelompok dalam waktu { $time }
 compute_found_invalid_symlinks = Ditemukan { $number_files } tautan simbolik yang tidak valid dalam { $time }
-compute_found_broken_files = Ditemukan { $number_files } berkas yang rusak dalam waktu { $time }
-compute_found_bad_extensions = Ditemukan { $number_files } berkas dengan ekstensi yang tidak valid dalam waktu { $time }
+compute_found_broken_files = Ditemukan { $number_files } file yang rusak dalam waktu { $time }
+compute_found_bad_extensions = Ditemukan { $number_files } file dengan ekstensi yang tidak valid dalam waktu { $time }
 # Progress window
-progress_current_stage = Current Stage:{ "  " }
-progress_all_stages = All Stages:{ "  " }
+progress_current_stage = Tahap Saat Ini:{ "  " }
+progress_all_stages = Semua Tahap:{ "  " }
 # Saving loading 
 saving_loading_saving_success = Konfigurasi telah disimpan ke file { $name }.
 saving_loading_saving_failure = Gagal menyimpan data konfigurasi ke file { $name }, alasannya { $reason }.
 saving_loading_reset_configuration = Konfigurasi saat ini telah dihapus.
 saving_loading_loading_success = Konfigurasi aplikasi telah dimuat dengan benar.
-saving_loading_no_config_file = Tidak ditemukan berkas konfigurasi, menggunakan pengaturan bawaan.
+saving_loading_no_config_file = Tidak ditemukan file konfigurasi, menggunakan pengaturan bawaan.
 saving_loading_failed_to_create_config_file = Gagal membuat file konfigurasi "{ $path }", alasannya "{ $reason }".
 saving_loading_failed_to_read_config_file = Tidak dapat memuat konfigurasi dari "{ $path }" karena file tersebut tidak ada atau bukan merupakan sebuah file.
 saving_loading_failed_to_read_data_from_file = Tidak dapat membaca data dari file "{ $path }", alasannya "{ $reason }".
@@ -477,17 +477,17 @@ text_view_messages = PESAN
 text_view_warnings = PERINGATAN
 text_view_errors = KESALAHAN
 about_window_motto = Program ini gratis untuk digunakan dan akan selalu demikian.
-krokiet_new_app = Czkawka sedang dalam masa pemeliharaan, yang berarti hanya *bug* penting yang akan diperbaiki dan tidak ada fitur baru yang akan ditambahkan. Untuk fitur-fitur baru, silakan coba aplikasi Krokiet yang baru, yang lebih stabil dan memiliki kinerja lebih baik, dan masih dalam tahap pengembangan aktif.
+krokiet_new_app = Versi GTK dari Czkawka ini tidak lagi dikembangkan sejak versi 12. Untuk fitur baru dan pengembangan aktif, silakan gunakan Krokiet, yang lebih stabil dan berkinerja lebih baik.
 # Various dialog
 dialogs_ask_next_time = Tanyakan lagi lain waktu
-symlink_failed = Failed to symlink { $name } to { $target }, reason { $reason }
+symlink_failed = Gagal membuat tautan simbolik dari { $name } ke { $target }, alasannya { $reason }
 delete_title_dialog = Konfirmasi penghapusan
-delete_question_label = Apakah Anda yakin ingin menghapus berkas-berkas ini?
-delete_all_files_in_group_title = Konfirmasi penghapusan semua berkas dalam grup
+delete_question_label = Apakah Anda yakin ingin menghapus file-file ini?
+delete_all_files_in_group_title = Konfirmasi penghapusan semua file dalam grup
 delete_all_files_in_group_label1 = Dalam beberapa kelompok, semua catatan dipilih.
 delete_all_files_in_group_label2 = Apakah Anda yakin ingin menghapusnya?
-delete_items_label = { $items } berkas akan dihapus.
-delete_items_groups_label = { $items } berkas dari { $groups } grup akan dihapus.
+delete_items_label = { $items } file akan dihapus.
+delete_items_groups_label = { $items } file dari { $groups } grup akan dihapus.
 hardlink_failed = Gagal membuat tautan keras untuk { $name } ke { $target }, alasannya: { $reason }
 hard_sym_invalid_selection_title_dialog = Pemilihan tidak valid dengan beberapa grup
 hard_sym_invalid_selection_label_1 = Dalam beberapa grup, hanya ada satu catatan yang dipilih, dan catatan tersebut akan diabaikan.
@@ -495,12 +495,12 @@ hard_sym_invalid_selection_label_2 = Untuk dapat membuat tautan keras/simbolik k
 hard_sym_invalid_selection_label_3 = Yang pertama dalam kelompok dianggap sebagai yang asli dan tidak diubah, tetapi yang kedua dan selanjutnya dimodifikasi.
 hard_sym_link_title_dialog = Konfirmasi tautan
 hard_sym_link_label = Apakah Anda yakin ingin menautkan file-file ini?
-move_folder_failed = Failed to move folder { $name }, reason { $reason }
-move_file_failed = Failed to move file { $name }, reason { $reason }
+move_folder_failed = Gagal memindahkan folder { $name }, alasannya { $reason }
+move_file_failed = Gagal memindahkan file { $name }, alasannya { $reason }
 move_files_title_dialog = Pilih folder tempat Anda ingin memindahkan file-file yang terduplikasi
-move_files_choose_more_than_1_path = Only one path may be selected to be able to copy their duplicated files, selected { $path_number }.
-move_stats = Properly moved { $num_files }/{ $all_files } items
-save_results_to_file = Saved results both to txt and json files into "{ $name }" folder.
+move_files_choose_more_than_1_path = Hanya satu jalur yang dapat dipilih untuk menyalin file duplikatnya, saat ini terpilih { $path_number }.
+move_stats = Berhasil memindahkan { $num_files }/{ $all_files } item
+save_results_to_file = Hasil disimpan ke file txt dan json di dalam folder "{ $name }".
 search_not_choosing_any_music = ERROR: Anda harus memilih setidaknya satu kotak centang dengan jenis pencarian musik.
 search_not_choosing_any_broken_files = ERROR: Anda harus memilih setidaknya satu kotak centang yang menunjukkan jenis file rusak.
 include_folders_dialog_title = Folder yang akan disertakan
@@ -511,12 +511,12 @@ cache_clear_duplicates_title = Menghapus cache duplikat
 cache_clear_similar_images_title = Menghapus cache gambar-gambar yang serupa
 cache_clear_similar_videos_title = Menghapus cache untuk video yang serupa
 cache_clear_message_label_1 = Apakah Anda ingin menghapus cache entri yang sudah kedaluwarsa?
-cache_clear_message_label_2 = Operasi ini akan menghapus semua entri cache yang mengarah ke berkas-berkas yang tidak valid.
+cache_clear_message_label_2 = Operasi ini akan menghapus semua entri cache yang mengarah ke file-file yang tidak valid.
 cache_clear_message_label_3 = Ini mungkin sedikit mempercepat proses memuat/menyimpan data ke dalam cache.
 cache_clear_message_label_4 = PERINGATAN: Operasi ini akan menghapus semua data yang tersimpan sementara dari perangkat eksternal yang tidak terhubung. Oleh karena itu, setiap hash perlu dibuat ulang.
 # Show preview
-preview_image_resize_failure = Failed to resize image { $name }.
-preview_image_opening_failure = Failed to open image { $name }, reason { $reason }
+preview_image_resize_failure = Gagal mengubah ukuran gambar { $name }.
+preview_image_opening_failure = Gagal membuka gambar { $name }, alasannya { $reason }
 # Compare images (L is short Left, R is short Right - they can't take too much space)
 compare_groups_number = Grup { $current_group }/{ $all_groups } ({ $images_in_group } gambar)
 compare_move_left_button = L

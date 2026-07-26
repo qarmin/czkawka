@@ -1,7 +1,6 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-
 tool_duplicate_files = Дублює
 tool_empty_folders = Порожні теки
 tool_similar_images = Схожі зображення
@@ -311,7 +310,7 @@ dir_open_folder = Відкрити папку
 compare_label = Порівняти
 compare_loading = Завантаження зображень...
 compare_cancelling = Скасування...
-compare_computing = Обчислення різниці.
+compare_computing = Обчислення відмінностей...
 compare_mode_normal = Сторона
 compare_mode_split = Спліт
 compare_mode_overlay = Накладення

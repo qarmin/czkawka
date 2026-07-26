@@ -1,7 +1,7 @@
 # Window titles
 window_settings_title = Ayarlar
 window_main_title = Czkawka (Hıçkırık)
-window_progress_title = Taranıyor
+window_progress_title = Taranıyor...
 window_compare_images = Resimleri Karşılaştır
 # General
 general_ok_button = Tamam
@@ -151,7 +151,7 @@ main_label_hash_type = SUÇ türü:
 main_label_hash_size = SURÇ boyutu:
 main_label_geometric_invariance = Geometrik değişmezlik
 main_label_size_bytes = Boyut (bayt):
-main_label_min_size = En az
+main_label_min_size = Min
 main_label_max_size = Maks
 main_label_shown_files = Gösterilecek Dosya Sayısı:
 main_label_resize_algorithm = Yeniden boyutlandırma algoritması:

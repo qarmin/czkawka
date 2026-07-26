@@ -1,7 +1,6 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-
 tool_duplicate_files = Eş Dosyalar
 tool_empty_folders = Boş Klasörler
 tool_similar_images = Benzer Resimler
@@ -310,8 +309,8 @@ dir_open_folder = Klasörü aç
 # Compare view
 compare_label = Karşılaştır
 compare_loading = Resimleri yükleniyor...
-compare_cancelling = İptal ediliyor...
-compare_computing = Farkları hesaplanıyor...
+compare_cancelling = Cancelling...
+compare_computing = Değişiklikleri hesaplanıyor...
 compare_mode_normal = Yan
 compare_mode_split = Böl
 compare_mode_overlay = Üst katman

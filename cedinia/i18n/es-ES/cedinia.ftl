@@ -1,7 +1,6 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-
 tool_duplicate_files = Duplicados
 tool_empty_folders = Carpetas vacías
 tool_similar_images = Imágenes similares
@@ -294,7 +293,7 @@ directories_check_label_excluded = Rutas excluidas:
 directories_check_label_referenced = Rutas de referencia:
 directories_check_label_would_scan = Archivos a escanear:
 directories_check_label_processable = Archivos procesables:
-directories_check_scanning = Escaneando...
+directories_check_scanning = Scanning...
 directories_check_warning_no_processable = No se encontraron archivos procesables - verifique sus carpetas incluidas/excluidas
 path_edit_title_include = Añadir a inclusión
 path_edit_title_exclude = Añadir a Excluir
@@ -311,7 +310,7 @@ dir_open_folder = Abrir carpeta
 compare_label = Comparar
 compare_loading = Cargando imágenes...
 compare_cancelling = Cancelando...
-compare_computing = Calculando la diferencia...
+compare_computing = Calculando difi...
 compare_mode_normal = Lado
 compare_mode_split = Dividir
 compare_mode_overlay = Superposición

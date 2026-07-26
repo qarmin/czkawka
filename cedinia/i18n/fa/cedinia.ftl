@@ -1,7 +1,6 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-
 tool_duplicate_files = فایل‌های تکراری
 tool_empty_folders = _folders تهی завدهندی
 tool_similar_images = تصویرهای مشابه
@@ -309,9 +308,9 @@ ctx_open_folder = باز کردن پوشه والد
 dir_open_folder = باز کردن پوشه
 # Compare view
 compare_label = مقایسه
-compare_loading = در حال بارگذاری تصاویر.
-compare_cancelling = لغو...
-compare_computing = محاسبه تفاوت‌ها.
+compare_loading = در حال بارگذاری تصاویر...
+compare_cancelling = Cancelling...
+compare_computing = محاسبه تفاوت‌ها...
 compare_mode_normal = سمت
 compare_mode_split = تقسیم
 compare_mode_overlay = پوشش‌دهی

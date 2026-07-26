@@ -7,15 +7,15 @@ window_compare_images = Сравнить изображения
 general_ok_button = ОК
 general_close_button = Закрыть
 # Krokiet info dialog
-krokiet_info_title = Уведомление о продлении
+krokiet_info_title = Уведомление об устаревании
 krokiet_info_message =
-    Окончательный релиз представляет собой Чокавку GTK 12.0. Никаких дальнейших обновлений, функций или исправлений не планируется.
+    Czkawka GTK 12.0 — это финальный выпуск. Дальнейших обновлений, новых функций или исправлений ошибок не планируется.
     
-    Большинство функций из Czkawka GTK доступны в Кроките, обычно в более простой, быстрее и более стабильной форме. Krokiet также добавляет новые возможности и улучшения, которые не были возможны в GTK версии.
+    Большинство возможностей Czkawka GTK доступны в Krokiet, обычно в более простом, быстром и стабильном виде. Krokiet также добавляет новые функции и улучшения, которые были невозможны в GTK-версии.
     
-    Если вы все еще используете Чкавка GTK, переключитесь на Крокиет должно быть просто, так как он имеет похожий интерфейс, меньше зависимостей и улучшена кросс-платформенная поддержка.
+    Если вы всё ещё пользуетесь Czkawka GTK, переход на Krokiet должен быть простым, поскольку у него схожий интерфейс, меньше зависимостей и лучшая кроссплатформенная поддержка.
     
-    PS: Это сообщение должно появиться только один раз. Если оно появляется снова, установите переменную окружения CZKAWKA_DONT_ANNOY_ME в любое непустое значение.
+    P.S.: Это сообщение должно появиться только один раз. Если оно показывается снова, установите переменную окружения CZKAWKA_DONT_ANNOY_ME в любое непустое значение.
 # Main window
 music_title_checkbox = Заголовок
 music_artist_checkbox = Артист
@@ -25,14 +25,14 @@ music_genre_checkbox = Жанр
 music_length_checkbox = Длительность
 music_comparison_checkbox = Приблизительное сравнение
 music_checking_by_tags = Теги
-music_checking_by_content = Содержание
-same_music_seconds_label = Минимальная длительность второго фрагмента
+music_checking_by_content = Содержимое
+same_music_seconds_label = Минимальная длительность фрагмента в секундах
 same_music_similarity_label = Максимум различия
 music_compare_only_in_title_group = Сравнить внутри групп с одинаковыми названиями
 music_compare_only_in_title_group_tooltip =
-    Когда включено, файлы сгруппируются по заголовку, а затем сравниваются друг с другом.
+    При включении файлы группируются по названию, после чего сравниваются внутри групп.
     
-    С 10000 файлов, вместо этого почти 100 миллионов сравнений обычно будет около 20000 сравнений.
+    Для 10 000 файлов вместо почти 100 миллионов сравнений обычно выполняется около 20 000.
 same_music_tooltip =
     Поиск похожих музыкальных файлов по его содержимому может быть настроен с помощью настройки:
     
@@ -77,9 +77,9 @@ duplicate_check_method_tooltip =
 image_hash_size_tooltip =
     Каждое проверяемое изображение производит специальный хэш, который можно сравнить друг с другом, и небольшая разница между ними означает, что эти изображения аналогичны.
     
-    8 размер хэша достаточно хорош, чтобы найти изображения, которые немного похожи на оригинал. С большим набором изображений (>1000), это приведет к большому количеству ложных срабатываний, поэтому в данном случае я рекомендую использовать больший размер хэша.
+    8 — размер хеша, который хорошо подходит для поиска изображений, лишь немного похожих на оригинал. С большим набором изображений (>1000), это приведет к большому количеству ложных срабатываний, поэтому в данном случае я рекомендую использовать больший размер хэша.
     
-    16 - это размер хэша по умолчанию, который является хорошим компромиссом между нахождением даже немного похожих изображений и наличием лишь небольшого количества хэш-коллизий.
+    16 — это размер хэша по умолчанию, который является хорошим компромиссом между нахождением даже немного похожих изображений и наличием лишь небольшого количества хэш-коллизий.
     
     32 и 64 хэши находят только очень похожие изображения, но не должны иметь ложных срабатываний (может быть, за исключением некоторых изображений с альфа-каналом).
 image_resize_filter_tooltip =
@@ -95,8 +95,8 @@ image_hash_alg_tooltip =
     
     Каждый имеет сильные и слабые точки и иногда даёт более качественные и иногда хуже результаты для разных изображений.
     
-    Поэтому для определения наилучшего из вас, требуется ручное тестирование.
-image_geometric_invariance_tooltip = Также сравнивайте зеркальные/перевернутые и при необходимости повернутые варианты каждого изображения. Это улучшает соответствие, но увеличивает время хэширования.
+    Поэтому для выбора наилучшего алгоритма требуется ручное тестирование.
+image_geometric_invariance_tooltip = Также сравнивает зеркальные/отражённые и, при необходимости, повёрнутые варианты каждого изображения. Это улучшает соответствие, но увеличивает время хэширования.
 big_files_mode_combobox_tooltip = Поиск наименьших/наибольших файлов
 big_files_mode_label = Проверенные файлы
 big_files_mode_smallest_combo_box = Самый малый
@@ -106,12 +106,12 @@ main_notebook_empty_directories = Пустые папки
 main_notebook_big_files = Большие файлы
 main_notebook_empty_files = Пустые файлы
 main_notebook_temporary = Временные файлы
-main_notebook_similar_images = Похожие изображения
+main_notebook_similar_images = Похожие картинки
 main_notebook_similar_videos = Похожие видео
 main_notebook_same_music = Дубликаты музыки
 main_notebook_symlinks = Битые симв. ссылки
 main_notebook_broken_files = Битые файлы
-main_notebook_bad_extensions = Плохие расширения
+main_notebook_bad_extensions = Неверные расширения
 main_tree_view_column_file_name = Имя файла
 main_tree_view_column_folder_name = Имя папки
 main_tree_view_column_path = Путь
@@ -131,7 +131,7 @@ main_tree_view_column_destination_path = Путь назначения
 main_tree_view_column_type_of_error = Тип ошибки
 main_tree_view_column_current_extension = Текущее расширение
 main_tree_view_column_proper_extensions = Верное расширение
-main_tree_view_column_fps = FPS
+main_tree_view_column_fps = Кадр/с
 main_tree_view_column_codec = Кодек
 main_label_check_method = Метод проверки
 main_label_hash_type = Тип хэша
@@ -143,14 +143,14 @@ main_label_max_size = Макс
 main_label_shown_files = Количество отображаемых файлов
 main_label_resize_algorithm = Алгоритм масштабирования
 main_label_similarity = Сходство{ "   " }
-main_check_box_broken_files_audio = Звук
-main_check_box_broken_files_pdf = Pdf
+main_check_box_broken_files_audio = Аудио
+main_check_box_broken_files_pdf = PDF
 main_check_box_broken_files_archive = Архив
 main_check_box_broken_files_image = Изображение
 main_check_box_broken_files_video = Видео
 main_check_box_broken_files_video_tooltip = Использует ffmpeg/ffprobe для проверки видеофайлов. Медленно и может находить избыточные ошибки, даже если файл воспроизводится нормально.
 check_button_general_same_size = Игнорировать одинаковый размер
-check_button_general_same_size_tooltip = Игнорировать файлы с одинаковым размером в результатах - обычно это 1:1 дубликаты
+check_button_general_same_size_tooltip = Игнорировать файлы с одинаковым размером — обычно это точные дубликаты
 main_label_size_bytes_tooltip = Размер файлов, которые будут просканированы
 # Upper window
 upper_tree_view_included_folder_column_title = Папки для поиска
@@ -193,9 +193,9 @@ upper_excluded_extensions_tooltip =
     
     При использовании разрешенных и отключенных расширений этот файл имеет более высокий приоритет, поэтому файл не будет проверяться.
 upper_excluded_items_tooltip =
-    Исключённые элементы должны содержать подстановочный знак «*» и должны быть разделены запятыми.
+    Исключённые объекты должны содержать подстановочный знак «*» и должны быть разделены запятыми.
     Это медленнее, чем «Исключённые пути», поэтому используйте с осторожностью.
-upper_excluded_items = Исключённые элементы:
+upper_excluded_items = Исключённые объекты:
 upper_allowed_extensions = Допустимые расширения:
 upper_excluded_extensions = Отключённые расширения:
 # Popovers
@@ -204,11 +204,11 @@ popover_unselect_all = Снять выделение
 popover_reverse = Обратить выделение
 popover_select_all_except_shortest_path = Выбрать все, кроме кратчайшего пути
 popover_select_all_except_longest_path = Выбрать все, кроме самого длинного пути
-popover_select_all_except_oldest = Выделить все, кроме старых
-popover_select_all_except_newest = Выделить все, кроме новых
+popover_select_all_except_oldest = Выбрать все, кроме самого старого
+popover_select_all_except_newest = Выбрать все, кроме самого нового
 popover_select_one_oldest = Выбрать один самый старый
 popover_select_one_newest = Выбрать один самый новый
-popover_select_custom = Выбрать произвольный
+popover_select_custom = Выбрать произвольно
 popover_unselect_custom = Снять выбор
 popover_select_all_images_except_biggest = Выделить все, кроме наибольшего
 popover_select_all_images_except_smallest = Выделить все, кроме наименьшего
@@ -247,13 +247,13 @@ popover_custom_regex_regex_label = Путь с рег. выраж. + имя
 popover_custom_case_sensitive_check_button = С учётом регистра
 popover_custom_all_in_group_label = Не выбирать все записи в группе
 popover_custom_mode_unselect = Снять выбор
-popover_custom_mode_select = Выбрать произвольный
+popover_custom_mode_select = Выбрать произвольно
 popover_sort_file_name = Имя файла
 popover_sort_folder_name = Название папки
 popover_sort_full_name = Полное имя
 popover_sort_size = Размер
 popover_sort_selection = Выбранные объекты
-popover_invalid_regex = Некорректное регулярное выражение
+popover_invalid_regex = Неверное регулярное выражение
 popover_valid_regex = Корректное регулярное выражение
 # Bottom buttons
 bottom_search_button = Искать
@@ -278,7 +278,7 @@ bottom_hardlink_button_tooltip =
     Работает, только когда выбрано не менее двух результатов в группе.
     Первый результат оставляется, а второй и последующие делаются жёсткими ссылками на первый.
 bottom_hardlink_button_not_available_tooltip =
-    Создание жестких ссылок.
+    Создание жёстких ссылок.
     Кнопка отключена, так как невозможно создать жёсткие ссылки.
     Связи работают только с правами администратора в Windows, поэтому не забудьте запустить приложение от имени администратора.
     Если приложение уже работает с такими привилегиями, проверьте аналогичные проблемы на Github.
@@ -349,13 +349,13 @@ krokiet_promo_link_project = Страница проекта
 
 settings_number_of_threads = Количество использованных потоков
 settings_number_of_threads_tooltip = Количество используемых потоков. Установите 0, чтобы использовать все доступные потоки.
-settings_use_rust_preview = Использовать внешние библиотеки вместо gtk для загрузки предпросмотра
+settings_use_rust_preview = Использовать внешние библиотеки вместо GTK для загрузки предпросмотра
 settings_use_rust_preview_tooltip =
-    Использование превью gtk иногда будет быстрее и поддерживать больше форматов, но иногда это может быть и наоборот.
+    Использование предпросмотра GTK иногда будет быстрее и поддерживать больше форматов, но иногда это может быть и наоборот.
     
     Если у вас возникли проблемы с загрузкой предпросмотра, вы можете попробовать изменить эту настройку.
     
-    На не-linux системах рекомендуется использовать эту опцию, потому что gtk-pixbuf не всегда доступен там, поэтому отключение этой опции не будет загружать превью некоторых изображений.
+    В системах, отличных от Linux, рекомендуется включать эту опцию, так как gtk-pixbuf доступен не везде; при отключении предпросмотр некоторых изображений загружаться не будет.
 settings_label_restart = Вам нужно перезапустить приложение, чтобы применить настройки!
 settings_ignore_other_filesystems = Игнорировать другие файловые системы (только Linux)
 settings_ignore_other_filesystems_tooltip =
@@ -368,7 +368,7 @@ settings_load_at_start_button_tooltip =
     
     Если не включено, будут использоваться настройки по умолчанию.
 settings_confirm_deletion_button_tooltip = Показать окно подтверждения при нажатии на кнопку удаления.
-settings_confirm_link_button_tooltip = Показывать окно подтверждения при нажатии кнопки жесткой/символической ссылки.
+settings_confirm_link_button_tooltip = Показывать окно подтверждения при нажатии кнопки жёсткой/символической ссылки.
 settings_confirm_group_deletion_button_tooltip = Показывать окно предупреждения при попытке удалить все записи из группы.
 settings_show_text_view_button_tooltip = Показать текстовую панель в нижней части интерфейса.
 settings_use_cache_button_tooltip = Использовать файловый кэш.
@@ -394,9 +394,9 @@ settings_multiple_delete_outdated_cache_checkbutton_tooltip =
     Отключение этой опции помогает при сканировании файлов на внешних носителях, чтобы информация о них не была очищена при следующем сканировании.
     
     При наличии сотен тысяч записей в кэше рекомендуется включить эту опцию, чтобы ускорить загрузку и сохранение кэша в начале и конце сканирования.
-settings_notebook_general = Общие настройки
+settings_notebook_general = Основные
 settings_notebook_duplicates = Дубликаты
-settings_notebook_images = Похожие изображения
+settings_notebook_images = Похожие картинки
 settings_notebook_videos = Похожие видео
 
 ## Multiple - settings used in multiple tabs
@@ -425,7 +425,7 @@ settings_duplicates_prehash_checkbutton_tooltip =
     
     Настоятельно рекомендуется использовать его при сканировании сотен тысяч или миллионов файлов, так как это может ускорить поиск в разы.
 settings_duplicates_prehash_minimal_entry_tooltip = Минимальный размер кэшируемого элемента.
-settings_duplicates_hide_hard_link_button = Скрыть жесткие ссылки
+settings_duplicates_hide_hard_link_button = Скрывать жёсткие ссылки
 settings_duplicates_prehash_checkbutton = Кэшировать предхэш
 settings_duplicates_minimal_size_cache_label = Минимальный размер (байт) кэшируемых файлов
 settings_duplicates_minimal_size_cache_prehash_label = Минимальный размер (байт) файлов для кэша предхэша
@@ -434,7 +434,7 @@ settings_duplicates_minimal_size_cache_prehash_label = Минимальный р
 
 settings_saving_button_tooltip = Сохранить текущую конфигурацию настроек в файл.
 settings_loading_button_tooltip = Загрузить настройки из файла и заменить ими текущую конфигурацию.
-settings_reset_button_tooltip = Сбросить текущую конфигурацию на конфигурацию по умолчанию.
+settings_reset_button_tooltip = Сбросить текущую конфигурацию на стандартную.
 settings_saving_button = Сохранить конфигурацию
 settings_loading_button = Загрузить конфигурацию
 settings_reset_button = Сбросить настройки
@@ -488,7 +488,7 @@ text_view_messages = СООБЩЕНИЯ
 text_view_warnings = ПРЕДУПРЕЖДЕНИЯ
 text_view_errors = ОШИБКИ
 about_window_motto = Эта программа бесплатна для использования и всегда будет оставаться таковой.
-krokiet_new_app = Чкавка находится в режиме технического обслуживания, что означает, что будут исправлены только критические ошибки, и новые возможности не будут добавлены. Для новых функций ознакомьтесь с новым приложением Krokiet, которое является более стабильным и эффективным, и всё ещё находится в стадии активной разработки.
+krokiet_new_app = Разработка GTK-версии Czkawka прекращена с выходом версии 12. Переходите на Krokiet: он содержит новые функции, активно обновляется, работает стабильнее и быстрее.
 # Various dialog
 dialogs_ask_next_time = Всегда спрашивать
 symlink_failed = Не удалось привязать { $name } к { $target }, причина { $reason }
@@ -509,7 +509,7 @@ hard_sym_link_label = Уверены, что хотите связать эти 
 move_folder_failed = Не удалось переместить папку { $name }. Причина: { $reason }
 move_file_failed = Не удалось переместить файл { $name }. Причина: { $reason }
 move_files_title_dialog = Выберите папку, в которую вы хотите переместить дублирующиеся файлы
-move_files_choose_more_than_1_path = Можно выбрать только один путь для копирования дубликатов файлов, но выбрано { $path_number }.
+move_files_choose_more_than_1_path = Для перемещения дубликатов можно выбрать только один путь; выбрано { $path_number }.
 move_stats = Успешно перемещённые элементы: { $num_files }/{ $all_files }
 save_results_to_file = Результаты сохранены в txt и json файлы в папку "{ $name }".
 search_not_choosing_any_music = ОШИБКА: Необходимо выбрать как минимум один флажок с типами поиска музыки.

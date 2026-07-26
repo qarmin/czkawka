@@ -1,7 +1,6 @@
 # Cedinia - English (fallback)
 
 # App / top bar titles
-
 tool_duplicate_files = Dubbletter
 tool_empty_folders = Tomma mappar
 tool_similar_images = Liknande bilder
@@ -20,8 +19,8 @@ tool_settings = Inställningar
 home_dup_description = Hitta filer med samma innehåll
 home_empty_folders_description = Mappar utan innehåll
 home_similar_images_description = Hitta visuellt liknande bilder
-home_empty_files_description = Filer med nollstorlek
-home_temp_files_description = Tillfälliga och cachade filer
+home_empty_files_description = Filer med storleken noll
+home_temp_files_description = Tillfälliga filer och cachefiler
 home_big_files_description = Största/minsta filer på disk
 home_broken_files_description = PDF, ljud, bilder, arkiv
 home_bad_extensions_description = Filer med ogiltig filändelse
@@ -31,7 +30,7 @@ home_exif_description = Bilder med EXIF-metadata
 home_similar_videos_description = Hitta videor med liknande ljud
 # Results list
 scanning = Skanning pågår...
-stopping = Stoppar...
+stopping = Stoppar…
 no_results = Inga resultat
 press_start = Tryck på START för att skanna
 select_label = Mark.
@@ -69,10 +68,10 @@ stopping_overlay_body =
     Slutför aktuell skanning...
     Vänta.
 # Permission popup
-permission_title = Åtkomst till fil
-permission_body = För att skanna filer behöver appen åtkomst till enhetslagring. Utan denna behörighet kommer skanning inte att vara möjlig.
+permission_title = Åtkomst till filer
+permission_body = För att skanna filer behöver appen åtkomst till enhetens lagring. Utan den behörigheten går det inte att skanna.
 grant = Bevilja
-no_permission_scan_warning = Ingen filåtkomst - bevilja behörighet att skanna
+no_permission_scan_warning = Ingen filåtkomst – ge behörighet för att skanna
 # Settings screen tabs
 settings_tab_general = Allmänt
 settings_tab_tools = Verktyg
@@ -83,15 +82,15 @@ settings_use_cache_desc = Snabbar upp efterföljande skanningar (hashvärden/bil
 settings_ignore_hidden = Ignorera dolda filer
 settings_ignore_hidden_desc = Filer och mappar vars namn börjar med "."
 settings_show_notification = Meddela när skanningen är klar
-settings_show_notification_desc = Visa en systemavisering vid skanning slutförd
-settings_notify_only_background = Endast när i bakgrunden
-settings_notify_only_background_desc = Hoppa över avisering om appen är synlig
+settings_show_notification_desc = Visa en systemavisering när skanningen är klar
+settings_notify_only_background = Endast i bakgrunden
+settings_notify_only_background_desc = Visa ingen avisering när appen är synlig
 notifications_disabled_banner = Aviseringar inaktiverade
 notifications_enable_button = Aktivera
 settings_scan_label = SKANNA
 settings_filters_label = FILTER (vissa verktyg)
-settings_min_file_size = Min. filstorlek
-settings_max_file_size = Max. filstorlek
+settings_min_file_size = Minsta filstorlek
+settings_max_file_size = Största filstorlek
 settings_language = Språk
 settings_language_restart = Kräver omstart av appen
 settings_common_label = VANLIGA INSTÄLLNINGAR
@@ -100,7 +99,7 @@ settings_excluded_items_placeholder = t.ex. *.tmp, */.git/*, */node_modules/*
 settings_allowed_extensions = TILLGÄNGLIGA FILÄNDELSER (tom = alla)
 settings_allowed_extensions_placeholder = t.ex. jpg, png, mp4
 settings_excluded_extensions = EXKLUDERADE FILÄNDELSER
-settings_excluded_extensions_placeholder = t.ex. bak, tmp, logg
+settings_excluded_extensions_placeholder = t.ex. bak, tmp, log
 # Settings - Tools section labels
 settings_duplicates_header = DUBBLETTER
 settings_check_method_label = JÄMFÖRELSEMETOD
@@ -132,10 +131,10 @@ settings_music_length = Längd
 settings_music_genre = Genre
 settings_music_bitrate = Bithastighet
 settings_music_approx = Ungefärlig taggjämförelse
-settings_temporary_files_header = TEMPORARI FILER
-settings_temporary_files_extensions_label = EXTENSIONER
+settings_temporary_files_header = TILLFÄLLIGA FILER
+settings_temporary_files_extensions_label = FILÄNDELSER
 settings_temporary_files_extensions_placeholder = t.ex. .tmp, .bak, ~
-settings_temporary_files_reset = Återställ till standardvärden
+settings_temporary_files_reset = Återställ standardvärden
 settings_broken_files_header = TRASIGA FILER
 settings_broken_files_note = Resursintensiv skanning. För bästa prestanda bör du använda Krokiet på skrivbordet.
 settings_broken_files_types_label = FILTYPER SOM KONTROLLERAS
@@ -144,10 +143,10 @@ settings_broken_pdf = PDF
 settings_broken_archive = Arkiv
 settings_broken_image = Bild
 settings_broken_font = Typsnitt
-settings_broken_markup = Markup (JSON/XML/TOML)
+settings_broken_markup = Märkspråk (JSON/XML/TOML)
 settings_similar_videos_header = LIKNANDE VIDEOR (LJUD)
-settings_similar_videos_audio_preset = Förinställning för ljudets likhet
-settings_similar_videos_audio_preset_desc = Kontrollerar hur strikt ljud måste matcha
+settings_similar_videos_audio_preset = Förval för ljudlikhet
+settings_similar_videos_audio_preset_desc = Anger hur nära ljudet måste matcha
 settings_bad_names_header = FELAKTIGA NAMN
 settings_bad_names_checks_label = KONTROLLER
 settings_bad_names_uppercase_ext = Filändelse med versaler
@@ -159,23 +158,23 @@ settings_ignore_same_resolution = Ignorera bilder med samma upplösning
 # Settings - Appearance section
 settings_appearance_label = UTSEENDE
 settings_dark_theme = Mörkt tema
-settings_dark_theme_desc = Använd mörk färgschema
+settings_dark_theme_desc = Använd ett mörkt färgschema
 # Settings - Diagnostics tab
 diagnostics_header = DIAGNOSTIK
 diagnostics_thumbnails = Miniatyrbildscache
-diagnostics_app_cache = Applikationscache
+diagnostics_app_cache = Appcache
 diagnostics_refresh = Uppdatera
 diagnostics_clear_thumbnails = Rensa miniatyrer
 diagnostics_open_thumbnails_folder = Öppna mapp
 diagnostics_clear_cache = Rensa cache
 diagnostics_open_cache_folder = Öppna mapp
 diagnostics_export_logs = Exportera loggar
-logs_label = LOGGGA
+logs_label = LOGGAR
 logs_export_title = Exportera loggar
-logs_export_saved = Loggar kopierade till:
-logs_export_failed = Kunde inte exportera loggar
-diagnostics_collect_test = Testa åtkomst till filer
-diagnostics_collect_test_desc = Kontrollera hur många filer som är tillgängliga
+logs_export_saved = Loggarna kopierades till:
+logs_export_failed = Det gick inte att exportera loggarna
+diagnostics_collect_test = Filåtkomsttest
+diagnostics_collect_test_desc = Kontrollera hur många filer som går att komma åt
 diagnostics_collect_test_run = Kör
 diagnostics_collect_test_stop = Stoppa
 collect_test_cancelled = Stoppad av användaren
@@ -223,20 +222,20 @@ deleted_errors_suffix = fel
 renamed_prefix = Bytte namn på
 renamed_files_suffix = filer
 renamed_errors_suffix = fel
-cleaned_exif_prefix = Rensat EXIF från
+cleaned_exif_prefix = Rensade EXIF från
 cleaned_exif_suffix = filer
 cleaned_exif_errors_suffix = fel
 rename_error_read_file_name = Kan inte läsa filnamnet
 rename_error_read_directory = Kan inte läsa mapp
-and_more_prefix = ...och
-and_more_suffix = mer
+and_more_prefix = …och
+and_more_suffix = ytterligare
 # Gallery / delete popups
 gallery_delete_button = Ta bort
 gallery_back = Tillbaka
 gallery_confirm_delete = Ja, ta bort
-deleting_files = Tar bort filer...
+deleting_files = Tar bort filer…
 stop = Stoppa
-scanning_fallback = Skannar...
+scanning_fallback = Skannar…
 app_subtitle = För att hedra slaget vid Cedynia (972 e.Kr.)
 app_license = Gränssnitt för Czkawka Core - GPL-3.0
 about_app_label = OM
@@ -249,7 +248,7 @@ confirm_delete_items = Är du säker på att du vill ta bort { $n } markerade ob
 gallery_confirm_delete_msg = Du håller på att ta bort { $total_images } bilder i { $total_groups } grupper.
 gallery_confirm_delete_warning = Alla objekt är markerade i { $unsafe_groups } grupper!
 # Settings - SameMusic fingerprint warning
-same_music_fingerprint_warning = Att beräkna och jämföra ljudfingeravtryck är mycket resurskrävande och kan ta lång tid. Det rekommenderas att använda Krokiet på ett skrivbordssystem för denna uppgift.
+same_music_fingerprint_warning = Att beräkna och jämföra ljudfingeravtryck är mycket resurskrävande och kan ta lång tid. Det rekommenderas att använda Krokiet på en dator för den här uppgiften.
 # Scan stage labels (shown during scan progress)
 # Group headers in scan results
 duplicates_group_header = { $count } filer x { $per_file } / fil = { $total } totalt
@@ -266,7 +265,7 @@ option_similarity_high = Hög
 option_similarity_medium = Medel
 option_similarity_low = Låg
 option_similarity_very_low = Mkt låg
-option_similarity_minimal = Min
+option_similarity_minimal = Min.
 option_check_method_hash = Hash
 option_check_method_name = Namn
 option_check_method_size_and_name = Storlek+namn
@@ -294,11 +293,11 @@ directories_check_label_excluded = Exkluderade sökvägar:
 directories_check_label_referenced = Referenssökvägar:
 directories_check_label_would_scan = Filer att skanna:
 directories_check_label_processable = Filer som kan bearbetas:
-directories_check_scanning = Skannar...
+directories_check_scanning = Skannar…
 directories_check_warning_no_processable = Inga filer som kan bearbetas hittades. Kontrollera vilka mappar som har inkluderats eller exkluderats
 path_edit_title_include = Lägg till bland inkluderade
 path_edit_title_exclude = Lägg till bland exkluderade
-path_edit_placeholder = Ange sökväg...
+path_edit_placeholder = Ange sökväg…
 path_edit_not_exists = Sökvägen finns inte
 path_edit_is_dir = Mapp
 path_edit_is_file = Fil
@@ -309,10 +308,10 @@ ctx_open_folder = Öppna överordnad mapp
 dir_open_folder = Öppna mapp
 # Compare view
 compare_label = Jämför
-compare_loading = Laddar bilder...
+compare_loading = Laddar bilder…
 compare_cancelling = Avbryter...
 compare_computing = Beräknar skillnad...
-compare_mode_normal = Sida
+compare_mode_normal = Sida vid sida
 compare_mode_split = Dela
 compare_mode_overlay = Överlagring
 compare_mode_diff = Skillnad
