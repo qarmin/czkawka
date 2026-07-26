@@ -320,11 +320,11 @@ krokiet_promo_title = Treffen Sie Krokiet!
 krokiet_promo_message =
     Hallo, mutiger Czkawka-Nutzer!
     
-    Die Macht ist eindeutig mit dir, Krokiet aber nicht – ein neuerer, schnellerer, leichterer und deutlich gutaussehenderer (vorausgesetzt, Apps können tatsächlich gutaussehend sein) Duplikat-Bereiniger.
+    Die Macht ist eindeutig mit dir, Krokiet aber nicht - ein neuerer, schnellerer, leichterer und deutlich gutaussehenderer (vorausgesetzt, Apps können tatsächlich gutaussehend sein) Duplikat-Bereiniger.
     
     Krokiet vereint alles, was die Menschen an Czkawka mochten. Es ist komplett kostenlos, Open Source, hat eine einzigartige und einfache Oberfläche (von vielen gleichermaßen gelobt wie kritisiert), führt zahlreiche neue Funktionen ein, kommt mit weniger Abhängigkeiten aus und funktioniert plattformübergreifend deutlich zuverlässiger.
     
-    Und falls du es irgendwie verpasst haben solltest: Es gibt bereits eine noch neuere App als Krokiet – Cedinia, die vor allem für Android-Geräte und die Touchscreen-Nutzung entwickelt wurde.
+    Und falls du es irgendwie verpasst haben solltest: Es gibt bereits eine noch neuere App als Krokiet - Cedinia, die vor allem für Android-Geräte und die Touchscreen-Nutzung entwickelt wurde.
     
     Czkawka GTK hat uns gut gedient, aber seine Wache ist nun zu Ende.
 krokiet_promo_link_download = Krokiet/Cedinia herunterladen

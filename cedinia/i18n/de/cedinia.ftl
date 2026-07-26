@@ -29,7 +29,7 @@ home_bad_names_description = Dateien mit problematischen Zeichen im Namen
 home_exif_description = Bilder mit EXIF-Metadaten
 home_similar_videos_description = Videos mit ähnlichem Ton finden
 # Results list
-scanning = Scan läuft…
+scanning = Scan läuft...
 stopping = Beenden...
 no_results = Keine Ergebnisse
 press_start = Zum Scannen START drücken
@@ -65,7 +65,7 @@ ok = OK
 # Stopping overlay
 stopping_overlay_title = Wird beendet
 stopping_overlay_body =
-    Der aktuelle Scan wird beendet…
+    Der aktuelle Scan wird beendet...
     Bitte warten.
 # Permission popup
 permission_title = Dateizugriff

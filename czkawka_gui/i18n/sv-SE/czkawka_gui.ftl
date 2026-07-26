@@ -321,11 +321,11 @@ krokiet_promo_title = Här är Krokiet!
 krokiet_promo_message =
     Hallå där, modiga Czkawka-användare!
     
-    Kraften är uppenbarligen med dig, men det är inte Krokiet – ett nyare, snabbare, lättare och betydligt snyggare verktyg för att rensa dubbletter (förutsatt att appar faktiskt kan vara snygga).
+    Kraften är uppenbarligen med dig, men det är inte Krokiet - ett nyare, snabbare, lättare och betydligt snyggare verktyg för att rensa dubbletter (förutsatt att appar faktiskt kan vara snygga).
     
     Krokiet innehåller allt som användarna uppskattade med Czkawka. Det är helt kostnadsfritt, har öppen källkod och ett unikt och enkelt användargränssnitt (som både har hyllats och kritiserats av många). Programmet innehåller många nya funktioner, använder färre beroenden och fungerar betydligt tillförlitligare på olika plattformar.
     
-    Och om du på något sätt har missat det finns det redan en ännu nyare app än Krokiet – Cedinia, som främst är utformad för Android-enheter och pekskärmar.
+    Och om du på något sätt har missat det finns det redan en ännu nyare app än Krokiet - Cedinia, som främst är utformad för Android-enheter och pekskärmar.
     
     Czkawka GTK har tjänat oss väl, men dess tid är över.
 krokiet_promo_link_download = Ladda ner Krokiet/Cedinia
@@ -472,7 +472,7 @@ saving_loading_failed_to_read_config_file = Kan inte ladda konfiguration från "
 saving_loading_failed_to_read_data_from_file = Det går inte att läsa data från filen "{ $path }". Orsak: "{ $reason }".
 # Other
 selected_all_reference_folders = Det går inte att starta sökningen när alla mappar har angetts som referensmappar
-searching_for_data = Söker data, det kan ta en stund, vänta…
+searching_for_data = Söker data, det kan ta en stund, vänta...
 text_view_messages = MEDDELANDEN
 text_view_warnings = VARNINGAR
 text_view_errors = FEL

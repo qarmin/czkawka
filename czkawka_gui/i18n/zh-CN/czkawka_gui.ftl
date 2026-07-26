@@ -187,7 +187,7 @@ upper_allowed_extensions_tooltip =
     
     还可以使用以下可一次添加多个扩展名的宏：IMAGE、VIDEO、MUSIC、TEXT。
     
-    用法示例“.exe, IMAGE, VIDEO, .rar, 7z”——这意味着将扫描图像（如 jpg、png）、视频（如 avi、mp4）、exe、rar 和 7z 文件。
+    用法示例“.exe, IMAGE, VIDEO, .rar, 7z”-这意味着将扫描图像（如 jpg、png）、视频（如 avi、mp4）、exe、rar 和 7z 文件。
 upper_excluded_extensions_tooltip =
     扫描时将忽略的禁用扩展名列表。
     
@@ -315,17 +315,17 @@ about_other_apps_system_info_collector_desc = 从操作系统收集 RAM/CPU 使�
 # Header
 header_setting_button_tooltip = 打开设置对话框。
 header_about_button_tooltip = 打开包含应用程序信息的对话框。
-header_krokiet_button_tooltip = 试试 Krokiet——全新改进版！
+header_krokiet_button_tooltip = 试试 Krokiet--全新改进版！
 # Krokiet promo dialog
 krokiet_promo_title = 认识一下 Krokiet！
 krokiet_promo_message =
     你好，勇敢的 Czkawka 用户！
     
-    原力显然与你同在，但 Krokiet 还没有——它是一款更新、更快、更轻量、也明显更英俊（假设应用程序真能称得上英俊）的重复文件清理工具。
+    原力显然与你同在，但 Krokiet 还没有--它是一款更新、更快、更轻量、也明显更英俊（假设应用程序真能称得上英俊）的重复文件清理工具。
     
     Krokiet 保留了 Czkawka 深受喜爱的一切。它完全免费、开源，拥有独特而简洁的 UI（有人盛赞也有人痛恨），引入了大量新功能，依赖更少，并且在不同平台上的运行可靠得多。
     
-    另外，如果你还没注意到，现在已经有比 Krokiet 更新的应用——Cedinia，主要为安卓设备和触摸屏设计。
+    另外，如果你还没注意到，现在已经有比 Krokiet 更新的应用--Cedinia，主要为安卓设备和触摸屏设计。
     
     Czkawka GTK 曾很好地为我们服务，但它的守望已经结束。
 krokiet_promo_link_download = 下载 Krokiet/Cedinia

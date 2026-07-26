@@ -227,7 +227,7 @@ cleaned_exif_suffix = 个文件中清理 EXIF
 cleaned_exif_errors_suffix = 个错误
 rename_error_read_file_name = 无法读取文件名
 rename_error_read_directory = 无法读取目录
-and_more_prefix = ……以及另外
+and_more_prefix = ...以及另外
 and_more_suffix = 项
 # Gallery / delete popups
 gallery_delete_button = 删除
