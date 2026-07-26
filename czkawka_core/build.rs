@@ -46,8 +46,8 @@ fn main() {
         println!("cargo:rustc-env=CZKAWKA_OFFICIAL_BUILD=0");
     }
 
-    let using_cranelift =
-        std::env::var("CARGO_PROFILE_RELEASE_CODEGEN_UNITS") == Ok("1".to_string()) || std::env::var("CARGO_PROFILE_DEV_CODEGEN_BACKEND") == Ok("cranelift".to_string());
+    let using_cranelift = std::env::var("CARGO_PROFILE_DEV_CODEGEN_BACKEND").as_deref() == Ok("cranelift")
+        || std::env::var("CARGO_PROFILE_RELEASE_CODEGEN_BACKEND").as_deref() == Ok("cranelift");
 
     if using_cranelift {
         println!("cargo:rustc-env=USING_CRANELIFT=1");

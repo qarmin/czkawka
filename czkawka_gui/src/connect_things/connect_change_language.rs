@@ -41,7 +41,7 @@ pub(crate) fn load_system_language(gui_data: &GuiData) {
     if let Some(language) = requested_languages.first() {
         let old_short_lang = language.to_string();
         let mut short_lang = String::new();
-        // removes from e.g. en_zb, ending _zd since Czkawka doesn't support this (maybe could add this in future)
+        // keep only the leading ASCII-alphabetic language part (drop region/script after the '-'), which Czkawka keys on
         for i in old_short_lang.chars() {
             if i.is_ascii_alphabetic() {
                 short_lang.push(i);

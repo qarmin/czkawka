@@ -38,7 +38,6 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
             PopoverTypes::Custom,
             PopoverTypes::Date,
             PopoverTypes::Size,
-            PopoverTypes::All,
             PopoverTypes::PathLength,
         ],
         column_activatable_button: Some(ColumnsDuplicates::ActivatableSelectButton as i32),
@@ -123,7 +122,7 @@ pub static NOTEBOOKS_INFO: [NotebookObject; CZKAWKA_GTK_TOOL_NUMBER] = [
         tree_view_name: "tree_view_big_files_finder",
     },
     NotebookObject {
-        name: "Big Files",
+        name: "Empty Files",
         notebook_type: NotebookMainEnum::EmptyFiles,
         available_modes: &[PopoverTypes::All, PopoverTypes::Reverse, PopoverTypes::Custom, PopoverTypes::PathLength],
         column_activatable_button: None,

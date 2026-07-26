@@ -38,7 +38,6 @@ impl DebugPrintModelRc for ModelRc<SingleMainListModel> {
     }
 }
 
-// TODO - tests
 // Removes orphan items in groups
 pub(crate) fn remove_single_items_in_groups(mut items: Vec<SingleMainListModel>, have_header: bool) -> Vec<SingleMainListModel> {
     // When have header, we must also throw out orphaned items

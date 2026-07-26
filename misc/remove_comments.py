@@ -190,7 +190,7 @@ def main() -> None:
         sys.exit(1)
     rs_files = list(TARGET_DIR.rglob("*.rs"))
     if not rs_files:
-        print("No .slint files found under", TARGET_DIR)
+        print("No .rs files found under", TARGET_DIR)
         sys.exit(0)
     changed = 0
     for f in rs_files:

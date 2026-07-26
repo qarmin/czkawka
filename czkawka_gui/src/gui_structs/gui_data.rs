@@ -95,7 +95,7 @@ impl GuiData {
         window_main.set_visible(true);
 
         let pixbuf = Pixbuf::from_read(BufReader::new(ICON_ABOUT))
-            .unwrap_or(Pixbuf::new(gdk4::gdk_pixbuf::Colorspace::Rgb, false, 8, 1, 1).expect("Crash is a lot of less likely than loading png file"));
+            .unwrap_or_else(|_| Pixbuf::new(gdk4::gdk_pixbuf::Colorspace::Rgb, false, 8, 1, 1).expect("Crash is a lot of less likely than loading png file"));
 
         window_main.set_application(Some(application));
 

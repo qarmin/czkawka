@@ -315,7 +315,7 @@ impl GuiMainNotebook {
         self.label_same_music_seconds.set_tooltip_text(Some(&flg!("same_music_tooltip")));
         self.label_same_music_similarity.set_tooltip_text(Some(&flg!("same_music_tooltip")));
         self.scale_seconds_same_music.set_tooltip_text(Some(&flg!("same_music_tooltip")));
-        self.scale_similarity_similar_videos.set_tooltip_text(Some(&flg!("same_music_tooltip")));
+        self.scale_similarity_same_music.set_tooltip_text(Some(&flg!("same_music_tooltip")));
 
         {
             let hash_size_index = self.combo_box_image_hash_size.active().expect("Some hash size must be active") as usize;

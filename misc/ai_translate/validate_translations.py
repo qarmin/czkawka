@@ -286,7 +286,7 @@ def fix_trailing_dots_in_language_file(
                         # only add ASCII "." when translation doesn't already end with any sentence-ending char
                         new_text = text + "."
                     elif not base_has_dot and trans_has_dot:
-                        # remove trailing sentence-end chars (ASCII "." and CJK "。")
+                        # remove trailing sentence-end chars (ASCII ".", CJK "。", Arabic "۔")
                         new_text = re.sub(r"[.。۔]+$", "", text)
 
                     if new_text != text:

@@ -273,7 +273,7 @@ impl VideoOptimizer {
             progress_sender,
             ToolStage::VideoOptimizer(VideoOptimizerStage::CreatingThumbnails),
             self.video_crop_result_entries.len(),
-            self.video_crop_result_entries.iter().map(|e| e.size).sum(),
+            0,
         );
 
         let Some(config_cache_path) = get_config_cache_path() else {

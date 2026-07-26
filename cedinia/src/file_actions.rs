@@ -29,7 +29,7 @@ pub(crate) enum DeleteEvent {
 
     ListDeleteFinished(Vec<String>, Vec<String>),
 
-    ListRenameFinished(usize, Vec<String>),
+    ListRenameFinished(ActiveTool, usize, Vec<String>),
 
     ExifCleanFinished(Vec<String>, Vec<String>),
 }
@@ -126,7 +126,7 @@ pub(crate) fn execute_rename_selected(win: &MainWindow, tx: std::sync::mpsc::Sen
             }
         }
         let renamed = renamed_indices.len();
-        let _ = tx.send(DeleteEvent::ListRenameFinished(renamed, errors));
+        let _ = tx.send(DeleteEvent::ListRenameFinished(ActiveTool::BadExtensions, renamed, errors));
     });
 }
 
@@ -178,7 +178,7 @@ pub(crate) fn execute_rename_bad_names(win: &MainWindow, tx: std::sync::mpsc::Se
                 let _ = tx.send(DeleteEvent::Progress(i + 1, total));
             }
         }
-        let _ = tx.send(DeleteEvent::ListRenameFinished(renamed_count, errors));
+        let _ = tx.send(DeleteEvent::ListRenameFinished(ActiveTool::BadNames, renamed_count, errors));
     });
 }
 pub(crate) fn execute_clean_exif_selected(win: &MainWindow, tx: std::sync::mpsc::Sender<DeleteEvent>) {
@@ -332,10 +332,10 @@ pub(crate) fn handle_delete_event(win: &MainWindow, event: DeleteEvent) {
                 show_delete_errors(win, &errors);
             }
         }
-        DeleteEvent::ListRenameFinished(renamed, errors) => {
+        DeleteEvent::ListRenameFinished(tool, renamed, errors) => {
             win.global::<AppState>().set_delete_running(false);
 
-            let model = win.get_bad_extensions_model();
+            let model = get_model_for_tool(win, tool);
             let vm = vm_file_entry(&model);
             let items: Vec<FileEntry> = vm.iter().filter(|e| !e.checked).collect();
             vm.set_vec(items);

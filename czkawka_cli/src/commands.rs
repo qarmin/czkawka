@@ -433,7 +433,7 @@ pub struct SameMusicArgs {
         value_parser = parse_maximum_difference,
         default_value = "2.0",
         help = "Maximum difference between audio segments",
-        long_help = "Maximum allowed difference between audio segments (0.0-10.0, inclusive). Value close to 0.0 will find only nearly identical segments, while 10.0 will find segments that are barely similar. Lower values mean stricter matching."
+        long_help = "Maximum allowed difference between audio segments (greater than 0.0, up to 10.0 inclusive). Value close to 0.0 will find only nearly identical segments, while 10.0 will find segments that are barely similar. Lower values mean stricter matching."
     )]
     pub maximum_difference: f64,
 }
@@ -1214,7 +1214,7 @@ EXAMPLES:
     {bin} empty-files -d /home/rafal /home/szczekacz -e /home/rafal/Pulpit -R -f results.txt
     {bin} temp -d /home/rafal/ -E */.git */tmp* *Pulpit -f results.txt -D
     {bin} image -d /home/rafal -e /home/rafal/Pulpit -f results.txt
-    {bin} music -d /home/rafal -e /home/rafal/Pulpit -z \"artist,year,ARTISTALBUM,ALBUM___tiTlE\"  -f results.txt
+    {bin} music -d /home/rafal -e /home/rafal/Pulpit -z \"track_artist,year,track_title\"  -f results.txt
     {bin} symlinks -d /home/kicikici/ /home/szczek -e /home/kicikici/jestempsem -x jpg -f results.txt
     {bin} broken -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
     {bin} ext -d /home/mikrut/ -e /home/mikrut/trakt -f results.txt
