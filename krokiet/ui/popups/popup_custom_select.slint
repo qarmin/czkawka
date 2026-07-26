@@ -85,7 +85,7 @@ export component PopupCustomSelect inherits Rectangle {
                                 width: 32px;
                                 checked: column.enabled;
                                 toggled => {
-                                    Callabler.update_custom_select_column(idx, self.checked, column.filter_value);
+                                    Callabler.update_custom_select_column({ col_idx: idx, enabled: self.checked, filter_value: column.filter_value });
                                 }
                             }
                             Text {
@@ -107,7 +107,7 @@ export component PopupCustomSelect inherits Rectangle {
                                             ? "/home/user/*.rs  or  *backup*"
                                             : "name*  or  *.rs";
                                 edited(val) => {
-                                    Callabler.update_custom_select_column(idx, column.enabled, val);
+                                    Callabler.update_custom_select_column({ col_idx: idx, enabled: column.enabled, filter_value: val });
                                 }
                             }
                         }
@@ -178,14 +178,24 @@ export component PopupCustomSelect inherits Rectangle {
                         text: Translations.popup_custom_select_button_text;
                         primary: true;
                         clicked => {
-                            Callabler.select_items_custom_columns(true, case_sensitive, leave_one_in_group, Settings.popup_custom_select_save_restore);
+                            Callabler.select_items_custom_columns({
+                                select_mode: true,
+                                case_sensitive: case_sensitive,
+                                leave_one_in_group: leave_one_in_group,
+                                save_restore: Settings.popup_custom_select_save_restore,
+                            });
                             popup_window.close();
                         }
                     }
                     Button {
                         text: Translations.popup_custom_unselect_button_text;
                         clicked => {
-                            Callabler.select_items_custom_columns(false, case_sensitive, leave_one_in_group, Settings.popup_custom_select_save_restore);
+                            Callabler.select_items_custom_columns({
+                                select_mode: false,
+                                case_sensitive: case_sensitive,
+                                leave_one_in_group: leave_one_in_group,
+                                save_restore: Settings.popup_custom_select_save_restore,
+                            });
                             popup_window.close();
                         }
                     }

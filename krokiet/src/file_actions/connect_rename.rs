@@ -11,7 +11,7 @@ use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel, Weak};
 use crate::common::StrDataBadNames;
 use crate::model_operations::model_processor::{MessageType, ModelProcessor, ProcessFunction};
 use crate::simpler_model::{SimplerSingleMainListModel, ToSimplerVec};
-use crate::{ActiveTab, Callabler, GuiState, MainWindow};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, RenameFileRequest};
 
 pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressData>, stop_flag: Arc<AtomicBool>) {
     let a = app.as_weak();
@@ -43,7 +43,8 @@ pub(crate) fn connect_rename(app: &MainWindow, progress_sender: Sender<ProgressD
 // this renames a single row to any name and updates the row in place - the file stays in its group.
 fn connect_rename_single_file(app: &MainWindow) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_rename_single_file(move |idx, new_name| {
+    app.global::<Callabler>().on_rename_single_file(move |request| {
+        let RenameFileRequest { row_idx: idx, new_name } = request;
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
         let model = active_tab.get_tool_model(&app);
@@ -109,7 +110,8 @@ fn connect_rename_single_file(app: &MainWindow) {
     // already exists on disk. Returns false for empty/invalid/unchanged names (those are handled
     // by separate warnings), so it only reports a genuine pre-existing target.
     let a = app.as_weak();
-    app.global::<Callabler>().on_rename_target_exists(move |idx, new_name| {
+    app.global::<Callabler>().on_rename_target_exists(move |request| {
+        let RenameFileRequest { row_idx: idx, new_name } = request;
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
         let model = active_tab.get_tool_model(&app);

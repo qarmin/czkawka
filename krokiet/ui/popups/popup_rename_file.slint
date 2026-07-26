@@ -15,7 +15,7 @@ export component PopupRenameFile inherits Rectangle {
     private property <bool> name_empty: text_data == "";
     private property <bool> name_unchanged: text_data == original_name;
     // Filesystem check is deferred to Rust; only run it once the name is a real, changed candidate.
-    private property <bool> target_exists: !name_empty && !name_unchanged && Callabler.rename_target_exists(row_idx, text_data);
+    private property <bool> target_exists: !name_empty && !name_unchanged && Callabler.rename_target_exists({ row_idx: row_idx, new_name: text_data });
 
     private property <string> warning_text:
         name_unchanged ? Translations.popup_rename_single_same_name_text
@@ -49,7 +49,7 @@ export component PopupRenameFile inherits Rectangle {
         }
 
         ok_clicked => {
-            Callabler.rename_single_file(root.row_idx, text_data);
+            Callabler.rename_single_file({ row_idx: root.row_idx, new_name: text_data });
         }
     }
 

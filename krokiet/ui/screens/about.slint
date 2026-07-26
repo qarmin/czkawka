@@ -219,54 +219,89 @@ export component About inherits VerticalLayout {
 
         HorizontalLayout {
             spacing: 5px;
-            Button {
+            height: 32px;
+            // Button is a built-in widget and only Rectangle/Path support `clip`, so the
+            // button is wrapped in a clipping Rectangle to stop long translated labels
+            // from spilling outside the button when the window is narrow.
+            Rectangle {
                 width: (root.width - 10px) / 3;
-                text <=> Translations.repository_text;
-                clicked => {
-                    Callabler.open_link("https://github.com/qarmin/czkawka");
+                clip: true;
+                Button {
+                    width: 100%;
+                    height: 100%;
+                    text <=> Translations.repository_text;
+                    clicked => {
+                        Callabler.open_link("https://github.com/qarmin/czkawka");
+                    }
                 }
             }
 
-            Button {
+            Rectangle {
                 width: (root.width - 10px) / 3;
-                text <=> Translations.instruction_text;
-                clicked => {
-                    Callabler.open_link("https://github.com/qarmin/czkawka/blob/master/instructions/Instruction.md");
+                clip: true;
+                Button {
+                    width: 100%;
+                    height: 100%;
+                    text <=> Translations.instruction_text;
+                    clicked => {
+                        Callabler.open_link("https://github.com/qarmin/czkawka/blob/master/instructions/Instruction.md");
+                    }
                 }
             }
 
-            Button {
+            Rectangle {
                 width: (root.width - 10px) / 3;
-                text <=> Translations.donation_text;
-                clicked => {
-                    Callabler.open_link("https://github.com/sponsors/qarmin");
+                clip: true;
+                Button {
+                    width: 100%;
+                    height: 100%;
+                    text <=> Translations.donation_text;
+                    clicked => {
+                        Callabler.open_link("https://github.com/sponsors/qarmin");
+                    }
                 }
             }
         }
 
         HorizontalLayout {
             spacing: 5px;
-            Button {
+            height: 32px;
+            Rectangle {
                 width: (root.width - 10px) / 3;
-                text <=> Translations.translation_text;
-                clicked => {
-                    Callabler.open_link("https://crowdin.com/project/czkawka");
+                clip: true;
+                Button {
+                    width: 100%;
+                    height: 100%;
+                    text <=> Translations.translation_text;
+                    clicked => {
+                        Callabler.open_link("https://crowdin.com/project/czkawka");
+                    }
                 }
             }
 
-            Button {
+            Rectangle {
                 width: (root.width - 10px) / 3;
-                text <=> Translations.other_apps_text;
-                clicked => {
-                    root.other_apps_clicked();
+                clip: true;
+                Button {
+                    width: 100%;
+                    height: 100%;
+                    text <=> Translations.other_apps_text;
+                    clicked => {
+                        root.other_apps_clicked();
+                    }
                 }
             }
 
-            Button {
+            Rectangle {
                 width: (root.width - 10px) / 3;
-                text <=> Translations.build_info_diagnostic_button_text;
-                clicked => {
-                    diagnostic_popup.show();
+                clip: true;
+                Button {
+                    width: 100%;
+                    height: 100%;
+                    text <=> Translations.build_info_diagnostic_button_text;
+                    clicked => {
+                        diagnostic_popup.show();
+                    }
                 }
             }
         }

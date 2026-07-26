@@ -149,6 +149,39 @@ export struct CacheCleaningResult {
     errors: string,
 }
 
+export struct UpdateCustomSelectColumnRequest {
+    col_idx: int,
+    enabled: bool,
+    filter_value: string,
+}
+
+export struct SelectItemsCustomColumnsRequest {
+    select_mode: bool,
+    case_sensitive: bool,
+    leave_one_in_group: bool,
+    save_restore: bool,
+}
+
+export struct LoadImagePreviewRequest {
+    path: string,
+    crop_left: int,
+    crop_top: int,
+    crop_right: int,
+    crop_bottom: int,
+    original_width: int,
+    original_height: int,
+}
+
+export struct RowSelectItemsWithShiftRequest {
+    start_idx: int,
+    end_idx: int,
+}
+
+export struct RenameFileRequest {
+    row_idx: int,
+    new_name: string,
+}
+
 export struct CompareImageData {
     path: string,
     dir: string,

@@ -1,4 +1,4 @@
-import { SelectMode, SortColumnMode, SortMode } from "common.slint";
+import { LoadImagePreviewRequest, RenameFileRequest, RowSelectItemsWithShiftRequest, SelectItemsCustomColumnsRequest, SelectMode, SortColumnMode, SortMode, UpdateCustomSelectColumnRequest } from "common.slint";
 import { Palette } from "std-widgets.slint";
 import { Settings } from "settings.slint";
 
@@ -13,7 +13,7 @@ export global Callabler {
     callback row_select_all();
     callback row_reverse_single_unique_item(int);
     callback row_reverse_item_selection(int);
-    callback row_select_items_with_shift(int, int);
+    callback row_select_items_with_shift(RowSelectItemsWithShiftRequest);
 
     callback row_reverse_checked_selection();
     callback row_open_item_with_index(int);
@@ -41,14 +41,13 @@ export global Callabler {
     callback select_items(SelectMode);
     callback update_select_buttons(); // rebuild select popup list after settings change
     callback populate_custom_select_columns(); // Rust fills GuiState.custom_select_columns for active tab
-    callback update_custom_select_column(int, bool, string); // col_idx, enabled, filter_value
-    callback select_items_custom_columns(bool, bool, bool, bool); // select_mode, case_sensitive, leave_one_in_group, save_restore
+    callback update_custom_select_column(UpdateCustomSelectColumnRequest);
+    callback select_items_custom_columns(SelectItemsCustomColumnsRequest);
     callback validate_regex(string) -> bool;
     callback sort_items(SortMode);
 
     // Preview
-    // Parameters: path, crop_left, crop_top, crop_right, crop_bottom, original_width, original_height
-    callback load_image_preview(string, int, int, int, int, int, int);
+    callback load_image_preview(LoadImagePreviewRequest);
 
     // Settings
     callback changed_settings_preset();
@@ -68,8 +67,8 @@ export global Callabler {
     callback save_results();
     callback move_items(string);
     callback rename_files();
-    callback rename_single_file(int, string);
-    pure callback rename_target_exists(int, string) -> bool;
+    callback rename_single_file(RenameFileRequest);
+    pure callback rename_target_exists(RenameFileRequest) -> bool;
     callback crop_video_items();
     callback reencode_video_items();
     callback clean_exif_items();

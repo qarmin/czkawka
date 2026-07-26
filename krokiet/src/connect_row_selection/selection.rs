@@ -8,7 +8,7 @@ use log::trace;
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
 use crate::connect_row_selection::checker::change_number_of_enabled_items;
-use crate::{ActiveTab, Callabler, GuiState, MainWindow, SingleMainListModel};
+use crate::{ActiveTab, Callabler, GuiState, MainWindow, RowSelectItemsWithShiftRequest, SingleMainListModel};
 
 const SELECTED_ROWS_LIMIT: usize = 1000;
 
@@ -214,7 +214,8 @@ pub(crate) fn reverse_selection_on_specific_item(app: &MainWindow) {
 
 pub(crate) fn select_items_with_shift(app: &MainWindow) {
     let a = app.as_weak();
-    app.global::<Callabler>().on_row_select_items_with_shift(move |first_idx, second_idx| {
+    app.global::<Callabler>().on_row_select_items_with_shift(move |request| {
+        let RowSelectItemsWithShiftRequest { start_idx, end_idx } = request;
         trace!("Clicked select items with shift");
         let app = a.upgrade().expect("Failed to upgrade app :(");
         let active_tab = app.global::<GuiState>().get_active_tab();
@@ -222,13 +223,13 @@ pub(crate) fn select_items_with_shift(app: &MainWindow) {
         let selection = lock.get_mut(&active_tab).expect("Failed to get selection data");
         let model = active_tab.get_tool_model(&app);
 
-        assert!(first_idx >= 0);
-        assert!(second_idx >= 0);
-        assert!((first_idx as usize) < model.row_count());
-        assert!((second_idx as usize) < model.row_count());
+        assert!(start_idx >= 0);
+        assert!(end_idx >= 0);
+        assert!((start_idx as usize) < model.row_count());
+        assert!((end_idx as usize) < model.row_count());
 
         validate_selection_and_model(selection, &model);
-        if let Some(new_model) = row_select_items_with_shift(selection, &model, (first_idx as usize, second_idx as usize)) {
+        if let Some(new_model) = row_select_items_with_shift(selection, &model, (start_idx as usize, end_idx as usize)) {
             validate_selection_and_model(selection, &new_model);
             active_tab.set_tool_model(&app, new_model);
         }

@@ -1,6 +1,6 @@
 import { CheckBox, ListView, ScrollView, VerticalBox } from "std-widgets.slint";
 import { ColorPalette } from "../globals/color_palette.slint";
-import { SingleMainListModel, SortColumnMode } from "../globals/common.slint";
+import { LoadImagePreviewRequest, SingleMainListModel, SortColumnMode } from "../globals/common.slint";
 import { Callabler } from "../globals/callabler.slint";
 import { FontSizes } from "../globals/fonts.slint";
 import { PopupContextMenu } from "popup_context_menu.slint";
@@ -139,7 +139,7 @@ export component SelectableTableView inherits Rectangle {
                                 if (start_shift_idx == -1) {
                                     start_shift_idx = idx;
                                 }
-                                Callabler.row_select_items_with_shift(idx, start_shift_idx);
+                                Callabler.row_select_items_with_shift({ start_idx: idx, end_idx: start_shift_idx });
 
                                 if (start_shift_idx == idx) {
                                     showPreview(idx);
@@ -235,7 +235,7 @@ export component SelectableTableView inherits Rectangle {
                 start_shift_idx = last_selected_idx;
             }
 
-            Callabler.row_select_items_with_shift(start_shift_idx, last_selected_idx);
+            Callabler.row_select_items_with_shift({ start_idx: start_shift_idx, end_idx: last_selected_idx });
             if (start_shift_idx == last_selected_idx) {
                 showPreview(last_selected_idx);
             } else {
@@ -257,7 +257,7 @@ export component SelectableTableView inherits Rectangle {
                 start_shift_idx = last_selected_idx;
             }
 
-            Callabler.row_select_items_with_shift(start_shift_idx, last_selected_idx);
+            Callabler.row_select_items_with_shift({ start_idx: start_shift_idx, end_idx: last_selected_idx });
             if (start_shift_idx == last_selected_idx) {
                 showPreview(last_selected_idx);
             } else {
@@ -299,40 +299,44 @@ export component SelectableTableView inherits Rectangle {
         }
     }
 
+    function no_crop_preview_request(path: string) -> LoadImagePreviewRequest {
+        return { path: path, crop_left: -1, crop_top: -1, crop_right: -1, crop_bottom: -1, original_width: -1, original_height: -1 };
+    }
+
     function showPreview(idx: int) {
         if (root.previewImageIdx != -1) {
             if (root.topLeftCropIdx == -1) {
-                Callabler.load_image_preview(root.values[idx].val_str[root.previewImageIdx], -1, -1, -1, -1, -1, -1);
+                Callabler.load_image_preview(no_crop_preview_request(root.values[idx].val_str[root.previewImageIdx]));
             } else {
-                Callabler.load_image_preview(
-                    root.values[idx].val_str[root.previewImageIdx],
-                    root.values[idx].val_int[root.topLeftCropIdx],
-                    root.values[idx].val_int[root.topLeftCropIdx+1],
-                    root.values[idx].val_int[root.topLeftCropIdx+2],
-                    root.values[idx].val_int[root.topLeftCropIdx+3],
-                    root.values[idx].val_int[root.originalWidthIdx],
-                    root.values[idx].val_int[root.originalHeightIdx],
-                );
+                Callabler.load_image_preview({
+                    path: root.values[idx].val_str[root.previewImageIdx],
+                    crop_left: root.values[idx].val_int[root.topLeftCropIdx],
+                    crop_top: root.values[idx].val_int[root.topLeftCropIdx+1],
+                    crop_right: root.values[idx].val_int[root.topLeftCropIdx+2],
+                    crop_bottom: root.values[idx].val_int[root.topLeftCropIdx+3],
+                    original_width: root.values[idx].val_int[root.originalWidthIdx],
+                    original_height: root.values[idx].val_int[root.originalHeightIdx],
+                });
             }
         } else {
             if (root.topLeftCropIdx == -1) {
-                Callabler.load_image_preview(root.values[idx].val_str[root.parentPathIdx] + "/" + root.values[idx].val_str[root.fileNameIdx], -1, -1, -1, -1, -1, -1);
+                Callabler.load_image_preview(no_crop_preview_request(root.values[idx].val_str[root.parentPathIdx] + "/" + root.values[idx].val_str[root.fileNameIdx]));
             } else {
-                Callabler.load_image_preview(
-                    root.values[idx].val_str[root.parentPathIdx] + "/" + root.values[idx].val_str[root.fileNameIdx],
-                    root.values[idx].val_int[root.topLeftCropIdx],
-                    root.values[idx].val_int[root.topLeftCropIdx+1],
-                    root.values[idx].val_int[root.topLeftCropIdx+2],
-                    root.values[idx].val_int[root.topLeftCropIdx+3],
-                    root.values[idx].val_int[root.originalWidthIdx],
-                    root.values[idx].val_int[root.originalHeightIdx],
-                );
+                Callabler.load_image_preview({
+                    path: root.values[idx].val_str[root.parentPathIdx] + "/" + root.values[idx].val_str[root.fileNameIdx],
+                    crop_left: root.values[idx].val_int[root.topLeftCropIdx],
+                    crop_top: root.values[idx].val_int[root.topLeftCropIdx+1],
+                    crop_right: root.values[idx].val_int[root.topLeftCropIdx+2],
+                    crop_bottom: root.values[idx].val_int[root.topLeftCropIdx+3],
+                    original_width: root.values[idx].val_int[root.originalWidthIdx],
+                    original_height: root.values[idx].val_int[root.originalHeightIdx],
+                });
             }
         }
     }
 
     function hidePreview() {
-        Callabler.load_image_preview("NOT_AVAILABLE.NOT_AVAILABLE", -1, -1, -1, -1, -1, -1);
+        Callabler.load_image_preview(no_crop_preview_request("NOT_AVAILABLE.NOT_AVAILABLE"));
     }
 
     context_menu := PopupContextMenu {

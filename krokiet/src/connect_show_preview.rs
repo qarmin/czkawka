@@ -10,87 +10,95 @@ use log::{debug, error};
 use slint::ComponentHandle;
 
 use crate::shared_models::SharedModels;
-use crate::{ActiveTab, Callabler, GuiState, MainWindow, Settings};
+use crate::{ActiveTab, Callabler, GuiState, LoadImagePreviewRequest, MainWindow, Settings};
 
 pub type ImageBufferRgba = image::ImageBuffer<image::Rgba<u8>, Vec<u8>>;
 
 pub(crate) fn connect_show_preview(app: &MainWindow, shared_models: Arc<Mutex<SharedModels>>) {
     let a = app.as_weak();
-    app.global::<Callabler>()
-        .on_load_image_preview(move |image_path, crop_left, crop_top, crop_right, crop_bottom, orig_width, orig_height| {
-            let app = a.upgrade().expect("Failed to upgrade app :(");
+    app.global::<Callabler>().on_load_image_preview(move |request| {
+        let LoadImagePreviewRequest {
+            path: image_path,
+            crop_left,
+            crop_top,
+            crop_right,
+            crop_bottom,
+            original_width: orig_width,
+            original_height: orig_height,
+        } = request;
+        let app = a.upgrade().expect("Failed to upgrade app :(");
 
-            let settings = app.global::<Settings>();
-            let gui_state = app.global::<GuiState>();
+        let settings = app.global::<Settings>();
+        let gui_state = app.global::<GuiState>();
 
-            let active_tab = gui_state.get_active_tab();
+        let active_tab = gui_state.get_active_tab();
 
-            if !((active_tab == ActiveTab::SimilarImages && settings.get_similar_images_show_image_preview())
-                || (active_tab == ActiveTab::DuplicateFiles && settings.get_duplicate_image_preview())
-                || ((active_tab == ActiveTab::SimilarVideos || active_tab == ActiveTab::VideoOptimizer) && settings.get_video_thumbnails_preview()))
-            {
-                set_preview_visible(&gui_state, None);
-                return;
+        if !((active_tab == ActiveTab::SimilarImages && settings.get_similar_images_show_image_preview())
+            || (active_tab == ActiveTab::DuplicateFiles && settings.get_duplicate_image_preview())
+            || ((active_tab == ActiveTab::SimilarVideos || active_tab == ActiveTab::VideoOptimizer) && settings.get_video_thumbnails_preview()))
+        {
+            set_preview_visible(&gui_state, None);
+            return;
+        }
+
+        if !check_if_can_display_image(&image_path) {
+            set_preview_visible(&gui_state, None);
+            return;
+        }
+
+        // Video Thumbnails files can be empty if generation failed or thumbnails are disabled
+        if metadata(&image_path).is_ok_and(|m| m.len() == 0) {
+            set_preview_visible(&gui_state, None);
+            return;
+        }
+
+        // Do not load the same image again
+        if image_path == gui_state.get_preview_image_path() {
+            return;
+        }
+
+        let path = Path::new(image_path.as_str());
+
+        let images_in_thumbnails_line = if active_tab == ActiveTab::VideoOptimizer {
+            shared_models
+                .lock()
+                .expect("Failed to lock model mutex")
+                .shared_video_optimizer_state
+                .as_ref()
+                .map_or(1, |state| state.get_params().get_generate_number_of_items_in_thumbnail_grid())
+        } else {
+            1
+        };
+
+        if let Some((mut timer, img)) = load_image(path) {
+            let mut img_to_use = img.into_rgba8();
+
+            if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 && orig_width > 0 && orig_height > 0 {
+                img_to_use = draw_crop_rectangle_on_image(
+                    img_to_use,
+                    crop_left,
+                    crop_top,
+                    crop_right,
+                    crop_bottom,
+                    orig_width as u32,
+                    orig_height as u32,
+                    images_in_thumbnails_line as u32,
+                );
+                timer.checkpoint("cropping image");
             }
 
-            if !check_if_can_display_image(&image_path) {
-                set_preview_visible(&gui_state, None);
-                return;
-            }
+            let slint_image = convert_into_slint_image(&img_to_use);
+            timer.checkpoint("converting image to Slint image");
 
-            // Video Thumbnails files can be empty if generation failed or thumbnails are disabled
-            if metadata(&image_path).is_ok_and(|m| m.len() == 0) {
-                set_preview_visible(&gui_state, None);
-                return;
-            }
+            gui_state.set_preview_image(slint_image);
+            timer.checkpoint("setting image in GUI");
 
-            // Do not load the same image again
-            if image_path == gui_state.get_preview_image_path() {
-                return;
-            }
-
-            let path = Path::new(image_path.as_str());
-
-            let images_in_thumbnails_line = if active_tab == ActiveTab::VideoOptimizer {
-                shared_models
-                    .lock()
-                    .expect("Failed to lock model mutex")
-                    .shared_video_optimizer_state
-                    .as_ref()
-                    .map_or(1, |state| state.get_params().get_generate_number_of_items_in_thumbnail_grid())
-            } else {
-                1
-            };
-
-            if let Some((mut timer, img)) = load_image(path) {
-                let mut img_to_use = img.into_rgba8();
-
-                if crop_left != -1 && crop_top != -1 && crop_right != -1 && crop_bottom != -1 && orig_width > 0 && orig_height > 0 {
-                    img_to_use = draw_crop_rectangle_on_image(
-                        img_to_use,
-                        crop_left,
-                        crop_top,
-                        crop_right,
-                        crop_bottom,
-                        orig_width as u32,
-                        orig_height as u32,
-                        images_in_thumbnails_line as u32,
-                    );
-                    timer.checkpoint("cropping image");
-                }
-
-                let slint_image = convert_into_slint_image(&img_to_use);
-                timer.checkpoint("converting image to Slint image");
-
-                gui_state.set_preview_image(slint_image);
-                timer.checkpoint("setting image in GUI");
-
-                debug!("{}", timer.report("total", true));
-                set_preview_visible(&gui_state, Some(image_path.as_str()));
-            } else {
-                set_preview_visible(&gui_state, None);
-            }
-        });
+            debug!("{}", timer.report("total", true));
+            set_preview_visible(&gui_state, Some(image_path.as_str()));
+        } else {
+            set_preview_visible(&gui_state, None);
+        }
+    });
 }
 
 fn set_preview_visible(gui_state: &GuiState, preview: Option<&str>) {
