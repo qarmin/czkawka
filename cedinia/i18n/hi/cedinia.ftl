@@ -34,7 +34,7 @@ stopping = रुकना...
 no_results = कोई परिणाम नहीं मिला
 press_start = START बटन दबाकर स्कैन करें
 select_label = चयनित.
-deselect_label = अचयनित।
+deselect_label = अचयनित।.
 list_label = सूची
 gallery_label = गैल
 # Selection popup
@@ -64,12 +64,12 @@ delete_errors_title = कुछ फ़ाइलें हटाने में 
 ok = ठीक है
 # Stopping overlay
 stopping_overlay_title = रुकना
-stopping_overlay_body =
+stopping_overlay_body = 
     वर्तमान स्कैन पूरा हो रहा है...
-    कृपया प्रतीक्षा करें।
+    कृपया प्रतीक्षा करें।.
 # Permission popup
 permission_title = फ़ाइल एक्सेस
-permission_body = फ़ाइलों को स्कैन करने के लिए, ऐप को डिवाइस स्टोरेज तक पहुंच की आवश्यकता होती है। इस अनुमति के बिना, स्कैनिंग संभव नहीं होगी।
+permission_body = फ़ाइलों को स्कैन करने के लिए, ऐप को डिवाइस स्टोरेज तक पहुंच की आवश्यकता होती है। इस अनुमति के बिना, स्कैनिंग संभव नहीं होगी।.
 grant = अनुमति दें
 no_permission_scan_warning = फ़ाइल एक्सेस नहीं - स्कैन करने की अनुमति दें
 # Settings screen tabs
@@ -136,7 +136,7 @@ settings_temporary_files_extensions_label = एक्सटेंशन
 settings_temporary_files_extensions_placeholder = उदाहरण के लिए: .tmp, .bak, ~
 settings_temporary_files_reset = डिफ़ॉल्ट सेटिंग्स पर पुनर्स्थापित करें
 settings_broken_files_header = टूटी हुई फ़ाइलें
-settings_broken_files_note = यह एक संसाधन-गहन स्कैन है। सर्वोत्तम प्रदर्शन के लिए, कृपया Krokiet को डेस्कटॉप पर उपयोग करें।
+settings_broken_files_note = यह एक संसाधन-गहन स्कैन है। सर्वोत्तम प्रदर्शन के लिए, कृपया Krokiet को डेस्कटॉप पर उपयोग करें।.
 settings_broken_files_types_label = जांच किए गए प्रकार
 settings_broken_audio = ऑडियो
 settings_broken_pdf = पीडीएफ
@@ -245,10 +245,10 @@ scan_completed_notification = स्कैन पूरा हुआ - { $file_c
 # Confirm popups (set from Rust)
 confirm_clean_exif = क्या आप निश्चित हैं कि आप { $n } चयनित फ़ाइलों से EXIF टैग हटाना चाहते हैं?
 confirm_delete_items = क्या आप निश्चित हैं कि आप { $n } चयनित आइटमों को हटाना चाहते हैं?
-gallery_confirm_delete_msg = आप { $total_images } छवियाँ { $total_groups } समूहों से हटाने वाले हैं।
+gallery_confirm_delete_msg = आप { $total_images } छवियाँ { $total_groups } समूहों से हटाने वाले हैं।.
 gallery_confirm_delete_warning = सभी आइटम { $unsafe_groups } समूहों में चुने गए हैं!
 # Settings - SameMusic fingerprint warning
-same_music_fingerprint_warning = ऑडियो फिंगरप्रिंट की गणना और तुलना करना बहुत अधिक संसाधनों का उपयोग करता है और इसमें काफी समय लग सकता है। इस कार्य के लिए, Krokiet का उपयोग डेस्कटॉप सिस्टम पर करना उचित है।
+same_music_fingerprint_warning = ऑडियो फिंगरप्रिंट की गणना और तुलना करना बहुत अधिक संसाधनों का उपयोग करता है और इसमें काफी समय लग सकता है। इस कार्य के लिए, Krokiet का उपयोग डेस्कटॉप सिस्टम पर करना उचित है।.
 # Scan stage labels (shown during scan progress)
 # Group headers in scan results
 duplicates_group_header = { $count } फ़ाइलें x { $per_file } प्रति फ़ाइल = { $total } कुल
@@ -309,7 +309,7 @@ dir_open_folder = फ़ोल्डर खोलें
 # Compare view
 compare_label = तुलना करें
 compare_loading = चित्र लोड हो रहे हैं...
-compare_cancelling = Cancelling...
+compare_cancelling = रद्द हो रहा है...
 compare_computing = अंतर की गणना की जा रही है...
 compare_mode_normal = साइड
 compare_mode_split = विभाजित

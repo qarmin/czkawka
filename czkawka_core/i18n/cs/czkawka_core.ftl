@@ -101,7 +101,7 @@ core_invalid_extension_contains_space = { $extension } není platná přípona, 
 core_invalid_extension_contains_dot = { $extension } není platná přípona, protože má v sobě tečku
 core_ffmpeg_unknown_encoder = Nelze kódovat { $file } pomocí enkodéru { $encoder }. Aktuální verze FFmpeg nepodporuje tento enkodér. Použijte jinou FFmpeg verzi s požadovanou podporou kodeku nebo vyberte jiný enkodér.
 core_ffmpeg_error = Chyba FFmpeg při zpracování { $file }, stavový kód { $code }, důvod { $reason }
-core_custom_command_missing_path_placeholder = Vlastní FFmpeg příkaz musí obsahovat { "{PATH}" } jako zástupný text pro vstupní soubor.
+core_custom_command_missing_path_placeholder = Vlastní FFmpeg příkaz musí obsahovat { "{PATH}" } jako zástupný text pro vstupní soubor
 core_custom_command_empty = Vlastní FFmpeg příkaz nemůže být prázdný
 # Scan stage labels
 # Collecting / scanning files (the { $entries_checked } counter grows while the disk is walked)

@@ -36,7 +36,7 @@ press_start = Pressione INICIAR para verificar
 select_label = Sel.
 deselect_label = Desel.
 list_label = Lista
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Selecionar
 select_all = Selecionar todos

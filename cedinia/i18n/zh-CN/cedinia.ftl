@@ -33,8 +33,8 @@ scanning = 正在扫描...
 stopping = 正在停止...
 no_results = 没有结果
 press_start = 点击“开始”进行扫描
-select_label = 选择
-deselect_label = 取消选择
+select_label = 选择.
+deselect_label = 取消选择.
 list_label = 列表
 gallery_label = 图库
 # Selection popup

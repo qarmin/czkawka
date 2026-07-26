@@ -303,7 +303,7 @@ header_about_button_tooltip = Abre diálogo com informações sobre a aplicaçã
 header_krokiet_button_tooltip = Experimente o Krokiet - a versão nova e melhorada!
 # Krokiet promo dialog
 krokiet_promo_title = Conheça o Krokiet!
-krokiet_promo_message = Transferir Krokiet/Cedinia
+krokiet_promo_message = Transferir Krokiet/Cedinia.
 krokiet_promo_link_download = Transferir Krokiet/Cedinia
 krokiet_promo_link_project = Página do projeto
 

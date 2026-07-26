@@ -267,7 +267,7 @@ bottom_compare_button = Vergleichen
 bottom_search_button_tooltip = Suche starten
 bottom_select_button_tooltip = Datensätze auswählen. Nur ausgewählte Dateien/Ordner können später verarbeitet werden.
 bottom_delete_button_tooltip = Ausgewählte Dateien/Ordner löschen.
-bottom_save_button_tooltip = Daten über die Suche in eine Datei speichern.
+bottom_save_button_tooltip = Daten über die Suche in eine Datei speichern
 bottom_symlink_button_tooltip =
     Erstelle symbolische Links.
     Funktioniert nur, wenn mindestens zwei Ergebnisse einer Gruppe ausgewählt sind.
@@ -346,10 +346,10 @@ settings_use_rust_preview_tooltip =
     Auf Nicht-Linux-Systemen wird empfohlen, diese Option zu verwenden, da gtk-pixbuf dort nicht immer verfügbar ist, so dass die Deaktivierung dieser Option keine Vorschau einiger Bilder laden wird.
 settings_label_restart = Sie müssen die App neu starten, um die Einstellungen anzuwenden!
 settings_ignore_other_filesystems = Andere Dateisysteme ignorieren (nur Linux)
-settings_ignore_other_filesystems_tooltip =
+settings_ignore_other_filesystems_tooltip = 
     Ignoriert Dateien, die nicht im selben Dateisystem sind wie die durchsuchten Verzeichnisse.
     
-    Funktioniert genauso wie die Option -xdev des Befehls find unter Linux.
+    Funktioniert genauso wie die Option -xdev des Befehls find unter Linux
 settings_save_at_exit_button_tooltip = Speichert die Konfiguration in einer Datei, wenn das Programm geschlossen wird.
 settings_load_at_start_button_tooltip =
     Konfiguration aus der Datei laden, wenn App geöffnet wird.
@@ -505,7 +505,7 @@ search_not_choosing_any_broken_files = FEHLER: Sie müssen mindestens ein Kontro
 include_folders_dialog_title = Einbezogene Ordner
 exclude_folders_dialog_title = Ausgeschlossene Ordner
 include_manually_directories_dialog_title = Verzeichnis manuell hinzufügen
-cache_properly_cleared = Cache wurde vollständig geleert.
+cache_properly_cleared = Cache wurde vollständig geleert
 cache_clear_duplicates_title = Leere Duplikate-Cache
 cache_clear_similar_images_title = Leere Cache für ähnliche Bilder
 cache_clear_similar_videos_title = Leere Cache für ähnliche Videos

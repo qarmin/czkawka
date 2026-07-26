@@ -23,7 +23,7 @@ same_music_seconds_label = الحد الأدنى من مدة التجزئة ال
 same_music_similarity_label = الفرق الأقصى
 music_compare_only_in_title_group = مقارنة داخل مجموعات من العناوين المتشابهة
 music_compare_only_in_title_group_tooltip = بوجود 10000 ملف، بدلاً من حوالي 100 مليون مقارنة، ستكون هناك عادةً حوالي 20000 مقارنة.
-same_music_tooltip = - الحد الأدنى لوقت الجزء الذي يمكن بعده تحديد ملفات الموسيقى بأنها متشابهة
+same_music_tooltip = - الحد الأدنى لوقت الجزء الذي يمكن بعده تحديد ملفات الموسيقى بأنها متشابهة.
 music_comparison_checkbox_tooltip = سيتم اعتبار الملفات محل النقاش نسخاً مكررة:
 duplicate_case_sensitive_name = حالة حساسة
 duplicate_case_sensitive_name_tooltip =
@@ -34,7 +34,7 @@ duplicate_mode_size_name_combo_box = الحجم والاسم
 duplicate_mode_name_combo_box = الاسم
 duplicate_mode_size_combo_box = الحجم
 duplicate_mode_hash_combo_box = التجزئة
-duplicate_hash_type_tooltip = ...ولكن نادرا ما تحدث بعض الاصطدام. (استبدال "بليك 3" بـ "Blake3" ليتطابق مع بقية النص)
+duplicate_hash_type_tooltip = ...ولكن نادرا ما تحدث بعض الاصطدام. (استبدال "بليك 3" بـ "Blake3" ليتطابق مع بقية النص).
 duplicate_check_method_tooltip =
     في الوقت الحالي، تقدم Czkawka ثلاثة أنواع من الطرق للعثور على التكرارات:
     

@@ -36,7 +36,7 @@ press_start = Pressione INICIAR para verificar
 select_label = Sel.
 deselect_label = Desel.
 list_label = Lista
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Selecionar
 select_all = Selecionar todos
@@ -64,7 +64,7 @@ delete_errors_title = Falha ao eliminar alguns ficheiros:
 ok = OK
 # Stopping overlay
 stopping_overlay_title = A parar
-stopping_overlay_body = A finalizar a verificação atual...\nPor favor, aguarde.
+stopping_overlay_body = A finalizar a verificação atual... Por favor, aguarde.
 # Permission popup
 permission_title = Acesso ao ficheiro
 permission_body = Para verificar ficheiros, a aplicação precisa de acesso ao armazenamento do dispositivo. Sem esta permissão, a verificação não será possível.

@@ -36,7 +36,7 @@ press_start = Druk op START om te scannen
 select_label = Sel.
 deselect_label = Desel.
 list_label = Lijst
-gallery_label = Gal.
+gallery_label = Gal
 # Selection popup
 selection_popup_title = Selecteren
 select_all = Alles selecteren

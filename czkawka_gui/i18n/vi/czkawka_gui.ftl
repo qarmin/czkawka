@@ -164,7 +164,7 @@ upper_manual_add_included_button_tooltip =
     /home/roman;/home/rozkaz sẽ thêm hai thư mục /home/roman và /home/rozkaz
 upper_add_included_button_tooltip = Thêm thư mục mới vào danh sách tìm kiếm.
 upper_remove_included_button_tooltip = Xóa thư mục khỏi kết quả tìm kiếm.
-upper_manual_add_excluded_button_tooltip = Thêm tên thư mục cần loại trừ theo cách thủ công.
+upper_manual_add_excluded_button_tooltip = Thêm tên thư mục cần loại trừ theo cách thủ công
 upper_add_excluded_button_tooltip = Thêm thư mục cần loại trừ khỏi quá trình tìm kiếm.
 upper_remove_excluded_button_tooltip = Xóa thư mục khỏi danh sách bị loại trừ.
 upper_notebook_items_configuration = Cấu hình mục

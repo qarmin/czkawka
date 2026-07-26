@@ -33,8 +33,8 @@ scanning = 스캔 진행 중...
 stopping = 정지 중...
 no_results = 결과가 없습니다
 press_start = START 버튼을 눌러 스캔을 시작하세요
-select_label = 선택
-deselect_label = 해제
+select_label = 선택.
+deselect_label = 해제.
 list_label = 목록
 gallery_label = 갤러리
 # Selection popup
@@ -309,7 +309,7 @@ dir_open_folder = 폴더 열기
 # Compare view
 compare_label = 비교
 compare_loading = 이미지 로딩 중...
-compare_cancelling = Cancelling...
+compare_cancelling = 취소 중...
 compare_computing = 차이점 계산 중...
 compare_mode_normal = 나란히
 compare_mode_split = 분할

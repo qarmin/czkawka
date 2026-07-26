@@ -64,7 +64,7 @@ delete_errors_title = いくつかのファイルを削除できませんでし�
 ok = 了解
 # Stopping overlay
 stopping_overlay_title = 停止中
-stopping_overlay_body = 現在のスキャンを完了しています...\nお待ちください。
+stopping_overlay_body = 現在のスキャンを完了しています... お待ちください。
 # Permission popup
 permission_title = ファイルアクセス
 permission_body = ファイルをスキャンするには、アプリがデバイスのストレージにアクセスする必要があります。この許可がないとスキャンはできません。

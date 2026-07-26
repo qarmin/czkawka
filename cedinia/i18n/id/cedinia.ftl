@@ -33,8 +33,8 @@ scanning = Proses pemindaian sedang berlangsung...
 stopping = Menghentikan...
 no_results = Tidak ada hasil
 press_start = Tekan MULAI untuk memulai pemindaian
-select_label = Pilih
-deselect_label = Batal pilih
+select_label = Pilih.
+deselect_label = Batal pilih.
 list_label = Daftar
 gallery_label = Galeri
 # Selection popup
@@ -309,10 +309,10 @@ dir_open_folder = Buka folder
 # Compare view
 compare_label = Bandingkan
 compare_loading = Memuat gambar...
-compare_cancelling = Cancelling...
+compare_cancelling = Sedang dibatalkan...
 compare_computing = Menghitung perbedaan...
 compare_mode_normal = Berdampingan
 compare_mode_split = Pisahkan
-compare_mode_overlay = Overlay
+compare_mode_overlay = Lapisan
 compare_mode_diff = Perbedaan
 compare_res_mismatch = Resolusi yang berbeda - perbedaan yang ditampilkan mungkin tidak akurat

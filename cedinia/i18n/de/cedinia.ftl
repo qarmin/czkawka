@@ -75,7 +75,7 @@ no_permission_scan_warning = Kein Dateizugriff - Berechtigung zum Scannen gewäh
 # Settings screen tabs
 settings_tab_general = Allgemein
 settings_tab_tools = Werkzeuge
-settings_tab_diagnostics = Info
+settings_tab_diagnostics = Information
 # Settings - General tab
 settings_use_cache = Cache verwenden
 settings_use_cache_desc = Beschleunigt folgende Scans (Hash/Bilder)
@@ -106,12 +106,12 @@ settings_check_method_label = VERGLEICHSMETHODE
 settings_check_method = Methode
 settings_hash_type_label = HASH-Typ
 settings_hash_type = Hash-Typ
-settings_hash_type_desc = Blake3 ist die empfohlene Option; CRC32 hat eine geringe Chance auf Fehlalarme.
+settings_hash_type_desc = Blake3 ist die empfohlene Option; CRC32 hat eine geringe Chance auf Fehlalarme
 settings_similar_images_header = ÄHNLICHE BILDER
 settings_similarity_preset = Ähnlichkeitsschwelle
 settings_similarity_desc = Sehr hoch = nur fast identisch
 settings_hash_size = Hash-Größe
-settings_hash_size_desc = Eine größere Hash-Größe bedeutet weniger Fehlalarme, aber auch weniger Ergebnisse.
+settings_hash_size_desc = Eine größere Hash-Größe bedeutet weniger Fehlalarme, aber auch weniger Ergebnisse
 settings_hash_alg = Hash-Algorithmus
 settings_image_filter = Skalierungsfilter
 settings_geometric_invariance = Geometrische Invarianz
@@ -169,7 +169,7 @@ diagnostics_open_thumbnails_folder = Ordner öffnen
 diagnostics_clear_cache = Cache leeren
 diagnostics_open_cache_folder = Ordner öffnen
 diagnostics_export_logs = Logs exportieren
-logs_label = LOGS
+logs_label = PROTOKOLLE
 logs_export_title = Logs exportieren
 logs_export_saved = Logs kopiert nach:
 logs_export_failed = Konnte Logs nicht exportieren

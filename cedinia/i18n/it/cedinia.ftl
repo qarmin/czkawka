@@ -106,12 +106,12 @@ settings_check_method_label = METODO DI CONFRONTO
 settings_check_method = Metodo
 settings_hash_type_label = TIPO DI HASH
 settings_hash_type = Tipo di hash
-settings_hash_type_desc = Blake3 è l'opzione consigliata; CRC32 ha una piccola probabilità di falsi positivi.
+settings_hash_type_desc = Blake3 è l'opzione consigliata; CRC32 ha una piccola probabilità di falsi positivi
 settings_similar_images_header = IMMAGINI SIMILI
 settings_similarity_preset = Soglia di somiglianza
 settings_similarity_desc = Molto Alta = solo quasi identiche
 settings_hash_size = Dimensione hash
-settings_hash_size_desc = Dimensioni più grandi hanno meno falsi positivi, ma trovano anche meno immagini simili.
+settings_hash_size_desc = Dimensioni più grandi hanno meno falsi positivi, ma trovano anche meno immagini simili
 settings_hash_alg = Algoritmo di hash
 settings_image_filter = Filtro di ridimensionamento
 settings_geometric_invariance = Invarianza geometrica

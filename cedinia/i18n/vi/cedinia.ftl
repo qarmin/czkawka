@@ -34,7 +34,7 @@ stopping = Đang dừng...
 no_results = Không có kết quả
 press_start = Nhấn nút BẮT ĐẦU để quét
 select_label = Chọn.
-deselect_label = Bỏ chọn
+deselect_label = Bỏ chọn.
 list_label = Danh sách
 gallery_label = Ảnh
 # Selection popup
@@ -309,7 +309,7 @@ dir_open_folder = Mở thư mục
 # Compare view
 compare_label = So sánh
 compare_loading = Đang tải hình ảnh...
-compare_cancelling = Cancelling...
+compare_cancelling = Đang hủy...
 compare_computing = Đang tính toán sự khác biệt...
 compare_mode_normal = Cạnh nhau
 compare_mode_split = Chia tách

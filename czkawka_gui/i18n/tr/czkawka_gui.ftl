@@ -1,7 +1,7 @@
 # Window titles
 window_settings_title = Ayarlar
 window_main_title = Czkawka (Hıçkırık)
-window_progress_title = Taranıyor...
+window_progress_title = Taranıyor
 window_compare_images = Resimleri Karşılaştır
 # General
 general_ok_button = Tamam

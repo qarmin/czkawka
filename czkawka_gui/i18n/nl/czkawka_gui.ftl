@@ -138,8 +138,8 @@ main_label_hash_type = Soort hash
 main_label_hash_size = Hash grootte
 main_label_geometric_invariance = Geometrische invariantie
 main_label_size_bytes = Grootte (bytes)
-main_label_min_size = Min.
-main_label_max_size = Max.
+main_label_min_size = Min
+main_label_max_size = Max
 main_label_shown_files = Aantal getoonde bestanden
 main_label_resize_algorithm = Algoritme voor formaat wijzigen
 main_label_similarity = Vergelijkbaarheid{ "   " }
@@ -347,10 +347,10 @@ settings_use_rust_preview_tooltip =
     Op niet-linux systemen is het aangeraden om deze optie te gebruiken, omdat gtk-pixbuf niet altijd beschikbaar is, dus het uitschakelen van deze optie zal geen voorvertoningen van sommige afbeeldingen laden.
 settings_label_restart = U moet de app herstarten om de instellingen toe te passen!
 settings_ignore_other_filesystems = Negeer andere bestandssystemen (alleen Linux)
-settings_ignore_other_filesystems_tooltip =
+settings_ignore_other_filesystems_tooltip = 
     negeert bestanden die niet in hetzelfde bestandssysteem zitten als gezochte mappen.
     
-    Werkt hetzelfde als de -xdev optie in het find-commando op Linux.
+    Werkt hetzelfde als de -xdev optie in het find-commando op Linux
 settings_save_at_exit_button_tooltip = Configuratie opslaan in bestand bij het sluiten van de app.
 settings_load_at_start_button_tooltip =
     Laad de configuratie van het bestand bij het openen van de app.
