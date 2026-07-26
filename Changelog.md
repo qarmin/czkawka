@@ -1,4 +1,4 @@
-## Version 12.0.1 - 06.07.2026r
+## Version 12.0.1 - 26.07.2026r
 
 ### Core
 - Fixed problem with showing console windows on Windows, when running ffmpeg internally - [#1989](https://github.com/qarmin/czkawka/pull/1989)
@@ -7,11 +7,17 @@
 
 ### Krokiet
 - Added a new "About / Diagnostics" panel, to check for build/runtime features and to test if certain image files are recognizable - [#1989](https://github.com/qarmin/czkawka/pull/1989)
-- Added a "Test image file" button in the diagnostics view to verify that a user selected file can actually be decoded - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Fixed the "Sort" popup showing no background - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Fixed some text in popups that overflowed in some languages - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Fixed the Video Optimizer "Optimize" confirmation popup content being cropped - [#2008](https://github.com/qarmin/czkawka/issues/2008), [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Added translations of settings dropdown options - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Pinned Slint to 1.17.0, to avoid on Wayland bug(1.17.1 version), not properly restoring windows size at start - [#2011](https://github.com/qarmin/czkawka/pull/2011)
 
 ### Cedinia
 - Fix invalid status in progress bar - [#1989](https://github.com/qarmin/czkawka/pull/1989)
 - Fixed auto selection of language on first run - [#1989](https://github.com/qarmin/czkawka/pull/1989)
+- Migrated all raw JNI usage (file picker, notifications, Android path setup) to the new `jni-high` crate to  - [#2011](https://github.com/qarmin/czkawka/pull/2011)
+- Bumped Slint from 1.15.0 to 1.17.0 (pinned) - [#2011](https://github.com/qarmin/czkawka/pull/2011)
 
 ## Version 12.0 - 28.06.2026r
 
