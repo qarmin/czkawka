@@ -4255,6 +4255,8 @@ dependencies = [
 [[package]]
 name = "jni-high"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5386b698e6a573417651bce973f296e8f0f24d53d1e40f41cb6923c30b9c5b29"
 dependencies = [
  "android-activity 0.6.1",
  "jni 0.22.4",
@@ -4265,11 +4267,13 @@ dependencies = [
 [[package]]
 name = "jni-high-macros"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2393cd3255475086e063256ac33a52fd1c1ce04c1a34894e6c0fae9386b87213"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
  "quote",
- "syn 2.0.119",
+ "syn 3.0.3",
 ]
 
 [[package]]
