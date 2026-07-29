@@ -130,6 +130,12 @@ unused_features:
     xdg-open czkawka_core/report.html
     xdg-open czkawka_gui/report.html
 
+##################### VERSION #####################
+
+# Bump version in all crates, UI files and release metadata, e.g. `just change-version 12.0.1`
+change-version version:
+    uv run misc/change_version.py {{version}}
+
 ##################### LICENSES #####################
 
 # Generate third-party license file for Cedinia.

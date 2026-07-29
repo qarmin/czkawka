@@ -8,8 +8,6 @@ adler2 2.0.1  [0BSD OR MIT OR Apache-2.0]  - Jonas Schievink <jonasschievink@gma
     https://github.com/oyvindln/adler2
 adler32 1.2.0  [Zlib]  - Remi Rampin <remirampin@gmail.com>
     https://github.com/remram44/adler32-rs
-aes 0.8.4  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/block-ciphers
 aes 0.9.1  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/block-ciphers
 ahash 0.8.12  [MIT OR Apache-2.0]  - Tom Kaitchuck <Tom.Kaitchuck@gmail.com>
@@ -56,11 +54,11 @@ anstyle-query 1.1.5  [MIT OR Apache-2.0]
     https://github.com/rust-cli/anstyle.git
 anstyle-wincon 3.0.11  [MIT OR Apache-2.0]
     https://github.com/rust-cli/anstyle.git
-anyhow 1.0.103  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
+anyhow 1.0.104  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/anyhow
 arbitrary 1.4.2  [MIT OR Apache-2.0]  - The Rust-Fuzz Project Developers, Nick Fitzgerald <fitzgen@gmail.com>, Manish Goregaokar <manishsmail@gmail.com>, Simonas Kazlauskas <arbitrary@kazlauskas.me>, Brian L. Troutwine <brian@troutwine.us>, Corey Farwell <coreyf@rwell.org>
     https://github.com/rust-fuzz/arbitrary/
-arc-swap 1.9.1  [MIT OR Apache-2.0]  - Michal 'vorner' Vaner <vorner@vorner.cz>
+arc-swap 1.9.2  [MIT OR Apache-2.0]  - Michal 'vorner' Vaner <vorner@vorner.cz>
     https://github.com/vorner/arc-swap
 arg_enum_proc_macro 0.3.4  [MIT]  - Luca Barbato <lu_zero@gentoo.org>
     https://github.com/lu-zero/arg_enum_proc_macro
@@ -68,7 +66,7 @@ arraydeque 0.5.1  [MIT/Apache-2.0]  - andylokandy
     https://github.com/andylokandy/arraydeque
 arrayref 0.3.9  [BSD-2-Clause]  - David Roundy <roundyd@physics.oregonstate.edu>
     https://github.com/droundy/arrayref
-arrayvec 0.7.7  [MIT OR Apache-2.0]  - bluss
+arrayvec 0.7.8  [MIT OR Apache-2.0]  - bluss
     https://github.com/bluss/arrayvec
 as-raw-xcb-connection 1.0.1  [MIT OR Apache-2.0]
     https://github.com/psychon/as-raw-xcb-connection
@@ -92,11 +90,11 @@ async-signal 0.2.14  [Apache-2.0 OR MIT]  - John Nunley <dev@notgull.net>
     https://github.com/smol-rs/async-signal
 async-task 4.7.1  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/async-task
-async-trait 0.1.89  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
+async-trait 0.1.91  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/async-trait
 atomic-waker 1.1.2  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>, Contributors to futures-rs
     https://github.com/smol-rs/atomic-waker
-auto_enums 0.8.9  [Apache-2.0 OR MIT]
+auto_enums 0.8.10  [Apache-2.0 OR MIT]
     https://github.com/taiki-e/auto_enums
 autocfg 1.5.1  [Apache-2.0 OR MIT]  - Josh Stone <cuviper@gmail.com>
     https://github.com/cuviper/autocfg
@@ -122,7 +120,7 @@ bit_field 0.10.3  [Apache-2.0/MIT]  - Philipp Oppermann <dev@phil-opp.com>
     https://github.com/phil-opp/rust-bit-field
 bitflags 1.3.2  [MIT/Apache-2.0]  - The Rust Project Developers
     https://github.com/bitflags/bitflags
-bitflags 2.13.0  [MIT OR Apache-2.0]  - The Rust Project Developers
+bitflags 2.13.1  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/bitflags/bitflags
 bitstream-io 4.10.0  [MIT/Apache-2.0]  - Brian Langenberger <bjl@usa.net>
     https://github.com/tuffy/bitstream-io
@@ -132,13 +130,9 @@ bk-tree 0.5.0  [MIT]  - Eugene Bulkin <eugene.bulkin2@gmail.com>
     https://github.com/eugene-bulkin/rust-bk-tree
 blake3 1.8.5  [CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception]  - Jack O'Connor <oconnor663@gmail.com>, Samuel Neves
     https://github.com/BLAKE3-team/BLAKE3
-block-buffer 0.10.4  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/utils
 block-buffer 0.12.1  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
 block-padding 0.4.2  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/utils
-block-padding 0.3.3  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
 block2 0.5.1  [MIT]  - Steven Sheldon, Mads Marquart <mads@marquart.dk>
     https://github.com/madsmtm/objc2
@@ -146,7 +140,7 @@ block2 0.6.2  [MIT]  - Mads Marquart <mads@marquart.dk>
     https://github.com/madsmtm/objc2
 blocking 1.6.2  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/blocking
-borsh 1.7.0  [MIT OR Apache-2.0]  - Near Inc <hello@near.org>
+borsh 1.8.0  [MIT OR Apache-2.0]  - Near Inc <hello@near.org>
     https://github.com/near/borsh-rs
 brotli 8.0.4  [BSD-3-Clause AND MIT]  - Daniel Reiter Horn <danielrh@dropbox.com>, The Brotli Authors
     https://github.com/dropbox/rust-brotli
@@ -158,45 +152,43 @@ bumpalo 3.20.3  [MIT OR Apache-2.0]  - Nick Fitzgerald <fitzgen@gmail.com>
     https://github.com/fitzgen/bumpalo
 by_address 1.2.1  [MIT OR Apache-2.0]  - Matt Brubeck <mbrubeck@limpet.net>
     https://github.com/mbrubeck/by_address
-bytemuck 1.25.0  [Zlib OR Apache-2.0 OR MIT]  - Lokathor <zefria@gmail.com>
+bytemuck 1.25.2  [Zlib OR Apache-2.0 OR MIT]  - Lokathor <zefria@gmail.com>
     https://github.com/Lokathor/bytemuck
-bytemuck_derive 1.10.2  [Zlib OR Apache-2.0 OR MIT]  - Lokathor <zefria@gmail.com>
+bytemuck_derive 1.11.0  [Zlib OR Apache-2.0 OR MIT]  - Lokathor <zefria@gmail.com>
     https://github.com/Lokathor/bytemuck
 byteorder 1.5.0  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
     https://github.com/BurntSushi/byteorder
 byteorder-lite 0.1.0  [Unlicense OR MIT]
     https://github.com/image-rs/byteorder-lite
-bytes 1.12.0  [MIT]  - Carl Lerche <me@carllerche.com>, Sean McArthur <sean@seanmonstar.com>
+bytes 1.12.1  [MIT]  - Carl Lerche <me@carllerche.com>, Sean McArthur <sean@seanmonstar.com>
     https://github.com/tokio-rs/bytes
 bzip2 0.6.1  [MIT OR Apache-2.0]
     https://github.com/trifectatechfoundation/bzip2-rs
 bzip2-rs 0.1.2  [MIT/Apache-2.0]  - Paolo Barbolini <paolo@paolo565.org>
     https://github.com/paolobarbolini/bzip2-rs
-calloop 0.13.0  [MIT]  - Elinor Berger <elinor@safaradeg.net>
-    https://github.com/Smithay/calloop
 calloop 0.14.4  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/Smithay/calloop
-calloop-wayland-source 0.3.0  [MIT]  - Kirill Chibisov <contact@kchibisov.com>
-    https://github.com/smithay/calloop-wayland-source
+calloop 0.13.0  [MIT]  - Elinor Berger <elinor@safaradeg.net>
+    https://github.com/Smithay/calloop
 calloop-wayland-source 0.4.1  [MIT]  - Kirill Chibisov <contact@kchibisov.com>
+    https://github.com/smithay/calloop-wayland-source
+calloop-wayland-source 0.3.0  [MIT]  - Kirill Chibisov <contact@kchibisov.com>
     https://github.com/smithay/calloop-wayland-source
 cast 0.3.0  [MIT OR Apache-2.0]  - Jorge Aparicio <jorge@japaric.io>
     https://github.com/japaric/cast.rs
 cbc 0.2.1  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/block-modes
-cbc 0.1.2  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/block-modes
-cc 1.2.65  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
+cc 1.4.0  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/rust-lang/cc-rs
 cesu8 1.1.0  [Apache-2.0/MIT]  - Eric Kidd <git@randomhacks.net>
     https://github.com/emk/cesu8-rs
 cexpr 0.6.0  [Apache-2.0/MIT]  - Jethro Beekman <jethro@jbeekman.nl>
     https://github.com/jethrogb/rust-cexpr
-cfb 0.7.3  [MIT]  - Matthew D. Steele <mdsteele@alum.mit.edu>
+cfb 0.14.0  [MIT]  - Matthew D. Steele <mdsteele@alum.mit.edu>
     https://github.com/mdsteele/rust-cfb
 cfg-if 1.0.4  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/rust-lang/cfg-if
-cfg_aliases 0.2.1  [MIT]  - Zicklag <zicklag@katharostech.com>
+cfg_aliases 0.2.2  [MIT]  - Zicklag <zicklag@katharostech.com>
     https://github.com/katharostech/cfg_aliases
 cgl 0.3.2  [MIT / Apache-2.0]  - The Servo Project Developers
     https://github.com/servo/cgl-rs
@@ -210,17 +202,15 @@ ciborium-io 0.2.2  [Apache-2.0]  - Nathaniel McCallum <npmccallum@profian.com>
     https://github.com/enarx/ciborium
 ciborium-ll 0.2.2  [Apache-2.0]  - Nathaniel McCallum <npmccallum@profian.com>
     https://github.com/enarx/ciborium
-cipher 0.4.4  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/traits
 cipher 0.5.2  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/traits
 clang-sys 1.8.1  [Apache-2.0]  - Kyle Mayes <kyle@mayeses.com>
     https://github.com/KyleMayes/clang-sys
-clap 4.6.1  [MIT OR Apache-2.0]
+clap 4.6.4  [MIT OR Apache-2.0]
     https://github.com/clap-rs/clap
-clap_builder 4.6.0  [MIT OR Apache-2.0]
+clap_builder 4.6.2  [MIT OR Apache-2.0]
     https://github.com/clap-rs/clap
-clap_derive 4.6.1  [MIT OR Apache-2.0]
+clap_derive 4.6.4  [MIT OR Apache-2.0]
     https://github.com/clap-rs/clap
 clap_lex 1.1.0  [MIT OR Apache-2.0]
     https://github.com/clap-rs/clap
@@ -268,8 +258,6 @@ cpubits 0.1.1  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
 cpufeatures 0.3.0  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
-cpufeatures 0.2.17  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/utils
 crc 3.4.0  [MIT OR Apache-2.0]  - Rui Hu <code@mrhooray.com>, Akhil Velagapudi <4@4khil.com>
     https://github.com/mrhooray/crc-rs.git
 crc-catalog 2.5.0  [MIT OR Apache-2.0]  - Akhil Velagapudi <akhilvelagapudi@gmail.com>
@@ -282,19 +270,17 @@ criterion-plot 0.8.2  [Apache-2.0 OR MIT]  - Jorge Aparicio <japaricious@gmail.c
     https://github.com/criterion-rs/criterion.rs
 critical-section 1.2.0  [MIT OR Apache-2.0]
     https://github.com/rust-embedded/critical-section
-crossbeam-channel 0.5.15  [MIT OR Apache-2.0]
+crossbeam-channel 0.5.16  [MIT OR Apache-2.0]
     https://github.com/crossbeam-rs/crossbeam
-crossbeam-deque 0.8.6  [MIT OR Apache-2.0]
+crossbeam-deque 0.8.7  [MIT OR Apache-2.0]
     https://github.com/crossbeam-rs/crossbeam
-crossbeam-epoch 0.9.18  [MIT OR Apache-2.0]
+crossbeam-epoch 0.9.20  [MIT OR Apache-2.0]
     https://github.com/crossbeam-rs/crossbeam
-crossbeam-utils 0.8.21  [MIT OR Apache-2.0]
+crossbeam-utils 0.8.22  [MIT OR Apache-2.0]
     https://github.com/crossbeam-rs/crossbeam
 crunchy 0.2.4  [MIT]  - Eira Fransham <jackefransham@gmail.com>
     https://github.com/eira-fransham/crunchy
 crypto-common 0.2.2  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/traits
-crypto-common 0.1.7  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/traits
 ctor 0.10.1  [Apache-2.0 OR MIT]  - Matt Mastracci <matthew@mastracci.com>
     https://github.com/mmastrac/rust-ctor
@@ -302,7 +288,7 @@ ctutils 0.4.2  [Apache-2.0 OR MIT]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
 cursor-icon 1.2.0  [MIT OR Apache-2.0 OR Zlib]  - Kirill Chibisov <contact@kchibisov.com>
     https://github.com/rust-windowing/cursor-icon
-czkawka_core 12.0.0  [MIT]  - Rafał Mikrut <mikrutrafal@protonmail.com>
+czkawka_core 12.0.1  [MIT]  - Rafał Mikrut <mikrutrafal@protonmail.com>
     https://github.com/qarmin/czkawka
 darling 0.14.4  [MIT]  - Ted Driggs <ted.driggs@outlook.com>
     https://github.com/TedDriggs/darling
@@ -316,9 +302,9 @@ data-encoding 2.11.0  [MIT]  - Julien Cretin <git@ia0.eu>
     https://github.com/ia0/data-encoding
 data-url 0.3.2  [MIT OR Apache-2.0]  - Simon Sapin <simon.sapin@exyr.org>
     https://github.com/servo/rust-url
-defmt 1.1.0  [MIT OR Apache-2.0]  - The Knurling-rs developers
+defmt 1.1.1  [MIT OR Apache-2.0]  - The Knurling-rs developers
     https://github.com/knurling-rs/defmt
-defmt-macros 1.1.0  [MIT OR Apache-2.0]  - The Knurling-rs developers
+defmt-macros 1.1.1  [MIT OR Apache-2.0]  - The Knurling-rs developers
     https://github.com/knurling-rs/defmt
 defmt-parser 1.0.0  [MIT OR Apache-2.0]  - The Knurling-rs developers
     https://github.com/knurling-rs/defmt
@@ -328,13 +314,11 @@ derive_more 2.1.1  [MIT]  - Jelte Fennema <github-tech@jeltef.nl>
     https://github.com/JelteF/derive_more
 derive_more-impl 2.1.1  [MIT]  - Jelte Fennema <github-tech@jeltef.nl>
     https://github.com/JelteF/derive_more
-derive_utils 0.15.1  [Apache-2.0 OR MIT]
+derive_utils 0.16.0  [Apache-2.0 OR MIT]
     https://github.com/taiki-e/derive_utils
 deunicode 1.6.2  [BSD-3-Clause]  - Kornel Lesinski <kornel@geekhood.net>, Amit Chowdhury <amitc97@gmail.com>
     https://github.com/kornelski/deunicode/
 digest 0.11.3  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/traits
-digest 0.10.7  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/traits
 directories-next 2.0.0  [MIT OR Apache-2.0]  - The @xdg-rs members
     https://github.com/xdg-rs/dirs/tree/master/directories
@@ -366,9 +350,9 @@ dtor 0.8.1  [Apache-2.0 OR MIT]  - Matt Mastracci <matthew@mastracci.com>
     https://github.com/mmastrac/rust-ctor
 dunce 1.0.5  [CC0-1.0 OR MIT-0 OR Apache-2.0]  - Kornel <kornel@geekhood.net>
     https://gitlab.com/kornelski/dunce
-ecb 0.1.2  [MIT]  - RustCrypto Developers, magic-akari
+ecb 0.2.0  [MIT]  - RustCrypto Developers, magic-akari
     https://github.com/magic-akari/ecb
-either 1.16.0  [MIT OR Apache-2.0]
+either 1.17.0  [MIT OR Apache-2.0]
     https://github.com/rayon-rs/either
 encoding_rs 0.8.35  [(Apache-2.0 OR MIT) AND BSD-3-Clause]  - Henri Sivonen <hsivonen@hsivonen.fi>
     https://github.com/hsivonen/encoding_rs
@@ -398,13 +382,13 @@ event-listener 5.4.1  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com
     https://github.com/smol-rs/event-listener
 event-listener-strategy 0.5.4  [Apache-2.0 OR MIT]  - John Nunley <dev@notgull.net>
     https://github.com/smol-rs/event-listener-strategy
-exr 1.74.0  [BSD-3-Clause]  - johannesvollmer <contact@johannesvollmer.com>
+exr 1.74.2  [BSD-3-Clause]  - johannesvollmer <contact@johannesvollmer.com>
     https://github.com/johannesvollmer/exrs
 extended 0.1.0  [MIT]  - Dietrich Epp <depp@zdome.net>
     https://github.com/depp/extended-rs
-fast_image_resize 6.0.0  [MIT OR Apache-2.0]  - Kirill Kuzminykh <cykooz@gmail.com>
+fast_image_resize 6.1.0  [MIT OR Apache-2.0]  - Kirill Kuzminykh <cykooz@gmail.com>
     https://github.com/cykooz/fast_image_resize
-fastrand 2.4.1  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
+fastrand 2.5.0  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>
     https://github.com/smol-rs/fastrand
 fax 0.2.7  [MIT]  - Sebastian K <s3bk@protonmail.com>
     https://github.com/pdf-rs/fax
@@ -442,6 +426,8 @@ fnv 1.0.7  [Apache-2.0 / MIT]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/servo/rust-fnv
 foldhash 0.2.0  [Zlib]  - Orson Peters <orsonpeters@gmail.com>
     https://github.com/orlp/foldhash
+font-types 0.12.2  [MIT OR Apache-2.0]
+    https://github.com/googlefonts/fontations
 font-types 0.11.3  [MIT OR Apache-2.0]
     https://github.com/googlefonts/fontations
 fontdb 0.23.0  [MIT]  - Yevhenii Reizner <razrfalcon@gmail.com>
@@ -450,7 +436,7 @@ fontique 0.10.0  [Apache-2.0 OR MIT]
     https://github.com/linebender/parley
 foreign-types 0.5.0  [MIT/Apache-2.0]  - Steven Fackler <sfackler@gmail.com>
     https://github.com/sfackler/foreign-types
-foreign-types-macros 0.2.3  [MIT/Apache-2.0]  - Steven Fackler <sfackler@gmail.com>
+foreign-types-macros 0.2.4  [MIT/Apache-2.0]  - Steven Fackler <sfackler@gmail.com>
     https://github.com/sfackler/foreign-types
 foreign-types-shared 0.3.1  [MIT/Apache-2.0]  - Steven Fackler <sfackler@gmail.com>
     https://github.com/sfackler/foreign-types
@@ -462,41 +448,39 @@ fun_time_derive 0.3.4  [MIT]  - Steven Liebregt <stevenliebregt@outlook.com>
     https://github.com/stevenliebregt/fun_time
 funty 2.0.0  [MIT]  - myrrlyn <self@myrrlyn.dev>
     https://github.com/myrrlyn/funty
-futures 0.3.32  [MIT OR Apache-2.0]
+futures 0.3.33  [MIT OR Apache-2.0]
     https://github.com/rust-lang/futures-rs
-futures-channel 0.3.32  [MIT OR Apache-2.0]
+futures-channel 0.3.33  [MIT OR Apache-2.0]
     https://github.com/rust-lang/futures-rs
-futures-core 0.3.32  [MIT OR Apache-2.0]
+futures-core 0.3.33  [MIT OR Apache-2.0]
     https://github.com/rust-lang/futures-rs
-futures-executor 0.3.32  [MIT OR Apache-2.0]
+futures-executor 0.3.33  [MIT OR Apache-2.0]
     https://github.com/rust-lang/futures-rs
-futures-io 0.3.32  [MIT OR Apache-2.0]
+futures-io 0.3.33  [MIT OR Apache-2.0]
     https://github.com/rust-lang/futures-rs
 futures-lite 2.6.1  [Apache-2.0 OR MIT]  - Stjepan Glavina <stjepang@gmail.com>, Contributors to futures-rs
     https://github.com/smol-rs/futures-lite
-futures-macro 0.3.32  [MIT OR Apache-2.0]
+futures-macro 0.3.33  [MIT OR Apache-2.0]
     https://github.com/rust-lang/futures-rs
-futures-sink 0.3.32  [MIT OR Apache-2.0]
+futures-sink 0.3.33  [MIT OR Apache-2.0]
     https://github.com/rust-lang/futures-rs
-futures-task 0.3.32  [MIT OR Apache-2.0]
+futures-task 0.3.33  [MIT OR Apache-2.0]
     https://github.com/rust-lang/futures-rs
-futures-util 0.3.32  [MIT OR Apache-2.0]
+futures-util 0.3.33  [MIT OR Apache-2.0]
     https://github.com/rust-lang/futures-rs
 gbm 0.18.0  [MIT]  - Victoria Brekenfeld <github@drakulix.de>
     https://github.com/Smithay/gbm.rs
 gbm-sys 0.4.0  [MIT]  - Drakulix (Victor Brekenfeld)
     https://github.com/Drakulix/gbm.rs/tree/master/gbm-sys
-generic-array 0.14.7  [MIT]  - Bartłomiej Kamiński <fizyk20@gmail.com>, Aaron Trent <novacrazy@gmail.com>
-    https://github.com/fizyk20/generic-array.git
 gethostname 1.1.0  [Apache-2.0]  - Sebastian Wiesner <sebastian@swsnr.de>
     https://codeberg.org/swsnr/gethostname.rs.git
 getopts 0.2.24  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-lang/getopts
+getrandom 0.3.4  [MIT OR Apache-2.0]  - The Rand Project Developers
+    https://github.com/rust-random/getrandom
 getrandom 0.2.17  [MIT OR Apache-2.0]  - The Rand Project Developers
     https://github.com/rust-random/getrandom
 getrandom 0.4.3  [MIT OR Apache-2.0]  - The Rand Project Developers
-    https://github.com/rust-random/getrandom
-getrandom 0.3.4  [MIT OR Apache-2.0]  - The Rand Project Developers
     https://github.com/rust-random/getrandom
 gif 0.14.2  [MIT OR Apache-2.0]  - The image-rs Developers
     https://github.com/image-rs/image-gif
@@ -506,7 +490,7 @@ gl_generator 0.14.0  [Apache-2.0]  - Brendan Zabarauskas <bjzaba@yahoo.com.au>, 
     https://github.com/brendanzab/gl-rs/
 glibc_musl_version 0.1.0  [MIT]
     https://github.com/qarmin/glibc_musl_version
-glob 0.3.3  [MIT OR Apache-2.0]  - The Rust Project Developers
+glob 0.3.4  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-lang/glob
 glow 0.17.0  [MIT OR Apache-2.0 OR Zlib]  - Joshua Groves <josh@joshgroves.com>, Dzmitry Malyshau <kvarkus@gmail.com>
     https://github.com/grovesNL/glow
@@ -532,17 +516,17 @@ harfrust 0.8.4  [MIT]
     https://github.com/harfbuzz/harfrust
 hashbrown 0.17.1  [MIT OR Apache-2.0]
     https://github.com/rust-lang/hashbrown
-hashbrown 0.16.1  [MIT OR Apache-2.0]  - Amanieu d'Antras <amanieu@gmail.com>
-    https://github.com/rust-lang/hashbrown
 hashbrown 0.14.5  [MIT OR Apache-2.0]  - Amanieu d'Antras <amanieu@gmail.com>
+    https://github.com/rust-lang/hashbrown
+hashbrown 0.16.1  [MIT OR Apache-2.0]  - Amanieu d'Antras <amanieu@gmail.com>
     https://github.com/rust-lang/hashbrown
 hashlink 0.11.1  [MIT OR Apache-2.0]
     https://github.com/djc/hashlink
 heck 0.5.0  [MIT OR Apache-2.0]
     https://github.com/withoutboats/heck
-hermit-abi 0.3.9  [MIT OR Apache-2.0]  - Stefan Lankes
-    https://github.com/hermit-os/hermit-rs
 hermit-abi 0.5.2  [MIT OR Apache-2.0]  - Stefan Lankes
+    https://github.com/hermit-os/hermit-rs
+hermit-abi 0.3.9  [MIT OR Apache-2.0]  - Stefan Lankes
     https://github.com/hermit-os/hermit-rs
 hex 0.4.3  [MIT OR Apache-2.0]  - KokaKiwi <kokakiwi@kokakiwi.net>
     https://github.com/KokaKiwi/rust-hex
@@ -582,7 +566,7 @@ i18n-config 0.4.8  [MIT]  - Luke Frisken <l.frisken@gmail.com>
     https://github.com/kellpossible/cargo-i18n/tree/master/i18n-config
 i18n-embed 0.16.0  [MIT]  - Luke Frisken <l.frisken@gmail.com>
     https://github.com/kellpossible/cargo-i18n/tree/master/i18n-embed
-i18n-embed-fl 0.10.0  [MIT]  - Luke Frisken <l.frisken@gmail.com>
+i18n-embed-fl 0.10.1  [MIT]  - Luke Frisken <l.frisken@gmail.com>
     https://github.com/kellpossible/cargo-i18n/tree/master/i18n-embed-fl
 i18n-embed-impl 0.8.4  [MIT]  - Luke Frisken <l.frisken@gmail.com>
     https://github.com/kellpossible/cargo-i18n/tree/master/i18n-embed
@@ -638,11 +622,9 @@ imgref 1.12.2  [CC0-1.0 OR Apache-2.0]  - Kornel Lesiński <kornel@geekhood.net
     https://github.com/kornelski/imgref
 indexmap 2.14.0  [Apache-2.0 OR MIT]
     https://github.com/indexmap-rs/indexmap
-infer 0.19.0  [MIT]  - Bojan <dbojan@gmail.com>
+infer 0.22.0  [MIT]  - Bojan <dbojan@gmail.com>
     https://github.com/bojand/infer
 inout 0.2.2  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/utils
-inout 0.1.4  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/utils
 input 0.10.0  [MIT]  - Drakulix (Victoria Brekenfeld)
     https://github.com/Drakulix/input.rs
@@ -664,19 +646,21 @@ is-wsl 0.4.0  [MIT]  - Sean Larkin <TheLarkInn@users.noreply.github.com>
     https://github.com/TheLarkInn/is-wsl
 is_terminal_polyfill 1.70.2  [MIT OR Apache-2.0]
     https://github.com/polyfill-rs/is_terminal_polyfill
+itertools 0.15.0  [MIT OR Apache-2.0]  - bluss
+    https://github.com/rust-itertools/itertools
 itertools 0.14.0  [MIT OR Apache-2.0]  - bluss
     https://github.com/rust-itertools/itertools
 itertools 0.13.0  [MIT OR Apache-2.0]  - bluss
     https://github.com/rust-itertools/itertools
-itertools 0.15.0  [MIT OR Apache-2.0]  - bluss
-    https://github.com/rust-itertools/itertools
 itoa 1.0.18  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/itoa
-jiff 0.2.29  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
+jiff 0.2.35  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
     https://github.com/BurntSushi/jiff
-jiff-static 0.2.29  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
+jiff-core 0.1.0  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
     https://github.com/BurntSushi/jiff
-jiff-tzdb 0.1.6  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
+jiff-static 0.2.35  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
+    https://github.com/BurntSushi/jiff
+jiff-tzdb 0.1.8  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
     https://github.com/BurntSushi/jiff
 jiff-tzdb-platform 0.1.3  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
     https://github.com/BurntSushi/jiff
@@ -684,6 +668,10 @@ jni 0.21.1  [MIT/Apache-2.0]  - Josh Chase <josh@prevoty.com>
     https://github.com/jni-rs/jni-rs
 jni 0.22.4  [MIT OR Apache-2.0]  - jni team
     https://github.com/jni-rs/jni-rs
+jni-high 0.1.0  [MIT OR Apache-2.0]  - Rafał Mikrut <mikrutrafal@protonmail.com>
+    https://github.com/qarmin/jni-high
+jni-high-macros 0.1.0  [MIT OR Apache-2.0]  - Rafał Mikrut <mikrutrafal@protonmail.com>
+    https://github.com/qarmin/jni-high
 jni-macros 0.22.4  [MIT OR Apache-2.0]
     https://github.com/jni-rs/jni-rs
 jni-sys 0.4.1  [MIT OR Apache-2.0]  - Steven Fackler <sfackler@gmail.com>, Robert Bragg <robert@sixbynine.org>
@@ -692,7 +680,7 @@ jni-sys 0.3.1  [MIT OR Apache-2.0]  - Steven Fackler <sfackler@gmail.com>
     https://github.com/jni-rs/jni-sys
 jni-sys-macros 0.4.1  [MIT OR Apache-2.0]  - Robert Bragg <robert@sixbynine.org>
     https://github.com/jni-rs/jni-sys
-jobserver 0.1.34  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
+jobserver 0.1.35  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/rust-lang/jobserver-rs
 js-sys 0.3.103  [MIT OR Apache-2.0]  - The wasm-bindgen Developers
     https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys
@@ -734,9 +722,9 @@ lebe 0.5.3  [BSD-3-Clause]  - johannesvollmer <contact@johannesvollmer.com>
     https://github.com/johannesvollmer/lebe
 libbz2-rs-sys 0.2.5  [bzip2-1.0.6]
     https://github.com/trifectatechfoundation/libbzip2-rs
-libc 0.2.186  [MIT OR Apache-2.0]  - The Rust Project Developers
+libc 0.2.189  [MIT OR Apache-2.0]
     https://github.com/rust-lang/libc
-libflate 2.3.0  [MIT]
+libflate 2.3.1  [MIT]
     https://github.com/sile/libflate
 libflate_lz77 2.3.0  [MIT]
     https://github.com/sile/libflate
@@ -746,7 +734,7 @@ libloading 0.8.9  [ISC]  - Simonas Kazlauskas <libloading@kazlauskas.me>
     https://github.com/nagisa/rust_libloading/
 libm 0.2.16  [MIT]  - Alex Crichton <alex@alexcrichton.com>, Amanieu d'Antras <amanieu@gmail.com>, Jorge Aparicio <japaricious@gmail.com>, Trevor Gross <tg@trevorgross.com>
     https://github.com/rust-lang/compiler-builtins
-libredox 0.1.17  [MIT]  - 4lDO2 <4lDO2@protonmail.com>
+libredox 0.1.18  [MIT]  - 4lDO2 <4lDO2@protonmail.com>
     https://gitlab.redox-os.org/redox-os/libredox.git
 libudev-sys 0.1.4  [MIT]  - David Cuddeback <david.cuddeback@gmail.com>
     https://github.com/dcuddeback/libudev-sys
@@ -756,11 +744,11 @@ linked-hash-map 0.5.6  [MIT/Apache-2.0]  - Stepan Koltsov <stepan.koltsov@gmail.
     https://github.com/contain-rs/linked-hash-map
 linked_hash_set 0.1.6  [Apache-2.0]  - Alex Butler <alexheretic@gmail.com>
     https://github.com/alexheretic/linked-hash-set
-linux-raw-sys 0.4.15  [Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT]  - Dan Gohman <dev@sunfishcode.online>
+linux-raw-sys 0.12.1  [Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT]  - Dan Gohman <dev@sunfishcode.online>
     https://github.com/sunfishcode/linux-raw-sys
 linux-raw-sys 0.9.4  [Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT]  - Dan Gohman <dev@sunfishcode.online>
     https://github.com/sunfishcode/linux-raw-sys
-linux-raw-sys 0.12.1  [Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT]  - Dan Gohman <dev@sunfishcode.online>
+linux-raw-sys 0.4.15  [Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT]  - Dan Gohman <dev@sunfishcode.online>
     https://github.com/sunfishcode/linux-raw-sys
 litemap 0.8.2  [Unicode-3.0]  - The ICU4X Project Developers
     https://github.com/unicode-org/icu4x
@@ -780,7 +768,7 @@ log-panics 2.1.0  [MIT/Apache-2.0]  - Steven Fackler <sfackler@gmail.com>
     https://github.com/sfackler/rust-log-panics
 loop9 0.1.5  [MIT]  - Kornel <kornel@geekhood.net>
     https://gitlab.com/kornelski/loop9.git
-lopdf 0.42.0  [MIT]  - Junfeng Liu <china.liujunfeng@gmail.com>, Emulator <emulator@hotmail.it>
+lopdf 0.44.0  [MIT]  - Junfeng Liu <china.liujunfeng@gmail.com>, Emulator <emulator@hotmail.it>
     https://github.com/J-F-Liu/lopdf.git
 lyon_algorithms 1.0.20  [MIT OR Apache-2.0]  - Nicolas Silva <nical@fastmail.com>
     https://github.com/nical/lyon
@@ -792,19 +780,19 @@ lyon_path 1.0.19  [MIT OR Apache-2.0]  - Nicolas Silva <nical@fastmail.com>
     https://github.com/nical/lyon
 lzma-rs 0.3.0  [MIT]  - Guillaume Endignoux <ggendx@gmail.com>
     https://github.com/gendx/lzma-rs
-lzma-rust2 0.16.4  [Apache-2.0]
+lzma-rust2 0.16.5  [Apache-2.0]
     https://github.com/hasenbanck/lzma-rust2/
 mac-notification-sys 0.6.15  [MIT/Apache-2.0]  - Felix Döring <development@felixdoering.com>, Hendrik Sollich <hendrik@hoodie.de>
     https://github.com/h4llow3En/mac-notification-sys
-matrixmultiply 0.3.10  [MIT/Apache-2.0]  - bluss, R. Janis Goldschmidt
+matrixmultiply 0.3.11  [MIT/Apache-2.0]  - bluss, R. Janis Goldschmidt
     https://github.com/bluss/matrixmultiply/
 maybe-rayon 0.1.1  [MIT]
     https://github.com/shssoichiro/maybe-rayon
-md-5 0.10.6  [MIT OR Apache-2.0]  - RustCrypto Developers
+md-5 0.11.0  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/hashes
-md5 0.8.0  [Apache-2.0/MIT]  - Ivan Ukhov <ivan.ukhov@gmail.com>, Kamal Ahmad <shibe@openmailbox.org>, Konstantin Stepanov <milezv@gmail.com>, Lukas Kalbertodt <lukas.kalbertodt@gmail.com>, Nathan Musoke <nathan.musoke@gmail.com>, Scott Mabin <scott@mabez.dev>, Tony Arcieri <bascule@gmail.com>, Wim de With <register@dewith.io>, Yosef Dinerstein <yosefdi@gmail.com>
+md5 0.8.1  [Apache-2.0 OR MIT]  - Daniel McKenna <danielmckenna93@gmail.com>, Ivan Ukhov <ivan.ukhov@gmail.com>, Kamal Ahmad <shibe@openmailbox.org>, Konstantin Stepanov <milezv@gmail.com>, Lukas Kalbertodt <lukas.kalbertodt@gmail.com>, Nathan Musoke <nathan.musoke@gmail.com>, Scott Mabin <scott@mabez.dev>, Tony Arcieri <bascule@gmail.com>, Wim de With <register@dewith.io>, Yosef Dinerstein <yosefdi@gmail.com>
     https://github.com/stainless-steel/md5
-memchr 2.8.2  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>, bluss
+memchr 2.8.3  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>, bluss
     https://github.com/BurntSushi/memchr
 memmap2 0.9.11  [MIT OR Apache-2.0]  - Dan Burkert <dan@danburkert.com>, Yevhenii Reizner <razrfalcon@gmail.com>, The Contributors
     https://github.com/RazrFalcon/memmap2-rs
@@ -830,15 +818,15 @@ natord 1.0.9  [MIT]  - Kang Seonghoon <public+rust@mearie.org>
     https://github.com/lifthrasiir/rust-natord
 ndarray 0.17.2  [MIT OR Apache-2.0]  - Ulrik Sverdrup "bluss", Jim Turner
     https://github.com/rust-ndarray/ndarray
-ndk 0.9.0  [MIT OR Apache-2.0]  - The Rust Mobile contributors
-    https://github.com/rust-mobile/ndk
 ndk 0.8.0  [MIT OR Apache-2.0]  - The Rust Mobile contributors
+    https://github.com/rust-mobile/ndk
+ndk 0.9.0  [MIT OR Apache-2.0]  - The Rust Mobile contributors
     https://github.com/rust-mobile/ndk
 ndk-context 0.1.1  [MIT OR Apache-2.0]  - The Rust Windowing contributors
     https://github.com/rust-windowing/android-ndk-rs
-ndk-sys 0.6.0+11769913  [MIT OR Apache-2.0]  - The Rust Windowing contributors
-    https://github.com/rust-mobile/ndk
 ndk-sys 0.5.0+25.2.9519653  [MIT OR Apache-2.0]  - The Rust Windowing contributors
+    https://github.com/rust-mobile/ndk
+ndk-sys 0.6.0+11769913  [MIT OR Apache-2.0]  - The Rust Windowing contributors
     https://github.com/rust-mobile/ndk
 new_debug_unreachable 1.0.6  [MIT]  - Matt Brubeck <mbrubeck@limpet.net>, Jonathan Reem <jonathan.reem@gmail.com>
     https://github.com/mbrubeck/rust-debug-unreachable
@@ -846,17 +834,17 @@ nix 0.31.3  [MIT]
     https://github.com/nix-rust/nix
 no_std_io2 0.9.4  [Apache-2.0 OR MIT]
     https://github.com/wcampbell0x2a/no-std-io2
-nom 8.0.0  [MIT]  - contact@geoffroycouprie.com
-    https://github.com/rust-bakery/nom
 nom 7.1.3  [MIT]  - contact@geoffroycouprie.com
     https://github.com/Geal/nom
+nom 8.0.0  [MIT]  - contact@geoffroycouprie.com
+    https://github.com/rust-bakery/nom
 noop_proc_macro 0.3.0  [MIT]  - Luca Barbato <lu_zero@gentoo.org>
     https://github.com/lu-zero/noop_proc_macro
 notify-rust 4.18.0  [MIT OR Apache-2.0]  - Hendrik Sollich <hendrik@hoodie.de>
     https://github.com/hoodie/notify-rust
 num 0.4.3  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-num/num
-num-bigint 0.4.6  [MIT OR Apache-2.0]  - The Rust Project Developers
+num-bigint 0.4.8  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-num/num-bigint
 num-complex 0.4.6  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-num/num-complex
@@ -866,7 +854,7 @@ num-derive 0.4.2  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-num/num-derive
 num-integer 0.1.46  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-num/num-integer
-num-iter 0.1.45  [MIT OR Apache-2.0]  - The Rust Project Developers
+num-iter 0.1.46  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-num/num-iter
 num-rational 0.4.2  [MIT OR Apache-2.0]  - The Rust Project Developers
     https://github.com/rust-num/num-rational
@@ -884,9 +872,9 @@ objc2 0.6.4  [MIT]  - Mads Marquart <mads@marquart.dk>
     https://github.com/madsmtm/objc2
 objc2 0.5.2  [MIT]  - Steven Sheldon, Mads Marquart <mads@marquart.dk>
     https://github.com/madsmtm/objc2
-objc2-app-kit 0.3.2  [Zlib OR Apache-2.0 OR MIT]
-    https://github.com/madsmtm/objc2
 objc2-app-kit 0.2.2  [MIT]
+    https://github.com/madsmtm/objc2
+objc2-app-kit 0.3.2  [Zlib OR Apache-2.0 OR MIT]
     https://github.com/madsmtm/objc2
 objc2-cloud-kit 0.3.2  [Zlib OR Apache-2.0 OR MIT]
     https://github.com/madsmtm/objc2
@@ -894,21 +882,21 @@ objc2-cloud-kit 0.2.2  [MIT]
     https://github.com/madsmtm/objc2
 objc2-contacts 0.2.2  [MIT]
     https://github.com/madsmtm/objc2
-objc2-core-data 0.3.2  [Zlib OR Apache-2.0 OR MIT]
-    https://github.com/madsmtm/objc2
 objc2-core-data 0.2.2  [MIT]
+    https://github.com/madsmtm/objc2
+objc2-core-data 0.3.2  [Zlib OR Apache-2.0 OR MIT]
     https://github.com/madsmtm/objc2
 objc2-core-foundation 0.3.2  [Zlib OR Apache-2.0 OR MIT]
     https://github.com/madsmtm/objc2
 objc2-core-graphics 0.3.2  [Zlib OR Apache-2.0 OR MIT]
     https://github.com/madsmtm/objc2
-objc2-core-image 0.3.2  [Zlib OR Apache-2.0 OR MIT]
-    https://github.com/madsmtm/objc2
 objc2-core-image 0.2.2  [MIT]
     https://github.com/madsmtm/objc2
-objc2-core-location 0.2.2  [MIT]
+objc2-core-image 0.3.2  [Zlib OR Apache-2.0 OR MIT]
     https://github.com/madsmtm/objc2
 objc2-core-location 0.3.2  [Zlib OR Apache-2.0 OR MIT]
+    https://github.com/madsmtm/objc2
+objc2-core-location 0.2.2  [MIT]
     https://github.com/madsmtm/objc2
 objc2-core-text 0.3.2  [Zlib OR Apache-2.0 OR MIT]
     https://github.com/madsmtm/objc2
@@ -934,15 +922,15 @@ objc2-quartz-core 0.3.2  [Zlib OR Apache-2.0 OR MIT]
     https://github.com/madsmtm/objc2
 objc2-symbols 0.2.2  [MIT]
     https://github.com/madsmtm/objc2
-objc2-ui-kit 0.2.2  [MIT]
-    https://github.com/madsmtm/objc2
 objc2-ui-kit 0.3.2  [Zlib OR Apache-2.0 OR MIT]
+    https://github.com/madsmtm/objc2
+objc2-ui-kit 0.2.2  [MIT]
     https://github.com/madsmtm/objc2
 objc2-uniform-type-identifiers 0.2.2  [MIT]
     https://github.com/madsmtm/objc2
-objc2-user-notifications 0.3.2  [Zlib OR Apache-2.0 OR MIT]
-    https://github.com/madsmtm/objc2
 objc2-user-notifications 0.2.2  [MIT]
+    https://github.com/madsmtm/objc2
+objc2-user-notifications 0.3.2  [Zlib OR Apache-2.0 OR MIT]
     https://github.com/madsmtm/objc2
 object 0.37.3  [Apache-2.0 OR MIT]
     https://github.com/gimli-rs/object
@@ -954,7 +942,7 @@ once_cell_polyfill 1.70.2  [MIT OR Apache-2.0]
     https://github.com/polyfill-rs/once_cell_polyfill
 oorandom 11.1.5  [MIT]  - Simon Heath <icefox@dreamquest.io>
     https://hg.sr.ht/~icefox/oorandom
-open 5.3.5  [MIT]  - Sebastian Thiel <byronimo@gmail.com>
+open 5.4.0  [MIT]  - Sebastian Thiel <byronimo@gmail.com>
     https://github.com/Byron/open-rs
 orbclient 0.3.55  [MIT]  - Jeremy Soller <jackpot51@gmail.com>
     https://gitlab.redox-os.org/redox-os/orbclient
@@ -982,8 +970,6 @@ paste 1.0.15  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/paste
 pastey 0.1.1  [MIT OR Apache-2.0]  - Aditya Kumar <git@adityais.dev>, David Tolnay <dtolnay@gmail.com>
     https://github.com/as1100k/pastey
-pathdiff 0.2.3  [MIT/Apache-2.0]  - Manish Goregaokar <manishsmail@gmail.com>
-    https://github.com/Manishearth/pathdiff
 pbkdf2 0.13.0  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/password-hashes
 percent-encoding 2.3.2  [MIT OR Apache-2.0]  - The rust-url developers
@@ -1014,7 +1000,7 @@ pollster 0.4.0  [Apache-2.0/MIT]  - Joshua Barretto <joshua.s.barretto@gmail.com
     https://github.com/zesterer/pollster
 polycool 0.4.0  [MIT OR Apache-2.0]
     https://github.com/linebender/kurbo
-portable-atomic 1.13.1  [Apache-2.0 OR MIT]
+portable-atomic 1.14.0  [Apache-2.0 OR MIT]
     https://github.com/taiki-e/portable-atomic
 portable-atomic-util 0.2.7  [Apache-2.0 OR MIT]
     https://github.com/taiki-e/portable-atomic-util
@@ -1032,11 +1018,11 @@ primal-check 0.3.4  [MIT OR Apache-2.0]  - Huon Wilson <dbau.pp@gmail.com>
     https://github.com/huonw/primal
 proc-macro-crate 3.5.0  [MIT OR Apache-2.0]  - Bastian Köcher <git@kchr.de>
     https://github.com/bkchr/proc-macro-crate
-proc-macro-error-attr2 2.0.0  [MIT OR Apache-2.0]  - CreepySkeleton <creepy-skeleton@yandex.ru>, GnomedDev <david2005thomas@gmail.com>
-    https://github.com/GnomedDev/proc-macro-error-2
-proc-macro-error2 2.0.1  [MIT OR Apache-2.0]  - CreepySkeleton <creepy-skeleton@yandex.ru>, GnomedDev <david2005thomas@gmail.com>
-    https://github.com/GnomedDev/proc-macro-error-2
-proc-macro2 1.0.106  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>, Alex Crichton <alex@alexcrichton.com>
+proc-macro-error-attr3 3.0.3  [MIT OR Apache-2.0]  - CreepySkeleton <creepy-skeleton@yandex.ru>, GnomedDev <david2005thomas@gmail.com>, gamma0987 <gamma0987@posteo.de>
+    https://github.com/gamma0987/proc-macro-error3
+proc-macro-error3 3.0.3  [MIT OR Apache-2.0]  - CreepySkeleton <creepy-skeleton@yandex.ru>, GnomedDev <david2005thomas@gmail.com>, gamma0987 <gamma0987@posteo.de>
+    https://github.com/gamma0987/proc-macro-error3
+proc-macro2 1.0.107  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>, Alex Crichton <alex@alexcrichton.com>
     https://github.com/dtolnay/proc-macro2
 profiling 1.0.18  [MIT OR Apache-2.0]  - Philip Degarmo <aclysma@gmail.com>
     https://github.com/aclysma/profiling
@@ -1046,19 +1032,21 @@ pulldown-cmark 0.13.4  [MIT]  - Raph Levien <raph.levien@gmail.com>, Marcus Klaa
     https://github.com/raphlinus/pulldown-cmark
 pulldown-cmark-escape 0.11.0  [MIT]  - Raph Levien <raph.levien@gmail.com>, Marcus Klaas de Vries <mail@marcusklaas.nl>
     https://github.com/raphlinus/pulldown-cmark
-pxfm 0.1.29  [BSD-3-Clause OR Apache-2.0]  - Radzivon Bartoshyk
+pulp 0.22.3  [MIT]  - sarah quiñones <sarah@veganb.tw>
+    https://github.com/sarah-quinones/pulp/
+pulp-wasm-simd-flag 0.1.1  [MIT]  - sarah quiñones <sarah@veganb.tw>
+    https://github.com/sarah-quinones/pulp/
+pxfm 0.1.30  [BSD-3-Clause OR Apache-2.0]  - Radzivon Bartoshyk
     https://github.com/awxkee/pxfm
 qoi 0.4.1  [MIT/Apache-2.0]  - Ivan Smirnov <rust@ivan.smirnov.ie>
     https://github.com/aldanor/qoi-rust
 quick-error 2.0.1  [MIT/Apache-2.0]  - Paul Colomiets <paul@colomiets.name>, Colin Kiegel <kiegel@gmx.de>
     http://github.com/tailhook/quick-error
-quick-xml 0.40.1  [MIT]
-    https://github.com/tafia/quick-xml
-quick-xml 0.39.4  [MIT]
+quick-xml 0.41.0  [MIT]
     https://github.com/tafia/quick-xml
 quick-xml 0.37.5  [MIT]
     https://github.com/tafia/quick-xml
-quote 1.0.46  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
+quote 1.0.47  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/quote
 r-efi 6.0.0  [MIT OR Apache-2.0 OR LGPL-2.1-or-later]
     https://github.com/r-efi/r-efi
@@ -1066,22 +1054,24 @@ r-efi 5.3.0  [MIT OR Apache-2.0 OR LGPL-2.1-or-later]
     https://github.com/r-efi/r-efi
 radium 0.7.0  [MIT]  - Nika Layzell <nika@thelayzells.com>, myrrlyn <self@myrrlyn.dev>
     https://github.com/bitvecto-rs/radium
-rand 0.10.1  [MIT OR Apache-2.0]  - The Rand Project Developers, The Rust Project Developers
+rand 0.10.2  [MIT OR Apache-2.0]  - The Rand Project Developers, The Rust Project Developers
     https://github.com/rust-random/rand
-rand 0.9.4  [MIT OR Apache-2.0]  - The Rand Project Developers, The Rust Project Developers
+rand 0.9.5  [MIT OR Apache-2.0]  - The Rand Project Developers, The Rust Project Developers
     https://github.com/rust-random/rand
 rand_chacha 0.9.0  [MIT OR Apache-2.0]  - The Rand Project Developers, The Rust Project Developers, The CryptoCorrosion Contributors
     https://github.com/rust-random/rand
-rand_core 0.10.1  [MIT OR Apache-2.0]  - The Rand Project Developers
-    https://github.com/rust-random/rand_core
 rand_core 0.9.5  [MIT OR Apache-2.0]  - The Rand Project Developers, The Rust Project Developers
     https://github.com/rust-random/rand
+rand_core 0.10.1  [MIT OR Apache-2.0]  - The Rand Project Developers
+    https://github.com/rust-random/rand_core
 rangemap 1.7.1  [MIT/Apache-2.0]  - Jeff Parsons <jeff@parsons.io>
     https://github.com/jeffparsons/rangemap
 rav1e 0.8.1  [BSD-2-Clause]  - Thomas Daede <tdaede@xiph.org>
     https://github.com/xiph/rav1e/
 ravif 0.13.0  [BSD-3-Clause]  - Kornel Lesiński <kornel@geekhood.net>
     https://github.com/kornelski/cavif-rs
+raw-cpuid 11.6.0  [MIT]  - Gerd Zellweger <mail@gerdzellweger.com>
+    https://github.com/gz/rust-cpuid
 raw-window-handle 0.6.2  [MIT OR Apache-2.0 OR Zlib]  - Osspial <osspial@gmail.com>
     https://github.com/rust-windowing/raw-window-handle
 raw-window-metal 1.1.0  [MIT OR Apache-2.0]
@@ -1094,11 +1084,15 @@ rayon 1.12.0  [MIT OR Apache-2.0]
     https://github.com/rayon-rs/rayon
 rayon-core 1.13.0  [MIT OR Apache-2.0]
     https://github.com/rayon-rs/rayon
+read-fonts 0.41.0  [MIT OR Apache-2.0]
+    https://github.com/googlefonts/fontations
 read-fonts 0.39.2  [MIT OR Apache-2.0]
     https://github.com/googlefonts/fontations
 realfft 3.5.0  [MIT]  - HEnquist <henrik.enquist@gmail.com>
     https://github.com/HEnquist/realfft
-redox_syscall 0.8.1  [MIT]  - Jeremy Soller <jackpot51@gmail.com>
+reborrow 0.5.5  [MIT]  - sarah <>
+    https://github.com/sarah-ek/reborrow/
+redox_syscall 0.9.0  [MIT]  - Jeremy Soller <jackpot51@gmail.com>
     https://gitlab.redox-os.org/redox-os/syscall
 redox_syscall 0.5.18  [MIT]  - Jeremy Soller <jackpot51@gmail.com>
     https://gitlab.redox-os.org/redox-os/syscall
@@ -1106,9 +1100,9 @@ redox_syscall 0.4.1  [MIT]  - Jeremy Soller <jackpot51@gmail.com>
     https://gitlab.redox-os.org/redox-os/syscall
 redox_users 0.4.6  [MIT]  - Jose Narvaez <goyox86@gmail.com>, Wesley Hershberger <mggmugginsmc@gmail.com>
     https://gitlab.redox-os.org/redox-os/users
-regex 1.12.4  [MIT OR Apache-2.0]  - The Rust Project Developers, Andrew Gallant <jamslam@gmail.com>
+regex 1.13.1  [MIT OR Apache-2.0]  - The Rust Project Developers, Andrew Gallant <jamslam@gmail.com>
     https://github.com/rust-lang/regex
-regex-automata 0.4.14  [MIT OR Apache-2.0]  - The Rust Project Developers, Andrew Gallant <jamslam@gmail.com>
+regex-automata 0.4.16  [MIT OR Apache-2.0]  - The Rust Project Developers, Andrew Gallant <jamslam@gmail.com>
     https://github.com/rust-lang/regex
 regex-lite 0.1.9  [MIT OR Apache-2.0]  - The Rust Project Developers, Andrew Gallant <jamslam@gmail.com>
     https://github.com/rust-lang/regex
@@ -1130,18 +1124,18 @@ rspolib 0.1.2  [MIT]
     https://github.com/mondeja/rspolib
 rubato 0.16.2  [MIT]  - HEnquist <henrik.enquist@gmail.com>
     https://github.com/HEnquist/rubato
-rust-embed 8.11.0  [MIT]  - pyrossh
+rust-embed 8.12.0  [MIT]  - pyrossh
     https://pyrossh.dev/repos/rust-embed
-rust-embed-impl 8.11.0  [MIT]  - pyrossh
+rust-embed-impl 8.12.0  [MIT]  - pyrossh
     https://pyrossh.dev/repos/rust-embed
-rust-embed-utils 8.11.0  [MIT]  - pyrossh
+rust-embed-utils 8.12.0  [MIT]  - pyrossh
     https://pyrossh.dev/repos/rust-embed
-rustc-demangle 0.1.27  [MIT/Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
+rustc-demangle 0.1.28  [MIT/Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/rust-lang/rustc-demangle
-rustc-hash 2.1.2  [Apache-2.0 OR MIT]  - The Rust Project Developers
-    https://github.com/rust-lang/rustc-hash
 rustc-hash 1.1.0  [Apache-2.0/MIT]  - The Rust Project Developers
     https://github.com/rust-lang-nursery/rustc-hash
+rustc-hash 2.1.3  [Apache-2.0 OR MIT]  - The Rust Project Developers
+    https://github.com/rust-lang/rustc-hash
 rustc_version 0.4.1  [MIT OR Apache-2.0]
     https://github.com/djc/rustc-version-rs
 rustdct 0.7.1  [MIT OR Apache-2.0]  - Elliott Mahler <join.together at gmail>
@@ -1152,7 +1146,7 @@ rustix 0.38.44  [Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT]  - Dan Goh
     https://github.com/bytecodealliance/rustix
 rustix 1.1.4  [Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT]  - Dan Gohman <dev@sunfishcode.online>, Jakub Konka <kubkon@jakubkonka.com>
     https://github.com/bytecodealliance/rustix
-rustversion 1.0.22  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
+rustversion 1.0.23  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/rustversion
 rusty-chromaprint 0.3.0  [MIT]
     https://github.com/darksv/rusty-chromaprint
@@ -1170,47 +1164,45 @@ scopeguard 1.2.0  [MIT OR Apache-2.0]  - bluss
     https://github.com/bluss/scopeguard
 sctk-adwaita 0.10.1  [MIT]  - Poly <marynczak.bartlomiej@gmail.com>
     https://github.com/PolyMeilex/sctk-adwaita
-self_cell 1.2.2  [Apache-2.0 OR GPL-2.0-only]  - Lukas Bergdoll <lukas.bergdoll@gmail.com>
+self_cell 1.3.0  [Apache-2.0 OR GPL-2.0-only]  - Lukas Bergdoll <lukas.bergdoll@gmail.com>
     https://github.com/Voultapher/self_cell
 semver 1.0.28  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/semver
-serde 1.0.228  [MIT OR Apache-2.0]  - Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>
+serde 1.0.229  [MIT OR Apache-2.0]  - Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>
     https://github.com/serde-rs/serde
-serde_core 1.0.228  [MIT OR Apache-2.0]  - Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>
+serde_core 1.0.229  [MIT OR Apache-2.0]  - Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>
     https://github.com/serde-rs/serde
-serde_derive 1.0.228  [MIT OR Apache-2.0]  - Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>
+serde_derive 1.0.229  [MIT OR Apache-2.0]  - Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>
     https://github.com/serde-rs/serde
-serde_json 1.0.150  [MIT OR Apache-2.0]  - Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>
+serde_json 1.0.151  [MIT OR Apache-2.0]  - Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>
     https://github.com/serde-rs/json
-serde_repr 0.1.20  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
+serde_repr 0.1.21  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/serde-repr
 serde_spanned 0.6.9  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
 serde_spanned 1.1.1  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
-sevenz-rust2 0.21.1  [Apache-2.0]
+sevenz-rust2 0.21.3  [Apache-2.0]
     https://github.com/hasenbanck/sevenz-rust
 sha1 0.11.0  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/hashes
 sha2 0.11.0  [MIT OR Apache-2.0]  - RustCrypto Developers
     https://github.com/RustCrypto/hashes
-sha2 0.10.9  [MIT OR Apache-2.0]  - RustCrypto Developers
-    https://github.com/RustCrypto/hashes
-shlex 1.3.0  [MIT OR Apache-2.0]  - comex <comexk@gmail.com>, Fenhl <fenhl@fenhl.net>, Adrian Taylor <adetaylor@chromium.org>, Alex Touchet <alextouchet@outlook.com>, Daniel Parks <dp+git@oxidized.org>, Garrett Berg <googberg@gmail.com>
-    https://github.com/comex/rust-shlex
 shlex 2.0.1  [MIT OR Apache-2.0]  - comex <comexk@gmail.com>, Fenhl <fenhl@fenhl.net>, Adrian Taylor <adetaylor@chromium.org>, Alex Touchet <alextouchet@outlook.com>, Daniel Parks <dp+git@oxidized.org>, Garrett Berg <googberg@gmail.com>
+    https://github.com/comex/rust-shlex
+shlex 1.3.0  [MIT OR Apache-2.0]  - comex <comexk@gmail.com>, Fenhl <fenhl@fenhl.net>, Adrian Taylor <adetaylor@chromium.org>, Alex Touchet <alextouchet@outlook.com>, Daniel Parks <dp+git@oxidized.org>, Garrett Berg <googberg@gmail.com>
     https://github.com/comex/rust-shlex
 signal-hook-registry 1.4.8  [MIT OR Apache-2.0]  - Michal 'vorner' Vaner <vorner@vorner.cz>, Masaki Hara <ackie.h.gmai@gmail.com>
     https://github.com/vorner/signal-hook
-simd-adler32 0.3.9  [MIT]  - Marvin Countryman <me@maar.vin>
+simd-adler32 0.3.10  [MIT]  - Marvin Countryman <me@maar.vin>
     https://github.com/mcountryman/simd-adler32
-simd_cesu8 1.1.1  [Apache-2.0 OR MIT]  - Sean C. Roach <me@seancroach.dev>
+simd_cesu8 1.2.0  [Apache-2.0 OR MIT]  - Sean C. Roach <me@seancroach.dev>
     https://github.com/seancroach/simd_cesu8
 simd_helpers 0.1.0  [MIT]  - Luca Barbato <lu_zero@gentoo.org>
     https://github.com/lu-zero/simd_helpers
 simdutf8 0.1.5  [MIT OR Apache-2.0]  - Hans Kratz <hans@appfour.com>
     https://github.com/rusticstuff/simdutf8
-similario_core 0.2.0  [MIT]  - Rafał Mikrut <mikrutrafal@protonmail.com>
+similario_core 0.2.1  [MIT]  - Rafał Mikrut <mikrutrafal@protonmail.com>
     https://github.com/qarmin/similario
 simplecss 0.2.2  [Apache-2.0 OR MIT]
     https://github.com/linebender/simplecss
@@ -1221,6 +1213,8 @@ skia-bindings 0.99.0  [MIT]  - LongYinan <lynweklm@gmail.com>, Armin Sander <arm
 skia-safe 0.99.0  [MIT]  - Armin Sander <armin@replicator.org>
     https://github.com/rust-skia/rust-skia
 skrifa 0.42.1  [MIT OR Apache-2.0]
+    https://github.com/googlefonts/fontations
+skrifa 0.44.0  [MIT OR Apache-2.0]
     https://github.com/googlefonts/fontations
 slab 0.4.12  [MIT]  - Carl Lerche <me@carllerche.com>
     https://github.com/tokio-rs/slab
@@ -1234,16 +1228,16 @@ slotmap 1.1.1  [Zlib]  - Orson Peters <orsonpeters@gmail.com>
     https://github.com/orlp/slotmap
 smallvec 1.15.2  [MIT OR Apache-2.0]  - The Servo Project Developers
     https://github.com/servo/rust-smallvec
-smithay-client-toolkit 0.19.2  [MIT]  - Elinor Berger <elinor@safaradeg.net>, i509VCB <mail@i509.me>, Ashley Wulber <ashley@system76.com>
-    https://github.com/smithay/client-toolkit
 smithay-client-toolkit 0.20.0  [MIT]  - Elinor Berger <elinor@safaradeg.net>, i509VCB <mail@i509.me>, Ashley Wulber <ashley@system76.com>
+    https://github.com/smithay/client-toolkit
+smithay-client-toolkit 0.19.2  [MIT]  - Elinor Berger <elinor@safaradeg.net>, i509VCB <mail@i509.me>, Ashley Wulber <ashley@system76.com>
     https://github.com/smithay/client-toolkit
 smithay-clipboard 0.7.3  [MIT]  - Kirill Chibisov <contact@kchibisov.com>, Elinor Berger <elinor@safaradeg.net>
     https://github.com/smithay/smithay-clipboard
-smol_str 0.3.6  [MIT OR Apache-2.0]  - Aleksey Kladov <aleksey.kladov@gmail.com>, Lukas Wirth <lukastw97@gmail.com>
-    https://github.com/rust-lang/rust-analyzer/tree/master/lib/smol_str
 smol_str 0.2.2  [MIT OR Apache-2.0]  - Aleksey Kladov <aleksey.kladov@gmail.com>
     https://github.com/rust-analyzer/smol_str
+smol_str 0.3.6  [MIT OR Apache-2.0]  - Aleksey Kladov <aleksey.kladov@gmail.com>, Lukas Wirth <lukastw97@gmail.com>
+    https://github.com/rust-lang/rust-analyzer/tree/master/lib/smol_str
 snafu 0.8.9  [MIT OR Apache-2.0]  - Jake Goulding <jake.goulding@gmail.com>
     https://github.com/shepmaster/snafu
 snafu-derive 0.8.9  [MIT OR Apache-2.0]  - Jake Goulding <jake.goulding@gmail.com>
@@ -1261,17 +1255,17 @@ strict-num 0.1.1  [MIT]  - Yevhenii Reizner <razrfalcon@gmail.com>
     https://github.com/RazrFalcon/strict-num
 stringprep 0.1.5  [MIT/Apache-2.0]  - Steven Fackler <sfackler@gmail.com>
     https://github.com/sfackler/rust-stringprep
-strsim 0.11.1  [MIT]  - Danny Guo <danny@dannyguo.com>, maxbachmann <oss@maxbachmann.de>
-    https://github.com/rapidfuzz/strsim-rs
 strsim 0.10.0  [MIT]  - Danny Guo <danny@dannyguo.com>
     https://github.com/dguo/strsim-rs
+strsim 0.11.1  [MIT]  - Danny Guo <danny@dannyguo.com>, maxbachmann <oss@maxbachmann.de>
+    https://github.com/rapidfuzz/strsim-rs
 strum 0.28.0  [MIT]  - Peter Glotfelty <peter.glotfelty@microsoft.com>
     https://github.com/Peternator7/strum
 strum_macros 0.28.0  [MIT]  - Peter Glotfelty <peter.glotfelty@microsoft.com>
     https://github.com/Peternator7/strum
 svgtypes 0.16.1  [Apache-2.0 OR MIT]
     https://github.com/linebender/svgtypes
-swash 0.2.9  [Apache-2.0 OR MIT]  - Chad Brokaw <cbrokaw@gmail.com>
+swash 0.2.10  [Apache-2.0 OR MIT]  - Chad Brokaw <cbrokaw@gmail.com>
     https://github.com/dfrg/swash
 symphonia 0.6.0  [MPL-2.0]  - Philip Deljanov <philip.deljanov@gmail.com>
     https://github.com/pdeljanov/Symphonia
@@ -1305,9 +1299,11 @@ symphonia-format-riff 0.6.0  [MPL-2.0]  - Philip Deljanov <philip.deljanov@gmail
     https://github.com/pdeljanov/Symphonia
 symphonia-metadata 0.6.0  [MPL-2.0]  - Philip Deljanov <philip.deljanov@gmail.com>
     https://github.com/pdeljanov/Symphonia
-syn 2.0.118  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
+syn 2.0.119  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/syn
 syn 1.0.109  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
+    https://github.com/dtolnay/syn
+syn 3.0.3  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/syn
 synstructure 0.13.2  [MIT]  - Nika Layzell <nika@thelayzells.com>
     https://github.com/mystor/synstructure
@@ -1321,7 +1317,7 @@ tar 0.4.46  [MIT OR Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/composefs/tar-rs
 target-features 0.1.6  [MIT OR Apache-2.0]  - Caleb Zulawski <caleb.zulawski@gmail.com>
     https://github.com/calebzulawski/target-features
-tauri-winrt-notification 0.7.2  [MIT OR Apache-2.0]  - allenbenz, Tauri Programme within The Commons Conservancy
+tauri-winrt-notification 0.7.3  [MIT OR Apache-2.0]  - allenbenz, Tauri Programme within The Commons Conservancy
     https://github.com/tauri-apps/winrt-notification
 tempfile 3.27.0  [MIT OR Apache-2.0]  - Steven Allen <steven@stebalien.com>, The Rust Project Developers, Ashley Mannix <ashleymannix@live.com.au>, Jason White <me@jasonwhite.io>
     https://github.com/Stebalien/tempfile
@@ -1329,26 +1325,26 @@ termcolor 1.4.1  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
     https://github.com/BurntSushi/termcolor
 text-size 1.1.1  [MIT OR Apache-2.0]  - Aleksey Kladov <aleksey.kladov@gmail.com>, Christopher Durham (CAD97) <cad97@cad97.com>
     https://github.com/rust-analyzer/text-size
-thiserror 2.0.18  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
+thiserror 2.0.19  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/thiserror
 thiserror 1.0.69  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/thiserror
-thiserror-impl 2.0.18  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
+thiserror-impl 2.0.19  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/thiserror
 thiserror-impl 1.0.69  [MIT OR Apache-2.0]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/thiserror
 tiff 0.11.3  [MIT]  - The image-rs Developers
     https://github.com/image-rs/image-tiff
-time 0.3.51  [MIT OR Apache-2.0]  - Jacob Pratt <open-source@jhpratt.dev>, Time contributors
+time 0.3.54  [MIT OR Apache-2.0]  - Jacob Pratt <open-source@jhpratt.dev>, Time contributors
     https://github.com/time-rs/time
 time-core 0.1.9  [MIT OR Apache-2.0]  - Jacob Pratt <open-source@jhpratt.dev>, Time contributors
     https://github.com/time-rs/time
-time-macros 0.2.30  [MIT OR Apache-2.0]  - Jacob Pratt <open-source@jhpratt.dev>, Time contributors
+time-macros 0.2.32  [MIT OR Apache-2.0]  - Jacob Pratt <open-source@jhpratt.dev>, Time contributors
     https://github.com/time-rs/time
-tiny-skia 0.11.4  [BSD-3-Clause]  - Yevhenii Reizner <razrfalcon@gmail.com>
-    https://github.com/RazrFalcon/tiny-skia
 tiny-skia 0.12.0  [BSD-3-Clause]  - Yevhenii Reizner <razrfalcon@gmail.com>
     https://github.com/linebender/tiny-skia
+tiny-skia 0.11.4  [BSD-3-Clause]  - Yevhenii Reizner <razrfalcon@gmail.com>
+    https://github.com/RazrFalcon/tiny-skia
 tiny-skia-path 0.11.4  [BSD-3-Clause]  - Yevhenii Reizner <razrfalcon@gmail.com>
     https://github.com/RazrFalcon/tiny-skia/tree/master/path
 tiny-skia-path 0.12.0  [BSD-3-Clause]  - Yevhenii Reizner <razrfalcon@gmail.com>
@@ -1359,21 +1355,21 @@ tinystr 0.8.3  [Unicode-3.0]  - The ICU4X Project Developers
     https://github.com/unicode-org/icu4x
 tinytemplate 1.2.1  [Apache-2.0 OR MIT]  - Brook Heisler <brookheisler@gmail.com>
     https://github.com/bheisler/TinyTemplate
-tinyvec 1.11.0  [Zlib OR Apache-2.0 OR MIT]  - Lokathor <zefria@gmail.com>
+tinyvec 1.12.0  [Zlib OR Apache-2.0 OR MIT]  - Lokathor <zefria@gmail.com>
     https://github.com/Lokathor/tinyvec
 tinyvec_macros 0.1.1  [MIT OR Apache-2.0 OR Zlib]  - Soveu <marx.tomasz@gmail.com>
     https://github.com/Soveu/tinyvec_macros
-toml 1.1.2+spec-1.1.0  [MIT OR Apache-2.0]
+toml 0.5.11  [MIT/Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/toml-rs/toml
 toml 0.8.23  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
-toml 0.5.11  [MIT/Apache-2.0]  - Alex Crichton <alex@alexcrichton.com>
-    https://github.com/toml-rs/toml
-toml_datetime 1.1.1+spec-1.1.0  [MIT OR Apache-2.0]
+toml 1.1.3+spec-1.1.0  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
 toml_datetime 0.6.11  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
-toml_edit 0.25.12+spec-1.1.0  [MIT OR Apache-2.0]
+toml_datetime 1.1.1+spec-1.1.0  [MIT OR Apache-2.0]
+    https://github.com/toml-rs/toml
+toml_edit 0.25.13+spec-1.1.0  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
 toml_edit 0.22.27  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
@@ -1381,7 +1377,7 @@ toml_parser 1.1.2+spec-1.1.0  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
 toml_write 0.1.2  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
-toml_writer 1.1.1+spec-1.1.0  [MIT OR Apache-2.0]
+toml_writer 1.1.2+spec-1.1.0  [MIT OR Apache-2.0]
     https://github.com/toml-rs/toml
 tracing 0.1.44  [MIT]  - Eliza Weisman <eliza@buoyant.io>, Tokio Contributors <team@tokio.rs>
     https://github.com/tokio-rs/tracing
@@ -1397,7 +1393,7 @@ triple_accel 0.3.4  [MIT]  - c0deb0t <daniel.liu02@gmail.com>
     https://github.com/Daniel-Liu-c0deb0t/triple_accel
 ttf-parser 0.25.1  [MIT OR Apache-2.0]  - Caleb Maclennan <caleb@alerque.com>, Laurenz Stampfl <laurenz.stampfl@gmail.com>, Yevhenii Reizner <razrfalcon@gmail.com>, خالد حسني (Khaled Hosny) <khaled@aliftype.com>
     https://github.com/harfbuzz/ttf-parser
-twox-hash 2.1.2  [MIT]  - Jake Goulding <jake.goulding@gmail.com>
+twox-hash 2.1.3  [MIT]  - Jake Goulding <jake.goulding@gmail.com>
     https://github.com/shepmaster/twox-hash
 type-map 0.5.1  [MIT/Apache-2.0]  - Jacob Brown <kardeiz@gmail.com>
     https://github.com/kardeiz/type-map
@@ -1455,7 +1451,7 @@ utf8_iter 1.0.4  [Apache-2.0 OR MIT]  - Henri Sivonen <hsivonen@hsivonen.fi>
     https://github.com/hsivonen/utf8_iter
 utf8parse 0.2.2  [Apache-2.0 OR MIT]  - Joe Wilm <joe@jwilm.com>, Christian Duerr <contact@christianduerr.com>
     https://github.com/alacritty/vte
-uuid 1.23.4  [Apache-2.0 OR MIT]  - Ashley Mannix<ashleymannix@live.com.au>, Dylan DPC<dylan.dpc@gmail.com>, Hunar Roop Kahlon<hunar.roop@gmail.com>
+uuid 1.24.0  [Apache-2.0 OR MIT]  - Ashley Mannix<ashleymannix@live.com.au>, Dylan DPC<dylan.dpc@gmail.com>, Hunar Roop Kahlon<hunar.roop@gmail.com>
     https://github.com/uuid-rs/uuid
 v_frame 0.3.9  [BSD-2-Clause]  - Luca Barbato <lu_zero@gentoo.org>
     https://github.com/rust-av/v_frame
@@ -1481,9 +1477,9 @@ wasm-bindgen-macro-support 0.2.126  [MIT OR Apache-2.0]  - The wasm-bindgen Deve
     https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro-support
 wasm-bindgen-shared 0.2.126  [MIT OR Apache-2.0]  - The wasm-bindgen Developers
     https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared
-wayland-backend 0.3.15  [MIT]  - Elinor Berger <elinor@safaradeg.net>
+wayland-backend 0.3.16  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/smithay/wayland-rs
-wayland-client 0.31.14  [MIT]  - Elinor Berger <elinor@safaradeg.net>
+wayland-client 0.31.15  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/smithay/wayland-rs
 wayland-csd-frame 0.3.0  [MIT]  - Kirill Chibisov <contact@kchibisov.com>
     https://github.com/rust-windowing/wayland-csd-frame
@@ -1499,7 +1495,7 @@ wayland-protocols-plasma 0.3.12  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/smithay/wayland-rs
 wayland-protocols-wlr 0.3.12  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/smithay/wayland-rs
-wayland-scanner 0.31.10  [MIT]  - Elinor Berger <elinor@safaradeg.net>
+wayland-scanner 0.31.11  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/smithay/wayland-rs
 wayland-sys 0.31.11  [MIT]  - Elinor Berger <elinor@safaradeg.net>
     https://github.com/smithay/wayland-rs
@@ -1511,6 +1507,8 @@ webbrowser 1.2.1  [MIT OR Apache-2.0]  - Amod Malviya @amodm
     https://github.com/amodm/webbrowser-rs
 weezl 0.1.12  [MIT OR Apache-2.0]  - The image-rs Developers
     https://github.com/image-rs/weezl
+weezl 0.2.1  [MIT OR Apache-2.0]  - The image-rs Developers
+    https://github.com/image-rs/weezl
 winapi 0.3.9  [MIT/Apache-2.0]  - Peter Atashian <retep998@gmail.com>
     https://github.com/retep998/winapi-rs
 winapi-i686-pc-windows-gnu 0.4.0  [MIT/Apache-2.0]  - Peter Atashian <retep998@gmail.com>
@@ -1519,37 +1517,37 @@ winapi-util 0.1.11  [Unlicense OR MIT]  - Andrew Gallant <jamslam@gmail.com>
     https://github.com/BurntSushi/winapi-util
 winapi-x86_64-pc-windows-gnu 0.4.0  [MIT/Apache-2.0]  - Peter Atashian <retep998@gmail.com>
     https://github.com/retep998/winapi-rs
+windows 0.61.3  [MIT OR Apache-2.0]  - Microsoft
+    https://github.com/microsoft/windows-rs
 windows 0.62.2  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows 0.56.0  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows 0.61.3  [MIT OR Apache-2.0]  - Microsoft
-    https://github.com/microsoft/windows-rs
-windows-collections 0.2.0  [MIT OR Apache-2.0]
-    https://github.com/microsoft/windows-rs
 windows-collections 0.3.2  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
-windows-core 0.61.2  [MIT OR Apache-2.0]  - Microsoft
+windows-collections 0.2.0  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows-core 0.56.0  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows-core 0.62.2  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
-windows-future 0.3.2  [MIT OR Apache-2.0]
+windows-core 0.61.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows-future 0.2.1  [MIT OR Apache-2.0]
+    https://github.com/microsoft/windows-rs
+windows-future 0.3.2  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows-implement 0.60.2  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows-implement 0.56.0  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows-interface 0.56.0  [MIT OR Apache-2.0]  - Microsoft
-    https://github.com/microsoft/windows-rs
 windows-interface 0.59.3  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
-windows-link 0.2.1  [MIT OR Apache-2.0]
+windows-interface 0.56.0  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows-link 0.1.3  [MIT OR Apache-2.0]  - Microsoft
+    https://github.com/microsoft/windows-rs
+windows-link 0.2.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows-numerics 0.2.0  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
@@ -1561,15 +1559,11 @@ windows-result 0.1.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows-result 0.4.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
-windows-strings 0.5.1  [MIT OR Apache-2.0]
-    https://github.com/microsoft/windows-rs
 windows-strings 0.4.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows-sys 0.59.0  [MIT OR Apache-2.0]  - Microsoft
+windows-strings 0.5.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows-sys 0.45.0  [MIT OR Apache-2.0]  - Microsoft
-    https://github.com/microsoft/windows-rs
-windows-sys 0.52.0  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows-sys 0.60.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
@@ -1577,85 +1571,89 @@ windows-sys 0.61.2  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows-sys 0.48.0  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows-targets 0.52.6  [MIT OR Apache-2.0]  - Microsoft
+windows-sys 0.59.0  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows-targets 0.53.5  [MIT OR Apache-2.0]
-    https://github.com/microsoft/windows-rs
-windows-targets 0.42.2  [MIT OR Apache-2.0]  - Microsoft
+windows-sys 0.52.0  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows-targets 0.48.5  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows-threading 0.1.0  [MIT OR Apache-2.0]  - Microsoft
+windows-targets 0.42.2  [MIT OR Apache-2.0]  - Microsoft
+    https://github.com/microsoft/windows-rs
+windows-targets 0.53.5  [MIT OR Apache-2.0]
+    https://github.com/microsoft/windows-rs
+windows-targets 0.52.6  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows-threading 0.2.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
+windows-threading 0.1.0  [MIT OR Apache-2.0]  - Microsoft
+    https://github.com/microsoft/windows-rs
 windows-version 0.1.7  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
-windows_aarch64_gnullvm 0.48.5  [MIT OR Apache-2.0]  - Microsoft
+windows_aarch64_gnullvm 0.52.6  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_aarch64_gnullvm 0.53.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows_aarch64_gnullvm 0.42.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows_aarch64_gnullvm 0.52.6  [MIT OR Apache-2.0]  - Microsoft
-    https://github.com/microsoft/windows-rs
-windows_aarch64_msvc 0.52.6  [MIT OR Apache-2.0]  - Microsoft
+windows_aarch64_gnullvm 0.48.5  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_aarch64_msvc 0.42.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows_aarch64_msvc 0.48.5  [MIT OR Apache-2.0]  - Microsoft
+windows_aarch64_msvc 0.52.6  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_aarch64_msvc 0.53.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
-windows_i686_gnu 0.53.1  [MIT OR Apache-2.0]
+windows_aarch64_msvc 0.48.5  [MIT OR Apache-2.0]  - Microsoft
+    https://github.com/microsoft/windows-rs
+windows_i686_gnu 0.48.5  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_i686_gnu 0.42.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_i686_gnu 0.52.6  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows_i686_gnu 0.48.5  [MIT OR Apache-2.0]  - Microsoft
+windows_i686_gnu 0.53.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows_i686_gnullvm 0.53.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
 windows_i686_gnullvm 0.52.6  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows_i686_msvc 0.52.6  [MIT OR Apache-2.0]  - Microsoft
+windows_i686_msvc 0.42.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows_i686_msvc 0.48.5  [MIT OR Apache-2.0]  - Microsoft
+windows_i686_msvc 0.52.6  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_i686_msvc 0.53.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
-windows_i686_msvc 0.42.2  [MIT OR Apache-2.0]  - Microsoft
-    https://github.com/microsoft/windows-rs
-windows_x86_64_gnu 0.52.6  [MIT OR Apache-2.0]  - Microsoft
+windows_i686_msvc 0.48.5  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_x86_64_gnu 0.53.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
-windows_x86_64_gnu 0.48.5  [MIT OR Apache-2.0]  - Microsoft
-    https://github.com/microsoft/windows-rs
 windows_x86_64_gnu 0.42.2  [MIT OR Apache-2.0]  - Microsoft
+    https://github.com/microsoft/windows-rs
+windows_x86_64_gnu 0.52.6  [MIT OR Apache-2.0]  - Microsoft
+    https://github.com/microsoft/windows-rs
+windows_x86_64_gnu 0.48.5  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_x86_64_gnullvm 0.53.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
-windows_x86_64_gnullvm 0.48.5  [MIT OR Apache-2.0]  - Microsoft
+windows_x86_64_gnullvm 0.42.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_x86_64_gnullvm 0.52.6  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows_x86_64_gnullvm 0.42.2  [MIT OR Apache-2.0]  - Microsoft
-    https://github.com/microsoft/windows-rs
-windows_x86_64_msvc 0.42.2  [MIT OR Apache-2.0]  - Microsoft
+windows_x86_64_gnullvm 0.48.5  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_x86_64_msvc 0.48.5  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
-windows_x86_64_msvc 0.52.6  [MIT OR Apache-2.0]  - Microsoft
+windows_x86_64_msvc 0.42.2  [MIT OR Apache-2.0]  - Microsoft
     https://github.com/microsoft/windows-rs
 windows_x86_64_msvc 0.53.1  [MIT OR Apache-2.0]
     https://github.com/microsoft/windows-rs
+windows_x86_64_msvc 0.52.6  [MIT OR Apache-2.0]  - Microsoft
+    https://github.com/microsoft/windows-rs
 winit 0.30.13  [Apache-2.0]  - The winit contributors, Pierre Krieger <pierre.krieger1708@gmail.com>
     https://github.com/rust-windowing/winit
-winnow 1.0.3  [MIT]
-    https://github.com/winnow-rs/winnow
 winnow 0.7.15  [MIT]
+    https://github.com/winnow-rs/winnow
+winnow 1.0.4  [MIT]
     https://github.com/winnow-rs/winnow
 wit-bindgen 0.57.1  [Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT]  - Alex Crichton <alex@alexcrichton.com>
     https://github.com/bytecodealliance/wit-bindgen
@@ -1687,7 +1685,7 @@ xml-rs 0.8.28  [MIT]  - Vladimir Matveev <vmatveev@citrine.cc>
     https://github.com/kornelski/xml-rs
 xmlwriter 0.1.0  [MIT]  - Evgeniy Reizner <razrfalcon@gmail.com>
     https://github.com/RazrFalcon/xmlwriter
-xxhash-rust 0.8.15  [BSL-1.0]  - Douman <douman@gmx.se>
+xxhash-rust 0.8.18  [BSL-1.0]  - Douman <douman@gmx.se>
     https://github.com/DoumanAsh/xxhash-rust
 y4m 0.8.0  [MIT]  - Kagami Hiiragi <kagami@genshiken.org>
     https://github.com/image-rs/y4m.git
@@ -1701,17 +1699,17 @@ yoke 0.8.3  [Unicode-3.0]  - Manish Goregaokar <manishsmail@gmail.com>
     https://github.com/unicode-org/icu4x
 yoke-derive 0.8.2  [Unicode-3.0]  - Manish Goregaokar <manishsmail@gmail.com>
     https://github.com/unicode-org/icu4x
-zbus 5.16.0  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>
+zbus 5.18.0  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>
     https://github.com/z-galaxy/zbus/
-zbus_macros 5.16.0  [MIT]  - Marc-André Lureau <marcandre.lureau@redhat.com>, Zeeshan Ali Khan <zeeshanak@gnome.org>
+zbus_macros 5.18.0  [MIT]  - Marc-André Lureau <marcandre.lureau@redhat.com>, Zeeshan Ali Khan <zeeshanak@gnome.org>
     https://github.com/z-galaxy/zbus/
-zbus_names 4.3.2  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>
+zbus_names 4.3.4  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>
     https://github.com/z-galaxy/zbus/
 zeno 0.3.3  [Apache-2.0 OR MIT]  - Chad Brokaw <cbrokaw@gmail.com>
     https://github.com/dfrg/zeno
-zerocopy 0.8.52  [BSD-2-Clause OR Apache-2.0 OR MIT]  - Joshua Liebow-Feeser <joshlf@google.com>, Jack Wrenn <jswrenn@amazon.com>
+zerocopy 0.8.55  [BSD-2-Clause OR Apache-2.0 OR MIT]  - Joshua Liebow-Feeser <joshlf@google.com>, Jack Wrenn <jswrenn@amazon.com>
     https://github.com/google/zerocopy
-zerocopy-derive 0.8.52  [BSD-2-Clause OR Apache-2.0 OR MIT]  - Joshua Liebow-Feeser <joshlf@google.com>, Jack Wrenn <jswrenn@amazon.com>
+zerocopy-derive 0.8.55  [BSD-2-Clause OR Apache-2.0 OR MIT]  - Joshua Liebow-Feeser <joshlf@google.com>, Jack Wrenn <jswrenn@amazon.com>
     https://github.com/google/zerocopy
 zerofrom 0.1.8  [Unicode-3.0]  - The ICU4X Project Developers
     https://github.com/unicode-org/icu4x
@@ -1727,9 +1725,9 @@ zerovec-derive 0.11.3  [Unicode-3.0]  - Manish Goregaokar <manishsmail@gmail.com
     https://github.com/unicode-org/icu4x
 zip 8.6.0  [MIT]  - Mathijs van de Nes <git@mathijs.vd-nes.nl>, Marli Frost <marli@frost.red>, Ryan Levick <ryan.levick@gmail.com>, Chris Hennick <hennickc@amazon.com>
     https://github.com/zip-rs/zip2
-zlib-rs 0.6.4  [Zlib]
+zlib-rs 0.6.6  [Zlib]
     https://github.com/trifectatechfoundation/zlib-rs
-zmij 1.0.21  [MIT]  - David Tolnay <dtolnay@gmail.com>
+zmij 1.0.23  [MIT]  - David Tolnay <dtolnay@gmail.com>
     https://github.com/dtolnay/zmij
 zopfli 0.8.3  [Apache-2.0]
     https://github.com/zopfli-rs/zopfli
@@ -1738,9 +1736,9 @@ zune-core 0.5.1  [MIT OR Apache-2.0 OR Zlib]
 zune-inflate 0.2.54  [MIT OR Apache-2.0 OR Zlib]
 zune-jpeg 0.5.15  [MIT OR Apache-2.0 OR Zlib]  - caleb <etemesicaleb@gmail.com>
     https://github.com/etemesi254/zune-image/tree/dev/crates/zune-jpeg
-zvariant 5.12.0  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>
+zvariant 5.13.1  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>
     https://github.com/z-galaxy/zbus/
-zvariant_derive 5.12.0  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>
+zvariant_derive 5.13.1  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>
     https://github.com/z-galaxy/zbus/
-zvariant_utils 3.4.0  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>, turbocooler <turbocooler@cocaine.ninja>
+zvariant_utils 3.5.0  [MIT]  - Zeeshan Ali Khan <zeeshanak@gnome.org>, turbocooler <turbocooler@cocaine.ninja>
     https://github.com/z-galaxy/zbus/

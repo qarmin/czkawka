@@ -1,4 +1,4 @@
-## Version 12.0.1 - 26.07.2026r
+## Version 12.0.1 - 29.07.2026r
 
 ### Core
 - Fixed an issue where console windows appeared on Windows when running FFmpeg internally - [#1989](https://github.com/qarmin/czkawka/pull/1989)
@@ -17,7 +17,7 @@
 - Fixed automatic language selection on first launch - [#1989](https://github.com/qarmin/czkawka/pull/1989)
 - Migrated all raw and unsafe JNI usage (file picker, notifications, Android path setup) to the new `jni-high` crate - [#2011](https://github.com/qarmin/czkawka/pull/2011)
 
-## Version 12.0 - 28.06.2026r
+## Version 12.0.0 - 28.06.2026r
 
 ### Czkawka GTK Deprecation Notice
 **Version 12.0 is the last released version of Czkawka GTK.** No new binaries will be provided from this point on. All users are encouraged to migrate to Krokiet, the new Slint-based GUI frontend.
