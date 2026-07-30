@@ -1,0 +1,11 @@
+[package]
+name = "czkawka_tui"
+version = "12.0.1"
+edition = "2024"
+
+[dependencies]
+czkawka_core = { path = "../czkawka_core" }
+crossterm = "0.27"
+ratatui = "0.26"
+crossbeam-channel = "0.5"
+anyhow = "1.0"
