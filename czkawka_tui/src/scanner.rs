@@ -68,6 +68,7 @@ impl Scanner {
                     let mut string_results = Vec::new();
                     for (_hash, groups) in df.get_files_sorted_by_hash() {
                         for group in groups {
+                            string_results.push(format!("--- Group ({} files) ---", group.len()));
                             for entry in group {
                                 string_results.push(entry.path.to_string_lossy().to_string());
                             }
@@ -207,5 +208,42 @@ impl Scanner {
             };
             let _ = sender.send((tool_type, results));
         });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use czkawka_core::common::config_cache_path::set_config_cache_path;
+
+    #[test]
+    fn test_duplicate_scanner_no_panic() {
+        set_config_cache_path("czkawka_tui_test", "czkawka_tui_test");
+
+        let mut scanner = Scanner::new();
+        scanner.start_scan(ToolType::Duplicate, ".");
+
+        let mut results_received = false;
+
+        // Wait for results
+        for _ in 0..100 {
+            if let Ok((tool_type, results)) = scanner.receiver.try_recv() {
+                assert_eq!(tool_type, ToolType::Duplicate);
+
+                // If it found duplicates, verify group headers exist.
+                // There might not be duplicates in ".", but if there are,
+                // they should have group headers.
+                if !results.is_empty() {
+                    let has_group_header = results.iter().any(|r| r.starts_with("--- Group"));
+                    assert!(has_group_header, "Expected at least one group header if results exist");
+                }
+
+                results_received = true;
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(50));
+        }
+
+        assert!(results_received, "Scanner did not return results in a reasonable time");
     }
 }
