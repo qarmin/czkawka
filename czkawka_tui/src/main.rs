@@ -1,3 +1,4 @@
+use czkawka_core::common::config_cache_path::set_config_cache_path;
 mod app;
 mod ui;
 mod scanner;
@@ -20,6 +21,7 @@ use crate::scanner::Scanner;
 use std::env;
 
 fn main() -> Result<()> {
+    set_config_cache_path("czkawka_tui", "czkawka_tui");
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
