@@ -31,16 +31,21 @@ fn main() -> Result<()> {
     // Read dir from args or default to current directory
     let args: Vec<String> = env::args().collect();
     let scan_dir = if args.len() > 1 {
-        &args[1]
+        args[1].clone()
     } else {
-        "."
+        ".".to_string()
     };
-    let scanner = Scanner::new(scan_dir);
+    app.scan_dir = scan_dir.clone();
 
-    // Initial loading message
-    app.all_items = vec![format!("Scanning {} for duplicates...", scan_dir)];
+    let mut scanner = Scanner::new();
 
-    let res = run_app(&mut terminal, &mut app, &scanner);
+    // Start initial scan for the first tool
+    {
+        let tool = app.active_tool_mut();
+        tool.all_items = vec![format!("Press Enter to scan {}...", scan_dir)];
+    }
+
+    let res = run_app(&mut terminal, &mut app, &mut scanner);
 
     disable_raw_mode()?;
     execute!(
@@ -56,10 +61,9 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &Scanner) -> Result<()> {
+fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &mut Scanner) -> Result<()> {
     let tick_rate = Duration::from_millis(100);
     let mut last_tick = Instant::now();
-    let mut scanned = false;
 
     loop {
         terminal.draw(|f| {
@@ -67,14 +71,14 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &Scan
         })?;
 
         // Check if scan is complete
-        if !scanned {
-            if let Ok(results) = scanner.receiver.try_recv() {
-                app.all_items = results;
-                if app.all_items.is_empty() {
-                    app.all_items.push("No duplicates found.".to_string());
+        if let Ok((tool_type, results)) = scanner.receiver.try_recv() {
+            if let Some(tool) = app.tools.iter_mut().find(|t| t.tool_type == tool_type) {
+                tool.all_items = results;
+                if tool.all_items.is_empty() {
+                    tool.all_items.push("No items found.".to_string());
                 }
-                scanned = true;
-                app.list_state.select(Some(0)); // Initialize selection
+                tool.list_state.select(Some(0)); // Initialize selection
+                tool.selected_items.clear();
             }
         }
 
@@ -88,8 +92,11 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &Scan
                     InputMode::Normal => match key.code {
                         KeyCode::Char('q') => return Ok(()),
                         KeyCode::F(10) => return Ok(()),
-                        KeyCode::F(8) => {
+                        KeyCode::F(8) | KeyCode::Delete => {
                             app.delete_selected();
+                        }
+                        KeyCode::Char('e') => {
+                            app.export_selected();
                         }
                         KeyCode::Char('j') | KeyCode::Down => {
                             app.next();
@@ -97,8 +104,32 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &Scan
                         KeyCode::Char('k') | KeyCode::Up => {
                             app.previous();
                         }
-                        KeyCode::Char('/') | KeyCode::F(5) => {
+                        KeyCode::Char(' ') => {
+                            app.toggle_selection();
+                            app.next();
+                        }
+                        KeyCode::Char('/') => {
                             app.input_mode = InputMode::Search;
+                        }
+                        KeyCode::Char('s') => {
+                            app.input_mode = InputMode::Select;
+                        }
+                        KeyCode::Tab => {
+                            app.next_tool();
+                        }
+                        KeyCode::BackTab => {
+                            app.previous_tool();
+                        }
+                        KeyCode::Enter => {
+                            // Start scan for active tool
+                            let tt = app.active_tool().tool_type;
+                            app.active_tool_mut().all_items = vec!["Scanning...".to_string()];
+                            app.active_tool_mut().selected_items.clear();
+                            scanner.start_scan(tt, &app.scan_dir);
+                        }
+                        KeyCode::Esc => {
+                            scanner.cancel();
+                            app.status_message = "Scan cancelled".to_string();
                         }
                         _ => {}
                     },
@@ -107,12 +138,32 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &Scan
                             app.input_mode = InputMode::Normal;
                         }
                         KeyCode::Char(c) => {
-                            app.filter.push(c);
+                            let tool = app.active_tool_mut();
+                            tool.filter.push(c);
                             app.on_filter_change();
                         }
                         KeyCode::Backspace => {
-                            app.filter.pop();
+                            let tool = app.active_tool_mut();
+                            tool.filter.pop();
                             app.on_filter_change();
+                        }
+                        _ => {}
+                    },
+                    InputMode::Select => match key.code {
+                        KeyCode::Esc | KeyCode::Enter => {
+                             app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char('a') => {
+                             app.select_all();
+                             app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char('n') => {
+                             app.deselect_all();
+                             app.input_mode = InputMode::Normal;
+                        }
+                        KeyCode::Char('i') => {
+                             app.invert_selection();
+                             app.input_mode = InputMode::Normal;
                         }
                         _ => {}
                     }
