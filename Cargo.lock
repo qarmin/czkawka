@@ -1820,6 +1820,7 @@ dependencies = [
  "crossbeam-channel",
  "crossterm",
  "czkawka_core",
+ "image_hasher",
  "ratatui",
 ]
 
