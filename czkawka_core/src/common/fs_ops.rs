@@ -6,35 +6,6 @@ use crate::flc;
 
 const MAX_SYMLINK_HARDLINK_ATTEMPTS: u8 = 5;
 
-#[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
-thread_local! {
-    static TOKIO_RT: std::cell::RefCell<Option<Result<tokio::runtime::Runtime, String>>> = const { std::cell::RefCell::new(None) };
-}
-
-#[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
-fn with_runtime<F, R>(f: F) -> Result<R, String>
-where
-    F: FnOnce(&tokio::runtime::Runtime) -> Result<R, String>,
-{
-    TOKIO_RT.with(|cell| {
-        let mut opt = cell.borrow_mut();
-
-        if opt.is_none() {
-            let rt = tokio::runtime::Builder::new_current_thread()
-                .enable_all()
-                .build()
-                .map_err(|e| format!("Failed to build Tokio runtime: {e}"));
-
-            *opt = Some(rt);
-        }
-
-        match opt.as_ref().expect("Tokio runtime is initialized before") {
-            Ok(rt) => f(rt),
-            Err(e) => Err(e.clone()),
-        }
-    })
-}
-
 pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> Result<(), String> {
     let path = path.as_ref();
     if !path.is_dir() {
@@ -103,7 +74,7 @@ fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
         use std::os::fd::AsFd;
         let file = std::fs::OpenOptions::new().write(true).read(true).open(path).map_err(|err| err.to_string())?;
 
-        with_runtime(|rt| rt.block_on(async move { ashpd::desktop::trash::trash_file(&file.as_fd()).await.map_err(|e| e.to_string()) }))?;
+        async_io::block_on(async move { ashpd::desktop::trash::trash_file(&file.as_fd()).await.map_err(|e| e.to_string()) })?;
 
         Ok(())
     }
