@@ -4,6 +4,7 @@ use std::thread;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::model::{CheckingMethod, HashType};
+use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::Search;
 use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsParameters};
@@ -26,15 +27,20 @@ use crate::app::{ToolType, TuiGroup, TuiItem};
 pub struct Scanner {
     pub receiver: Receiver<(ToolType, Vec<TuiGroup>)>,
     sender: Sender<(ToolType, Vec<TuiGroup>)>,
+    pub progress_receiver: Receiver<ProgressData>,
+    progress_sender: Sender<ProgressData>,
     pub stop_flag: Arc<AtomicBool>,
 }
 
 impl Scanner {
     pub fn new() -> Self {
         let (sender, receiver) = unbounded();
+        let (progress_sender, progress_receiver) = unbounded();
         Scanner {
             receiver,
             sender,
+            progress_receiver,
+            progress_sender,
             stop_flag: Arc::new(AtomicBool::new(false)),
         }
     }
@@ -47,6 +53,7 @@ impl Scanner {
         self.stop_flag.store(false, Ordering::Relaxed);
         let stop_flag = self.stop_flag.clone();
         let sender = self.sender.clone();
+        let progress_sender = self.progress_sender.clone();
 
         let included_paths: Vec<std::path::PathBuf> = included_dirs.into_iter().map(std::path::PathBuf::from).collect();
         let reference_paths: Vec<std::path::PathBuf> = reference_dirs.into_iter().map(std::path::PathBuf::from).collect();
@@ -59,7 +66,7 @@ impl Scanner {
                     let mut df = DuplicateFinder::new(params);
                     df.set_included_paths(included_paths.clone());
                     df.set_reference_paths(reference_paths.clone());
-                    df.search(&stop_flag, None);
+                    df.search(&stop_flag, Some(&progress_sender));
 
                     let mut tui_groups = Vec::new();
                     for groups in df.get_files_sorted_by_hash().values() {
@@ -80,7 +87,7 @@ impl Scanner {
                 ToolType::EmptyFolders => {
                     let mut ef = EmptyFolder::new();
                     ef.set_included_paths(included_paths.clone());
-                    ef.search(&stop_flag, None);
+                    ef.search(&stop_flag, Some(&progress_sender));
 
                     let mut items = Vec::new();
                     for p in ef.get_empty_folder_list().values() {
@@ -96,7 +103,7 @@ impl Scanner {
                     let params = BigFileParameters::new(50, SearchMode::BiggestFiles);
                     let mut bf = BigFile::new(params);
                     bf.set_included_paths(included_paths.clone());
-                    bf.search(&stop_flag, None);
+                    bf.search(&stop_flag, Some(&progress_sender));
 
                     let mut items = Vec::new();
                     for f in bf.get_big_files() {
@@ -111,7 +118,7 @@ impl Scanner {
                 ToolType::EmptyFiles => {
                     let mut ef = EmptyFiles::new(EmptyFilesParameters::default());
                     ef.set_included_paths(included_paths.clone());
-                    ef.search(&stop_flag, None);
+                    ef.search(&stop_flag, Some(&progress_sender));
 
                     let mut items = Vec::new();
                     for f in ef.get_empty_files() {
@@ -130,7 +137,7 @@ impl Scanner {
                     }
                     let mut tf = Temporary::new(params);
                     tf.set_included_paths(included_paths.clone());
-                    tf.search(&stop_flag, None);
+                    tf.search(&stop_flag, Some(&progress_sender));
 
                     let mut items = Vec::new();
                     for f in tf.get_temporary_files() {
@@ -147,7 +154,7 @@ impl Scanner {
                     let mut si = SimilarImages::new(params);
                     si.set_included_paths(included_paths.clone());
                     si.set_reference_paths(reference_paths.clone());
-                    si.search(&stop_flag, None);
+                    si.search(&stop_flag, Some(&progress_sender));
 
                     let mut res = Vec::new();
                     for groups in si.get_similar_images() {
@@ -168,7 +175,7 @@ impl Scanner {
                     let mut sm = SameMusic::new(params);
                     sm.set_included_paths(included_paths.clone());
                     sm.set_reference_paths(reference_paths.clone());
-                    sm.search(&stop_flag, None);
+                    sm.search(&stop_flag, Some(&progress_sender));
 
                     let mut res = Vec::new();
                     for groups in sm.get_duplicated_music_entries() {
@@ -187,7 +194,7 @@ impl Scanner {
                 ToolType::InvalidSymlinks => {
                     let mut is = InvalidSymlinks::new();
                     is.set_included_paths(included_paths.clone());
-                    is.search(&stop_flag, None);
+                    is.search(&stop_flag, Some(&progress_sender));
 
                     let mut items = Vec::new();
                     for s in is.get_invalid_symlinks() {
@@ -202,7 +209,7 @@ impl Scanner {
                 ToolType::BrokenFiles => {
                     let mut bf = BrokenFiles::new(BrokenFilesParameters::new(CheckedTypes::AUDIO)); // Just a sensible default for testing
                     bf.set_included_paths(included_paths.clone());
-                    bf.search(&stop_flag, None);
+                    bf.search(&stop_flag, Some(&progress_sender));
 
                     let mut items = Vec::new();
                     for f in bf.get_broken_files() {
@@ -219,7 +226,7 @@ impl Scanner {
                     let mut sv = SimilarVideos::new(params);
                     sv.set_included_paths(included_paths.clone());
                     sv.set_reference_paths(reference_paths.clone());
-                    sv.search(&stop_flag, None);
+                    sv.search(&stop_flag, Some(&progress_sender));
 
                     let mut res = Vec::new();
                     for group in sv.get_similar_videos() {
@@ -239,7 +246,7 @@ impl Scanner {
                     let params = BadExtensionsParameters::new();
                     let mut be = BadExtensions::new(params);
                     be.set_included_paths(included_paths.clone());
-                    be.search(&stop_flag, None);
+                    be.search(&stop_flag, Some(&progress_sender));
 
                     let mut items = Vec::new();
                     for f in be.get_bad_extensions_files() {
@@ -263,7 +270,7 @@ impl Scanner {
                     let params = BadNamesParameters::new(name_issues);
                     let mut bn = BadNames::new(params);
                     bn.set_included_paths(included_paths.clone());
-                    bn.search(&stop_flag, None);
+                    bn.search(&stop_flag, Some(&progress_sender));
 
                     let mut items = Vec::new();
                     for f in bn.get_bad_names_files() {
@@ -285,7 +292,7 @@ impl Scanner {
                     ));
                     let mut vo = VideoOptimizer::new(params);
                     vo.set_included_paths(included_paths.clone());
-                    vo.search(&stop_flag, None);
+                    vo.search(&stop_flag, Some(&progress_sender));
 
                     let mut items = Vec::new();
                     for f in vo.get_video_transcode_entries() {

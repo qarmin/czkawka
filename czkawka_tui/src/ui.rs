@@ -2,9 +2,9 @@ use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Borders, List, ListItem, Paragraph, Tabs};
+use ratatui::widgets::{Block, Borders, Cell, List, ListItem, Paragraph, Row, Table, Tabs};
 
-use crate::app::{App, InputMode};
+use crate::app::{App, InputMode, ViewItem};
 
 pub fn ui(f: &mut Frame, app: &mut App) {
     let chunks = Layout::default()
@@ -54,10 +54,13 @@ pub fn ui(f: &mut Frame, app: &mut App) {
                         style = style.fg(Color::Yellow);
                     }
 
-                    ListItem::new(Line::from(vec![
-                        Span::styled(prefix, style),
-                        Span::raw(p.file_name().unwrap_or(p.as_os_str()).to_string_lossy().to_string()),
-                    ]))
+                    let display_name = if Some(p.as_path()) == app.dir_picker_current_path.parent() {
+                        "..".to_string()
+                    } else {
+                        p.file_name().unwrap_or(p.as_os_str()).to_string_lossy().to_string()
+                    };
+
+                    ListItem::new(Line::from(vec![Span::styled(prefix, style), Span::raw(display_name)]))
                 })
                 .collect();
 
@@ -70,47 +73,85 @@ pub fn ui(f: &mut Frame, app: &mut App) {
         _ => {
             let tool_idx = app.active_tool_idx;
             let tool = &app.tools[tool_idx];
-            let mut list_items = Vec::new();
 
             let filtered = tool.filtered_items();
-            let mut current_group = None;
+            let mut rows = Vec::new();
 
-            for (actual_idx, item) in &filtered {
-                let (g_idx, _) = *actual_idx;
-                if current_group != Some(g_idx) {
-                    current_group = Some(g_idx);
-                    list_items.push(ListItem::new(Line::from(vec![Span::styled(
-                        format!("--- Group {} ({} items) ---", g_idx + 1, tool.groups[g_idx].items.len()),
-                        Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD),
-                    )])));
+            for view_item in &filtered {
+                match view_item {
+                    ViewItem::Header(g_idx, group) => {
+                        rows.push(
+                            Row::new(vec![
+                                Cell::from(format!("--- Group {} ({} items) ---", g_idx + 1, group.items.len()))
+                                    .style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                                Cell::from(""),
+                                Cell::from(""),
+                                Cell::from(""),
+                            ])
+                            .bottom_margin(0),
+                        );
+                    }
+                    ViewItem::Item(g_idx, i_idx, item) => {
+                        let is_selected = tool.selected_items.contains(&(*g_idx, *i_idx));
+                        let prefix = if is_selected { "[X]" } else { "[ ]" };
+
+                        let size = item.size;
+                        let size_str = humansize::format_size(size, humansize::BINARY);
+
+                        let p = std::path::Path::new(&item.path);
+                        let name = p.file_name().unwrap_or_default().to_string_lossy().to_string();
+                        let path = p.parent().unwrap_or(std::path::Path::new("")).to_string_lossy().to_string();
+
+                        let date = if item.modified_date > 0 {
+                            // Format the system time. item.modified_date is a unix timestamp in seconds.
+                            // However humansize is not sufficient here. We can use chrono, but for now let's just show it.
+                            if let Some(dt) = chrono::DateTime::from_timestamp(item.modified_date as i64, 0) {
+                                dt.format("%Y-%m-%d %H:%M:%S").to_string()
+                            } else {
+                                format!("{}", item.modified_date)
+                            }
+                        } else {
+                            "".to_string()
+                        };
+
+                        rows.push(Row::new(vec![
+                            Cell::from(format!("{} {}", prefix, name)).style(Style::default().fg(if is_selected { Color::Green } else { Color::White })),
+                            Cell::from(path),
+                            Cell::from(size_str).style(Style::default().fg(Color::Cyan)),
+                            Cell::from(date),
+                        ]));
+                    }
                 }
-
-                let prefix = if tool.selected_items.contains(actual_idx) { "[X] " } else { "[ ] " };
-                let size_str = format!("{:>10} ", item.size); // Basic formatting for size
-                list_items.push(ListItem::new(Line::from(vec![
-                    Span::styled(
-                        prefix,
-                        Style::default().fg(if tool.selected_items.contains(actual_idx) { Color::Green } else { Color::DarkGray }),
-                    ),
-                    Span::styled(size_str, Style::default().fg(Color::Cyan)),
-                    Span::raw(item.path.clone()),
-                ])));
             }
 
-            let items_list = List::new(list_items)
-                .block(Block::default().borders(Borders::ALL).title(format!("Results ({})", app.scan_dir)))
-                .highlight_style(Style::default().bg(Color::Blue).fg(Color::White).add_modifier(Modifier::BOLD))
-                .highlight_symbol(">> ");
+            let header = Row::new(vec!["Name", "Path", "Size", "Modified"])
+                .style(Style::default().add_modifier(Modifier::BOLD).fg(Color::Magenta))
+                .bottom_margin(1);
 
-            f.render_stateful_widget(items_list, chunks[2], &mut app.tools[tool_idx].list_state);
+            let table = Table::new(
+                rows,
+                [
+                    Constraint::Percentage(30),
+                    Constraint::Percentage(40),
+                    Constraint::Percentage(15),
+                    Constraint::Percentage(15),
+                ],
+            )
+            .header(header)
+            .block(Block::default().borders(Borders::ALL).title(format!("Results ({})", app.scan_dir)))
+            .highlight_style(Style::default().bg(Color::Blue).fg(Color::White).add_modifier(Modifier::BOLD))
+            .highlight_symbol(">> ");
+
+            f.render_stateful_widget(table, chunks[2], &mut app.tools[tool_idx].table_state);
         }
     }
 
     // 4. Search Bar
     let input_title = match app.input_mode {
-        InputMode::Normal => "Press '/' to filter, Enter to Scan, Esc to Cancel, 's' Select, 'd' Dir Picker",
+        InputMode::Normal => "Press '/' to filter, Enter to Scan, Esc to Cancel, 's' Select, 'o' Dir Picker",
         InputMode::Search => "Filter (Press Enter/Esc to stop)",
         InputMode::Select => "Select mode (a: All, n: None, i: Invert, b: All Exc Biggest, s: Exc Smallest, w: Exc Newest, o: Exc Oldest, Esc to cancel)",
+        InputMode::ActionMenu => "Action menu (d: Delete, s: Symlink, h: Hardlink, Esc to cancel)",
         InputMode::DirPicker => "Dir Picker: Space -> Include, 'r' -> Reference, Enter -> Open, Esc -> Done",
         InputMode::ConfirmAction => "Confirm Action (y/n)",
     };
@@ -120,6 +161,7 @@ pub fn ui(f: &mut Frame, app: &mut App) {
         InputMode::Search => Style::default().fg(Color::Yellow),
         InputMode::Select => Style::default().fg(Color::Green),
         InputMode::DirPicker => Style::default().fg(Color::Cyan),
+        InputMode::ActionMenu => Style::default().fg(Color::Magenta),
         InputMode::ConfirmAction => Style::default().fg(Color::Red),
     };
 
@@ -134,7 +176,7 @@ pub fn ui(f: &mut Frame, app: &mut App) {
     }
 
     // 5. FAR-style bottom bar
-    let shortcut_text = "Enter Scan | Space Toggle | / Filter | s Select | F8 Delete | L Symlink | H Hardlink | e Export | F10/q Quit | j/k Nav | Tab Tool";
+    let shortcut_text = "Enter Scan | Space Toggle | / Filter | s Select | a Action | e Export | O Sort | o Dir | q Quit | j/k/h/l Nav";
     let shortcuts = Paragraph::new(shortcut_text).style(Style::default().bg(Color::Cyan).fg(Color::Black));
     f.render_widget(shortcuts, chunks[4]);
 

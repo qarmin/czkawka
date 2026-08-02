@@ -81,9 +81,22 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &mut 
                         modified_date: 0,
                     }],
                 });
+                app.status_message = "Scan completed. No results.".to_string();
+            } else {
+                app.status_message = "Scan completed.".to_string();
             }
-            tool.list_state.select(Some(0)); // Initialize selection
+            tool.table_state.select(Some(0)); // Initialize selection
             tool.selected_items.clear();
+        }
+
+        // Check progress
+        while let Ok(progress) = scanner.progress_receiver.try_recv() {
+            let display = progress.to_display();
+            if display.all_progress >= 0 {
+                app.status_message = format!("{} [{}%]", display.label, display.all_progress);
+            } else {
+                app.status_message = display.label.clone();
+            }
         }
 
         let timeout = tick_rate.checked_sub(last_tick.elapsed()).unwrap_or_else(|| Duration::from_secs(0));
@@ -95,17 +108,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &mut 
                 InputMode::Normal => match key.code {
                     KeyCode::Char('q') => return Ok(()),
                     KeyCode::F(10) => return Ok(()),
-                    KeyCode::F(8) | KeyCode::Delete => {
-                        app.pending_action = crate::app::PendingAction::Delete;
-                        app.input_mode = InputMode::ConfirmAction;
-                    }
-                    KeyCode::Char('L') => {
-                        app.pending_action = crate::app::PendingAction::Symlink;
-                        app.input_mode = InputMode::ConfirmAction;
-                    }
-                    KeyCode::Char('H') => {
-                        app.pending_action = crate::app::PendingAction::Hardlink;
-                        app.input_mode = InputMode::ConfirmAction;
+                    KeyCode::Char('a') => {
+                        app.input_mode = InputMode::ActionMenu;
                     }
                     KeyCode::Char('e') => {
                         app.export_selected();
@@ -116,9 +120,26 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &mut 
                     KeyCode::Char('k') | KeyCode::Up => {
                         app.previous();
                     }
+                    KeyCode::Char('h') | KeyCode::Left => {
+                        app.previous_tool();
+                    }
+                    KeyCode::Char('l') | KeyCode::Right => {
+                        app.next_tool();
+                    }
+                    KeyCode::PageDown => {
+                        app.page_down();
+                    }
+                    KeyCode::PageUp => {
+                        app.page_up();
+                    }
+                    KeyCode::Home => {
+                        app.home();
+                    }
+                    KeyCode::End => {
+                        app.end();
+                    }
                     KeyCode::Char(' ') => {
                         app.toggle_selection();
-                        app.next();
                     }
                     KeyCode::Char('/') => {
                         app.input_mode = InputMode::Search;
@@ -126,10 +147,10 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &mut 
                     KeyCode::Char('s') => {
                         app.input_mode = InputMode::Select;
                     }
-                    KeyCode::Char('d') => {
+                    KeyCode::Char('o') => {
                         app.open_dir_picker();
                     }
-                    KeyCode::Char('c') => {
+                    KeyCode::Char('O') => {
                         let tool = app.active_tool_mut();
                         tool.cycle_sort_order();
                         app.status_message = format!("Sort order: {:?}", tool.sort_order);
@@ -237,6 +258,24 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &mut 
                     }
                     KeyCode::Char('r') => {
                         app.dir_picker_add_reference();
+                    }
+                    _ => {}
+                },
+                InputMode::ActionMenu => match key.code {
+                    KeyCode::Esc | KeyCode::Char('q') => {
+                        app.input_mode = InputMode::Normal;
+                    }
+                    KeyCode::Char('d') | KeyCode::Delete => {
+                        app.pending_action = crate::app::PendingAction::Delete;
+                        app.input_mode = InputMode::ConfirmAction;
+                    }
+                    KeyCode::Char('s') => {
+                        app.pending_action = crate::app::PendingAction::Symlink;
+                        app.input_mode = InputMode::ConfirmAction;
+                    }
+                    KeyCode::Char('h') => {
+                        app.pending_action = crate::app::PendingAction::Hardlink;
+                        app.input_mode = InputMode::ConfirmAction;
                     }
                     _ => {}
                 },
