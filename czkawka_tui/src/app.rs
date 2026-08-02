@@ -410,9 +410,7 @@ impl App {
         }
 
         let i = match tool.table_state.selected() {
-            Some(i) => {
-                i.saturating_sub(10)
-            }
+            Some(i) => i.saturating_sub(10),
             None => 0,
         };
         tool.table_state.select(Some(i));
@@ -480,9 +478,10 @@ impl App {
             if let Some(i) = tool.table_state.selected() {
                 let items = tool.filtered_items();
                 if i < items.len()
-                    && let ViewItem::Item(g_idx, i_idx, _) = items[i] {
-                        to_toggle = Some((g_idx, i_idx));
-                    }
+                    && let ViewItem::Item(g_idx, i_idx, _) = items[i]
+                {
+                    to_toggle = Some((g_idx, i_idx));
+                }
             }
         }
         if let Some((g_idx, i_idx)) = to_toggle {
