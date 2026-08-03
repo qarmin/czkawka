@@ -232,6 +232,22 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App, scanner: &mut 
                         app.select_all_except_oldest();
                         app.input_mode = InputMode::Normal;
                     }
+                    KeyCode::Char('B') => {
+                        app.select_one_biggest();
+                        app.input_mode = InputMode::Normal;
+                    }
+                    KeyCode::Char('S') => {
+                        app.select_one_smallest();
+                        app.input_mode = InputMode::Normal;
+                    }
+                    KeyCode::Char('W') => {
+                        app.select_one_newest();
+                        app.input_mode = InputMode::Normal;
+                    }
+                    KeyCode::Char('O') => {
+                        app.select_one_oldest();
+                        app.input_mode = InputMode::Normal;
+                    }
                     _ => {}
                 },
                 InputMode::DirPicker => match key.code {

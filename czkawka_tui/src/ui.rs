@@ -150,7 +150,7 @@ pub fn ui(f: &mut Frame, app: &mut App) {
     let input_title = match app.input_mode {
         InputMode::Normal => "Press '/' to filter, Enter to Scan, Esc to Cancel, 's' Select, 'o' Dir Picker",
         InputMode::Search => "Filter (Press Enter/Esc to stop)",
-        InputMode::Select => "Select mode (a: All, n: None, i: Invert, b: All Exc Biggest, s: Exc Smallest, w: Exc Newest, o: Exc Oldest, Esc to cancel)",
+        InputMode::Select => "Select (a:All, n:None, i:Inv, b:All Exc Big, s:Exc Small, w:Exc New, o:Exc Old | B:One Big, S:One Small, W:One New, O:One Old)",
         InputMode::ActionMenu => "Action menu (d: Delete, s: Symlink, h: Hardlink, Esc to cancel)",
         InputMode::DirPicker => "Dir Picker: Space -> Include, 'r' -> Reference, Enter -> Open, Esc -> Done",
         InputMode::ConfirmAction => "Confirm Action (y/n)",

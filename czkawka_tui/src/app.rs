@@ -629,6 +629,82 @@ impl App {
         }
     }
 
+    pub fn select_one_biggest(&mut self) {
+        let tool = self.active_tool_mut();
+        tool.selected_items.clear();
+        for (g_idx, group) in tool.groups.iter().enumerate() {
+            if group.items.is_empty() {
+                continue;
+            }
+            let mut max_size = group.items[0].size;
+            let mut max_idx = 0;
+            for (i_idx, item) in group.items.iter().enumerate() {
+                if item.size > max_size {
+                    max_size = item.size;
+                    max_idx = i_idx;
+                }
+            }
+            tool.selected_items.insert((g_idx, max_idx));
+        }
+    }
+
+    pub fn select_one_smallest(&mut self) {
+        let tool = self.active_tool_mut();
+        tool.selected_items.clear();
+        for (g_idx, group) in tool.groups.iter().enumerate() {
+            if group.items.is_empty() {
+                continue;
+            }
+            let mut min_size = group.items[0].size;
+            let mut min_idx = 0;
+            for (i_idx, item) in group.items.iter().enumerate() {
+                if item.size < min_size {
+                    min_size = item.size;
+                    min_idx = i_idx;
+                }
+            }
+            tool.selected_items.insert((g_idx, min_idx));
+        }
+    }
+
+    pub fn select_one_newest(&mut self) {
+        let tool = self.active_tool_mut();
+        tool.selected_items.clear();
+        for (g_idx, group) in tool.groups.iter().enumerate() {
+            if group.items.is_empty() {
+                continue;
+            }
+            let mut max_date = group.items[0].modified_date;
+            let mut max_idx = 0;
+            for (i_idx, item) in group.items.iter().enumerate() {
+                if item.modified_date > max_date {
+                    max_date = item.modified_date;
+                    max_idx = i_idx;
+                }
+            }
+            tool.selected_items.insert((g_idx, max_idx));
+        }
+    }
+
+    pub fn select_one_oldest(&mut self) {
+        let tool = self.active_tool_mut();
+        tool.selected_items.clear();
+        for (g_idx, group) in tool.groups.iter().enumerate() {
+            if group.items.is_empty() {
+                continue;
+            }
+            let mut min_date = group.items[0].modified_date;
+            let mut min_idx = 0;
+            for (i_idx, item) in group.items.iter().enumerate() {
+                if item.modified_date < min_date {
+                    min_date = item.modified_date;
+                    min_idx = i_idx;
+                }
+            }
+            tool.selected_items.insert((g_idx, min_idx));
+        }
+    }
+
     pub fn execute_action(&mut self) {
         let action = self.pending_action;
         let mut success_count = 0;
