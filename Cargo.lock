@@ -1817,9 +1817,11 @@ name = "czkawka_tui"
 version = "12.0.1"
 dependencies = [
  "anyhow",
+ "chrono",
  "crossbeam-channel",
  "crossterm",
  "czkawka_core",
+ "humansize",
  "image_hasher",
  "ratatui",
 ]

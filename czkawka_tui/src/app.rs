@@ -1,5 +1,5 @@
 use czkawka_core::common::model::ToolType as CoreToolType;
-use ratatui::widgets::ListState;
+use ratatui::widgets::{ListState, TableState};
 
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum InputMode {
@@ -8,6 +8,7 @@ pub enum InputMode {
     Select,
     DirPicker,
     ConfirmAction,
+    ActionMenu,
 }
 
 #[derive(PartialEq, Clone, Copy, Debug)]
@@ -85,6 +86,12 @@ pub struct TuiGroup {
     pub items: Vec<TuiItem>,
 }
 
+#[derive(Clone, Debug)]
+pub enum ViewItem<'a> {
+    Header(usize, &'a TuiGroup),
+    Item(usize, usize, &'a TuiItem),
+}
+
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum SortOrder {
     None,
@@ -98,7 +105,7 @@ pub struct ToolState {
     pub tool_type: ToolType,
     pub filter: String,
     pub groups: Vec<TuiGroup>,
-    pub list_state: ListState,
+    pub table_state: TableState,
     pub selected_items: std::collections::HashSet<(usize, usize)>, // (group_idx, item_idx)
     pub sort_order: SortOrder,
 }
@@ -109,18 +116,23 @@ impl ToolState {
             tool_type,
             filter: String::new(),
             groups: Vec::new(),
-            list_state: ListState::default(),
+            table_state: TableState::default(),
             selected_items: std::collections::HashSet::new(),
             sort_order: SortOrder::None,
         }
     }
 
-    pub fn filtered_items(&self) -> Vec<((usize, usize), &TuiItem)> {
+    pub fn filtered_items(&self) -> Vec<ViewItem<'_>> {
         let mut results = Vec::new();
         for (g_idx, group) in self.groups.iter().enumerate() {
+            let mut has_items = false;
             for (i_idx, item) in group.items.iter().enumerate() {
                 if self.filter.is_empty() || item.path.to_lowercase().contains(&self.filter.to_lowercase()) {
-                    results.push(((g_idx, i_idx), item));
+                    if !has_items {
+                        results.push(ViewItem::Header(g_idx, group));
+                        has_items = true;
+                    }
+                    results.push(ViewItem::Item(g_idx, i_idx, item));
                 }
             }
         }
@@ -142,6 +154,28 @@ impl ToolState {
                 }
             });
         }
+
+        self.groups.sort_by(|a, b| {
+            if a.items.is_empty() {
+                return std::cmp::Ordering::Greater;
+            }
+            if b.items.is_empty() {
+                return std::cmp::Ordering::Less;
+            }
+            let item_a = &a.items[0];
+            let item_b = &b.items[0];
+            match order {
+                SortOrder::None => std::cmp::Ordering::Equal,
+                SortOrder::Size => item_b.size.cmp(&item_a.size),
+                SortOrder::Path => item_a.path.cmp(&item_b.path),
+                SortOrder::ModifiedDate => item_b.modified_date.cmp(&item_a.modified_date),
+                SortOrder::Name => {
+                    let a_name = std::path::Path::new(&item_a.path).file_name().unwrap_or_default();
+                    let b_name = std::path::Path::new(&item_b.path).file_name().unwrap_or_default();
+                    a_name.cmp(b_name)
+                }
+            }
+        });
     }
 
     pub fn cycle_sort_order(&mut self) {
@@ -327,11 +361,11 @@ impl App {
         let tool = &mut self.tools[tool_idx];
         let items = tool.filtered_items();
         if items.is_empty() {
-            tool.list_state.select(None);
+            tool.table_state.select(None);
             return;
         }
 
-        let i = match tool.list_state.selected() {
+        let i = match tool.table_state.selected() {
             Some(i) => {
                 if i >= items.len() - 1 {
                     0
@@ -341,7 +375,67 @@ impl App {
             }
             None => 0,
         };
-        tool.list_state.select(Some(i));
+        tool.table_state.select(Some(i));
+    }
+
+    pub fn page_down(&mut self) {
+        let tool_idx = self.active_tool_idx;
+        let tool = &mut self.tools[tool_idx];
+        let items = tool.filtered_items();
+        if items.is_empty() {
+            tool.table_state.select(None);
+            return;
+        }
+
+        let i = match tool.table_state.selected() {
+            Some(i) => {
+                if i + 10 >= items.len() - 1 {
+                    items.len() - 1
+                } else {
+                    i + 10
+                }
+            }
+            None => 0,
+        };
+        tool.table_state.select(Some(i));
+    }
+
+    pub fn page_up(&mut self) {
+        let tool_idx = self.active_tool_idx;
+        let tool = &mut self.tools[tool_idx];
+        let items = tool.filtered_items();
+        if items.is_empty() {
+            tool.table_state.select(None);
+            return;
+        }
+
+        let i = match tool.table_state.selected() {
+            Some(i) => i.saturating_sub(10),
+            None => 0,
+        };
+        tool.table_state.select(Some(i));
+    }
+
+    pub fn home(&mut self) {
+        let tool_idx = self.active_tool_idx;
+        let tool = &mut self.tools[tool_idx];
+        let items = tool.filtered_items();
+        if items.is_empty() {
+            tool.table_state.select(None);
+            return;
+        }
+        tool.table_state.select(Some(0));
+    }
+
+    pub fn end(&mut self) {
+        let tool_idx = self.active_tool_idx;
+        let tool = &mut self.tools[tool_idx];
+        let items = tool.filtered_items();
+        if items.is_empty() {
+            tool.table_state.select(None);
+            return;
+        }
+        tool.table_state.select(Some(items.len() - 1));
     }
 
     pub fn previous(&mut self) {
@@ -349,11 +443,11 @@ impl App {
         let tool = &mut self.tools[tool_idx];
         let items = tool.filtered_items();
         if items.is_empty() {
-            tool.list_state.select(None);
+            tool.table_state.select(None);
             return;
         }
 
-        let i = match tool.list_state.selected() {
+        let i = match tool.table_state.selected() {
             Some(i) => {
                 if i == 0 {
                     items.len() - 1
@@ -363,40 +457,57 @@ impl App {
             }
             None => 0,
         };
-        tool.list_state.select(Some(i));
+        tool.table_state.select(Some(i));
     }
 
     pub fn on_filter_change(&mut self) {
         let tool_idx = self.active_tool_idx;
         let tool = &mut self.tools[tool_idx];
-        tool.list_state.select(Some(0));
+        tool.table_state.select(Some(0));
         let items = tool.filtered_items();
         if items.is_empty() {
-            tool.list_state.select(None);
+            tool.table_state.select(None);
         }
     }
 
     pub fn toggle_selection(&mut self) {
         let tool_idx = self.active_tool_idx;
-        let tool = &mut self.tools[tool_idx];
-        if let Some(i) = tool.list_state.selected() {
-            let items = tool.filtered_items();
-            if i < items.len() {
-                let actual_idx = items[i].0;
-                if tool.selected_items.contains(&actual_idx) {
-                    tool.selected_items.remove(&actual_idx);
-                } else {
-                    tool.selected_items.insert(actual_idx);
+        let mut to_toggle = None;
+        {
+            let tool = &self.tools[tool_idx];
+            if let Some(i) = tool.table_state.selected() {
+                let items = tool.filtered_items();
+                if i < items.len()
+                    && let ViewItem::Item(g_idx, i_idx, _) = items[i]
+                {
+                    to_toggle = Some((g_idx, i_idx));
                 }
+            }
+        }
+        if let Some((g_idx, i_idx)) = to_toggle {
+            let tool = &mut self.tools[tool_idx];
+            if tool.selected_items.contains(&(g_idx, i_idx)) {
+                tool.selected_items.remove(&(g_idx, i_idx));
+            } else {
+                tool.selected_items.insert((g_idx, i_idx));
             }
         }
     }
 
     pub fn select_all(&mut self) {
+        let mut to_insert = Vec::new();
+        {
+            let tool = self.active_tool();
+            let items = tool.filtered_items();
+            for item in items {
+                if let ViewItem::Item(g_idx, i_idx, _) = item {
+                    to_insert.push((g_idx, i_idx));
+                }
+            }
+        }
         let tool = self.active_tool_mut();
-        let items: Vec<((usize, usize), TuiItem)> = tool.filtered_items().into_iter().map(|(i, s)| (i, s.clone())).collect();
-        for (actual_idx, _) in items {
-            tool.selected_items.insert(actual_idx);
+        for idx in to_insert {
+            tool.selected_items.insert(idx);
         }
     }
 
@@ -406,13 +517,22 @@ impl App {
     }
 
     pub fn invert_selection(&mut self) {
+        let mut to_toggle = Vec::new();
+        {
+            let tool = self.active_tool();
+            let items = tool.filtered_items();
+            for item in items {
+                if let ViewItem::Item(g_idx, i_idx, _) = item {
+                    to_toggle.push((g_idx, i_idx));
+                }
+            }
+        }
         let tool = self.active_tool_mut();
-        let items: Vec<((usize, usize), TuiItem)> = tool.filtered_items().into_iter().map(|(i, s)| (i, s.clone())).collect();
-        for (actual_idx, _) in items {
-            if tool.selected_items.contains(&actual_idx) {
-                tool.selected_items.remove(&actual_idx);
+        for idx in to_toggle {
+            if tool.selected_items.contains(&idx) {
+                tool.selected_items.remove(&idx);
             } else {
-                tool.selected_items.insert(actual_idx);
+                tool.selected_items.insert(idx);
             }
         }
     }
@@ -509,6 +629,82 @@ impl App {
         }
     }
 
+    pub fn select_one_biggest(&mut self) {
+        let tool = self.active_tool_mut();
+        tool.selected_items.clear();
+        for (g_idx, group) in tool.groups.iter().enumerate() {
+            if group.items.is_empty() {
+                continue;
+            }
+            let mut max_size = group.items[0].size;
+            let mut max_idx = 0;
+            for (i_idx, item) in group.items.iter().enumerate() {
+                if item.size > max_size {
+                    max_size = item.size;
+                    max_idx = i_idx;
+                }
+            }
+            tool.selected_items.insert((g_idx, max_idx));
+        }
+    }
+
+    pub fn select_one_smallest(&mut self) {
+        let tool = self.active_tool_mut();
+        tool.selected_items.clear();
+        for (g_idx, group) in tool.groups.iter().enumerate() {
+            if group.items.is_empty() {
+                continue;
+            }
+            let mut min_size = group.items[0].size;
+            let mut min_idx = 0;
+            for (i_idx, item) in group.items.iter().enumerate() {
+                if item.size < min_size {
+                    min_size = item.size;
+                    min_idx = i_idx;
+                }
+            }
+            tool.selected_items.insert((g_idx, min_idx));
+        }
+    }
+
+    pub fn select_one_newest(&mut self) {
+        let tool = self.active_tool_mut();
+        tool.selected_items.clear();
+        for (g_idx, group) in tool.groups.iter().enumerate() {
+            if group.items.is_empty() {
+                continue;
+            }
+            let mut max_date = group.items[0].modified_date;
+            let mut max_idx = 0;
+            for (i_idx, item) in group.items.iter().enumerate() {
+                if item.modified_date > max_date {
+                    max_date = item.modified_date;
+                    max_idx = i_idx;
+                }
+            }
+            tool.selected_items.insert((g_idx, max_idx));
+        }
+    }
+
+    pub fn select_one_oldest(&mut self) {
+        let tool = self.active_tool_mut();
+        tool.selected_items.clear();
+        for (g_idx, group) in tool.groups.iter().enumerate() {
+            if group.items.is_empty() {
+                continue;
+            }
+            let mut min_date = group.items[0].modified_date;
+            let mut min_idx = 0;
+            for (i_idx, item) in group.items.iter().enumerate() {
+                if item.modified_date < min_date {
+                    min_date = item.modified_date;
+                    min_idx = i_idx;
+                }
+            }
+            tool.selected_items.insert((g_idx, min_idx));
+        }
+    }
+
     pub fn execute_action(&mut self) {
         let action = self.pending_action;
         let mut success_count = 0;
@@ -582,8 +778,12 @@ impl App {
                 items
             } else {
                 let items = tool.filtered_items();
-                if let Some(i) = tool.list_state.selected() {
-                    if i < items.len() { vec![items[i].1.path.clone()] } else { vec![] }
+                if let Some(i) = tool.table_state.selected() {
+                    if i < items.len() {
+                        if let ViewItem::Item(_, _, item) = &items[i] { vec![item.path.clone()] } else { vec![] }
+                    } else {
+                        vec![]
+                    }
                 } else {
                     vec![]
                 }
