@@ -1,3 +1,4 @@
+pub mod organizer;
 pub mod bad_extensions;
 pub mod bad_names;
 pub mod big_file;
