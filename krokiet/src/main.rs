@@ -143,6 +143,7 @@ fn main() {
 
     let original_preset_idx = base_settings.default_preset;
     set_initial_settings_to_gui(&app, &base_settings, &custom_settings, cli_args, preset_to_load);
+    fill_text_errors_with_random_lines(&app, 10_000);
     update_available_hardware_encoders(&app);
     apply_build_info(&app);
     connect_build_info(&app);
@@ -191,6 +192,32 @@ fn main() {
             show_critical_error(e.to_string());
         }
     }
+}
+
+// Debug helper - stuffs the "Text errors" panel with a lot of content to measure TextEdit performance
+fn fill_text_errors_with_random_lines(app: &MainWindow, lines: usize) {
+    const ALPHABET: &[u8] = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789     ";
+
+    let mut state = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0x2545_f491_4f6c_dd1d, |duration| duration.as_nanos() as u64 | 1);
+    let mut next_random = move || {
+        state ^= state << 13;
+        state ^= state >> 7;
+        state ^= state << 17;
+        state
+    };
+
+    let mut text = String::with_capacity(lines * 80);
+    for line_idx in 0..lines {
+        text.push_str(&format!("[{line_idx:05}] "));
+        let line_len = 20 + next_random() % 80;
+        text.extend((0..line_len).map(|_| ALPHABET[next_random() as usize % ALPHABET.len()] as char));
+        text.push('\n');
+    }
+
+    info!("Filling text errors panel with {lines} random lines ({} bytes)", text.len());
+    app.global::<GuiState>().set_info_text(text.into());
 }
 
 pub fn show_critical_error(error: String) {

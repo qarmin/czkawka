@@ -38,12 +38,12 @@ lopdf = "0.44.0"
 sevenz-rust2 = "0.21.0"
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 tar = { version = "0.4", default-features = false }
-ruzstd = "0.8"
+ruzstd = "0.9"
 ttf-parser = "0.25"
 quick-xml = "0.41"
 toml = { version = "1.1", default-features = false, features = ["parse", "serde"] }
 yaml-rust2 = "0.11"
-usvg = { version = "0.47", default-features = false }
+usvg = { version = "0.48", default-features = false }
 bzip2-rs = "0.1"
 lzma-rs = "0.3"
 
