@@ -368,6 +368,7 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     let sm = win.global::<SameMusicSettings>();
     sm.set_title(s.same_music_title);
     sm.set_artist(s.same_music_artist);
+    sm.set_album(s.same_music_album);
     sm.set_year(s.same_music_year);
     sm.set_length(s.same_music_length);
     sm.set_genre(s.same_music_genre);
