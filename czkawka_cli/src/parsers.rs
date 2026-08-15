@@ -13,72 +13,68 @@ use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec};
 /// Values above this threshold are practically meaningless for audio segment matching
 const MAX_SAME_MUSIC_DIFFERENCE: f64 = 10.0;
 
+fn parse_f64_finite(src: &str) -> Result<f64, String> {
+    let value = src.parse::<f64>().map_err(|e| e.to_string())?;
+    if !value.is_finite() {
+        return Err(format!("Value '{src}' is not finite"));
+    }
+    Ok(value)
+}
+
+fn parse_f32_finite(src: &str) -> Result<f32, String> {
+    let value = src.parse::<f32>().map_err(|e| e.to_string())?;
+    if !value.is_finite() {
+        return Err(format!("Value '{src}' is not finite"));
+    }
+    Ok(value)
+}
+
 pub(crate) fn parse_maximum_difference(src: &str) -> Result<f64, String> {
-    match src.parse::<f64>() {
-        Ok(maximum_difference) => {
-            if maximum_difference <= 0.0 {
-                Err("Maximum difference must be bigger than 0".to_string())
-            } else if maximum_difference > MAX_SAME_MUSIC_DIFFERENCE {
-                Err(format!("Maximum difference must be at most {MAX_SAME_MUSIC_DIFFERENCE}"))
-            } else {
-                Ok(maximum_difference)
-            }
-        }
-        Err(e) => Err(e.to_string()),
+    let maximum_difference = parse_f64_finite(src)?;
+    if maximum_difference <= 0.0 {
+        Err("Maximum difference must be bigger than 0".to_string())
+    } else if maximum_difference > MAX_SAME_MUSIC_DIFFERENCE {
+        Err(format!("Maximum difference must be at most {MAX_SAME_MUSIC_DIFFERENCE}"))
+    } else {
+        Ok(maximum_difference)
     }
 }
 
 pub(crate) fn parse_minimum_segment_duration(src: &str) -> Result<f32, String> {
-    match src.parse::<f32>() {
-        Ok(minimum_segment_duration) => {
-            if minimum_segment_duration <= 0.0 {
-                Err("Minimum segment duration must be bigger than 0".to_string())
-            } else if minimum_segment_duration >= 3600.0 {
-                Err("Minimum segment duration must be smaller than 3600(greater values not have much sense)".to_string())
-            } else {
-                Ok(minimum_segment_duration)
-            }
-        }
-        Err(e) => Err(e.to_string()),
+    let minimum_segment_duration = parse_f32_finite(src)?;
+    if minimum_segment_duration <= 0.0 {
+        Err("Minimum segment duration must be bigger than 0".to_string())
+    } else if minimum_segment_duration >= 3600.0 {
+        Err("Minimum segment duration must be smaller than 3600(greater values not have much sense)".to_string())
+    } else {
+        Ok(minimum_segment_duration)
     }
 }
 
 pub(crate) fn parse_audio_similarity_percent(src: &str) -> Result<f64, String> {
-    match src.parse::<f64>() {
-        Ok(v) => {
-            if ALLOWED_AUDIO_SIMILARITY_PERCENT.contains(&v) {
-                Ok(v)
-            } else {
-                Err(format!("Audio similarity percent must be in range {ALLOWED_AUDIO_SIMILARITY_PERCENT:?}"))
-            }
-        }
-        Err(e) => Err(e.to_string()),
+    let v = parse_f64_finite(src)?;
+    if ALLOWED_AUDIO_SIMILARITY_PERCENT.contains(&v) {
+        Ok(v)
+    } else {
+        Err(format!("Audio similarity percent must be in range {ALLOWED_AUDIO_SIMILARITY_PERCENT:?}"))
     }
 }
 
 pub(crate) fn parse_audio_maximum_difference(src: &str) -> Result<f64, String> {
-    match src.parse::<f64>() {
-        Ok(v) => {
-            if v >= 0.0 {
-                Ok(v)
-            } else {
-                Err("Audio maximum difference must be >= 0.0".to_string())
-            }
-        }
-        Err(e) => Err(e.to_string()),
+    let v = parse_f64_finite(src)?;
+    if v >= 0.0 {
+        Ok(v)
+    } else {
+        Err("Audio maximum difference must be >= 0.0".to_string())
     }
 }
 
 pub(crate) fn parse_audio_length_ratio(src: &str) -> Result<f64, String> {
-    match src.parse::<f64>() {
-        Ok(v) => {
-            if ALLOWED_AUDIO_LENGTH_RATIO.contains(&v) {
-                Ok(v)
-            } else {
-                Err(format!("Audio length ratio must be in range {ALLOWED_AUDIO_LENGTH_RATIO:?}"))
-            }
-        }
-        Err(e) => Err(e.to_string()),
+    let v = parse_f64_finite(src)?;
+    if ALLOWED_AUDIO_LENGTH_RATIO.contains(&v) {
+        Ok(v)
+    } else {
+        Err(format!("Audio length ratio must be in range {ALLOWED_AUDIO_LENGTH_RATIO:?}"))
     }
 }
 
@@ -109,28 +105,20 @@ pub(crate) fn parse_window_count(src: &str) -> Result<u32, String> {
 }
 
 pub(crate) fn parse_duration_tolerance_pct(src: &str) -> Result<f64, String> {
-    match src.parse::<f64>() {
-        Ok(v) => {
-            if ALLOWED_DURATION_TOLERANCE_PCT.contains(&v) {
-                Ok(v)
-            } else {
-                Err(format!("Duration tolerance must be in range {ALLOWED_DURATION_TOLERANCE_PCT:?}"))
-            }
-        }
-        Err(e) => Err(e.to_string()),
+    let v = parse_f64_finite(src)?;
+    if ALLOWED_DURATION_TOLERANCE_PCT.contains(&v) {
+        Ok(v)
+    } else {
+        Err(format!("Duration tolerance must be in range {ALLOWED_DURATION_TOLERANCE_PCT:?}"))
     }
 }
 
 pub(crate) fn parse_match_fraction(src: &str) -> Result<f64, String> {
-    match src.parse::<f64>() {
-        Ok(v) => {
-            if ALLOWED_MATCH_FRACTION.contains(&v) {
-                Ok(v)
-            } else {
-                Err(format!("Match fraction must be in range {ALLOWED_MATCH_FRACTION:?}"))
-            }
-        }
-        Err(e) => Err(e.to_string()),
+    let v = parse_f64_finite(src)?;
+    if ALLOWED_MATCH_FRACTION.contains(&v) {
+        Ok(v)
+    } else {
+        Err(format!("Match fraction must be in range {ALLOWED_MATCH_FRACTION:?}"))
     }
 }
 
@@ -370,5 +358,19 @@ mod tests {
         assert_eq!(parse_geometric_invariance("off"), Ok(GeometricInvariance::Off));
         assert_eq!(parse_geometric_invariance("mirror-flip"), Ok(GeometricInvariance::MirrorFlip));
         assert_eq!(parse_geometric_invariance("mirror-flip-rotate90"), Ok(GeometricInvariance::MirrorFlipRotate90));
+    }
+
+    #[test]
+    fn test_parse_finite_float_rejects_nan_and_inf() {
+        for value in ["NaN", "nan", "inf", "+inf", "-inf", "INF", "-INF"] {
+            assert!(parse_maximum_difference(value).is_err(), "value {value:?} should be rejected");
+            assert!(parse_audio_maximum_difference(value).is_err(), "value {value:?} should be rejected");
+            assert!(parse_duration_tolerance_pct(value).is_err(), "value {value:?} should be rejected");
+            assert!(parse_match_fraction(value).is_err(), "value {value:?} should be rejected");
+        }
+
+        assert!(parse_minimum_segment_duration("-inf").is_err());
+        assert!(parse_audio_similarity_percent("nan").is_err());
+        assert!(parse_match_fraction("inf").is_err());
     }
 }
