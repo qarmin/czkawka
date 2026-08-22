@@ -115,6 +115,14 @@ export component PopupReencodeVideo inherits Rectangle {
                             LineEdit { text <=> Settings.popup_reencode_video_max_height; enabled: Settings.popup_reencode_video_limit_video_size; }
                         }
 
+                        CheckBox { text: Translations.optimize_limit_fps_text; checked <=> Settings.popup_reencode_video_limit_fps; }
+
+                        VerticalLayout {
+                            spacing: 2px;
+                            Text { text: Translations.optimize_max_fps_text; wrap: TextWrap.word-wrap; }
+                            LineEdit { text <=> Settings.popup_reencode_video_max_fps; enabled: Settings.popup_reencode_video_limit_fps; }
+                        }
+
                         CheckBox { text: Translations.subsettings_video_optimizer_use_custom_command_text; checked <=> Settings.video_optimizer_sub_use_custom_command; }
 
                         if Settings.video_optimizer_sub_use_custom_command: VerticalLayout {

@@ -589,6 +589,8 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_popup_reencode_video_limit_video_size(custom_settings.popup_reencode_video_limit_video_size);
     settings.set_popup_reencode_video_max_width(custom_settings.popup_reencode_video_max_width.to_string().into());
     settings.set_popup_reencode_video_max_height(custom_settings.popup_reencode_video_max_height.to_string().into());
+    settings.set_popup_reencode_video_limit_fps(custom_settings.popup_reencode_video_limit_fps);
+    settings.set_popup_reencode_video_max_fps(custom_settings.popup_reencode_video_max_fps.to_string().into());
     settings.set_popup_crop_video_overwrite_files(custom_settings.popup_crop_video_overwrite_files);
     settings.set_popup_crop_video_reencode(custom_settings.popup_crop_video_reencode);
     settings.set_popup_crop_video_quality(custom_settings.popup_crop_video_quality as f32);
@@ -624,7 +626,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
         settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
         settings.set_exif_remover_column_size(fnm(&[sel_px, size_px, name_px, path_px, 300.0, mod_px], "exif_remover"));
-        settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, 160.0, mod_px], "video_optimizer"));
+        settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, 160.0, 90.0, 100.0, mod_px], "video_optimizer"));
         settings.set_bad_names_column_size(fnm(&[sel_px, name_px, 250.0, path_px], "bad_names"));
     }
 
@@ -923,6 +925,8 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         popup_reencode_video_limit_video_size: settings.get_popup_reencode_video_limit_video_size(),
         popup_reencode_video_max_width: settings.get_popup_reencode_video_max_width().parse::<u32>().unwrap_or(1920),
         popup_reencode_video_max_height: settings.get_popup_reencode_video_max_height().parse::<u32>().unwrap_or(1920),
+        popup_reencode_video_limit_fps: settings.get_popup_reencode_video_limit_fps(),
+        popup_reencode_video_max_fps: settings.get_popup_reencode_video_max_fps().parse::<u32>().unwrap_or(60),
         popup_crop_video_overwrite_files: settings.get_popup_crop_video_overwrite_files(),
         popup_crop_video_reencode: settings.get_popup_crop_video_reencode(),
         popup_crop_video_quality: settings.get_popup_crop_video_quality().round() as u32,

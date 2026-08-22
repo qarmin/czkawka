@@ -60,16 +60,16 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
         let fail_if_bigger = settings.get_popup_reencode_video_fail_if_bigger();
         let overwrite_files = settings.get_popup_reencode_video_overwrite_files();
         let video_quality = settings.get_popup_reencode_video_quality();
-        let limit_video_size = settings.get_popup_reencode_video_limit_video_size();
 
-        let max_width_str = settings.get_popup_reencode_video_max_width();
-        let max_height_str = settings.get_popup_reencode_video_max_height();
+        let max_dimensions = settings.get_popup_reencode_video_limit_video_size().then(|| {
+            let max_width = settings.get_popup_reencode_video_max_width().parse::<u32>().unwrap_or(1920);
+            let max_height = settings.get_popup_reencode_video_max_height().parse::<u32>().unwrap_or(1920);
+            (max_width, max_height)
+        });
 
-        let max_width = max_width_str.parse::<i32>().unwrap_or(0).max(0) as u32;
-        let max_height = max_height_str.parse::<i32>().unwrap_or(0).max(0) as u32;
-
-        let max_width = if max_width > 0 { max_width } else { 1920 };
-        let max_height = if max_height > 0 { max_height } else { 1920 };
+        let max_fps = settings
+            .get_popup_reencode_video_limit_fps()
+            .then(|| settings.get_popup_reencode_video_max_fps().parse::<u32>().unwrap_or(60));
 
         let noise_reduction = combo.video_optimizer_noise_reduction.value;
         let noise_reduction_strength = settings.get_video_optimizer_sub_noise_reduction_strength().round() as u32;
@@ -92,9 +92,8 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
             fail_if_bigger,
             overwrite_files,
             video_quality,
-            limit_video_size,
-            max_width,
-            max_height,
+            max_dimensions,
+            max_fps,
             noise_reduction,
             noise_reduction_strength,
             custom_ffmpeg_command,
@@ -113,6 +112,8 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
         let limit = settings.get_popup_reencode_video_limit_video_size();
         let max_w = settings.get_popup_reencode_video_max_width().parse::<u32>().unwrap_or(1920);
         let max_h = settings.get_popup_reencode_video_max_height().parse::<u32>().unwrap_or(1920);
+        let limit_fps = settings.get_popup_reencode_video_limit_fps();
+        let max_fps = settings.get_popup_reencode_video_max_fps().parse::<u32>().unwrap_or(60);
 
         let mut parts: Vec<String> = vec![
             "ffmpeg".into(),
@@ -130,6 +131,9 @@ pub(crate) fn connect_optimize_video(app: &MainWindow, progress_sender: Sender<P
         }
         if let Some(f) = nr.to_ffmpeg_filter(nr_strength) {
             filters.push(f);
+        }
+        if limit_fps {
+            filters.push(format!("fps={max_fps}"));
         }
         if !filters.is_empty() {
             parts.extend(["-vf".into(), filters.join(",")]);
@@ -152,9 +156,8 @@ impl ModelProcessor {
         fail_if_bigger: bool,
         overwrite_files: bool,
         video_quality: f32,
-        limit_video_size: bool,
-        max_width: u32,
-        max_height: u32,
+        max_dimensions: Option<(u32, u32)>,
+        max_fps: Option<u32>,
         noise_reduction: NoiseReductionMethod,
         noise_reduction_strength: u32,
         custom_ffmpeg_command: Option<String>,
@@ -190,9 +193,8 @@ impl ModelProcessor {
                         quality: target_quality,
                         fail_if_not_smaller: fail_if_bigger,
                         overwrite_original: overwrite_files,
-                        limit_video_size,
-                        max_width,
-                        max_height,
+                        max_dimensions,
+                        max_fps,
                         noise_reduction: noise_reduction.clone(),
                         noise_reduction_strength,
                         custom_ffmpeg_command: custom_ffmpeg_command.clone(),

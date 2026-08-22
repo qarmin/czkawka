@@ -454,6 +454,8 @@ optimize_overwrite_files_text = Overwrite files
 optimize_limit_video_size_text = Limit video size
 optimize_max_width_text = Max width:
 optimize_max_height_text = Max height:
+optimize_limit_fps_text = Limit video fps
+optimize_max_fps_text = Max fps:
 optimize_crf_hint = Lower value = better quality. 0 is nearly lossless, 51 is worst. Recommended: 18-28.
 optimize_noise_reduction_hint = Noise reduction may significantly increase encoding time.
 optimize_noise_reduction_strength_hint = 1 = minimal, 10 = maximum noise reduction.

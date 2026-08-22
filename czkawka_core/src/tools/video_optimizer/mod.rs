@@ -52,9 +52,10 @@ pub struct VideoTranscodeFixParams {
     pub quality: u32,
     pub fail_if_not_smaller: bool,
     pub overwrite_original: bool,
-    pub limit_video_size: bool,
-    pub max_width: u32,
-    pub max_height: u32,
+    /// (max_width, max_height); the scale filter is only added if the source actually exceeds it.
+    pub max_dimensions: Option<(u32, u32)>,
+    /// The fps filter is only added if the source's fps actually exceeds it.
+    pub max_fps: Option<u32>,
     pub noise_reduction: NoiseReductionMethod,
     pub noise_reduction_strength: u32,
     pub custom_ffmpeg_command: Option<String>,
@@ -196,6 +197,7 @@ pub struct VideoTranscodeEntry {
     pub width: u32,
     pub height: u32,
     pub duration: f64,
+    pub bitrate: Option<u64>,
 
     #[serde(skip)] // Saving it to cache is bad idea, because cache can be moved to another locations
     pub thumbnail_path: Option<PathBuf>,
@@ -213,6 +215,7 @@ pub struct VideoCropEntry {
     pub height: u32,
     pub new_image_dimensions: (u32, u32, u32, u32),
     pub duration: f64,
+    pub bitrate: Option<u64>,
 
     #[serde(skip)] // Saving it to cache is bad idea, because cache can be moved to another locations
     pub thumbnail_path: Option<PathBuf>,
@@ -253,6 +256,7 @@ impl FileEntry {
             width: 0,
             height: 0,
             duration: 0.0,
+            bitrate: None,
             thumbnail_path: None,
         }
     }
@@ -268,6 +272,7 @@ impl FileEntry {
             height: 0,
             new_image_dimensions: (0, 0, 0, 0),
             duration: 0.0,
+            bitrate: None,
             thumbnail_path: None,
         }
     }

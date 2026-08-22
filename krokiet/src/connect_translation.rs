@@ -271,6 +271,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_optimize_limit_video_size_text(flk!("optimize_limit_video_size_text").into());
     translation.set_optimize_max_width_text(flk!("optimize_max_width_text").into());
     translation.set_optimize_max_height_text(flk!("optimize_max_height_text").into());
+    translation.set_optimize_limit_fps_text(flk!("optimize_limit_fps_text").into());
+    translation.set_optimize_max_fps_text(flk!("optimize_max_fps_text").into());
     translation.set_optimize_crf_hint_text(flk!("optimize_crf_hint").into());
     translation.set_optimize_noise_reduction_hint_text(flk!("optimize_noise_reduction_hint").into());
     translation.set_optimize_noise_reduction_strength_hint_text(flk!("optimize_noise_reduction_strength_hint").into());
@@ -521,7 +523,18 @@ fn translate_items(app: &MainWindow) {
     settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));
     settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
     settings.set_exif_remover_column_name(fnm(&[&selection, &size, &file_name, &path, &exif_tags, &mod_date]));
-    settings.set_video_optimizer_column_name(fnm(&[&selection, &size, &file_name, &path, &codec, &dimensions, &new_dimensions, &mod_date]));
+    settings.set_video_optimizer_column_name(fnm(&[
+        &selection,
+        &size,
+        &file_name,
+        &path,
+        &codec,
+        &dimensions,
+        &new_dimensions,
+        &duration,
+        &bitrate,
+        &mod_date,
+    ]));
     settings.set_bad_names_column_name(fnm(&[&selection, &file_name, &new_name, &path]));
 
     crate::set_initial_gui_info::apply_combo_box_translations(app);

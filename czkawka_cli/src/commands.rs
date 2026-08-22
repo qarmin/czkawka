@@ -762,24 +762,27 @@ pub struct TranscodeArgs {
     pub fail_if_not_smaller: bool,
     #[clap(long, help = "Overwrite original files", long_help = "Overwrite original video files with optimized versions")]
     pub overwrite_original: bool,
-    #[clap(long, help = "Limit video size", long_help = "Limit maximum video dimensions")]
-    pub limit_video_size: bool,
     #[clap(
         long,
-        default_value = "1920",
         value_parser = clap::value_parser!(u32),
         help = "Maximum video width",
-        long_help = "Maximum video width in pixels when limit_video_size is enabled"
+        long_help = "Maximum video width in pixels; the video is only rescaled if it actually exceeds this (requires --max-height too)"
     )]
-    pub max_width: u32,
+    pub max_width: Option<u32>,
     #[clap(
         long,
-        default_value = "1080",
         value_parser = clap::value_parser!(u32),
         help = "Maximum video height",
-        long_help = "Maximum video height in pixels when limit_video_size is enabled"
+        long_help = "Maximum video height in pixels; the video is only rescaled if it actually exceeds this (requires --max-width too)"
     )]
-    pub max_height: u32,
+    pub max_height: Option<u32>,
+    #[clap(
+        long,
+        value_parser = clap::value_parser!(u32),
+        help = "Maximum video fps",
+        long_help = "Maximum video frame rate in frames per second; the fps filter is only applied if the video actually exceeds this"
+    )]
+    pub max_fps: Option<u32>,
     #[clap(
         long,
         default_value = "none",

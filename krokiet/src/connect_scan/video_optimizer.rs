@@ -5,6 +5,7 @@ use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::Search;
 use czkawka_core::common::{format_time, split_path};
+use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::video_optimizer;
 use czkawka_core::tools::video_optimizer::{
     VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerMode, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
@@ -170,12 +171,16 @@ fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (Mod
         fe.codec.into(),
         format!("{}x{}", fe.width, fe.height).into(),
         "-".into(),
+        format_duration_opt(Some(fe.duration)).into(),
+        format_bitrate_opt(fe.bitrate).into(),
         get_dt_timestamp_string(fe.modified_date).into(),
         fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default().into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
+    let bitrate_split = split_u64_into_i32s(fe.bitrate.unwrap_or(0));
+    let duration_centiseconds = (fe.duration * 100.0) as i32;
     let dimension = fe.width as i32 * fe.height as i32; // Video dimension, limited to 16K vs 16K, so no overflow
     let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
         modification_split.0,
@@ -190,6 +195,9 @@ fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (Mod
         0,
         0,
         0,
+        duration_centiseconds,
+        bitrate_split.0,
+        bitrate_split.1,
     ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     (data_model_str, data_model_int)
@@ -228,12 +236,16 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> Option<(ModelR
         fe.codec.into(),
         format!("{}x{}", fe.width, fe.height).into(),
         dim_string.into(),
+        format_duration_opt(Some(fe.duration)).into(),
+        format_bitrate_opt(fe.bitrate).into(),
         get_dt_timestamp_string(fe.modified_date).into(),
         fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default().into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
+    let bitrate_split = split_u64_into_i32s(fe.bitrate.unwrap_or(0));
+    let duration_centiseconds = (fe.duration * 100.0) as i32;
     let dimension = fe.width as i32 * fe.height as i32;
     let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
         modification_split.0,
@@ -248,6 +260,9 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> Option<(ModelR
         top as i32,
         right as i32,
         bottom as i32,
+        duration_centiseconds,
+        bitrate_split.0,
+        bitrate_split.1,
     ];
     let data_model_int = VecModel::from_slice(&data_model_int_arr);
     Some((data_model_str, data_model_int))

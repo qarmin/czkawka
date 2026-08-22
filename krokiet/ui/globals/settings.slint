@@ -253,6 +253,8 @@ export global Settings {
     in-out property <bool> popup_reencode_video_limit_video_size: false;
     in-out property <string> popup_reencode_video_max_width: "1920";
     in-out property <string> popup_reencode_video_max_height: "1920";
+    in-out property <bool> popup_reencode_video_limit_fps: false;
+    in-out property <string> popup_reencode_video_max_fps: "60";
 
     // Crop video popup settings
     in-out property <bool> popup_crop_video_overwrite_files: false;
@@ -317,6 +319,6 @@ export global Settings {
     in-out property <[length]> bad_names_column_size: [35px, name_px, 300px, path_px];
     in-out property <[string]> exif_remover_column_name: ["Selection", "Size", "File Name", "Path", "EXIF Tags", "Modification Date"];
     in-out property <[length]> exif_remover_column_size: [35px, size_px, name_px, path_px, 300px, mod_px];
-    in-out property <[string]> video_optimizer_column_name: ["Selection", "Size", "File Name", "Path", "Codec", "Dimensions", "New Dimensions", "Modification Date"];
-    in-out property <[length]> video_optimizer_column_size: [35px, size_px, name_px, path_px, 100px, 120px, 160px, mod_px];
+    in-out property <[string]> video_optimizer_column_name: ["Selection", "Size", "File Name", "Path", "Codec", "Dimensions", "New Dimensions", "Length", "Bitrate", "Modification Date"];
+    in-out property <[length]> video_optimizer_column_size: [35px, size_px, name_px, path_px, 100px, 120px, 160px, 90px, 100px, mod_px];
 }
