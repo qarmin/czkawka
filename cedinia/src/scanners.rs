@@ -596,8 +596,8 @@ pub(crate) fn scan_similar_videos<H: ScanResultHandler>(
     scan_id: u32,
 ) -> Vec<FileItem> {
     use czkawka_core::tools::similar_videos::{
-        DEFAULT_CROP_DETECT, DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_FFMPEG_TIMEOUT_SECONDS, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT,
-        DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_VID_HASH_DURATION, DEFAULT_WINDOW_COUNT, SimilarVideos, SimilarVideosParameters, VideosEntry,
+        DEFAULT_CROP_DETECT, DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_FFMPEG_TIMEOUT_SECONDS, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH,
+        DEFAULT_VID_HASH_DURATION, DEFAULT_WINDOW_COUNT, SimilarVideos, SimilarVideosParameters, VideosEntry,
     };
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
     let params = SimilarVideosParameters::new(
