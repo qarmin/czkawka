@@ -1,3 +1,8 @@
+## Version 12.0.2 - 03.09.2026r
+
+### Core
+- Fixed unrelated images that consist of one light and one dark region being grouped as identical - such images produced a perceptual hash encoding only the position of the split, so they collided at distance 0 regardless of hash size - [#2059](https://github.com/qarmin/czkawka/pull/2059)
+
 ## Version 12.0.1 - 29.07.2026r
 
 ### Core
