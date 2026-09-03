@@ -21,7 +21,10 @@ use crate::common::progress_data::{ProgressData, SimilarImagesStage, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
 use crate::common::tool_data::{CommonData, CommonToolData};
 use crate::flc;
-use crate::tools::similar_images::{GeometricInvariance, Hamming, ImHash, ImagesEntry, SIMILAR_VALUES, SimilarImages, SimilarImagesParameters, SimilarityPreset};
+use crate::tools::similar_images::{
+    GeometricInvariance, Hamming, ImHash, ImagesEntry, MIN_DISTINCT_HASH_LINES, MIN_HASH_SIZE_FOR_STRUCTURE_CHECK, SIMILAR_VALUES, SimilarImages, SimilarImagesParameters,
+    SimilarityPreset,
+};
 
 impl SimilarImages {
     pub fn new(params: SimilarImagesParameters) -> Self {
@@ -205,7 +208,7 @@ impl SimilarImages {
         let entry_for_map = ImagesEntry { hashes: Vec::new(), ..file_entry };
 
         for hash in hashes {
-            if !Self::is_hash_valid(&hash) {
+            if !Self::is_hash_valid(&hash, self.get_params().hash_size) {
                 continue;
             }
             let vec_entry = self.image_hashes.entry(hash).or_default();
@@ -249,8 +252,11 @@ impl SimilarImages {
         hashes.into_iter().collect()
     }
 
-    fn is_hash_valid(hash: &ImHash) -> bool {
-        !(hash.is_empty() || hash.iter().all(|e| *e == 0) || hash.iter().all(|e| *e == 255))
+    pub(crate) fn is_hash_valid(hash: &ImHash, hash_size: u8) -> bool {
+        if hash.is_empty() || hash.iter().all(|e| *e == 0) || hash.iter().all(|e| *e == 255) {
+            return false;
+        }
+        hash_has_spatial_structure(hash, hash_size)
     }
 
     // Split hashes at 2 parts, base hashes and hashes to compare, 3 argument is set of hashes with multiple images
@@ -758,6 +764,44 @@ impl DisjointSet {
 
 fn is_in_reference_folder(reference_directories: &[PathBuf], path: &Path) -> bool {
     reference_directories.iter().any(|e| path.starts_with(e))
+}
+
+/// Rejects hashes that encode no spatial content.
+///
+/// An image made of one light and one dark region hashes to a bit matrix whose rows (or
+/// columns) are all identical, because every block on one side of the split lands on the
+/// same side of the algorithm's threshold and the actual content never crosses it. Such a
+/// hash records only where the split is, so unrelated images collide at distance 0.
+///
+/// Only square `hash_size x hash_size` layouts can be inspected this way, and only from
+/// hash size 16 up - an 8x8 matrix has too few lines to tell a degenerate hash from a
+/// legitimately simple image.
+fn hash_has_spatial_structure(hash: &ImHash, hash_size: u8) -> bool {
+    let side = hash_size as usize;
+    if hash_size < MIN_HASH_SIZE_FOR_STRUCTURE_CHECK || side > u64::BITS as usize || hash.len() * 8 != side * side {
+        return true;
+    }
+
+    let mut rows: Vec<u64> = Vec::with_capacity(side);
+    let mut columns: Vec<u64> = vec![0; side];
+    for row_idx in 0..side {
+        let mut row = 0;
+        for (col_idx, column) in columns.iter_mut().enumerate() {
+            let bit_idx = row_idx * side + col_idx;
+            let byte = hash.get(bit_idx / 8).copied().unwrap_or_default();
+            let bit = u64::from((byte >> (7 - (bit_idx % 8))) & 1);
+            row = (row << 1) | bit;
+            *column = (*column << 1) | bit;
+        }
+        rows.push(row);
+    }
+
+    rows.sort_unstable();
+    rows.dedup();
+    columns.sort_unstable();
+    columns.dedup();
+
+    rows.len() >= MIN_DISTINCT_HASH_LINES && columns.len() >= MIN_DISTINCT_HASH_LINES
 }
 
 #[expect(clippy::indexing_slicing)] // Because hash size is validated before

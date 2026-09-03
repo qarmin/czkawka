@@ -23,6 +23,12 @@ use crate::common::traits::ResultEntry;
 type ImHash = Vec<u8>;
 
 // 40 is a little useless in 8 similarity - but this value is kept to simplify harder Krokiet max value calculations
+// Hash sizes below this have too few rows/columns for the structure check in
+// `hash_has_spatial_structure` to separate a degenerate hash from a simple image.
+pub(crate) const MIN_HASH_SIZE_FOR_STRUCTURE_CHECK: u8 = 16;
+// Distinct rows and columns a square hash must have to be considered to carry content.
+pub(crate) const MIN_DISTINCT_HASH_LINES: usize = 4;
+
 pub const SIMILAR_VALUES: [[u32; 6]; 4] = [
     [1, 2, 5, 7, 14, 40],    // 8
     [2, 5, 15, 30, 40, 40],  // 16
