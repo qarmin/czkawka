@@ -1,7 +1,6 @@
 Icons
 icons/*
-res/*
-ui/icons/*
+res/**/*
 
 Copyright (c) 2020-2026 Rafał Mikrut
 
