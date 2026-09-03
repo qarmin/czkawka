@@ -1,3 +1,9 @@
+## Version 12.0.2 - 02.09.2026r
+
+### Krokiet
+- Added a resizable bottom panel - the included/excluded paths section can now be dragged to any height and its size is remembered between restarts - [#2058](https://github.com/qarmin/czkawka/pull/2058)
+- Added an "Exclude" button, that adds all selected items to the excluded paths list at once, instead of excluding them one by one from the context menu - [#2058](https://github.com/qarmin/czkawka/pull/2058)
+
 ## Version 12.0.1 - 29.07.2026r
 
 ### Core
