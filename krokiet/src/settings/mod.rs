@@ -22,8 +22,8 @@ use crate::connect_translation::change_language;
 use crate::settings::combo_box::StringComboBoxItems;
 use crate::settings::model::{
     BasicSettings, ComboBoxItems, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT,
-    DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX,
-    SettingsCustom, default_video_optimizer_black_bar_min_percentage, default_video_optimizer_black_pixel_threshold, default_video_optimizer_max_samples,
+    DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, MIN_BOTTOM_PANEL_HEIGHT, PRESET_NAME_RESERVED, PRESET_NUMBER,
+    RESERVER_PRESET_IDX, SettingsCustom, default_video_optimizer_black_bar_min_percentage, default_video_optimizer_black_pixel_threshold, default_video_optimizer_max_samples,
     default_video_optimizer_min_crop_size,
 };
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
@@ -273,6 +273,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     if basic_settings.settings_load_windows_size_at_startup {
         app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
     }
+    settings.set_bottom_panel_height(basic_settings.bottom_panel_height.clamp(MIN_BOTTOM_PANEL_HEIGHT, 4000.0));
     settings.set_dark_theme(basic_settings.dark_theme);
     settings.set_show_only_icons(basic_settings.show_only_icons);
     app.global::<Callabler>().invoke_theme_changed();
@@ -993,6 +994,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         preset_names,
         window_width,
         window_height,
+        bottom_panel_height: settings.get_bottom_panel_height(),
         dark_theme,
         show_only_icons,
         settings_load_tabs_sizes_at_startup,
