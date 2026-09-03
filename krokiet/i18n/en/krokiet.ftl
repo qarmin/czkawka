@@ -80,6 +80,9 @@ rust_optimize_video_confirmation_number_simple = { $items } items selected.
 
 rust_hardlink_confirmation = Are you sure you want to create hardlinks for the selected items?
 rust_hardlink_confirmation_number_simple = { $items } items selected.
+rust_exclude_confirmation = Are you sure you want to permanently exclude the selected items from future scans? They will be added to the excluded paths list.
+rust_exclude_confirmation_number_simple = { $items } items selected.
+rust_exclude_summary = Excluded { $items } items from future scans
 
 rust_symlink_confirmation = Are you sure you want to create symlinks for the selected items?
 rust_symlink_confirmation_number_simple = { $items } items selected.
@@ -463,6 +466,9 @@ hardlink_confirmation_text = Are you sure you want to create hardlinks for the s
 softlink_button_text = Softlink
 softlink_text = Create softlinks
 softlink_confirmation_text = Are you sure you want to create softlinks (symlinks) for the selected items?
+exclude_button_text = Exclude
+exclude_text = Exclude items
+exclude_confirmation_text = Are you sure you want to permanently exclude the selected items from future scans?
 popup_custom_select_title_text = Custom Select / Unselect
 popup_custom_select_button_text = Select
 popup_custom_unselect_button_text = Unselect

@@ -440,6 +440,20 @@ export component MainWindow inherits Window {
         }
     }
 
+    exclude_popup_window := PopupActionConfirm {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.exclude_text;
+        confirmation_text: Translations.exclude_confirmation_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed => {
+            Callabler.exclude_items();
+        }
+    }
+
     if GuiState.compare_visible: ImageCompareOverlay {
         x: 0;
         y: 0;
@@ -535,6 +549,8 @@ export component MainWindow inherits Window {
             rename_bad_file_name_popup_window.show_popup();
         } else if (request == PopupRequest.Hardlink) {
             hardlink_popup_window.show_popup();
+        } else if (request == PopupRequest.Exclude) {
+            exclude_popup_window.show_popup();
         } else if (request == PopupRequest.Save) {
             save_popup_window.show_popup();
         } else {
