@@ -117,11 +117,9 @@ fn test_similar_images_exclude_same_directory() {
     std::fs::create_dir(&dir_b).unwrap();
     std::fs::create_dir(&dir_c).unwrap();
 
-    // Group fully contained in dir_a - should be dropped entirely when the filter is on.
     let base = create_asymmetric_test_image(&dir_a.join("image1.png"));
     base.save(dir_a.join("image2.png")).expect("Failed to save second copy in dir_a");
 
-    // Group spanning dir_b and dir_c - should survive untouched (both entries kept).
     let flipped = base.fliph();
     flipped.save(dir_b.join("image3.png")).expect("Failed to save copy in dir_b");
     flipped.save(dir_c.join("image4.png")).expect("Failed to save copy in dir_c");

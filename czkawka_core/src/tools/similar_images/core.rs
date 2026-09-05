@@ -586,9 +586,6 @@ impl SimilarImages {
         }
     }
 
-    // Drops entire groups whose members all live in the same directory (e.g. burst-shot
-    // sequences), instead of deduplicating individual entries like the size/resolution filters
-    // above - a group is only useful here if it points across directories.
     #[fun_time(message = "exclude_items_with_same_directory", level = "debug")]
     fn exclude_items_with_same_directory(&mut self) {
         if self.get_params().exclude_images_with_same_directory {
