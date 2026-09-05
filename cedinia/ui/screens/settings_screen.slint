@@ -423,6 +423,13 @@ export component SettingsScreen {
                     Divider {}
 
                     ToggleRow {
+                        label: Translations.settings_ignore_same_directory_text;
+                        description: Translations.settings_ignore_same_directory_desc_text;
+                        value <=> SimilarImagesSettings.ignore_same_directory;
+                    }
+                    Divider {}
+
+                    ToggleRow {
                         label: Translations.settings_gallery_image_fit_cover_text;
                         description: Translations.settings_gallery_image_fit_cover_desc_text;
                         value <=> SimilarImagesSettings.gallery_image_fit_cover;

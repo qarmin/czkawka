@@ -189,6 +189,7 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     geometric_invariance: czkawka_core::tools::similar_images::GeometricInvariance,
     ignore_same_size: bool,
     ignore_same_resolution: bool,
+    ignore_same_directory: bool,
     filters: &CommonFilters,
     stop: &Arc<AtomicBool>,
     handler: &Arc<H>,
@@ -197,7 +198,16 @@ pub(crate) fn scan_similar_images<H: ScanResultHandler>(
     use czkawka_core::tools::similar_images::{ImagesEntry, SimilarImages, SimilarImagesParameters, return_similarity_from_similarity_preset};
     let max_diff = return_similarity_from_similarity_preset(similarity_preset, hash_size);
     let (ptx, fwd) = spawn_progress_forwarder(Arc::clone(handler), scan_id);
-    let params = SimilarImagesParameters::new(max_diff, hash_size, hash_alg, image_filter, ignore_same_size, ignore_same_resolution, geometric_invariance);
+    let params = SimilarImagesParameters::new(
+        max_diff,
+        hash_size,
+        hash_alg,
+        image_filter,
+        ignore_same_size,
+        ignore_same_resolution,
+        ignore_same_directory,
+        geometric_invariance,
+    );
     let mut tool = SimilarImages::new(params);
     tool.set_included_paths(dirs);
     apply_filters(&mut tool, filters);

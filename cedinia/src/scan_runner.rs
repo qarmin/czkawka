@@ -82,6 +82,7 @@ pub enum ScanRequest {
         geometric_invariance: GeometricInvariance,
         ignore_same_size: bool,
         ignore_same_resolution: bool,
+        ignore_same_directory: bool,
         filters: CommonFilters,
     },
     EmptyFiles {
@@ -244,6 +245,7 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                 geometric_invariance,
                 ignore_same_size,
                 ignore_same_resolution,
+                ignore_same_directory,
                 filters,
             } => {
                 let items = scan_similar_images(
@@ -255,6 +257,7 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                     geometric_invariance,
                     ignore_same_size,
                     ignore_same_resolution,
+                    ignore_same_directory,
                     &filters,
                     stop_flag,
                     &handler,

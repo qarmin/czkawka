@@ -121,6 +121,7 @@ pub struct SimilarImagesParameters {
     pub image_filter: FilterType,
     pub exclude_images_with_same_size: bool,
     pub exclude_images_with_same_resolution: bool,
+    pub exclude_images_with_same_directory: bool,
     pub geometric_invariance: GeometricInvariance,
 }
 
@@ -132,6 +133,7 @@ impl SimilarImagesParameters {
         image_filter: FilterType,
         exclude_images_with_same_size: bool,
         exclude_images_with_same_resolution: bool,
+        exclude_images_with_same_directory: bool,
         geometric_invariance: GeometricInvariance,
     ) -> Self {
         assert!([8, 16, 32, 64].contains(&hash_size));
@@ -142,6 +144,7 @@ impl SimilarImagesParameters {
             image_filter,
             exclude_images_with_same_size,
             exclude_images_with_same_resolution,
+            exclude_images_with_same_directory,
             geometric_invariance,
         }
     }

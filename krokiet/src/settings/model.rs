@@ -100,6 +100,8 @@ pub struct SettingsCustom {
     pub similar_images_sub_ignore_same_size: bool,
     #[serde(default)]
     pub similar_images_sub_ignore_same_resolution: bool,
+    #[serde(default)]
+    pub similar_images_sub_ignore_same_directory: bool,
     #[serde(default = "default_image_similarity")]
     pub similar_images_sub_similarity: i32,
     #[serde(default = "default_duplicates_check_method")]
