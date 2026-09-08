@@ -24,6 +24,8 @@ use file_actions::connect_rename::connect_rename;
 use file_actions::connect_symlink::connect_symlink;
 use log::{error, info};
 use slint::VecModel;
+use slint::platform::set_platform;
+use i_slint_backend_winit::Backend;
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
 use crate::connect_build_info::{apply_build_info, connect_build_info, start_build_info_background_probes};
@@ -93,6 +95,9 @@ mod ui {
 pub use ui::*;
 
 fn main() {
+    let backend = Backend::new().unwrap();
+    set_platform(Box::new(backend)).unwrap();
+    slint::set_xdg_app_id("krokiet").unwrap();
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
