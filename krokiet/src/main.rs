@@ -30,6 +30,7 @@ use crate::connect_build_info::{apply_build_info, connect_build_info, start_buil
 use crate::connect_clean_cache::connect_clean_cache;
 use crate::connect_compare::connect_compare;
 use crate::connect_directories_changes::connect_add_remove_directories;
+use crate::connect_exclude::connect_exclude;
 use crate::connect_open::connect_open_items;
 use crate::connect_progress_receiver::connect_progress_gathering;
 use crate::connect_row_selection::connect_row_selections;
@@ -58,6 +59,7 @@ mod connect_build_info;
 mod connect_clean_cache;
 mod connect_compare;
 mod connect_directories_changes;
+mod connect_exclude;
 mod connect_open;
 mod connect_progress_receiver;
 mod connect_rfd;
@@ -168,6 +170,7 @@ fn main() {
     connect_symlink(&app, progress_sender, stop_flag);
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);
+    connect_exclude(&app);
     connect_sort(&app);
     connect_sort_column(&app);
     let (task_sender, task_receiver) = std::sync::mpsc::channel();

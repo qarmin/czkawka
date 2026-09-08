@@ -275,6 +275,9 @@ fn translate_items(app: &MainWindow) {
     translation.set_optimize_noise_reduction_hint_text(flk!("optimize_noise_reduction_hint").into());
     translation.set_optimize_noise_reduction_strength_hint_text(flk!("optimize_noise_reduction_strength_hint").into());
     translation.set_hardlink_button_text(flk!("hardlink_button_text").into());
+    translation.set_exclude_button_text(flk!("exclude_button_text").into());
+    translation.set_exclude_text(flk!("exclude_text").into());
+    translation.set_exclude_confirmation_text(flk!("exclude_confirmation_text").into());
     translation.set_hardlink_text(flk!("hardlink_text").into());
     translation.set_hardlink_confirmation_text(flk!("hardlink_confirmation_text").into());
     translation.set_softlink_button_text(flk!("softlink_button_text").into());

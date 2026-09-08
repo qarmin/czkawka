@@ -35,6 +35,9 @@ pub const DEFAULT_MINIMAL_FRAGMENT_DURATION_VALUE: f32 = 5.0;
 pub const MAX_HASH_SIZE: f32 = 40.0;
 pub const DEFAULT_WINDOW_WIDTH: u32 = 800;
 pub const DEFAULT_WINDOW_HEIGHT: u32 = 600;
+pub const DEFAULT_BOTTOM_PANEL_HEIGHT: f32 = 150.0;
+// Keeps the panel usable after a restart, mirrors min_panel_height of the splitter in main_window.slint
+pub const MIN_BOTTOM_PANEL_HEIGHT: f32 = 80.0;
 pub const DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT: u8 = 1;
 pub const DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT: u8 = 99;
 
@@ -320,6 +323,8 @@ pub struct BasicSettings {
     pub window_width: u32,
     #[serde(default = "default_window_height")]
     pub window_height: u32,
+    #[serde(default = "default_bottom_panel_height")]
+    pub bottom_panel_height: f32,
     #[serde(default = "detect_language")]
     pub language: String,
     #[serde(default = "ttrue")]
@@ -540,6 +545,9 @@ pub(crate) fn default_window_width() -> u32 {
 }
 pub(crate) fn default_window_height() -> u32 {
     DEFAULT_WINDOW_HEIGHT
+}
+pub(crate) fn default_bottom_panel_height() -> f32 {
+    DEFAULT_BOTTOM_PANEL_HEIGHT
 }
 pub(crate) fn default_video_optimizer_mode() -> String {
     "transcode".to_string()

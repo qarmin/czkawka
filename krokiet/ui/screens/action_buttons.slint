@@ -264,6 +264,18 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
+    exclude_button := Button {
+        visible: lists_enabled;
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.exclude_button_text;
+        icon: @image-url("../../icons/krokiet_exclude.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Exclude);
+        }
+    }
+
     Rectangle {
         horizontal-stretch: 0.5;
     }

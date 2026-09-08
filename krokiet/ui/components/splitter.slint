@@ -1,0 +1,39 @@
+import { ColorPalette } from "../globals/color_palette.slint";
+
+// Drag bar resizing the panel placed below it - dragging up grows the panel, dragging down shrinks it.
+export component HorizontalSplitter inherits Rectangle {
+    in-out property <length> panel_height;
+    in property <length> min_panel_height: 80px;
+    in property <length> max_panel_height: 100000px;
+
+    // Height when the drag started, so the panel follows the cursor instead of accelerating
+    private property <length> panel_height_at_press;
+
+    height: 7px;
+    background: touch_area.pressed || touch_area.has-hover ? ColorPalette.splitter_hovered_color : ColorPalette.splitter_color;
+
+    Rectangle {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        width: 40px;
+        height: 3px;
+        border-radius: 1.5px;
+        background: ColorPalette.splitter_grip_color;
+    }
+
+    touch_area := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        mouse-cursor: ns-resize;
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                root.panel_height_at_press = root.panel_height;
+            }
+        }
+        moved => {
+            if (self.pressed) {
+                root.panel_height = min(max(root.panel_height_at_press - (self.mouse-y - self.pressed-y), root.min_panel_height), root.max_panel_height);
+            }
+        }
+    }
+}

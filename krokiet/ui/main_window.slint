@@ -2,7 +2,7 @@ import { HorizontalBox, LineEdit, Palette, VerticalBox } from "std-widgets.slint
 import { FontSizes } from "globals/fonts.slint";
 import { LeftSidePanel } from "screens/left_side_panel.slint";
 import { MainList } from "screens/main_lists.slint";
-import { ActiveTab, PopupRequest, ProgressToSend, SingleMainListModel } from "globals/common.slint";
+import { ActiveTab, BottomPanelVisibility, PopupRequest, ProgressToSend, SingleMainListModel } from "globals/common.slint";
 import { ActionButtons } from "screens/action_buttons.slint";
 import { Progress } from "screens/progress.slint";
 import { Settings } from "globals/settings.slint";
@@ -10,6 +10,7 @@ import { Callabler } from "globals/callabler.slint";
 import { BottomPanel } from "screens/bottom_panel.slint";
 import { GuiState } from "globals/gui_state.slint";
 import { Preview } from "components/preview.slint";
+import { HorizontalSplitter } from "components/splitter.slint";
 import { PopupNewDirectories } from "popups/popup_new_directories.slint";
 import { PopupDelete } from "popups/popup_delete.slint";
 import { PopupTrash } from "popups/popup_trash.slint";
@@ -60,6 +61,12 @@ export component MainWindow inherits Window {
     preferred-width: 800px;
     min-height: 300px;
     preferred-height: 600px;
+    // Space that must stay free for the results list, buttons and summary row
+    property <length> bottom_panel_max_height: max(80px, root.height - 250px);
+    // Clamping in the height binding of the panel instead would form a binding loop through layoutinfo
+    changed height => {
+        Settings.bottom_panel_height = min(Settings.bottom_panel_height, root.bottom_panel_max_height);
+    }
     in-out property <string> text_summary_text: "";
     in-out property <bool> stop_requested: false;
     in-out property <bool> scanning: false;
@@ -159,6 +166,12 @@ export component MainWindow inherits Window {
             }
         }
 
+        if GuiState.bottom_panel_visibility != BottomPanelVisibility.NotVisible: HorizontalSplitter {
+            vertical-stretch: 0.0;
+            panel_height <=> Settings.bottom_panel_height;
+            max_panel_height: root.bottom_panel_max_height;
+        }
+
         action_buttons := ActionButtons {
             duplicate_files_model <=> root.duplicate_files_model;
             empty_folder_model <=> root.empty_folder_model;
@@ -222,6 +235,7 @@ export component MainWindow inherits Window {
         bottom_panel := BottomPanel {
             bottom_panel_visibility <=> action_buttons.bottom_panel_visibility;
             vertical-stretch: 0.0;
+            height: self.bottom_panel_visibility == BottomPanelVisibility.NotVisible ? 0px : Settings.bottom_panel_height;
             folder_choose_requested(included_paths) => {
                 root.folder_choose_requested(included_paths)
             }
@@ -426,6 +440,20 @@ export component MainWindow inherits Window {
         }
     }
 
+    exclude_popup_window := PopupActionConfirm {
+        height: root.height;
+        width: root.width;
+        title_text: Translations.exclude_text;
+        confirmation_text: Translations.exclude_confirmation_text;
+
+        x: parent.x + (root.width - self.popup_width) / 2.0;
+        y: parent.y + (parent.height - self.popup_height) / 2.0;
+
+        action_confirmed => {
+            Callabler.exclude_items();
+        }
+    }
+
     if GuiState.compare_visible: ImageCompareOverlay {
         x: 0;
         y: 0;
@@ -521,6 +549,8 @@ export component MainWindow inherits Window {
             rename_bad_file_name_popup_window.show_popup();
         } else if (request == PopupRequest.Hardlink) {
             hardlink_popup_window.show_popup();
+        } else if (request == PopupRequest.Exclude) {
+            exclude_popup_window.show_popup();
         } else if (request == PopupRequest.Save) {
             save_popup_window.show_popup();
         } else {
