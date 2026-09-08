@@ -163,11 +163,26 @@ pub fn make_hard_link<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::Res
             fs::remove_file(&temp)?;
             Ok(())
         }
-        Err(e) => {
-            let _ = fs::rename(&temp, dst);
-            Err(describe_hardlink_error(e, dst))
-        }
+        Err(e) => Err(recover_from_failed_link(&temp, dst, describe_hardlink_error(e, dst))),
     }
+}
+
+// After moving the original `dst` aside to `temp`, the hardlink/symlink creation failed. Move the
+// original back. If that rollback rename also fails, the original file is now orphaned at `temp`;
+// returning only the primary error would hide that (silent data loss, issue #1991), so fold the
+// rollback failure and the temp location into the returned error.
+fn recover_from_failed_link(temp: &Path, dst: &Path, primary_error: io::Error) -> io::Error {
+    let Err(rollback_error) = fs::rename(temp, dst) else {
+        return primary_error;
+    };
+    Error::new(
+        primary_error.kind(),
+        format!(
+            "{primary_error}; original file could not be restored and is now left at \"{}\" (rename back to \"{}\" failed: {rollback_error})",
+            temp.to_string_lossy(),
+            dst.to_string_lossy()
+        ),
+    )
 }
 
 // rclone/network/FUSE mounts and cross-device targets can't hold a hard link; the bare
@@ -214,10 +229,7 @@ pub fn make_file_symlink<P: AsRef<Path>, Q: AsRef<Path>>(src: P, dst: Q) -> io::
             fs::remove_file(&temp)?;
             Ok(())
         }
-        Err(e) => {
-            let _ = fs::rename(&temp, dst);
-            Err(e)
-        }
+        Err(e) => Err(recover_from_failed_link(&temp, dst, e)),
     }
 }
 
@@ -257,5 +269,39 @@ mod tests {
 
         assert_eq!(described.kind(), ErrorKind::PermissionDenied);
         assert_eq!(described.to_string(), "Permission denied");
+    }
+
+    #[test]
+    fn recover_from_failed_link_returns_primary_error_when_rollback_succeeds() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let temp = dir.path().join("orig.czkawka_tmp");
+        let dst = dir.path().join("orig");
+        fs::write(&temp, b"original contents").expect("write temp");
+
+        let returned = recover_from_failed_link(&temp, &dst, Error::new(ErrorKind::Unsupported, "hard_link failed"));
+
+        // Rollback succeeded: the original file is back at dst, temp is gone, and the caller sees
+        // the unchanged primary error.
+        assert_eq!(returned.kind(), ErrorKind::Unsupported);
+        assert_eq!(returned.to_string(), "hard_link failed");
+        assert_eq!(fs::read(&dst).expect("dst restored"), b"original contents");
+        assert!(!temp.exists(), "temp should have been renamed back to dst");
+    }
+
+    #[test]
+    fn recover_from_failed_link_reports_orphaned_file_when_rollback_fails() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        // temp does not exist, so the rollback rename fails deterministically on every platform.
+        let temp = dir.path().join("orig.czkawka_tmp");
+        let dst = dir.path().join("orig");
+
+        let returned = recover_from_failed_link(&temp, &dst, Error::new(ErrorKind::Unsupported, "hard_link failed"));
+
+        assert_eq!(returned.kind(), ErrorKind::Unsupported);
+        let message = returned.to_string();
+        assert!(message.contains("hard_link failed"), "missing primary error in: {message}");
+        assert!(message.contains("orig.czkawka_tmp"), "missing orphaned temp path in: {message}");
+        assert!(message.contains("could not be restored"), "missing recovery note in: {message}");
+        assert!(!dst.exists(), "dst must not be created when rollback fails");
     }
 }
