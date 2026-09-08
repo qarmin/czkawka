@@ -434,6 +434,11 @@ export component ToolSettings {
                 }
 
                 CheckBoxWrapper {
+                    text: Translations.subsettings_music_album_text;
+                    checked <=> Settings.similar_music_sub_album;
+                }
+
+                CheckBoxWrapper {
                     text: Translations.subsettings_music_bitrate_text;
                     checked <=> Settings.similar_music_sub_bitrate;
                 }

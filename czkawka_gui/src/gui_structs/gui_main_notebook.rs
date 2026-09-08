@@ -79,6 +79,7 @@ pub struct GuiMainNotebook {
     // Music
     pub check_button_music_title: CheckButton,
     pub check_button_music_artist: CheckButton,
+    pub check_button_music_album: CheckButton,
     pub check_button_music_year: CheckButton,
     pub check_button_music_bitrate: CheckButton,
     pub check_button_music_genre: CheckButton,
@@ -109,6 +110,7 @@ impl GuiMainNotebook {
         let check_button_duplicate_case_sensitive_name: CheckButton = builder.object("check_button_duplicate_case_sensitive_name").expect("Cambalache");
         let check_button_music_title: CheckButton = builder.object("check_button_music_title").expect("Cambalache");
         let check_button_music_artist: CheckButton = builder.object("check_button_music_artist").expect("Cambalache");
+        let check_button_music_album: CheckButton = builder.object("check_button_music_album").expect("Cambalache");
         let check_button_music_year: CheckButton = builder.object("check_button_music_year").expect("Cambalache");
         let check_button_music_bitrate: CheckButton = builder.object("check_button_music_bitrate").expect("Cambalache");
         let check_button_music_genre: CheckButton = builder.object("check_button_music_genre").expect("Cambalache");
@@ -221,6 +223,7 @@ impl GuiMainNotebook {
             check_button_broken_files_video,
             check_button_music_title,
             check_button_music_artist,
+            check_button_music_album,
             check_button_music_year,
             check_button_music_bitrate,
             check_button_music_genre,
@@ -245,6 +248,7 @@ impl GuiMainNotebook {
         self.check_button_duplicate_case_sensitive_name.set_label(Some(&flg!("duplicate_case_sensitive_name")));
         self.check_button_music_title.set_label(Some(&flg!("music_title_checkbox")));
         self.check_button_music_artist.set_label(Some(&flg!("music_artist_checkbox")));
+        self.check_button_music_album.set_label(Some(&flg!("music_album_checkbox")));
         self.check_button_music_year.set_label(Some(&flg!("music_year_checkbox")));
         self.check_button_music_bitrate.set_label(Some(&flg!("music_bitrate_checkbox")));
         self.check_button_music_genre.set_label(Some(&flg!("music_genre_checkbox")));
