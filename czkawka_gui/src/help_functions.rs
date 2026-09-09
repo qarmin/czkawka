@@ -170,8 +170,6 @@ pub(crate) fn scale_step_function(scale: &Scale, _scroll_type: ScrollType, value
 mod test {
     use std::path::PathBuf;
 
-    use gtk4::prelude::*;
-
     use super::*;
 
     #[test]

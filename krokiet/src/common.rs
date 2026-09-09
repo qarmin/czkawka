@@ -2,6 +2,7 @@
 
 use std::path::PathBuf;
 
+use czkawka_core::common::model::ToolType;
 use num_enum::TryFromPrimitive;
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 
@@ -654,6 +655,26 @@ impl ActiveTab {
             Self::ExifRemover => app.set_exif_remover_model(model),
             Self::VideoOptimizer => app.set_video_optimizer_model(model),
             Self::Settings | Self::About => panic!("Button should be disabled"),
+        }
+    }
+
+    pub(crate) fn from_tool_type(tool: ToolType) -> Self {
+        match tool {
+            ToolType::Duplicate => Self::DuplicateFiles,
+            ToolType::EmptyFolders => Self::EmptyFolders,
+            ToolType::EmptyFiles => Self::EmptyFiles,
+            ToolType::InvalidSymlinks => Self::InvalidSymlinks,
+            ToolType::BrokenFiles => Self::BrokenFiles,
+            ToolType::BadExtensions => Self::BadExtensions,
+            ToolType::BadNames => Self::BadNames,
+            ToolType::BigFile => Self::BigFiles,
+            ToolType::SameMusic => Self::SimilarMusic,
+            ToolType::SimilarImages => Self::SimilarImages,
+            ToolType::SimilarVideos => Self::SimilarVideos,
+            ToolType::TemporaryFiles => Self::TemporaryFiles,
+            ToolType::ExifRemover => Self::ExifRemover,
+            ToolType::VideoOptimizer => Self::VideoOptimizer,
+            ToolType::None => panic!("CLI tool parsing never produces ToolType::None"),
         }
     }
 }
