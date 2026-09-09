@@ -1,3 +1,17 @@
+## Version 12.0.2 - 09.09.2026r
+
+### Core
+- Surfaced rollback rename failures in `make_hard_link`/`make_file_symlink` instead of silently ignoring them - [#1995](https://github.com/qarmin/czkawka/pull/1995)
+- Switched the XDG portal trash implementation to `async-io`, avoiding a Tokio runtime requirement alongside Slint's async-io backend - [#2025](https://github.com/qarmin/czkawka/pull/2025)
+- Fixed the AVIF license metadata - [#2060](https://github.com/qarmin/czkawka/pull/2060)
+
+### CLI
+- Rejected non-finite user input (e.g. `NaN`/`inf`) in numeric arguments - [#2038](https://github.com/qarmin/czkawka/pull/2038)
+- Added the ability to start a scan in Krokiet via CLI arguments - [#2069](https://github.com/qarmin/czkawka/pull/2069)
+
+### Krokiet
+- Fixed popup OK/Close button text truncation and centered popups more reasonably - [#2043](https://github.com/qarmin/czkawka/pull/2043)
+
 ## Version 12.0.1 - 29.07.2026r
 
 ### Core
