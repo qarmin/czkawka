@@ -4,6 +4,7 @@
 - Surfaced rollback rename failures in `make_hard_link`/`make_file_symlink` instead of silently ignoring them - [#1995](https://github.com/qarmin/czkawka/pull/1995)
 - Switched the XDG portal trash implementation to `async-io`, avoiding a Tokio runtime requirement alongside Slint's async-io backend - [#2025](https://github.com/qarmin/czkawka/pull/2025)
 - Fixed the AVIF license metadata - [#2060](https://github.com/qarmin/czkawka/pull/2060)
+- Fixed the AVIF tests - [#2061](https://github.com/qarmin/czkawka/pull/2061)
 
 ### CLI
 - Rejected non-finite user input (e.g. `NaN`/`inf`) in numeric arguments - [#2038](https://github.com/qarmin/czkawka/pull/2038)
