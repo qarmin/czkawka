@@ -62,11 +62,7 @@ pub(crate) fn parse_audio_similarity_percent(src: &str) -> Result<f64, String> {
 
 pub(crate) fn parse_audio_maximum_difference(src: &str) -> Result<f64, String> {
     let v = parse_f64_finite(src)?;
-    if v >= 0.0 {
-        Ok(v)
-    } else {
-        Err("Audio maximum difference must be >= 0.0".to_string())
-    }
+    if v >= 0.0 { Ok(v) } else { Err("Audio maximum difference must be >= 0.0".to_string()) }
 }
 
 pub(crate) fn parse_audio_length_ratio(src: &str) -> Result<f64, String> {
@@ -369,8 +365,8 @@ mod tests {
             assert!(parse_match_fraction(value).is_err(), "value {value:?} should be rejected");
         }
 
-        assert!(parse_minimum_segment_duration("-inf").is_err());
-        assert!(parse_audio_similarity_percent("nan").is_err());
-        assert!(parse_match_fraction("inf").is_err());
+        parse_minimum_segment_duration("-inf").unwrap_err();
+        parse_audio_similarity_percent("nan").unwrap_err();
+        parse_match_fraction("inf").unwrap_err();
     }
 }
