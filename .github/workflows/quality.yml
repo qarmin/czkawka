@@ -19,9 +19,10 @@ jobs:
       - name: Install Gtk 4
         run: sudo apt update || true; sudo apt install -y libgtk-4-dev libraw-dev libheif-dev libavif-dev libdav1d-dev libasound2-dev -y
 
+      # Bumped from MSRV 1.94.1 to 1.98.0 - rustfmt in 1.94.1 has a formatting regression.
       - name: Setup rust version
         run: |
-          rustup default 1.94.1
+          rustup default 1.98.0
           rustup component add rustfmt
           rustup component add clippy
 
