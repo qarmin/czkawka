@@ -247,6 +247,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         allow_hard_links,
         ignore_same_size,
         ignore_same_resolution,
+        ignore_same_directory,
     } = similar_images;
 
     validate_file_sizes(minimal_file_size, maximal_file_size);
@@ -258,6 +259,7 @@ fn similar_images(similar_images: SimilarImagesArgs, stop_flag: &Arc<AtomicBool>
         image_filter,
         ignore_same_size.ignore_same_size,
         ignore_same_resolution.ignore_same_resolution,
+        ignore_same_directory.ignore_same_directory,
         geometric_invariance,
     );
     let mut tool = SimilarImages::new(params);

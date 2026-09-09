@@ -292,6 +292,7 @@ let params = SimilarImagesParameters::new(
     FilterType::Nearest,
     false,                      // exclude_images_with_same_size
     false,                      // exclude_images_with_same_resolution
+    false,                      // exclude_images_with_same_directory
     GeometricInvariance::Off,   // Off | MirrorFlip | MirrorFlipRotate90
 );
 let mut tool = SimilarImages::new(params);

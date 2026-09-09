@@ -323,6 +323,8 @@ pub struct SimilarImagesArgs {
     pub ignore_same_size: IgnoreSameSize,
     #[clap(flatten)]
     pub ignore_same_resolution: IgnoreSameResolution,
+    #[clap(flatten)]
+    pub ignore_same_directory: IgnoreSameDirectory,
     #[clap(
         short = 'g',
         long,
@@ -1157,6 +1159,17 @@ pub struct IgnoreSameResolution {
         long_help = "Within each similar-file group, removes entries that share a resolution (WxH) with another entry in the same group. Groups that shrink to a single entry are discarded."
     )]
     pub ignore_same_resolution: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct IgnoreSameDirectory {
+    #[clap(
+        short = 'Y',
+        long,
+        help = "Hide groups confined to a single directory",
+        long_help = "Discards similar-file groups whose members all live in the same directory (e.g. sequential burst-shot photos). Groups whose members span two or more directories are kept unchanged."
+    )]
+    pub ignore_same_directory: bool,
 }
 
 impl FileToSave {

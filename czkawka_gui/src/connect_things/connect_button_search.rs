@@ -610,6 +610,7 @@ fn similar_image_search(
                 image_filter,
                 ignore_same_size,
                 false, // Not implemented in gtk gui
+                false, // Not implemented in gtk gui
                 geometric_invariance,
             );
             let mut tool = SimilarImages::new(params);

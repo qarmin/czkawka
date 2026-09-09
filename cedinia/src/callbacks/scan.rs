@@ -166,6 +166,7 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
                 geometric_invariance: StringComboBoxItems::value_from_idx(&items.image_geometric_invariance, s.get_geometric_invariance_idx(), GeometricInvariance::Off),
                 ignore_same_size: s.get_ignore_same_size(),
                 ignore_same_resolution: s.get_ignore_same_resolution(),
+                ignore_same_directory: s.get_ignore_same_directory(),
                 filters,
             }
         }

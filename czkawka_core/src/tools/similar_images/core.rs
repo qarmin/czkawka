@@ -526,6 +526,7 @@ impl SimilarImages {
 
         self.exclude_items_with_same_size();
         self.exclude_items_with_same_resolution();
+        self.exclude_items_with_same_directory();
 
         self.remove_multiple_records_from_reference_folders();
 
@@ -582,6 +583,17 @@ impl SimilarImages {
                     self.similar_vectors.push(vec_values);
                 }
             }
+        }
+    }
+
+    #[fun_time(message = "exclude_items_with_same_directory", level = "debug")]
+    fn exclude_items_with_same_directory(&mut self) {
+        if self.get_params().exclude_images_with_same_directory {
+            self.similar_vectors.retain(|vec_file_entry| {
+                let mut directories = vec_file_entry.iter().map(|file_entry| file_entry.path.parent().unwrap_or(Path::new("")));
+                let first_directory = directories.next();
+                directories.any(|directory| Some(directory) != first_directory)
+            });
         }
     }
 
@@ -934,6 +946,7 @@ mod tests {
             image_filter: FilterType::Lanczos3,
             exclude_images_with_same_size: false,
             exclude_images_with_same_resolution: false,
+            exclude_images_with_same_directory: false,
             geometric_invariance: GeometricInvariance::Off,
         }
     }
@@ -1577,7 +1590,7 @@ mod connect_results_tests {
 
     #[test]
     fn test_connect_results_real_case() {
-        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false, GeometricInvariance::Off);
+        let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false, false, GeometricInvariance::Off);
         let _finder = SimilarImages::new(params);
 
         let hash1: ImHash = vec![59, 41, 53, 27, 19, 143, 228, 228];
