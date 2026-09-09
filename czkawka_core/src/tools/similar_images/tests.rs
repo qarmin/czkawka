@@ -326,3 +326,112 @@ fn test_similar_images_avif_striped_pattern_are_all_similar_under_gradient_hash(
     assert_eq!(info.number_of_groups, 1, "All striped AVIFs should be one group under gradient hash");
     assert_eq!(info.number_of_duplicates, 2);
 }
+
+#[cfg(test)]
+mod structureless_hash_tests {
+    use image::{DynamicImage, ImageBuffer, Rgb};
+    use image_hasher::{FilterType, HashAlg, HasherConfig};
+
+    use crate::tools::similar_images::SimilarImages;
+
+    // Two unrelated pictures that share only a hard light/dark vertical split. Blockhash
+    // thresholds every block against the median, so the low contrast detail inside each half
+    // never crosses it and both images hash to the same "one vertical edge" pattern.
+    fn split_tone_image(seed: u32) -> DynamicImage {
+        let buf = ImageBuffer::from_fn(256, 256, |x, y| {
+            let base = if x < 128 { 242 } else { 38 };
+            let detail = ((x * seed + y * (seed + 3)) % 11) as i32;
+            let v = (base + detail).clamp(0, 255) as u8;
+            Rgb([v, v, v])
+        });
+        DynamicImage::ImageRgb8(buf)
+    }
+
+    // Broad shapes plus fine detail and grain, so the hash varies from row to row the way it
+    // does for real pictures. A plain smooth gradient is deliberately not used here: it is
+    // itself close to structureless and would be rejected.
+    fn detailed_image(seed: u32) -> DynamicImage {
+        let buf = ImageBuffer::from_fn(256, 256, |x, y| {
+            let fx = x as f32 / 256.0;
+            let fy = y as f32 / 256.0;
+            let broad = (fx * 3.0 * seed as f32).sin() * (fy * 4.0).cos() * 60.0;
+            let fine = (fx * 37.0).sin() * (fy * 41.0 + seed as f32).cos() * 45.0;
+            let grain = f32::from(u8::try_from((x.wrapping_mul(2_654_435_761_u32.wrapping_add(seed)) ^ y.wrapping_mul(40_503)) % 64).unwrap_or_default()) - 32.0;
+            let v = (broad + fine + grain + 128.0).clamp(0.0, 255.0) as u8;
+            Rgb([v, v, v])
+        });
+        DynamicImage::ImageRgb8(buf)
+    }
+
+    fn hash_of(image: &DynamicImage, hash_size: u32) -> Vec<u8> {
+        HasherConfig::new()
+            .hash_size(hash_size, hash_size)
+            .hash_alg(HashAlg::Blockhash)
+            .resize_filter(FilterType::Lanczos3)
+            .to_hasher()
+            .hash_image(image)
+            .as_bytes()
+            .to_vec()
+    }
+
+    #[test]
+    fn unrelated_split_tone_images_collide_and_are_rejected() {
+        for hash_size in [16_u32, 32, 64] {
+            let first = hash_of(&split_tone_image(1), hash_size);
+            let second = hash_of(&split_tone_image(5), hash_size);
+
+            let distance: u32 = first.iter().zip(&second).map(|(a, b)| (a ^ b).count_ones()).sum();
+            assert_eq!(distance, 0, "unrelated split tone images should collide at hash size {hash_size}");
+
+            assert!(
+                !SimilarImages::is_hash_valid(&first, hash_size as u8),
+                "structureless hash should be rejected at hash size {hash_size}"
+            );
+        }
+    }
+
+    #[test]
+    fn detailed_images_are_kept() {
+        for hash_size in [16_u32, 32, 64] {
+            for seed in 1..=3 {
+                let hash = hash_of(&detailed_image(seed), hash_size);
+                assert!(
+                    SimilarImages::is_hash_valid(&hash, hash_size as u8),
+                    "detailed image should be kept at hash size {hash_size}, seed {seed}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn structure_check_is_skipped_for_small_hashes() {
+        // An 8x8 matrix has too few lines to distinguish a degenerate hash from a simple
+        // image, so the check must not run and must not reject anything there.
+        let hash = hash_of(&split_tone_image(1), 8);
+        assert!(SimilarImages::is_hash_valid(&hash, 8));
+    }
+
+    #[test]
+    fn uniform_hashes_are_still_rejected() {
+        assert!(!SimilarImages::is_hash_valid(&vec![0_u8; 128], 32));
+        assert!(!SimilarImages::is_hash_valid(&vec![255_u8; 128], 32));
+        assert!(!SimilarImages::is_hash_valid(&Vec::new(), 32));
+    }
+
+    #[test]
+    fn non_square_hash_layout_is_left_alone() {
+        // DoubleGradient does not produce a hash_size x hash_size matrix, so the structural
+        // check cannot interpret it and must pass it through.
+        let image = split_tone_image(1);
+        let hash = HasherConfig::new()
+            .hash_size(32, 32)
+            .hash_alg(HashAlg::DoubleGradient)
+            .resize_filter(FilterType::Lanczos3)
+            .to_hasher()
+            .hash_image(&image)
+            .as_bytes()
+            .to_vec();
+        assert_ne!(hash.len() * 8, 32 * 32, "DoubleGradient is expected to use a different layout");
+        assert!(SimilarImages::is_hash_valid(&hash, 32));
+    }
+}
