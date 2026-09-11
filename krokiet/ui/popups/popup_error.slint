@@ -6,14 +6,16 @@ import { PopupCenteredText } from "../components/popup_centered_text.slint";
 // Used to make failed actions (e.g. a rename that could not be completed) visible to the user,
 // instead of only logging them to the console / hidden bottom panel.
 export component PopupError inherits Rectangle {
-    out property <length> popup_width: 450px;
-    out property <length> popup_height: 190px;
+    private property <length> popup_width: 450px;
+    private property <length> popup_min_height: 190px;
     private property <string> message_text;
     callback show_popup(string);
 
     popup_window := PopupBase {
         width: popup_width;
-        height: popup_height;
+        popup_min_height: popup_min_height;
+        x: (parent.width - popup_width) / 2.0;
+        y: (parent.height - self.height) / 2.0;
         title_text <=> Translations.popup_error_title_text;
         show_cancel_button: false;
 

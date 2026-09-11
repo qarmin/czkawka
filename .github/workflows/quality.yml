@@ -31,7 +31,9 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
 
       - name: Check the format
-        run: cargo fmt --all -- --check
+        run: |
+          cargo fmt --version
+          cargo fmt --all -- --check
 
       - name: Run clippy
         run: |

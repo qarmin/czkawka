@@ -3,6 +3,7 @@ use std::process;
 use log::{error, warn};
 
 use crate::common::config_cache_path::get_config_cache_path;
+use crate::common::model::ToolType;
 use crate::{CZKAWKA_VERSION, flc};
 
 #[derive(Clone, Debug)]
@@ -10,12 +11,39 @@ pub struct CliResult {
     pub included_items: Vec<String>,
     pub excluded_items: Vec<String>,
     pub referenced_items: Vec<String>,
+    pub tool: Option<ToolType>,
+    pub preset: Option<i32>,
+    pub start_scan: bool,
+    pub exit_after_scan: bool,
+}
+
+const TOOL_NAME_MAPPING: &[(&str, ToolType)] = &[
+    ("duplicates", ToolType::Duplicate),
+    ("empty-folders", ToolType::EmptyFolders),
+    ("biggest-files", ToolType::BigFile),
+    ("empty-files", ToolType::EmptyFiles),
+    ("temporary", ToolType::TemporaryFiles),
+    ("similar-images", ToolType::SimilarImages),
+    ("similar-videos", ToolType::SimilarVideos),
+    ("same-music", ToolType::SameMusic),
+    ("invalid-symlinks", ToolType::InvalidSymlinks),
+    ("broken-files", ToolType::BrokenFiles),
+    ("bad-extensions", ToolType::BadExtensions),
+    ("bad-names", ToolType::BadNames),
+    ("exif-remover", ToolType::ExifRemover),
+    ("video-optimizer", ToolType::VideoOptimizer),
+];
+
+fn tool_type_from_cli_name(name: &str) -> Option<ToolType> {
+    TOOL_NAME_MAPPING.iter().find(|(candidate, _)| *candidate == name).map(|(_, tool)| *tool)
 }
 
 enum ExpectedArgs {
     Include,
     Exclude,
     Referenced,
+    Tool,
+    Preset,
 }
 
 // Manual processing of CLI arguments, because Clap would be too heavy for this simple task
@@ -33,6 +61,13 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
         println!("  FOLDER                Include a folder in the search");
         println!("  -e FOLDER, --exclude FOLDER      Exclude a folder from the search");
         println!("  -r FOLDER, --referenced FOLDER   Include a folder and set it as referenced");
+        println!(
+            "  -t TOOL, --tool TOOL  Select the active tool. One of: {}",
+            TOOL_NAME_MAPPING.iter().map(|(name, _)| *name).collect::<Vec<_>>().join(", ")
+        );
+        println!("  -p NUMBER, --preset NUMBER       Select which settings preset to load");
+        println!("  -s, --scan            Automatically start a scan on launch");
+        println!("  -x, --exit            Close the app once the auto-started scan finishes (requires --scan)");
         println!("  --cache, -c           Opens the cache folder");
         println!("  --config, -C          Opens the config folder");
         println!("  --help, -h            Show this help message");
@@ -40,7 +75,8 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
         println!("Examples:");
         println!("  {app_exec} /path/absolute/to/folder -e relative_path/2 -r /path/to/referenced");
         println!("  {app_exec} . folder2 folder3");
-        println!("If no folders are specified, the program will exit without doing anything.");
+        println!("  {app_exec} -t similar-images -s -x /path/to/folder");
+        println!("If none of the above are specified, the program launches normally with saved settings.");
         process::exit(0);
     }
     if ["--version", "-v"].iter().any(|&arg| args.contains(&arg.to_string())) {
@@ -60,6 +96,10 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
         included_items: Vec::new(),
         excluded_items: Vec::new(),
         referenced_items: Vec::new(),
+        tool: None,
+        preset: None,
+        start_scan: false,
+        exit_after_scan: false,
     };
     let mut errors = Vec::new();
 
@@ -68,6 +108,10 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
             match arg.as_str() {
                 "-e" | "--exclude" => expected_arg = ExpectedArgs::Exclude,
                 "-r" | "--referenced" => expected_arg = ExpectedArgs::Referenced,
+                "-t" | "--tool" => expected_arg = ExpectedArgs::Tool,
+                "-p" | "--preset" => expected_arg = ExpectedArgs::Preset,
+                "-s" | "--scan" => cli_result.start_scan = true,
+                "-x" | "--exit" => cli_result.exit_after_scan = true,
                 "-c" | "--cache" => {
                     if let Some(cfg) = get_config_cache_path() {
                         if let Err(e) = open::that(&cfg.cache_folder) {
@@ -114,9 +158,29 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
                     }
                     Err(e) => errors.push(e),
                 },
+                ExpectedArgs::Tool => match tool_type_from_cli_name(&arg) {
+                    Some(tool) => cli_result.tool = Some(tool),
+                    None => {
+                        let valid_names = TOOL_NAME_MAPPING.iter().map(|(name, _)| *name).collect::<Vec<_>>().join(", ");
+                        eprintln!("Unknown tool: {arg}. Valid values: {valid_names}");
+                        process::exit(1);
+                    }
+                },
+                ExpectedArgs::Preset => match arg.parse::<i32>() {
+                    Ok(preset) if preset >= 1 => cli_result.preset = Some(preset),
+                    _ => {
+                        eprintln!("Invalid preset number: {arg}. Must be a positive integer.");
+                        process::exit(1);
+                    }
+                },
             }
             expected_arg = ExpectedArgs::Include;
         }
+    }
+
+    if cli_result.exit_after_scan && !cli_result.start_scan {
+        eprintln!("--exit can only be used together with --scan");
+        process::exit(1);
     }
 
     deduplicate_folders(&mut cli_result.included_items);
@@ -130,7 +194,14 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
         warn!("{error}");
     }
 
-    if cli_result.included_items.is_empty() && cli_result.excluded_items.is_empty() && cli_result.referenced_items.is_empty() {
+    if cli_result.included_items.is_empty()
+        && cli_result.excluded_items.is_empty()
+        && cli_result.referenced_items.is_empty()
+        && cli_result.tool.is_none()
+        && cli_result.preset.is_none()
+        && !cli_result.start_scan
+        && !cli_result.exit_after_scan
+    {
         None
     } else {
         Some(cli_result)
@@ -230,5 +301,43 @@ mod tests {
         let args = Vec::new();
         let result = process_cli_args("A", "B", args);
         assert!(result.is_none());
+    }
+
+    #[test]
+    fn processes_tool_selection() {
+        let args = vec!["--tool".to_string(), "similar-images".to_string()];
+        let result = process_cli_args("A", "B", args).expect("TEST");
+        assert_eq!(result.tool, Some(ToolType::SimilarImages));
+    }
+
+    #[test]
+    fn processes_preset_selection() {
+        let args = vec!["-p".to_string(), "3".to_string()];
+        let result = process_cli_args("A", "B", args).expect("TEST");
+        assert_eq!(result.preset, Some(3));
+    }
+
+    #[test]
+    fn processes_scan_and_exit_flags() {
+        let args = vec!["-s".to_string(), "-x".to_string()];
+        let result = process_cli_args("A", "B", args).expect("TEST");
+        assert!(result.start_scan);
+        assert!(result.exit_after_scan);
+    }
+
+    #[test]
+    fn scan_alone_does_not_imply_exit() {
+        let args = vec!["--scan".to_string()];
+        let result = process_cli_args("A", "B", args).expect("TEST");
+        assert!(result.start_scan);
+        assert!(!result.exit_after_scan);
+    }
+
+    #[test]
+    fn tool_and_preset_default_to_none() {
+        let args = vec!["/valid/folder".to_string()];
+        let result = process_cli_args("A", "B", args).expect("TEST");
+        assert_eq!(result.tool, None);
+        assert_eq!(result.preset, None);
     }
 }
