@@ -56,8 +56,13 @@ def build_rules(old: str, new: str, iso_date: str) -> list[Rule]:
         Rule("misc/cargo/PublishOther.sh", f'NUMBER="{esc}"', f'NUMBER="{new}"'),
         Rule(".github/ISSUE_TEMPLATE/bug_report.md", f"version: {esc},", f"version: {new},"),
         Rule(".github/ISSUE_TEMPLATE/bug_report.md", f"e.g. {esc} cli/gui", f"e.g. {new} cli/gui"),
-        Rule("README.md", f"about the {esc} release", f"about the {new} release"),
     ]
+    old_major_minor = ".".join(old.split(".")[:2])
+    new_major_minor = ".".join(new.split(".")[:2])
+    if old_major_minor != new_major_minor:
+        rules.append(
+            Rule("README.md", f"about the {re.escape(old_major_minor)} release", f"about the {new_major_minor} release")
+        )
     for crate in CRATES:
         manifest = f"{crate}/Cargo.toml"
         rules.append(Rule(manifest, f'^version = "{esc}"$', f'version = "{new}"'))
