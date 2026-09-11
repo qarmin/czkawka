@@ -32,12 +32,10 @@ import { ToolSettings } from "screens/tool_settings.slint";
 import { Translations } from "globals/translations.slint";
 import { ImageCompareOverlay } from "screens/image_compare.slint";
 import { ColorPalette } from "globals/color_palette.slint";
-import "fonts/NotoSansCJK-Regular.ttc";
 
 export {Settings, Callabler, GuiState, Translations, Palette}
 
 export component MainWindow inherits Window {
-    default-font-family: "Noto Sans CJK SC";
     default-font-size: FontSizes.normal;
 
     callback scan_stopping;
