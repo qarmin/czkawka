@@ -125,6 +125,8 @@ fn main() {
         }
     };
 
+    configure_system_cjk_fallbacks();
+
     #[cfg(feature = "audio")]
     app.global::<GuiState>().set_audio_feature_enabled(true);
 
@@ -227,6 +229,47 @@ fn main() {
             error!("Error during running the application: {e}");
             show_critical_error(e.to_string());
         }
+    }
+}
+
+fn configure_system_cjk_fallbacks() {
+    let mut collection = slint::fontique_010::shared_collection();
+    let han_script = fontique::Script::from_str_unchecked("Hani");
+    let simplified_key = fontique::FallbackKey::from((han_script, "zh-CN"));
+    let traditional_key = fontique::FallbackKey::from((han_script, "zh-TW"));
+
+    for (label, key, candidates) in [
+        (
+            "zh-CN",
+            simplified_key,
+            ["Microsoft YaHei UI", "Microsoft YaHei", "DengXian", "Noto Sans CJK SC", "Noto Sans SC", "SimSun"],
+        ),
+        (
+            "zh-TW",
+            traditional_key,
+            ["Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans CJK TC", "Noto Sans TC", "PingFang TC", "MingLiU"],
+        ),
+    ] {
+        let mut family_ids: Vec<_> = candidates.iter().filter_map(|name| collection.family_by_name(name).map(|family| family.id())).collect();
+        if family_ids.is_empty() {
+            family_ids = collection.fallback_families(key).collect();
+        }
+        let family_names: Vec<_> = family_ids.iter().filter_map(|family_id| collection.family_name(*family_id).map(str::to_owned)).collect();
+
+        if family_ids.is_empty() {
+            info!("No system font with {label} Han support was detected");
+        } else {
+            collection.set_fallbacks(key, family_ids.into_iter());
+            info!("Using system {label} Han font fallback: {}", family_names.join(", "));
+        }
+    }
+
+    let default_key = fontique::FallbackKey::new(han_script, None);
+    let default_families: Vec<_> = collection.fallback_families(simplified_key).collect();
+    if default_families.is_empty() {
+        info!("No default system Han font fallback was detected");
+    } else {
+        collection.set_fallbacks(default_key, default_families.into_iter());
     }
 }
 
