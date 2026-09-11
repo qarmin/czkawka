@@ -205,39 +205,19 @@ fn configure_system_cjk_fallbacks() {
         (
             "zh-CN",
             simplified_key,
-            [
-                "Microsoft YaHei UI",
-                "Microsoft YaHei",
-                "DengXian",
-                "Noto Sans CJK SC",
-                "Noto Sans SC",
-                "SimSun",
-            ],
+            ["Microsoft YaHei UI", "Microsoft YaHei", "DengXian", "Noto Sans CJK SC", "Noto Sans SC", "SimSun"],
         ),
         (
             "zh-TW",
             traditional_key,
-            [
-                "Microsoft JhengHei UI",
-                "Microsoft JhengHei",
-                "Noto Sans CJK TC",
-                "Noto Sans TC",
-                "PingFang TC",
-                "MingLiU",
-            ],
+            ["Microsoft JhengHei UI", "Microsoft JhengHei", "Noto Sans CJK TC", "Noto Sans TC", "PingFang TC", "MingLiU"],
         ),
     ] {
-        let mut family_ids: Vec<_> = candidates
-            .iter()
-            .filter_map(|name| collection.family_by_name(name).map(|family| family.id()))
-            .collect();
+        let mut family_ids: Vec<_> = candidates.iter().filter_map(|name| collection.family_by_name(name).map(|family| family.id())).collect();
         if family_ids.is_empty() {
             family_ids = collection.fallback_families(key).collect();
         }
-        let family_names: Vec<_> = family_ids
-            .iter()
-            .filter_map(|family_id| collection.family_name(*family_id).map(str::to_owned))
-            .collect();
+        let family_names: Vec<_> = family_ids.iter().filter_map(|family_id| collection.family_name(*family_id).map(str::to_owned)).collect();
 
         if family_ids.is_empty() {
             info!("No system font with {label} Han support was detected");
