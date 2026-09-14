@@ -26,7 +26,7 @@ use file_actions::connect_rename::connect_rename;
 use file_actions::connect_symlink::connect_symlink;
 use log::{error, info};
 use slint::{Timer, TimerMode, VecModel};
-use slint::Platform::set_platform;
+use slint::platform::set_platform;
 use i_slint_backend_winit::Backend;
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
@@ -98,6 +98,7 @@ mod ui {
 pub use ui::*;
 
 fn main() {
+    //this was the only way i found out
     let backend = Backend::new().unwrap();
     set_platform(Box::new(backend)).unwrap();
     slint::set_xdg_app_id("krokiet").unwrap();
