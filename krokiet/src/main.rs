@@ -25,9 +25,9 @@ use file_actions::connect_optimize_video::connect_optimize_video;
 use file_actions::connect_rename::connect_rename;
 use file_actions::connect_symlink::connect_symlink;
 use log::{error, info};
-use slint::platform::set_platform;
-use i_slint_backend_winit::Backend;
 use slint::{Timer, TimerMode, VecModel};
+use slint::Platform::set_platform;
+use i_slint_backend_winit::Backend;
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders};
