@@ -41,6 +41,7 @@ slint = { version = "=1.17.0", default-features = false, features = [
     "backend-winit",
     "compat-1-2",
 ] }
+i-slint-backend-winit = "=1.17.0"
 
 rodio = { version = "0.22.0", default-features = false, features = ["playback", "symphonia-all"], optional = true }
 notify-rust = { version = "4" }
@@ -48,7 +49,7 @@ notify-rust = { version = "4" }
 # Easier cross-compilation of app to e.g. 32 bit os, by using dlopen instead of linking libraries at compile time
 # Must match version used in slint
 fontique = { version = "=0.10.0", default-features = false, features = ["fontconfig-dlopen", "std"] }
-i-slint-backend-winit = "=1.17.0"
+
 
 [build-dependencies]
 #slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
