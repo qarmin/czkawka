@@ -309,9 +309,7 @@ fn test_similar_images_avif_files_are_found() {
 
 #[cfg(feature = "libavif")]
 #[test]
-fn test_similar_images_avif_solid_colors_are_all_similar_under_gradient_hash() {
-    // Gradient hash of solid-color images is all-zeros regardless of color,
-    // so all three solid-color AVIF test images hash identically and land in one group.
+fn test_similar_images_avif_striped_pattern_are_all_similar_under_gradient_hash() {
     let test_path = get_heif_images_path();
 
     let params = SimilarImagesParameters::new(0, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false, GeometricInvariance::Off);
@@ -325,6 +323,6 @@ fn test_similar_images_avif_solid_colors_are_all_similar_under_gradient_hash() {
 
     let info = finder.get_information();
     assert_eq!(info.initial_found_files, 3);
-    assert_eq!(info.number_of_groups, 1, "All solid-color AVIFs should be one group under gradient hash");
+    assert_eq!(info.number_of_groups, 1, "All striped AVIFs should be one group under gradient hash");
     assert_eq!(info.number_of_duplicates, 2);
 }

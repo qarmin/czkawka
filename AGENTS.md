@@ -6,6 +6,21 @@ All code, comments, commit messages, and documentation must be written in **Engl
 
 ---
 
+## AI-authored commits & merge/pull requests
+
+Always, without exception: every commit created by an AI assistant must start its title (the
+first line of the commit message) with `[AI] `, e.g. `[AI] Fix crash when scanning empty
+directories`. If the commit message has a body, the body does not need the prefix again - the
+title alone marks it.
+
+The same applies to any merge request (GitLab) or pull request (GitHub) opened by an AI
+assistant: both the title and the body/description must start with `[AI] `, e.g. title
+`[AI] Add duplicate detection for symlinked folders` and body starting with
+`[AI] This MR adds ...`. This must stay visible to reviewers at a glance in both GitLab and
+GitHub - never omit it, even for small or automatic changes.
+
+---
+
 ## Rust Style
 
 Applies to every Rust crate in the workspace (`czkawka_core`, `czkawka_cli`, `czkawka_gui`,
@@ -116,6 +131,10 @@ Two properties are non-negotiable across every sub-project:
 ---
 
 ## `just fix` – baseline quality gate
+
+**Mandatory: after finishing any coding task, run `just fix` and resolve everything it reports
+before considering the task done.** This applies always, without exception - not just before
+opening a merge request.
 
 Running `just fix` must pass before any merge request. It runs, in order:
 

@@ -112,6 +112,7 @@ pub(crate) fn create_default_settings_files() {
     }
 }
 
+#[expect(clippy::print_stderr)]
 pub(crate) fn load_initial_settings_from_file(cli_result: Option<&CliResult>) -> (BasicSettings, SettingsCustom, i32) {
     StringComboBoxItems::regenerate_and_set();
 
@@ -124,7 +125,15 @@ pub(crate) fn load_initial_settings_from_file(cli_result: Option<&CliResult>) ->
         BasicSettings::default()
     };
 
-    let preset_to_load = if cli_result.is_some() { RESERVER_PRESET_IDX } else { base_settings.default_preset };
+    let preset_to_load = match cli_result.and_then(|c| c.preset) {
+        Some(preset) if (1..=PRESET_NUMBER as i32).contains(&preset) => preset - 1,
+        Some(preset) => {
+            eprintln!("Invalid preset number: {preset}. Must be between 1 and {PRESET_NUMBER}.");
+            std::process::exit(1);
+        }
+        None if cli_result.is_some() => RESERVER_PRESET_IDX,
+        None => base_settings.default_preset,
+    };
 
     let mut custom_settings = load_data_from_file::<SettingsCustom>(get_config_file(preset_to_load)).unwrap_or_else(|e| {
         error!("Cannot load custom settings for preset {preset_to_load} - {e}, using default instead");
@@ -151,18 +160,18 @@ pub(crate) fn set_initial_settings_to_gui(app: &MainWindow, base_settings: &Basi
     set_number_of_threads(custom_settings.thread_number as usize);
 }
 
-pub(crate) fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
-    save_base_settings_to_file(app, original_preset_idx);
+pub(crate) fn save_all_settings_to_file(app: &MainWindow, original_preset_idx: i32, explicit_cli_preset_used: bool) {
+    save_base_settings_to_file(app, original_preset_idx, explicit_cli_preset_used);
     save_custom_settings_to_file(app);
 
     info!("Saved settings to file");
 }
 
-pub(crate) fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32) {
+pub(crate) fn save_base_settings_to_file(app: &MainWindow, original_preset_idx: i32, explicit_cli_preset_used: bool) {
     let mut collected_config_from_file = collect_base_settings(app);
 
     // We cannot normally start app with disallowed preset, so we restore it to original value
-    if collected_config_from_file.default_preset == PRESET_NUMBER as i32 - 1 {
+    if collected_config_from_file.default_preset == PRESET_NUMBER as i32 - 1 || explicit_cli_preset_used {
         collected_config_from_file.default_preset = original_preset_idx;
     }
 
@@ -400,7 +409,11 @@ pub(crate) fn set_combobox_custom_settings_items(settings: &Settings, custom_set
 pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCustom, base_settings: &BasicSettings, cli_args: Option<CliResult>) {
     let settings = app.global::<Settings>();
 
-    let (included, referenced, excluded) = if let Some(cli_args) = cli_args {
+    let cli_args_has_paths = cli_args
+        .as_ref()
+        .is_some_and(|c| !c.included_items.is_empty() || !c.excluded_items.is_empty() || !c.referenced_items.is_empty());
+    let (included, referenced, excluded) = if cli_args_has_paths {
+        let cli_args = cli_args.expect("checked above via cli_args_has_paths");
         let vs_to_vp = |vec: Vec<String>| vec.into_iter().map(PathBuf::from).collect::<Vec<_>>();
         (vs_to_vp(cli_args.included_items), vs_to_vp(cli_args.referenced_items), vs_to_vp(cli_args.excluded_items))
     } else {

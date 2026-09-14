@@ -100,7 +100,7 @@ fix:
     cargo +nightly fmt
     cargo clippy --fix --allow-dirty --allow-staged --all-features --all-targets
     cargo +nightly fmt
-    cargo fmt
+    cargo fmt 2>/dev/null
 
 fixn:
     cargo +nightly fmt

@@ -51,3 +51,6 @@ DIFFS
 ___*
 .claude
 cedinia/ui/fonts
+tmp/
+test/
+temp/
