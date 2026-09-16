@@ -109,6 +109,8 @@ pub struct CediniaSettings {
     #[serde(default)]
     pub similar_images_ignore_same_resolution: bool,
     #[serde(default)]
+    pub similar_images_ignore_same_directory: bool,
+    #[serde(default)]
     pub gallery_image_fit_cover: bool,
 
     #[serde(default = "default_search_mode")]
@@ -353,6 +355,7 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
 
     win.global::<SimilarImagesSettings>().set_ignore_same_size(s.similar_images_ignore_same_size);
     win.global::<SimilarImagesSettings>().set_ignore_same_resolution(s.similar_images_ignore_same_resolution);
+    win.global::<SimilarImagesSettings>().set_ignore_same_directory(s.similar_images_ignore_same_directory);
     win.global::<SimilarImagesSettings>().set_gallery_image_fit_cover(s.gallery_image_fit_cover);
 
     let sm_idx = StringComboBoxItems::idx_from_config_name(&s.big_files_search_mode, &items.biggest_files_method);
@@ -450,6 +453,7 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         ),
         similar_images_ignore_same_size: si.get_ignore_same_size(),
         similar_images_ignore_same_resolution: si.get_ignore_same_resolution(),
+        similar_images_ignore_same_directory: si.get_ignore_same_directory(),
         gallery_image_fit_cover: si.get_gallery_image_fit_cover(),
         big_files_search_mode: items
             .biggest_files_method

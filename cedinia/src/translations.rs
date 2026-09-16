@@ -264,6 +264,8 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_ctx_open_file_text(flc!("ctx_open_file").into());
     t.set_ctx_open_folder_text(flc!("ctx_open_folder").into());
     t.set_settings_ignore_same_resolution_text(flc!("settings_ignore_same_resolution").into());
+    t.set_settings_ignore_same_directory_text(flc!("settings_ignore_same_directory").into());
+    t.set_settings_ignore_same_directory_desc_text(flc!("settings_ignore_same_directory_desc").into());
     t.set_settings_appearance_label_text(flc!("settings_appearance_label").into());
     t.set_settings_dark_theme_text(flc!("settings_dark_theme").into());
     t.set_settings_dark_theme_desc_text(flc!("settings_dark_theme_desc").into());
