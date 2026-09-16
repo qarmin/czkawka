@@ -6,3 +6,5 @@ rustflags = ["-C", "link-arg=/STACK:8000000"]
 # Increase default stack size to avoid running out of stack
 # space in debug builds. The size matches Linux's default.
 rustflags = ["-C", "link-arg=/STACK:8000000"]
+[target.x86_64-pc-windows-gnu]
+rustflags = ["-C", "link-arg=-Wl,--stack,8000000"]
