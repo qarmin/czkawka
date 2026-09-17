@@ -103,28 +103,23 @@ mod ui {
 pub use ui::*;
 
 fn main() {
-    //this was the only way i found out
-    //Made a few changes in order to comply with new tests and don't override user choice of backend
-    //Looking thorught the toml winit is the deafult so it'll only follow my code (which depends on winnit)
-    // If a) no env variable is passed or b) the variable ccontains winit. In order to respect user input.
+    // Initialize Winit on Linux so the XDG application ID is applied correctly.
+    // Respect an explicitly selected non-Winit backend via SLINT_BACKEND.
     #[cfg(target_os = "linux")]
     {
         let use_winit = std::env::var_os("SLINT_BACKEND")
             .map(|backend| backend.to_string_lossy().contains("winit"))
             .unwrap_or(true);
-
         if use_winit {
             if let Ok(backend) = Backend::new() {
                 let _ = set_platform(Box::new(backend));
             }
-    
             let _ = slint::set_xdg_app_id("krokiet");
         }
     }
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
-
     let (base_settings, custom_settings, preset_to_load) = load_initial_settings_from_file(cli_args.as_ref());
     if base_settings.use_manual_application_scale {
         // SAFETY:
