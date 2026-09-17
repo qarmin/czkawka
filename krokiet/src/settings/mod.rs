@@ -10,8 +10,8 @@ use czkawka_core::common::basic_gui_cli::CliResult;
 use czkawka_core::common::config_cache_path::get_config_cache_path;
 use czkawka_core::common::{get_all_available_threads, set_number_of_threads};
 use czkawka_core::tools::similar_videos::{
-    ALLOWED_AUDIO_LENGTH_RATIO, ALLOWED_AUDIO_SIMILARITY_PERCENT, ALLOWED_DURATION_TOLERANCE_PCT, ALLOWED_MATCH_FRACTION, ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION,
-    ALLOWED_WINDOW_COUNT,
+    ALLOWED_AUDIO_LENGTH_RATIO, ALLOWED_AUDIO_SIMILARITY_PERCENT, ALLOWED_DURATION_TOLERANCE_PCT, ALLOWED_FFMPEG_TIMEOUT_SECONDS, ALLOWED_MATCH_FRACTION,
+    ALLOWED_SKIP_FORWARD_AMOUNT, ALLOWED_VID_HASH_DURATION, ALLOWED_WINDOW_COUNT,
 };
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
@@ -529,6 +529,13 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_similar_videos_audio_min_duration_seconds_max(600.0);
     settings.set_similar_videos_audio_maximum_difference(custom_settings.similar_videos_audio_maximum_difference.max(0.0));
     settings.set_similar_videos_audio_maximum_difference_max(10.0);
+    settings.set_similar_videos_ffmpeg_timeout_seconds(
+        custom_settings
+            .similar_videos_ffmpeg_timeout_seconds
+            .clamp(*ALLOWED_FFMPEG_TIMEOUT_SECONDS.start(), *ALLOWED_FFMPEG_TIMEOUT_SECONDS.end()) as f32,
+    );
+    settings.set_similar_videos_ffmpeg_timeout_seconds_min(*ALLOWED_FFMPEG_TIMEOUT_SECONDS.start() as f32);
+    settings.set_similar_videos_ffmpeg_timeout_seconds_max(*ALLOWED_FFMPEG_TIMEOUT_SECONDS.end() as f32);
 
     settings.set_video_thumbnails_generate(custom_settings.video_thumbnails_generate);
     settings.set_video_thumbnails_percentage(
@@ -721,6 +728,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let similar_videos_audio_length_ratio = settings.get_similar_videos_audio_length_ratio();
     let similar_videos_audio_min_duration_seconds = settings.get_similar_videos_audio_min_duration_seconds().round() as u32;
     let similar_videos_audio_maximum_difference = settings.get_similar_videos_audio_maximum_difference();
+    let similar_videos_ffmpeg_timeout_seconds = settings.get_similar_videos_ffmpeg_timeout_seconds().round() as u32;
 
     let video_thumbnails_generate = settings.get_video_thumbnails_generate();
     let video_thumbnails_percentage = settings.get_video_thumbnails_percentage().round() as u8;
@@ -863,6 +871,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         similar_videos_audio_length_ratio,
         similar_videos_audio_min_duration_seconds,
         similar_videos_audio_maximum_difference,
+        similar_videos_ffmpeg_timeout_seconds,
         similar_music_sub_audio_check_type,
         similar_music_sub_approximate_comparison,
         similar_music_compare_fingerprints_only_with_similar_titles,

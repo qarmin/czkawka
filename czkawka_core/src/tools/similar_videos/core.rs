@@ -41,13 +41,21 @@ impl SimilarVideos {
     }
 
     fn signature_config(&self) -> SignatureConfig {
+        let timeout_secs = f64::from(self.params.ffmpeg_timeout_seconds);
+        let timeout = FfmpegTimeout {
+            base_secs: timeout_secs,
+            factor: 0.0,
+            min_secs: timeout_secs,
+            max_secs: timeout_secs,
+        };
+
         SignatureConfig {
             skip_secs: f64::from(self.params.skip_forward_amount),
             window_count: self.params.window_count as usize,
             window_secs: f64::from(self.params.duration),
             cropdetect: self.params.crop_detect,
             audio_fingerprint: false,
-            ffmpeg_timeout: FfmpegTimeout::default(), // TODO - in future, this may be configurable
+            ffmpeg_timeout: timeout,
         }
     }
 

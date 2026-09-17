@@ -259,6 +259,7 @@ subsettings_videos_audio_similarity_percent = Similarity [%]
 subsettings_videos_audio_length_ratio = Min length ratio (shorter/longer)
 subsettings_videos_audio_min_duration_seconds = Min file duration [s]
 subsettings_videos_audio_maximum_difference = Max audio difference
+subsettings_videos_ffmpeg_timeout = FFmpeg timeout [s]
 subsettings_music_audio_check_type = Audio check type
 subsettings_music_approximate_comparison = Approximate Tag Comparison
 subsettings_music_compared_tags = Compared tags

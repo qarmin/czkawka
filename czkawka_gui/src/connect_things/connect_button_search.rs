@@ -666,6 +666,7 @@ fn similar_video_search(
                 czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MAXIMUM_DIFFERENCE,
                 czkawka_core::tools::similar_videos::DEFAULT_AUDIO_LENGTH_RATIO,
                 czkawka_core::tools::similar_videos::DEFAULT_AUDIO_MIN_DURATION_SECONDS,
+                czkawka_core::tools::similar_videos::DEFAULT_FFMPEG_TIMEOUT_SECONDS,
             );
             let mut tool = SimilarVideos::new(params);
 

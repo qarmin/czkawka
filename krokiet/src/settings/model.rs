@@ -10,8 +10,8 @@ use czkawka_core::tools::big_file::SearchMode;
 use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_videos::{
     DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_CROP_DETECT,
-    DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_VID_HASH_DURATION,
-    DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, DEFAULT_WINDOW_COUNT,
+    DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_FFMPEG_TIMEOUT_SECONDS, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH,
+    DEFAULT_VID_HASH_DURATION, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, DEFAULT_WINDOW_COUNT,
 };
 use czkawka_core::tools::temporary::DEFAULT_TEMP_EXTENSIONS_STR;
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec, VideoCroppingMechanism, VideoOptimizerMode};
@@ -202,6 +202,8 @@ pub struct SettingsCustom {
     pub similar_videos_audio_min_duration_seconds: u32,
     #[serde(default = "default_similar_videos_audio_maximum_difference")]
     pub similar_videos_audio_maximum_difference: f32,
+    #[serde(default = "default_similar_videos_ffmpeg_timeout_seconds")]
+    pub similar_videos_ffmpeg_timeout_seconds: u32,
     #[serde(default)]
     pub video_thumbnails_generate: bool,
     #[serde(default = "default_similar_videos_thumbnail_percentage")]
@@ -457,6 +459,9 @@ fn default_similar_videos_audio_min_duration_seconds() -> u32 {
 }
 fn default_similar_videos_audio_maximum_difference() -> f32 {
     DEFAULT_AUDIO_MAXIMUM_DIFFERENCE as f32
+}
+fn default_similar_videos_ffmpeg_timeout_seconds() -> u32 {
+    DEFAULT_FFMPEG_TIMEOUT_SECONDS
 }
 fn default_similar_videos_thumbnail_percentage() -> u8 {
     DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL

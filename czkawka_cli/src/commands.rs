@@ -13,8 +13,8 @@ use czkawka_core::tools::same_music::MusicSimilarity;
 use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_videos::{
     DEFAULT_AUDIO_LENGTH_RATIO, DEFAULT_AUDIO_MAXIMUM_DIFFERENCE, DEFAULT_AUDIO_MIN_DURATION_SECONDS, DEFAULT_AUDIO_SIMILARITY_PERCENT, DEFAULT_CROP_DETECT,
-    DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH, DEFAULT_THUMBNAIL_GRID_TILES_PER_SIDE,
-    DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, DEFAULT_WINDOW_COUNT,
+    DEFAULT_DURATION_TOLERANCE_PCT, DEFAULT_FFMPEG_TIMEOUT_SECONDS, DEFAULT_MIN_MATCHING_WINDOWS, DEFAULT_SKIP_FORWARD_AMOUNT, DEFAULT_SUBCLIP_MIN_MATCH,
+    DEFAULT_THUMBNAIL_GRID_TILES_PER_SIDE, DEFAULT_VIDEO_PERCENTAGE_FOR_THUMBNAIL, DEFAULT_WINDOW_COUNT,
 };
 use czkawka_core::tools::video_optimizer::{NoiseReductionMethod, VideoCodec};
 use log::error;
@@ -626,6 +626,13 @@ pub struct SimilarVideosArgs {
         long_help = "Videos with audio duration shorter than this value are excluded from audio comparison."
     )]
     pub audio_min_duration_seconds: u32,
+    #[clap(
+        long,
+        default_value_t = DEFAULT_FFMPEG_TIMEOUT_SECONDS,
+        help = "FFmpeg operation timeout in seconds (30-3600)",
+        long_help = "Maximum time to wait for FFmpeg operations before timing out. Longer values allow processing of larger/slower files. Allowed range: 30-3600 seconds."
+    )]
+    pub ffmpeg_timeout_seconds: u32,
 }
 
 #[derive(Debug, clap::Args)]

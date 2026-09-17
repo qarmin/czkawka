@@ -48,6 +48,9 @@ pub const DEFAULT_AUDIO_LENGTH_RATIO: f64 = 0.1;
 pub const DEFAULT_AUDIO_MIN_DURATION_SECONDS: u32 = 10;
 pub const DEFAULT_AUDIO_MAXIMUM_DIFFERENCE: f64 = 3.0;
 
+pub const ALLOWED_FFMPEG_TIMEOUT_SECONDS: RangeInclusive<u32> = 30..=3600;
+pub const DEFAULT_FFMPEG_TIMEOUT_SECONDS: u32 = 300;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VideosEntry {
     pub path: PathBuf,
@@ -155,6 +158,7 @@ pub struct SimilarVideosParameters {
     pub maximum_difference: f64,
     pub audio_length_ratio: f64,
     pub audio_min_duration_seconds: u32,
+    pub ffmpeg_timeout_seconds: u32,
 }
 
 impl SimilarVideosParameters {
@@ -178,6 +182,7 @@ impl SimilarVideosParameters {
         maximum_difference: f64,
         audio_length_ratio: f64,
         audio_min_duration_seconds: u32,
+        ffmpeg_timeout_seconds: u32,
     ) -> Self {
         assert!((0..=MAX_TOLERANCE).contains(&tolerance));
         assert!(ALLOWED_SKIP_FORWARD_AMOUNT.contains(&skip_forward_amount));
@@ -188,6 +193,7 @@ impl SimilarVideosParameters {
         assert!(ALLOWED_MATCH_FRACTION.contains(&subclip_min_match));
         assert!(ALLOWED_AUDIO_SIMILARITY_PERCENT.contains(&audio_similarity_percent));
         assert!(ALLOWED_AUDIO_LENGTH_RATIO.contains(&audio_length_ratio));
+        assert!(ALLOWED_FFMPEG_TIMEOUT_SECONDS.contains(&ffmpeg_timeout_seconds));
         Self {
             tolerance,
             exclude_videos_with_same_size,
@@ -208,6 +214,7 @@ impl SimilarVideosParameters {
             maximum_difference,
             audio_length_ratio,
             audio_min_duration_seconds,
+            ffmpeg_timeout_seconds,
         }
     }
 }
