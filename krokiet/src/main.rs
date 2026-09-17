@@ -24,10 +24,12 @@ use file_actions::connect_move::connect_move;
 use file_actions::connect_optimize_video::connect_optimize_video;
 use file_actions::connect_rename::connect_rename;
 use file_actions::connect_symlink::connect_symlink;
-use log::{error, info};
-use slint::{Timer, TimerMode, VecModel};
-use slint::platform::set_platform;
+// Had to add this internal slint crate because I was unable to fix it without it, it follow the same slint version in
+// Cargo.toml it is a simple copy/paste of slint's version
 use i_slint_backend_winit::Backend;
+use log::{error, info};
+use slint::platform::set_platform;
+use slint::{Timer, TimerMode, VecModel};
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders};
