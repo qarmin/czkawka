@@ -106,7 +106,7 @@ fn main() {
     // Initialize Winit on Linux so the XDG application ID is applied correctly.
     #[cfg(target_os = "linux")]
     {
-        let use_winit = std::env::var_os("SLINT_BACKEND").is_none_or(true, |backend| backend.to_string_lossy().contains("winit"));
+        let use_winit = std::env::var_os("SLINT_BACKEND").is_none_or(|backend| backend.to_string_lossy().contains("winit"));
         if use_winit {
             if let Ok(backend) = Backend::new() {
                 let _ = set_platform(Box::new(backend));
