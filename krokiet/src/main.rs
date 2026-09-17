@@ -107,9 +107,7 @@ fn main() {
     // Respect an explicitly selected non-Winit backend via SLINT_BACKEND.
     #[cfg(target_os = "linux")]
     {
-        let use_winit = std::env::var_os("SLINT_BACKEND")
-            .map(|backend| backend.to_string_lossy().contains("winit"))
-            .unwrap_or(true);
+        let use_winit = std::env::var_os("SLINT_BACKEND").map(|backend| backend.to_string_lossy().contains("winit")).unwrap_or(true);
         if use_winit {
             if let Ok(backend) = Backend::new() {
                 let _ = set_platform(Box::new(backend));
