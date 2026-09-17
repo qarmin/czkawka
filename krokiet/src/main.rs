@@ -107,7 +107,7 @@ fn main() {
     //Made a few changes in order to comply with new tests and don't override user choice of backend
     //Looking thorught the toml winit is the deafult so it'll only follow my code (which depends on winnit)
     // If a) no env variable is passed or b) the variable ccontains winit. In order to respect user input.
-#[cfg(target_os = "linux")]
+    #[cfg(target_os = "linux")]
     {
         let use_winit = std::env::var_os("SLINT_BACKEND")
             .map(|backend| backend.to_string_lossy().contains("winit"))
