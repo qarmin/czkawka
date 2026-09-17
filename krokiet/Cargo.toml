@@ -41,6 +41,7 @@ slint = { version = "=1.17.0", default-features = false, features = [
     "backend-winit",
     "compat-1-2",
 ] }
+i-slint-backend-winit = "=1.17.0"
 
 rodio = { version = "0.22.0", default-features = false, features = ["playback", "symphonia-all"], optional = true }
 notify-rust = { version = "4" }

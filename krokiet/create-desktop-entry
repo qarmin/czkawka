@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+#--------------------------------------
+#Creates a Functional .desktop icon for the distros it supports
+#--------------------------------------
+#Variables
+BIN="${HOME}/.cargo/bin/krokiet"
+ICON_SRC="./icons/krokiet_logo_flag.png"
+APPS_DIR="${HOME}/.local/share/applications/"
+ICON_DIR="${HOME}/.local/share/icons/apps/krokiet/"
+DESKTOP_FILE="${APPS_DIR}/krokiet.desktop"
+#Functions
+handle_error() {
+    local type="$1"
+    printf "Error: %s\n" "${type}"
+    printf "Exiting...\n"
+    exit 1
+}
+check_dir() {
+    local dir="$1"
+    if [ -d "${dir}" ]; then
+        printf "%s found\n" "${dir}!"
+    else
+        printf "%s not found, trying to create...\n" "${dir}"
+        mkdir -p "${dir}" || handle_error "Failed to create ${dir}!"
+        printf "%s created\n" "${dir}"
+    fi
+}
+#Main
+if [ ! -f "${BIN}" ]; then
+    handle_error "Krokiet binary not found: ${BIN}"
+fi
+if [ ! -f "${ICON_SRC}" ]; then
+    handle_error "Source icon not found: ${ICON_SRC}"
+fi
+check_dir "$APPS_DIR"
+check_dir "$ICON_DIR"
+cp "$ICON_SRC" "$ICON_DIR/" || handle_error "Failed to copy icon"
+cat > "${DESKTOP_FILE}" << EOF
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=Krokiet
+Comment=File cleaning and duplicate finder
+Icon=${ICON_DIR}krokiet_logo_flag.png
+Exec=${BIN}
+Path=${HOME}/.local/share
+Actions=
+Categories=X-GNOME-Utilities;
+Keywords=Krokiet;krokiet;czkawka;Czkawka;
+StartupWMClass=krokiet
+EOF
+if [ $? -ne 0 ]; then 
+    handle_error "Failed to create ${DESKTOP_FILE}!"
+fi
+printf "${DESKTOP_FILE} created sucessfully!"
+exit 0
+#by betor
