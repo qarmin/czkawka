@@ -26,8 +26,11 @@ use file_actions::connect_rename::connect_rename;
 use file_actions::connect_symlink::connect_symlink;
 // Had to add this internal slint crate because I was unable to fix it without it, it follow the same slint version in
 // Cargo.toml it is a simple copy/paste of slint's version
+// Only use those crate if on Linux (it was needed for xdg icon setting)
+#[cfg(target_os = "linux")]
 use i_slint_backend_winit::Backend;
 use log::{error, info};
+#[cfg(target_os = "linux")]
 use slint::platform::set_platform;
 use slint::{Timer, TimerMode, VecModel};
 
@@ -101,9 +104,23 @@ pub use ui::*;
 
 fn main() {
     //this was the only way i found out
-    let backend = Backend::new().unwrap();
-    set_platform(Box::new(backend)).unwrap();
-    slint::set_xdg_app_id("krokiet").unwrap();
+    //Made a few changes in order to comply with new tests and don't override user choice of backend
+    //Looking thorught the toml winit is the deafult so it'll only follow my code (which depends on winnit)
+    // If a) no env variable is passed or b) the variable ccontains winit. In order to respect user input.
+#[cfg(target_os = "linux")]
+    {
+        let use_winit = std::env::var_os("SLINT_BACKEND")
+            .map(|backend| backend.to_string_lossy().contains("winit"))
+            .unwrap_or(true);
+
+        if use_winit {
+            if let Ok(backend) = Backend::new() {
+                let _ = set_platform(Box::new(backend));
+            }
+    
+            let _ = slint::set_xdg_app_id("krokiet");
+        }
+    }
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
