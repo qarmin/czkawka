@@ -6,6 +6,7 @@ pub mod config_cache_path;
 pub mod consts;
 pub mod dir_traversal;
 pub mod directories;
+pub mod deduplication;
 pub mod extensions;
 pub mod ffmpeg_utils;
 pub mod image;
