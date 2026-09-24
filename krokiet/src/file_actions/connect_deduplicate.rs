@@ -18,13 +18,13 @@ pub(crate) fn connect_deduplicate(app: &MainWindow, progress_sender: Sender<Prog
         let weak_app = a.clone();
         let progress_sender = progress_sender.clone();
         let stop_flag = stop_flag.clone();
-        stop_flag.store(false, Ordering::Relaxed);
-        let app = a.upgrade().expect("Failed to upgrade app :(");
+        let app = a.upgrade().expect("MainWindow dropped while deduplication callback is active");
         let active_tab = app.global::<GuiState>().get_active_tab();
 
-        if active_tab != ActiveTab::DuplicateFiles || !cfg!(target_os = "linux") || app.get_processing() {
+        if active_tab != ActiveTab::DuplicateFiles || !cfg!(target_os = "linux") || app.get_processing() || app.get_scanning() {
             return;
         }
+        stop_flag.store(false, Ordering::Relaxed);
         app.set_processing(true);
         let processor = ModelProcessor::new(active_tab);
         processor.deduplicate_selected_items(progress_sender, weak_app, stop_flag);
@@ -33,7 +33,7 @@ pub(crate) fn connect_deduplicate(app: &MainWindow, progress_sender: Sender<Prog
 
 impl ModelProcessor {
     fn deduplicate_selected_items(self, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
-        let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
+        let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("MainWindow dropped before collecting deduplication results"));
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
             let path_idx = self.active_tab.get_str_path_idx();
