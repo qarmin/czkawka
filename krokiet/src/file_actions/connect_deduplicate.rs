@@ -64,3 +64,55 @@ fn deduplicate_single_item(original_path: &str, derived_path: &str, stop: &Atomi
     czkawka_core::common::deduplication::deduplicate_files(Path::new(original_path), Path::new(derived_path), stop)
         .map_err(|e| crate::flk!("rust_deduplicate_failed", name = original_path, target = derived_path, reason = e.to_string()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deduplicate_selection_keeps_failed_items_and_uses_reference_or_first_selected_source() {
+        for reference in [false, true] {
+            let mut header = SimplerSingleMainListModel::from(&crate::test_common::get_main_list_model());
+            header.header_row = true;
+            header.filled_header_row = reference;
+            header.val_str = vec!["source".to_string()];
+            let mut source = header.clone();
+            source.header_row = false;
+            source.filled_header_row = false;
+            source.checked = true;
+            let mut successful = source.clone();
+            successful.val_str = vec!["success".to_string()];
+            let mut failed = source.clone();
+            failed.val_str = vec!["failed".to_string()];
+            let items = if reference {
+                vec![header, successful, failed]
+            } else {
+                vec![header, source, successful, failed]
+            };
+            let operation = ProcessFunction::Related(Box::new(|source, destination| {
+                assert_eq!(source.val_str, ["source"]);
+                if destination.val_str == ["failed"] {
+                    Err("unsupported filesystem".to_string())
+                } else {
+                    Ok(())
+                }
+            }));
+            let (sender, _receiver) = crossbeam_channel::unbounded();
+            let results = ModelProcessor::process_items(
+                items.into_iter().enumerate().collect(),
+                2,
+                sender,
+                &Arc::new(AtomicBool::new(false)),
+                &operation,
+                MessageType::Deduplicate,
+                None,
+                false,
+            );
+            let (remaining, errors, processed) = ModelProcessor::remove_processed_items_from_model(results);
+            assert_eq!(processed, 1);
+            assert_eq!(errors, ["unsupported filesystem"]);
+            assert_eq!(remaining.last().unwrap().val_str, ["failed"]);
+            assert_eq!(remaining.len(), if reference { 2 } else { 3 });
+        }
+    }
+}
