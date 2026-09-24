@@ -779,6 +779,27 @@ Yes. When "Ignore same inode" (or "Hide hardlinks") is enabled, files that share
 
 ## Symlink Handling
 
+### Q: Can I save space while keeping duplicate files independently editable?
+
+In Krokiet on Linux, use **Deduplicate (CoW)** in Duplicate Files. Select at least two
+files in each group: the first selected file supplies the shared data. With reference
+folders, the reference file is used as the source and selected files are destinations.
+
+This uses the kernel's `FIDEDUPERANGE` operation on supporting filesystems, such as
+Btrfs and reflink-enabled XFS. Files must be on the same filesystem. Each file keeps
+its inode, permissions, ownership and contents; subsequent writes remain independent.
+The kernel compares data before sharing it, so stale scan results cannot cause differing
+contents to be overwritten. There is no fallback to hardlinks or ordinary copies.
+
+Unsupported filesystems, incompatible file attributes, permission failures and different
+contents are reported as errors. Existing hardlinks are not converted into independent
+files. Cancellation or a later failure may leave earlier ranges safely shared.
+
+Successfully processed entries are removed from the current results list, but their files
+remain on disk. Scanning again can find them again because their contents are still equal.
+The processed-file count is not a measurement of disk space saved. Snapshots and existing
+extent sharing can affect the amount of space reclaimed.
+
 ### Q: Does Czkawka follow symlinks when scanning?
 
 By default, Czkawka does **not** follow symbolic links. A symlink is treated as its own filesystem entry; the scan does not traverse into the symlink target. This prevents accidental deletion of original files when a symlink points to them.

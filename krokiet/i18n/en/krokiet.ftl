@@ -508,3 +508,12 @@ context_menu_copy_parent_folder_path_text = Copy Parent Folder
 context_menu_copy_full_path_text = Copy Full Path
 context_menu_rename_text = Rename
 
+
+deduplicate_button_text = Deduplicate (CoW)
+deduplicate_text = Share duplicate data
+deduplicate_confirmation_text = Share identical data blocks while keeping separate files and permissions. Later edits affect only the edited file.
+     Select at least two files per group; the first selected file is the source. With reference folders, select the files to deduplicate against the reference.
+     Requires files on the same Linux filesystem supporting deduplication, such as Btrfs or XFS. Unsupported files and differing contents are reported as errors. Files are not deleted or replaced.
+rust_deduplicate_failed = Cannot deduplicate { $target } against { $name }: { $reason }
+rust_no_files_deduplicated = No files were deduplicated
+rust_deduplicate_summary = Deduplicated { $deduplicated } files, { $failed } failed, out of { $total } files

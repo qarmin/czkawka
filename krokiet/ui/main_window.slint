@@ -369,6 +369,18 @@ export component MainWindow inherits Window {
         }
     }
 
+    deduplicate_popup_window := PopupActionConfirm {
+        height: root.height;
+        width: root.width;
+        x: 0.0; y: 0.0;
+        title_text: Translations.deduplicate_text;
+        confirmation_text: Translations.deduplicate_confirmation_text;
+
+        action_confirmed => {
+            Callabler.deduplicate_items();
+        }
+    }
+
     hardlink_popup_window := PopupActionConfirm {
         height: root.height;
         width: root.width;
@@ -486,6 +498,8 @@ export component MainWindow inherits Window {
             rename_extension_popup_window.show_popup();
         } else if (request == PopupRequest.RenameBadFileName) {
             rename_bad_file_name_popup_window.show_popup();
+        } else if (request == PopupRequest.Deduplicate) {
+            deduplicate_popup_window.show_popup();
         } else if (request == PopupRequest.Hardlink) {
             hardlink_popup_window.show_popup();
         } else if (request == PopupRequest.Save) {

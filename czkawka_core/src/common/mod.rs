@@ -4,6 +4,7 @@ pub mod build_runtime_info;
 pub mod cache;
 pub mod config_cache_path;
 pub mod consts;
+pub mod deduplication;
 pub mod dir_traversal;
 pub mod directories;
 pub mod extensions;

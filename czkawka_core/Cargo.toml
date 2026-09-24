@@ -57,6 +57,7 @@ crc32fast = "1.4"
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
 
 tempfile = "3.13"
+thiserror = "2"
 
 # Video Duplicates
 similario_core = "0.2.0"
@@ -119,6 +120,9 @@ trash = "5.1"
 
 [target.'cfg(windows)'.dependencies]
 file-id = "0.2.2"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = "0.2"
 
 [build-dependencies]
 rustc_version = "0.4"
