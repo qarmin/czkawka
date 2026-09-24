@@ -45,7 +45,7 @@ mod linux {
     use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
     use std::sync::atomic::Ordering;
 
-    use super::*;
+    use super::{AtomicBool, DeduplicationError, Path, io};
 
     const CHUNK_SIZE: u64 = 16 * 1024 * 1024;
 
