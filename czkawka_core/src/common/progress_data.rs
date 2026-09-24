@@ -86,6 +86,7 @@ pub enum ToolStage {
     MovingFiles,
     HardlinkingFiles,
     SymlinkingFiles,
+    DeduplicatingFiles,
     OptimizingVideos,
     CleaningExif,
 
@@ -106,7 +107,14 @@ impl ToolStage {
     pub fn is_special_non_tool_stage(self) -> bool {
         matches!(
             self,
-            Self::DeletingFiles | Self::RenamingFiles | Self::MovingFiles | Self::HardlinkingFiles | Self::SymlinkingFiles | Self::OptimizingVideos | Self::CleaningExif
+            Self::DeletingFiles
+                | Self::RenamingFiles
+                | Self::MovingFiles
+                | Self::HardlinkingFiles
+                | Self::DeduplicatingFiles
+                | Self::SymlinkingFiles
+                | Self::OptimizingVideos
+                | Self::CleaningExif
         )
     }
 
@@ -179,6 +187,7 @@ impl ToolStage {
             | Self::RenamingFiles
             | Self::MovingFiles
             | Self::HardlinkingFiles
+            | Self::DeduplicatingFiles
             | Self::SymlinkingFiles
             | Self::OptimizingVideos
             | Self::CleaningExif => 0,
@@ -248,6 +257,7 @@ impl ToolStage {
             | Self::RenamingFiles
             | Self::MovingFiles
             | Self::HardlinkingFiles
+            | Self::DeduplicatingFiles
             | Self::SymlinkingFiles
             | Self::OptimizingVideos
             | Self::CleaningExif => 0,
@@ -420,6 +430,8 @@ impl ProgressData {
             ToolStage::MovingFiles => flc!("stage_moving_no_size_files", items_stats = items_stats),
             ToolStage::HardlinkingFiles if has_size => flc!("stage_hardlinking_files", items_stats = items_stats, size_stats = size_stats),
             ToolStage::HardlinkingFiles => flc!("stage_hardlinking_no_size_files", items_stats = items_stats),
+            ToolStage::DeduplicatingFiles if has_size => flc!("stage_deduplicating_files", items_stats = items_stats, size_stats = size_stats),
+            ToolStage::DeduplicatingFiles => flc!("stage_deduplicating_no_size_files", items_stats = items_stats),
             ToolStage::SymlinkingFiles if has_size => flc!("stage_symlinking_files", items_stats = items_stats, size_stats = size_stats),
             ToolStage::SymlinkingFiles => flc!("stage_symlinking_no_size_files", items_stats = items_stats),
             ToolStage::OptimizingVideos if has_size => flc!("stage_optimizing_videos", items_stats = items_stats, size_stats = size_stats),

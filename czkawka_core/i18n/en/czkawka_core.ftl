@@ -163,3 +163,6 @@ stage_optimizing_videos = Optimized { $items_stats } video ({ $size_stats })
 stage_optimizing_no_size_videos = Optimized { $items_stats } video
 stage_cleaning_exif = Cleaning EXIF from { $items_stats } file ({ $size_stats })
 stage_cleaning_no_size_exif = Cleaning EXIF from { $items_stats } file
+
+stage_deduplicating_files = Deduplicating { $items_stats } files ({ $size_stats })
+stage_deduplicating_no_size_files = Deduplicating { $items_stats } files

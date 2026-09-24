@@ -1,4 +1,5 @@
 pub mod connect_clean_exif;
+pub mod connect_deduplicate;
 pub mod connect_delete;
 pub mod connect_hardlink;
 pub mod connect_move;

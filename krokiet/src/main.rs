@@ -18,6 +18,7 @@ use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::tools::video_optimizer::HardwareEncoder;
 use file_actions::connect_clean_exif::connect_clean;
+use file_actions::connect_deduplicate::connect_deduplicate;
 use file_actions::connect_delete::{connect_delete_button, connect_trash_button};
 use file_actions::connect_hardlink::connect_hardlink;
 use file_actions::connect_move::connect_move;
@@ -183,6 +184,7 @@ fn main() {
     connect_optimize_video(&app, progress_sender.clone(), stop_flag.clone());
     connect_clean(&app, progress_sender.clone(), stop_flag.clone());
     connect_hardlink(&app, progress_sender.clone(), stop_flag.clone());
+    connect_deduplicate(&app, progress_sender.clone(), stop_flag.clone());
     connect_symlink(&app, progress_sender, stop_flag);
     connect_save(&app, Arc::clone(&shared_models));
     connect_row_selections(&app);

@@ -124,6 +124,9 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow, shared_models: Arc<Mut
                 base.push_str(format!("\n{}", flk!("rust_symlink_confirmation_number_simple", items = res.checked_items_number)).as_str());
                 translation.set_softlink_confirmation_text(base.into());
             }
+            PopupRequest::Deduplicate => {
+                translation.set_deduplicate_confirmation_text(flk!("deduplicate_confirmation_text").into());
+            }
             PopupRequest::Hardlink => {
                 let mut base = flk!("rust_hardlink_confirmation");
                 base.push_str(format!("\n{}", flk!("rust_hardlink_confirmation_number_simple", items = res.checked_items_number)).as_str());

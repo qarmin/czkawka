@@ -242,6 +242,17 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
+    if lists_enabled && active_tab == ActiveTab.DuplicateFiles && GuiState.cow_deduplication_available: deduplicate_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.deduplicate_button_text;
+        icon: @image-url("../../icons/krokiet_deduplicate.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.Deduplicate);
+        }
+    }
+
     if lists_enabled && GuiState.tool_with_groups: hardlink_button := Button {
         height: parent.height;
         enabled: base_buttons_may_be_available && self.visible && checked_anything;
