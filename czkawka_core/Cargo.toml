@@ -6,7 +6,6 @@ edition = "2024"
 rust-version = "1.94.1"
 description = "Core of Czkawka app"
 license = "MIT"
-homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 build = "build.rs"
 
@@ -34,15 +33,15 @@ lofty = "0.25"
 
 # Needed by broken files
 zip = { version = "8.6", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
-lopdf = "0.44.0"
-sevenz-rust2 = "0.22.2"
+lopdf = "0.45.0"
+sevenz-rust2 = "0.23.0"
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 tar = { version = "0.4", default-features = false }
 ruzstd = "0.9"
 ttf-parser = "0.25"
 quick-xml = "0.42"
 toml = { version = "1.1", default-features = false, features = ["parse", "serde"] }
-yaml-rust2 = "0.12"
+yaml-rust2 = "0.13"
 usvg = { version = "0.48", default-features = false }
 bzip2-rs = "0.1"
 lzma-rs = "0.3"
@@ -109,7 +108,7 @@ log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 deunicode = "1.6.2"
 glibc_musl_version = "0.1.0"
 
-rand = "0.10.2"
+rand = "0.10.3"
 
 ashpd = { version = "0.13.13", optional = true, features = ["trash"] }
 tokio = { version = "1.53.1", optional = true }
@@ -126,7 +125,7 @@ glibc_musl_version = "0.1.0"
 
 [dev-dependencies]
 criterion =  { version = "0.8", default-features = false, features = [] }
-rand = "0.10.2"
+rand = "0.10.3"
 
 [[bench]]
 name = "hash_calculation_benchmark"

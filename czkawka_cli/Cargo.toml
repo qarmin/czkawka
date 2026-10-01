@@ -6,7 +6,6 @@ edition = "2024"
 rust-version = "1.94.1"
 description = "CLI frontend of Czkawka"
 license = "MIT"
-homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]

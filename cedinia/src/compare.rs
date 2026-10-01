@@ -134,7 +134,7 @@ fn compute_diff_image(left_path: &str, right_path: &str) -> Option<RawPixels> {
     };
 
     let mut out: Vec<u8> = Vec::with_capacity((w * h * 4) as usize);
-    for (lp, rp) in left.data.chunks_exact(4).zip(right_data.chunks_exact(4)) {
+    for (lp, rp) in left.data.as_chunks::<4>().0.iter().zip(right_data.as_chunks::<4>().0.iter()) {
         let dr = (lp[0] as f32 - rp[0] as f32).powi(2);
         let dg = (lp[1] as f32 - rp[1] as f32).powi(2);
         let db = (lp[2] as f32 - rp[2] as f32).powi(2);

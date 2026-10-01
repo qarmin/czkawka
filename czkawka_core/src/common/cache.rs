@@ -384,11 +384,11 @@ where
     }
     let mut all_results: BTreeMap<String, K> = Default::default();
 
-    for file_entry in vec_file_entry.iter().cloned() {
-        all_results.insert(file_entry.get_path().to_string_lossy().to_string(), file_entry);
-    }
     for (name, file_entry) in loaded_hash_map {
         all_results.insert(name, file_entry);
+    }
+    for file_entry in vec_file_entry.iter().cloned() {
+        all_results.insert(file_entry.get_path().to_string_lossy().to_string(), file_entry);
     }
 
     let messages = save_cache_to_file_generalized(cache_file_name, &all_results, common_data.get_save_also_as_json(), 0);

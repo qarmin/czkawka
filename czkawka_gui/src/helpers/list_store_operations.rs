@@ -257,7 +257,6 @@ mod test {
     use glib::Value;
     use glib::types::Type;
     use gtk4::TreeView;
-    use gtk4::prelude::*;
 
     use super::*;
     use crate::notebook_enums::NotebookMainEnum;

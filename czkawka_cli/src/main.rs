@@ -111,9 +111,8 @@ fn main() {
 
     if cli_output.found_any_files && !cli_output.ignored_error_code_on_found {
         std::process::exit(11);
-    } else {
-        std::process::exit(0);
     }
+    std::process::exit(0);
 }
 
 fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {

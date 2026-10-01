@@ -418,6 +418,9 @@ impl BrokenFiles {
     }
 
     pub(crate) fn video_entry_missing_required_checks(file_entry: &BrokenEntry, checked_types: CheckedTypes) -> bool {
+        if check_extension_availability(&file_entry.path) != Some(TypeOfFile::Video) {
+            return false;
+        }
         (checked_types.contains(CheckedTypes::VIDEO_FFPROBE) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfprobe))
             || (checked_types.contains(CheckedTypes::VIDEO_FFMPEG) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg))
     }

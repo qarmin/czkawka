@@ -6,13 +6,12 @@ edition = "2024"
 rust-version = "1.94.1"
 description = "GTK frontend of Czkawka"
 license = "MIT"
-homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 
 [dependencies]
-gdk4 = { version = "0.11.4", default-features = false, features = ["v4_6"] }
-glib = "0.22.9"
-gtk4 = { version = "0.11.4", default-features = false, features = ["v4_6"] }
+gdk4 = { version = "0.11.5", default-features = false, features = ["v4_6"] }
+glib = "0.22.10"
+gtk4 = { version = "0.11.5", default-features = false, features = ["v4_6"] }
 
 humansize = "2.1"
 chrono = "0.4.45"
@@ -37,7 +36,7 @@ resvg = { version = "0.48.1", default-features = false }
 serde_json = "1.0.151"
 serde = { version = "1.0.229", features = ["derive"] }
 itertools = "0.15.0"
-rand = "0.10.2"
+rand = "0.10.3"
 
 [dev-dependencies]
 
