@@ -136,6 +136,14 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka exif-remover -d /home/rafal -f results.txt"
     )]
     ExifRemover(ExifRemoverArgs),
+    #[clap(name = "completions", about = "Generates shell completions", hide = true)]
+    Completions(CompletionsArgs),
+}
+
+#[derive(Debug, clap::Args)]
+pub struct CompletionsArgs {
+    #[clap(value_enum, help = "Shell to generate completions for")]
+    pub shell: clap_complete::Shell,
 }
 
 #[derive(Debug, clap::Args)]

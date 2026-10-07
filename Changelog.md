@@ -1,3 +1,8 @@
+## Unreleased
+
+### CLI
+- Added a hidden `completions <SHELL>` subcommand to `czkawka_cli` that prints shell completion scripts (bash, zsh, fish, elvish, powershell) - [#2094](https://github.com/qarmin/czkawka/pull/2094)
+
 ## Version 12.0.2 - 09.09.2026r
 
 ### Core

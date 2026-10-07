@@ -34,8 +34,8 @@ use czkawka_core::tools::video_optimizer::{
 use log::{debug, error, info};
 
 use crate::commands::{
-    Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, ExifRemoverArgs,
-    InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs, validate_file_sizes,
+    Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, CompletionsArgs, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs,
+    ExifRemoverArgs, InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs, validate_file_sizes,
 };
 use crate::progress::connect_progress;
 
@@ -57,6 +57,12 @@ fn main() {
         Args::command().debug_assert();
     }
     let command = Args::parse().command;
+
+    if let Commands::Completions(CompletionsArgs { shell }) = command {
+        use clap::CommandFactory;
+        clap_complete::generate(shell, &mut Args::command(), "czkawka_cli", &mut std::io::stdout());
+        return;
+    }
 
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Czkawka");
     setup_logger(true, "czkawka_cli", filtering_messages);
@@ -88,6 +94,7 @@ fn main() {
             Commands::BadNames(bad_names_args) => bad_names(bad_names_args, &stop_flag, &progress_sender),
             Commands::VideoOptimizer(video_optimizer_args) => video_optimizer(video_optimizer_args, &stop_flag, &progress_sender),
             Commands::ExifRemover(exif_remover_args) => exif_remover(exif_remover_args, &stop_flag, &progress_sender),
+            Commands::Completions(_) => unreachable!("Completions are handled before the scan starts"),
         })
         .expect("Failed to spawn calculation thread");
 
