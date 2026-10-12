@@ -2,8 +2,7 @@ name: 🍎 MacOS
 on:
   push:
   pull_request:
-  schedule:
-    - cron: '0 0 * * 2'
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
