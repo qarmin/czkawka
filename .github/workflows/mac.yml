@@ -1,11 +1,9 @@
 name: 🍎 MacOS
-
 on:
   push:
-    branches: [ master, main ]
   pull_request:
-    branches: [ master, main ]
-  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 2'
 
 env:
   CARGO_TERM_COLOR: always
@@ -17,9 +15,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
+        os: [macos-15-intel]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup env
         run: |
@@ -27,14 +25,16 @@ jobs:
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Setup rust version
-        run: rustup default 1.94.1
+        run: rustup default 1.92.0
 
       - name: Install Homebrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       - name: Install GTK4
         run: |
+          brew link --overwrite python@3.13
           brew install gtk4 libheif libavif dav1d || true
+          # brew link --overwrite python@3.13
 
       - name: Build Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -102,45 +102,40 @@ jobs:
           cargo build --profile fastci --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu,heif,libavif"
           mv target/fastci/krokiet mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}
 
-      - name: Package krokiet with launchers
-        run: |
-          bash misc/pack_all_backends.sh mac_krokiet_all_backends_${{ env.ARCHNAME }} mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
-          bash misc/pack_all_backends.sh mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }} mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
-
       - name: Store MacOS
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
-            mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
-            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_czkawka_gui_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: "Nightly"
           files: |
-            mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_czkawka_gui_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
-            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_czkawka_gui_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}
