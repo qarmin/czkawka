@@ -54,3 +54,4 @@ cedinia/ui/fonts
 tmp/
 test/
 temp/
+.DS_Store
