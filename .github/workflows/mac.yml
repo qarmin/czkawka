@@ -24,7 +24,7 @@ jobs:
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Setup rust version
-        run: rustup default 1.92.0
+        run: rustup default 1.94.1
 
       - name: Install MacPorts and required packages
         run: |
