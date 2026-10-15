@@ -26,14 +26,45 @@ jobs:
       - name: Setup rust version
         run: rustup default 1.92.0
 
-      - name: Install Homebrew
-        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      - name: Install MacPorts and required packages
+        run: |
+          set -e
+          # Ensure MacPorts exists; if not, try to download & install a MacPorts pkg.
+          if ! command -v port >/dev/null 2>&1; then
+            echo "MacPorts not found. Attempting to download and install a MacPorts pkg — this URL may need adjustment for the runner macOS version."
+            # NOTE: adjust the URL below to a MacPorts pkg matching the runner macOS version if needed.
+            MACPORTS_PKG_URL="https://github.com/macports/macports-base/releases/latest/download/MacPorts.pkg"
+            curl -fsSL "$MACPORTS_PKG_URL" -o macports.pkg || true
+            if [ -f macports.pkg ]; then
+              sudo installer -pkg macports.pkg -target /
+              rm -f macports.pkg
+            else
+              echo "MacPorts package not downloaded; if you're on GitHub-hosted runners this step may fail. Ensure MacPorts is available or use a runner with MacPorts preinstalled."
+            fi
+          fi
+
+          # Update MacPorts and install needed packages (names: gtk4, libheif, libavif, dav1d, python39)
+          if command -v port >/dev/null 2>&1; then
+            sudo port -v selfupdate || true
+            sudo port install gtk4 libheif libavif dav1d python39 || true
+
+            # Ensure python points to the installed one (optional)
+            if port select --list python | grep -q python39; then
+              sudo port select --set python python39 || true
+            fi
+
+            # Add MacPorts bin to PATH for subsequent steps
+            echo "/opt/local/bin" >> $GITHUB_PATH
+            echo "/opt/local/sbin" >> $GITHUB_PATH
+          else
+            echo "MacPorts not available; subsequent build steps may fail."
+          fi
 
       - name: Install GTK4
         run: |
-          brew link --overwrite python@3.13
-          brew install gtk4 libheif libavif dav1d || true
-          # brew link --overwrite python@3.13
+          # With MacPorts, gtk4 and libs installed to /opt/local
+          # This step kept for compatibility with previous workflow; it is now a no-op if ports already installed.
+          /opt/local/bin/port installed gtk4 || true
 
       - name: Build Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -44,7 +75,7 @@ jobs:
           
           echo "VERS=release" >> $GITHUB_ENV
           
-          export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
+          export LIBRARY_PATH=$LIBRARY_PATH:/opt/local/lib
           
           cargo build --release
           mv target/release/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
@@ -77,7 +108,7 @@ jobs:
           
           echo "VERS=debug" >> $GITHUB_ENV
           
-          export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix)/lib
+          export LIBRARY_PATH=$LIBRARY_PATH:/opt/local/lib
           
           cargo build --profile fastci
           mv target/fastci/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
