@@ -33,7 +33,7 @@ jobs:
           if ! command -v port >/dev/null 2>&1; then
             echo "MacPorts not found. Attempting to download and install a MacPorts pkg — this URL may need adjustment for the runner macOS version."
             # NOTE: adjust the URL below to a MacPorts pkg matching the runner macOS version if needed.
-            MACPORTS_PKG_URL="https://github.com/macports/macports-base/releases/latest/download/MacPorts.pkg"
+            MACPORTS_PKG_URL="https://github.com/macports/macports-base/releases/download/v2.12.7/MacPorts-2.12.7-15-Sequoia.pkg"
             curl -fsSL "$MACPORTS_PKG_URL" -o macports.pkg || true
             if [ -f macports.pkg ]; then
               sudo installer -pkg macports.pkg -target /
