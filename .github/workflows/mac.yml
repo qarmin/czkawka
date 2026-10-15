@@ -76,6 +76,9 @@ jobs:
           echo "VERS=release" >> $GITHUB_ENV
           
           export LIBRARY_PATH=$LIBRARY_PATH:/opt/local/lib
+          export PATH="/opt/local/bin:$PATH" 
+          export LIBRARY_PATH="${LIBRARY_PATH}:/opt/local/lib" 
+          export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/local/lib/pkgconfig:/opt/local/share/pkgconfig"
           
           cargo build --release
           mv target/release/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
@@ -109,6 +112,9 @@ jobs:
           echo "VERS=debug" >> $GITHUB_ENV
           
           export LIBRARY_PATH=$LIBRARY_PATH:/opt/local/lib
+          export PATH="/opt/local/bin:$PATH" 
+          export LIBRARY_PATH="${LIBRARY_PATH}:/opt/local/lib" 
+          export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/local/lib/pkgconfig:/opt/local/share/pkgconfig"
           
           cargo build --profile fastci
           mv target/fastci/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
