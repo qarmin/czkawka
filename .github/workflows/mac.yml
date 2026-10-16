@@ -47,9 +47,9 @@ jobs:
           # Configure sources.conf to use HTTPS tarball instead of rsync (avoids port 873 firewall issues)
           echo "https://distfiles.macports.org/ports.tar.gz [default]" | sudo tee /opt/local/etc/macports/sources.conf > /dev/null
 
-          # Update port definitions
+          # Update port definitions (use -v to bypass a known MacPorts Tcl bug with uninitialized verboseflag during tarball extraction)
           echo "Syncing ports tree..."
-          sudo /opt/local/bin/port -N sync
+          sudo /opt/local/bin/port -v sync
 
           # Install needed packages (gdk-pixbuf2 is the MacPorts package name for gdk-pixbuf-2.0)
           echo "Installing dependencies..."
