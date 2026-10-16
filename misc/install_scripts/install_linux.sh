@@ -32,7 +32,7 @@ case "$DISTRO" in
         BASE="ffmpeg gtk4-devel"
         OPTIONAL="libheif-devel LibRaw-devel libavif-devel dav1d-devel"
         INSTALL_CMD="dnf install -y"
-        UPDATE_CMD="dnf check-update || true"
+        UPDATE_CMD="dnf check-update"
         ;;
     arch)
         BASE="ffmpeg gtk4"
@@ -60,7 +60,12 @@ if [[ "$answer" =~ ^[Nn]$ ]]; then
     exit 0
 fi
 
-$UPDATE_CMD
+$UPDATE_CMD || {
+    update_status=$?
+    if [[ "$DISTRO" != "fedora" || "$update_status" -ne 100 ]]; then
+        exit "$update_status"
+    fi
+}
 
 $INSTALL_CMD $BASE
 
