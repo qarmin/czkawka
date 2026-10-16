@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use std::panic;
 use std::path::Path;
 
-use fast_image_resize::{FilterType as FirFilterType, ResizeAlg, ResizeOptions as FirResizeOptions, Resizer};
+use fast_image_resize::FilterType as FirFilterType;
 use image::{DynamicImage, ImageReader};
 use little_exif::exif_tag::ExifTag;
 use little_exif::ifd::ExifTagGroup;
@@ -153,14 +153,9 @@ pub struct ImgResizeOptions {
     pub filter: FirFilterType,
 }
 
-pub fn resize_image_exact(img: &DynamicImage, width: u32, height: u32, filter: FirFilterType) -> DynamicImage {
-    let mut dst = DynamicImage::new(width, height, img.color());
-    let fir_opts = FirResizeOptions::new().resize_alg(ResizeAlg::Interpolation(filter));
-
-    match Resizer::new().resize(img, &mut dst, Some(&fir_opts)) {
-        Ok(()) => dst,
-        Err(_) => img.resize_exact(width, height, image::imageops::FilterType::Lanczos3),
-    }
+pub fn resize_image_exact(img: &DynamicImage, width: u32, height: u32, _filter: FirFilterType) -> DynamicImage {
+    // Use image-rs built-in resizer for portability and correctness.
+    img.resize_exact(width, height, image::imageops::FilterType::Lanczos3)
 }
 
 fn resize_image(img: DynamicImage, opts: ImgResizeOptions) -> DynamicImage {
@@ -175,16 +170,8 @@ fn resize_image(img: DynamicImage, opts: ImgResizeOptions) -> DynamicImage {
     let new_w = ((orig_w as f32 * scale) as u32).max(1).min(img.width());
     let new_h = ((orig_h as f32 * scale) as u32).max(1).min(img.height());
 
-    let mut dst = DynamicImage::new(new_w, new_h, img.color());
-    let fir_opts = FirResizeOptions::new().resize_alg(ResizeAlg::Interpolation(opts.filter));
-
-    match Resizer::new().resize(&img, &mut dst, Some(&fir_opts)) {
-        Ok(()) => dst,
-        Err(_) => {
-            // Fall back to the image-rs built-in resizer if fast_image_resize fails, quite unlikely
-            img.resize(new_w, new_h, image::imageops::FilterType::Lanczos3)
-        }
-    }
+    // Fall back to the image-rs built-in resizer which returns DynamicImage directly.
+    img.resize(new_w, new_h, image::imageops::FilterType::Lanczos3)
 }
 
 #[cfg(feature = "libraw")]
