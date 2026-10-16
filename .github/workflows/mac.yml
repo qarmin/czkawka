@@ -44,14 +44,12 @@ jobs:
             rm -f macports.pkg
           fi
 
-          # Switch sources.conf to HTTPS tarball to avoid rsync port 873 firewall blocks on CI
-          if [ -f /opt/local/etc/macports/sources.conf ]; then
-            sudo sed -i '' 's|^rsync://rsync.macports.org/macports/release/tarballs/ports.tar|https://distfiles.macports.org/ports.tar.gz|' /opt/local/etc/macports/sources.conf || true
-          fi
+          # Configure sources.conf to use HTTPS tarball instead of rsync (avoids port 873 firewall issues)
+          echo "https://distfiles.macports.org/ports.tar.gz [default]" | sudo tee /opt/local/etc/macports/sources.conf > /dev/null
 
           # Update port definitions
           echo "Syncing ports tree..."
-          sudo /opt/local/bin/port -N sync || sudo /opt/local/bin/port -N selfupdate || true
+          sudo /opt/local/bin/port -N sync
 
           # Install needed packages (gdk-pixbuf2 is the MacPorts package name for gdk-pixbuf-2.0)
           echo "Installing dependencies..."
