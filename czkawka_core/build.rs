@@ -33,6 +33,12 @@ fn main() {
         }
     }
 
+    // Ensure en directory exists and target filename matches what the i18n macros expect
+    let en_dir = i18n_dir.join("en");
+    if let Err(e) = fs::create_dir_all(&en_dir) {
+        panic!("Failed to create en i18n directory {:?}: {}", en_dir, e);
+    }
+
     // If still empty, write minimal fallback translations
     if entries.is_empty() {
         let fallback = r#"core_similarity_very_high = Very high
@@ -43,7 +49,7 @@ core_similarity_very_small = Very small
 core_similarity_minimal = Minimal
 core_ffmpeg_not_found = FFmpeg not found
 "#;
-        let target = i18n_dir.join("en.ftl");
+        let target = en_dir.join("czkawka_core.ftl");
         fs::write(&target, fallback).unwrap_or_else(|e| {
             panic!("Failed to write fallback {:?}: {}", target, e);
         });
@@ -53,11 +59,11 @@ core_ffmpeg_not_found = FFmpeg not found
     // Build the .ftl contents
     let mut ftl = String::new();
     for (k, v) in entries {
-        // Escape braces if needed? Keep value as-is; .ftl expects plain text or variables like { $var }
+        // For .ftl keep value as-is; keys/values are simple strings
         ftl.push_str(&format!("{} = {}\n", k, v));
     }
 
-    let target = i18n_dir.join("en.ftl");
+    let target = en_dir.join("czkawka_core.ftl");
     fs::write(&target, ftl).unwrap_or_else(|e| {
         panic!("Failed to write {:?}: {}", target, e);
     });
@@ -102,7 +108,6 @@ fn parse_key_values(s: &str) -> Vec<(String, String)> {
             }
             // Unescape simple escaped quotes
             let val = val.replace("\\\"", "\"").replace("\\'", "'");
-            // For .ftl we keep same value. If there are TOML inline tables or complex values, they will be skipped.
             res.push((key, val));
         }
     }
