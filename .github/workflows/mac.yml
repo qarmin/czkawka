@@ -45,8 +45,8 @@ jobs:
 
           # Update MacPorts and install needed packages (names: gtk4, libheif, libavif, dav1d, python39)
           if command -v port >/dev/null 2>&1; then
-            sudo port -v selfupdate || true
-            sudo port install gtk4 libheif libavif dav1d python39 || true
+            sudo port -v selfupdate
+            sudo port install gtk4 libheif libavif dav1d python39 gdk-pixbuf pkgconfig
 
             # Ensure python points to the installed one (optional)
             if port select --list python | grep -q python39; then
