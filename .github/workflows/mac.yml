@@ -22,6 +22,10 @@ jobs:
         run: |
           ARCHNAME=$([ "${{ runner.arch }}" = "ARM64" ] && echo arm64 || echo x86_64)
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
+          echo "/opt/local/bin" >> $GITHUB_PATH
+          echo "/opt/local/sbin" >> $GITHUB_PATH
+          echo "PKG_CONFIG_PATH=/opt/local/lib/pkgconfig:/opt/local/share/pkgconfig" >> $GITHUB_ENV
+          echo "LIBRARY_PATH=/opt/local/lib" >> $GITHUB_ENV
 
       - name: Setup rust version
         run: rustup default 1.94.1
@@ -29,42 +33,34 @@ jobs:
       - name: Install MacPorts and required packages
         run: |
           set -e
-          # Ensure MacPorts exists; if not, try to download & install a MacPorts pkg.
-          if ! command -v port >/dev/null 2>&1; then
-            echo "MacPorts not found. Attempting to download and install a MacPorts pkg — this URL may need adjustment for the runner macOS version."
-            # NOTE: adjust the URL below to a MacPorts pkg matching the runner macOS version if needed.
+          export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+
+          # Ensure MacPorts exists; if not, download & install official package for Sequoia
+          if ! [ -x /opt/local/bin/port ]; then
+            echo "MacPorts not found. Downloading and installing MacPorts package..."
             MACPORTS_PKG_URL="https://github.com/macports/macports-base/releases/download/v2.12.7/MacPorts-2.12.7-15-Sequoia.pkg"
-            curl -fsSL "$MACPORTS_PKG_URL" -o macports.pkg || true
-            if [ -f macports.pkg ]; then
-              sudo installer -pkg macports.pkg -target /
-              rm -f macports.pkg
-            else
-              echo "MacPorts package not downloaded; if you're on GitHub-hosted runners this step may fail. Ensure MacPorts is available or use a runner with MacPorts preinstalled."
-            fi
+            curl -fsSL "$MACPORTS_PKG_URL" -o macports.pkg
+            sudo installer -pkg macports.pkg -target /
+            rm -f macports.pkg
           fi
 
-          # Update MacPorts and install needed packages (names: gtk4, libheif, libavif, dav1d, python39)
-          if command -v port >/dev/null 2>&1; then
-            sudo port -v selfupdate
-            sudo port install gtk4 libheif libavif dav1d python39 gdk-pixbuf pkgconfig
-
-            # Ensure python points to the installed one (optional)
-            if port select --list python | grep -q python39; then
-              sudo port select --set python python39 || true
-            fi
-
-            # Add MacPorts bin to PATH for subsequent steps
-            echo "/opt/local/bin" >> $GITHUB_PATH
-            echo "/opt/local/sbin" >> $GITHUB_PATH
-          else
-            echo "MacPorts not available; subsequent build steps may fail."
+          # Switch sources.conf to HTTPS tarball to avoid rsync port 873 firewall blocks on CI
+          if [ -f /opt/local/etc/macports/sources.conf ]; then
+            sudo sed -i '' 's|^rsync://rsync.macports.org/macports/release/tarballs/ports.tar|https://distfiles.macports.org/ports.tar.gz|' /opt/local/etc/macports/sources.conf || true
           fi
 
-      - name: Install GTK4
-        run: |
-          # With MacPorts, gtk4 and libs installed to /opt/local
-          # This step kept for compatibility with previous workflow; it is now a no-op if ports already installed.
-          /opt/local/bin/port installed gtk4 || true
+          # Update port definitions
+          echo "Syncing ports tree..."
+          sudo /opt/local/bin/port -N sync || sudo /opt/local/bin/port -N selfupdate || true
+
+          # Install needed packages (gdk-pixbuf2 is the MacPorts package name for gdk-pixbuf-2.0)
+          echo "Installing dependencies..."
+          sudo /opt/local/bin/port -N install gtk4 libheif libavif dav1d gdk-pixbuf2 pkgconfig
+
+          # Verify packages and pkg-config resolution
+          echo "Verifying installation..."
+          /opt/local/bin/port installed gtk4 gdk-pixbuf2 pkgconfig
+          PKG_CONFIG_PATH="/opt/local/lib/pkgconfig:/opt/local/share/pkgconfig" /opt/local/bin/pkg-config --libs --cflags gdk-pixbuf-2.0
 
       - name: Build Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -75,10 +71,9 @@ jobs:
           
           echo "VERS=release" >> $GITHUB_ENV
           
-          export LIBRARY_PATH=$LIBRARY_PATH:/opt/local/lib
-          export PATH="/opt/local/bin:$PATH" 
-          export LIBRARY_PATH="${LIBRARY_PATH}:/opt/local/lib" 
-          export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/local/lib/pkgconfig:/opt/local/share/pkgconfig"
+          export PATH="/opt/local/bin:$PATH"
+          export LIBRARY_PATH="/opt/local/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+          export PKG_CONFIG_PATH="/opt/local/lib/pkgconfig:/opt/local/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
           
           cargo build --release
           mv target/release/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
@@ -111,10 +106,9 @@ jobs:
           
           echo "VERS=debug" >> $GITHUB_ENV
           
-          export LIBRARY_PATH=$LIBRARY_PATH:/opt/local/lib
-          export PATH="/opt/local/bin:$PATH" 
-          export LIBRARY_PATH="${LIBRARY_PATH}:/opt/local/lib" 
-          export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/opt/local/lib/pkgconfig:/opt/local/share/pkgconfig"
+          export PATH="/opt/local/bin:$PATH"
+          export LIBRARY_PATH="/opt/local/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+          export PKG_CONFIG_PATH="/opt/local/lib/pkgconfig:/opt/local/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
           
           cargo build --profile fastci
           mv target/fastci/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
