@@ -1,69 +1,110 @@
+use std::env;
+use std::fs;
+use std::path::Path;
+
 fn main() {
-    let rust_version = match rustc_version::version_meta() {
-        Ok(meta) => {
-            let rust_v = meta.semver.to_string();
-            let rust_date = meta.commit_date.unwrap_or_default();
-            format!("{rust_v} ({rust_date})")
-        }
-        Err(_) => "<unknown>".to_string(),
-    };
-    println!("cargo:rustc-env=RUST_VERSION_INTERNAL={rust_version}");
+    // Re-run build script if i18n.toml or this build script changes
+    println!("cargo:rerun-if-changed=i18n.toml");
+    println!("cargo:rerun-if-changed=build.rs");
 
-    if let Ok(encoded) = std::env::var("CARGO_ENCODED_RUSTFLAGS") {
-        println!("cargo:rustc-env=UUSED_RUSTFLAGS={encoded}");
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set");
+    let crate_root = Path::new(&manifest_dir);
+    let i18n_dir = crate_root.join("i18n");
+    if let Err(e) = fs::create_dir_all(&i18n_dir) {
+        panic!("Failed to create i18n directory {:?}: {}", i18n_dir, e);
     }
 
-    // Get Git commit hash
-    let git_commit = std::process::Command::new("git")
-        .args(["rev-parse", "HEAD"])
-        .output()
-        .ok()
-        .and_then(|output| if output.status.success() { String::from_utf8(output.stdout).ok() } else { None })
-        .map_or_else(|| "<unknown>".to_string(), |s| s.trim().to_string());
-    println!("cargo:rustc-env=CZKAWKA_GIT_COMMIT={git_commit}");
+    let toml_path = crate_root.join("i18n.toml");
+    let mut entries: Vec<(String, String)> = Vec::new();
 
-    // Get short Git commit hash
-    let git_commit_short = if git_commit != "<unknown>" && git_commit.len() >= 10 {
-        git_commit.chars().take(10).collect::<String>()
-    } else {
-        git_commit
-    };
-    println!("cargo:rustc-env=CZKAWKA_GIT_COMMIT_SHORT={git_commit_short}");
+    if toml_path.exists() {
+        let toml_str = fs::read_to_string(&toml_path).unwrap_or_else(|e| {
+            panic!("Failed to read {:?}: {}", toml_path, e);
+        });
 
-    // Commit date
-    let git_commit_date = std::process::Command::new("git")
-        .args(["log", "-1", "--format=%cd", "--date=format:%Y-%m-%d"])
-        .output()
-        .ok()
-        .and_then(|output| if output.status.success() { String::from_utf8(output.stdout).ok() } else { None })
-        .map_or_else(|| "<unknown>".to_string(), |s| s.trim().to_string());
-    println!("cargo:rustc-env=CZKAWKA_GIT_COMMIT_DATE={git_commit_date}");
-
-    // Official build flag
-    if std::env::var("CZKAWKA_OFFICIAL_BUILD") == Ok("1".to_string()) {
-        println!("cargo:rustc-env=CZKAWKA_OFFICIAL_BUILD=1");
-    } else {
-        println!("cargo:rustc-env=CZKAWKA_OFFICIAL_BUILD=0");
-    }
-
-    let using_cranelift =
-        std::env::var("CARGO_PROFILE_DEV_CODEGEN_BACKEND").as_deref() == Ok("cranelift") || std::env::var("CARGO_PROFILE_RELEASE_CODEGEN_BACKEND").as_deref() == Ok("cranelift");
-
-    if using_cranelift {
-        println!("cargo:rustc-env=USING_CRANELIFT=1");
-    }
-
-    if cfg!(target_os = "linux") {
-        if let Ok(ver) = glibc_musl_version::get_os_libc_versions() {
-            println!("cargo:rustc-env=CZKAWKA_LIBC_VERSIONS={ver}");
+        // Try to extract [en] section first. If present, prefer it.
+        if let Some(en_section) = extract_section(&toml_str, "en") {
+            entries = parse_key_values(&en_section);
         }
 
-        if cfg!(target_env = "gnu") {
-            println!("cargo:rustc-env=CZKAWKA_LIBC=glibc");
-        } else if cfg!(target_env = "musl") {
-            println!("cargo:rustc-env=CZKAWKA_LIBC=musl");
-        } else {
-            println!("cargo:rustc-env=CZKAWKA_LIBC=unknown");
+        // If no [en] section or empty, parse top-level simple key = "value" pairs
+        if entries.is_empty() {
+            entries = parse_key_values(&toml_str);
         }
     }
+
+    // If still empty, write minimal fallback translations
+    if entries.is_empty() {
+        let fallback = r#"core_similarity_very_high = Very high
+core_similarity_high = High
+core_similarity_medium = Medium
+core_similarity_small = Small
+core_similarity_very_small = Very small
+core_similarity_minimal = Minimal
+core_ffmpeg_not_found = FFmpeg not found
+"#;
+        let target = i18n_dir.join("en.ftl");
+        fs::write(&target, fallback).unwrap_or_else(|e| {
+            panic!("Failed to write fallback {:?}: {}", target, e);
+        });
+        return;
+    }
+
+    // Build the .ftl contents
+    let mut ftl = String::new();
+    for (k, v) in entries {
+        // Escape braces if needed? Keep value as-is; .ftl expects plain text or variables like { $var }
+        ftl.push_str(&format!("{} = {}\n", k, v));
+    }
+
+    let target = i18n_dir.join("en.ftl");
+    fs::write(&target, ftl).unwrap_or_else(|e| {
+        panic!("Failed to write {:?}: {}", target, e);
+    });
+}
+
+fn extract_section(s: &str, section: &str) -> Option<String> {
+    let start = format!("[{}]", section);
+    let mut in_section = false;
+    let mut collected = String::new();
+    for line in s.lines() {
+        let line_trim = line.trim();
+        if line_trim.starts_with('[') && line_trim.ends_with(']') {
+            if in_section {
+                break; // end of section
+            }
+            if line_trim == start {
+                in_section = true;
+                continue;
+            }
+        }
+        if in_section {
+            collected.push_str(line);
+            collected.push('\n');
+        }
+    }
+    if in_section { Some(collected) } else { None }
+}
+
+fn parse_key_values(s: &str) -> Vec<(String, String)> {
+    let mut res = Vec::new();
+    for line in s.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') || line.starts_with('[') {
+            continue;
+        }
+        if let Some(idx) = line.find('=') {
+            let key = line[..idx].trim().trim_matches('"').trim_matches('\'').to_string();
+            let mut val = line[idx+1..].trim();
+            // strip optional quotes
+            if (val.starts_with('"') && val.ends_with('"')) || (val.starts_with('\'') && val.ends_with('\'')) {
+                val = &val[1..val.len()-1];
+            }
+            // Unescape simple escaped quotes
+            let val = val.replace("\\\"", "\"").replace("\\'", "'");
+            // For .ftl we keep same value. If there are TOML inline tables or complex values, they will be skipped.
+            res.push((key, val));
+        }
+    }
+    res
 }
