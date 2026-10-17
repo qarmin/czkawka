@@ -360,21 +360,6 @@ export component ImageCompareOverlay inherits Rectangle {
                 }
             }
             Button {
-                text: zoom_factor >= 9.5 ? "10x" :
-                      zoom_factor >= 6.5 ? "8x"  :
-                      zoom_factor >= 4.5 ? "6x"  :
-                      zoom_factor >= 3.5 ? "4x"  :
-                      zoom_factor >= 2.5 ? "3x"  :
-                      zoom_factor >= 1.5 ? "2x"  : "1x";
-                height: parent.height; width: 36px;
-                enabled: zoom_factor > 1.0;
-                clicked => {
-                    zoom_factor = 1.0;
-                    zoom_pan_x = 0px;
-                    zoom_pan_y = 0px;
-                }
-            }
-            Button {
                 text: "+";
                 height: parent.height; width: 30px;
                 enabled: zoom_factor < 10.0;
