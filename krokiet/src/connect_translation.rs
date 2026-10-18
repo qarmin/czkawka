@@ -409,13 +409,17 @@ fn translate_items(app: &MainWindow) {
 
     translation.set_compare_button_text(flk!("compare_button_text").into());
     translation.set_compare_back_text(flk!("compare_back_text").into());
+    translation.set_compare_back_tooltip_text(flk!("compare_back_tooltip_text").into());
     translation.set_compare_prev_group_text(flk!("compare_prev_group_text").into());
+    translation.set_compare_prev_group_tooltip_text(flk!("compare_prev_group_tooltip_text").into());
     translation.set_compare_next_group_text(flk!("compare_next_group_text").into());
+    translation.set_compare_next_group_tooltip_text(flk!("compare_next_group_tooltip_text").into());
     translation.set_compare_swap_text(flk!("compare_swap_text").into());
     translation.set_compare_info_text(flk!("compare_info_text").into());
     translation.set_compare_diff_text(flk!("compare_diff_text").into());
     translation.set_compare_split_text(flk!("compare_split_text").into());
     translation.set_compare_overlay_text(flk!("compare_overlay_text").into());
+    translation.set_compare_overlay_tooltip_text(flk!("compare_overlay_tooltip_text").into());
     translation.set_compare_loading_title_text(flk!("compare_loading_title_text").into());
     translation.set_compare_cancel_text(flk!("compare_cancel_text").into());
     translation.set_compare_resolution_mismatch_text(flk!("compare_resolution_mismatch_text").into());
@@ -425,6 +429,10 @@ fn translate_items(app: &MainWindow) {
     translation.set_compare_info_size_text(flk!("compare_info_size_text").into());
     translation.set_compare_info_resolution_text(flk!("compare_info_resolution_text").into());
     translation.set_compare_info_modification_date_text(flk!("compare_info_modification_date_text").into());
+    translation.set_compare_filmstrip_set_left_tooltip_text(flk!("compare_filmstrip_set_left_tooltip_text").into());
+    translation.set_compare_filmstrip_set_right_tooltip_text(flk!("compare_filmstrip_set_right_tooltip_text").into());
+    translation.set_compare_pane_toggle_left_selection_tooltip_text(flk!("compare_pane_toggle_left_selection_tooltip_text").into());
+    translation.set_compare_pane_toggle_right_selection_tooltip_text(flk!("compare_pane_toggle_right_selection_tooltip_text").into());
     translation.set_compare_loading_images_text(flk!("compare_loading_images_text").into());
     translation.set_compare_cancelling_text(flk!("compare_cancelling_text").into());
 

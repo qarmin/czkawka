@@ -83,6 +83,8 @@ pub(crate) fn connect_compare(app: &MainWindow, _shared_models: Arc<std::sync::M
     connect_compare_open(app);
     connect_compare_set_left(app);
     connect_compare_set_right(app);
+    connect_compare_step_left_pane(app);
+    connect_compare_step_right_pane(app);
     connect_compare_toggle_checkbox(app);
     connect_compare_next_group(app);
     connect_compare_prev_group(app);
@@ -144,6 +146,54 @@ fn connect_compare_set_right(app: &MainWindow) {
         gui_state.set_compare_diff_image(slint::Image::default());
         if let Some(img) = load_full_image(&path) {
             gui_state.set_compare_right_image(img);
+        }
+    });
+}
+
+fn next_pane_index(current: i32, delta: i32, blocked: i32, count: usize) -> Option<i32> {
+    if count == 0 || current < 0 || current >= count as i32 {
+        return None;
+    }
+    let mut candidate = current + delta;
+    while candidate >= 0 && candidate < count as i32 {
+        if candidate != blocked {
+            return Some(candidate);
+        }
+        candidate += delta;
+    }
+    None
+}
+
+fn connect_compare_step_left_pane(app: &MainWindow) {
+    let a = app.as_weak();
+    app.global::<Callabler>().on_compare_step_left_pane(move |delta| {
+        if delta == 0 {
+            return;
+        }
+        let app = a.upgrade().expect("Failed to upgrade app");
+        let gui_state = app.global::<GuiState>();
+        let count = gui_state.get_compare_images().row_count();
+        let current = gui_state.get_compare_left_idx();
+        let blocked = gui_state.get_compare_right_idx();
+        if let Some(next) = next_pane_index(current, delta, blocked, count) {
+            app.global::<Callabler>().invoke_compare_set_left(next);
+        }
+    });
+}
+
+fn connect_compare_step_right_pane(app: &MainWindow) {
+    let a = app.as_weak();
+    app.global::<Callabler>().on_compare_step_right_pane(move |delta| {
+        if delta == 0 {
+            return;
+        }
+        let app = a.upgrade().expect("Failed to upgrade app");
+        let gui_state = app.global::<GuiState>();
+        let count = gui_state.get_compare_images().row_count();
+        let current = gui_state.get_compare_right_idx();
+        let blocked = gui_state.get_compare_left_idx();
+        if let Some(next) = next_pane_index(current, delta, blocked, count) {
+            app.global::<Callabler>().invoke_compare_set_right(next);
         }
     });
 }

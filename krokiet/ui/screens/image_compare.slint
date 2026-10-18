@@ -109,6 +109,43 @@ export component ImageCompareOverlay inherits Rectangle {
 
     private property <bool> resolution_mismatch: left_valid && right_valid && GuiState.compare_images[GuiState.compare_left_idx].resolution != GuiState.compare_images[GuiState.compare_right_idx].resolution;
 
+    function exit_compare() {
+        if GuiState.compare_loading {
+            GuiState.compare_visible = false;
+            Callabler.compare_cancel_load();
+            return;
+        }
+        GuiState.compare_visible = false;
+        info_visible = false;
+        diff_mode = false;
+        split_mode = false;
+        transparent_mode = false;
+    }
+
+    function toggle_overlay_mode() {
+        transparent_mode = !transparent_mode;
+        diff_mode = false;
+        split_mode = false;
+    }
+
+    function pane_letter_delta(event: KeyEvent) -> int {
+        if event.text == "a" || event.text == "A" || event.text == "q" || event.text == "Q" {
+            return -1;
+        }
+        if event.text == "d" || event.text == "D" || event.text == "e" || event.text == "E" {
+            return 1;
+        }
+        return 0;
+    }
+
+    function is_left_pane_step_key(event: KeyEvent) -> bool {
+        return event.text == "q" || event.text == "Q" || event.text == "e" || event.text == "E";
+    }
+
+    function is_right_pane_step_key(event: KeyEvent) -> bool {
+        return event.text == "a" || event.text == "A" || event.text == "d" || event.text == "D";
+    }
+
     background: ColorPalette.compare_main_background;
 
     TouchArea { width: parent.width; height: parent.height; }
@@ -133,17 +170,6 @@ export component ImageCompareOverlay inherits Rectangle {
 
         // Block all pointer events so buttons behind the overlay cannot be clicked
         TouchArea { width: parent.width; height: parent.height; }
-
-        // Steal keyboard focus so Space / arrow-keys do NOT reach the main
-        // table's FocusScope while loading is in progress.  Without this a
-        // Space press during thumbnail loading would toggle checked state in
-        // the main model BEFORE compare_images is rebuilt, producing a stale
-        // snapshot and eventually a counter underflow crash.
-        FocusScope {
-            width: parent.width; height: parent.height;
-            key-released(event) => { accept }
-            key-pressed(event) => { accept }
-        }
 
         Rectangle {
             x: (parent.width  - self.width)  / 2;
@@ -182,10 +208,7 @@ export component ImageCompareOverlay inherits Rectangle {
                     Button {
                         text: Translations.compare_cancel_text;
                         enabled: !GuiState.compare_cancelling;
-                        clicked => {
-                            GuiState.compare_visible = false;
-                            Callabler.compare_cancel_load();
-                        }
+                        clicked => { exit_compare(); }
                     }
                 }
             }
@@ -205,6 +228,11 @@ export component ImageCompareOverlay inherits Rectangle {
                 height: parent.height;
                 enabled: GuiState.compare_has_prev_group;
                 clicked => { Callabler.compare_prev_group(); }
+                Tooltip {
+                    Text {
+                        text: Translations.compare_prev_group_tooltip_text;
+                    }
+                }
             }
 
             Rectangle { horizontal-stretch: 1.0; }
@@ -255,10 +283,11 @@ export component ImageCompareOverlay inherits Rectangle {
                 text: Translations.compare_overlay_text;
                 height: parent.height;
                 checked: transparent_mode;
-                clicked => {
-                    transparent_mode = !transparent_mode;
-                    diff_mode = false;
-                    split_mode = false;
+                clicked => { toggle_overlay_mode(); }
+                Tooltip {
+                    Text {
+                        text: Translations.compare_overlay_tooltip_text;
+                    }
                 }
             }
             Button {
@@ -266,12 +295,11 @@ export component ImageCompareOverlay inherits Rectangle {
                 colorize-icon: true;
                 text: Translations.compare_back_text;
                 height: parent.height;
-                clicked => {
-                    GuiState.compare_visible = false;
-                    info_visible = false;
-                    diff_mode = false;
-                    split_mode = false;
-                    transparent_mode = false;
+                clicked => { exit_compare(); }
+                Tooltip {
+                    Text {
+                        text: Translations.compare_back_tooltip_text;
+                    }
                 }
             }
 
@@ -284,6 +312,11 @@ export component ImageCompareOverlay inherits Rectangle {
                 height: parent.height;
                 enabled: GuiState.compare_has_next_group;
                 clicked => { Callabler.compare_next_group(); }
+                Tooltip {
+                    Text {
+                        text: Translations.compare_next_group_tooltip_text;
+                    }
+                }
             }
         }
 
@@ -409,6 +442,11 @@ export component ImageCompareOverlay inherits Rectangle {
                             text: (left_valid && GuiState.compare_images[GuiState.compare_left_idx].checked) ? "✓" : "□";
                             checked: left_valid && GuiState.compare_images[GuiState.compare_left_idx].checked;
                             clicked => { Callabler.compare_toggle_checkbox(GuiState.compare_left_idx); }
+                            Tooltip {
+                                Text {
+                                    text: Translations.compare_pane_toggle_left_selection_tooltip_text;
+                                }
+                            }
                         }
                     }
                 }
@@ -442,6 +480,11 @@ export component ImageCompareOverlay inherits Rectangle {
                             text: (right_valid && GuiState.compare_images[GuiState.compare_right_idx].checked) ? "✓" : "□";
                             checked: right_valid && GuiState.compare_images[GuiState.compare_right_idx].checked;
                             clicked => { Callabler.compare_toggle_checkbox(GuiState.compare_right_idx); }
+                            Tooltip {
+                                Text {
+                                    text: Translations.compare_pane_toggle_right_selection_tooltip_text;
+                                }
+                            }
                         }
                     }
                 }
@@ -518,6 +561,11 @@ export component ImageCompareOverlay inherits Rectangle {
                             checked: idx == GuiState.compare_left_idx;
                             enabled: idx != GuiState.compare_right_idx;
                             clicked => { Callabler.compare_set_left(idx); }
+                            Tooltip {
+                                Text {
+                                    text: Translations.compare_filmstrip_set_left_tooltip_text;
+                                }
+                            }
                         }
                         Button {
                             width: 38px; height: parent.height;
@@ -530,6 +578,11 @@ export component ImageCompareOverlay inherits Rectangle {
                             checked: idx == GuiState.compare_right_idx;
                             enabled: idx != GuiState.compare_left_idx;
                             clicked => { Callabler.compare_set_right(idx); }
+                            Tooltip {
+                                Text {
+                                    text: Translations.compare_filmstrip_set_right_tooltip_text;
+                                }
+                            }
                         }
                     }
 
@@ -543,6 +596,39 @@ export component ImageCompareOverlay inherits Rectangle {
                     }
                 }
             }
+        }
+    }
+
+    // Full-screen keyboard trap: shortcuts for compare; other keys must not reach the main table.
+    compare_keyboard_trap := FocusScope {
+        z: 200;
+        width: parent.width;
+        height: parent.height;
+        init => { self.focus(); }
+        key-pressed(event) => {
+            let letter_delta = pane_letter_delta(event);
+            if event.text == Key.Escape {
+                exit_compare();
+            } else if !GuiState.compare_loading && letter_delta != 0 && is_left_pane_step_key(event) {
+                Callabler.compare_step_left_pane(letter_delta);
+            } else if !GuiState.compare_loading && letter_delta != 0 && is_right_pane_step_key(event) {
+                Callabler.compare_step_right_pane(letter_delta);
+            } else if !GuiState.compare_loading && event.text == Key.LeftArrow && GuiState.compare_has_prev_group {
+                Callabler.compare_prev_group();
+            } else if !GuiState.compare_loading && event.text == Key.RightArrow && GuiState.compare_has_next_group {
+                Callabler.compare_next_group();
+            }
+            accept
+        }
+        key-released(event) => {
+            if !GuiState.compare_loading && (event.text == "w" || event.text == "W") && left_valid {
+                Callabler.compare_toggle_checkbox(GuiState.compare_left_idx);
+            } else if !GuiState.compare_loading && (event.text == "s" || event.text == "S") && right_valid {
+                Callabler.compare_toggle_checkbox(GuiState.compare_right_idx);
+            } else if !GuiState.compare_loading && (event.text == "o" || event.text == "O") {
+                toggle_overlay_mode();
+            }
+            accept
         }
     }
 }
