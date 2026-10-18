@@ -417,12 +417,6 @@ export component ImageCompareOverlay inherits Rectangle {
                     }
                 }
 
-                Rectangle {
-                    x: (parent.width - 1px) / 2; y: 0px;
-                    width: 1px; height: parent.height;
-                    background: ColorPalette.compare_divider_color;
-                }
-
                 VerticalLayout {
                     x: (parent.width + 1px) / 2; y: 0px;
                     width: (parent.width - 1px) / 2; height: parent.height;
