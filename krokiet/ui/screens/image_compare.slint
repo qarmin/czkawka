@@ -168,6 +168,8 @@ export component ImageCompareOverlay inherits Rectangle {
     private property <float> overlay_split_pos: 0.5;
     private property <float> overlay_alpha: 0.5;
 
+    private property <bool> side_by_side_mode: !diff_mode && !split_mode && !transparent_mode;
+
     // Shared zoom/pan state passed into both ZoomedImagePanel instances.
     private property <float> zoom_factor: 1.0;
     private property <length> zoom_pan_x: 0px;
@@ -353,16 +355,31 @@ export component ImageCompareOverlay inherits Rectangle {
             Button {
                 text: "-";
                 height: parent.height; width: 30px;
-                enabled: zoom_factor > 1.0;
+                enabled: zoom_factor > 1.0 && side_by_side_mode;
                 clicked => {
                     zoom_factor = max(1.0, zoom_factor / 1.5);
                     if zoom_factor <= 1.0 { zoom_pan_x = 0px; zoom_pan_y = 0px; }
                 }
             }
             Button {
+                text: zoom_factor >= 9.5 ? "10x" :
+                      zoom_factor >= 6.5 ? "8x"  :
+                      zoom_factor >= 4.5 ? "6x"  :
+                      zoom_factor >= 3.5 ? "4x"  :
+                      zoom_factor >= 2.5 ? "3x"  :
+                      zoom_factor >= 1.5 ? "2x"  : "1x";
+                height: parent.height; width: 46px;
+                enabled: zoom_factor > 1.0 && side_by_side_mode;
+                clicked => {
+                    zoom_factor = 1.0;
+                    zoom_pan_x = 0px;
+                    zoom_pan_y = 0px;
+                }
+            }
+            Button {
                 text: "+";
                 height: parent.height; width: 30px;
-                enabled: zoom_factor < 10.0;
+                enabled: zoom_factor < 10.0 && side_by_side_mode;
                 clicked => { zoom_factor = min(10.0, zoom_factor * 1.5); }
             }
 
@@ -474,7 +491,7 @@ export component ImageCompareOverlay inherits Rectangle {
                 }
             }
 
-            if !diff_mode && !split_mode && !transparent_mode: Rectangle {
+            if side_by_side_mode: Rectangle {
                 width: parent.width; height: parent.height;
 
                 VerticalLayout {
