@@ -389,13 +389,19 @@ export component ImageCompareOverlay inherits Rectangle {
                 VerticalLayout {
                     x: 0px; y: 0px;
                     width: (parent.width - 1px) / 2; height: parent.height;
-                    padding: 2px;
+                    padding-top: 2px;
+                    padding-right: 1px;
+                    padding-bottom: 2px;
+                    padding-left: 2px;
                     Rectangle {
                         vertical-stretch: 1.0;
                         Rectangle {
                             width: parent.width; height: parent.height;
                             background: ColorPalette.compare_image_panel_background;
-                            border-radius: 4px; clip: true;
+                            border-radius: 4px;
+                            border-width: 2px;
+                            border-color: ColorPalette.compare_left_value_color;
+                            clip: true;
                             Preview {
                                 width: parent.width; height: parent.height;
                                 source: GuiState.compare_left_image;
@@ -422,13 +428,19 @@ export component ImageCompareOverlay inherits Rectangle {
                 VerticalLayout {
                     x: (parent.width + 1px) / 2; y: 0px;
                     width: (parent.width - 1px) / 2; height: parent.height;
-                    padding: 2px;
+                    padding-top: 2px;
+                    padding-right: 2px;
+                    padding-bottom: 2px;
+                    padding-left: 1px;
                     Rectangle {
                         vertical-stretch: 1.0;
                         Rectangle {
                             width: parent.width; height: parent.height;
                             background: ColorPalette.compare_image_panel_background;
-                            border-radius: 4px; clip: true;
+                            border-radius: 4px;
+                            border-width: 2px;
+                            border-color: ColorPalette.compare_right_value_color;
+                            clip: true;
                             Preview {
                                 width: parent.width; height: parent.height;
                                 source: GuiState.compare_right_image;
