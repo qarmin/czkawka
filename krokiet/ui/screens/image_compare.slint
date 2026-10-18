@@ -332,8 +332,15 @@ export component ImageCompareOverlay inherits Rectangle {
                 Rectangle {
                     clip: true;
                     x: 0px; y: 0px;
-                    width: main-image-area.width * overlay_split_pos;
+                    width: main-image-area.width * overlay_split_pos + 1px;
                     height: main-image-area.height;
+
+                    border-width: 2px;
+                    border-color: ColorPalette.compare_left_value_color;
+                    border-radius: 4px;
+                    border-top-right-radius: 0;
+                    border-bottom-right-radius: 0;
+
                     Image {
                         x: 0px; y: 0px;
                         width: main-image-area.width;
@@ -346,9 +353,16 @@ export component ImageCompareOverlay inherits Rectangle {
                 // Right clip: shows right portion of the right image
                 Rectangle {
                     clip: true;
-                    x: main-image-area.width * overlay_split_pos; y: 0px;
+                    x: main-image-area.width * overlay_split_pos - 1px; y: 0px;
                     width: main-image-area.width * (1 - overlay_split_pos);
                     height: main-image-area.height;
+
+                    border-width: 2px;
+                    border-color: ColorPalette.compare_right_value_color;
+                    border-radius: 4px;
+                    border-top-left-radius: 0;
+                    border-bottom-left-radius: 0;
+
                     Image {
                         x: -(main-image-area.width * overlay_split_pos); y: 0px;
                         width: main-image-area.width;
