@@ -428,6 +428,10 @@ fn translate_items(app: &MainWindow) {
     translation.set_compare_info_size_text(flk!("compare_info_size_text").into());
     translation.set_compare_info_resolution_text(flk!("compare_info_resolution_text").into());
     translation.set_compare_info_modification_date_text(flk!("compare_info_modification_date_text").into());
+    translation.set_compare_filmstrip_set_left_tooltip_text(flk!("compare_filmstrip_set_left_tooltip_text").into());
+    translation.set_compare_filmstrip_set_right_tooltip_text(flk!("compare_filmstrip_set_right_tooltip_text").into());
+    translation.set_compare_pane_toggle_left_selection_tooltip_text(flk!("compare_pane_toggle_left_selection_tooltip_text").into());
+    translation.set_compare_pane_toggle_right_selection_tooltip_text(flk!("compare_pane_toggle_right_selection_tooltip_text").into());
     translation.set_compare_loading_images_text(flk!("compare_loading_images_text").into());
     translation.set_compare_cancelling_text(flk!("compare_cancelling_text").into());
 
