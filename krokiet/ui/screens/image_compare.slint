@@ -122,6 +122,12 @@ export component ImageCompareOverlay inherits Rectangle {
         transparent_mode = false;
     }
 
+    function toggle_overlay_mode() {
+        transparent_mode = !transparent_mode;
+        diff_mode = false;
+        split_mode = false;
+    }
+
     function pane_letter_delta(event: KeyEvent) -> int {
         if event.text == "a" || event.text == "A" || event.text == "q" || event.text == "Q" {
             return -1;
@@ -277,10 +283,11 @@ export component ImageCompareOverlay inherits Rectangle {
                 text: Translations.compare_overlay_text;
                 height: parent.height;
                 checked: transparent_mode;
-                clicked => {
-                    transparent_mode = !transparent_mode;
-                    diff_mode = false;
-                    split_mode = false;
+                clicked => { toggle_overlay_mode(); }
+                Tooltip {
+                    Text {
+                        text: Translations.compare_overlay_tooltip_text;
+                    }
                 }
             }
             Button {
@@ -618,6 +625,8 @@ export component ImageCompareOverlay inherits Rectangle {
                 Callabler.compare_toggle_checkbox(GuiState.compare_left_idx);
             } else if !GuiState.compare_loading && (event.text == "s" || event.text == "S") && right_valid {
                 Callabler.compare_toggle_checkbox(GuiState.compare_right_idx);
+            } else if !GuiState.compare_loading && (event.text == "o" || event.text == "O") {
+                toggle_overlay_mode();
             }
             accept
         }

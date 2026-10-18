@@ -486,6 +486,7 @@ compare_info_text = Info
 compare_diff_text = Diff
 compare_split_text = Split
 compare_overlay_text = Overlay
+compare_overlay_tooltip_text = Overlay (O)
 compare_loading_title_text = Please wait...
 compare_cancel_text = Cancel
 compare_resolution_mismatch_text = Different resolutions - diff results may be inaccurate

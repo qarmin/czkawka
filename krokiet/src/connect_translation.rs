@@ -419,6 +419,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_compare_diff_text(flk!("compare_diff_text").into());
     translation.set_compare_split_text(flk!("compare_split_text").into());
     translation.set_compare_overlay_text(flk!("compare_overlay_text").into());
+    translation.set_compare_overlay_tooltip_text(flk!("compare_overlay_tooltip_text").into());
     translation.set_compare_loading_title_text(flk!("compare_loading_title_text").into());
     translation.set_compare_cancel_text(flk!("compare_cancel_text").into());
     translation.set_compare_resolution_mismatch_text(flk!("compare_resolution_mismatch_text").into());
