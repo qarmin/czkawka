@@ -409,6 +409,7 @@ fn translate_items(app: &MainWindow) {
 
     translation.set_compare_button_text(flk!("compare_button_text").into());
     translation.set_compare_back_text(flk!("compare_back_text").into());
+    translation.set_compare_back_tooltip_text(flk!("compare_back_tooltip_text").into());
     translation.set_compare_prev_group_text(flk!("compare_prev_group_text").into());
     translation.set_compare_next_group_text(flk!("compare_next_group_text").into());
     translation.set_compare_swap_text(flk!("compare_swap_text").into());

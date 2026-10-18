@@ -109,6 +109,19 @@ export component ImageCompareOverlay inherits Rectangle {
 
     private property <bool> resolution_mismatch: left_valid && right_valid && GuiState.compare_images[GuiState.compare_left_idx].resolution != GuiState.compare_images[GuiState.compare_right_idx].resolution;
 
+    function exit_compare() {
+        if GuiState.compare_loading {
+            GuiState.compare_visible = false;
+            Callabler.compare_cancel_load();
+            return;
+        }
+        GuiState.compare_visible = false;
+        info_visible = false;
+        diff_mode = false;
+        split_mode = false;
+        transparent_mode = false;
+    }
+
     background: ColorPalette.compare_main_background;
 
     TouchArea { width: parent.width; height: parent.height; }
@@ -133,17 +146,6 @@ export component ImageCompareOverlay inherits Rectangle {
 
         // Block all pointer events so buttons behind the overlay cannot be clicked
         TouchArea { width: parent.width; height: parent.height; }
-
-        // Steal keyboard focus so Space / arrow-keys do NOT reach the main
-        // table's FocusScope while loading is in progress.  Without this a
-        // Space press during thumbnail loading would toggle checked state in
-        // the main model BEFORE compare_images is rebuilt, producing a stale
-        // snapshot and eventually a counter underflow crash.
-        FocusScope {
-            width: parent.width; height: parent.height;
-            key-released(event) => { accept }
-            key-pressed(event) => { accept }
-        }
 
         Rectangle {
             x: (parent.width  - self.width)  / 2;
@@ -182,10 +184,7 @@ export component ImageCompareOverlay inherits Rectangle {
                     Button {
                         text: Translations.compare_cancel_text;
                         enabled: !GuiState.compare_cancelling;
-                        clicked => {
-                            GuiState.compare_visible = false;
-                            Callabler.compare_cancel_load();
-                        }
+                        clicked => { exit_compare(); }
                     }
                 }
             }
@@ -266,12 +265,11 @@ export component ImageCompareOverlay inherits Rectangle {
                 colorize-icon: true;
                 text: Translations.compare_back_text;
                 height: parent.height;
-                clicked => {
-                    GuiState.compare_visible = false;
-                    info_visible = false;
-                    diff_mode = false;
-                    split_mode = false;
-                    transparent_mode = false;
+                clicked => { exit_compare(); }
+                Tooltip {
+                    Text {
+                        text: Translations.compare_back_tooltip_text;
+                    }
                 }
             }
 
@@ -544,5 +542,20 @@ export component ImageCompareOverlay inherits Rectangle {
                 }
             }
         }
+    }
+
+    // Full-screen keyboard trap: Esc closes compare; other keys must not reach the main table.
+    compare_keyboard_trap := FocusScope {
+        z: 200;
+        width: parent.width;
+        height: parent.height;
+        init => { self.focus(); }
+        key-pressed(event) => {
+            if event.text == Key.Escape {
+                exit_compare();
+            }
+            accept
+        }
+        key-released(event) => { accept }
     }
 }

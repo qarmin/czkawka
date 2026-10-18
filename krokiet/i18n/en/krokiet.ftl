@@ -476,6 +476,7 @@ popup_custom_hint_date_text = Date columns: DD-MM-YYYY or YYYY-MM-DD, optional t
 popup_custom_save_restore_text = Save and restore filter data
 compare_button_text = Compare
 compare_back_text = Back
+compare_back_tooltip_text = Back (Esc)
 compare_prev_group_text = Prev Group
 compare_next_group_text = Next Group
 compare_swap_text = Swap
