@@ -204,6 +204,11 @@ export component ImageCompareOverlay inherits Rectangle {
                 height: parent.height;
                 enabled: GuiState.compare_has_prev_group;
                 clicked => { Callabler.compare_prev_group(); }
+                Tooltip {
+                    Text {
+                        text: Translations.compare_prev_group_tooltip_text;
+                    }
+                }
             }
 
             Rectangle { horizontal-stretch: 1.0; }
@@ -282,6 +287,11 @@ export component ImageCompareOverlay inherits Rectangle {
                 height: parent.height;
                 enabled: GuiState.compare_has_next_group;
                 clicked => { Callabler.compare_next_group(); }
+                Tooltip {
+                    Text {
+                        text: Translations.compare_next_group_tooltip_text;
+                    }
+                }
             }
         }
 
@@ -544,7 +554,7 @@ export component ImageCompareOverlay inherits Rectangle {
         }
     }
 
-    // Full-screen keyboard trap: Esc closes compare; other keys must not reach the main table.
+    // Full-screen keyboard trap: shortcuts for compare; other keys must not reach the main table.
     compare_keyboard_trap := FocusScope {
         z: 200;
         width: parent.width;
@@ -553,6 +563,10 @@ export component ImageCompareOverlay inherits Rectangle {
         key-pressed(event) => {
             if event.text == Key.Escape {
                 exit_compare();
+            } else if !GuiState.compare_loading && event.text == Key.LeftArrow && GuiState.compare_has_prev_group {
+                Callabler.compare_prev_group();
+            } else if !GuiState.compare_loading && event.text == Key.RightArrow && GuiState.compare_has_next_group {
+                Callabler.compare_next_group();
             }
             accept
         }
