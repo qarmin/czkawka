@@ -69,25 +69,12 @@ pub(crate) fn apply_language_preference(lang: &str) {
         }
     } else {
         log::debug!("apply_language_preference: '{lang}' not in list, detecting OS language");
-        #[cfg(not(target_os = "android"))]
-        {
-            let requested = i18n_embed::DesktopLanguageRequester::requested_languages();
-            let _ = localizer.select(&requested);
-            let _ = core_localizer.select(&requested);
-        }
-        #[cfg(target_os = "android")]
-        {
-            if let Some(tag) = crate::file_picker_android::get_android_language_tag() {
-                let idx = czkawka_core::localizer_core::find_language_idx(&tag);
-                let lang_code = czkawka_core::localizer_core::LANGUAGE_LIST.get(idx).map(|l| l.short_name).unwrap_or("en");
-                log::debug!("apply_language_preference: Android tag={tag}, applying '{lang_code}'");
-                if let Ok(lang_id) = lang_code.parse::<i18n_embed::unic_langid::LanguageIdentifier>() {
-                    let _ = localizer.select(std::slice::from_ref(&lang_id));
-                    let _ = core_localizer.select(&[lang_id]);
-                }
-            } else {
-                log::debug!("apply_language_preference: could not get Android language, staying with English");
-            }
+        let idx = detect_os_language_idx() as usize;
+        let lang_code = czkawka_core::localizer_core::LANGUAGE_LIST.get(idx).map(|l| l.short_name).unwrap_or("en");
+        log::debug!("apply_language_preference: applying detected language '{lang_code}'");
+        if let Ok(lang_id) = lang_code.parse::<i18n_embed::unic_langid::LanguageIdentifier>() {
+            let _ = localizer.select(std::slice::from_ref(&lang_id));
+            let _ = core_localizer.select(&[lang_id]);
         }
     }
 }
