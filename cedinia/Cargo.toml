@@ -30,7 +30,7 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 # Translations
 i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.10"
-rust-embed = { version = "8.12", features = ["debug-embed"] }
+rust-embed = { version = "8.13", features = ["debug-embed"] }
 
 
 [target.'cfg(target_os = "android")'.dependencies]

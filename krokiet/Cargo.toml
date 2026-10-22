@@ -30,7 +30,7 @@ arboard = "3"
 # Translations
 i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.10"
-rust-embed = { version = "8.12", features = ["debug-embed"] }
+rust-embed = { version = "8.13", features = ["debug-embed"] }
 
 # Try to use only needed features from https://github.com/slint-ui/slint/blob/master/api/rs/slint/Cargo.toml#L23-L31
 #slint = { path = "../test/slint/api/rs/slint", default-features = false, features = [
@@ -41,7 +41,7 @@ slint = { version = "1.18.1", default-features = false, features = [
     "compat-1-2",
 ] }
 
-rodio = { version = "0.22.2", default-features = false, features = ["playback", "symphonia-all"], optional = true }
+rodio = { version = "0.23.0", default-features = false, features = ["playback", "symphonia-all"], optional = true }
 notify-rust = { version = "4" }
 
 # Easier cross-compilation of app to e.g. 32 bit os, by using dlopen instead of linking libraries at compile time
