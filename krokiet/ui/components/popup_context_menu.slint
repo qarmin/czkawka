@@ -39,12 +39,13 @@ export component PopupContextMenu inherits Rectangle {
         Button { text: Translations.context_menu_copy_full_path_text; }
     }
     out property <length> popup_menu_width: max(230px, m_labels.preferred-width);
+    out property <length> popup_menu_height: menu_item_height * 13 + divider_height * 5;
 
     callback show_popup();
 
     popup_window := PopupWindow {
         width: popup_menu_width;
-        height: menu_item_height * 13 + divider_height * 5;
+        height: popup_menu_height;
         close-policy: PopupClosePolicy.close-on-click-outside;
 
         Rectangle {

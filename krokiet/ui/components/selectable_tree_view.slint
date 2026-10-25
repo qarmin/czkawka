@@ -6,6 +6,8 @@ import { FontSizes } from "../globals/fonts.slint";
 import { PopupContextMenu } from "popup_context_menu.slint";
 
 export component SelectableTableView inherits Rectangle {
+    in property <length> main_window_width;
+    in property <length> main_window_height;
     in property <[string]> columns;
     in-out property <[SingleMainListModel]> values: [
         {checked: false, focused_row: false, header_row: true, filled_header_row: false, val_str: ["kropkarz", "/Xd1", "24.10.2023"], val_int: []} ,
@@ -126,8 +128,8 @@ export component SelectableTableView inherits Rectangle {
                             if (contains_data(idx)) {
                                 Callabler.row_reverse_single_unique_item(idx);
                                 context_menu_row_idx = idx;
-                                context_menu.x = touch_area.mouse-x;
-                                context_menu.y = list_view.y + idx * item_height + list_view.viewport-y;
+                                context_menu.x = min(touch-area.absolute-position.x + touch-area.mouse-x, main_window_width - context_menu.popup_menu_width) - root.absolute-position.x;
+                                context_menu.y = min(touch-area.absolute-position.y + touch-area.mouse-y, main_window_height - context_menu.popup_menu_height) - root.absolute-position.y;
                                 context_menu.show_popup();
                             }
                         } else if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up) {
