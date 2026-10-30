@@ -20,7 +20,7 @@
 - **Cache support** - second and further scans should be much faster than the first one
 - **Easy to run, easy to compile** - minimal runtime and build dependencies, portable version available
 - **CLI frontend** - for easy automation
-- **GUI frontend** - uses Slint or GTK 4 frameworks
+- **GUI frontend** - Krokiet, built with the Slint framework
 - **Core library** - allows to reuse functionality in other apps
 - **Android app** - touch-friendly frontend for Android devices
 - **No spying** - Czkawka does not have access to the Internet, nor does it collect any user information or statistics
@@ -58,7 +58,7 @@ You can read more about the 12.0 release, its new features, and the issues that 
 Each tool uses different technologies, so you can find instructions for each of them in the appropriate file:
 
 - [Krokiet GUI (Slint frontend)](krokiet/README.md)</br>
-- [Czkawka GUI (GTK frontend)](czkawka_gui/README.md)</br>
+- [Czkawka GUI (legacy GTK frontend, no longer released)](czkawka_gui/README.md)</br>
 - [Czkawka CLI](czkawka_cli/README.md)</br>
 - [Czkawka Core](czkawka_core/README.md)</br>
 - [Cedinia](cedinia/README.md)</br>
@@ -102,7 +102,7 @@ options to choose than other).
 |   In active development   |     Yes     |    No**     | Yes***  |   No   |  No<sup>*</sup>   |     Yes     |
 
 <p><sup>*</sup> Few small commits added recently and last version released in 2023</p> 
-<p><sup>**</sup> Czkawka GTK 12.0 was the last released version - no new binaries will be provided</p>
+<p><sup>**</sup> Czkawka GTK 12.0 was the last released version - no new binaries, packages or crates.io releases will be provided; the code is only checked to compile in CI</p>
 <p><sup>***</sup> Cedinia is an android app, video tools are not available due missing ffmpeg in Android</p>
 
 ## Other apps
@@ -188,7 +188,7 @@ The vast majority of the code in this project was written by me (qarmin) without
 That said, every pull request, whether created with AI or not, must meet proper quality standards. The author must be able to clearly explain what the code does, without relying on AI for that explanation. I manually review every PR and test each change, so the risk of incorrect code slipping through is low. Still, to avoid wasting time, please refrain from submitting AI Slop PRs.
 
 ## Officially Supported Projects
-Only this repository, [prebuild-binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_gui) and [flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  
+Only this repository, [prebuild-binaries](https://github.com/qarmin/czkawka/releases), projects on [crates.io](https://crates.io/crates/czkawka_cli) and [flathub](https://flathub.org/apps/com.github.qarmin.czkawka) are directly maintained by me.  
 
 Czkawka does not have an official website, so do not trust any sites that claim to be the official one.  
 
