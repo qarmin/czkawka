@@ -45,9 +45,8 @@ rodio = { version = "0.23.0", default-features = false, features = ["playback", 
 notify-rust = { version = "4" }
 
 # Easier cross-compilation of app to e.g. 32 bit os, by using dlopen instead of linking libraries at compile time
-# Must match version used in slint - disabled while bisecting against a local slint checkout,
-# because the required version changes across the bisect range
-#fontique = { version = "=0.10.0", default-features = false, features = ["fontconfig-dlopen", "std"] }
+# Must match version used in slint
+fontique = { version = "=0.11.1", default-features = false, features = ["fontconfig-dlopen", "std"] }
 
 [build-dependencies]
 #slint-build = { path = "../test/slint/api/rs/build" }
