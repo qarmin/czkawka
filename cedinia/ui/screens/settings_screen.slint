@@ -259,7 +259,7 @@ export component SettingsScreen {
 
         Flickable {
             vertical-stretch: 1.0;
-            viewport-height: max(tab_content.preferred-height, self.height);
+            content-height: max(tab_content.preferred-height, self.height);
 
             tab_content := VerticalLayout {
                 spacing: 0px;
@@ -935,7 +935,7 @@ export component SettingsScreen {
 
                 Flickable {
                     vertical-stretch: 1.0;
-                    viewport-height: max(lic_text.preferred-height + 24px, self.height);
+                    content-height: max(lic_text.preferred-height + 24px, self.height);
 
                     lic_text := Text {
                         x: 12px;

@@ -322,8 +322,11 @@ pub enum IntDataVideoOptimizer {
     RectTop,
     RectRight,
     RectBottom,
+    DurationCentiseconds,
+    BitratePart1,
+    BitratePart2,
 }
-pub const MAX_INT_DATA_VIDEO_OPTIMIZER: usize = IntDataVideoOptimizer::RectBottom as usize + 1;
+pub const MAX_INT_DATA_VIDEO_OPTIMIZER: usize = IntDataVideoOptimizer::BitratePart2 as usize + 1;
 
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -334,6 +337,8 @@ pub enum StrDataVideoOptimizer {
     Codec,
     Dimensions,
     NewDimensions,
+    Length,
+    Bitrate,
     ModificationDate,
     PreviewPath,
 }
@@ -452,6 +457,8 @@ impl ActiveTab {
                 StrDataVideoOptimizer::Size => SortIdx::IntIdxPair(IntDataVideoOptimizer::SizePart1 as i32, IntDataVideoOptimizer::SizePart2 as i32),
                 StrDataVideoOptimizer::Dimensions => SortIdx::IntIdx(IntDataVideoOptimizer::PixelCount as i32),
                 StrDataVideoOptimizer::NewDimensions => SortIdx::IntIdx(IntDataVideoOptimizer::DiffInPixels as i32),
+                StrDataVideoOptimizer::Length => SortIdx::IntIdx(IntDataVideoOptimizer::DurationCentiseconds as i32),
+                StrDataVideoOptimizer::Bitrate => SortIdx::IntIdxPair(IntDataVideoOptimizer::BitratePart1 as i32, IntDataVideoOptimizer::BitratePart2 as i32),
             },
             Self::Settings | Self::About => panic!("Button should be disabled"),
         }

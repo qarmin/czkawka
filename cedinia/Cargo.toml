@@ -6,7 +6,6 @@ edition = "2024"
 rust-version = "1.94.1"
 description = "Android touch-friendly GUI for Czkawka Core - named after the Battle of Cedynia (972 AD)"
 license = "GPL-3.0-only"
-homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 build = "build.rs"
 
@@ -31,13 +30,13 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 # Translations
 i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.10"
-rust-embed = { version = "8.5", features = ["debug-embed"] }
+rust-embed = { version = "8.13", features = ["debug-embed"] }
 
 
 [target.'cfg(target_os = "android")'.dependencies]
-#slint = { path = "/home/rafal/test/slint/api/rs/slint/", default-features = false, features = [
-#slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = [
-slint = { version = "=1.17.0", default-features = false, features = [
+#slint = { path = "../test/slint/api/rs/slint", default-features = false, features = [
+#slint = { git = "https://github.com/slint-ui/slint.git", rev = "fdde7a535305d2ab2d4072dee637bad186a49723", default-features = false, features = [
+slint = { version = "1.18.1", default-features = false, features = [
     "std",
     "compat-1-2",
     "backend-android-activity-06",
@@ -50,11 +49,11 @@ android_logger = "0.15.1"
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 rfd = { version = "0.17", default-features = false, features = ["xdg-portal"] }
-trash = "5.2.5"
+trash = "5.2.9"
 notify-rust = "4"
-#slint = { path = "/home/rafal/test/slint/api/rs/slint/", default-features = false, features = [
-#slint = { git = "https://github.com/slint-ui/slint.git", default-features = false, features = [
-slint = { version = "=1.17.0", default-features = false, features = [
+#slint = { path = "../test/slint/api/rs/slint", default-features = false, features = [
+#slint = { git = "https://github.com/slint-ui/slint.git", rev = "fdde7a535305d2ab2d4072dee637bad186a49723", default-features = false, features = [
+slint = { version = "1.18.1", default-features = false, features = [
     "std",
     "compat-1-2",
     "backend-winit",
@@ -63,13 +62,13 @@ slint = { version = "=1.17.0", default-features = false, features = [
 ] }
 
 [build-dependencies]
-#slint-build = { path = "/home/rafal/test/slint/api/rs/build/"}
-#slint-build = { git = "https://github.com/slint-ui/slint.git" }
-slint-build = "=1.17.0"
+#slint-build = { path = "../test/slint/api/rs/build" }
+#slint-build = { git = "https://github.com/slint-ui/slint.git", rev = "fdde7a535305d2ab2d4072dee637bad186a49723" }
+slint-build = "1.18.1"
 
 # Used by build.rs to compile Java helpers to DEX when cross-compiling for Android.
 # The build.rs itself guards on TARGET containing "android" so this is a no-op on desktop.
-android-build = "0.1.2"
+android-build = "0.1.4"
 
 [features]
 default = []

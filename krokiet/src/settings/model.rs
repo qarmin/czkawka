@@ -278,6 +278,10 @@ pub struct SettingsCustom {
     #[serde(default = "default_video_optimizer_max_height")]
     pub popup_reencode_video_max_height: u32,
     #[serde(default)]
+    pub popup_reencode_video_limit_fps: bool,
+    #[serde(default = "default_video_optimizer_max_fps")]
+    pub popup_reencode_video_max_fps: u32,
+    #[serde(default)]
     pub popup_crop_video_overwrite_files: bool,
     #[serde(default)]
     pub popup_crop_video_reencode: bool,
@@ -330,8 +334,6 @@ pub struct BasicSettings {
     pub settings_load_windows_size_at_startup: bool,
     #[serde(default = "ttrue")]
     pub settings_load_tabs_sizes_at_startup: bool,
-    #[serde(default = "ttrue")]
-    pub settings_limit_lines_of_messages: bool,
     #[serde(default = "default_manual_application_scale")]
     pub manual_application_scale: f32,
     #[serde(default = "default_use_manual_application_scale")]
@@ -573,6 +575,9 @@ pub(crate) fn default_video_optimizer_max_width() -> u32 {
 }
 pub(crate) fn default_video_optimizer_max_height() -> u32 {
     1920
+}
+pub(crate) fn default_video_optimizer_max_fps() -> u32 {
+    60
 }
 pub(crate) fn default_video_optimizer_image_threshold() -> u8 {
     1

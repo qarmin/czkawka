@@ -34,7 +34,7 @@ pub(crate) fn scan_exif_remover(a: Weak<MainWindow>, sd: ScanData) {
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_exif_files().clone();
-            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
+            let (critical, messages) = get_text_messages(&tool);
 
             vector.par_sort_unstable_by(|a, b| b.exif_tags.len().cmp(&a.exif_tags.len()));
 

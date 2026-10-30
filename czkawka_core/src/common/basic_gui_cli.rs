@@ -119,10 +119,9 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
                             process::exit(1);
                         }
                         process::exit(0);
-                    } else {
-                        error!("Failed to get cache folder path");
-                        process::exit(1);
                     }
+                    error!("Failed to get cache folder path");
+                    process::exit(1);
                 }
                 "-C" | "--config" => {
                     if let Some(cfg) = get_config_cache_path() {
@@ -131,10 +130,9 @@ pub fn process_cli_args(app_display: &str, app_exec: &str, args: Vec<String>) ->
                             process::exit(1);
                         }
                         process::exit(0);
-                    } else {
-                        error!("Failed to get config folder path");
-                        process::exit(1);
                     }
+                    error!("Failed to get config folder path");
+                    process::exit(1);
                 }
                 _ => {
                     eprintln!("Unknown option: {arg}");

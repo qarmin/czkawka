@@ -28,7 +28,7 @@ pub(crate) fn scan_big_files(a: Weak<MainWindow>, sd: ScanData) {
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_big_files().clone();
-            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
+            let (critical, messages) = get_text_messages(&tool);
 
             if big_files_mode == SearchMode::BiggestFiles {
                 vector.par_sort_unstable_by_key(|fe| u64::MAX - fe.size);

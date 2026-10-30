@@ -111,9 +111,8 @@ fn main() {
 
     if cli_output.found_any_files && !cli_output.ignored_error_code_on_found {
         std::process::exit(11);
-    } else {
-        std::process::exit(0);
     }
+    std::process::exit(0);
 }
 
 fn duplicates(duplicates: DuplicatesArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
@@ -490,9 +489,9 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
                 quality,
                 fail_if_not_smaller,
                 overwrite_original,
-                limit_video_size,
                 max_width,
                 max_height,
+                max_fps,
                 thumbnail_grid_tiles_per_side,
                 noise_reduction,
                 noise_reduction_strength,
@@ -522,9 +521,8 @@ fn video_optimizer(video_optimizer: VideoOptimizerArgs, stop_flag: &Arc<AtomicBo
                     quality,
                     fail_if_not_smaller,
                     overwrite_original,
-                    limit_video_size,
-                    max_width,
-                    max_height,
+                    max_dimensions: max_width.zip(max_height),
+                    max_fps,
                     noise_reduction,
                     noise_reduction_strength,
                     custom_ffmpeg_command,

@@ -310,7 +310,7 @@ impl SimilarImages {
             // If hash contains other hasher OR multiple images are available for checked hash
             if child_number > 0 || hashes_with_multiple_images.contains(&parent_hash) {
                 let vec_fe = all_hashed_images[&parent_hash].clone();
-                collected_similar_images.insert(parent_hash.clone(), vec_fe);
+                collected_similar_images.insert(parent_hash, vec_fe);
             }
         }
 
@@ -1096,7 +1096,7 @@ mod tests {
         for _ in 0..200 {
             let hash: Vec<u8> = (0..8).map(|_| rng.random::<u8>()).collect();
             let fe1 = create_random_file_entry(hash.clone(), "a.jpg");
-            let fe2 = create_random_file_entry(hash.clone(), "b.jpg");
+            let fe2 = create_random_file_entry(hash, "b.jpg");
 
             let mut parameters = get_default_parameters();
             parameters.max_difference = 0;
