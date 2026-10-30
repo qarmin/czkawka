@@ -3,9 +3,11 @@
 #![allow(clippy::allow_attributes)]
 #![allow(clippy::indexing_slicing)]
 
+use std::process;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::time::Duration;
 
 use crossbeam_channel::{Receiver, Sender, unbounded};
 use czkawka_core::common::basic_gui_cli::process_cli_args;
@@ -23,9 +25,10 @@ use file_actions::connect_optimize_video::connect_optimize_video;
 use file_actions::connect_rename::connect_rename;
 use file_actions::connect_symlink::connect_symlink;
 use log::{error, info};
-use slint::VecModel;
+use slint::{Timer, TimerMode, VecModel};
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
+use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders};
 use crate::connect_build_info::{apply_build_info, connect_build_info, start_build_info_background_probes};
 use crate::connect_clean_cache::connect_clean_cache;
 use crate::connect_compare::connect_compare;
@@ -142,8 +145,22 @@ fn main() {
     set_initial_scroll_list_data_indexes(&app);
 
     let original_preset_idx = base_settings.default_preset;
+    let cli_tool = cli_args.as_ref().and_then(|c| c.tool);
+    let cli_start_scan = cli_args.as_ref().is_some_and(|c| c.start_scan);
+    let cli_exit_after_scan = cli_args.as_ref().is_some_and(|c| c.exit_after_scan);
+    let explicit_cli_preset_used = cli_args.as_ref().is_some_and(|c| c.preset.is_some());
     set_initial_settings_to_gui(&app, &base_settings, &custom_settings, cli_args, preset_to_load);
-    fill_text_errors_with_random_lines(&app, 10_000);
+
+    if let Some(tool) = cli_tool {
+        app.global::<GuiState>().set_active_tab(ActiveTab::from_tool_type(tool));
+        app.global::<Callabler>().invoke_tab_changed();
+    }
+
+    if cli_start_scan && (!check_if_there_are_any_included_folders(&app) || check_if_all_included_dirs_are_referenced(&app)) {
+        error!("Cannot start the requested scan: no included folders are configured, or all included folders are marked as referenced.");
+        process::exit(1);
+    }
+
     update_available_hardware_encoders(&app);
     apply_build_info(&app);
     connect_build_info(&app);
@@ -183,41 +200,34 @@ fn main() {
     // This is simpler solution, than setting sizes of popups manually for each language
     app.invoke_initialize_popup_sizes();
 
+    let _exit_after_scan_timer = cli_exit_after_scan.then(|| {
+        let weak = app.as_weak();
+        let timer = Timer::default();
+        timer.start(TimerMode::Repeated, Duration::from_millis(200), move || {
+            let Some(app) = weak.upgrade() else { return };
+            if !app.get_scanning() {
+                slint::quit_event_loop().expect("event loop must be running while this timer fires");
+            }
+        });
+        timer
+    });
+
+    if cli_start_scan {
+        app.set_scanning(true);
+        app.set_text_summary_text(app.global::<Translations>().get_searching_text());
+        let active_tab = app.global::<GuiState>().get_active_tab();
+        app.invoke_scan_starting(active_tab);
+    }
+
     match app.run() {
         Ok(()) => {
-            save_all_settings_to_file(&app, original_preset_idx);
+            save_all_settings_to_file(&app, original_preset_idx, explicit_cli_preset_used);
         }
         Err(e) => {
             error!("Error during running the application: {e}");
             show_critical_error(e.to_string());
         }
     }
-}
-
-// Debug helper - stuffs the "Text errors" panel with a lot of content to measure TextEdit performance
-fn fill_text_errors_with_random_lines(app: &MainWindow, lines: usize) {
-    const ALPHABET: &[u8] = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789     ";
-
-    let mut state = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_or(0x2545_f491_4f6c_dd1d, |duration| duration.as_nanos() as u64 | 1);
-    let mut next_random = move || {
-        state ^= state << 13;
-        state ^= state >> 7;
-        state ^= state << 17;
-        state
-    };
-
-    let mut text = String::with_capacity(lines * 80);
-    for line_idx in 0..lines {
-        text.push_str(&format!("[{line_idx:05}] "));
-        let line_len = 20 + next_random() % 80;
-        text.extend((0..line_len).map(|_| ALPHABET[next_random() as usize % ALPHABET.len()] as char));
-        text.push('\n');
-    }
-
-    info!("Filling text errors panel with {lines} random lines ({} bytes)", text.len());
-    app.global::<GuiState>().set_info_text(text.into());
 }
 
 pub fn show_critical_error(error: String) {

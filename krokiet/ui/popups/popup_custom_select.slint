@@ -8,8 +8,8 @@ import { GuiState } from "../globals/gui_state.slint";
 import { Settings } from "../globals/settings.slint";
 
 export component PopupCustomSelect inherits Rectangle {
-    out property <length> popup_width: 620px;
-    out property <length> popup_height: 540px;
+    private property <length> popup_width: 620px;
+    private property <length> popup_height: 540px;
     callback show_popup();
     private property <bool> case_sensitive: false;
     private property <bool> leave_one_in_group: true;
@@ -26,6 +26,8 @@ export component PopupCustomSelect inherits Rectangle {
     popup_window := PopupWindow {
         width: popup_width;
         height: popup_height;
+        x: (parent.width - popup_width) / 2.0;
+        y: (parent.height - self.height) / 2.0;
         close-policy: PopupClosePolicy.no-auto-close;
         Rectangle {
             width: parent.width;

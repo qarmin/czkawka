@@ -52,8 +52,8 @@ component AppRow inherits Rectangle {
 export component PopupOtherApps inherits Rectangle {
     callback show_popup();
 
-    out property <length> popup_width: 520px;
-    out property <length> popup_height: 420px;
+    private property <length> popup_width: 520px;
+    private property <length> popup_height: 420px;
 
     property <[OtherApp]> apps: [
         { name: "Szyszka",               url: "https://github.com/qarmin/szyszka" },
@@ -67,6 +67,8 @@ export component PopupOtherApps inherits Rectangle {
     popup_window := PopupWindow {
         width: popup_width;
         height: popup_height;
+        x: (parent.width - popup_width) / 2.0;
+        y: (parent.height - self.height) / 2.0;
         close-policy: PopupClosePolicy.no-auto-close;
 
         Rectangle {

@@ -451,11 +451,6 @@ export component SettingsList inherits VerticalLayout {
             }
 
             CheckBoxComponent {
-                name <=> Translations.settings_limit_lines_of_messages_text;
-                model <=> Settings.limit_messages_lines;
-            }
-
-            CheckBoxComponent {
                 name <=> Translations.settings_use_manual_application_scale_text;
                 model <=> Settings.use_manual_application_scale;
                 toggled => { restart_required_global = true; }

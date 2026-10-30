@@ -6,8 +6,8 @@ import { ColorPalette } from "../globals/color_palette.slint";
 import { PopupBase } from "../components/popup_base.slint";
 
 export component PopupRenameFile inherits Rectangle {
-    out property <length> popup_width: 500px;
-    out property <length> popup_height: 185px;
+    private property <length> popup_width: 500px;
+    private property <length> popup_min_height: 185px;
     in-out property <int> row_idx: -1;
     private property <string> original_name;
     private property <string> text_data;
@@ -26,7 +26,9 @@ export component PopupRenameFile inherits Rectangle {
 
     popup_window := PopupBase {
         width: popup_width;
-        height: popup_height;
+        popup_min_height: popup_min_height;
+        x: (parent.width - popup_width) / 2.0;
+        y: (parent.height - self.height) / 2.0;
         title_text <=> Translations.popup_rename_single_title_text;
         enabled_ok_button: !name_empty && !name_unchanged && !target_exists;
 

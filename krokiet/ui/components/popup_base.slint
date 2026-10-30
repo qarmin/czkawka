@@ -9,20 +9,22 @@ export component PopupBase inherits PopupWindow {
     in-out property <string> cancel_text <=> Translations.cancel_button_text;
     in-out property <bool> enabled_ok_button: true;
     in-out property <bool> show_cancel_button: true;
+    in property <length> popup_min_height: 0px;
 
     callback ok_clicked();
     callback cancel_clicked();
 
+    height: max(popup_min_height, vlayout.preferred-height);
     close-policy: PopupClosePolicy.no-auto-close;
     rect := Rectangle {
-        width: parent.width;
-        height: parent.height;
+        width: 100%;
+        height: 100%;
         border-radius: 10px;
         border-color: ColorPalette.popup_border_color;
         border-width: 2px;
         background: ColorPalette.popup_background;
         clip: true;
-        VerticalLayout {
+        vlayout := VerticalLayout {
             Rectangle {
                 background: ColorPalette.popup_background_title_line;
 

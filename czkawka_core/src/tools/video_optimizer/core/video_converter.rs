@@ -122,10 +122,6 @@ fn run_standard_command(params: &VideoTranscodeFixParams, video_path: &str, temp
 
     let mut filters: Vec<String> = Vec::new();
 
-    // Neither `scale` nor `fps` need to be in the filter graph at all when the source is already
-    // within bounds, so the source is probed once up front and each filter is only added when the
-    // corresponding limit is actually exceeded - keeps the filter graph minimal and avoids
-    // needlessly re-scaling/re-sampling (and the interactions that can cause, e.g. with hwupload).
     let needs_probe = params.max_dimensions.is_some() || params.max_fps.is_some();
     let source_metadata = needs_probe.then(|| VideoMetadata::from_path(Path::new(video_path)).ok()).flatten();
 

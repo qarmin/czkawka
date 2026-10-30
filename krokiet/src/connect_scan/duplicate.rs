@@ -35,7 +35,7 @@ pub(crate) fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
 
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
-            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
+            let (critical, messages) = get_text_messages(&tool);
 
             let mut vector;
             if tool.get_use_reference() {

@@ -334,8 +334,6 @@ pub struct BasicSettings {
     pub settings_load_windows_size_at_startup: bool,
     #[serde(default = "ttrue")]
     pub settings_load_tabs_sizes_at_startup: bool,
-    #[serde(default = "ttrue")]
-    pub settings_limit_lines_of_messages: bool,
     #[serde(default = "default_manual_application_scale")]
     pub manual_application_scale: f32,
     #[serde(default = "default_use_manual_application_scale")]

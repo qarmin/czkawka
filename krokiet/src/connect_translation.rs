@@ -356,7 +356,6 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_videos_window_count_text(flk!("subsettings_videos_window_count").into());
     translation.set_settings_load_tabs_sizes_at_startup_text(flk!("settings_load_tabs_sizes_at_startup").into());
     translation.set_settings_load_windows_size_at_startup_text(flk!("settings_load_windows_size_at_startup").into());
-    translation.set_settings_limit_lines_of_messages_text(flk!("settings_limit_lines_of_messages").into());
     translation.set_settings_play_audio_on_scan_completion_text(flk!("settings_play_audio_on_scan_completion_text").into());
     translation.set_settings_audio_feature_hint_text(flk!("settings_audio_feature_hint_text").into());
     translation.set_settings_audio_env_variable_hint_text(flk!("settings_audio_env_variable_hint_text").into());

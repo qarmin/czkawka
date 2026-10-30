@@ -347,12 +347,12 @@ jobs:
           bash misc/compare_files.sh
 
   linux-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev -y
+        run: sudo apt update || true; sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev libdav1d-dev libasound2-dev -y
 
       - name: Setup rust version
         run: rustup default 1.94.1
@@ -361,7 +361,7 @@ jobs:
         run: |
           sed -i 's/^\(\[profile\.dev\.package.*\)/#\1/' Cargo.toml
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
-          xvfb-run cargo test
+          xvfb-run cargo test --all-features
 
   linux-regression-tests-on-minimal-rust-version:
     runs-on: ubuntu-22.04

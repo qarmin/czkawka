@@ -4,13 +4,15 @@ import { PopupBase } from "../components/popup_base.slint";
 import { PopupCenteredText } from "../components/popup_centered_text.slint";
 
 export component PopupRenameBadFileNames inherits Rectangle {
-    out property <length> popup_width: 500px;
-    out property <length> popup_height: 150px;
+    private property <length> popup_width: 500px;
+    private property <length> popup_min_height: 150px;
     callback show_popup();
 
     popup_window := PopupBase {
         width: popup_width;
-        height: popup_height;
+        popup_min_height: popup_min_height;
+        x: (parent.width - popup_width) / 2.0;
+        y: (parent.height - self.height) / 2.0;
         title_text <=> Translations.popup_rename_title_text;
 
         VerticalLayout {

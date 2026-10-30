@@ -62,7 +62,7 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
 
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
-            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
+            let (critical, messages) = get_text_messages(&tool);
 
             let info = tool.get_information();
             let stopped_search = tool.get_stopped_search();

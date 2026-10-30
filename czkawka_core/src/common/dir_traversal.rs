@@ -206,8 +206,6 @@ fn entry_type(file_type: FileType) -> EntryType {
     }
 }
 
-// czkawka stores paths as UTF-8 strings everywhere downstream (cache, GUI, CLI), so entries with
-// a non-UTF-8 path are rejected here instead of being carried around as lossy/unusable data.
 fn has_valid_utf8_path(path: &Path, warnings: &mut Vec<String>) -> bool {
     if path.to_str().is_some() {
         return true;

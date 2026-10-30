@@ -23,7 +23,7 @@ pub(crate) fn scan_empty_folders(a: Weak<MainWindow>, sd: ScanData) {
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_empty_folder_list().values().cloned().collect::<Vec<_>>();
-            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
+            let (critical, messages) = get_text_messages(&tool);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 

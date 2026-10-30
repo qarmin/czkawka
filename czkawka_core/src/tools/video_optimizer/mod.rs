@@ -52,9 +52,7 @@ pub struct VideoTranscodeFixParams {
     pub quality: u32,
     pub fail_if_not_smaller: bool,
     pub overwrite_original: bool,
-    /// (max_width, max_height); the scale filter is only added if the source actually exceeds it.
     pub max_dimensions: Option<(u32, u32)>,
-    /// The fps filter is only added if the source's fps actually exceeds it.
     pub max_fps: Option<u32>,
     pub noise_reduction: NoiseReductionMethod,
     pub noise_reduction_strength: u32,

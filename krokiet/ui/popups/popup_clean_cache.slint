@@ -11,12 +11,14 @@ export component PopupCleanCache inherits Rectangle {
 
     in-out property <bool> stopped_by_user: false;
 
-    out property <length> popup_width: 500px;
-    out property <length> popup_height: 300px;
+    private property <length> popup_width: 500px;
+    private property <length> popup_height: 300px;
 
     popup_window := PopupWindow {
         width: popup_width;
         height: popup_height;
+        x: (parent.width - popup_width) / 2.0;
+        y: (parent.height - self.height) / 2.0;
         close-policy: PopupClosePolicy.no-auto-close;
 
         Rectangle {

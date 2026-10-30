@@ -13,13 +13,15 @@ export component PopupReencodeVideo inherits Rectangle {
 
     callback action_confirmed();
 
-    out property <length> popup_width: 460px;
-    out property <length> popup_height: 600px;
+    private property <length> popup_width: 460px;
+    private property <length> popup_min_height: 600px;
     callback show_popup();
 
     popup_window := PopupBase {
         width: popup_width;
-        height: popup_height;
+        popup_min_height: popup_min_height;
+        x: (parent.width - popup_width) / 2.0;
+        y: (parent.height - self.height) / 2.0;
         title_text <=> root.title_text;
 
         VerticalLayout {
