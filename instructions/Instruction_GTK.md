@@ -1,6 +1,6 @@
 # Czkawka GTK - Instructions
 
-> **Deprecation notice**: Czkawka GTK 12.0 is the last released version. No new binaries will be provided. New users and existing users are encouraged to migrate to [Krokiet](Instruction_Krokiet.md).
+> **Deprecation notice**: Czkawka GTK 12.0 is the last released version. No new binaries or packages will be provided; CI only verifies that it compiles. New users and existing users are encouraged to migrate to [Krokiet](Instruction_Krokiet.md).
 
 ## GUI overview
 

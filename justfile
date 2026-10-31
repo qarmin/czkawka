@@ -240,11 +240,9 @@ unused_features:
     unused-features build-report --input krokiet/report.json
     unused-features build-report --input czkawka_cli/report.json
     unused-features build-report --input czkawka_core/report.json
-    unused-features build-report --input czkawka_gui/report.json
     xdg-open krokiet/report.html
     xdg-open czkawka_cli/report.html
     xdg-open czkawka_core/report.html
-    xdg-open czkawka_gui/report.html
 
 ##################### VERSION #####################
 
@@ -500,7 +498,6 @@ tags:
 install:
     cargo install --path czkawka_cli --locked
     cargo install --path krokiet --locked
-    cargo install --path czkawka_gui --locked
 
 ##################### TRANSLATIONS #####################
 
@@ -517,14 +514,12 @@ prepare_translations_deps:
 
 [group('translations')]
 translate:
-    uv run misc/ai_translate/translate.py czkawka_gui/i18n
     uv run misc/ai_translate/translate.py czkawka_core/i18n
     uv run misc/ai_translate/translate.py krokiet/i18n
     uv run misc/ai_translate/translate.py cedinia/i18n
 
 [group('translations')]
 validate_translations *args: # Available --fix argument, which removes invalid translations
-    uv run misc/ai_translate/validate_translations.py czkawka_gui/i18n {{args}}
     uv run misc/ai_translate/validate_translations.py czkawka_core/i18n {{args}}
     uv run misc/ai_translate/validate_translations.py krokiet/i18n {{args}}
     uv run misc/ai_translate/validate_translations.py cedinia/i18n {{args}}
@@ -587,21 +582,18 @@ setup_verify_tools:
 [group('profiling')]
 llvm_lines:
     cargo llvm-lines -p krokiet --bin krokiet | head -40
-    cargo llvm-lines -p czkawka_gui --bin czkawka_gui | head -40
     cargo llvm-lines -p czkawka_cli --bin czkawka_cli | head -40
 
 # Prints size of functions in binary
 [group('profiling')]
 bloat_by_function:
     cargo bloat --release --bin czkawka_cli -n 30
-    cargo bloat --release --bin czkawka_gui -n 30
     cargo bloat --release --bin krokiet -n 30
 
 # Prints size of crates in binary
 [group('profiling')]
 bloat_by_crate:
     cargo bloat --release --crates --bin czkawka_cli
-    cargo bloat --release --crates --bin czkawka_gui
     cargo bloat --release --crates --bin krokiet
 
 # Draws dependency graphs of certain binaries(like regex, image, etc)
@@ -609,7 +601,6 @@ bloat_by_crate:
 dependencies_graph:
     cd czkawka_core;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
     cd czkawka_cli;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
-    cd czkawka_gui;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
     cd krokiet;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
 
 # Shows llvm compilation data summary
@@ -617,7 +608,7 @@ dependencies_graph:
 profiling profile='debug' mode='build':
     if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi; \
     cargo clean; \
-    for crate in czkawka_core czkawka_gui czkawka_cli krokiet; do \
+    for crate in czkawka_core czkawka_cli krokiet; do \
         cd "$crate"; \
         rm ../*.mm_profdata || true; \
         rm *.mm_profdata || true; \
@@ -631,7 +622,7 @@ profiling profile='debug' mode='build':
 timings profile='debug' mode='build':
     if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi; \
     cargo clean; \
-    for crate in czkawka_core czkawka_gui czkawka_cli krokiet; do \
+    for crate in czkawka_core czkawka_cli krokiet; do \
         cd "$crate"; \
         rm ../target/cargo-timings/*.html || true; \
         cargo "{{mode}}" $release_flag --timings; \
@@ -640,8 +631,6 @@ timings profile='debug' mode='build':
     done
     #cargo clean
 #    cd czkawka_core; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
-#    cargo clean
-#    cd czkawka_gui; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
 #    cargo clean
 #    cd czkawka_cli; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
 #    cargo clean
@@ -653,8 +642,6 @@ timings profile='debug' mode='build':
 time_passes:
     cargo clean
     cd czkawka_core; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
-    cargo clean
-    cd czkawka_gui; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
     cargo clean
     cd czkawka_cli; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
     cargo clean
