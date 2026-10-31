@@ -9,6 +9,9 @@ export component MainList {
     callback show_clean_cache_popup();
     callback show_other_apps_popup();
 
+    in property <length> main_window_width;
+    in property <length> main_window_height;
+
     in-out property <bool> working: false;
 
     in-out property <[SingleMainListModel]> duplicate_files_model: [];
@@ -41,6 +44,8 @@ export component MainList {
     callback changed_active_tab();
 
     duplicates := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.DuplicateFiles;
         min-width: 200px;
         height: parent.height;
@@ -57,6 +62,8 @@ export component MainList {
     }
 
     empty_folders := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.EmptyFolders;
         min-width: 200px;
         height: parent.height;
@@ -73,6 +80,8 @@ export component MainList {
     }
 
     big_files := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.BigFiles;
         min-width: 200px;
         height: parent.height;
@@ -89,6 +98,8 @@ export component MainList {
     }
 
     empty_files := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.EmptyFiles;
         min-width: 200px;
         height: parent.height;
@@ -105,6 +116,8 @@ export component MainList {
     }
 
     temporary_files := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.TemporaryFiles;
         min-width: 200px;
         height: parent.height;
@@ -121,6 +134,8 @@ export component MainList {
     }
 
     similar_images := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.SimilarImages;
         min-width: 200px;
         height: parent.height;
@@ -137,6 +152,8 @@ export component MainList {
     }
 
     similar_videos := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.SimilarVideos;
         min-width: 200px;
         height: parent.height;
@@ -153,6 +170,8 @@ export component MainList {
     }
 
     similar_music := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.SimilarMusic;
         min-width: 200px;
         height: parent.height;
@@ -169,6 +188,8 @@ export component MainList {
     }
 
     invalid_symlink := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.InvalidSymlinks;
         min-width: 200px;
         height: parent.height;
@@ -185,6 +206,8 @@ export component MainList {
     }
 
     broken_files := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.BrokenFiles;
         min-width: 200px;
         height: parent.height;
@@ -201,6 +224,8 @@ export component MainList {
     }
 
     bad_extensions := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.BadExtensions;
         min-width: 200px;
         height: parent.height;
@@ -217,6 +242,8 @@ export component MainList {
     }
 
     exif_remover := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.ExifRemover;
         min-width: 200px;
         height: parent.height;
@@ -233,6 +260,8 @@ export component MainList {
     }
 
     video_optimizer := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.VideoOptimizer;
         min-width: 200px;
         height: parent.height;
@@ -249,6 +278,8 @@ export component MainList {
     }
 
     bad_names := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
         visible: GuiState.active_tab == ActiveTab.BadNames;
         min-width: 200px;
         height: parent.height;

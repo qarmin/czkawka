@@ -102,6 +102,8 @@ export component MainWindow inherits Window {
                 Rectangle {
                     vertical-stretch: 1.0;
                     main_list := MainList {
+                        main_window_width: root.width;
+                        main_window_height: root.height;
                         x: 0;
                         width: preview_or_tool_settings.visible ? parent.width / 2 : parent.width;
                         height: parent.height;
