@@ -35,7 +35,7 @@ Name[hi]=Czkawka
 Comment=Multi functional app to clean OS which allow to find duplicates, empty folders, similar files etc.
 
 Comment[it]=Programma multifunzionale per pulire il sistema, che permette di trovare file duplicati, cartelle vuote, file simili, ecc.
-Comment[pt_BR]=Programa multifuncional para limpar o sistema e encontrar arquivos duplicados, pastas vazias e arquivos similares.
+Comment[pt_BR]=O ‘Czkawka’, que em idioma português significa ‘soluço’, é um programa que permite comparar e encontrar (buscar ou localizar ou pesquisar) arquivos duplicados, pastas ou diretórios vazios, arquivos equivalentes (semelhantes ou similares), criar arquivos de verificação da integridade (hash) de vários tipos de arquivos diferentes (por exemplo, arquivos de imagens, músicas, vídeos, etc.), mover para a lixeira os arquivos duplicados, excluir permanentemente os arquivos duplicados, etc., possibilita realizar a limpeza do sistema operacional e muito mais
 Comment[pl]=Wielofunkcyjna aplikacja do czyszczenia systemu, pozwalająca znaleźć duplikaty, puste foldery i podobne pliki.
 Comment[de]=Multifunktionale Anwendung zur Systembereinigung, die doppelte Dateien, leere Ordner und ähnliche Dateien findet.
 Comment[fr]=Application multifonction pour nettoyer le système et trouver les doublons, dossiers vides et fichiers similaires.
@@ -66,7 +66,7 @@ Keywords[es]=duplicados;similares;copias;limpieza;archivos;
 Keywords[ru]=дубликаты;схожие;копии;очистка;файлы;
 Keywords[uk]=дублікати;схожі;копії;очищення;файли;
 Keywords[it]=duplicati;simili;copie;pulizia;file;
-Keywords[pt_BR]=duplicados;similares;cópias;limpeza;arquivos;
+Keywords[pt_BR]=czkawka;hiccup;soluço;arquivos;ficheiros;duplicados;igual;iguais;equivalentes;similares;semelhantes;limpar;limpeza;mais limpo;cópias;repetido;comparar;pastas;
 Keywords[nl]=duplicaten;vergelijkbaar;kopieën;opschonen;bestanden;
 Keywords[sv]=dubletter;liknande;kopior;rensa;filer;
 Keywords[no]=duplikater;lignende;kopier;rydde;filer;
