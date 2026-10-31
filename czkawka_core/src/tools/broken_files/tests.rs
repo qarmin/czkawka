@@ -371,6 +371,29 @@ fn test_move_cached_video_entries_promotes_only_entries_missing_required_checks(
     assert!(!promoted.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg));
 }
 
+#[test]
+fn test_non_video_entry_never_needs_recheck_when_video_modes_enabled() {
+    let entry = make_broken_entry("image.jpg", &[(CheckedTypesSingle::Image, None)]);
+    let both = CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
+    assert!(!BrokenFiles::video_entry_missing_required_checks(&entry, both));
+}
+
+#[test]
+fn test_move_cached_entries_keeps_non_video_entries_cached_when_video_modes_enabled() {
+    let mut records_already_cached = BTreeMap::from([
+        ("image.jpg".to_string(), make_broken_entry("image.jpg", &[(CheckedTypesSingle::Image, None)])),
+        ("archive.zip".to_string(), make_broken_entry("archive.zip", &[(CheckedTypesSingle::Archive, None)])),
+    ]);
+    let mut non_cached_files_to_check = BTreeMap::new();
+
+    let both = CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
+    BrokenFiles::move_cached_entries_missing_required_checks(&mut records_already_cached, &mut non_cached_files_to_check, both);
+
+    assert!(records_already_cached.contains_key("image.jpg"), "non-video entries should stay cached");
+    assert!(records_already_cached.contains_key("archive.zip"), "non-video entries should stay cached");
+    assert!(non_cached_files_to_check.is_empty(), "no non-video entry should be promoted for recheck");
+}
+
 #[cfg(feature = "libavif")]
 fn get_heif_images_path() -> std::path::PathBuf {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources").join("heif_images");

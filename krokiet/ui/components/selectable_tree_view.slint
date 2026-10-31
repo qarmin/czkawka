@@ -40,7 +40,7 @@ export component SelectableTableView inherits Rectangle {
         padding: 0px;
         ScrollView {
             height: 30px;
-            viewport-x <=> list_view.viewport-x;
+            content-x <=> list_view.content-x;
             vertical-stretch: 0;
 
             HorizontalLayout {
@@ -210,10 +210,10 @@ export component SelectableTableView inherits Rectangle {
     }
 
     function position_to_item(idx: int) {
-        if (idx * item_height < -list_view.viewport-y) {
-            list_view.viewport-y = - (idx * item_height - 10px);
-        } else if ((idx + 1) * item_height > -list_view.viewport-y + list_view.height) {
-            list_view.viewport-y = - ((idx + 1) * item_height - list_view.height + 10px);
+        if (idx * item_height < -list_view.content-y) {
+            list_view.content-y = - (idx * item_height - 10px);
+        } else if ((idx + 1) * item_height > -list_view.content-y + list_view.height) {
+            list_view.content-y = - ((idx + 1) * item_height - list_view.height + 10px);
         }
     }
 

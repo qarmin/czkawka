@@ -210,6 +210,8 @@ pub(super) fn build_custom_select_columns(active_tab: ActiveTab) -> Vec<CustomSe
             col_str!(&path, StrDataVideoOptimizer::Path),
             col_str!(&codec, StrDataVideoOptimizer::Codec),
             col_int_pair!(format!("{} [KB]", size), IntDataVideoOptimizer::SizePart1),
+            col_int!(format!("{} [s]", duration), IntDataVideoOptimizer::DurationCentiseconds),
+            col_int_pair!(format!("{} [kbps]", bitrate), IntDataVideoOptimizer::BitratePart1),
             col_date!(&mod_date, IntDataVideoOptimizer::ModificationDatePart1),
         ],
         ActiveTab::Settings | ActiveTab::About => Vec::new(),

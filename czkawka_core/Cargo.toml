@@ -6,44 +6,43 @@ edition = "2024"
 rust-version = "1.94.1"
 description = "Core of Czkawka app"
 license = "MIT"
-homepage = "https://github.com/qarmin/czkawka"
 repository = "https://github.com/qarmin/czkawka"
 build = "build.rs"
 
 [dependencies]
 humansize = "2.1"
-rayon = "1.10"
+rayon = "1.12"
 crossbeam-channel = "0.5"
 
 # For stable iteration over hashmaps.
-indexmap = "2.11"
+indexmap = "2.14"
 
 # For saving/loading config files to specific directories
 directories-next = "2.0"
 
 # Needed by similar images
-image_hasher = { version = "3.0", features = ["fast_resize_unstable"] }
+image_hasher = { version = "3.1", features = ["fast_resize_unstable"] }
 bk-tree = "0.5"
 image = { version = "0.25", default-features = false, features = ["bmp", "dds", "exr", "ff", "gif", "hdr", "ico", "jpeg", "png", "pnm", "qoi", "tga", "tiff", "webp", "rayon"] }
-hamming-bitwise-fast = "1.0"
-fast_image_resize = { version = "6.0.0", features = ["image"] }
+hamming-bitwise-fast = "1.1"
+fast_image_resize = { version = "6.1.0", features = ["image"] }
 
 # Needed by same music
-bitflags = "2.6"
-lofty = "0.24"
+bitflags = "2.13"
+lofty = "0.25"
 
 # Needed by broken files
-zip = { version = "8.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
-lopdf = "0.44.0"
-sevenz-rust2 = "0.21.0"
+zip = { version = "9.1", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
+lopdf = "0.46.0"
+sevenz-rust2 = "0.24.1"
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 tar = { version = "0.4", default-features = false }
-ruzstd = "0.8"
+ruzstd = "0.9"
 ttf-parser = "0.25"
-quick-xml = "0.41"
+quick-xml = "0.42"
 toml = { version = "1.1", default-features = false, features = ["parse", "serde"] }
-yaml-rust2 = "0.11"
-usvg = { version = "0.47", default-features = false }
+yaml-rust2 = "0.13"
+usvg = { version = "0.49", default-features = false }
 bzip2-rs = "0.1"
 lzma-rs = "0.3"
 
@@ -52,15 +51,15 @@ rusty-chromaprint = "0.3"
 symphonia = { version = "0.6", features = ["all"] }
 
 # Hashes for duplicate files
-blake3 = "1.5"
-crc32fast = "1.4"
+blake3 = "1.8"
+crc32fast = "1.5"
 xxhash-rust = { version = "0.8", features = ["xxh3"] }
 
-tempfile = "3.13"
+tempfile = "3.27"
 
 # Video Duplicates
-similario_core = "0.2.0"
-filetime = "0.2.26"
+similario_core = "0.2.1"
+filetime = "0.2.29"
 
 # For extracting video properties using ffprobe CLI
 # https://github.com/theduke/ffprobe-rs/issues/33
@@ -74,51 +73,51 @@ serde_json = "1.0"
 # Language
 i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester"] }
 i18n-embed-fl = "0.10"
-rust-embed = { version = "8.5", features = ["debug-embed"] }
-once_cell = "1.20"
+rust-embed = { version = "8.13", features = ["debug-embed"] }
+once_cell = "1.21"
 
 # Raw image files
-rawler = "0.7.0"
+rawler = "0.8.0"
 libraw-rs = { version = "0.0.4", optional = true }
-jxl-oxide = { version = "0.12.0", features = ["image"] }
+jxl-oxide = { version = "0.12.6", features = ["image"] }
 
 # Checking for invalid extensions
 mime_guess = "2.0"
 infer = "0.22"
 
 # Newer version of libheif-rs, which is not compatible with Ubuntu 22.04, and works only o
-libheif-rs = { version = "2", optional = true, default-features = false, features = ["v1_17", "image"] }
+libheif-rs = { version = "3", optional = true, default-features = false, features = ["v1_17", "image"] }
 
 
 # EXIF data cleaning
-little_exif = "0.6.20"
+little_exif = "0.6.23"
 
 dunce = "1.0.5"
 
 os_info = { version = "3", default-features = false }
-log = "0.4.22"
+log = "0.4.34"
 handsome_logger = "0.9"
 fun_time = { version = "0.3", features = ["log"] }
 itertools = "0.15"
 static_assertions = "1.1.0"
 file-rotate = "0.8.0"
 
-open = "5.3"
+open = "5.4"
 
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 deunicode = "1.6.2"
 glibc_musl_version = "0.1.0"
 
-rand = "0.10.0"
+rand = "0.10.3"
 
-ashpd = { version = "0.13.2", optional = true, default-features = false, features = ["async-io", "trash"] }
+ashpd = { version = "0.13.13", optional = true, default-features = false, features = ["async-io", "trash"] }
 async-io = { version = "2.6.0", optional = true }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-trash = "5.1"
+trash = "5.2"
 
 [target.'cfg(windows)'.dependencies]
-file-id = "0.2.2"
+file-id = "0.2.3"
 
 [build-dependencies]
 rustc_version = "0.4"
@@ -126,7 +125,7 @@ glibc_musl_version = "0.1.0"
 
 [dev-dependencies]
 criterion =  { version = "0.8", default-features = false, features = [] }
-rand = "0.10.0"
+rand = "0.10.3"
 
 [[bench]]
 name = "hash_calculation_benchmark"

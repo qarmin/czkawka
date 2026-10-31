@@ -166,7 +166,7 @@ If `just fix` produces any output on stderr or exits non-zero the code is not re
 czkawka/
 ├── czkawka_core/   # Scanning logic – shared library used by all frontends
 ├── czkawka_cli/    # Command-line interface
-├── czkawka_gui/    # Legacy GTK 4 GUI (maintenance mode only)
+├── czkawka_gui/    # Legacy GTK 4 GUI (unreleased, compile-checked in CI only)
 ├── krokiet/        # Primary desktop GUI – Slint-based
 ├── cedinia/        # Android / mobile GUI – Slint-based
 └── misc/           # Scripts: AI translation, validation, benchmarks, CI helpers
@@ -269,8 +269,9 @@ for progress bars. No GUI code. Results printed via the tool's `PrintResults` tr
 
 ## czkawka_gui
 
-Legacy GTK 4 GUI. **Maintenance mode only** – no new features are added. Bug-fixes that
-keep it compatible with core API changes are accepted.
+Legacy GTK 4 GUI, **no longer released**. It stays in the workspace and CI only checks that it compiles;
+no binaries, packages or crates.io/Flathub releases are produced. Only fixes keeping it compatible with
+core API changes are accepted.
 
 ---
 

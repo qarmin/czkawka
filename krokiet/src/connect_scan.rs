@@ -160,18 +160,12 @@ fn insert_data_to_model(items: &Rc<VecModel<SingleMainListModel>>, data_model_st
     items.push(main);
 }
 
-fn get_text_messages<T>(component: &T, basic_settings: &BasicSettings) -> (Option<String>, String)
+fn get_text_messages<T>(component: &T) -> (Option<String>, String)
 where
     T: CommonData,
 {
-    let limit = if basic_settings.settings_limit_lines_of_messages {
-        MessageLimit::Lines(500)
-    } else {
-        MessageLimit::NoLimit
-    };
-
     let text_messages = component.get_text_messages();
-    (text_messages.critical.clone(), text_messages.create_messages_text(limit))
+    (text_messages.critical.clone(), text_messages.create_messages_text(MessageLimit::NoLimit))
 }
 
 fn set_common_settings<T>(component: &mut T, custom_settings: &SettingsCustom, stop_flag: &Arc<AtomicBool>)

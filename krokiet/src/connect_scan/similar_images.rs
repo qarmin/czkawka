@@ -44,7 +44,7 @@ pub(crate) fn scan_similar_images(a: Weak<MainWindow>, sd: ScanData) {
 
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
-            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
+            let (critical, messages) = get_text_messages(&tool);
 
             let mut vector: Vec<_> = if tool.get_use_reference() {
                 tool.get_similar_images_referenced()

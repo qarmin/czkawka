@@ -9,12 +9,14 @@ adb := "adb"
 apk_package := "io.github.qarmin.cedinia"
 apk_activity := "android.app.NativeActivity"
 
+[group('test')]
 build_all: && fix
     cargo build --release
     cargo build
     cargo clippy
     cargo test
 
+[group('test')]
 itests:
     [ ! -f TestFiles.zip ] && wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip || true
     cd ci_tester && cargo build --release && cd ..
@@ -24,24 +26,31 @@ itests:
 
 ## run
 
+[group('run')]
 run +args:
     cargo run --bin {{args}}
 
+[group('run')]
 runr +args:
     cargo run --profile fast_release --bin {{args}}
 
+[group('run')]
 runc +args:
     CARGO_PROFILE_DEV_CODEGEN_BACKEND=cranelift cargo +nightly run -Zcodegen-backend --bin {{args}}
 
+# needs: nightly + rust-src + llvm-tools-preview (see `doctor`/`setup`)
+[group('run')]
 runs +args:
     export RUST_BACKTRACE=1 # or full depending on project
     export ASAN_SYMBOLIZER_PATH=$(which llvm-symbolizer) # Version depends on your system
     export ASAN_OPTIONS="symbolize=1:detect_leaks=0" # Leak check is disabled, because is slow and ususally not needed
     ASAN_OPTIONS="symbolize=1:detect_leaks=0" RUSTFLAGS="-Zsanitizer=address" cargo +nightly run --target x86_64-unknown-linux-gnu --bin {{args}}
 
+[group('run')]
 val bin:
     valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes target/debug/{{bin}}
 
+[group('run')]
 valr bin:
     valgrind --leak-check=full --show-leak-kinds=definite --track-origins=yes target/release/{{bin}}
 
@@ -51,42 +60,142 @@ valr bin:
 # echo "kernel.perf_event_paranoid = -1" | sudo tee /etc/sysctl.d/99-perf.conf
 # sudo sysctl --system
 
+[group('profiling')]
 samply bin *args:
     cargo build --bin {{bin}}
     samply record target/debug/{{bin}} {{args}}
 
+[group('profiling')]
 samplyrd bin *args:
     cargo build --bin {{bin}} --profile rdebug
     samply record target/rdebug/{{bin}} {{args}}
 
-## Other
+## setup
+# doctor = read-only check that what the rest of this justfile needs is actually
+# installed; exits non-zero if something required is missing. Never calls sudo:
+# it prints the install command and lets the human decide whether to run it.
+# setup = installs whatever `doctor` flags as missing, but only Rust-toolchain-level
+# and cargo-installable things; system packages are still print-only.
 
+# read-only health check
+[group('setup')]
+doctor:
+    #!/usr/bin/env bash
+    set +e
+    fail=0
+    check() {
+        local name="$1"; shift
+        if "$@" >/dev/null 2>&1; then
+            printf "  [OK]      %s\n" "$name"
+        else
+            printf "  [MISSING] %s\n" "$name"
+            fail=$((fail + 1))
+        fi
+    }
+    info() {
+        local name="$1"; shift
+        if "$@" >/dev/null 2>&1; then
+            printf "  [OK]      %s\n" "$name"
+        else
+            printf "  [-]       %s (optional)\n" "$name"
+        fi
+    }
+
+    echo "Rust toolchain:"
+    check "rustc"                      rustc --version
+    check "cargo"                      cargo --version
+    check "nightly toolchain"          rustup run nightly rustc --version
+    check "rustfmt (nightly)"          rustup run nightly cargo fmt --version
+    check "clippy"                     cargo clippy --version
+    check "cargo-edit (cargo upgrade)" cargo upgrade --version
+    check "uv (fix, translations)"     uv --version
+
+    echo ""
+    echo "Optional tools (only needed for specific recipes):"
+    info "nightly: rust-src (runs)"             bash -c "rustup component list --toolchain nightly --installed | grep -q rust-src"
+    info "nightly: llvm-tools-preview (runs)"   bash -c "rustup component list --toolchain nightly --installed | grep -q llvm-tools"
+    info "llvm-symbolizer (runs)"               bash -c "command -v llvm-symbolizer"
+    info "valgrind (val/valr)"                  valgrind --version
+    info "samply (samply/samplyrd)"             samply --version
+    info "heaptrack (heaptrack/test_heaptrack)" heaptrack --version
+    info "perf (hotspot profiling)"             perf --version
+    info "hyperfine (benchmark)"                hyperfine --version
+    info "cargo-llvm-lines"                     cargo llvm-lines --version
+    info "cargo-bloat"                          cargo bloat --version
+    info "cargo-deps"                           bash -c "command -v cargo-deps"
+    info "graphviz dot (dependencies_graph)"    dot -V
+    info "flamegraph"                           bash -c "command -v flamegraph"
+    info "measureme (profiling/timings)"        bash -c "command -v summarize"
+    info "ollama (translate deps)"              ollama --version
+    info "wget (itests/prepare_binaries)"       wget --version
+    info "adb (android)"                        adb --version
+    info "gradle (android)"                     gradle --version
+    info "keytool (gen_keystores)"              bash -c "command -v keytool"
+
+    echo ""
+    if [ "$fail" -eq 0 ]; then
+        echo "All required tools present."
+    else
+        echo "$fail required tool(s) missing - run 'just setup' to install what's installable."
+        exit 1
+    fi
+
+# installs whatever `doctor` flagged as missing (Rust-toolchain-level and cargo-installable only)
+[group('setup')]
+setup: setup_sanitizer setup_verify_tools
+    #!/usr/bin/env bash
+    set -e
+    rustup component add clippy
+    rustup component add rustfmt --toolchain nightly
+    command -v cargo-upgrade >/dev/null 2>&1 || cargo install cargo-edit --locked
+    command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
+    command -v samply >/dev/null 2>&1 || cargo install samply --locked
+
+    echo "System packages not installed here (no sudo) - install manually if missing:"
+    command -v valgrind  >/dev/null 2>&1 || echo "  sudo apt install valgrind"
+    command -v heaptrack >/dev/null 2>&1 || echo "  sudo apt install heaptrack"
+    command -v perf      >/dev/null 2>&1 || echo "  sudo apt install linux-tools-common linux-tools-generic"
+    command -v hyperfine >/dev/null 2>&1 || echo "  sudo apt install hyperfine"
+    command -v dot       >/dev/null 2>&1 || echo "  sudo apt install graphviz"
+    command -v wget      >/dev/null 2>&1 || echo "  sudo apt install wget"
+    command -v ollama    >/dev/null 2>&1 || echo "  curl -fsSL https://ollama.com/install.sh | sh"
+
+    echo "Done - run 'just doctor' to verify."
+
+[group('setup')]
 setup_sanitizer:
     rustup install nightly
     rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
     rustup component add llvm-tools-preview --toolchain nightly-x86_64-unknown-linux-gnu
 
+[group('setup')]
 setup_sanitizer_android:
     rustup install nightly
     rustup target add aarch64-linux-android --toolchain nightly
     rustup component add llvm-tools-preview --toolchain nightly
 
 
+[group('benchmark')]
 bench:
     cd czkawka_core && cargo bench
     xdg-open target/criterion/report/index.html
 
+[group('benchmark')]
 bench_clean:
     rm -rf target/criterion
 
+# Bumps version requirements in Cargo.toml, including incompatible ones (needs cargo-edit, see `doctor`)
+[group('install')]
 upgrade:
-    cargo +nightly -Z unstable-options update --breaking
+    cargo upgrade -i
     cargo update
 
+[group('fix')]
 clip:
     cargo clippy --fix --allow-dirty --allow-staged --all-features --all-targets
     cargo clippy --fix --allow-dirty --allow-staged --no-default-features --features winit_software --all-targets
 
+[group('fix')]
 fix:
     grep -rl --null -F --include='*.rs' --include='*.slint' --include='*.md' --include='*.ftl' --exclude='AGENTS.md' --exclude='justfile' --exclude-dir='.git' --exclude-dir='target' -e '─' -e '–' -e '—' -e '…' . | xargs -0 -r perl -CSD -i -pe 's/[\x{2500}\x{2013}\x{2014}]/-/g; s/\x{2026}\.?/.../g' || true
     cp misc/pyproject.toml .
@@ -100,46 +209,52 @@ fix:
     cargo +nightly fmt
     cargo clippy --fix --allow-dirty --allow-staged --all-features --all-targets
     cargo +nightly fmt
+    # stable rustfmt warns that the nightly-only import options in .rustfmt.toml aren't
+    # available on this channel - harmless noise on every run, so it's silenced here.
     cargo fmt 2>/dev/null
 
+[group('fix')]
 fixn:
     cargo +nightly fmt
     cargo +nightly clippy --fix --allow-dirty --allow-staged --all-features --all-targets
     cargo +nightly fmt
 
+[group('benchmark')]
 test_resize arg:
     cd misc/test_image_perf; cargo build --release; sudo ./target/release/test_image_perf "{{arg}}"
 
 # Run all normal (non-ignored) tests across the workspace
+[group('test')]
 test:
     cargo test --workspace
 
 # Run only #[ignore]-marked tests (fuzzers, stress tests, slow tests)
+[group('test')]
 ignored:
     cargo test --workspace -- --ignored
 
 # Not works, due of edition 2024 and workspaces
+[group('profiling')]
 unused_features:
     unused-features analyze
     unused-features build-report --input krokiet/report.json
     unused-features build-report --input czkawka_cli/report.json
     unused-features build-report --input czkawka_core/report.json
-    unused-features build-report --input czkawka_gui/report.json
     xdg-open krokiet/report.html
     xdg-open czkawka_cli/report.html
     xdg-open czkawka_core/report.html
-    xdg-open czkawka_gui/report.html
 
 ##################### VERSION #####################
 
 # Bump version in all crates, UI files and release metadata, e.g. `just change-version 12.0.1`
+[group('release')]
 change-version version:
     uv run misc/change_version.py {{version}}
 
 ##################### LICENSES #####################
 
-# Generate third-party license file for Cedinia.
-# Requires: cargo install cargo-license
+# Generate third-party license file for Cedinia (parses `cargo metadata` JSON directly, no extra tool needed).
+[group('release')]
 gen_cedinia_licenses:
     cargo metadata --format-version 1 \
         | python3 misc/gen_cedinia_licenses.py > cedinia/THIRD_PARTY_LICENSES.txt
@@ -149,6 +264,7 @@ gen_cedinia_licenses:
 
 keystore_dir := "cedinia/android/keystore"
 
+[group('android')]
 gen_keystores:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -173,6 +289,7 @@ gen_keystores:
         -dname "CN=Release, OU=Release, O=Release, L=Release, S=Release, C=US" \
         -noprompt
 
+[group('android')]
 android_build:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -182,6 +299,7 @@ android_build:
 
     cargo apk build -p cedinia --lib
 
+[group('android')]
 android_build_release:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -191,29 +309,38 @@ android_build_release:
 
     cargo apk build -p cedinia --lib --release
 
+[group('android')]
 android_install:
     {{adb}} install -r target/debug/apk/cedinia.apk
 
+[group('android')]
 android_install_release:
     {{adb}} install -r target/release/apk/cedinia.apk
 
+[group('android')]
 android_run:
     {{adb}} shell am start -n {{apk_package}}/{{apk_activity}}
 
+[group('android')]
 android_log:
     {{adb}} logcat -s RustStdoutStderr:V *:S
 
+[group('android')]
 android_logc:
     {{adb}} logcat | grep edinia
 
+[group('android')]
 android_devices:
     {{adb}} devices -l
 
+[group('android')]
 android: android_build android_install android_run
 
+[group('android')]
 androidr: android_build_release android_install_release android_run
 
 # Install and launch a prebuilt APK (e.g. downloaded from CI) without building.
+[group('android')]
 android_manual apk:
     {{adb}} install -r "{{apk}}"
     {{adb}} shell am start -n {{apk_package}}/{{apk_activity}}
@@ -235,6 +362,7 @@ android_manual apk:
 #
 # Pass `smoke` to enable a deliberate startup heap-buffer-overflow that ASan must
 # report - use it once to confirm ASan is really active:  just android_asan smoke
+[group('android')]
 android_asan smoke="":
     #!/usr/bin/env bash
     set -euo pipefail
@@ -303,6 +431,7 @@ android_asan smoke="":
 # Symbolize a saved logcat / tombstone dump: offsets -> function + file:line, using
 # the unstripped local libcedinia.so (build it first with `just android_asan`).
 # Usage: just android_symbolize target/cedinia-asan-logcat.txt
+[group('android')]
 android_symbolize dump:
     "$ANDROID_NDK_HOME/ndk-stack" -sym target/aarch64-linux-android/debug -dump {{dump}}
 
@@ -310,6 +439,7 @@ android_symbolize dump:
 # Requires gradle 8.9+ in PATH (e.g. sdk install gradle 8.9 via sdkman).
 # The libcedinia.so is compiled by cargo-apk and the DEX is already embedded
 # in the .so via include_bytes! – no separate Java compilation is needed.
+[group('android')]
 android_build_aab:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -337,12 +467,14 @@ android_build_aab:
 
 ##################### BENCHMARKS #####################
 
+[group('benchmark')]
 prepare_binaries:
     mkdir -p benchmarks
     wget https://github.com/qarmin/czkawka/releases/download/Nightly/linux_czkawka_cli -O benchmarks/czkawka_cli_normal
     cd czkawka_cli; cargo build --release; cd ..; cp target/release/czkawka_cli benchmarks/czkawka_cli_v4
     cd czkawka_cli; cargo build --profile fastest; cd ..; cp target/fastest/czkawka_cli benchmarks/czkawka_cli_fastest
 
+[group('benchmark')]
 benchmark media:
     # benchmarks/czkawka_cli_old dup -d /media/rafal/Kotyk
     # benchmarks/czkawka_cli_fastest dup -d /media/rafal/Kotyk -W -N -M -H
@@ -351,22 +483,25 @@ benchmark media:
     hyperfine --prepare "sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'; rm /home/rafal/.cache/czkawka/cache_similar_images_16_Gradient_Nearest_80.bin || true" 'benchmarks/czkawka_cli_fastest image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_v4 image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_normal image -d "{{ media }}" -W -N -M -H' 'benchmarks/czkawka_cli_old image -d "{{ media }}" > /dev/null'
 
 
+[group('benchmark')]
 check_compilations:
     git checkout Cargo.toml
     #cargo install --path misc/test_compilation_speed_size
     test_compilation_speed_size misc/test_compilation_speed_size/krokiet.json
     python3 misc/test_compilation_speed_size/generate_md_and_plots.py
 
+[group('misc')]
 tags:
     tags=($(git tag --sort=version:refname | grep -v Nightly)); for ((i=0; i<${#tags[@]}-1; i++)); do from=${tags[$i]}; to=${tags[$i+1]}; echo "$from -> $to : $(git diff --shortstat "$from" "$to")"; done; last=${tags[-1]}; echo "$last -> master : $(git diff --shortstat "$last" master)"
 
+[group('install')]
 install:
     cargo install --path czkawka_cli --locked
     cargo install --path krokiet --locked
-    cargo install --path czkawka_gui --locked
 
 ##################### TRANSLATIONS #####################
 
+[group('translations')]
 prepare_translations_deps:
     @command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
     @command -v ollama >/dev/null 2>&1 || curl -fsSL https://ollama.com/install.sh | sh
@@ -377,19 +512,20 @@ prepare_translations_deps:
     # translategemma:12b - probably very slow - using only for small tasks
     export OLLAMA_VULKAN=1; export HSA_OVERRIDE_GFX_VERSION=10.3.0; ollama pull translategemma:12b
 
+[group('translations')]
 translate:
-    uv run misc/ai_translate/translate.py czkawka_gui/i18n
     uv run misc/ai_translate/translate.py czkawka_core/i18n
     uv run misc/ai_translate/translate.py krokiet/i18n
     uv run misc/ai_translate/translate.py cedinia/i18n
 
+[group('translations')]
 validate_translations *args: # Available --fix argument, which removes invalid translations
-    uv run misc/ai_translate/validate_translations.py czkawka_gui/i18n {{args}}
     uv run misc/ai_translate/validate_translations.py czkawka_core/i18n {{args}}
     uv run misc/ai_translate/validate_translations.py krokiet/i18n {{args}}
     uv run misc/ai_translate/validate_translations.py cedinia/i18n {{args}}
 
 # Crowdin allows to import zip file with structured translations
+[group('translations')]
 pack_translations:
     rm -f i18n_translations.zip
     mkdir -p /tmp/czkawka_i18n
@@ -406,6 +542,7 @@ pack_translations:
     rm -rf /tmp/czkawka_i18n
     @echo "Created i18n_translations.zip with all translations (excluding English)"
 
+[group('translations')]
 unpack_translations path_to_file:
     @echo "Unpacking translations from {{path_to_file}}..."
     mkdir -p /tmp/czkawka_unpack
@@ -420,52 +557,58 @@ unpack_translations path_to_file:
     rm -rf /tmp/czkawka_unpack
     @echo "Translations unpacked successfully"
 
+[group('misc')]
 cache:
     xdg-open ~/.cache/czkawka
 
+[group('misc')]
 configc:
     xdg-open ~/.config/czkawka
 
+[group('misc')]
 configk:
     xdg-open ~/.config/krokiet
 
 
 ##################### DEBUG SIZE, PERFORMANCE AND OTHERS #####################
+
+[group('setup')]
 setup_verify_tools:
     rustup component add llvm-tools-preview
-    cargo install cargo-llvm-lines cargo-bloat cargo-deps flamegraph measureme
+    cargo install cargo-llvm-lines cargo-bloat cargo-deps flamegraph
     cargo install --git https://github.com/rust-lang/measureme crox flamegraph summarize
 
 # Prints lines of certain functions in binary
+[group('profiling')]
 llvm_lines:
     cargo llvm-lines -p krokiet --bin krokiet | head -40
-    cargo llvm-lines -p czkawka_gui --bin czkawka_gui | head -40
     cargo llvm-lines -p czkawka_cli --bin czkawka_cli | head -40
 
 # Prints size of functions in binary
+[group('profiling')]
 bloat_by_function:
     cargo bloat --release --bin czkawka_cli -n 30
-    cargo bloat --release --bin czkawka_gui -n 30
     cargo bloat --release --bin krokiet -n 30
 
 # Prints size of crates in binary
+[group('profiling')]
 bloat_by_crate:
     cargo bloat --release --crates --bin czkawka_cli
-    cargo bloat --release --crates --bin czkawka_gui
     cargo bloat --release --crates --bin krokiet
 
 # Draws dependency graphs of certain binaries(like regex, image, etc)
+[group('profiling')]
 dependencies_graph:
     cd czkawka_core;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
     cd czkawka_cli;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
-    cd czkawka_gui;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
     cd krokiet;cargo deps --all-deps | dot -Tpng > deps.png;cd ..
 
 # Shows llvm compilation data summary
+[group('profiling')]
 profiling profile='debug' mode='build':
     if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi; \
     cargo clean; \
-    for crate in czkawka_core czkawka_gui czkawka_cli krokiet; do \
+    for crate in czkawka_core czkawka_cli krokiet; do \
         cd "$crate"; \
         rm ../*.mm_profdata || true; \
         rm *.mm_profdata || true; \
@@ -475,10 +618,11 @@ profiling profile='debug' mode='build':
     done
 
 # Timings of crates compilation
+[group('profiling')]
 timings profile='debug' mode='build':
     if [ "{{profile}}" = "release" ]; then release_flag="--release"; else release_flag=""; fi; \
     cargo clean; \
-    for crate in czkawka_core czkawka_gui czkawka_cli krokiet; do \
+    for crate in czkawka_core czkawka_cli krokiet; do \
         cd "$crate"; \
         rm ../target/cargo-timings/*.html || true; \
         cargo "{{mode}}" $release_flag --timings; \
@@ -488,34 +632,34 @@ timings profile='debug' mode='build':
     #cargo clean
 #    cd czkawka_core; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
 #    cargo clean
-#    cd czkawka_gui; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
-#    cargo clean
 #    cd czkawka_cli; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
 #    cargo clean
 #    cd krokiet; RUSTFLAGS="-Ztime" cargo +nightly rustc; cd ..;
 
 # Per crate compilation times and ram usage
 # This is very verbose, so probably not really useful
+[group('profiling')]
 time_passes:
     cargo clean
     cd czkawka_core; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
-    cargo clean
-    cd czkawka_gui; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
     cargo clean
     cd czkawka_cli; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
     cargo clean
     cd krokiet; RUSTFLAGS="-Ztime-passes" cargo +nightly rustc; cd ..;
 
+[group('profiling')]
 test_heaptrack:
     cd test && cargo build --profile rdebug
     heaptrack test/target/rdebug/TEST
     heaptrack_gui --appimage-extract-and-run "$(ls -t *.zst | head -n1)"
 
+[group('profiling')]
 heaptrack bin:
     cargo build --profile rdebug --bin {{bin}}
     heaptrack target/rdebug/{{bin}}
     heaptrack_gui --appimage-extract-and-run "$(ls -t *.zst | head -n1)"
 
+[group('misc')]
 diffs VERSION:
 	mkdir -p DIFFS
 	git diff --name-only {{VERSION}} HEAD | while read file; do \

@@ -374,7 +374,6 @@ settings_clean_cache_button_text = Clean outdated cache
 settings_settings = Settings
 settings_load_tabs_sizes_at_startup = Load tabs sizes at startup
 settings_load_windows_size_at_startup = Load windows size at startup
-settings_limit_lines_of_messages = Limit messages to 500 lines(workaround for slow TextEdit widget)
 settings_play_audio_on_scan_completion_text = Play sound when scan completes successfully
 settings_audio_feature_hint_text = Available only when compiling with audio feature
 settings_audio_env_variable_hint_text = Sound can be changed, by setting KROKIET_AUDIO_STOP_FILE environment variable to a valid audio file path
@@ -454,6 +453,8 @@ optimize_overwrite_files_text = Overwrite files
 optimize_limit_video_size_text = Limit video size
 optimize_max_width_text = Max width:
 optimize_max_height_text = Max height:
+optimize_limit_fps_text = Limit video fps
+optimize_max_fps_text = Max fps:
 optimize_crf_hint = Lower value = better quality. 0 is nearly lossless, 51 is worst. Recommended: 18-28.
 optimize_noise_reduction_hint = Noise reduction may significantly increase encoding time.
 optimize_noise_reduction_strength_hint = 1 = minimal, 10 = maximum noise reduction.

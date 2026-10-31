@@ -24,7 +24,7 @@ pub(crate) fn scan_invalid_symlinks(a: Weak<MainWindow>, sd: ScanData) {
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
             let mut vector = tool.get_invalid_symlinks().clone();
-            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
+            let (critical, messages) = get_text_messages(&tool);
 
             vector.par_sort_unstable_by(|a, b| split_path_compare(a.path.as_path(), b.path.as_path()));
 
