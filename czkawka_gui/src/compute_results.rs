@@ -302,6 +302,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
 
         let is_track_title = (MusicSimilarity::TRACK_TITLE & music_similarity) != MusicSimilarity::NONE;
         let is_track_artist = (MusicSimilarity::TRACK_ARTIST & music_similarity) != MusicSimilarity::NONE;
+        let is_track_album = (MusicSimilarity::TRACK_ALBUM & music_similarity) != MusicSimilarity::NONE;
         let is_year = (MusicSimilarity::YEAR & music_similarity) != MusicSimilarity::NONE;
         let is_bitrate = (MusicSimilarity::BITRATE & music_similarity) != MusicSimilarity::NONE;
         let is_length = (MusicSimilarity::LENGTH & music_similarity) != MusicSimilarity::NONE;
@@ -322,6 +323,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                     base_file_entry.modified_date,
                     &base_file_entry.track_title,
                     &base_file_entry.track_artist,
+                    &base_file_entry.track_album,
                     &base_file_entry.year,
                     base_file_entry.bitrate,
                     &format!("{} kbps", base_file_entry.bitrate),
@@ -340,6 +342,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                         file_entry.modified_date,
                         &file_entry.track_title,
                         &file_entry.track_artist,
+                        &file_entry.track_album,
                         &file_entry.year,
                         file_entry.bitrate,
                         &format!("{} kbps", file_entry.bitrate),
@@ -366,6 +369,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                     0,
                     if is_track_title { text } else { "" },
                     if is_track_artist { text } else { "" },
+                    if is_track_album { text } else { "" },
                     if is_year { text } else { "" },
                     0,
                     if is_bitrate { text } else { "" },
@@ -384,6 +388,7 @@ fn compute_same_music(mf: SameMusic, entry_info: &Entry, text_view_errors: &Text
                         file_entry.modified_date,
                         &file_entry.track_title,
                         &file_entry.track_artist,
+                        &file_entry.track_album,
                         &file_entry.year,
                         file_entry.bitrate,
                         &format!("{} kbps", file_entry.bitrate),
@@ -1068,6 +1073,7 @@ fn same_music_add_to_list_store(
     modified_date: u64,
     track_title: &str,
     track_artist: &str,
+    track_album: &str,
     track_year: &str,
     track_bitrate: u32,
     bitrate_string: &str,
@@ -1076,7 +1082,7 @@ fn same_music_add_to_list_store(
     is_header: bool,
     is_reference_folder: bool,
 ) {
-    const COLUMNS_NUMBER: usize = 18;
+    const COLUMNS_NUMBER: usize = 19;
     let (size_str, string_date) = format_size_and_date(size, modified_date, is_header, is_reference_folder);
     let color = get_row_color(is_header);
 
@@ -1089,6 +1095,7 @@ fn same_music_add_to_list_store(
         (ColumnsSameMusic::Path as u32, &directory),
         (ColumnsSameMusic::Title as u32, &track_title),
         (ColumnsSameMusic::Artist as u32, &track_artist),
+        (ColumnsSameMusic::Album as u32, &track_album),
         (ColumnsSameMusic::Year as u32, &track_year),
         (ColumnsSameMusic::Genre as u32, &track_genre),
         (ColumnsSameMusic::Bitrate as u32, &bitrate_string),

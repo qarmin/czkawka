@@ -22,6 +22,7 @@ krokiet_info_message =
 # Main window
 music_title_checkbox = Title
 music_artist_checkbox = Artist
+music_album_checkbox = Album
 music_year_checkbox = Year
 music_bitrate_checkbox = Bitrate
 music_genre_checkbox = Genre

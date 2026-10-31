@@ -387,7 +387,7 @@ pub struct SameMusicArgs {
         long,
         default_value = "track_title,track_artist",
         value_parser = parse_music_duplicate_type,
-        help = "Search method (track_title,track_artist,year,bitrate,genre,length)",
+        help = "Search method (track_title,track_artist,track_album,year,bitrate,genre,length)",
         long_help = "Sets which rows must be equal to set these files as duplicates (may be mixed, but must be divided by commas)."
     )]
     pub music_similarity: MusicSimilarity,

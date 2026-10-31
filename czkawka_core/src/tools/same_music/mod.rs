@@ -23,10 +23,11 @@ bitflags! {
 
         const TRACK_TITLE = 0b1;
         const TRACK_ARTIST = 0b10;
-        const YEAR = 0b100;
-        const LENGTH = 0b1000;
-        const GENRE = 0b10000;
-        const BITRATE = 0b10_0000;
+        const TRACK_ALBUM = 0b100;
+        const YEAR = 0b1000;
+        const LENGTH = 0b1_0000;
+        const GENRE = 0b10_0000;
+        const BITRATE = 0b100_0000;
     }
 }
 
@@ -40,6 +41,7 @@ pub struct MusicEntry {
 
     pub track_title: String,
     pub track_artist: String,
+    pub track_album: String,
     pub year: String,
     pub length: u32,
     pub genre: String,
@@ -68,6 +70,7 @@ impl FileEntry {
             fingerprint: Vec::new(),
             track_title: String::new(),
             track_artist: String::new(),
+            track_album: String::new(),
             year: String::new(),
             length: 0,
             genre: String::new(),

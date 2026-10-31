@@ -245,9 +245,10 @@ impl SameMusic {
         let mut new_duplicates: Vec<Vec<MusicEntry>> = Vec::new();
 
         let approximate = self.params.approximate_comparison;
-        let tag_checks: [(MusicSimilarity, fn(&MusicEntry) -> String, bool); 5] = [
+        let tag_checks: [(MusicSimilarity, fn(&MusicEntry) -> String, bool); 6] = [
             (MusicSimilarity::TRACK_TITLE, |fe| fe.track_title.clone(), approximate),
             (MusicSimilarity::TRACK_ARTIST, |fe| fe.track_artist.clone(), approximate),
+            (MusicSimilarity::TRACK_ALBUM, |fe| fe.track_album.clone(), approximate),
             (MusicSimilarity::YEAR, |fe| fe.year.clone(), false),
             (MusicSimilarity::LENGTH, |fe| format_audio_duration(fe.length), false),
             (MusicSimilarity::GENRE, |fe| fe.genre.clone(), false),
@@ -526,6 +527,7 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
 
     let mut track_title = String::new();
     let mut track_artist = String::new();
+    let mut track_album = String::new();
     let mut year = String::new();
     let mut genre = String::new();
 
@@ -534,6 +536,7 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
     if let Some(tag) = tagged_file.primary_tag() {
         track_title = tag.get_string(ItemKey::TrackTitle).unwrap_or_default().to_string();
         track_artist = tag.get_string(ItemKey::TrackArtist).unwrap_or_default().to_string();
+        track_album = tag.get_string(ItemKey::AlbumTitle).unwrap_or_default().to_string();
         year = tag.get_string(ItemKey::Year).unwrap_or_default().to_string();
         genre = tag.get_string(ItemKey::Genre).unwrap_or_default().to_string();
     }
@@ -548,6 +551,11 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
             && let Some(tag_value) = tag.get_string(ItemKey::TrackArtist)
         {
             track_artist = tag_value.to_string();
+        }
+        if track_album.is_empty()
+            && let Some(tag_value) = tag.get_string(ItemKey::AlbumTitle)
+        {
+            track_album = tag_value.to_string();
         }
         if year.is_empty()
             && let Some(tag_value) = tag.get_string(ItemKey::Year)
@@ -571,6 +579,7 @@ fn read_single_file_tags(path: &str, mut music_entry: MusicEntry) -> Option<Musi
 
     music_entry.track_title = track_title;
     music_entry.track_artist = track_artist;
+    music_entry.track_album = track_album;
     music_entry.year = year;
     music_entry.length = length_in_seconds;
     music_entry.genre = genre;

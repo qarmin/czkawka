@@ -187,7 +187,7 @@ fn test_same_music_by_tags_all_criteria() {
     let test_path = get_test_resources_path();
 
     let params = SameMusicParameters::new(
-        MusicSimilarity::TRACK_TITLE | MusicSimilarity::TRACK_ARTIST | MusicSimilarity::YEAR | MusicSimilarity::GENRE,
+        MusicSimilarity::TRACK_TITLE | MusicSimilarity::TRACK_ARTIST | MusicSimilarity::TRACK_ALBUM | MusicSimilarity::YEAR | MusicSimilarity::GENRE,
         false,
         CheckingMethod::AudioTags,
         10.0,
@@ -290,6 +290,7 @@ fn test_same_music_reference_mode_deletes_only_non_reference() {
         fingerprint: Vec::new(),
         track_title: String::new(),
         track_artist: String::new(),
+        track_album: String::new(),
         year: String::new(),
         length: 0,
         genre: String::new(),

@@ -234,6 +234,9 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
             if m.get_artist() {
                 sim |= MusicSimilarity::TRACK_ARTIST;
             }
+            if m.get_album() {
+                sim |= MusicSimilarity::TRACK_ALBUM;
+            }
             if m.get_year() {
                 sim |= MusicSimilarity::YEAR;
             }

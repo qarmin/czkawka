@@ -138,9 +138,10 @@ impl PrintResults for SameMusic {
 fn write_music_entry<T: Write>(writer: &mut T, file_entry: &MusicEntry) -> std::io::Result<()> {
     writeln!(
         writer,
-        "TT: {}  -  TA: {}  -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
+        "TT: {}  -  TAr: {}  - TAl: {} -  Y: {}  -  L: {}  -  G: {}  -  B: {}  -  P: \"{}\"",
         file_entry.track_title,
         file_entry.track_artist,
+        file_entry.track_album,
         file_entry.year,
         format_audio_duration(file_entry.length),
         file_entry.genre,

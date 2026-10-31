@@ -181,6 +181,7 @@ pub enum ColumnsSameMusic {
     Path,
     Title,
     Artist,
+    Album,
     Year,
     Bitrate,
     BitrateAsNumber,
