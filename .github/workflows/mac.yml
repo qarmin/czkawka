@@ -34,7 +34,7 @@ jobs:
 
       - name: Install GTK4
         run: |
-          brew install gtk4 libheif libavif dav1d || true
+          brew install gtk4 libheif libavif dav1d librsvg || true
 
       - name: Build Release
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -103,21 +103,43 @@ jobs:
           bash misc/pack_all_backends.sh mac_krokiet_all_backends_${{ env.ARCHNAME }} mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
           bash misc/pack_all_backends.sh mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }} mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
 
+      - name: Package macOS apps
+        run: |
+          set -eu
+          pack() {
+            bash misc/pack_macos_app.sh "$1" "$1.app.zip" "$2" "$3"
+          }
+          A="${ARCHNAME}"
+          # Default Krokiet is the macOS OpenGL (femtovg) build, deprecated in favor of Skia Vulkan.
+          # The GTK GUI is deprecated since 12.0. Both stay naked binaries, without a .app.
+          pack "mac_krokiet_skia_vulkan_${A}" "Krokiet Skia Vulkan" "pl.Qarmin.Krokiet.SkiaVulkan"
+          pack "mac_krokiet_femtovg_wgpu_${A}" "Krokiet femtovg wgpu" "pl.Qarmin.Krokiet.FemtovgWgpu"
+          pack "mac_krokiet_all_backends_${A}" "Krokiet All Backends" "pl.Qarmin.Krokiet.AllBackends"
+          pack "mac_krokiet_skia_vulkan_heif_avif_${A}" "Krokiet Skia Vulkan HEIF AVIF" "pl.Qarmin.Krokiet.SkiaVulkan.HeifAvif"
+          pack "mac_krokiet_heif_avif_femtovg_wgpu_${A}" "Krokiet femtovg wgpu HEIF AVIF" "pl.Qarmin.Krokiet.FemtovgWgpu.HeifAvif"
+          pack "mac_krokiet_heif_avif_all_backends_${A}" "Krokiet All Backends HEIF AVIF" "pl.Qarmin.Krokiet.AllBackends.HeifAvif"
+
       - name: Store MacOS
         uses: actions/upload-artifact@v6
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}.app.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.app.zip
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
+            mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+            mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
 
       - name: Release
         if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
@@ -126,13 +148,19 @@ jobs:
           tag_name: "Nightly"
           files: |
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_all_backends_${{ env.ARCHNAME }}.app.zip
             mac_czkawka_cli_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_${{ env.ARCHNAME }}
             mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_heif_avif_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_heif_avif_all_backends_${{ env.ARCHNAME }}.app.zip
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}
+            mac_krokiet_skia_vulkan_heif_avif_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}
+            mac_krokiet_skia_vulkan_${{ env.ARCHNAME }}.app.zip
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
+            mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}.app.zip
           token: ${{ secrets.PAT_REPOSITORY }}

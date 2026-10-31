@@ -12,6 +12,8 @@ Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04(base)/24
 
 You can download them from https://github.com/qarmin/czkawka/releases/, which contains recommendations, which variant to use depending on your needs.
 
+On macOS the current Krokiet builds are also `.app` zips: Skia Vulkan, femtovg wgpu, and all-backends, plus the HEIF/AVIF variants of those. Unzip one and double-click the app. The plain binary is still there. The default OpenGL build and the GTK GUI stay single files. HEIF/AVIF still needs the Homebrew libraries. The CLI stays a terminal program.
+
 ## Requirements
 
 Prebuilt binaries have no mandatory runtime dependencies.
