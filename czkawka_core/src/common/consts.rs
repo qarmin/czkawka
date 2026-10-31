@@ -3,7 +3,7 @@ pub const DEFAULT_WORKER_THREAD_SIZE: usize = 4 * 1024 * 1024; // 4 MB
 pub const VIDEO_RESOLUTION_LIMIT: u32 = 16 * 1024; // Cap so width * height fits in i32 (the GUI stores the product as i32; larger values would overflow).
 
 pub const RAW_IMAGE_EXTENSIONS: &[&str] = &[
-    "ari", "cr3", "cr2", "crw", "erf", "raf", "3fr", "kdc", "dcs", "dcr", "iiq", "mos", "mef", "mrw", "nef", "nrw", "orf", "rw2", "pef", "srw", "arw", "srf", "sr2",
+    "ari", "cr3", "cr2", "crw", "dng", "erf", "raf", "3fr", "kdc", "dcs", "dcr", "iiq", "mos", "mef", "mrw", "nef", "nrw", "orf", "rw2", "pef", "srw", "arw", "srf", "sr2",
 ];
 #[cfg(feature = "libavif")]
 pub const IMAGE_RS_EXTENSIONS: &[&str] = &[
