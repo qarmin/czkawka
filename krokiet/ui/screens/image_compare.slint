@@ -109,6 +109,8 @@ export component ImageCompareOverlay inherits Rectangle {
 
     private property <bool> resolution_mismatch: left_valid && right_valid && GuiState.compare_images[GuiState.compare_left_idx].resolution != GuiState.compare_images[GuiState.compare_right_idx].resolution;
 
+    private property <length> compare_pane_seam_padding: 1px;
+
     background: ColorPalette.compare_main_background;
 
     TouchArea { width: parent.width; height: parent.height; }
@@ -323,46 +325,66 @@ export component ImageCompareOverlay inherits Rectangle {
                 }
             }
 
-            if split_mode && !diff_mode: Rectangle {
+            if split_mode && !diff_mode: VerticalLayout {
                 width: parent.width; height: parent.height;
-                background: ColorPalette.compare_image_panel_background;
-                border-radius: 4px; clip: true;
+                padding: 2px;
 
-                // Left clip: shows left portion of the left image
-                Rectangle {
-                    clip: true;
-                    x: 0px; y: 0px;
-                    width: main-image-area.width * overlay_split_pos;
-                    height: main-image-area.height;
-                    Image {
+                split-stage := Rectangle {
+                    vertical-stretch: 1.0;
+                    horizontal-stretch: 1.0;
+
+                    property <length> split_x: split-stage.width * overlay_split_pos;
+
+                    // Left clip: shows left portion of the left image
+                    Rectangle {
+                        clip: true;
                         x: 0px; y: 0px;
-                        width: main-image-area.width;
-                        height: main-image-area.height;
-                        source: GuiState.compare_left_image;
-                        image-fit: ImageFit.contain;
-                    }
-                }
+                        width: split_x + compare_pane_seam_padding;
+                        height: split-stage.height;
+                        background: ColorPalette.compare_image_panel_background;
+                        border-width: 2px;
+                        border-color: ColorPalette.compare_left_value_color;
+                        border-radius: 4px;
+                        border-top-right-radius: 0;
+                        border-bottom-right-radius: 0;
 
-                // Right clip: shows right portion of the right image
-                Rectangle {
-                    clip: true;
-                    x: main-image-area.width * overlay_split_pos; y: 0px;
-                    width: main-image-area.width * (1 - overlay_split_pos);
-                    height: main-image-area.height;
-                    Image {
-                        x: -(main-image-area.width * overlay_split_pos); y: 0px;
-                        width: main-image-area.width;
-                        height: main-image-area.height;
-                        source: GuiState.compare_right_image;
-                        image-fit: ImageFit.contain;
+                        Image {
+                            x: 0px; y: 0px;
+                            width: split-stage.width;
+                            height: split-stage.height;
+                            source: GuiState.compare_left_image;
+                            image-fit: ImageFit.contain;
+                        }
                     }
-                }
 
-                // Divider line at the split position
-                Rectangle {
-                    x: main-image-area.width * overlay_split_pos - 1px; y: 0px;
-                    width: 2px; height: main-image-area.height;
-                    background: ColorPalette.compare_split_divider_color;
+                    // Right clip: shows right portion of the right image
+                    Rectangle {
+                        clip: true;
+                        x: split_x - compare_pane_seam_padding; y: 0px;
+                        width: split-stage.width - split_x + compare_pane_seam_padding;
+                        height: split-stage.height;
+                        background: ColorPalette.compare_image_panel_background;
+                        border-width: 2px;
+                        border-color: ColorPalette.compare_right_value_color;
+                        border-radius: 4px;
+                        border-top-left-radius: 0;
+                        border-bottom-left-radius: 0;
+
+                        Image {
+                            x: -split_x; y: 0px;
+                            width: split-stage.width;
+                            height: split-stage.height;
+                            source: GuiState.compare_right_image;
+                            image-fit: ImageFit.contain;
+                        }
+                    }
+
+                    // Divider line at the split position
+                    Rectangle {
+                        x: split_x - compare_pane_seam_padding; y: 0px;
+                        width: 2px; height: split-stage.height;
+                        background: ColorPalette.compare_split_divider_color;
+                    }
                 }
             }
 
@@ -388,14 +410,18 @@ export component ImageCompareOverlay inherits Rectangle {
 
                 VerticalLayout {
                     x: 0px; y: 0px;
-                    width: (parent.width - 1px) / 2; height: parent.height;
+                    width: (parent.width - compare_pane_seam_padding) / 2; height: parent.height;
                     padding: 2px;
+                    padding-right: compare_pane_seam_padding;
                     Rectangle {
                         vertical-stretch: 1.0;
                         Rectangle {
                             width: parent.width; height: parent.height;
                             background: ColorPalette.compare_image_panel_background;
-                            border-radius: 4px; clip: true;
+                            border-radius: 4px;
+                            border-width: 2px;
+                            border-color: ColorPalette.compare_left_value_color;
+                            clip: true;
                             Preview {
                                 width: parent.width; height: parent.height;
                                 source: GuiState.compare_left_image;
@@ -413,22 +439,20 @@ export component ImageCompareOverlay inherits Rectangle {
                     }
                 }
 
-                Rectangle {
-                    x: (parent.width - 1px) / 2; y: 0px;
-                    width: 1px; height: parent.height;
-                    background: ColorPalette.compare_divider_color;
-                }
-
                 VerticalLayout {
-                    x: (parent.width + 1px) / 2; y: 0px;
-                    width: (parent.width - 1px) / 2; height: parent.height;
+                    x: (parent.width + compare_pane_seam_padding) / 2; y: 0px;
+                    width: (parent.width - compare_pane_seam_padding) / 2; height: parent.height;
                     padding: 2px;
+                    padding-left: compare_pane_seam_padding;
                     Rectangle {
                         vertical-stretch: 1.0;
                         Rectangle {
                             width: parent.width; height: parent.height;
                             background: ColorPalette.compare_image_panel_background;
-                            border-radius: 4px; clip: true;
+                            border-radius: 4px;
+                            border-width: 2px;
+                            border-color: ColorPalette.compare_right_value_color;
+                            clip: true;
                             Preview {
                                 width: parent.width; height: parent.height;
                                 source: GuiState.compare_right_image;
