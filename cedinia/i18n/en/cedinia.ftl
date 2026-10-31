@@ -165,6 +165,8 @@ settings_bad_names_space = Spaces at start/end
 settings_bad_names_non_ascii = Non-ASCII characters
 settings_bad_names_duplicated = Repeated characters
 settings_ignore_same_resolution = Ignore images with the same resolution
+settings_ignore_same_directory = Hide groups found only in one directory
+settings_ignore_same_directory_desc = Groups whose images all live in the same folder (e.g. burst shots) are hidden entirely
 
 # Settings - Appearance section
 settings_appearance_label = APPEARANCE

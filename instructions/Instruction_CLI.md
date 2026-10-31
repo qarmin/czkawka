@@ -312,6 +312,7 @@ czkawka_cli image -d <dirs> [options]
 | `-i` / `--maximal-file-size` | (max) | Max size in bytes |
 | `-J` / `--ignore-same-size` | false | Skip images with identical byte size |
 | `-Z` / `--ignore-same-resolution` | false | Skip images with identical pixel dimensions |
+| `-Y` / `--ignore-same-directory` | false | Hide groups whose members all live in the same directory |
 | `-L` / `--allow-hard-links` | false | Treat hard links as separate files |
 | `-r` / `--reference-directories` | - | Reference directories |
 | `-D` / `-Q` / `-y` | | Delete method / dry-run / trash |
