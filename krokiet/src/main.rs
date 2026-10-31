@@ -24,7 +24,14 @@ use file_actions::connect_move::connect_move;
 use file_actions::connect_optimize_video::connect_optimize_video;
 use file_actions::connect_rename::connect_rename;
 use file_actions::connect_symlink::connect_symlink;
+// Had to add this internal slint crate because I was unable to fix it without it, it follow the same slint version in
+// Cargo.toml it is a simple copy/paste of slint's version
+// Only use those crate if on Linux (it was needed for xdg icon setting)
+#[cfg(target_os = "linux")]
+use i_slint_backend_winit::Backend;
 use log::{error, info};
+#[cfg(target_os = "linux")]
+use slint::platform::set_platform;
 use slint::{Timer, TimerMode, VecModel};
 
 use crate::clear_outdated_video_thumbnails::clear_outdated_video_thumbnails;
@@ -96,10 +103,20 @@ mod ui {
 pub use ui::*;
 
 fn main() {
+    // Initialize Winit on Linux so the XDG application ID is applied correctly.
+    #[cfg(target_os = "linux")]
+    {
+        let use_winit = std::env::var_os("SLINT_BACKEND").is_none_or(|backend| backend.to_string_lossy().contains("winit"));
+        if use_winit {
+            if let Ok(backend) = Backend::new() {
+                let _ = set_platform(Box::new(backend));
+            }
+            let _ = slint::set_xdg_app_id("krokiet");
+        }
+    }
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
-
     let (base_settings, custom_settings, preset_to_load) = load_initial_settings_from_file(cli_args.as_ref());
     if base_settings.use_manual_application_scale {
         // SAFETY:

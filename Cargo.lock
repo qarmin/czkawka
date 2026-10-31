@@ -4443,6 +4443,7 @@ dependencies = [
  "fs_extra",
  "home",
  "humansize",
+ "i-slint-backend-winit",
  "i18n-embed",
  "i18n-embed-fl",
  "image",
