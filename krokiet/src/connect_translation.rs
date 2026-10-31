@@ -191,6 +191,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_videos_audio_length_ratio_text(flk!("subsettings_videos_audio_length_ratio").into());
     translation.set_subsettings_videos_audio_min_duration_seconds_text(flk!("subsettings_videos_audio_min_duration_seconds").into());
     translation.set_subsettings_videos_audio_maximum_difference_text(flk!("subsettings_videos_audio_maximum_difference").into());
+    translation.set_subsettings_videos_ffmpeg_timeout_text(flk!("subsettings_videos_ffmpeg_timeout").into());
     translation.set_subsettings_music_audio_check_type_text(flk!("subsettings_music_audio_check_type").into());
     translation.set_subsettings_music_approximate_comparison_text(flk!("subsettings_music_approximate_comparison").into());
     translation.set_subsettings_music_compared_tags_text(flk!("subsettings_music_compared_tags").into());

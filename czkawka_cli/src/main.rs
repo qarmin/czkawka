@@ -371,6 +371,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         audio_maximum_difference,
         audio_length_ratio,
         audio_min_duration_seconds,
+        ffmpeg_timeout_seconds,
     } = similar_videos;
 
     validate_file_sizes(minimal_file_size, maximal_file_size);
@@ -395,6 +396,7 @@ fn similar_videos(similar_videos: SimilarVideosArgs, stop_flag: &Arc<AtomicBool>
         audio_maximum_difference,
         audio_length_ratio,
         audio_min_duration_seconds,
+        ffmpeg_timeout_seconds,
     );
     let mut tool = SimilarVideos::new(params);
 
