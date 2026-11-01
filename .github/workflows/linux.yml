@@ -349,7 +349,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Install basic libraries
-        run: sudo apt update || true; sudo apt install xvfb imagemagick libgl1-mesa-dri mesa-vulkan-drivers -y
+        run: sudo apt update || true; sudo apt install xvfb imagemagick libgl1-mesa-dri mesa-vulkan-drivers libxkbcommon-x11-0 -y
 
       - name: Setup rust version
         run: rustup default 1.94.1
