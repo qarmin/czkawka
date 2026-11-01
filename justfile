@@ -16,6 +16,12 @@ build_all: && fix
     cargo clippy
     cargo test
 
+# needs: xvfb, imagemagick, mesa-vulkan-drivers (wgpu on software Vulkan); starts krokiet on a virtual display (see e2e/)
+[group('test')]
+e2e *args:
+    cargo build --profile fast_release --bin krokiet --no-default-features --features "winit_femtovg,winit_software,femtovg_wgpu,vello"
+    cd e2e && cargo run --release -- ../target/fast_release/krokiet {{args}}
+
 [group('test')]
 itests:
     [ ! -f TestFiles.zip ] && wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip || true

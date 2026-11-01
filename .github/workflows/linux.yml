@@ -343,6 +343,31 @@ jobs:
           sed -i 's|^opt-level = 3 # OPT PACKAGES|#opt-level = 3 # OPT PACKAGES|' Cargo.toml
           xvfb-run cargo test --all-features
 
+  linux-e2e:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install basic libraries
+        run: sudo apt update || true; sudo apt install xvfb imagemagick libgl1-mesa-dri mesa-vulkan-drivers -y
+
+      - name: Setup rust version
+        run: rustup default 1.94.1
+
+      - name: Build Krokiet
+        run: cargo build --profile fastci --bin krokiet --no-default-features --features "winit_femtovg,winit_software,femtovg_wgpu,vello"
+
+      - name: E2E tests
+        run: cd e2e && cargo run --release -- ../target/fastci/krokiet
+
+      - name: Upload screenshots of failed checks
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-screenshots-${{ github.sha }}
+          path: e2e/artifacts
+          if-no-files-found: ignore
+
   linux-regression-tests-on-minimal-rust-version:
     runs-on: ubuntu-22.04
     steps:
@@ -364,7 +389,7 @@ jobs:
         run: |
           wget -q https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip
           cd ci_tester
-          cargo build --bin czkawka_cli --bin krokiet --release
+          cargo build --release
           cd ..
 
           ci_tester/target/release/ci_tester target/debug/czkawka_cli
