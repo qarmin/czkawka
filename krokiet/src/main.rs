@@ -76,9 +76,11 @@ mod connect_tab_changed;
 mod connect_translation;
 mod create_calculate_task_size;
 mod file_actions;
+mod gpu_info;
 mod localizer_krokiet;
 mod model_operations;
 mod notification_manager;
+mod renderer_selection;
 mod set_initial_gui_info;
 mod set_initial_scroll_list_data_indexes;
 mod settings;
@@ -96,6 +98,7 @@ mod ui {
 pub use ui::*;
 
 fn main() {
+    renderer_selection::apply_preferred_renderer();
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
@@ -113,6 +116,7 @@ fn main() {
     print_version_mode("Krokiet");
     print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
     print_krokiet_features();
+    gpu_info::log_session_info();
 
     create_default_settings_files();
 
@@ -120,10 +124,15 @@ fn main() {
         Ok(app) => app,
         Err(e) => {
             error!("Error during creating main window: {e}");
+            if let Some(exit_code) = renderer_selection::restart_with_next_renderer() {
+                process::exit(exit_code);
+            }
             show_critical_error(e.to_string());
             return;
         }
     };
+
+    gpu_info::log_graphics_info_on_renderer_setup(app.window());
 
     #[cfg(feature = "audio")]
     app.global::<GuiState>().set_audio_feature_enabled(true);
@@ -305,24 +314,18 @@ pub(crate) fn print_krokiet_features() {
 
     #[cfg(feature = "audio")]
     features.push("audio");
-    #[cfg(feature = "skia_opengl")]
-    features.push("skia_opengl");
-    #[cfg(feature = "skia_vulkan")]
-    features.push("skia_vulkan");
     #[cfg(feature = "software")]
     features.push("software");
     #[cfg(feature = "femtovg")]
     features.push("femtovg");
     #[cfg(feature = "winit_femtovg")]
     features.push("winit_femtovg");
-    #[cfg(feature = "winit_skia_opengl")]
-    features.push("winit_skia_opengl");
-    #[cfg(feature = "winit_skia_vulkan")]
-    features.push("winit_skia_vulkan");
     #[cfg(feature = "winit_software")]
     features.push("winit_software");
     #[cfg(feature = "femtovg_wgpu")]
     features.push("femtovg_wgpu");
+    #[cfg(feature = "vello")]
+    features.push("vello");
 
     info!("Krokiet features({}): [{}]", features.len(), features.join(", "));
 }

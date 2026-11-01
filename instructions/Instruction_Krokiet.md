@@ -26,7 +26,7 @@ Krokiet-specific or tool-focused terms:
 | **Hash group** | A set of files sharing the same hash (or visually similar within the chosen threshold) - candidate duplicates. |
 | **Similarity threshold** | For similar images/videos/music: the maximum allowed difference between two items for them to be considered similar. Lower = stricter. |
 | **Preset** | A saved configuration profile storing scan directories, filters, and tool parameters. Multiple presets can be created and switched between. |
-| **Backend / renderer** | The graphics API used to draw the Krokiet window. Options: femtovg (OpenGL, default), skia, software. Use `software` on unusual setups or when OpenGL is unavailable. |
+| **Backend / renderer** | The graphics API used to draw the Krokiet window. Options: femtovg (OpenGL, default), femtovg-wgpu, vello, software. Use `software` on unusual setups or when OpenGL is unavailable. |
 | **Hard link** | A filesystem feature where two filenames point to the same inode. Krokiet detects hard links and counts them only once by default to avoid false duplicates. |
 
 ---
@@ -70,7 +70,8 @@ By default femtovg (OpenGL) and software renderers are built in. Switch at runti
 ```shell
 SLINT_BACKEND=software ./krokiet        # pure software rendering, safest fallback
 SLINT_BACKEND=winit-femtovg ./krokiet  # OpenGL via femtovg (default)
-SLINT_BACKEND=skia ./krokiet           # Skia (requires winit_skia_opengl compile feature)
+SLINT_BACKEND=femtovg-wgpu ./krokiet   # femtovg on wgpu (requires femtovg_wgpu compile feature)
+SLINT_BACKEND=vello ./krokiet          # Vello on wgpu (requires vello compile feature)
 ```
 
 To verify which backend is active:

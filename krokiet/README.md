@@ -71,7 +71,9 @@ If you have installed new `cargo`, you can easily compile and install it via `ca
 ## Additional Renderers
 
 By default, only femtovg (OpenGL) and the software renderer are enabled, but you can enable more renderers by compiling the app
-with additional features.
+with additional features (`femtovg_wgpu`, `vello`). Skia is not supported.
+
+When `SLINT_BACKEND` is not set, the first renderer that starts successfully is used, in this order: femtovg (OpenGL), femtovg-wgpu, vello, software.
 
 Most users will want to use the app with a windowing system/compositor, so features starting with `winit` in the name are
 recommended.
@@ -79,7 +81,8 @@ recommended.
 For example:
 
 ```
-cargo build --release --features "winit_skia_opengl"
+cargo build --release --features "femtovg_wgpu"
+cargo build --release --features "vello"
 cargo build --release --features "winit_software"
 ```
 
@@ -88,13 +91,14 @@ To run the app with a different renderer, set the `SLINT_BACKEND` environment va
 ```
 SLINT_BACKEND=winit-femtovg ./target/release/krokiet
 SLINT_BACKEND=software ./target/release/krokiet
-SLINT_BACKEND=skia ./target/release/krokiet
+SLINT_BACKEND=femtovg-wgpu ./target/release/krokiet
+SLINT_BACKEND=vello ./target/release/krokiet
 ```
 
 If you use an invalid or non-existing backend, the app will show a warning:
 
 ```
-slint winit: unrecognized renderer skia, falling back to FemtoVG
+slint winit: unrecognized renderer vello, falling back to FemtoVG
 ```
 
 To check which backend is actually used, add the `SLINT_DEBUG_PERFORMANCE=refresh_lazy,console,overlay` environment variable:

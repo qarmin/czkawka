@@ -1,28 +1,37 @@
 #!/bin/sh
 # Packages an all-backends krokiet binary together with per-backend launcher
-# shell scripts into a zip archive.
+# scripts into a zip archive (shell scripts, or batch scripts for a Windows binary).
 #
-# Usage: pack_all_backends.sh <binary> <output_zip>
+# Usage: pack_all_backends.sh <binary> <output_zip> [windows]
 #   binary      - path to the compiled all-backends krokiet binary
 #   output_zip  - path for the resulting zip file (created or overwritten)
+#   windows     - optional, produce krokiet.exe with .bat launchers instead of .sh ones
 set -eu
 
 BINARY="$1"
 OUTPUT_ZIP="$2"
+TARGET_OS="${3:-unix}"
+
+BACKENDS="winit-femtovg femtovg-wgpu vello winit-software"
 
 PKGDIR=$(mktemp -d)
 # shellcheck disable=SC2064
 trap "rm -rf '$PKGDIR'" EXIT
 
-cp "$BINARY" "$PKGDIR/krokiet"
-chmod +x "$PKGDIR/krokiet"
+if [ "$TARGET_OS" = "windows" ]; then
+    cp "$BINARY" "$PKGDIR/krokiet.exe"
+    for backend in $BACKENDS; do
+        printf '@echo off\r\nset SLINT_BACKEND=%s\r\n"%%~dp0krokiet.exe" %%*\r\n' "$backend" > "$PKGDIR/krokiet_$(echo "$backend" | tr '-' '_').bat"
+    done
+else
+    cp "$BINARY" "$PKGDIR/krokiet"
+    chmod +x "$PKGDIR/krokiet"
+    for backend in $BACKENDS; do
+        printf '#!/bin/sh\nSLINT_BACKEND=%s exec "$(dirname "$0")/krokiet" "$@"\n' "$backend" > "$PKGDIR/krokiet_$(echo "$backend" | tr '-' '_').sh"
+    done
+    chmod +x "$PKGDIR"/*.sh
+fi
 
-printf '#!/bin/sh\nSLINT_BACKEND=winit-femtovg exec "$(dirname "$0")/krokiet" "$@"\n'     > "$PKGDIR/krokiet_winit_femtovg.sh"
-printf '#!/bin/sh\nSLINT_BACKEND=winit-skia-opengl exec "$(dirname "$0")/krokiet" "$@"\n' > "$PKGDIR/krokiet_winit_skia_opengl.sh"
-printf '#!/bin/sh\nSLINT_BACKEND=winit-skia-vulkan exec "$(dirname "$0")/krokiet" "$@"\n' > "$PKGDIR/krokiet_winit_skia_vulkan.sh"
-printf '#!/bin/sh\nSLINT_BACKEND=winit-software exec "$(dirname "$0")/krokiet" "$@"\n'    > "$PKGDIR/krokiet_winit_software.sh"
-printf '#!/bin/sh\nSLINT_BACKEND=femtovg-wgpu exec "$(dirname "$0")/krokiet" "$@"\n'     > "$PKGDIR/krokiet_femtovg_wgpu.sh"
-chmod +x "$PKGDIR"/*.sh
-
-(cd "$PKGDIR" && zip -r - .) > "$OUTPUT_ZIP"
-
+OUTPUT_ZIP_ABS="$(cd "$(dirname "$OUTPUT_ZIP")" && pwd)/$(basename "$OUTPUT_ZIP")"
+rm -f "$OUTPUT_ZIP_ABS"
+(cd "$PKGDIR" && zip -qr "$OUTPUT_ZIP_ABS" .)

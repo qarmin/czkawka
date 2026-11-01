@@ -7,7 +7,7 @@ rust_init_error_message =
 
     This may be caused by missing or malfunctioning OpenGL/Vulkan drivers, running the application in a virtual machine or a bug in Krokiet or one of its libraries.
 
-    You can try running different builds (skia_opengl, skia_vulkan, femtovg_opengl - the default) or with software renderer to see if that resolves the issue.
+    You can try running different builds (winit_femtovg, skia_opengl, skia_vulkan) or with software renderer to see if that resolves the issue.
 
 rust_loaded_preset = Loaded preset { $preset_idx }
 rust_file_already_exists = File "{ $file }" already exists, and will not be overridden
