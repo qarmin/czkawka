@@ -156,13 +156,13 @@ The release assets stack a few naming components, e.g. `<os>_<app>[_<features>][
 - `cedinia` - experimental Android app
 - `arm` / `arm64`, `x86_64` - CPU architecture. Most Windows/Linux machines use `x86_64`, while on Mac the `arm` (Apple Silicon) version is becoming the most common choice
 - `heif`, `raw`, `avif` - additional image-format features that require extra libraries installed on the OS (libheif / libraw / libavif)
-- `skia_opengl`, `skia_vulkan`, `femtovg_wgpu`, `all_backends` - alternative Krokiet rendering backends; different builds may fix some problems like blurry fonts or graphics crashes. `all_backends` bundles all of them (plus launcher scripts) in one package
+- `vello`, `femtovg_wgpu`, `all_backends` - alternative Krokiet rendering backends; different builds may fix some problems like blurry fonts or graphics crashes. `all_backends` bundles all of them (plus launcher scripts) in one package
 - `apk` / `aab` - Cedinia Android package formats - just use `apk`; `aab` is used only for testing purposes
-- (Windows only) `on_linux` / `on_windows` - which host the `.exe` was cross-compiled on
+- (Windows only) `on_linux` - the `.exe` is cross-compiled on Linux with the GNU toolchain; there are no longer separate `on_windows` (MSVC) builds, because those were only needed for Skia
 
 ### Q: Which one should I pick?
 
-Pick `krokiet` for your architecture with the **default** backend - it is built to be the most compatible everywhere. Only reach for a `skia_opengl` / `skia_vulkan` / `femtovg_wgpu` / `all_backends` build if the default one shows blurry text, fails to render, or crashes on your GPU. Choose a `heif` / `raw` / `avif` build only if you need those image formats (and install the matching system libraries). On Windows, if you are unsure between `on_linux` and `on_windows`, start with `windows_krokiet_on_linux`.
+Pick `krokiet` for your architecture with the **default** backend - it is built to be the most compatible everywhere. Only reach for a `vello` / `femtovg_wgpu` / `all_backends` build if the default one shows blurry text, fails to render, or crashes on your GPU. Choose a `heif` / `raw` / `avif` build only if you need those image formats (and install the matching system libraries). On Windows, start with `windows_krokiet_on_linux`.
 
 ### Q: On Linux Krokiet shows nothing or crashes with a rendering error
 
@@ -174,7 +174,7 @@ SLINT_BACKEND=software krokiet
 
 On systems without a GPU (VMs, headless servers), this is often the only option.
 
-The default `linux_krokiet_*` binary only ships the femtovg and software renderers. If you want to try Skia/OpenGL/Vulkan/wgpu backends too, download the **`linux_krokiet_all_backends_*`** build - it is packaged as a **ZIP that contains the binary plus small bash launcher scripts**, one per renderer, that just set the right `SLINT_BACKEND` and start the app. So instead of exporting the variable yourself you can simply run, for example, `./krokiet_winit_skia_opengl.sh`, `./krokiet_winit_skia_vulkan.sh`, `./krokiet_winit_software.sh`, `./krokiet_femtovg_wgpu.sh`, or `./krokiet_winit_femtovg.sh` until one renders correctly.
+The default `linux_krokiet_*` binary only ships the femtovg and software renderers. If you want to try the wgpu-based backends (femtovg-wgpu, Vello) too, download the **`linux_krokiet_all_backends_*`** build - it is packaged as a **ZIP that contains the binary plus small bash launcher scripts**, one per renderer, that just set the right `SLINT_BACKEND` and start the app. So instead of exporting the variable yourself you can simply run, for example, `./krokiet_winit_femtovg.sh`, `./krokiet_femtovg_wgpu.sh`, `./krokiet_vello.sh`, or `./krokiet_winit_software.sh` until one renders correctly.
 
 ### Q: Which Windows GTK GUI variant is provided?
 

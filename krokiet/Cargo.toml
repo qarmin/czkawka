@@ -60,14 +60,11 @@ default = ["winit_femtovg", "winit_software"]
 audio = ["rodio"]
 
 # Renderers
-skia_opengl = ["slint/renderer-skia-opengl"]
-skia_vulkan = ["slint/renderer-skia-vulkan"]
 software = ["slint/renderer-software"]
 femtovg = ["slint/renderer-femtovg"]
-femtovg_wgpu = ["slint/renderer-femtovg-wgpu"]
+femtovg_wgpu = ["slint/renderer-femtovg-wgpu", "slint/unstable-wgpu-30"]
+vello = ["slint/renderer-vello", "slint/unstable-wgpu-29"]
 winit_femtovg = ["slint/renderer-winit-femtovg"]
-winit_skia_opengl = ["slint/renderer-winit-skia-opengl"]
-winit_skia_vulkan = ["slint/renderer-winit-skia-vulkan"]
 winit_software = ["slint/renderer-winit-software"]
 
 # Additional features

@@ -73,14 +73,11 @@ android-build = "0.1.4"
 [features]
 default = []
 
-skia_opengl = ["slint/renderer-skia-opengl"]
-skia_vulkan = ["slint/renderer-skia-vulkan"]
 software = ["slint/renderer-software"]
 femtovg = ["slint/renderer-femtovg"]
 femtovg_wgpu = ["slint/renderer-femtovg-wgpu"]
+vello = ["slint/renderer-vello"]
 winit_femtovg = ["slint/renderer-winit-femtovg"]
-winit_skia_opengl = ["slint/renderer-winit-skia-opengl"]
-winit_skia_vulkan = ["slint/renderer-winit-skia-vulkan"]
 winit_software = ["slint/renderer-winit-software"]
 
 #  Android packaging metadata (used by cargo-apk)

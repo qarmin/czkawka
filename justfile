@@ -16,6 +16,12 @@ build_all: && fix
     cargo clippy
     cargo test
 
+# needs: xvfb, imagemagick, mesa-vulkan-drivers (wgpu on software Vulkan); starts krokiet on a virtual display (see e2e/)
+[group('test')]
+e2e *args:
+    cargo build --profile fast_release --bin krokiet --no-default-features --features "winit_femtovg,winit_software,femtovg_wgpu,vello"
+    cd e2e && cargo run --release -- ../target/fast_release/krokiet {{args}}
+
 [group('test')]
 itests:
     [ ! -f TestFiles.zip ] && wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip || true
@@ -33,6 +39,27 @@ run +args:
 [group('run')]
 runr +args:
     cargo run --profile fast_release --bin {{args}}
+
+[group('run')]
+runk_vello *args:
+    cargo run --bin krokiet --no-default-features --features vello -- {{args}}
+
+[group('run')]
+runk_software *args:
+    cargo run --bin krokiet --no-default-features --features winit_software -- {{args}}
+
+[group('run')]
+runk_femtovg_o *args:
+    cargo run --bin krokiet --no-default-features --features winit_femtovg -- {{args}}
+
+[group('run')]
+runk_femtovg_wgpu *args:
+    cargo run --bin krokiet --no-default-features --features femtovg_wgpu -- {{args}}
+
+# needs: slint-viewer (see `doctor`/`setup`); previews the Krokiet UI without compiling any Rust, reloads on file change
+[group('run')]
+runm *args:
+    slint-viewer --style fluent-dark --auto-reload krokiet/ui/main_window.slint {{args}}
 
 [group('run')]
 runc +args:
@@ -112,6 +139,7 @@ doctor:
 
     echo ""
     echo "Optional tools (only needed for specific recipes):"
+    info "slint-viewer (runm)"            slint-viewer --version
     info "nightly: rust-src (runs)"             bash -c "rustup component list --toolchain nightly --installed | grep -q rust-src"
     info "nightly: llvm-tools-preview (runs)"   bash -c "rustup component list --toolchain nightly --installed | grep -q llvm-tools"
     info "llvm-symbolizer (runs)"               bash -c "command -v llvm-symbolizer"
@@ -150,6 +178,7 @@ setup: setup_sanitizer setup_verify_tools
     command -v cargo-upgrade >/dev/null 2>&1 || cargo install cargo-edit --locked
     command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
     command -v samply >/dev/null 2>&1 || cargo install samply --locked
+    command -v slint-viewer >/dev/null 2>&1 || cargo install slint-viewer --locked
 
     echo "System packages not installed here (no sudo) - install manually if missing:"
     command -v valgrind  >/dev/null 2>&1 || echo "  sudo apt install valgrind"

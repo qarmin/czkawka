@@ -15,7 +15,7 @@ use czkawka_core::tools::similar_videos::{
 };
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
-use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize};
+use slint::{ComponentHandle, LogicalSize, Model, ModelRc, VecModel, WindowSize};
 
 use crate::common::{create_excluded_paths_model_from_pathbuf, create_included_paths_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::change_language;
@@ -276,11 +276,11 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_settings_preset_idx(preset_idx);
     settings.set_settings_presets(ModelRc::new(create_vec_model_from_vec_string(basic_settings.preset_names.clone())));
 
-    let width = basic_settings.window_width.clamp(100, 1920 * 4);
-    let height = basic_settings.window_height.clamp(100, 1080 * 4);
+    let width = basic_settings.window_width.clamp(100, 1920 * 4) as f32;
+    let height = basic_settings.window_height.clamp(100, 1080 * 4) as f32;
 
     if basic_settings.settings_load_windows_size_at_startup {
-        app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
+        app.window().set_size(WindowSize::Logical(LogicalSize { width, height }));
     }
     settings.set_dark_theme(basic_settings.dark_theme);
     settings.set_show_only_icons(basic_settings.show_only_icons);

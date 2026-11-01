@@ -39,9 +39,16 @@ jobs:
           cargo build --release --target x86_64-pc-windows-gnu --bin krokiet --bin czkawka_cli
           mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux.exe
           mv target/x86_64-pc-windows-gnu/release/czkawka_cli.exe windows_czkawka_cli.exe
+          cargo build --release --target x86_64-pc-windows-gnu --bin krokiet --no-default-features --features "femtovg_wgpu"
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_femtovg_wgpu.exe
+          cargo build --release --target x86_64-pc-windows-gnu --bin krokiet --no-default-features --features "vello"
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_vello.exe
+          cargo build --release --target x86_64-pc-windows-gnu --bin krokiet --no-default-features --features "winit_femtovg,winit_software,femtovg_wgpu,vello"
+          mv target/x86_64-pc-windows-gnu/release/krokiet.exe windows_krokiet_on_linux_all_backends.exe
           
           export WINEPREFIX=$(mktemp -d)
-          wine rcedit-x64.exe windows_krokiet_on_linux.exe --set-icon krokiet/icons/krokiet_logo_flag.ico
+          for exe in windows_krokiet_on_linux*.exe; do wine rcedit-x64.exe "$exe" --set-icon krokiet/icons/krokiet_logo_flag.ico; done
+          bash misc/pack_all_backends.sh windows_krokiet_on_linux_all_backends.exe windows_krokiet_on_linux_all_backends.zip windows
 
       - name: Compile Krokiet Debug
         if: ${{ github.ref != 'refs/heads/master' }}
@@ -51,14 +58,24 @@ jobs:
           cargo build --target x86_64-pc-windows-gnu --bin krokiet --bin czkawka_cli
           mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux.exe
           mv target/x86_64-pc-windows-gnu/debug/czkawka_cli.exe windows_czkawka_cli.exe
+          cargo build --target x86_64-pc-windows-gnu --bin krokiet --no-default-features --features "femtovg_wgpu"
+          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux_femtovg_wgpu.exe
+          cargo build --target x86_64-pc-windows-gnu --bin krokiet --no-default-features --features "vello"
+          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux_vello.exe
+          cargo build --target x86_64-pc-windows-gnu --bin krokiet --no-default-features --features "winit_femtovg,winit_software,femtovg_wgpu,vello"
+          mv target/x86_64-pc-windows-gnu/debug/krokiet.exe windows_krokiet_on_linux_all_backends.exe
           
           export WINEPREFIX=$(mktemp -d)
-          wine rcedit-x64.exe windows_krokiet_on_linux.exe --set-icon krokiet/icons/krokiet_logo_flag.ico
+          for exe in windows_krokiet_on_linux*.exe; do wine rcedit-x64.exe "$exe" --set-icon krokiet/icons/krokiet_logo_flag.ico; done
+          bash misc/pack_all_backends.sh windows_krokiet_on_linux_all_backends.exe windows_krokiet_on_linux_all_backends.zip windows
 
       - name: Pack with 7z
         run: |
           time 7z a -t7z -mx=3 czkawka_all.7z \
             windows_krokiet_on_linux.exe \
+            windows_krokiet_on_linux_femtovg_wgpu.exe \
+            windows_krokiet_on_linux_vello.exe \
+            windows_krokiet_on_linux_all_backends.zip \
             windows_czkawka_cli.exe
 
       - name: Upload artifacts
@@ -76,78 +93,10 @@ jobs:
           tag_name: "Nightly"
           files: |
             windows_krokiet_on_linux.exe
+            windows_krokiet_on_linux_femtovg_wgpu.exe
+            windows_krokiet_on_linux_vello.exe
+            windows_krokiet_on_linux_all_backends.zip
             windows_czkawka_cli.exe
-          token: ${{ secrets.PAT_REPOSITORY }}
-
-  # Skia not provides support for gnu toolchain, which is easy to cross-compile - https://github.com/rust-skia/rust-skia/issues/345
-  # So need to compile krokiet on msvc Windows
-  krokiet-compiled-on-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup rust version
-        run: |
-          rustup default 1.94.1
-
-      - name: Download rcedit
-        run: |
-          curl -L https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe -o rcedit-x64.exe
-
-      - name: Compile Krokiet Release
-        if: ${{ github.ref == 'refs/heads/master' }}
-        run: |
-          powershell -Command "(Get-Content Cargo.toml) -replace '#lto = ', 'lto = ' | Set-Content Cargo.toml; (Get-Content Cargo.toml) -replace '#codegen-units ', 'codegen-units ' | Set-Content Cargo.toml"
-          cargo build --release --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
-          mv target/release/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
-          cargo build --release --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
-          mv target/release/krokiet.exe windows_krokiet_on_windows_skia_vulkan.exe
-          cargo build --release --bin krokiet --no-default-features --features "femtovg_wgpu"
-          mv target/release/krokiet.exe windows_krokiet_on_windows_femtovg_wgpu.exe
-          cargo build --release --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu"
-          mv target/release/krokiet.exe windows_krokiet_on_windows_all_backends.exe
-          Get-ChildItem windows_krokiet_on_windows_*.exe | ForEach-Object { ./rcedit-x64.exe $_.Name --set-icon krokiet/icons/krokiet_logo_flag.ico }
-
-      - name: Compile Krokiet Debug
-        if: ${{ github.ref != 'refs/heads/master' }}
-        run: |
-          (Get-Content Cargo.toml) -replace '#lto = ','lto = ' -replace '#codegen-units ','codegen-units ' -replace '^\[profile\.dev\.package','#\[profile.dev.package' -replace '^opt-level = 3 # OPT PACKAGES','#opt-level = 3 # OPT PACKAGES' | Set-Content Cargo.toml
-          
-          cargo build --bin krokiet --no-default-features --features "winit_skia_opengl,winit_software"
-          mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_opengl.exe
-          cargo build --bin krokiet --no-default-features --features "winit_skia_vulkan,winit_software"
-          mv target/debug/krokiet.exe windows_krokiet_on_windows_skia_vulkan.exe
-          cargo build --bin krokiet --no-default-features --features "femtovg_wgpu"
-          mv target/debug/krokiet.exe windows_krokiet_on_windows_femtovg_wgpu.exe
-          cargo build --bin krokiet --no-default-features --features "winit_femtovg,winit_skia_opengl,winit_skia_vulkan,winit_software,femtovg_wgpu"
-          mv target/debug/krokiet.exe windows_krokiet_on_windows_all_backends.exe
-          
-          Get-ChildItem windows_krokiet_on_windows_*.exe | ForEach-Object { ./rcedit-x64.exe $_.Name --set-icon krokiet/icons/krokiet_logo_flag.ico }
-
-      - name: Package krokiet with launchers
-        run: pwsh misc/pack_all_backends.ps1 -Binary windows_krokiet_on_windows_all_backends.exe -OutputZip windows_krokiet_on_windows_all_backends.zip
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: krokiet-windows-on-windows-${{ github.sha }}
-          path: |
-            windows_krokiet_on_windows_all_backends.zip
-            windows_krokiet_on_windows_skia_opengl.exe
-            windows_krokiet_on_windows_skia_vulkan.exe
-            windows_krokiet_on_windows_femtovg_wgpu.exe
-          if-no-files-found: error
-
-      - name: Release
-        uses: softprops/action-gh-release@v3
-        if: ${{ github.ref == 'refs/heads/master' && vars.HAVE_PAT_REPOSITORY_TOKEN == '1' }}
-        with:
-          tag_name: "Nightly"
-          files: |
-            windows_krokiet_on_windows_all_backends.zip
-            windows_krokiet_on_windows_skia_opengl.exe
-            windows_krokiet_on_windows_skia_vulkan.exe
-            windows_krokiet_on_windows_femtovg_wgpu.exe
           token: ${{ secrets.PAT_REPOSITORY }}
 
   windows-tests:
