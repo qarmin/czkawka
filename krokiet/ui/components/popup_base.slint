@@ -1,4 +1,5 @@
 import { Button } from "std-widgets.slint";
+import { PopupBackdrop } from "popup_backdrop.slint";
 import { ColorPalette } from "../globals/color_palette.slint";
 import { Translations } from "../globals/translations.slint";
 import { FontSizes } from "../globals/fonts.slint";
@@ -16,6 +17,8 @@ export component PopupBase inherits PopupWindow {
 
     height: max(popup_min_height, vlayout.preferred-height);
     close-policy: PopupClosePolicy.no-auto-close;
+    PopupBackdrop { }
+
     rect := Rectangle {
         width: 100%;
         height: 100%;

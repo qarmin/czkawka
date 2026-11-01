@@ -1,4 +1,5 @@
 import { Button, ScrollView } from "std-widgets.slint";
+import { PopupBackdrop } from "../components/popup_backdrop.slint";
 import { ColorPalette } from "../globals/color_palette.slint";
 import { Callabler } from "../globals/callabler.slint";
 import { Translations } from "../globals/translations.slint";
@@ -70,6 +71,8 @@ export component PopupOtherApps inherits Rectangle {
         x: (parent.width - popup_width) / 2.0;
         y: (parent.height - self.height) / 2.0;
         close-policy: PopupClosePolicy.no-auto-close;
+
+        PopupBackdrop { }
 
         Rectangle {
             width: parent.width;

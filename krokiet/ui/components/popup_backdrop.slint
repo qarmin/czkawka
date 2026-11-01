@@ -1,0 +1,10 @@
+import { ColorPalette } from "../globals/color_palette.slint";
+
+// Popups are not clipped to their own bounds, so an oversized rectangle dims the whole window
+export component PopupBackdrop inherits Rectangle {
+    x: -10000px;
+    y: -10000px;
+    width: 20000px;
+    height: 20000px;
+    background: ColorPalette.popup_backdrop;
+}
