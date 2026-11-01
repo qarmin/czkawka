@@ -10,6 +10,7 @@ import { Callabler } from "globals/callabler.slint";
 import { BottomPanel } from "screens/bottom_panel.slint";
 import { GuiState } from "globals/gui_state.slint";
 import { Preview } from "components/preview.slint";
+import { PanelSplitter } from "components/panel_splitter.slint";
 import { PopupNewDirectories } from "popups/popup_new_directories.slint";
 import { PopupDelete } from "popups/popup_delete.slint";
 import { PopupTrash } from "popups/popup_trash.slint";
@@ -28,7 +29,7 @@ import { PopupReencodeVideo } from "popups/popup_optimize.slint";
 import { PopupCleanExif } from "popups/popup_clean_exif.slint";
 import { PopupCleanCache } from "popups/popup_clean_cache.slint";
 import { PopupOtherApps } from "popups/popup_other_apps.slint";
-import { ToolSettings } from "screens/tool_settings.slint";
+import { PopupToolSettings } from "popups/popup_tool_settings.slint";
 import { Translations } from "globals/translations.slint";
 import { ImageCompareOverlay } from "screens/image_compare.slint";
 import { ColorPalette } from "globals/color_palette.slint";
@@ -94,18 +95,24 @@ export component MainWindow inherits Window {
                     GuiState.preview_visible = false;
                     main_list.changed_active_tab();
                 }
+                show_tool_settings() => {
+                    tool_settings_popup_window.show_popup();
+                }
             }
 
             VerticalLayout {
                 horizontal-stretch: 1.0;
                 min_width: 300px;
-                Rectangle {
+                content_area := Rectangle {
                     vertical-stretch: 1.0;
+                    property <bool> preview_shown: GuiState.preview_visible && GuiState.is_tool_tab_active;
+                    property <length> splitter_width: 10px;
+                    property <length> preview_width: self.preview_shown ? max(0px, parent.width * GuiState.preview_width_ratio - splitter_width) : 0px;
                     main_list := MainList {
                         main_window_width: root.width;
                         main_window_height: root.height;
                         x: 0;
-                        width: preview_or_tool_settings.visible ? parent.width / 2 : parent.width;
+                        width: parent.width - preview_panel.width - (preview_panel.visible ? splitter.width : 0px);
                         height: parent.height;
                         horizontal-stretch: 0.5;
                         working: root.scanning || root.processing;
@@ -133,24 +140,23 @@ export component MainWindow inherits Window {
                         }
                     }
 
-                    preview_or_tool_settings := Rectangle {
-                        visible: (GuiState.preview_visible || tool_settings.visible) && GuiState.is_tool_tab_active;
+                    splitter := PanelSplitter {
+                        visible: preview_panel.visible;
+                        x: main_list.width;
+                        width: parent.splitter_width;
                         height: parent.height;
-                        x: parent.width / 2;
-                        width: self.visible ? parent.width / 2 : 0;
-                        Preview {
-                            height: parent.height;
-                            width: parent.width;
-                            visible: GuiState.preview_visible && !tool_settings.visible;
-                            source: GuiState.preview_image;
-                            image-fit: ImageFit.contain;
+                        dragged(cursor_x) => {
+                            GuiState.preview_width_ratio = max(0.15, min(0.85, 1.0 - cursor_x / content_area.width));
                         }
+                    }
 
-                        tool_settings := ToolSettings {
-                            height: parent.height;
-                            width: parent.width;
-                            visible: GuiState.visible_tool_settings && GuiState.available_subsettings;
-                        }
+                    preview_panel := Preview {
+                        visible: parent.preview_shown;
+                        x: parent.width - self.width;
+                        width: parent.preview_width;
+                        height: parent.height;
+                        source: GuiState.preview_image;
+                        image-fit: ImageFit.contain;
                     }
                 }
 
@@ -316,6 +322,12 @@ export component MainWindow inherits Window {
         y: parent.y + y_offset - self.all_items_height - 5px;
         height: root.height;
         width: root.width;
+    }
+
+    tool_settings_popup_window := PopupToolSettings {
+        height: root.height;
+        width: root.width;
+        x: 0.0; y: 0.0;
     }
 
     clean_popup_window := PopupCleanExif {

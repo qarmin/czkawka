@@ -1,4 +1,4 @@
-import { Button, ListView } from "std-widgets.slint";
+import { Button, ListView, Palette } from "std-widgets.slint";
 import { ActiveTab, BottomPanelVisibility } from "../globals/common.slint";
 import { ColorPalette } from "../globals/color_palette.slint";
 import { GuiState } from "../globals/gui_state.slint";
@@ -68,6 +68,34 @@ component TabItem {
     ]
 }
 
+component PanelToggle inherits Rectangle {
+    in property <bool> collapsed;
+    callback clicked();
+
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    background: touch_area.has-hover ? ColorPalette.tab_hovered_color : transparent;
+
+    Path {
+        width: 6px;
+        height: 10px;
+        viewbox-width: 6;
+        viewbox-height: 10;
+        commands: root.collapsed ? "M 0 0 L 6 5 L 0 10" : "M 6 0 L 0 5 L 6 10";
+        stroke: Palette.foreground;
+        stroke-width: 1.5px;
+        opacity: touch_area.has-hover ? 1.0 : 0.4;
+    }
+
+    touch_area := TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            root.clicked();
+        }
+    }
+}
+
 export component LeftSidePanel {
     callback changed_active_tab();
 
@@ -94,8 +122,11 @@ export component LeftSidePanel {
         ];
     }
 
-    preferred-width: t_tools.measure_width + 20px;
-    VerticalLayout {
+    callback show_tool_settings();
+
+    preferred-width: GuiState.left_panel_collapsed ? 18px : t_tools.measure_width + 20px;
+
+    if !GuiState.left_panel_collapsed: VerticalLayout {
         spacing: 2px;
         Rectangle {
             visible: GuiState.active_tab != ActiveTab.About;
@@ -153,8 +184,6 @@ export component LeftSidePanel {
             HorizontalLayout {
                 alignment: end;
                 Button {
-                    checkable: true;
-                    checked: GuiState.visible_tool_settings;
                     visible: GuiState.available_subsettings;
                     min-width: 20px;
                     min-height: 20px;
@@ -163,10 +192,19 @@ export component LeftSidePanel {
                     icon: @image-url("../../icons/krokiet_subsettings.svg");
                     colorize-icon: true;
                     clicked => {
-                        GuiState.visible_tool_settings = !GuiState.visible_tool_settings;
+                        root.show_tool_settings();
                     }
                 }
             }
+        }
+    }
+
+    PanelToggle {
+        x: 0px;
+        y: 0px;
+        collapsed: GuiState.left_panel_collapsed;
+        clicked => {
+            GuiState.left_panel_collapsed = !GuiState.left_panel_collapsed;
         }
     }
 }

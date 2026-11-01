@@ -253,6 +253,10 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_video_optimizer_custom_command_hint_text(flk!("subsettings_video_optimizer_custom_command_hint").into());
     translation.set_subsettings_video_optimizer_generate_template_text(flk!("subsettings_video_optimizer_generate_template").into());
     translation.set_subsettings_reset_text(flk!("subsettings_reset").into());
+    translation.set_subsettings_scan_options_text(flk!("subsettings_scan_options").into());
+    translation.set_subsettings_scan_options_hint_text(flk!("subsettings_scan_options_hint").into());
+    translation.set_subsettings_filter_options_text(flk!("subsettings_filter_options").into());
+    translation.set_subsettings_filter_options_hint_text(flk!("subsettings_filter_options_hint").into());
     translation.set_subsettings_exif_ignored_tags_text(flk!("subsettings_exif_ignored_tags_text").into());
     translation.set_subsettings_exif_ignored_tags_hint_text(flk!("subsettings_exif_ignored_tags_hint_text").into());
     translation.set_subsettings_temporary_files_extensions_text(flk!("subsettings_temporary_files_extensions_text").into());

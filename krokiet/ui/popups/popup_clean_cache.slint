@@ -1,4 +1,5 @@
 import { Button, ProgressIndicator, ScrollView } from "std-widgets.slint";
+import { PopupBackdrop } from "../components/popup_backdrop.slint";
 import { ColorPalette } from "../globals/color_palette.slint";
 import { Translations } from "../globals/translations.slint";
 import { FontSizes } from "../globals/fonts.slint";
@@ -20,6 +21,8 @@ export component PopupCleanCache inherits Rectangle {
         x: (parent.width - popup_width) / 2.0;
         y: (parent.height - self.height) / 2.0;
         close-policy: PopupClosePolicy.no-auto-close;
+
+        PopupBackdrop { }
 
         Rectangle {
             width: parent.width;
