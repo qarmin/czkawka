@@ -1,5 +1,5 @@
 pub(crate) mod checker;
-mod clipboard;
+pub(crate) mod clipboard;
 mod context_menu;
 mod opener;
 mod selection;

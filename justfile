@@ -22,6 +22,12 @@ e2e *args:
     cargo build --profile fast_release --bin krokiet --no-default-features --features "winit_femtovg,winit_software,femtovg_wgpu,vello"
     cd e2e && cargo run --release -- ../target/fast_release/krokiet {{args}}
 
+# Screenshots of every screen of Krokiet in the dark and the light theme, saved to tmp/screens (needs xvfb, xdotool, imagemagick)
+[group('test')]
+screens:
+    cargo build -p krokiet
+    bash misc/screens.sh
+
 [group('test')]
 itests:
     [ ! -f TestFiles.zip ] && wget https://github.com/qarmin/czkawka/releases/download/6.0.0/TestFiles.zip || true

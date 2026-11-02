@@ -1,0 +1,22 @@
+import { ColorPalette } from "../globals/color_palette.slint";
+
+export global ContextMenuMetrics {
+    out property <length> item_height: 28px;
+    out property <length> divider_height: 5px;
+}
+
+// Frame of a right-click menu; the items go inside it
+export component ContextMenuFrame inherits Rectangle {
+    border-radius: 5px;
+    background: ColorPalette.popup_background;
+    border-color: ColorPalette.popup_border_color;
+    border-width: 1px;
+    clip: true;
+
+    @children
+}
+
+export component ContextMenuDivider inherits Rectangle {
+    height: ContextMenuMetrics.divider_height;
+    background: ColorPalette.popup_border_color.with_alpha(0.25);
+}

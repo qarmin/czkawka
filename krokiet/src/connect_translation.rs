@@ -253,6 +253,32 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_video_optimizer_custom_command_hint_text(flk!("subsettings_video_optimizer_custom_command_hint").into());
     translation.set_subsettings_video_optimizer_generate_template_text(flk!("subsettings_video_optimizer_generate_template").into());
     translation.set_subsettings_reset_text(flk!("subsettings_reset").into());
+    translation.set_tool_disk_usage_text(flk!("tool_disk_usage").into());
+    translation.set_disk_usage_mode_treemap_text(flk!("disk_usage_mode_treemap").into());
+    translation.set_disk_usage_mode_sunburst_text(flk!("disk_usage_mode_sunburst").into());
+    translation.set_disk_usage_zoom_out_text(flk!("disk_usage_zoom_out").into());
+    translation.set_disk_usage_no_results_text(flk!("disk_usage_no_results").into());
+    translation.set_disk_usage_depth_text(flk!("disk_usage_depth").into());
+    translation.set_disk_usage_ignore_excluded_items_text(flk!("disk_usage_ignore_excluded_items").into());
+    translation.set_disk_usage_ignore_excluded_directories_text(flk!("disk_usage_ignore_excluded_directories").into());
+    translation.set_disk_usage_ignore_excluded_hint_text(flk!("disk_usage_ignore_excluded_hint").into());
+    translation.set_disk_usage_content_detection_text(flk!("disk_usage_content_detection").into());
+    translation.set_disk_usage_content_detection_hint_text(flk!("disk_usage_content_detection_hint").into());
+    translation.set_disk_usage_content_detection_extension_text(flk!("disk_usage_content_detection_extension").into());
+    translation.set_disk_usage_content_detection_large_text(flk!("disk_usage_content_detection_large").into());
+    translation.set_disk_usage_content_detection_all_text(flk!("disk_usage_content_detection_all").into());
+    translation.set_disk_usage_nested_borders_text(flk!("disk_usage_nested_borders").into());
+    translation.set_disk_usage_detail_title_text(flk!("disk_usage_detail_title").into());
+    translation.set_disk_usage_detail_hint_text(flk!("disk_usage_detail_hint").into());
+    translation.set_disk_usage_group_below_text(flk!("disk_usage_group_below").into());
+    translation.set_disk_usage_min_item_text(flk!("disk_usage_min_item").into());
+    translation.set_disk_usage_folder_block_text(flk!("disk_usage_folder_block").into());
+    translation.set_disk_usage_move_to_trash_text(flk!("disk_usage_move_to_trash").into());
+    translation.set_disk_usage_open_file_text(flk!("disk_usage_open_file").into());
+    translation.set_disk_usage_open_folder_text(flk!("disk_usage_open_folder").into());
+    translation.set_disk_usage_open_parent_text(flk!("disk_usage_open_parent").into());
+    translation.set_disk_usage_copy_path_text(flk!("disk_usage_copy_path").into());
+    crate::disk_usage::refresh_category_names(app);
     translation.set_subsettings_scan_options_text(flk!("subsettings_scan_options").into());
     translation.set_subsettings_scan_options_hint_text(flk!("subsettings_scan_options_hint").into());
     translation.set_subsettings_filter_options_text(flk!("subsettings_filter_options").into());
@@ -447,7 +473,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_context_menu_copy_full_path_text(flk!("context_menu_copy_full_path_text").into());
     translation.set_context_menu_rename_text(flk!("context_menu_rename_text").into());
 
-    let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
+    let list_tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),
         (flk!("tool_empty_folders").into(), ActiveTab::EmptyFolders),
         (flk!("tool_big_files").into(), ActiveTab::BigFiles),
@@ -463,8 +489,10 @@ fn translate_items(app: &MainWindow) {
         (flk!("tool_exif_remover").into(), ActiveTab::ExifRemover),
         (flk!("tool_video_optimizer").into(), ActiveTab::VideoOptimizer),
     ];
+    let mut tools_model = list_tools_model.to_vec();
+    tools_model.push((flk!("tool_disk_usage").into(), ActiveTab::DiskUsage));
     let gui_state = app.global::<GuiState>();
-    gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model.to_vec())));
+    gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model)));
 
     let sort_model: [SortModel; 3] = [
         SortModel {

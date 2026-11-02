@@ -131,6 +131,10 @@ rand = "0.10.3"
 name = "hash_calculation_benchmark"
 harness = false
 
+[[bench]]
+name = "disk_usage_benchmark"
+harness = false
+
 #[[bench]]
 #name = "similar_images_hash_benchmark"
 #harness = false
