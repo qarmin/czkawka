@@ -125,7 +125,7 @@ Two properties are non-negotiable across every sub-project:
 2. **Minimal non-Rust dependencies** – every additional C/C++ library (or any other non-Rust
    language) makes cross-compilation harder, narrows the set of supported targets, and increases
    build complexity for contributors. Prefer pure-Rust crates. If a native library is truly
-   necessary (e.g. `libheif`, `libraw`), gate it behind an optional Cargo feature so the default
+   necessary (e.g. `libheif`), gate it behind an optional Cargo feature so the default
    build stays fully Rust.
 
 ---

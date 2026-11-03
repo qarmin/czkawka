@@ -69,7 +69,6 @@ winit_software = ["slint/renderer-winit-software"]
 
 # Additional features
 heif = ["czkawka_core/heif"]
-libraw = ["czkawka_core/libraw"]
 libavif = ["czkawka_core/libavif"]
 
 # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails

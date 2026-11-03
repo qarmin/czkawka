@@ -16,7 +16,7 @@ elif command -v pacman &>/dev/null; then
 elif command -v zypper &>/dev/null; then
     DISTRO="opensuse"
 else
-    echo "Unsupported distro. Install manually: ffmpeg, libgtk-4, libheif, libraw, libavif."
+    echo "Unsupported distro. Install manually: ffmpeg, libgtk-4, libheif, libavif."
     exit 1
 fi
 
@@ -24,25 +24,25 @@ fi
 case "$DISTRO" in
     debian)
         BASE="ffmpeg libgtk-4-dev"
-        OPTIONAL="libheif-dev libraw-dev libavif-dev libdav1d-dev libheif-plugin-libde265 libheif-plugin-dav1d libheif-plugin-aomdec"
+        OPTIONAL="libheif-dev libavif-dev libdav1d-dev libheif-plugin-libde265 libheif-plugin-dav1d libheif-plugin-aomdec"
         INSTALL_CMD="apt install -y"
         UPDATE_CMD="apt update"
         ;;
     fedora)
         BASE="ffmpeg gtk4-devel"
-        OPTIONAL="libheif-devel LibRaw-devel libavif-devel dav1d-devel"
+        OPTIONAL="libheif-devel libavif-devel dav1d-devel"
         INSTALL_CMD="dnf install -y"
         UPDATE_CMD="dnf check-update || true"
         ;;
     arch)
         BASE="ffmpeg gtk4"
-        OPTIONAL="libheif libraw libavif dav1d"
+        OPTIONAL="libheif libavif dav1d"
         INSTALL_CMD="pacman -S --noconfirm"
         UPDATE_CMD="pacman -Sy"
         ;;
     opensuse)
         BASE="ffmpeg-4 gtk4-devel"
-        OPTIONAL="libheif-devel libraw-devel libavif-devel dav1d-devel"
+        OPTIONAL="libheif-devel libavif-devel dav1d-devel"
         INSTALL_CMD="zypper install -y"
         UPDATE_CMD="zypper refresh"
         ;;

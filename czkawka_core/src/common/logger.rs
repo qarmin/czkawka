@@ -101,8 +101,6 @@ pub fn format_version_string(app: &str) -> String {
     features.push("heif");
     #[cfg(feature = "libavif")]
     features.push("libavif");
-    #[cfg(feature = "libraw")]
-    features.push("libraw");
 
     let mut app_cpu_version = "Baseline";
     let mut os_cpu_version = "Baseline";
