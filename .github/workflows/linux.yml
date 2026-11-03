@@ -292,7 +292,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [1.94.1, nightly]
+        # nightly disabled until notify-rust includes https://github.com/hoodie/notify-rust/pull/297
+        toolchain: [1.94.1] # , nightly]
     steps:
       - uses: actions/checkout@v6
 
