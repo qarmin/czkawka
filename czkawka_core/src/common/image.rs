@@ -368,6 +368,7 @@ mod tests {
         assert!(check_if_can_display_image("test.webp"));
         assert!(check_if_can_display_image("test.jxl"));
         assert!(check_if_can_display_image("test.cr2"));
+        assert!(check_if_can_display_image("test.dng"));
         assert!(check_if_can_display_image("test.JPG"));
 
         assert!(!check_if_can_display_image("test.txt"));

@@ -282,6 +282,33 @@ fn test_similar_images_reference_mode_deletes_only_non_reference() {
     assert!(!duplicate.exists(), "Non-reference duplicate must be deleted (#1643)");
 }
 
+#[test]
+fn test_similar_images_dng_files_are_found_and_hashed() {
+    let temp_dir = TempDir::new().unwrap();
+    let dng_src = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("src")
+        .join("common")
+        .join("test_assets")
+        .join("test_raw.dng");
+    std::fs::copy(&dng_src, temp_dir.path().join("first.dng")).unwrap();
+    std::fs::copy(&dng_src, temp_dir.path().join("second.DNG")).unwrap();
+
+    let params = SimilarImagesParameters::new(10, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false, GeometricInvariance::Off);
+    let mut finder = SimilarImages::new(params);
+    finder.set_included_paths(vec![temp_dir.path().to_path_buf()]);
+    finder.set_recursive_search(false);
+    finder.set_use_cache(false);
+
+    let stop_flag = Arc::new(AtomicBool::new(false));
+    finder.search(&stop_flag, None);
+
+    let info = finder.get_information();
+    assert_eq!(info.initial_found_files, 2, "DNG files must not be skipped (#2007)");
+    assert!(finder.get_text_messages().errors.is_empty(), "{:?}", finder.get_text_messages().errors);
+    assert_eq!(info.number_of_groups, 1);
+    assert_eq!(info.number_of_duplicates, 1);
+}
+
 #[cfg(feature = "libavif")]
 fn get_heif_images_path() -> PathBuf {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources").join("heif_images");
