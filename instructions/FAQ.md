@@ -102,16 +102,16 @@ Yes. Nightly builds compiled from the latest master branch commits are published
 
 ### Q: How do I run it, and what do I need to install? (Linux / Windows / macOS)
 
-Krokiet itself is a single self-contained binary - just download, run, and it works. You only need to install extra system libraries if you want optional functionality: `ffmpeg` for the Similar Videos tool, and `libheif`/`libavif`/`libraw` if you use a build with those image-format features. (The GTK GUI additionally needs GTK4 itself at runtime.)
+Krokiet itself is a single self-contained binary - just download, run, and it works. You only need to install extra system libraries if you want optional functionality: `ffmpeg` for the Similar Videos tool, and `libheif`/`libavif` if you use a build with those image-format features. (The GTK GUI additionally needs GTK4 itself at runtime.)
 
 There are ready-made scripts in the repo that install these dependencies for you (`misc/install_scripts/`):
-- `install_linux.sh` (run with `sudo`) - auto-detects apt / dnf / pacman / zypper and installs `ffmpeg` + `gtk4` (base) and `libheif`/`libraw`/`libavif`/`dav1d` (optional).
-- `install_macos.sh` - installs (and offers to set up Homebrew, then) `ffmpeg libheif libraw libavif` via `brew`.
-- `install_windows.bat` - installs `ffmpeg` via `winget`; notes that `libheif`/`libraw`/`libavif` are only available through MSYS2 builds.
+- `install_linux.sh` (run with `sudo`) - auto-detects apt / dnf / pacman / zypper and installs `ffmpeg` + `gtk4` (base) and `libheif`/`libavif`/`dav1d` (optional).
+- `install_macos.sh` - installs (and offers to set up Homebrew, then) `ffmpeg libheif libavif` via `brew`.
+- `install_windows.bat` - installs `ffmpeg` via `winget`; notes that `libheif`/`libavif` are only available through MSYS2 builds.
 
 Per platform:
 
-- **Linux**: download `linux_krokiet_x86_64` (or `_arm64`), `chmod +x` it, and run. For HEIF/AVIF/RAW use a `heif_raw_avif` build and install the matching libs (or just run `sudo misc/install_scripts/install_linux.sh`). The GTK GUI needs GTK4 installed.
+- **Linux**: download `linux_krokiet_x86_64` (or `_arm64`), `chmod +x` it, and run. For HEIF/AVIF use a `heif_avif` build and install the matching libs (or just run `sudo misc/install_scripts/install_linux.sh`). The GTK GUI needs GTK4 installed.
 - **Windows**: download a `windows_krokiet_on_*` build and run the `.exe` - no runtime to install for the core app. Install `ffmpeg` (e.g. `winget install Gyan.FFmpeg` or `misc/install_scripts/install_windows.bat`) only if you need Similar Videos.
 - **macOS**: download `mac_krokiet_arm64` (Apple Silicon) or `mac_krokiet_x86_64` (Intel), then:
 
@@ -120,7 +120,7 @@ Per platform:
   ./mac_krokiet_arm64
   ```
 
-  If macOS says "cannot be opened because it is from an unidentified developer", right-click the file and choose "Open", then confirm. If it opens as text in TextEdit, the executable bit is not set - run `chmod +x` first. For optional codecs use a `heif_avif` build and `brew install ffmpeg libheif libavif libraw` (or run `misc/install_scripts/install_macos.sh`). The GTK GUI (`mac_czkawka_gui_*`) additionally needs `brew install gtk4`.
+  If macOS says "cannot be opened because it is from an unidentified developer", right-click the file and choose "Open", then confirm. If it opens as text in TextEdit, the executable bit is not set - run `chmod +x` first. For optional codecs use a `heif_avif` build and `brew install ffmpeg libheif libavif` (or run `misc/install_scripts/install_macos.sh`). The GTK GUI (`mac_czkawka_gui_*`) additionally needs `brew install gtk4`.
 
 ### Q: Which Linux packages are available?
 
@@ -155,14 +155,14 @@ The release assets stack a few naming components, e.g. `<os>_<app>[_<features>][
 - `cli` (`czkawka_cli`) - command-line version of the app
 - `cedinia` - experimental Android app
 - `arm` / `arm64`, `x86_64` - CPU architecture. Most Windows/Linux machines use `x86_64`, while on Mac the `arm` (Apple Silicon) version is becoming the most common choice
-- `heif`, `raw`, `avif` - additional image-format features that require extra libraries installed on the OS (libheif / libraw / libavif)
+- `heif`, `avif` - additional image-format features that require extra libraries installed on the OS (libheif / libavif)
 - `vello`, `femtovg_wgpu`, `all_backends` - alternative Krokiet rendering backends; different builds may fix some problems like blurry fonts or graphics crashes. `all_backends` bundles all of them (plus launcher scripts) in one package
 - `apk` / `aab` - Cedinia Android package formats - just use `apk`; `aab` is used only for testing purposes
 - (Windows only) `on_linux` - the `.exe` is cross-compiled on Linux with the GNU toolchain; there are no longer separate `on_windows` (MSVC) builds, because those were only needed for Skia
 
 ### Q: Which one should I pick?
 
-Pick `krokiet` for your architecture with the **default** backend - it is built to be the most compatible everywhere. Only reach for a `vello` / `femtovg_wgpu` / `all_backends` build if the default one shows blurry text, fails to render, or crashes on your GPU. Choose a `heif` / `raw` / `avif` build only if you need those image formats (and install the matching system libraries). On Windows, start with `windows_krokiet_on_linux`.
+Pick `krokiet` for your architecture with the **default** backend - it is built to be the most compatible everywhere. Only reach for a `vello` / `femtovg_wgpu` / `all_backends` build if the default one shows blurry text, fails to render, or crashes on your GPU. Choose a `heif` / `avif` build only if you need those image formats (and install the matching system libraries). On Windows, start with `windows_krokiet_on_linux`.
 
 ### Q: On Linux Krokiet shows nothing or crashes with a rendering error
 
@@ -346,7 +346,7 @@ Supported in all builds: JPEG, PNG, BMP, TIFF, WebP, TGA, plus the less common F
 Formats requiring optional features:
 - **HEIC/HEIF**: needs a build with the `heif` feature (requires the `libheif` system library on Linux/macOS).
 - **AVIF**: needs a build with the `libavif` feature - compile with `--features libavif` or use a binary variant whose name includes `avif`.
-- **RAW** (CR2, NEF, ARW, etc.): basic RAW support is **always built in** via the pure-Rust `rawler` library, but it does not cover every format and not always fully. The optional `libraw` feature adds the `libraw` backend - the industry-standard library - which supports a larger set of RAW formats more completely. So RAW works without any special build; use a `libraw` build only if your camera's format is missing or mis-decoded.
+- **RAW** (CR2, NEF, ARW, etc.): RAW support is **always built in** via the pure-Rust `rawler` library, no extra library or special build is needed. Rawler reads the EXIF orientation of the file itself. Cameras that rawler does not know yet are reported as an error.
 
 ### Q: Can Similar Images find duplicates across different image formats (e.g., JPEG vs WebP vs PNG)?
 
@@ -379,10 +379,10 @@ Practical guidance: for finding re-encoded/resized copies of the same image, sta
 
 ### Q: HEIC images are not found
 
-Ensure you are using a build that includes the `heif` feature. The plain `linux_krokiet_all_backends_x86_64` binary does **not** include HEIF/AVIF support. Use a `heif_raw_avif` variant (e.g. `linux_krokiet_heif_raw_avif_x86_64`) or compile with the appropriate feature flags:
+Ensure you are using a build that includes the `heif` feature. The plain `linux_krokiet_all_backends_x86_64` binary does **not** include HEIF/AVIF support. Use a `heif_avif` variant (e.g. `linux_krokiet_heif_avif_x86_64`) or compile with the appropriate feature flags:
 
 ```bash
-cargo run --bin krokiet --features "winit_femtovg,winit_software,heif,libavif,libraw"
+cargo run --bin krokiet --features "winit_femtovg,winit_software,heif,libavif"
 ```
 
 ---

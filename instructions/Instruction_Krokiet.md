@@ -50,7 +50,6 @@ For the **Similar Videos** tool, **ffmpeg** must be installed separately:
 | Feature | Library | Purpose |
 |---------|---------|---------|
 | `heif` | `libheif` | HEIF/HEIC image support |
-| `libraw` | `libraw` | RAW camera image support |
 | `libavif` | `libavif`, `libdav1d` | AVIF image support |
 
 ### Compile from source
@@ -60,7 +59,7 @@ For the **Similar Videos** tool, **ffmpeg** must be installed separately:
 cargo install krokiet --locked
 
 # With optional image format support
-cargo build --release --bin krokiet --features "heif,libraw,libavif"
+cargo build --release --bin krokiet --features "heif,libavif"
 ```
 
 ### Alternative renderers

@@ -587,7 +587,6 @@ Optional features (require native libraries installed at build and runtime):
 | Feature | Library | Purpose |
 |---------|---------|---------|
 | `heif` | `libheif` | HEIF/HEIC image support |
-| `libraw` | `libraw` | RAW camera image support |
 | `libavif` | `libavif`, `libdav1d` | AVIF image support |
 
 The `similar_videos` tool requires **ffmpeg** at runtime only (not a build dependency).

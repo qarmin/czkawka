@@ -282,7 +282,7 @@ Cross-thread updates use `weak.upgrade_in_event_loop(|app| { … })`.
 - Renderer features: `winit_femtovg` (default), `winit_software` (default),
   `femtovg_wgpu`, `vello` – select GPU backend at compile time. Without `SLINT_BACKEND`, `src/renderer_selection.rs`
   tries them in the order femtovg, femtovg-wgpu, vello, software and restarts the process with the next one on failure
-- `heif`, `libraw`, `libavif`, `xdg_portal_trash` – forwarded to `czkawka_core`
+- `heif`, `libavif`, `xdg_portal_trash` – forwarded to `czkawka_core`
 
 ### Build
 

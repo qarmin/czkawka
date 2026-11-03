@@ -78,7 +78,6 @@ once_cell = "1.21"
 
 # Raw image files
 rawler = "0.8.0"
-libraw-rs = { version = "0.0.4", optional = true }
 jxl-oxide = { version = "0.12.6", features = ["image"] }
 
 # Checking for invalid extensions
@@ -142,7 +141,6 @@ harness = false
 [features]
 default = []
 heif = ["dep:libheif-rs"]
-libraw = ["dep:libraw-rs"]
 libavif = ["image/avif-native", "image/avif"]
 blake_pure = ["blake3/pure"]
 # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails

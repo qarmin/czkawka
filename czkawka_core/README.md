@@ -15,7 +15,6 @@ Optional features require additional native libraries:
 | Feature   | Library               | Purpose                  |
 |-----------|-----------------------|--------------------------|
 | `heif`    | `libheif`             | HEIF/HEIC image support  |
-| `libraw`  | `libraw`              | RAW camera image support |
 | `libavif` | `libavif`, `libdav1d` | AVIF image support       |
 
 The `similar_videos` tool requires **ffmpeg** at runtime (not a build dependency).
@@ -27,19 +26,19 @@ The `similar_videos` tool requires **ffmpeg** at runtime (not a build dependency
 sudo apt install ffmpeg 
 
 # Optional build + runtime: extra image formats
-sudo apt install libheif-dev libraw-dev libavif-dev libdav1d-dev
+sudo apt install libheif-dev libavif-dev libdav1d-dev
 ```
 
 ### macOS
 
 ```shell
-brew install ffmpeg libraw libheif libavif dav1d
+brew install ffmpeg libheif libavif dav1d
 ```
 
 ### Windows
 
 - ffmpeg: `choco install ffmpeg` or download from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) and place `ffmpeg.exe` in your `PATH`.
-- `heif` and `libraw` features are very hard to set up on Windows and are not available in prebuild binaries(there are some unofficial builds, that enables this features)
+- `heif` feature is very hard to set up on Windows and are not available in prebuild binaries(there are some unofficial builds, that enables this feature)
 
 ## Compilation
 
@@ -48,7 +47,7 @@ brew install ffmpeg libraw libheif libavif dav1d
 cargo build --release -p czkawka_core
 
 # With all optional image format features
-cargo build --release -p czkawka_core --features "heif,libraw,libavif"
+cargo build --release -p czkawka_core --features "heif,libavif"
 ```
 
 ## License

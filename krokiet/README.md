@@ -21,7 +21,6 @@ Optional features require native libraries installed before compilation:
 | Feature   | Library               | Purpose                  |
 |-----------|-----------------------|--------------------------|
 | `heif`    | `libheif`             | HEIF/HEIC image support  |
-| `libraw`  | `libraw`              | RAW camera image support |
 | `libavif` | `libavif`, `libdav1d` | AVIF image support       |
 
 The similar videos tool requires **ffmpeg** at runtime.
@@ -33,19 +32,19 @@ The similar videos tool requires **ffmpeg** at runtime.
 sudo apt install ffmpeg
 
 # Optional build + runtime: extra image formats
-sudo apt install libheif-dev libraw-dev libavif-dev libdav1d-dev
+sudo apt install libheif-dev libavif-dev libdav1d-dev
 ```
 
 ### macOS
 
 ```shell
-brew install ffmpeg libraw libheif libavif dav1d
+brew install ffmpeg libheif libavif dav1d
 ```
 
 ### Windows
 
 - ffmpeg: `choco install ffmpeg` or download from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) and place `ffmpeg.exe` in your `PATH`.
-- `heif` and `libraw` features are very hard to set up on Windows and are not available in prebuild binaries(there are some unofficial builds, that enables this features)
+- `heif` feature is very hard to set up on Windows and are not available in prebuild binaries(there are some unofficial builds, that enables this feature)
 
 ## Compilation
 
@@ -63,7 +62,7 @@ Compilation with `cargo build --release` should produce a working binary, that w
 To enable support for extra image formats, compile with optional features:
 
 ```shell
-cargo build --release --bin krokiet --features "heif,libraw,libavif"
+cargo build --release --bin krokiet --features "heif,libavif"
 ```
 
 If you have installed new `cargo`, you can easily compile and install it via `cargo install krokiet`

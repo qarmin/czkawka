@@ -9,12 +9,12 @@ Precompiled binaries should work without any additional dependencies on Linux (U
 On Linux, it is even possible (with eyra) to avoid libc entirely and use a fully static Rust binary, but alternatively you can use musl for this task.
 
 If you want to use the similar videos tool, you need to install ffmpeg (runtime dependency).  
-If you want to use heif/libraw/libavif (build/runtime dependency), you need to install the required packages.
+If you want to use heif/libavif (build/runtime dependency), you need to install the required packages.
 
-- macOS: `brew install ffmpeg libraw libheif libavif dav1d` - [ffmpeg formula](https://formulae.brew.sh/formula/ffmpeg)
-- Linux: `sudo apt install ffmpeg libraw-dev libheif-dev libavif-dev libdav1d-dev`
+- macOS: `brew install ffmpeg libheif libavif dav1d` - [ffmpeg formula](https://formulae.brew.sh/formula/ffmpeg)
+- Linux: `sudo apt install ffmpeg libheif-dev libavif-dev libdav1d-dev`
 - Windows: `choco install ffmpeg` - or, if not working, download from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) and
-  unpack to the location with `czkawka_cli.exe`. `heif` and `libraw` features are very hard to set up on Windows and are not available in prebuild binaries(there are some unofficial builds, that enables this features)
+  unpack to the location with `czkawka_cli.exe`. `heif` feature is very hard to set up on Windows and are not available in prebuild binaries(there are some unofficial builds, that enables this feature)
 
 ## Compilation
 
@@ -27,7 +27,7 @@ cargo run --release --bin czkawka_cli
 You can enable additional features with:
 
 ```shell
-cargo run --release --bin czkawka_cli --features "heif,libraw,libavif"
+cargo run --release --bin czkawka_cli --features "heif,libavif"
 ```
 
 ## How to use

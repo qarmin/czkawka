@@ -355,7 +355,6 @@ Tools that support reference directories: `Duplicate`, `SameMusic`,
 
 Optional (behind features):
 - `heif` → `libheif-rs` – HEIC/HEIF image support
-- `libraw` → `rawler` / `libraw-rs` – RAW photo support
 - `libavif` – AVIF image support
 - `xdg_portal_trash` – FlatPak trash via XDG portal
 - `blake_pure` → `blake3/pure` – pure-Rust Blake3 (no SIMD asm), for targets where the asm
