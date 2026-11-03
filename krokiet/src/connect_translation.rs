@@ -94,12 +94,10 @@ fn translate_items(app: &MainWindow) {
     translation.set_help_title_text(flk!("help_title").into());
     translation.set_help_tools_text(flk!("help_tools").into());
     translation.set_help_button_tip_text(flk!("help_button_tip").into());
-    translation.set_build_info_build_text(flk!("build_info_build").into());
     translation.set_build_info_runtime_text(flk!("build_info_runtime").into());
     translation.set_build_info_refresh_text(flk!("build_info_refresh").into());
     translation.set_build_info_diagnostic_button_text(flk!("build_info_diagnostic_button").into());
     translation.set_build_info_diagnostic_title_text(flk!("build_info_diagnostic_title").into());
-    translation.set_build_info_library_restart_hint_text(flk!("build_info_library_restart_hint").into());
     translation.set_build_info_test_file_text(flk!("build_info_test_file").into());
     translation.set_other_apps_title_text(flk!("other_apps_title").into());
     translation.set_other_apps_open_source_note_text(flk!("other_apps_open_source_note").into());

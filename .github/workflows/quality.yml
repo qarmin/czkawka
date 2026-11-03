@@ -12,12 +12,12 @@ env:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
 
       - name: Install Gtk 4
-        run: sudo apt update || true; sudo apt install -y libgtk-4-dev libheif-dev libavif-dev libdav1d-dev libasound2-dev -y
+        run: sudo apt update || true; sudo apt install -y libgtk-4-dev libasound2-dev -y
 
       - name: Setup rust version
         run: |

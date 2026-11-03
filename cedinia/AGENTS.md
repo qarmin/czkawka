@@ -324,7 +324,7 @@ does not include it - a pre-existing inconsistency in the repo, not a doc bug.
 
 ## Optional Features (forwarded to czkawka_core)
 
-`heif`, `libavif`, `xdg_portal_trash`
+`xdg_portal_trash`
 
 ---
 

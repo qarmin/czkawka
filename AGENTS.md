@@ -21,9 +21,15 @@ GitHub - never omit it, even for small or automatic changes.
 
 ---
 
+## Changelog
+
+Never edit `Changelog.md` automatically. It is maintained by hand by the author; do not add, update or "complete" entries unless explicitly asked.
+
+---
+
 ## Rust Style
 
-Applies to every Rust crate in the workspace (`czkawka_core`, `czkawka_cli`, `czkawka_gui`,
+Applies to every Rust crate in the workspace (`czkawka_core`, `czkawka_cli`,
 `krokiet`, `cedinia`). Program-specific deviations or elaborations live in that program's own
 `AGENTS.md`.
 
@@ -125,7 +131,7 @@ Two properties are non-negotiable across every sub-project:
 2. **Minimal non-Rust dependencies** – every additional C/C++ library (or any other non-Rust
    language) makes cross-compilation harder, narrows the set of supported targets, and increases
    build complexity for contributors. Prefer pure-Rust crates. If a native library is truly
-   necessary (e.g. `libheif`), gate it behind an optional Cargo feature so the default
+   necessary (e.g. a codec library), gate it behind an optional Cargo feature so the default
    build stays fully Rust.
 
 ---
@@ -166,7 +172,6 @@ If `just fix` produces any output on stderr or exits non-zero the code is not re
 czkawka/
 ├── czkawka_core/   # Scanning logic – shared library used by all frontends
 ├── czkawka_cli/    # Command-line interface
-├── czkawka_gui/    # Legacy GTK 4 GUI (unreleased, compile-checked in CI only)
 ├── krokiet/        # Primary desktop GUI – Slint-based
 ├── cedinia/        # Android / mobile GUI – Slint-based
 └── misc/           # Scripts: AI translation, validation, benchmarks, CI helpers
@@ -267,14 +272,6 @@ for progress bars. No GUI code. Results printed via the tool's `PrintResults` tr
 
 ---
 
-## czkawka_gui
-
-Legacy GTK 4 GUI, **no longer released**. It stays in the workspace and CI only checks that it compiles;
-no binaries, packages or crates.io/Flathub releases are produced. Only fixes keeping it compatible with
-core API changes are accepted.
-
----
-
 ## misc/
 
 **Translation tooling** (`ai_translate/`):
@@ -322,7 +319,6 @@ All user-visible strings use [Fluent](https://projectfluent.org/) (`.ftl` files)
 | krokiet      | `flk!` | `krokiet/i18n/<lang>/krokiet.ftl`           |
 | cedinia      | `flc!` | `cedinia/i18n/<lang>/cedinia.ftl`           |
 | czkawka_core | `flc!` | `czkawka_core/i18n/<lang>/czkawka_core.ftl` |
-| czkawka_gui  | `flg!` | `czkawka_gui/i18n/<lang>/czkawka_gui.ftl`   |
 
 English is the source/fallback language. All other locales are AI-translated and then validated.
 

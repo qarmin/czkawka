@@ -20,8 +20,8 @@ const MAXIMUM_IMAGE_PIXELS: u32 = 2_000_000_000;
 const MAXIMUM_IMAGE_FILE_SIZE: u64 = 500 * 1024 * 1024;
 
 pub fn register_image_decoding_hooks() {
-    #[cfg(feature = "heif")]
-    libheif_rs::integration::image::register_all_decoding_hooks();
+    imgalifier_heif::register_decoding_hooks();
+    imgalifier_avif::register_decoding_hooks();
     jxl_oxide::integration::register_image_decoding_hook();
 }
 
@@ -226,11 +226,7 @@ pub fn check_if_can_display_image(path: &str) -> bool {
         return false;
     };
     let extension_str = extension.to_string_lossy().to_lowercase();
-    #[cfg(feature = "heif")]
     let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat();
-
-    #[cfg(not(feature = "heif"))]
-    let allowed_extensions = &[IMAGE_RS_EXTENSIONS, RAW_IMAGE_EXTENSIONS].concat();
 
     allowed_extensions.iter().any(|ext| &extension_str == ext)
 }
@@ -280,7 +276,7 @@ pub(crate) fn get_rotation_from_exif(path: &str) -> Result<Option<ExifOrientatio
     if let Some(extension) = Path::new(path).extension()
         && HEIC_EXTENSIONS.contains(&extension.to_string_lossy().to_lowercase().as_str())
     {
-        return Ok(None); // libheif already applies orientation
+        return Ok(None); // the HEIF decoder already applies orientation
     }
 
     let res = panic::catch_unwind(|| {

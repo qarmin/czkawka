@@ -10,7 +10,7 @@ this, so this script flags any *letter* whose script is not expected for the
 target language.
 
 What is always accepted, regardless of language:
-  - basic ASCII letters A-Z / a-z  (brand and technical terms: MIT, JSON, gtk, https, regex, ...)
+  - basic ASCII letters A-Z / a-z  (brand and technical terms: MIT, JSON, https, regex, ...)
   - digits, punctuation, symbols, separators, combining marks, control/format chars
     (so placeholders like { $name }, Arabic-Indic / Persian digits and ZWNJ are fine)
 

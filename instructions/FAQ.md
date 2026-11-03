@@ -8,7 +8,6 @@ It is derived from hundreds of real user reports and is updated alongside the pr
 - [Instruction_Krokiet.md](Instruction_Krokiet.md) - full guide for the Krokiet GUI (recommended frontend)
 - [Instruction_CLI.md](Instruction_CLI.md) - full guide for the command-line interface
 - [Instruction_Core.md](Instruction_Core.md) - internals: algorithms, cache, configuration format
-- [Instruction_GTK.md](Instruction_GTK.md) - guide for the legacy GTK GUI (deprecated since v12.0)
 
 ---
 
@@ -17,7 +16,6 @@ It is derived from hundreds of real user reports and is updated alongside the pr
 1. [General & Project Overview](#general--project-overview)
 2. [Installation & Requirements](#installation--requirements)
 3. [Which Build / Binary to Use](#which-build--binary-to-use)
-4. [GTK Deprecation & Migration to Krokiet](#gtk-deprecation--migration-to-krokiet)
 5. [Krokiet Rendering Issues (blank/transparent window, GPU)](#krokiet-rendering-issues)
 6. [Cache & Config Files](#cache--config-files)
 7. [Duplicate Files - Not Finding Expected Duplicates](#duplicate-files---not-finding-expected-duplicates)
@@ -28,7 +26,7 @@ It is derived from hundreds of real user reports and is updated alongside the pr
 12. [Selection & "Select Custom"](#selection--select-custom)
 13. [Bad Extensions Tool](#bad-extensions-tool)
 14. [Scanning External Drives, NAS, Network Paths](#scanning-external-drives-nas-network-paths)
-15. [Snap & Flatpak Packages](#snap--flatpak-packages)
+15. [Snap Package](#snap-package)
 16. [Performance & Large Scans](#performance--large-scans)
 17. [CLI Usage](#cli-usage)
 18. [Security - Antivirus False Positives](#security---antivirus-false-positives)
@@ -49,7 +47,6 @@ It is derived from hundreds of real user reports and is updated alongside the pr
 Both share the same scanning engine (`czkawka_core`). The difference is the frontend:
 
 - **Krokiet** - the current recommended GUI, built with the Slint framework. Statically linked, no external GUI dependencies, works reliably on Windows, macOS, and Linux. Actively developed.
-- **Czkawka GTK** - the old GTK4-based GUI. Deprecated since v12.0; no new features - all development happens in Krokiet. GTK worked well on Linux, but outside Linux (Windows and macOS) it had a lot of problems - transparent/unclickable windows, blurry HiDPI text, broken previews, renderer crashes - many of which could not be fully fixed because of the state of the GTK4 Windows/macOS ports. Krokiet was created largely to escape these cross-platform GTK issues.
 - **czkawka_cli** - the command-line interface for scripting and automation.
 
 Just use Krokiet - it is the recommended frontend for all platforms.
@@ -64,8 +61,6 @@ The actively maintained download sources are:
 - [GitHub releases page](https://github.com/qarmin/czkawka/releases) - the primary, always-current source
 - [crates.io](https://crates.io/)
 
-The [Flathub](https://flathub.org/) package (GTK GUI) still exists but is **no longer maintained by the author and is frozen at v10.0** - it lags far behind. There is no Krokiet Flatpak.
-
 The project has no official website. Other sites that present themselves as one are **not** official and may be unsafe.
 
 ### Q: Can I run two instances of Czkawka at the same time?
@@ -76,7 +71,7 @@ You can run instances of different tools simultaneously (each tool has its own c
 
 The project is **not** uniformly MIT - it depends on the component, and for the Slint apps it depends on whether you mean the source or the finished binary:
 
-- **czkawka_core**, **czkawka_cli**, and the **Czkawka GTK GUI** - MIT.
+- **czkawka_core** and **czkawka_cli** - MIT.
 - **Krokiet** and **Cedinia** - their **own application source code is MIT** (see `LICENSE_MIT_CODE` in each crate), **but the apps as a whole are GPL-3.0-only**. This is because they link the Slint UI framework under its free license, which is GPL-3.0; so the resulting combined work / binary must be distributed under GPL-3.0 (see `LICENSE_GPL_APP`). In other words: you may reuse their code under MIT, but a built Krokiet/Cedinia is GPL.
 - All **images and audio files** - CC BY 4.0.
 
@@ -84,7 +79,7 @@ The per-component `LICENSE_*` files in each crate directory hold the exact texts
 
 ### Q: Is there a web-based UI or Docker-based web interface for Czkawka?
 
-There are third-party Docker images by jlesage that wrap the GUI in a VNC/web UI accessible from a browser: `jlesage/krokiet` (Krokiet) and `jlesage/czkawka` (the GTK GUI).
+There are third-party Docker images by jlesage that wrap the GUI in a VNC/web UI accessible from a browser: `jlesage/krokiet`.
 
 ### Q: Are there nightly / pre-release builds available?
 
@@ -96,22 +91,22 @@ Yes. Nightly builds compiled from the latest master branch commits are published
 
 ### Q: What are the system requirements?
 
-- **Linux**: Ubuntu 22.04 or newer (glibc 2.35+). The pre-built binaries are statically linked (Krokiet) or dynamically linked against GTK4 (GTK GUI).
+- **Linux**: any distribution with glibc 2.17 or newer (x86_64 and arm64) - almost every Linux distribution released after 2014 (e.g. RHEL/CentOS 7, Debian 8, Ubuntu 14.04 and newer) meets this. The pre-built binaries are built with `cargo zigbuild` against glibc 2.17, so they do not depend on a newer system glibc.
 - **Windows**: Windows 10 or newer. Krokiet binaries are self-contained.
-- **macOS**: Krokiet binaries are available for both Intel (x86_64) and Apple Silicon (ARM64). The GTK GUI binaries require GTK4 to be installed (e.g. via Homebrew).
+- **macOS**: Krokiet binaries are available for both Intel (x86_64) and Apple Silicon (ARM64).
 
 ### Q: How do I run it, and what do I need to install? (Linux / Windows / macOS)
 
-Krokiet itself is a single self-contained binary - just download, run, and it works. You only need to install extra system libraries if you want optional functionality: `ffmpeg` for the Similar Videos tool, and `libheif`/`libavif` if you use a build with those image-format features. (The GTK GUI additionally needs GTK4 itself at runtime.)
+Krokiet itself is a single self-contained binary - just download, run, and it works. You only need to install extra system libraries if you want optional functionality: `ffmpeg` for the Similar Videos tool (HEIC/HEIF and AVIF are decoded by built-in pure-Rust decoders, nothing extra is needed).
 
 There are ready-made scripts in the repo that install these dependencies for you (`misc/install_scripts/`):
-- `install_linux.sh` (run with `sudo`) - auto-detects apt / dnf / pacman / zypper and installs `ffmpeg` + `gtk4` (base) and `libheif`/`libavif`/`dav1d` (optional).
-- `install_macos.sh` - installs (and offers to set up Homebrew, then) `ffmpeg libheif libavif` via `brew`.
-- `install_windows.bat` - installs `ffmpeg` via `winget`; notes that `libheif`/`libavif` are only available through MSYS2 builds.
+- `install_linux.sh` (run with `sudo`) - auto-detects apt / dnf / pacman / zypper and installs `ffmpeg`.
+- `install_macos.sh` - installs (and offers to set up Homebrew, then) `ffmpeg` via `brew`.
+- `install_windows.bat` - installs `ffmpeg` via `winget`.
 
 Per platform:
 
-- **Linux**: download `linux_krokiet_x86_64` (or `_arm64`), `chmod +x` it, and run. For HEIF/AVIF use a `heif_avif` build and install the matching libs (or just run `sudo misc/install_scripts/install_linux.sh`). The GTK GUI needs GTK4 installed.
+- **Linux**: download `linux_krokiet_x86_64` (or `_arm64`), `chmod +x` it, and run. To install `ffmpeg` you can run `sudo misc/install_scripts/install_linux.sh`.
 - **Windows**: download a `windows_krokiet_on_*` build and run the `.exe` - no runtime to install for the core app. Install `ffmpeg` (e.g. `winget install Gyan.FFmpeg` or `misc/install_scripts/install_windows.bat`) only if you need Similar Videos.
 - **macOS**: download `mac_krokiet_arm64` (Apple Silicon) or `mac_krokiet_x86_64` (Intel), then:
 
@@ -120,12 +115,11 @@ Per platform:
   ./mac_krokiet_arm64
   ```
 
-  If macOS says "cannot be opened because it is from an unidentified developer", right-click the file and choose "Open", then confirm. If it opens as text in TextEdit, the executable bit is not set - run `chmod +x` first. For optional codecs use a `heif_avif` build and `brew install ffmpeg libheif libavif` (or run `misc/install_scripts/install_macos.sh`). The GTK GUI (`mac_czkawka_gui_*`) additionally needs `brew install gtk4`.
+  If macOS says "cannot be opened because it is from an unidentified developer", right-click the file and choose "Open", then confirm. If it opens as text in TextEdit, the executable bit is not set - run `chmod +x` first. To install `ffmpeg` use `brew install ffmpeg` (or run `misc/install_scripts/install_macos.sh`).
 
 ### Q: Which Linux packages are available?
 
 - **Pre-built binaries**: Download from the GitHub releases page (recommended, always up to date). This is now effectively the only source the author actively maintains.
-- **Flatpak** (GTK GUI, `com.github.qarmin.czkawka`): Was author-maintained but is **no longer updated and is stuck at v10.0**. It still works but lags far behind; hopefully a new maintainer takes it over. No Krokiet Flatpak exists.
 - **AppImage**: **No longer provided.** AppImages were dropped (random AppImage-specific bugs, little value over the plain Linux binaries). Use the pre-built binary instead.
 - **Snap**: The author **used to publish a Snap but no longer maintains it**. It is outdated and has known permission issues (external drives, NFS); prefer the pre-built binary.
 - **AUR / Debian / other distro repos**: Community-maintained, not by the project author. They may lag several versions behind. For the newest version use the GitHub binaries.
@@ -151,18 +145,15 @@ The release assets stack a few naming components, e.g. `<os>_<app>[_<features>][
 ### Legend
 
 - `krokiet` - primary graphical version of the application, fully supported and actively developed, includes new features and ongoing improvements
-- `gtk_gui` (`czkawka_gui`) - legacy GTK-based graphical version, maintenance mode only, receives critical fixes but no new features
 - `cli` (`czkawka_cli`) - command-line version of the app
 - `cedinia` - experimental Android app
 - `arm` / `arm64`, `x86_64` - CPU architecture. Most Windows/Linux machines use `x86_64`, while on Mac the `arm` (Apple Silicon) version is becoming the most common choice
-- `heif`, `avif` - additional image-format features that require extra libraries installed on the OS (libheif / libavif)
 - `vello`, `femtovg_wgpu`, `all_backends` - alternative Krokiet rendering backends; different builds may fix some problems like blurry fonts or graphics crashes. `all_backends` bundles all of them (plus launcher scripts) in one package
 - `apk` / `aab` - Cedinia Android package formats - just use `apk`; `aab` is used only for testing purposes
-- (Windows only) `on_linux` - the `.exe` is cross-compiled on Linux with the GNU toolchain; there are no longer separate `on_windows` (MSVC) builds, because those were only needed for Skia
 
 ### Q: Which one should I pick?
 
-Pick `krokiet` for your architecture with the **default** backend - it is built to be the most compatible everywhere. Only reach for a `vello` / `femtovg_wgpu` / `all_backends` build if the default one shows blurry text, fails to render, or crashes on your GPU. Choose a `heif` / `avif` build only if you need those image formats (and install the matching system libraries). On Windows, start with `windows_krokiet_on_linux`.
+Pick `krokiet` for your architecture with the **default** backend - it is built to be the most compatible everywhere. Only reach for a `vello` / `femtovg_wgpu` / `all_backends` build if the default one shows blurry text, fails to render, or crashes on your GPU. On Windows, start with `windows_krokiet`.
 
 ### Q: On Linux Krokiet shows nothing or crashes with a rendering error
 
@@ -176,43 +167,9 @@ On systems without a GPU (VMs, headless servers), this is often the only option.
 
 The default `linux_krokiet_*` binary only ships the femtovg and software renderers. If you want to try the wgpu-based backends (femtovg-wgpu, Vello) too, download the **`linux_krokiet_all_backends_*`** build - it is packaged as a **ZIP that contains the binary plus small bash launcher scripts**, one per renderer, that just set the right `SLINT_BACKEND` and start the app. So instead of exporting the variable yourself you can simply run, for example, `./krokiet_winit_femtovg.sh`, `./krokiet_femtovg_wgpu.sh`, `./krokiet_vello.sh`, or `./krokiet_winit_software.sh` until one renders correctly.
 
-### Q: Which Windows GTK GUI variant is provided?
-
-Only one GTK build is shipped: `windows_czkawka_gui_gtk_412.zip` (GTK 4.12). The ZIP also contains `czkawka_cli.exe` and small `.bat` launchers that set `GSK_RENDERER` (cairo / opengl / vulkan) for the GTK GUI. If the GTK GUI renders a black window or fails to start with the default renderer, run those launchers instead of the `.exe` directly until one works (cairo is the safest software fallback). The GTK GUI is deprecated - prefer Krokiet, which needs no GTK at all.
-
----
-
-## GTK Deprecation & Migration to Krokiet
-
-### Q: I get a popup in Czkawka GTK saying to switch to Krokiet. Is GTK really deprecated?
-
-Yes. **Version 12.0 is the last released version of the Czkawka GTK frontend** - no new GTK binaries will be provided, and no new features are planned. (Any Docker or distro packages built on top of it are third-party, not maintained by the project author.)
-
-All new features and active development happen in **Krokiet**. Users should migrate to Krokiet.
-
-### Q: Czkawka GTK works for me. Why should I switch?
-
-The GTK frontend has persistent platform issues on Windows and macOS that cannot be fully fixed due to the nature of the GTK4 Windows/macOS port. These include:
-- Transparent / unclickable window (Windows, #1904)
-- Tiny or blurry text on HiDPI displays
-- WebP preview not working (Windows, #1095)
-- Various crashes when sorting, pasting text, or using custom select (#967, #1170)
-
-Krokiet avoids all of these by using the Slint framework, which has a pure-Rust rendering pipeline and no dependency on GTK.
-
 ### Q: Does Czkawka work on Windows 7 or older Windows versions?
 
 Windows 10 is the minimum supported version. The Rust standard library has dropped support for older Windows versions, so running on Windows 7 or Windows XP is not supported and is very unlikely to work with any current release. There are no plans to support systems that have themselves been out of support for years. Windows 10 will likely keep working until Rust itself drops it, which is probably ~10 years away.
-
-### Q: The GTK GUI shows text too small on my 4K display
-
-For the GTK GUI: create or edit `%LocalAppData%\gtk-4.0\gtk.css` (Windows) or `~/.config/gtk-4.0/gtk.css` (Linux) with:
-
-```css
-* {
-    font-size: 22px;
-}
-```
 
 Adjust the value as needed. Alternatively, use Krokiet, which supports a manual scale factor in Settings.
 
@@ -239,9 +196,8 @@ This is usually a GPU driver or rendering backend issue. Try, in order:
 | Linux | `~/.config/krokiet/` | `~/.cache/czkawka/` |
 | macOS | `~/Library/Application Support/pl.Qarmin.Krokiet/` | `~/Library/Caches/pl.Qarmin.Czkawka/` |
 | Windows | `%APPDATA%\Qarmin\Krokiet\config\` | `%LOCALAPPDATA%\Qarmin\Czkawka\cache\` |
-| Flatpak | `~/.var/app/com.github.qarmin.czkawka/config/czkawka/` | `~/.var/app/com.github.qarmin.czkawka/cache/czkawka/` |
 
-The cache is **shared between all frontends** (CLI, Krokiet, GTK). Both Krokiet and the GTK GUI read and write the same cache files in `~/.cache/czkawka/`.
+The cache is **shared between all frontends** (CLI and Krokiet). Both read and write the same cache files in `~/.cache/czkawka/`.
 
 The Krokiet config files are:
 - `config_general.json` - window size, language, dark/light theme, current preset, etc.
@@ -283,7 +239,6 @@ Changing directory paths in the JSON cache directly is possible in principle, bu
 The most common reason is the **minimum file size** setting. In the Krokiet GUI the default minimum is **16 KB (16 384 bytes)**, so smaller files are ignored. (The CLI uses per-tool defaults, and for `dup` that default is lower - 8 192 bytes.) To scan smaller files:
 
 - **Krokiet**: Settings > minimum file size > set to a low value (the GUI value is in KB).
-- **GTK GUI**: "Items configuration" tab > "Size (bytes) Min" > set to `1`.
 - **CLI**: add `--minimal-file-size 1` to the command.
 
 ### Q: I have files below 16 KB that are duplicates - why are they excluded by default?
@@ -341,11 +296,10 @@ Check these settings:
 
 ### Q: What image formats does Similar Images support?
 
-Supported in all builds: JPEG, PNG, BMP, TIFF, WebP, TGA, plus the less common FF (Farbfeld), QOI, EXR, and JXL. (These are the extensions the Similar Images tool actually enumerates.)
+Supported: JPEG, PNG, BMP, TIFF, WebP, TGA, plus the less common FF (Farbfeld), QOI, EXR, and JXL. (These are the extensions the Similar Images tool actually enumerates.)
 
-Formats requiring optional features:
-- **HEIC/HEIF**: needs a build with the `heif` feature (requires the `libheif` system library on Linux/macOS).
-- **AVIF**: needs a build with the `libavif` feature - compile with `--features libavif` or use a binary variant whose name includes `avif`.
+Also built in (pure-Rust decoders, no extra libraries):
+- **HEIC/HEIF** and **AVIF**: decoded by `imgalifier-heif` and `imgalifier-avif`.
 - **RAW** (CR2, NEF, ARW, etc.): RAW support is **always built in** via the pure-Rust `rawler` library, no extra library or special build is needed. Rawler reads the EXIF orientation of the file itself. Cameras that rawler does not know yet are reported as an error.
 
 ### Q: Can Similar Images find duplicates across different image formats (e.g., JPEG vs WebP vs PNG)?
@@ -376,14 +330,6 @@ The settings control the perceptual hashing step in Similar Images:
 - **Hash size**: 8, 16, 32, or 64 bits per dimension. Larger values produce longer, more precise fingerprints that reduce false positives but may miss re-encoded versions.
 
 Practical guidance: for finding re-encoded/resized copies of the same image, start with Mean hash + size 16 and a "max difference" of 8-10. For stricter matching (fewer false positives), use Gradient/Double Gradient with size 32 and lower the max difference to 4-5.
-
-### Q: HEIC images are not found
-
-Ensure you are using a build that includes the `heif` feature. The plain `linux_krokiet_all_backends_x86_64` binary does **not** include HEIF/AVIF support. Use a `heif_avif` variant (e.g. `linux_krokiet_heif_avif_x86_64`) or compile with the appropriate feature flags:
-
-```bash
-cargo run --bin krokiet --features "winit_femtovg,winit_software,heif,libavif"
-```
 
 ---
 
@@ -470,10 +416,6 @@ Common causes:
 
 On the same filesystem, Krokiet performs a rename (which is instant). If the source and destination are on different filesystems (e.g., moving from one drive to another), a full copy-then-delete is performed, which is expected to be slow. This is not a bug.
 
-### Q: Flatpak version moves deleted files to a different Trash folder than the system uses
-
-This is a known behavior of the Flatpak sandbox. Files moved to trash inside a Flatpak container go to `~/.Trash-<uid>/` rather than `~/.local/share/Trash/`. This cannot be configured and is a limitation of the Flatpak sandbox, not of Czkawka itself.
-
 ### Q: How does Hardlink work? What does it actually do to my files?
 
 Hardlink replaces the checked duplicate files with hard links pointing to one retained file: the reference file if the group has one, otherwise the first checked file of the group (so check at least two files per group). After hardlinking, all files share the same inode - they appear as separate filenames but consume disk space only once. **Note**: hardlinking across different filesystems or partitions is not possible. Such a pair is not silently skipped - the operation fails for it and an error is reported (e.g. "Failed to hardlink ...: Invalid cross-device link"); the original file is left untouched, so nothing is lost.
@@ -526,8 +468,6 @@ In the **CLI**: pass `-F` / `--fix-extensions` to `bad-ext` and the matched file
 czkawka_cli bad-ext -d /path/to/scan -F
 ```
 
-In the **GTK GUI**: renaming from the GUI is not supported. Export results and rename manually.
-
 ### Q: Bad Extensions incorrectly flags a file's extension, or makes other obvious mistakes
 
 The extension detection uses file magic bytes (the `infer` crate). Many file formats share the same leading bytes, so there is no unambiguous way to pick a single "correct" extension from the content alone. Examples:
@@ -566,15 +506,11 @@ Not currently. Drag and drop to add directories is not implemented, because Slin
 
 ---
 
-## Snap & Flatpak Packages
+## Snap Package
 
 ### Q: The Snap package is outdated / has permission problems
 
 I used to publish a Snap but I no longer maintain it - I dropped Snap builds in v9.0, so the last Snap is stuck at **v8.0** and it has known permission issues for external drives and NFS mounts. Use the **pre-built binary** from the GitHub releases page instead (recommended).
-
-### Q: The Flatpak version is out of date
-
-Yes - I no longer maintain the Flathub package (GTK GUI, `com.github.qarmin.czkawka`); it is **frozen at v10.0**, so it is many versions behind. It may be adopted by a new maintainer in the future. For the latest version, use the pre-built binary from the GitHub releases page.
 
 ---
 
@@ -724,7 +660,7 @@ Yes. Set the following environment variables before launching the application:
 - `CZKAWKA_CACHE_PATH` - path where cache files are stored
 - `CZKAWKA_CONFIG_PATH` - path where config files are stored
 
-These variables are read by `czkawka_core`, so they apply to all frontends (CLI, GTK GUI, and Krokiet).
+These variables are read by `czkawka_core`, so they apply to all frontends (CLI and Krokiet).
 
 Example (Windows):
 ```bat

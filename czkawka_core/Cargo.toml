@@ -84,8 +84,9 @@ jxl-oxide = { version = "0.12.6", features = ["image"] }
 mime_guess = "2.0"
 infer = "0.22"
 
-# Newer version of libheif-rs, which is not compatible with Ubuntu 22.04, and works only o
-libheif-rs = { version = "3", optional = true, default-features = false, features = ["v1_17", "image"] }
+# Pure-Rust HEIC/HEIF and AVIF decoders
+imgalifier-heif = { version = "0.1.0", features = ["image"] }
+imgalifier-avif = { version = "0.1.0", features = ["image"] }
 
 
 # EXIF data cleaning
@@ -140,8 +141,6 @@ harness = false
 
 [features]
 default = []
-heif = ["dep:libheif-rs"]
-libavif = ["image/avif-native", "image/avif"]
 blake_pure = ["blake3/pure"]
 # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
 # No-op on other OSes, it is slower and provides less helpful error messages
