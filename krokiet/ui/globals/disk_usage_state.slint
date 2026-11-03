@@ -1,0 +1,82 @@
+import { DiskUsageMode } from "common.slint";
+
+export struct DiskUsageCategory {
+    name: string,
+    color: color,
+    enabled: bool,
+}
+
+export struct DiskUsageTreeRow {
+    name: string,
+    size_text: string,
+    // Share of the parent directory, 0 to 100
+    percent: float,
+    depth: int,
+    expandable: bool,
+    expanded: bool,
+    selected: bool,
+    color: color,
+}
+
+// Transient state of the disk usage tool; its options are not saved in presets
+export global DiskUsageState {
+    in-out property <image> chart_image;
+    in-out property <bool> has_results;
+    in-out property <bool> rendering;
+    in-out property <DiskUsageMode> mode: DiskUsageMode.Treemap;
+    in-out property <float> depth: 6;
+    in-out property <int> content_detection_index: 1;
+    in-out property <bool> ignore_excluded_items: true;
+    in-out property <bool> ignore_excluded_directories: false;
+    // Every level of directories keeps a frame of its own, so the lines pile up with nesting
+    in-out property <bool> nested_borders: false;
+    // Entries smaller than 1 / 10^group_exponent of their folder are grouped into one block of small entries
+    in-out property <float> group_exponent: 6;
+    // Entries and folders narrower than this many pixels are not drawn
+    in-out property <float> min_item_px: 1;
+    // Folders narrower than this many pixels are drawn as one block; 0 means never
+    in-out property <float> folder_block_px: 0;
+    in-out property <[DiskUsageCategory]> categories: [];
+    in-out property <[DiskUsageTreeRow]> tree_rows: [];
+    in-out property <int> tree_selected_row: -1;
+    // The item under the cursor, shown in a tooltip; empty title means nothing is hovered
+    in-out property <string> hover_title;
+    in-out property <string> hover_kind;
+    in-out property <string> hover_size;
+    in-out property <string> hover_share;
+    in-out property <string> hover_path;
+    in-out property <color> hover_color;
+    // The selected item, described in the line below the chart and in its context menu
+    in-out property <bool> has_selection;
+    in-out property <bool> selected_is_directory;
+    in-out property <string> selected_title;
+    in-out property <string> selected_meta;
+    in-out property <color> selected_color;
+    in-out property <string> selected_text;
+    in-out property <string> zoom_text;
+    // Shown in the middle of the rings: the directory the chart shows and how much space it takes
+    in-out property <string> center_title;
+    in-out property <string> center_size;
+    in-out property <bool> can_zoom_out;
+
+    // Size of the chart area in physical pixels, so it follows the scale factor of the monitor the window is on
+    callback chart_resized(int, int);
+    // Positions are shares of the chart size, 0.0 to 1.0
+    callback chart_hovered(float, float);
+    callback chart_left_clicked(float, float);
+    callback chart_double_clicked(float, float);
+    callback chart_right_clicked(float, float);
+    callback chart_scrolled(length);
+    callback options_changed();
+    callback results_changed();
+    callback category_toggled(int, bool);
+    callback zoom_out();
+    callback tree_row_toggled(int);
+    callback tree_row_clicked(int);
+    callback tree_row_right_clicked(int);
+    callback tree_row_activated(int);
+    callback open_selected_item();
+    callback open_selected_parent();
+    callback copy_path();
+    callback move_to_trash();
+}

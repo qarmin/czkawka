@@ -6,6 +6,7 @@ use czkawka_core::tools::bad_extensions::BadExtensions;
 use czkawka_core::tools::bad_names::BadNames;
 use czkawka_core::tools::big_file::BigFile;
 use czkawka_core::tools::broken_files::BrokenFiles;
+use czkawka_core::tools::disk_usage::DiskUsage;
 use czkawka_core::tools::duplicate::DuplicateFinder;
 use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
@@ -34,6 +35,7 @@ pub struct SharedModels {
     pub shared_bad_names_state: Option<BadNames>,
     pub shared_exif_remover_state: Option<ExifRemover>,
     pub shared_video_optimizer_state: Option<VideoOptimizer>,
+    pub shared_disk_usage_state: Option<DiskUsage>,
 }
 
 impl SharedModels {
@@ -53,6 +55,7 @@ impl SharedModels {
             shared_bad_names_state: None,
             shared_exif_remover_state: None,
             shared_video_optimizer_state: None,
+            shared_disk_usage_state: None,
         }
     }
 
@@ -77,6 +80,7 @@ impl SharedModels {
             ActiveTab::BadNames => self.shared_bad_names_state.as_ref().map(|x| x.save_all_in_one(cd, "results_bad_names")),
             ActiveTab::ExifRemover => self.shared_exif_remover_state.as_ref().map(|x| x.save_all_in_one(cd, "results_exif_remover")),
             ActiveTab::VideoOptimizer => self.shared_video_optimizer_state.as_ref().map(|x| x.save_all_in_one(cd, "results_video_optimizer")),
+            ActiveTab::DiskUsage => self.shared_disk_usage_state.as_ref().map(|x| x.save_all_in_one(cd, "results_disk_usage")),
             ActiveTab::Settings | ActiveTab::About => panic!("Cannot save results for settings or about tab"),
         };
 
@@ -107,6 +111,7 @@ impl SharedModels {
             ActiveTab::BadNames => self.shared_bad_names_state.as_ref().map(|e| e.get_use_reference_folders()),
             ActiveTab::ExifRemover => self.shared_exif_remover_state.as_ref().map(|e| e.get_use_reference_folders()),
             ActiveTab::VideoOptimizer => self.shared_video_optimizer_state.as_ref().map(|e| e.get_use_reference_folders()),
+            ActiveTab::DiskUsage => None,
             ActiveTab::Settings | ActiveTab::About => panic!("Cannot get use reference folders for settings or about tab"),
         }
         .unwrap_or(false);

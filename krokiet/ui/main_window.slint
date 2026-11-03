@@ -10,6 +10,8 @@ import { Callabler } from "globals/callabler.slint";
 import { BottomPanel } from "screens/bottom_panel.slint";
 import { GuiState } from "globals/gui_state.slint";
 import { Preview } from "components/preview.slint";
+import { DiskUsageView } from "screens/disk_usage.slint";
+import { DiskUsageState } from "globals/disk_usage_state.slint";
 import { PanelSplitter } from "components/panel_splitter.slint";
 import { PopupNewDirectories } from "popups/popup_new_directories.slint";
 import { PopupDelete } from "popups/popup_delete.slint";
@@ -34,7 +36,7 @@ import { Translations } from "globals/translations.slint";
 import { ImageCompareOverlay } from "screens/image_compare.slint";
 import { ColorPalette } from "globals/color_palette.slint";
 
-export {Settings, Callabler, GuiState, Translations, Palette}
+export {Settings, Callabler, GuiState, Translations, Palette, DiskUsageState}
 
 export component MainWindow inherits Window {
     default-font-size: FontSizes.normal;
@@ -138,6 +140,13 @@ export component MainWindow inherits Window {
                         show_other_apps_popup() => {
                             other_apps_popup_window.show_popup();
                         }
+                    }
+
+                    DiskUsageView {
+                        visible: GuiState.active_tab == ActiveTab.DiskUsage;
+                        x: 0;
+                        width: main_list.width;
+                        height: parent.height;
                     }
 
                     splitter := PanelSplitter {

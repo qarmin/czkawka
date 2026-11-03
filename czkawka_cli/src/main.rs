@@ -18,6 +18,7 @@ use czkawka_core::tools::bad_extensions::{BadExtensions, BadExtensionsFixParams,
 use czkawka_core::tools::bad_names::{BadNames, BadNamesParameters, NameFixerParams, NameIssues};
 use czkawka_core::tools::big_file::{BigFile, BigFileParameters, SearchMode};
 use czkawka_core::tools::broken_files::{BrokenFiles, BrokenFilesParameters, CheckedTypes};
+use czkawka_core::tools::disk_usage::{DiskUsage, DiskUsageParameters};
 use czkawka_core::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters};
 use czkawka_core::tools::empty_files::{EmptyFiles, EmptyFilesParameters};
 use czkawka_core::tools::empty_folder::EmptyFolder;
@@ -34,8 +35,8 @@ use czkawka_core::tools::video_optimizer::{
 use log::{debug, error, info};
 
 use crate::commands::{
-    Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs, ExifRemoverArgs,
-    InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs, validate_file_sizes,
+    Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DiskUsageArgs, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs,
+    ExifRemoverArgs, InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs, validate_file_sizes,
 };
 use crate::progress::connect_progress;
 
@@ -77,6 +78,7 @@ fn main() {
             Commands::Duplicates(duplicates_args) => duplicates(duplicates_args, &stop_flag, &progress_sender),
             Commands::EmptyFolders(empty_folders_args) => empty_folders(empty_folders_args, &stop_flag, &progress_sender),
             Commands::BiggestFiles(biggest_files_args) => biggest_files(biggest_files_args, &stop_flag, &progress_sender),
+            Commands::DiskUsage(disk_usage_args) => disk_usage(disk_usage_args, &stop_flag, &progress_sender),
             Commands::EmptyFiles(empty_files_args) => empty_files(empty_files_args, &stop_flag, &progress_sender),
             Commands::Temporary(temporary_args) => temporary(temporary_args, &stop_flag, &progress_sender),
             Commands::SimilarImages(similar_images_args) => similar_images(similar_images_args, &stop_flag, &progress_sender),
@@ -181,6 +183,32 @@ fn biggest_files(biggest_files: BiggestFilesArgs, stop_flag: &Arc<AtomicBool>, p
 
     set_common_settings(&mut tool, &common_cli_items, None);
     set_simple_delete(&mut tool, delete_method);
+
+    tool.search(stop_flag, Some(progress_sender));
+
+    save_and_write_results_to_writer(&tool, &common_cli_items)
+}
+
+fn disk_usage(disk_usage: DiskUsageArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
+    let DiskUsageArgs {
+        common_cli_items,
+        depth,
+        top,
+        detect_by_content,
+        ignore_excluded_items,
+        ignore_excluded_directories,
+    } = disk_usage;
+
+    let params = DiskUsageParameters {
+        report_depth: depth.max(1),
+        report_entries_per_directory: top,
+        ignore_excluded_items,
+        ignore_excluded_directories,
+        ..DiskUsageParameters::new(detect_by_content.into())
+    };
+    let mut tool = DiskUsage::new(params);
+
+    set_common_settings(&mut tool, &common_cli_items, None);
 
     tool.search(stop_flag, Some(progress_sender));
 

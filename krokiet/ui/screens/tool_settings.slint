@@ -1,5 +1,6 @@
 import { Button, CheckBox, ComboBox, LineEdit, ScrollView, Slider } from "std-widgets.slint";
 import { ActiveTab } from "../globals/common.slint";
+import { DiskUsageState } from "../globals/disk_usage_state.slint";
 import { Settings } from "../globals/settings.slint";
 import { GuiState } from "../globals/gui_state.slint";
 import { TextComponent } from "settings_list.slint";
@@ -69,6 +70,7 @@ component SliderWrapper inherits HorizontalLayout {
     in-out property <string> text;
     in-out property <string> end_text;
     in-out property <string> max_end_text;
+    callback value_changed();
     spacing: 5px;
     vertical-stretch: 0;
     Text {
@@ -82,6 +84,9 @@ component SliderWrapper inherits HorizontalLayout {
         minimum <=> root.minimum;
         maximum <=> root.maximum;
         value <=> root.value;
+        changed(value) => {
+            root.value_changed();
+        }
     }
 
     Rectangle {
@@ -904,6 +909,93 @@ export component ToolSettings inherits ScrollView {
             HintText {
                 width: root.hint_width;
                 hint_text: Translations.subsettings_exif_ignored_tags_hint_text;
+            }
+
+            Rectangle { }
+        }
+
+        if GuiState.active_tab == ActiveTab.DiskUsage: VerticalLayout {
+            spacing: 5px;
+            padding: 10px;
+
+            CheckBoxWrapper {
+                text: Translations.disk_usage_ignore_excluded_items_text;
+                checked <=> DiskUsageState.ignore_excluded_items;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.disk_usage_ignore_excluded_directories_text;
+                checked <=> DiskUsageState.ignore_excluded_directories;
+            }
+
+            HintText {
+                width: root.hint_width;
+                hint_text: Translations.disk_usage_ignore_excluded_hint_text;
+            }
+
+            Rectangle {
+                height: 6px;
+            }
+
+            ComboBoxWrapper {
+                text: Translations.disk_usage_content_detection_text;
+                model: [
+                    Translations.disk_usage_content_detection_extension_text,
+                    Translations.disk_usage_content_detection_large_text,
+                    Translations.disk_usage_content_detection_all_text,
+                ];
+                current_index <=> DiskUsageState.content_detection_index;
+            }
+
+            HintText {
+                width: root.hint_width;
+                hint_text: Translations.disk_usage_content_detection_hint_text;
+            }
+
+            Rectangle {
+                height: 6px;
+            }
+
+            OptionsGroupHeader {
+                title: Translations.disk_usage_detail_title_text;
+                hint: Translations.disk_usage_detail_hint_text;
+                hint_width: root.hint_width;
+            }
+
+            SliderWrapper {
+                text: Translations.disk_usage_group_below_text;
+                end_text: "1/" + round(pow(10, round(DiskUsageState.group_exponent)));
+                max_end_text: "1/10000000";
+                minimum: 2;
+                maximum: 7;
+                value <=> DiskUsageState.group_exponent;
+                value_changed => {
+                    DiskUsageState.options_changed();
+                }
+            }
+
+            SliderWrapper {
+                text: Translations.disk_usage_min_item_text;
+                end_text: round(DiskUsageState.min_item_px) + " px";
+                max_end_text: "10 px";
+                minimum: 1;
+                maximum: 10;
+                value <=> DiskUsageState.min_item_px;
+                value_changed => {
+                    DiskUsageState.options_changed();
+                }
+            }
+
+            SliderWrapper {
+                text: Translations.disk_usage_folder_block_text;
+                end_text: round(DiskUsageState.folder_block_px) == 0 ? "-" : round(DiskUsageState.folder_block_px) + " px";
+                max_end_text: "60 px";
+                minimum: 0;
+                maximum: 60;
+                value <=> DiskUsageState.folder_block_px;
+                value_changed => {
+                    DiskUsageState.options_changed();
+                }
             }
 
             Rectangle { }

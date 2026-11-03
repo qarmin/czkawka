@@ -1,0 +1,445 @@
+import { Button, Palette, Slider } from "std-widgets.slint";
+import { Settings } from "../globals/settings.slint";
+import { DiskUsageMode } from "../globals/common.slint";
+import { DiskUsageState } from "../globals/disk_usage_state.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+import { FontSizes } from "../globals/fonts.slint";
+import { Translations } from "../globals/translations.slint";
+import { DiskUsageTree } from "../components/disk_usage_tree.slint";
+import { ContextMenuDivider, ContextMenuFrame, ContextMenuMetrics } from "../components/context_menu_parts.slint";
+
+component CategoryToggle inherits Rectangle {
+    in property <image> icon;
+    in property <color> accent;
+    in property <bool> active;
+    in property <string> tip;
+    callback toggled();
+
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    background: touch_area.has-hover ? ColorPalette.tab_hovered_color : transparent;
+
+    Image {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        width: 18px;
+        height: 18px;
+        source: root.icon;
+        colorize: root.active ? root.accent : ColorPalette.hint_color.with-alpha(0.45);
+    }
+
+    touch_area := TouchArea {
+        clicked => {
+            root.toggled();
+        }
+    }
+
+    Tooltip {
+        text: @markdown("\{root.tip}");
+    }
+}
+
+component ModeButton inherits Button {
+    in property <DiskUsageMode> target_mode;
+    primary: DiskUsageState.mode == root.target_mode;
+    clicked => {
+        DiskUsageState.mode = root.target_mode;
+        DiskUsageState.options_changed();
+    }
+}
+
+export component DiskUsageView inherits Rectangle {
+    // The chart is drawn with colours for the theme, so it has to be drawn again when the theme changes
+    private property <bool> dark_theme: Settings.dark_theme;
+    changed dark_theme => {
+        DiskUsageState.options_changed();
+    }
+
+    private property <length> menu_width: 280px;
+    private property <length> menu_header_height: 46px;
+    private property <length> menu_height: root.menu_header_height + 4 * ContextMenuMetrics.item_height + 3 * ContextMenuMetrics.divider_height;
+    private property <length> menu_x;
+    private property <length> menu_y;
+    private property <[image]> category_icons: [
+        @image-url("../../icons/krokiet_type_audio.svg"),
+        @image-url("../../icons/krokiet_type_video.svg"),
+        @image-url("../../icons/krokiet_type_image.svg"),
+        @image-url("../../icons/krokiet_type_archive.svg"),
+        @image-url("../../icons/krokiet_type_document.svg"),
+        @image-url("../../icons/krokiet_type_code.svg"),
+        @image-url("../../icons/krokiet_type_disk_image.svg"),
+        @image-url("../../icons/krokiet_type_binary.svg"),
+        @image-url("../../icons/krokiet_type_other.svg"),
+    ];
+
+    VerticalLayout {
+        spacing: 5px;
+
+        FlexboxLayout {
+            vertical-stretch: 0;
+            spacing: 12px;
+            cross-axis-alignment: CrossAxisAlignment.center;
+
+            HorizontalLayout {
+                spacing: 5px;
+                ModeButton {
+                    text: Translations.disk_usage_mode_treemap_text;
+                    target_mode: DiskUsageMode.Treemap;
+                }
+
+                ModeButton {
+                    text: Translations.disk_usage_mode_sunburst_text;
+                    target_mode: DiskUsageMode.Sunburst;
+                }
+
+                VerticalLayout {
+                    width: 28px;
+                    alignment: center;
+                    CategoryToggle {
+                        icon: @image-url("../../icons/krokiet_borders.svg");
+                        accent: Palette.foreground;
+                        active: DiskUsageState.nested_borders;
+                        tip: Translations.disk_usage_nested_borders_text;
+                        toggled => {
+                            DiskUsageState.nested_borders = !DiskUsageState.nested_borders;
+                            DiskUsageState.options_changed();
+                        }
+                    }
+                }
+            }
+
+            HorizontalLayout {
+                spacing: 2px;
+                for category[index] in DiskUsageState.categories: CategoryToggle {
+                    icon: root.category_icons[index];
+                    accent: category.color;
+                    active: category.enabled;
+                    tip: category.name;
+                    toggled => {
+                        DiskUsageState.category_toggled(index, !category.enabled);
+                    }
+                }
+            }
+
+            if DiskUsageState.mode != DiskUsageMode.Treemap: HorizontalLayout {
+                spacing: 8px;
+                Text {
+                    text: Translations.disk_usage_depth_text + " " + round(DiskUsageState.depth);
+                    font-size: FontSizes.normal;
+                    vertical-alignment: center;
+                }
+
+                Slider {
+                    width: 140px;
+                    minimum: 2;
+                    maximum: 8;
+                    value <=> DiskUsageState.depth;
+                    changed(value) => {
+                        DiskUsageState.options_changed();
+                    }
+                }
+            }
+
+            HorizontalLayout {
+                spacing: 8px;
+                Text {
+                    text: DiskUsageState.zoom_text;
+                    font-size: FontSizes.normal;
+                    vertical-alignment: center;
+                    overflow: elide;
+                    max-width: max(120px, root.width - 180px);
+                }
+
+                Button {
+                    text: Translations.disk_usage_zoom_out_text;
+                    enabled: DiskUsageState.can_zoom_out;
+                    clicked => {
+                        DiskUsageState.zoom_out();
+                    }
+                }
+            }
+        }
+
+        HorizontalLayout {
+            vertical-stretch: 1;
+            spacing: 5px;
+
+            if DiskUsageState.mode == DiskUsageMode.Sunburst && DiskUsageState.has_results: DiskUsageTree {
+                horizontal-stretch: 0;
+                min-width: 240px;
+                preferred-width: 340px;
+                menu_requested(x, y) => {
+                    root.menu_x = max(0px, min(x - root.absolute-position.x, root.width - root.menu_width));
+                    root.menu_y = max(0px, min(y - root.absolute-position.y, root.height - root.menu_height));
+                    if (DiskUsageState.has_selection) {
+                        context_menu.show();
+                    }
+                }
+            }
+
+            chart_area := Rectangle {
+                horizontal-stretch: 1;
+                clip: true;
+
+                property <int> physical_width: round(self.width / 1phx);
+                property <int> physical_height: round(self.height / 1phx);
+
+                changed physical_width => {
+                    DiskUsageState.chart_resized(self.physical_width, self.physical_height);
+                }
+                changed physical_height => {
+                    DiskUsageState.chart_resized(self.physical_width, self.physical_height);
+                }
+
+                Image {
+                    width: chart_area.physical_width * 1phx;
+                    height: chart_area.physical_height * 1phx;
+                    source: DiskUsageState.chart_image;
+                    image-fit: ImageFit.fill;
+                    image-rendering: ImageRendering.pixelated;
+                    visible: DiskUsageState.has_results;
+                }
+
+                Text {
+                    visible: !DiskUsageState.has_results;
+                    text: Translations.disk_usage_no_results_text;
+                    font-size: FontSizes.normal;
+                    color: ColorPalette.hint_color;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    width: parent.width;
+                    height: parent.height;
+                }
+
+                if DiskUsageState.mode == DiskUsageMode.Sunburst && DiskUsageState.has_results: VerticalLayout {
+                    // The hole in the middle of the rings is 0.38 of the shorter side of the chart wide
+                    width: min(chart_area.width, chart_area.height) * 0.34;
+                    x: (chart_area.width - self.width) / 2;
+                    y: (chart_area.height - self.preferred-height) / 2;
+                    height: self.preferred-height;
+                    alignment: center;
+                    spacing: 1px;
+                    Text {
+                        text: DiskUsageState.center_size;
+                        font-size: FontSizes.normal;
+                        font-weight: FontSizes.bold_light;
+                        horizontal-alignment: center;
+                        overflow: elide;
+                    }
+
+                    Text {
+                        text: DiskUsageState.center_title;
+                        font-size: FontSizes.small;
+                        color: ColorPalette.hint_color;
+                        horizontal-alignment: center;
+                        overflow: elide;
+                    }
+                }
+
+                chart_touch := TouchArea {
+                    enabled: DiskUsageState.has_results;
+                    pointer-event(event) => {
+                        if (event.kind == PointerEventKind.down && event.button == PointerEventButton.right) {
+                            DiskUsageState.chart_right_clicked(self.mouse-x / self.width, self.mouse-y / self.height);
+                            root.menu_x = chart_area.absolute-position.x - root.absolute-position.x + min(self.mouse-x, self.width - root.menu_width);
+                            root.menu_y = chart_area.absolute-position.y - root.absolute-position.y + min(self.mouse-y, self.height - root.menu_height);
+                            if (DiskUsageState.has_selection) {
+                                context_menu.show();
+                            }
+                        } else if (event.kind == PointerEventKind.down && event.button == PointerEventButton.left) {
+                            DiskUsageState.chart_left_clicked(self.mouse-x / self.width, self.mouse-y / self.height);
+                        } else if (event.kind == PointerEventKind.move) {
+                            DiskUsageState.chart_hovered(self.mouse-x / self.width, self.mouse-y / self.height);
+                        }
+                    }
+                    double-clicked => {
+                        DiskUsageState.chart_double_clicked(self.mouse-x / self.width, self.mouse-y / self.height);
+                    }
+                    scroll-event(event) => {
+                        DiskUsageState.chart_scrolled(event.delta-y);
+                        accept
+                    }
+                }
+
+                hover_card := ContextMenuFrame {
+                    private property <length> gap: 14px;
+                    private property <length> text_width: max(260px, min(520px, chart_area.width - 60px));
+                    visible: chart_touch.has-hover && DiskUsageState.hover_title != "";
+                    width: card_layout.preferred-width;
+                    height: card_layout.preferred-height;
+                    x: chart_touch.mouse-x + self.gap + self.width > chart_area.width ? max(0px, chart_touch.mouse-x - self.gap - self.width) : chart_touch.mouse-x + self.gap;
+                    y: chart_touch.mouse-y + 22px + self.height > chart_area.height ? max(0px, chart_touch.mouse-y - 10px - self.height) : chart_touch.mouse-y + 22px;
+                    drop-shadow-blur: 10px;
+                    drop-shadow-color: #00000080;
+                    drop-shadow-offset-y: 2px;
+
+                    card_layout := VerticalLayout {
+                        padding: 10px;
+                        spacing: 6px;
+                        HorizontalLayout {
+                            spacing: 8px;
+                            Rectangle {
+                                width: 4px;
+                                border-radius: 2px;
+                                background: DiskUsageState.hover_color;
+                            }
+
+                            Text {
+                                text: DiskUsageState.hover_title;
+                                font-size: FontSizes.normal;
+                                font-weight: FontSizes.bold_light;
+                                overflow: elide;
+                                max-width: hover_card.text_width;
+                            }
+                        }
+
+                        HorizontalLayout {
+                            spacing: 8px;
+                            Text {
+                                text: DiskUsageState.hover_size;
+                                font-size: FontSizes.normal;
+                                font-weight: FontSizes.bold_light;
+                                vertical-alignment: center;
+                            }
+
+                            Text {
+                                text: DiskUsageState.hover_share;
+                                font-size: FontSizes.normal;
+                                color: Palette.foreground.with-alpha(0.65);
+                                vertical-alignment: center;
+                            }
+
+                            Rectangle { }
+
+                            if DiskUsageState.hover_kind != "": Rectangle {
+                                background: DiskUsageState.hover_color.with-alpha(0.28);
+                                border-radius: 9px;
+                                HorizontalLayout {
+                                    padding-left: 8px;
+                                    padding-right: 8px;
+                                    padding-top: 2px;
+                                    padding-bottom: 2px;
+                                    Text {
+                                        text: DiskUsageState.hover_kind;
+                                        font-size: FontSizes.small;
+                                        vertical-alignment: center;
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            height: 1px;
+                            background: Palette.foreground.with-alpha(0.18);
+                        }
+
+                        Text {
+                            text: DiskUsageState.hover_path;
+                            font-size: FontSizes.small;
+                            color: Palette.foreground.with-alpha(0.65);
+                            overflow: elide;
+                            max-width: hover_card.text_width;
+                        }
+                    }
+                }
+            }
+        }
+
+        context_menu := PopupWindow {
+            x: root.menu_x;
+            y: root.menu_y;
+            width: root.menu_width;
+            height: root.menu_height;
+            close-policy: PopupClosePolicy.close-on-click-outside;
+
+            ContextMenuFrame {
+                width: parent.width;
+                height: parent.height;
+
+                VerticalLayout {
+                    Rectangle {
+                        height: root.menu_header_height;
+
+                        HorizontalLayout {
+                            padding: 8px;
+                            spacing: 8px;
+                            Rectangle {
+                                width: 4px;
+                                border-radius: 2px;
+                                background: DiskUsageState.selected_color;
+                            }
+
+                            VerticalLayout {
+                                alignment: center;
+                                spacing: 2px;
+                                Text {
+                                    text: DiskUsageState.selected_title;
+                                    font-size: FontSizes.normal;
+                                    font-weight: FontSizes.bold_light;
+                                    overflow: elide;
+                                }
+
+                                Text {
+                                    text: DiskUsageState.selected_meta;
+                                    font-size: FontSizes.small;
+                                    color: Palette.foreground.with-alpha(0.65);
+                                    overflow: elide;
+                                }
+                            }
+                        }
+                    }
+
+                    ContextMenuDivider { }
+
+                    Button {
+                        text: DiskUsageState.selected_is_directory ? Translations.disk_usage_open_folder_text : Translations.disk_usage_open_file_text;
+                        height: ContextMenuMetrics.item_height;
+                        clicked => {
+                            context_menu.close();
+                            DiskUsageState.open_selected_item();
+                        }
+                    }
+
+                    Button {
+                        text: Translations.disk_usage_open_parent_text;
+                        height: ContextMenuMetrics.item_height;
+                        clicked => {
+                            context_menu.close();
+                            DiskUsageState.open_selected_parent();
+                        }
+                    }
+
+                    ContextMenuDivider { }
+
+                    Button {
+                        text: Translations.disk_usage_copy_path_text;
+                        height: ContextMenuMetrics.item_height;
+                        clicked => {
+                            context_menu.close();
+                            DiskUsageState.copy_path();
+                        }
+                    }
+
+                    ContextMenuDivider { }
+
+                    Button {
+                        text: Translations.disk_usage_move_to_trash_text;
+                        height: ContextMenuMetrics.item_height;
+                        clicked => {
+                            context_menu.close();
+                            DiskUsageState.move_to_trash();
+                        }
+                    }
+                }
+            }
+        }
+
+        Text {
+            vertical-stretch: 0;
+            text: DiskUsageState.selected_text;
+            font-size: FontSizes.normal;
+            overflow: elide;
+        }
+    }
+}

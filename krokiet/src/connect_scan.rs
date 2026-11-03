@@ -4,6 +4,7 @@ mod bad_extensions;
 mod bad_names;
 mod big_files;
 mod broken_files;
+mod disk_usage;
 mod duplicate;
 mod empty_files;
 mod empty_folders;
@@ -24,6 +25,7 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::helpers::messages::MessageLimit;
+use czkawka_core::tools::disk_usage::ContentDetection;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::audio_player::AudioPlayer;
@@ -34,6 +36,7 @@ use crate::connect_scan::bad_extensions::scan_bad_extensions;
 use crate::connect_scan::bad_names::scan_bad_names;
 use crate::connect_scan::big_files::scan_big_files;
 use crate::connect_scan::broken_files::scan_broken_files;
+use crate::connect_scan::disk_usage::scan_disk_usage;
 use crate::connect_scan::duplicate::scan_duplicates;
 use crate::connect_scan::empty_files::scan_empty_files;
 use crate::connect_scan::empty_folders::scan_empty_folders;
@@ -47,7 +50,7 @@ use crate::connect_scan::video_optimizer::scan_video_optimizer;
 use crate::settings::model::{BasicSettings, ComboBoxItems, SettingsCustom};
 use crate::settings::{collect_base_settings, collect_combo_box_settings, collect_settings};
 use crate::shared_models::SharedModels;
-use crate::{ActiveTab, GuiState, MainWindow, ProgressToSend, SingleMainListModel, flk};
+use crate::{ActiveTab, DiskUsageState, GuiState, MainWindow, ProgressToSend, SingleMainListModel, flk};
 
 pub struct ScanData {
     pub progress_sender: Sender<ProgressData>,
@@ -57,6 +60,9 @@ pub struct ScanData {
     pub combo_box_items: ComboBoxItems,
     pub shared_models: Arc<Mutex<SharedModels>>,
     pub audio_player: Arc<AudioPlayer>,
+    pub disk_usage_content_detection: ContentDetection,
+    pub disk_usage_ignore_excluded_items: bool,
+    pub disk_usage_ignore_excluded_directories: bool,
 }
 
 pub struct MessagesData {
@@ -114,6 +120,9 @@ pub(crate) fn connect_scan_button(
             combo_box_items,
             shared_models: cloned_model,
             audio_player: audio_player_clone,
+            disk_usage_content_detection: content_detection_from_index(app.global::<DiskUsageState>().get_content_detection_index()),
+            disk_usage_ignore_excluded_items: app.global::<DiskUsageState>().get_ignore_excluded_items(),
+            disk_usage_ignore_excluded_directories: app.global::<DiskUsageState>().get_ignore_excluded_directories(),
         };
 
         match active_tab {
@@ -131,6 +140,7 @@ pub(crate) fn connect_scan_button(
             ActiveTab::TemporaryFiles => scan_temporary_files(a, scan_data),
             ActiveTab::ExifRemover => scan_exif_remover(a, scan_data),
             ActiveTab::VideoOptimizer => scan_video_optimizer(a, scan_data),
+            ActiveTab::DiskUsage => scan_disk_usage(a, scan_data),
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
     });
@@ -188,4 +198,12 @@ where
     component.set_save_also_as_json(custom_settings.save_also_as_json);
     component.set_delete_outdated_cache(custom_settings.delete_outdated_cache_entries);
     component.set_hide_hard_links(custom_settings.hide_hard_links);
+}
+
+fn content_detection_from_index(index: i32) -> ContentDetection {
+    match index {
+        0 => ContentDetection::ExtensionOnly,
+        2 => ContentDetection::AllFiles,
+        _ => ContentDetection::LargeFiles,
+    }
 }

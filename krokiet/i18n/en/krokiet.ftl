@@ -513,3 +513,49 @@ context_menu_copy_parent_folder_path_text = Copy Parent Folder
 context_menu_copy_full_path_text = Copy Full Path
 context_menu_rename_text = Rename
 
+
+# Disk usage
+tool_disk_usage = Disk Usage
+disk_usage_mode_treemap = Treemap
+disk_usage_mode_sunburst = Rings
+disk_usage_zoom_out = Zoom out
+disk_usage_whole_scan = Whole scan
+disk_usage_no_results = Scan to see how disk space is used
+disk_usage_depth = Levels
+disk_usage_ignore_excluded_items = Ignore excluded items
+disk_usage_ignore_excluded_directories = Ignore excluded folders
+disk_usage_ignore_excluded_hint = Excluded items hide hidden folders, caches and node_modules by default, so the total would be lower than the real disk usage. Excluded folders are the paths from the bottom panel.
+disk_usage_content_detection = File type detection
+disk_usage_content_detection_hint = Files with an unknown extension can be recognized by reading their beginning. Reading only large files is cheap and covers most of the used space; reading all of them is much slower.
+disk_usage_content_detection_extension = Extension only
+disk_usage_content_detection_large = Content of large files
+disk_usage_content_detection_all = Content of all files
+disk_usage_nested_borders = Nested borders
+disk_usage_detail_title = Detail
+disk_usage_detail_hint = Applied to the chart immediately. Showing more entries takes longer to draw.
+disk_usage_group_below = Group entries smaller than
+disk_usage_min_item = Smallest entry shown
+disk_usage_folder_block = Folders narrower than this are one block
+disk_usage_move_to_trash = Move to trash
+disk_usage_open_file = Open file
+disk_usage_open_folder = Open folder
+disk_usage_kind_file = File
+disk_usage_kind_folder = Folder
+disk_usage_small_items =
+    { $count ->
+        [one] 1 small item
+       *[other] { $count } small items
+    }
+disk_usage_open_parent = Open parent folder
+disk_usage_copy_path = Copy path
+disk_usage_category_folder = Folders
+disk_usage_category_audio = Audio
+disk_usage_category_video = Video
+disk_usage_category_image = Images
+disk_usage_category_archive = Archives
+disk_usage_category_document = Documents
+disk_usage_category_code = Code and data
+disk_usage_category_disk_image = Disk images
+disk_usage_category_binary = Programs and libraries
+disk_usage_category_other = Other
+rust_found_disk_usage = Measured { $items_found } files in { $time }, { $size } in total

@@ -363,6 +363,7 @@ All other language files are managed through [Crowdin](https://crowdin.com/) and
 just run krokiet          # debug run
 just runr krokiet         # fast_release run
 just fix                  # format + clippy + Python checks
+just screens              # screenshots of every Krokiet screen in the dark and light theme -> tmp/screens
 just translate            # AI-translate all projects
 just validate_translations [--fix]
 just pack_translations    # create i18n_translations.zip for Crowdin
