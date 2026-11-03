@@ -64,6 +64,7 @@ pub(crate) fn change_language(app: &MainWindow) {
 // To generate this, check misc folder
 // This is ugly workaround for missing fluent language support in slint
 fn translate_items(app: &MainWindow) {
+    crate::help::set_help_content(app);
     let translation = app.global::<Translations>();
     let settings = app.global::<Settings>();
 
@@ -90,6 +91,9 @@ fn translate_items(app: &MainWindow) {
     translation.set_donation_text(flk!("donation").into());
     translation.set_translation_text(flk!("translation").into());
     translation.set_other_apps_text(flk!("other_apps").into());
+    translation.set_help_title_text(flk!("help_title").into());
+    translation.set_help_tools_text(flk!("help_tools").into());
+    translation.set_help_button_tip_text(flk!("help_button_tip").into());
     translation.set_build_info_build_text(flk!("build_info_build").into());
     translation.set_build_info_runtime_text(flk!("build_info_runtime").into());
     translation.set_build_info_refresh_text(flk!("build_info_refresh").into());

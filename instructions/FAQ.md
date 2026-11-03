@@ -66,7 +66,7 @@ The actively maintained download sources are:
 
 The [Flathub](https://flathub.org/) package (GTK GUI) still exists but is **no longer maintained by the author and is frozen at v10.0** - it lags far behind. There is no Krokiet Flatpak.
 
-Sites such as `czkawka.net`, `czkawka.com`, `czawka.net` and similar are **not** official and may be unsafe.
+The project has no official website. Other sites that present themselves as one are **not** official and may be unsafe.
 
 ### Q: Can I run two instances of Czkawka at the same time?
 
@@ -476,11 +476,11 @@ This is a known behavior of the Flatpak sandbox. Files moved to trash inside a F
 
 ### Q: How does Hardlink work? What does it actually do to my files?
 
-Hardlink replaces selected duplicate files with hard links pointing to one retained copy. After hardlinking, all files share the same inode - they appear as separate filenames but consume disk space only once. **Note**: hardlinking across different filesystems or partitions is not possible. Such a pair is not silently skipped - the operation fails for it and an error is reported (e.g. "Failed to hardlink ...: Invalid cross-device link"); the original file is left untouched, so nothing is lost.
+Hardlink replaces the checked duplicate files with hard links pointing to one retained file: the reference file if the group has one, otherwise the first checked file of the group (so check at least two files per group). After hardlinking, all files share the same inode - they appear as separate filenames but consume disk space only once. **Note**: hardlinking across different filesystems or partitions is not possible. Such a pair is not silently skipped - the operation fails for it and an error is reported (e.g. "Failed to hardlink ...: Invalid cross-device link"); the original file is left untouched, so nothing is lost.
 
 ### Q: When hardlinking multiple groups at once, do files from different groups get linked together?
 
-No. Each group is processed independently. Within group A, the unselected file becomes the "original" and selected files become hard links to it. Within group B the same happens independently. Files from different groups are never linked together.
+No. Each group is processed independently. Within group A, the retained file becomes the "original" and the other checked files become hard links to it. Within group B the same happens independently. Files from different groups are never linked together.
 
 ---
 
@@ -488,10 +488,10 @@ No. Each group is processed independently. Within group A, the unselected file b
 
 ### Q: "Select Custom" does not work / selects nothing
 
-The "Select Custom" dialog selects files based on a text pattern matched against the file name, path, or a regex. Common mistakes:
-- The pattern must match a substring of the full path. Use `*` as a wildcard.
+The "Select Custom" dialog checks files by the values of columns (full path, file name, path, size, dates). Text columns use `*` wildcard patterns, not regular expressions. Common mistakes:
+- A pattern without `*` must match the whole value; without a `*` at the beginning or at the end it is anchored there. Use `*` as a wildcard, e.g. `*backup*`.
 - On Windows, use forward slashes or escaped backslashes in patterns; backslash in patterns can behave unexpectedly.
-- The "Don't select all files in a group" checkbox: if checked, at least one file in each group is always left unselected (a safety measure to avoid deleting all copies). Uncheck it if you want to select all matches regardless.
+- The "Select all items except one, in each group" checkbox (on by default, only in tools with groups): at least one file in each group is left unchecked. It is switched off automatically when reference folders were used. Uncheck it if you want to check all matches regardless.
 
 ### Q: How do I select all files except those in a specific folder?
 
@@ -502,26 +502,17 @@ Or set the folder you want to keep as a **Reference Folder** - reference folder 
 
 ### Q: If I click "Select All" and then delete, will all copies of a file be deleted including the last one?
 
-No. The automatic selection modes ("Select All Except Oldest", "Select All Except Newest", etc.) always leave at least one file in each group unselected. The plain "Select All" button selects every checked row, but each group's header row (the first entry) is always left unselected by the automatic modes. If you manually check every row yourself, you can select all files in a group - but even then, the delete operation will warn you before proceeding.
+The modes that pick one file or all except one ("One oldest", "All except newest", etc.) always leave at least one file in each group unchecked. "Select all" and the invert modes can check every file of a group, but the delete and trash popups then report how many groups have all their files checked.
 
 When using the CLI with `-D AEN` / `-D AEO` etc., the delete mode is described by its name: "All Except Newest" always keeps exactly one file per group.
 
 ### Q: Can I select files by extension using "Select Custom"?
 
-Yes. In the "Regex Path + Name" field, enter a regex that matches the extension. For example, to select all `.mp3` files:
-
-```
-.*mp3
-```
-
-Or for `.flac` files:
-```
-.*\.flac$
-```
+Yes. Enable the file name (or full path) column and enter a wildcard pattern, for example `*.mp3` or `*.flac`. Patterns are not regular expressions.
 
 ### Q: "Select Custom" on Windows - the "Path" filter selects nothing
 
-On Windows, use a plain path prefix without a trailing backslash or wildcard. For example, enter `C:\Users\username\Desktop` (not `C:\Users\username\Desktop\*`). The filter matches any file whose path contains the entered string as a substring.
+A pattern without `*` must match the whole value. Use a trailing wildcard, for example `C:\Users\username\Desktop*`, to match everything inside that folder.
 
 ## Bad Extensions Tool
 
@@ -811,11 +802,11 @@ Not officially. `czkawka_core` is platform-independent and can be compiled for A
 
 ### Q: Can I save scan results to review later without re-scanning?
 
-You can export results to files using the "Save" button in the GUI or the `-f` / `-C` / `-p` flags in the CLI. These files can be reviewed externally. However, you cannot load them back into the GUI to resume where you left off - the application must re-run the scan to display results interactively.
+You can export results to files using the "Save" button in the GUI (it asks for a folder and always writes three files: `.txt`, `_pretty.json` and `_compact.json`) or the `-f` / `-C` / `-p` flags in the CLI. These files can be reviewed externally. However, you cannot load them back into the GUI to resume where you left off - the application must re-run the scan to display results interactively.
 
 ### Q: Can I export results as JSON for use in my own scripts?
 
-Yes. Use `-C <filename>` for compact JSON or `-p <filename>` for pretty-printed JSON in the CLI. In the GUI, enable "Save also as JSON" in settings and use the Save button. The JSON format contains file paths, sizes, modification dates, and hashes (for duplicate files).
+Yes. Use `-C <filename>` for compact JSON or `-p <filename>` for pretty-printed JSON in the CLI. In the GUI, the Save button always writes JSON files next to the text file (the "Save also as JSON" setting concerns only the cache). The JSON format contains file paths, sizes, modification dates, and hashes (for duplicate files).
 
 ---
 
