@@ -8,14 +8,7 @@ Core scanning library shared by Czkawka GUI, Czkawka CLI, Krokiet, and Cedinia.
 
 ## Requirements
 
-The base build has no mandatory native dependencies - it is pure Rust.
-
-Optional features require additional native libraries:
-
-| Feature   | Library               | Purpose                  |
-|-----------|-----------------------|--------------------------|
-| `heif`    | `libheif`             | HEIF/HEIC image support  |
-| `libavif` | `libavif`, `libdav1d` | AVIF image support       |
+The build has no native dependencies - it is pure Rust (including HEIC/HEIF and AVIF decoding).
 
 The `similar_videos` tool requires **ffmpeg** at runtime (not a build dependency).
 
@@ -23,31 +16,23 @@ The `similar_videos` tool requires **ffmpeg** at runtime (not a build dependency
 
 ```shell
 # Runtime: similar videos
-sudo apt install ffmpeg 
-
-# Optional build + runtime: extra image formats
-sudo apt install libheif-dev libavif-dev libdav1d-dev
+sudo apt install ffmpeg
 ```
 
 ### macOS
 
 ```shell
-brew install ffmpeg libheif libavif dav1d
+brew install ffmpeg
 ```
 
 ### Windows
 
 - ffmpeg: `choco install ffmpeg` or download from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) and place `ffmpeg.exe` in your `PATH`.
-- `heif` feature is very hard to set up on Windows and are not available in prebuild binaries(there are some unofficial builds, that enables this feature)
 
 ## Compilation
 
 ```shell
-# Base (no optional features)
 cargo build --release -p czkawka_core
-
-# With all optional image format features
-cargo build --release -p czkawka_core --features "heif,libavif"
 ```
 
 ## License

@@ -10,7 +10,7 @@ on:
 jobs:
   build-apk:
     name: Build Android APK
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     env:
       # NDK releases: https://developer.android.com/ndk/downloads/revision_history
       # Latest stable NDK r27 (27.2.12479018)

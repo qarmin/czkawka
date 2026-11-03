@@ -33,7 +33,7 @@ Krokiet-specific or tool-focused terms:
 
 ## Installation
 
-Prebuilt binaries (no extra dependencies required) are available for Windows 10/11, macOS, and Ubuntu 22.04+.
+Prebuilt binaries (no extra dependencies required) are available for Windows 10/11, macOS, and Linux (glibc 2.17+, so almost every distribution released after 2014).
 
 Download from the [GitHub releases page](https://github.com/qarmin/czkawka/releases).
 
@@ -45,21 +45,11 @@ For the **Similar Videos** tool, **ffmpeg** must be installed separately:
 | macOS | `brew install ffmpeg` |
 | Windows | `choco install ffmpeg` or download from ffmpeg.org and place `ffmpeg.exe` in `PATH` |
 
-### Optional features (self-compilation only)
-
-| Feature | Library | Purpose |
-|---------|---------|---------|
-| `heif` | `libheif` | HEIF/HEIC image support |
-| `libavif` | `libavif`, `libdav1d` | AVIF image support |
-
 ### Compile from source
 
 ```shell
 # Simplest - installs the latest optimized binary
 cargo install krokiet --locked
-
-# With optional image format support
-cargo build --release --bin krokiet --features "heif,libavif"
 ```
 
 ### Alternative renderers
@@ -440,14 +430,12 @@ For default paths, cache file descriptions, env var overrides, and portable-driv
 | macOS | `~/Library/Application Support/pl.Qarmin.Krokiet/` |
 | Windows | `C:\Users\<user>\AppData\Roaming\Qarmin\Krokiet\config\` |
 
-Note: there is no Krokiet Flatpak. The Flathub package is GTK-only and frozen at v10.0.
-
 Key files:
 - `config_general.json` - window size, theme, preset count, active preset index
 - `config_preset_N.json` - all scan settings for preset N (paths, filters, tool parameters)
 - `config_custom_select_state.json` - saved custom selection rules
 
-Cache is shared with GTK and CLI (`~/.cache/czkawka/` on Linux).
+Cache is shared with CLI (`~/.cache/czkawka/` on Linux).
 
 ---
 

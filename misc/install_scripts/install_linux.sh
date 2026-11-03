@@ -16,33 +16,29 @@ elif command -v pacman &>/dev/null; then
 elif command -v zypper &>/dev/null; then
     DISTRO="opensuse"
 else
-    echo "Unsupported distro. Install manually: ffmpeg, libgtk-4, libheif, libavif."
+    echo "Unsupported distro. Install manually: ffmpeg."
     exit 1
 fi
 
 # Packages per distro
 case "$DISTRO" in
     debian)
-        BASE="ffmpeg libgtk-4-dev"
-        OPTIONAL="libheif-dev libavif-dev libdav1d-dev libheif-plugin-libde265 libheif-plugin-dav1d libheif-plugin-aomdec"
+        BASE="ffmpeg"
         INSTALL_CMD="apt install -y"
         UPDATE_CMD="apt update"
         ;;
     fedora)
-        BASE="ffmpeg gtk4-devel"
-        OPTIONAL="libheif-devel libavif-devel dav1d-devel"
+        BASE="ffmpeg"
         INSTALL_CMD="dnf install -y"
         UPDATE_CMD="dnf check-update || true"
         ;;
     arch)
-        BASE="ffmpeg gtk4"
-        OPTIONAL="libheif libavif dav1d"
+        BASE="ffmpeg"
         INSTALL_CMD="pacman -S --noconfirm"
         UPDATE_CMD="pacman -Sy"
         ;;
     opensuse)
-        BASE="ffmpeg-4 gtk4-devel"
-        OPTIONAL="libheif-devel libavif-devel dav1d-devel"
+        BASE="ffmpeg-4"
         INSTALL_CMD="zypper install -y"
         UPDATE_CMD="zypper refresh"
         ;;
@@ -52,7 +48,6 @@ echo "Detected distro: $DISTRO"
 echo ""
 echo "The following packages will be installed:"
 echo "  Base:     $BASE"
-echo "  Optional: $OPTIONAL"
 echo ""
 read -r -p "Do you want to continue? [Y/n] " answer
 if [[ "$answer" =~ ^[Nn]$ ]]; then
@@ -63,8 +58,6 @@ fi
 $UPDATE_CMD
 
 $INSTALL_CMD $BASE
-
-$INSTALL_CMD $OPTIONAL || echo "Some optional packages unavailable on this distro version - skipping."
 
 echo ""
 echo "Successfully installed all dependencies."

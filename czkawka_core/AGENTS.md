@@ -354,8 +354,6 @@ Tools that support reference directories: `Duplicate`, `SameMusic`,
 | `similario_core` | Video similarity (sibling path-dependency; replaced `vid_dup_finder_lib`) |
 
 Optional (behind features):
-- `heif` → `libheif-rs` – HEIC/HEIF image support
-- `libavif` – AVIF image support
 - `xdg_portal_trash` – FlatPak trash via XDG portal
 - `blake_pure` → `blake3/pure` – pure-Rust Blake3 (no SIMD asm), for targets where the asm
   backend doesn't build

@@ -68,8 +68,6 @@ winit_femtovg = ["slint/renderer-winit-femtovg"]
 winit_software = ["slint/renderer-winit-software"]
 
 # Additional features
-heif = ["czkawka_core/heif"]
-libavif = ["czkawka_core/libavif"]
 
 # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
 # No-op on other OSes, it is slower and provides less helpful error messages

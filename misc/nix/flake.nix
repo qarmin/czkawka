@@ -24,19 +24,9 @@
         packages = (import ./packages.nix { 
           inherit self pkgs crane;
           msrvRust = pkgs.rust-bin.stable.${cargoToml.package.rust-version}.minimal;
-          buildInputs = with pkgs; [
-            atk
-            cairo
-            gdk-pixbuf
-            glib
-            gtk4
-            pango
-          ];
+          buildInputs = [];
           nativeBuildInputs = with pkgs; [
             pkg-config
-            gobject-introspection
-            gsettings-desktop-schemas
-            wrapGAppsHook4
           ];
         });
       }
