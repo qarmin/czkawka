@@ -6,6 +6,7 @@ import { Callabler } from "../globals/callabler.slint";
 import { FontSizes } from "../globals/fonts.slint";
 import { Translations } from "../globals/translations.slint";
 import { MaxTextMeasure } from "../globals/text_size.slint";
+import { HelpIcon } from "../components/help_icon.slint";
 
 component TabItem {
     in property <string> text;
@@ -124,6 +125,7 @@ export component LeftSidePanel {
     }
 
     callback show_tool_settings();
+    callback show_help();
 
     preferred-width: GuiState.left_panel_collapsed ? 18px : t_tools.measure_width + 20px;
 
@@ -144,6 +146,16 @@ export component LeftSidePanel {
                     Callabler.tab_changed();
                     root.changed_active_tab();
                     GuiState.bottom_panel_visibility = BottomPanelVisibility.NotVisible;
+                }
+            }
+
+            HelpIcon {
+                x: parent.width - self.width;
+                y: 0px;
+                width: 22px;
+                height: 22px;
+                clicked => {
+                    root.show_help();
                 }
             }
         }

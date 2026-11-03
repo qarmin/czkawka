@@ -47,6 +47,7 @@ use crate::connect_tab_changed::connect_tab_changed;
 use crate::connect_translation::connect_translations;
 use crate::create_calculate_task_size::create_calculate_task_size;
 use crate::disk_usage::connect_disk_usage;
+use crate::help::connect_help;
 use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::set_initial_scroll_list_data_indexes::set_initial_scroll_list_data_indexes;
 // TODO - at start this should be used, to be sure that rust models are in sync with slint models
@@ -79,6 +80,7 @@ mod create_calculate_task_size;
 mod disk_usage;
 mod file_actions;
 mod gpu_info;
+mod help;
 mod localizer_krokiet;
 mod model_operations;
 mod notification_manager;
@@ -188,6 +190,7 @@ fn main() {
     connect_show_preview(&app, Arc::clone(&shared_models));
     connect_compare(&app, Arc::clone(&shared_models));
     connect_translations(&app);
+    connect_help(&app);
     connect_changing_settings_preset(&app);
     connect_select(&app, &shared_models);
     connect_move(&app, progress_sender.clone(), stop_flag.clone());
