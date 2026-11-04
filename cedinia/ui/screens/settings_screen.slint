@@ -4,7 +4,7 @@ import { Divider } from "../components/divider.slint";
 import { TouchButton } from "../components/buttons/touch_button.slint";
 import { PopupTitleBar } from "../components/popup_title_bar.slint";
 import { ScrimDialog } from "../components/scrim_dialog.slint";
-import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "../globals/app_state.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DiskUsageSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "../globals/app_state.slint";
 import { CategoryLabel } from "../components/settings/category_label.slint";
 import { DropdownRow } from "../components/settings/dropdown_row.slint";
 import { SegmentRow } from "../components/settings/segment_row.slint";
@@ -569,6 +569,11 @@ export component SettingsScreen {
                         options: SimilarVideosSettings.audio_preset_options;
                         selected <=> SimilarVideosSettings.audio_preset_idx;
                     }
+                    Divider {}
+
+
+                    ToolGroupHeader { label: Translations.settings_disk_usage_header_text; emoji: "📊"; }
+                    ToggleRow { label: Translations.settings_disk_usage_accurate_categories_text; value <=> DiskUsageSettings.accurate_categories; }
                     Divider {}
 
 
