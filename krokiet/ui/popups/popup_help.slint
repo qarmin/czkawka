@@ -43,7 +43,7 @@ component HelpGroupHeader inherits Rectangle {
 
     Path {
         x: 8px;
-        y: (parent.height - self.height) / 2;
+        y: round(((parent.height - self.height) / 2) / 1px) * 1px;
         width: 8px;
         height: 8px;
         viewbox-width: 8;
@@ -112,8 +112,8 @@ export component PopupHelp inherits Rectangle {
     popup_window := PopupWindow {
         width: popup_width;
         height: popup_height;
-        x: (parent.width - popup_width) / 2.0;
-        y: (parent.height - self.height) / 2.0;
+        x: round(((parent.width - popup_width) / 2.0) / 1px) * 1px;
+        y: round(((parent.height - self.height) / 2.0) / 1px) * 1px;
         close-policy: PopupClosePolicy.no-auto-close;
 
         PopupBackdrop { }
@@ -125,11 +125,13 @@ export component PopupHelp inherits Rectangle {
             border-color: ColorPalette.popup_border_color;
             border-width: 2px;
             background: ColorPalette.popup_background;
-            clip: true;
 
             VerticalLayout {
+                padding: 2px;
                 Rectangle {
                     background: ColorPalette.popup_background_title_line;
+                    border-top-left-radius: 8px;
+                    border-top-right-radius: 8px;
                     height: 36px;
                     Text {
                         text <=> Translations.help_title_text;
@@ -206,13 +208,19 @@ export component PopupHelp inherits Rectangle {
                     }
                 }
 
-                HorizontalLayout {
-                    padding: 10px;
-                    Rectangle { }
-                    Button {
-                        text <=> Translations.cancel_button_text;
-                        clicked => {
-                            popup_window.close();
+                Rectangle {
+                    background: ColorPalette.popup_background_footer;
+                    border-bottom-left-radius: 8px;
+                    border-bottom-right-radius: 8px;
+
+                    HorizontalLayout {
+                        padding: 10px;
+                        Rectangle { }
+                        Button {
+                            text <=> Translations.cancel_button_text;
+                            clicked => {
+                                popup_window.close();
+                            }
                         }
                     }
                 }

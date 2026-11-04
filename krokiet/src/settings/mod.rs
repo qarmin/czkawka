@@ -26,6 +26,7 @@ use crate::settings::model::{
     SettingsCustom, default_video_optimizer_black_bar_min_percentage, default_video_optimizer_black_pixel_threshold, default_video_optimizer_max_samples,
     default_video_optimizer_min_crop_size,
 };
+use crate::tools_visibility::{apply_hidden_tools, collect_hidden_tools};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
@@ -284,6 +285,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     }
     settings.set_dark_theme(basic_settings.dark_theme);
     settings.set_show_only_icons(basic_settings.show_only_icons);
+    apply_hidden_tools(app, &basic_settings.hidden_tools);
     app.global::<Callabler>().invoke_theme_changed();
     settings.set_load_tabs_sizes_at_startup(basic_settings.settings_load_tabs_sizes_at_startup);
     settings.set_load_windows_size_at_startup(basic_settings.settings_load_windows_size_at_startup);
@@ -1010,6 +1012,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         window_height,
         dark_theme,
         show_only_icons,
+        hidden_tools: collect_hidden_tools(app),
         settings_load_tabs_sizes_at_startup,
         settings_load_windows_size_at_startup,
         manual_application_scale,

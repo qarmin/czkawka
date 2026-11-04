@@ -86,6 +86,8 @@ export global Callabler {
 
     callback open_link(string);
 
+    callback tool_visibility_toggled(int, bool);
+
     callback theme_changed();
     theme_changed => {
         Palette.color-scheme = Settings.dark_theme ? ColorScheme.dark : ColorScheme.light;

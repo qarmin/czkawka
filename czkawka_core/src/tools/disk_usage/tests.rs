@@ -185,6 +185,9 @@ fn report_respects_depth_and_entry_limits() {
 #[test]
 fn extension_categories_are_case_insensitive() {
     assert_eq!(FileCategory::from_extension("JPG"), FileCategory::Image);
+    for extension in ["rw2", "raf", "orf", "3fr", "fff", "pef", "srw", "rwl", "x3f"] {
+        assert_eq!(FileCategory::from_extension(extension), FileCategory::Image, "{extension}");
+    }
     assert_eq!(FileCategory::from_extension("Rs"), FileCategory::Code);
     assert_eq!(FileCategory::from_extension("rlib"), FileCategory::Binary);
     assert_eq!(FileCategory::from_extension("gd"), FileCategory::Code);

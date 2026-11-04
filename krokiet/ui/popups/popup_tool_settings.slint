@@ -10,8 +10,8 @@ export component PopupToolSettings inherits Rectangle {
 
     popup_window := PopupBase {
         width: popup_width;
-        x: (root.width - self.width) / 2.0;
-        y: (root.height - self.height) / 2.0;
+        x: round(((root.width - self.width) / 2.0) / 1px) * 1px;
+        y: round(((root.height - self.height) / 2.0) / 1px) * 1px;
         title_text: Translations.subsettings_text + " - " + GuiState.active_tool_name;
         show_cancel_button: false;
 
