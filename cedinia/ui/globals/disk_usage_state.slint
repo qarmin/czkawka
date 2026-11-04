@@ -1,0 +1,30 @@
+export struct DiskUsageRow {
+    name: string,
+    size_text: string,
+    detail_text: string,
+    fraction: float,
+    color: color,
+    is_directory: bool,
+    category: int,
+    has_menu: bool,
+}
+
+export global DiskUsageState {
+    in-out property <[DiskUsageRow]> rows: [];
+    in-out property <[string]>        breadcrumb: [];
+    in-out property <string>          summary_text: "";
+    in-out property <bool>            has_results: false;
+
+    in-out property <bool>            menu_visible: false;
+    in-out property <bool>            confirm_visible: false;
+    in property <string>              menu_name: "";
+    in property <string>              menu_path: "";
+    in property <string>              menu_parent: "";
+    in property <bool>                menu_is_directory: false;
+    in property <string>              confirm_message: "";
+
+    callback row_tapped(int);
+    callback row_menu_requested(int);
+    callback delete_confirmed();
+    callback breadcrumb_tapped(int);
+}

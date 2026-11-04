@@ -18,6 +18,10 @@ pub(crate) fn translate_items(app: &MainWindow) {
     t.set_tool_bad_names_text(flc!("tool_bad_names").into());
     t.set_tool_exif_remover_text(flc!("tool_exif_remover").into());
     t.set_tool_similar_videos_text(flc!("tool_similar_videos").into());
+    t.set_tool_disk_usage_text(flc!("tool_disk_usage").into());
+    t.set_home_disk_usage_description_text(flc!("home_disk_usage_description").into());
+    t.set_settings_disk_usage_header_text(flc!("settings_disk_usage_header").into());
+    t.set_settings_disk_usage_accurate_categories_text(flc!("settings_disk_usage_accurate_categories").into());
     t.set_tool_directories_text(flc!("tool_directories").into());
     t.set_tool_settings_text(flc!("tool_settings").into());
 

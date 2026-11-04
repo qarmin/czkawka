@@ -22,7 +22,7 @@ use crate::settings::{apply_settings_to_gui, collect_settings_from_gui, load_dir
 use crate::thumbnail_loader::{ThumbnailData, collect_thumb_tasks, make_placeholder_image, rgba_to_slint_image, spawn_thumbnail_loader};
 use crate::translations::translate_items;
 use crate::volumes::home_dir;
-use crate::{AppState, FileEntry, MainWindow, ProgressData, ScanState};
+use crate::{ActiveTool, AppState, FileEntry, MainWindow, ProgressData, ScanState};
 
 #[cfg(target_os = "android")]
 thread_local! {
@@ -145,6 +145,13 @@ impl ScanResultHandler for GuiHandler {
             ScanResult::BadNames(items) => set_tool_model(weak, items, MainWindow::set_bad_names_model),
             ScanResult::ExifRemover(items) => set_tool_model(weak, items, MainWindow::set_exif_remover_model),
             ScanResult::SimilarVideos(items) => set_tool_model(weak, items, MainWindow::set_similar_videos_model),
+            ScanResult::DiskUsage(tree, info) => {
+                slint::invoke_from_event_loop(move || {
+                    let win = weak.upgrade().expect("Failed to upgrade app :(");
+                    crate::disk_usage::show_results(&win, tree, &info);
+                })
+                .expect("Failed to invoke disk usage results in event loop");
+            }
             ScanResult::Finished(id) => {
                 slint::invoke_from_event_loop(move || {
                     let win = weak.upgrade().expect("Failed to upgrade app :(");
@@ -158,8 +165,12 @@ impl ScanResultHandler for GuiHandler {
                     } else {
                         win.global::<AppState>().set_scan_state(ScanState::Done);
                         let tool = win.global::<AppState>().get_active_tool();
-                        let model = get_model_for_tool(&win, tool);
-                        let file_count = (0..model.row_count()).filter(|&i| model.row_data(i).is_some_and(|e| !e.is_header)).count();
+                        let file_count = if tool == ActiveTool::DiskUsage {
+                            crate::disk_usage::file_count()
+                        } else {
+                            let model = get_model_for_tool(&win, tool);
+                            (0..model.row_count()).filter(|&i| model.row_data(i).is_some_and(|e| !e.is_header)).count()
+                        };
                         let status = if file_count > 0 {
                             format!("{} {file_count} {}", crate::flc!("found_items_prefix"), crate::flc!("found_items_suffix"))
                         } else {
@@ -280,6 +291,7 @@ fn run_app_inner(
     wire_licenses_popup(&window);
     wire_save_settings_now(&window, included_dirs.clone(), excluded_dirs.clone(), referenced_dirs.clone());
     wire_compare(&window);
+    crate::disk_usage::wire_disk_usage(&window);
 
     let weak = window.as_weak();
     let thumb_rx = Rc::new(std::cell::RefCell::new(thumb_rx));

@@ -162,9 +162,33 @@ doctor:
     info "measureme (profiling/timings)"        bash -c "command -v summarize"
     info "ollama (translate deps)"              ollama --version
     info "wget (itests/prepare_binaries)"       wget --version
-    info "adb (android)"                        adb --version
-    info "gradle (android)"                     gradle --version
-    info "keytool (gen_keystores)"              bash -c "command -v keytool"
+
+    echo ""
+    echo "Android (just android / androidr / android_build*):"
+    warn() {
+        local name="$1" hint="$2"; shift 2
+        if "$@" >/dev/null 2>&1; then
+            printf "  [OK]      %s\n" "$name"
+        else
+            printf "  [MISSING] %s  ->  %s\n" "$name" "$hint"
+            android_missing=$((android_missing + 1))
+        fi
+    }
+    android_missing=0
+    warn "cargo-apk"                  "cargo install cargo-apk --locked (or just setup_android)"  cargo apk --help
+    warn "rust target aarch64-linux-android" "rustup target add aarch64-linux-android"    bash -c "rustup target list --installed | grep -qx aarch64-linux-android"
+    warn "java (JDK 17)"              "sudo apt install openjdk-17-jdk"                    bash -c "command -v java"
+    warn "keytool (gen_keystores)"    "comes with the JDK"                                 bash -c "command -v keytool"
+    warn "ANDROID_HOME is a directory" "export ANDROID_HOME=\$HOME/android-sdk, see cedinia/TMP_INSTALL.md" bash -c '[ -d "$ANDROID_HOME" ]'
+    warn "ANDROID_NDK_HOME is a directory" "export ANDROID_NDK_HOME=\$ANDROID_HOME/ndk/27.2.12479018" bash -c '[ -d "$ANDROID_NDK_HOME" ]'
+    warn "SDK platform + build-tools" "sdkmanager \"platforms;android-35\" \"build-tools;35.0.0\"" bash -c '[ -d "$ANDROID_HOME/platforms" ] && [ -d "$ANDROID_HOME/build-tools" ]'
+    warn "adb (install/run)"          "sdkmanager platform-tools, add it to PATH"          adb --version
+    warn "keystore_pass file"         "echo -n 123456 > keystore_pass (git-ignored)"       test -f keystore_pass
+    warn "keystores in cedinia/android/keystore" "just gen_keystores"                      bash -c "test -f cedinia/android/keystore/debug.keystore && test -f cedinia/android/keystore/release.keystore"
+    info "gradle (only for the AAB flow)" gradle --version
+    if [ "$android_missing" -gt 0 ]; then
+        echo "  $android_missing Android requirement(s) missing - Android recipes will fail (see cedinia/TMP_INSTALL.md)."
+    fi
 
     echo ""
     if [ "$fail" -eq 0 ]; then
@@ -195,7 +219,53 @@ setup: setup_sanitizer setup_verify_tools
     command -v wget      >/dev/null 2>&1 || echo "  sudo apt install wget"
     command -v ollama    >/dev/null 2>&1 || echo "  curl -fsSL https://ollama.com/install.sh | sh"
 
-    echo "Done - run 'just doctor' to verify."
+    echo "Done - run 'just doctor' to verify. Non-standard extras: 'just setup_android' (or 'just setup_all' for everything)."
+
+# standard setup plus every optional, non-standard environment below
+[group('setup')]
+setup_all: setup setup_android
+
+# Android build env: cargo-apk, Rust target, SDK/NDK in $ANDROID_HOME, keystores; needs a JDK (sudo), ~2 GB download, accepts SDK licences, prints shell exports
+[group('setup')]
+setup_android:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    SDK="${ANDROID_HOME:-$HOME/android-sdk}"
+    NDK_VERSION="27.2.12479018"
+    CMDLINE_TOOLS_ZIP="commandlinetools-linux-11076708_latest.zip"
+
+    cargo apk --help >/dev/null 2>&1 || cargo install cargo-apk --locked
+    rustup target add aarch64-linux-android
+
+    if ! command -v java >/dev/null 2>&1 || ! command -v keytool >/dev/null 2>&1; then
+        echo "JDK missing (needed by sdkmanager and keytool) - install it and re-run:  sudo apt install openjdk-17-jdk"
+        exit 1
+    fi
+    command -v unzip >/dev/null 2>&1 || { echo "unzip missing - sudo apt install unzip"; exit 1; }
+
+    if [ ! -x "$SDK/cmdline-tools/latest/bin/sdkmanager" ]; then
+        tmp=$(mktemp -d)
+        curl -fL -o "$tmp/tools.zip" "https://dl.google.com/android/repository/$CMDLINE_TOOLS_ZIP"
+        mkdir -p "$SDK/cmdline-tools"
+        unzip -q "$tmp/tools.zip" -d "$tmp"
+        rm -rf "$SDK/cmdline-tools/latest"
+        mv "$tmp/cmdline-tools" "$SDK/cmdline-tools/latest"
+        rm -rf "$tmp"
+    fi
+
+    SDKMANAGER="$SDK/cmdline-tools/latest/bin/sdkmanager"
+    yes | "$SDKMANAGER" --sdk_root="$SDK" --licenses >/dev/null || true
+    "$SDKMANAGER" --sdk_root="$SDK" "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;$NDK_VERSION"
+
+    [ -f keystore_pass ] || printf '123456' > keystore_pass
+    just gen_keystores
+
+    echo ""
+    echo "Add to ~/.bashrc (or ~/.zshrc), reload the shell, then run 'just doctor':"
+    echo "  export JAVA_HOME=\"$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")\""
+    echo "  export ANDROID_HOME=\"$SDK\""
+    echo "  export ANDROID_NDK_HOME=\"$SDK/ndk/$NDK_VERSION\""
+    echo "  export PATH=\"\$PATH:$SDK/platform-tools:$SDK/cmdline-tools/latest/bin\""
 
 [group('setup')]
 setup_sanitizer:
