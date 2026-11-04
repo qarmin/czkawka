@@ -13,7 +13,7 @@ component ComboBoxWrapper inherits HorizontalLayout {
     in-out property <string> text;
     in-out property <[string]> model;
     in-out property <int> current_index;
-    in-out property <string> current_value;
+    in-out property <string> current_value: root.model[root.current_index];
     spacing: 5px;
     vertical-stretch: 0;
     Text {

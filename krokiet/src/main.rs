@@ -55,6 +55,7 @@ use crate::set_initial_scroll_list_data_indexes::set_initial_scroll_list_data_in
 // use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_initial_settings_from_file, save_all_settings_to_file, set_initial_settings_to_gui};
 use crate::shared_models::SharedModels;
+use crate::tools_visibility::connect_tools_visibility;
 
 mod audio_player;
 mod clear_outdated_video_thumbnails;
@@ -92,6 +93,7 @@ mod shared_models;
 mod simpler_model;
 #[cfg(test)]
 mod test_common;
+mod tools_visibility;
 
 // Slint's generated code triggers many clippy lints (unwrap_used, indexing_slicing, ...)
 // that we enforce ourselves but cannot influence in third-party generated code.
@@ -190,6 +192,7 @@ fn main() {
     connect_show_preview(&app, Arc::clone(&shared_models));
     connect_compare(&app, Arc::clone(&shared_models));
     connect_translations(&app);
+    connect_tools_visibility(&app);
     connect_help(&app);
     connect_changing_settings_preset(&app);
     connect_select(&app, &shared_models);

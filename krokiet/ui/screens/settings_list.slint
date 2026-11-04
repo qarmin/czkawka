@@ -12,6 +12,7 @@ import { HintText } from "../components/hint_text.slint";
 
 global SettingsSize {
     out property <length> item_height: 30px;
+    out property <length> scrollbar_gap: 15px;
 }
 
 export component TextComponent inherits HorizontalLayout {
@@ -402,20 +403,38 @@ export component SettingsList inherits VerticalLayout {
 
     in-out property <bool> restart_required_global;
     in-out property <bool> restart_required;
+    in-out property <int> section: 0;
 
     Text {
         text <=> Translations.settings_settings_text;
+        width: parent.width - SettingsSize.scrollbar_gap;
         height: SettingsSize.item_height;
         horizontal-alignment: TextHorizontalAlignment.center;
         font-size: FontSizes.title;
     }
 
+    HorizontalLayout {
+        padding-right: SettingsSize.scrollbar_gap;
+        spacing: 5px;
+        for name[i] in [Translations.settings_section_general_text, Translations.settings_section_search_text, Translations.settings_section_tools_text, Translations.settings_section_cache_text]: Button {
+            text: name;
+            primary: root.section == i;
+            clicked => {
+                root.section = i;
+            }
+        }
+    }
+
     ScrollView {
         VerticalLayout {
-            padding-right: 15px;
+            alignment: start;
+            padding-right: SettingsSize.scrollbar_gap;
             padding-bottom: 10px;
             spacing: 5px;
 
+            if root.section == 0: VerticalLayout {
+                alignment: start;
+                spacing: 5px;
             HeaderText {
                 text <=> Translations.settings_global_settings_text;
             }
@@ -499,6 +518,11 @@ export component SettingsList inherits VerticalLayout {
                 hint_text: Translations.settings_notification_focused_hint_text;
             }
 
+            }
+
+            if root.section == 1: VerticalLayout {
+                alignment: start;
+                spacing: 5px;
             HeaderText {
                 text <=> Translations.settings_select_header_text;
             }
@@ -577,6 +601,30 @@ export component SettingsList inherits VerticalLayout {
                 horizontal-alignment: TextHorizontalAlignment.center;
                 font-size: FontSizes.normal;
             }
+            }
+
+            if root.section == 2: VerticalLayout {
+                alignment: start;
+                spacing: 5px;
+            HeaderText {
+                text <=> Translations.settings_visible_tools_text;
+            }
+
+            GridLayout {
+                spacing: 2px;
+                for tool[idx] in Settings.tools_visibility: CheckBox {
+                    row: floor(idx / 4);
+                    col: mod(idx, 4);
+                    height: SettingsSize.item_height;
+                    text: tool.name;
+                    checked: tool.visible;
+                    enabled: !tool.visible || Settings.visible_tools_count > 1;
+                    toggled => {
+                        Callabler.tool_visibility_toggled(idx, self.checked);
+                    }
+                }
+            }
+
             HeaderText {
                 text <=> Translations.tool_duplicate_files_text;
             }
@@ -714,6 +762,11 @@ export component SettingsList inherits VerticalLayout {
                 }
             }
 
+            }
+
+            if root.section == 3: VerticalLayout {
+                alignment: start;
+                spacing: 5px;
             HeaderText {
                 text <=> Translations.settings_cache_header_text;
             }
@@ -736,10 +789,13 @@ export component SettingsList inherits VerticalLayout {
             }
 
             ConfigCacheButtons { }
+            }
+
         }
     }
 
     HorizontalLayout {
+        padding-right: SettingsSize.scrollbar_gap;
         spacing: 5px;
         Button {
             text <=> Translations.settings_save_text;

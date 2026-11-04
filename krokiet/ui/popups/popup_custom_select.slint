@@ -27,8 +27,8 @@ export component PopupCustomSelect inherits Rectangle {
     popup_window := PopupWindow {
         width: popup_width;
         height: popup_height;
-        x: (parent.width - popup_width) / 2.0;
-        y: (parent.height - self.height) / 2.0;
+        x: round(((parent.width - popup_width) / 2.0) / 1px) * 1px;
+        y: round(((parent.height - self.height) / 2.0) / 1px) * 1px;
         close-policy: PopupClosePolicy.no-auto-close;
 
         PopupBackdrop { }

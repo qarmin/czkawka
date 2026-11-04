@@ -330,6 +330,8 @@ pub struct BasicSettings {
     pub dark_theme: bool,
     #[serde(default)]
     pub show_only_icons: bool,
+    #[serde(default)]
+    pub hidden_tools: Vec<String>,
     #[serde(default = "ttrue")]
     pub settings_load_windows_size_at_startup: bool,
     #[serde(default = "ttrue")]

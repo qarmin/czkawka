@@ -6,6 +6,7 @@ use log::{error, info};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::settings::combo_box::{SimilarVideosAudioPreset, SimilarVideosVisualPreset, StringComboBoxItems};
+use crate::tools_visibility::set_tools_names;
 use crate::{ActiveTab, Callabler, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
 
 pub(crate) fn connect_translations(app: &MainWindow) {
@@ -135,6 +136,11 @@ fn translate_items(app: &MainWindow) {
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
     translation.set_settings_dark_theme_text(flk!("settings_dark_theme").into());
     translation.set_settings_show_only_icons_text(flk!("settings_show_only_icons").into());
+    translation.set_settings_section_general_text(flk!("settings_section_general").into());
+    translation.set_settings_section_search_text(flk!("settings_section_search").into());
+    translation.set_settings_section_tools_text(flk!("settings_section_tools").into());
+    translation.set_settings_section_cache_text(flk!("settings_section_cache").into());
+    translation.set_settings_visible_tools_text(flk!("settings_visible_tools").into());
     translation.set_settings_global_settings_text(flk!("settings_global_settings").into());
     translation.set_selection_all_text(flk!("selection_all").into());
     translation.set_selection_deselect_all_text(flk!("selection_deselect_all").into());
@@ -493,10 +499,9 @@ fn translate_items(app: &MainWindow) {
         (flk!("tool_exif_remover").into(), ActiveTab::ExifRemover),
         (flk!("tool_video_optimizer").into(), ActiveTab::VideoOptimizer),
     ];
-    let mut tools_model = list_tools_model.to_vec();
-    tools_model.push((flk!("tool_disk_usage").into(), ActiveTab::DiskUsage));
-    let gui_state = app.global::<GuiState>();
-    gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model)));
+    let mut tools = list_tools_model.to_vec();
+    tools.push((flk!("tool_disk_usage").into(), ActiveTab::DiskUsage));
+    set_tools_names(app, tools);
 
     let sort_model: [SortModel; 3] = [
         SortModel {
@@ -513,7 +518,7 @@ fn translate_items(app: &MainWindow) {
         },
     ];
 
-    gui_state.set_sort_results_list(ModelRc::new(VecModel::from(sort_model.to_vec())));
+    app.global::<GuiState>().set_sort_results_list(ModelRc::new(VecModel::from(sort_model.to_vec())));
 
     let selection = flk!("column_selection");
     let size = flk!("column_size");

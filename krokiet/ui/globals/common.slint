@@ -138,6 +138,12 @@ export struct SortModel {
     name: string
 }
 
+export struct ToolVisibilityModel {
+    name: string,
+    tab: ActiveTab,
+    visible: bool
+}
+
 export struct CacheCleaningProgress {
     current_cache_file: int,
     total_cache_files: int,

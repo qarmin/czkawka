@@ -26,10 +26,12 @@ export component PopupBase inherits PopupWindow {
         border-color: ColorPalette.popup_border_color;
         border-width: 2px;
         background: ColorPalette.popup_background;
-        clip: true;
         vlayout := VerticalLayout {
+            padding: 2px;
             Rectangle {
                 background: ColorPalette.popup_background_title_line;
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
 
                 Text {
                     vertical-stretch: 0.0;
@@ -43,24 +45,30 @@ export component PopupBase inherits PopupWindow {
 
             @children
 
-            HorizontalLayout {
-                padding: 10px;
-                Button {
-                    enabled <=> enabled_ok_button;
-                    text <=> ok_text;
-                    primary: true;
-                    clicked => {
-                        root.close();
-                        ok_clicked();
+            Rectangle {
+                background: ColorPalette.popup_background_footer;
+                border-bottom-left-radius: 8px;
+                border-bottom-right-radius: 8px;
+
+                HorizontalLayout {
+                    padding: 10px;
+                    Button {
+                        enabled <=> enabled_ok_button;
+                        text <=> ok_text;
+                        primary: true;
+                        clicked => {
+                            root.close();
+                            ok_clicked();
+                        }
                     }
-                }
 
-                Rectangle { }
+                    Rectangle { }
 
-                if show_cancel_button: Button {
-                    text <=> cancel_text;
-                    clicked => {
-                        root.close();
+                    if show_cancel_button: Button {
+                        text <=> cancel_text;
+                        clicked => {
+                            root.close();
+                        }
                     }
                 }
             }

@@ -1,4 +1,4 @@
-import { ExcludedPathsModel, IncludedPathsModel } from "common.slint";
+import { ExcludedPathsModel, IncludedPathsModel, ToolVisibilityModel } from "common.slint";
 
 export global Settings {
     in-out property <int> settings_preset_idx: 0;
@@ -16,6 +16,8 @@ export global Settings {
     // Settings
     in-out property <bool> dark_theme: true;
     in-out property <bool> show_only_icons: false;
+    in-out property <[ToolVisibilityModel]> tools_visibility: [];
+    in-out property <int> visible_tools_count: 0;
     in-out property <bool> load_windows_size_at_startup: true;
     in-out property <bool> load_tabs_sizes_at_startup: true;
     in-out property <float> manual_application_scale: 1.0;

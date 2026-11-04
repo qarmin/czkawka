@@ -81,7 +81,8 @@ impl FileCategory {
         match extension.to_ascii_lowercase().as_str() {
             "mp3" | "flac" | "wav" | "aac" | "ogg" | "opus" | "m4a" | "wma" | "aiff" | "alac" => Self::Audio,
             "mp4" | "mkv" | "avi" | "mov" | "webm" | "m4v" | "wmv" | "mpg" | "mpeg" | "ts" | "flv" => Self::Video,
-            "jpg" | "jpeg" | "png" | "gif" | "bmp" | "webp" | "tiff" | "tif" | "svg" | "heic" | "avif" | "jxl" | "raw" | "cr2" | "nef" | "arw" | "dng" => Self::Image,
+            "jpg" | "jpeg" | "png" | "gif" | "bmp" | "webp" | "tiff" | "tif" | "svg" | "heic" | "avif" | "jxl" | "raw" | "cr2" | "nef" | "arw" | "dng" | "rw2" | "raf" | "orf"
+            | "3fr" | "fff" | "pef" | "srw" | "rwl" | "x3f" => Self::Image,
             "zip" | "7z" | "rar" | "tar" | "gz" | "xz" | "bz2" | "zst" | "cab" | "lz4" => Self::Archive,
             "pdf" | "doc" | "docx" | "odt" | "rtf" | "txt" | "md" | "xls" | "xlsx" | "ods" | "ppt" | "pptx" | "odp" | "epub" => Self::Document,
             "rs" | "c" | "h" | "hpp" | "cpp" | "cc" | "py" | "js" | "tsx" | "jsx" | "java" | "kt" | "go" | "php" | "rb" | "swift" | "cs" | "toml" | "json" | "yaml" | "yml"
