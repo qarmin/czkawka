@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use std::thread;
 
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
@@ -10,10 +9,12 @@ use czkawka_core::tools::duplicate;
 use czkawka_core::tools::duplicate::{DuplicateEntry, DuplicateFinder, DuplicateFinderParameters};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
+use slint::{ComponentHandle, SharedString, Weak};
 
 use crate::common::{MAX_INT_DATA_DUPLICATE_FILES, MAX_STR_DATA_DUPLICATE_FILES, split_u64_into_i32s};
-use crate::connect_scan::{MessagesData, ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
+use crate::connect_scan::{
+    MessagesData, PlainRow, RowContent, ScanData, get_dt_timestamp_string, get_text_messages, grouped_rows, reset_selection_at_end, rows_into_model, set_common_settings,
+};
 use crate::{ActiveTab, GuiState, MainWindow, flk};
 
 pub(crate) fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
@@ -95,15 +96,17 @@ pub(crate) fn scan_duplicates(a: Weak<MainWindow>, sd: ScanData) {
 
             let messages_data = MessagesData { critical, messages };
 
+            vector.reverse();
+            let rows = grouped_rows(vector, prepare_data_model_duplicates);
             a.upgrade_in_event_loop(move |app| {
-                write_duplicate_results(&app, vector, messages_data, info, sd, stopped_search, duplicates_number, groups_number, lost_space);
+                write_duplicate_results(&app, rows, messages_data, info, sd, stopped_search, duplicates_number, groups_number, lost_space);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
 fn write_duplicate_results(
     app: &MainWindow,
-    vector: Vec<(Option<DuplicateEntry>, Vec<DuplicateEntry>)>,
+    rows: Vec<PlainRow>,
     messages_data: MessagesData,
     info: duplicate::Info,
     sd: ScanData,
@@ -114,21 +117,7 @@ fn write_duplicate_results(
 ) {
     let scanning_time_str = format_time(info.scanning_time);
 
-    let items = Rc::new(VecModel::default());
-    for (ref_fe, vec_fe) in vector.into_iter().rev() {
-        if let Some(ref_fe) = ref_fe {
-            let (data_model_str, data_model_int) = prepare_data_model_duplicates(ref_fe);
-            insert_data_to_model(&items, data_model_str, data_model_int, Some(true));
-        } else {
-            insert_data_to_model(&items, ModelRc::new(VecModel::default()), ModelRc::new(VecModel::default()), Some(false));
-        }
-
-        for fe in vec_fe {
-            let (data_model_str, data_model_int) = prepare_data_model_duplicates(fe);
-            insert_data_to_model(&items, data_model_str, data_model_int, None);
-        }
-    }
-    app.set_duplicate_files_model(items.into());
+    app.set_duplicate_files_model(rows_into_model(rows));
     if let Some(critical) = messages_data.critical {
         app.invoke_scan_ended(critical.into());
     } else {
@@ -159,7 +148,7 @@ fn write_duplicate_results(
     app.global::<GuiState>().set_info_text(messages_data.messages.into());
     reset_selection_at_end(app, ActiveTab::DuplicateFiles);
 }
-fn prepare_data_model_duplicates(fe: DuplicateEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn prepare_data_model_duplicates(fe: DuplicateEntry) -> RowContent {
     let (directory, file) = split_path(fe.get_path());
     let data_model_str_arr: [SharedString; MAX_STR_DATA_DUPLICATE_FILES] = [
         format_size(fe.size, BINARY).into(),
@@ -167,10 +156,10 @@ fn prepare_data_model_duplicates(fe: DuplicateEntry) -> (ModelRc<SharedString>, 
         directory.into(),
         get_dt_timestamp_string(fe.get_modified_date()).into(),
     ];
-    let data_model_str = VecModel::from_slice(&data_model_str_arr);
+    let data_model_str = data_model_str_arr.to_vec();
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
     let data_model_int_arr: [i32; MAX_INT_DATA_DUPLICATE_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
-    let data_model_int = VecModel::from_slice(&data_model_int_arr);
+    let data_model_int = data_model_int_arr.to_vec();
     (data_model_str, data_model_int)
 }

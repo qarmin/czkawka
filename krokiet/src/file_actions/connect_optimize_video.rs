@@ -175,7 +175,7 @@ impl ModelProcessor {
             let stop_flag_clone = stop_flag.clone();
             let optimize_fnc = move |data: &SimplerSingleMainListModel| {
                 let file_codec = &data.val_str[codec_idx];
-                if custom_ffmpeg_command.is_none() && codec_str == *file_codec {
+                if custom_ffmpeg_command.is_none() && file_codec.as_str() == codec_str {
                     return Ok(()); // No need to transcode if codec is the same and no custom command
                 }
 
