@@ -11,7 +11,7 @@ use slint::{ComponentHandle, Image, Model, ModelRc, VecModel, Weak};
 
 use crate::disk_usage::describe::{self, ItemInfo};
 use crate::disk_usage::render::{ChartGeometry, RenderSettings, render_chart};
-use crate::disk_usage::tree_view;
+use crate::disk_usage::{selection, tree_view};
 use crate::shared_models::SharedModels;
 use crate::{DiskUsageCategory, DiskUsageMode, DiskUsageState, MainWindow, Settings, flk};
 
@@ -40,9 +40,9 @@ pub(super) struct ViewState {
 }
 
 pub(super) struct RenderedChart {
-    layout: Arc<Layout>,
-    geometry: ChartGeometry,
-    zoom: Vec<u32>,
+    pub layout: Arc<Layout>,
+    pub geometry: ChartGeometry,
+    pub zoom: Vec<u32>,
     total_size: u64,
 }
 
@@ -68,7 +68,6 @@ pub(super) struct RenderRequest {
     generation: u64,
     tree_version: u64,
     zoom: Vec<u32>,
-    selected: Option<Vec<u32>>,
     geometry: ChartGeometry,
     options: LayoutOptions,
     dark_theme: bool,
@@ -144,11 +143,9 @@ fn build_and_render(
         return None;
     }
 
-    let selected = request.selected.as_deref().and_then(|address| find_item_in_view(&layout, &request.zoom, address));
     let settings = RenderSettings {
         geometry: request.geometry,
         levels: request.options.max_depth,
-        selected,
         dark_theme: request.dark_theme,
         nested_borders: request.nested_borders,
     };
@@ -182,6 +179,7 @@ fn publish(weak: &Weak<MainWindow>, context: &Arc<ChartContext>, generation: u64
             .map(|tool| describe::root_label(tool.get_tree(), &chart.zoom));
         state.set_center_title(title.unwrap_or_default().into());
         *context.chart.lock().expect("Chart mutex poisoned") = Some(chart);
+        selection::update_overlay(&app, &context);
         // The pointer may be resting over a different item now, e.g. after zooming with the wheel
         let last_hover = context.view.lock().expect("View mutex poisoned").last_hover;
         if let Some((x, y)) = last_hover {
@@ -200,15 +198,6 @@ fn absolute_address(zoom: &[u32], relative: &[u32]) -> Vec<u32> {
     } else {
         zoom.iter().chain(relative.iter().skip(1)).copied().collect()
     }
-}
-
-fn find_item_in_view(layout: &Layout, zoom: &[u32], address: &[u32]) -> Option<usize> {
-    if zoom.is_empty() {
-        return layout.find_item(address);
-    }
-    let inside_zoom = address.strip_prefix(zoom)?;
-    let relative = std::iter::once(0).chain(inside_zoom.iter().copied()).collect::<Vec<_>>();
-    layout.find_item(&relative)
 }
 
 fn layout_options(app: &MainWindow, size_px: (u32, u32)) -> LayoutOptions {
@@ -241,9 +230,9 @@ pub(super) fn request_render(app: &MainWindow, context: &Arc<ChartContext>) {
     if !state.get_has_results() {
         return;
     }
-    let (size_px, zoom, selected) = {
+    let (size_px, zoom) = {
         let view = context.view.lock().expect("View mutex poisoned");
-        (view.size_px, view.zoom.clone(), view.selected.clone())
+        (view.size_px, view.zoom.clone())
     };
     if size_px.0 == 0 || size_px.1 == 0 {
         return;
@@ -253,7 +242,6 @@ pub(super) fn request_render(app: &MainWindow, context: &Arc<ChartContext>) {
         generation: context.generation.fetch_add(1, Ordering::Relaxed) + 1,
         tree_version: context.tree_version.load(Ordering::Relaxed),
         zoom,
-        selected,
         geometry: ChartGeometry {
             width: size_px.0,
             height: size_px.1,
@@ -337,7 +325,7 @@ pub(super) fn select_item_at(app: &MainWindow, context: &Arc<ChartContext>, x: f
     describe::show_selection(app, info.as_ref());
     tree_view::expand_ancestors_of_selection(context);
     tree_view::rebuild(app, context);
-    request_render(app, context);
+    selection::update_overlay(app, context);
 }
 
 /// Address of the item under the cursor, or of the directory that holds a block of omitted entries.

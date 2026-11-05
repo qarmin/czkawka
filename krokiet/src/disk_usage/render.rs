@@ -1,15 +1,15 @@
 use std::f32::consts::TAU;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use czkawka_core::tools::disk_usage::category::FileCategory;
 use czkawka_core::tools::disk_usage::layout::{Layout, LayoutItem, LayoutKind, SUNBURST_CENTER_RADIUS, Shape};
 use czkawka_core::tools::disk_usage::tree::{CategorySizes, NodeKind};
+use rayon::iter::{ParallelBridge, ParallelIterator};
 use slint::{Rgba8Pixel, SharedPixelBuffer};
 
 const BACKGROUND_DARK: [u8; 4] = [30, 30, 30, 255];
 const BACKGROUND_LIGHT: [u8; 4] = [248, 248, 248, 255];
 const NEUTRAL_ITEM: [u8; 3] = [96, 96, 96];
-const SELECTION_DARK_THEME: [u8; 4] = [255, 255, 255, 255];
-const SELECTION_LIGHT_THEME: [u8; 4] = [20, 20, 20, 255];
 const DIRECTORY_BRIGHTNESS: f32 = 0.62;
 /// Colour of the one-pixel lines between rectangles; the same for every rectangle, so they show up on any fill.
 const LINE_DARK: [u8; 4] = [52, 56, 64, 255];
@@ -30,7 +30,7 @@ pub(crate) struct ChartGeometry {
 
 impl ChartGeometry {
     /// The sunburst is a circle, so it gets the biggest centred square; everything else fills the whole chart.
-    fn drawing_area(self) -> (u32, u32, u32, u32) {
+    pub(super) fn drawing_area(self) -> (u32, u32, u32, u32) {
         if self.kind == LayoutKind::Sunburst {
             let side = self.width.min(self.height);
             ((self.width - side) / 2, (self.height - side) / 2, side, side)
@@ -55,7 +55,6 @@ pub(crate) struct RenderSettings {
     pub geometry: ChartGeometry,
     /// Number of rings or rows, needed to place the rings of the sunburst.
     pub levels: usize,
-    pub selected: Option<usize>,
     pub dark_theme: bool,
     /// A directory keeps its own frame around what is inside, so the lines pile up with every level of nesting;
     /// without it, entries fill their directory and only the faint border of each rectangle is left.
@@ -63,7 +62,7 @@ pub(crate) struct RenderSettings {
 }
 
 /// Returns `None` when `is_current` reports that the result is no longer wanted.
-pub(crate) fn render_chart(layout: &Layout, settings: &RenderSettings, is_current: &dyn Fn() -> bool) -> Option<SharedPixelBuffer<Rgba8Pixel>> {
+pub(crate) fn render_chart(layout: &Layout, settings: &RenderSettings, is_current: &(dyn Fn() -> bool + Sync)) -> Option<SharedPixelBuffer<Rgba8Pixel>> {
     let ChartGeometry { width, height, kind } = settings.geometry;
     // Starts fully transparent, so whatever is not drawn shows the background of the window in any theme
     let mut buffer = SharedPixelBuffer::<Rgba8Pixel>::new(width.max(1), height.max(1));
@@ -75,7 +74,7 @@ pub(crate) fn render_chart(layout: &Layout, settings: &RenderSettings, is_curren
     drawn.then_some(buffer)
 }
 
-fn draw_rectangles(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings, is_current: &dyn Fn() -> bool) -> bool {
+fn draw_rectangles(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings, is_current: &(dyn Fn() -> bool + Sync)) -> bool {
     let (width, height) = (settings.geometry.width, settings.geometry.height);
     for (index, item) in layout.items.iter().enumerate() {
         if index % 512 == 0 && !is_current() {
@@ -98,16 +97,15 @@ fn draw_rectangles(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings,
             continue;
         }
         let rect = (left, top, right, bottom);
-        let selection = (settings.selected == Some(index)).then(|| selection_color(settings));
         match (&item.composition, settings.geometry.kind) {
             (Some(composition), LayoutKind::Treemap) => {
-                draw_directory_block(bytes, width, rect, composition, usize::from(item.depth), selection, directory_line(settings));
+                draw_directory_block(bytes, width, rect, composition, usize::from(item.depth), directory_line(settings));
             }
             (None, LayoutKind::Treemap) if item.kind == NodeKind::Directory => {
                 let fill = directory_background(settings, usize::from(item.depth));
-                draw_framed(bytes, width, rect, fill, directory_line(settings), selection);
+                draw_framed(bytes, width, rect, fill, directory_line(settings));
             }
-            _ => draw_framed(bytes, width, rect, item_color(item), tile_line(settings), selection),
+            _ => draw_framed(bytes, width, rect, item_color(item), tile_line(settings)),
         }
     }
     true
@@ -128,21 +126,11 @@ fn directory_line(settings: &RenderSettings) -> [u8; 4] {
     }
 }
 
-/// Colour of the outline of the selected item; the one that stands out from the background.
-fn selection_color(settings: &RenderSettings) -> [u8; 4] {
-    if settings.dark_theme { SELECTION_DARK_THEME } else { SELECTION_LIGHT_THEME }
-}
-
-/// The fill with a `line` along its right and bottom edge, or a double frame in `selection` colour when the item is selected.
-fn draw_framed(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), color: [u8; 4], line: [u8; 4], selection: Option<[u8; 4]>) {
+/// The fill with a `line` along its right and bottom edge.
+fn draw_framed(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), color: [u8; 4], line: [u8; 4]) {
     let (left, top, right, bottom) = rect;
-    if let Some(selection) = selection {
-        fill_rect(bytes, image_width, (left, top, right, bottom), selection);
-        fill_rect(bytes, image_width, (left + 2, top + 2, right.saturating_sub(2), bottom.saturating_sub(2)), color);
-    } else {
-        fill_rect(bytes, image_width, (left, top, right, bottom), line);
-        fill_rect(bytes, image_width, (left, top, right.saturating_sub(1), bottom.saturating_sub(1)), color);
-    }
+    fill_rect(bytes, image_width, (left, top, right, bottom), line);
+    fill_rect(bytes, image_width, (left, top, right.saturating_sub(1), bottom.saturating_sub(1)), color);
 }
 
 /// Background of a directory that has its entries drawn inside it; deeper directories are a little lighter.
@@ -154,7 +142,7 @@ fn directory_background(settings: &RenderSettings, depth: usize) -> [u8; 4] {
 
 /// A directory with nothing drawn inside: bands show what kinds of files it holds (the biggest on the left),
 /// and diagonal lines tell it apart from a file.
-fn draw_directory_block(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), composition: &CategorySizes, depth: usize, selection: Option<[u8; 4]>, line: [u8; 4]) {
+fn draw_directory_block(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), composition: &CategorySizes, depth: usize, line: [u8; 4]) {
     let (left, top, right, bottom) = rect;
     let mut bands = FileCategory::ALL
         .iter()
@@ -180,15 +168,8 @@ fn draw_directory_block(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32
     }
     draw_hatch(bytes, image_width, rect);
 
-    if let Some(selection) = selection {
-        fill_rect(bytes, image_width, (left, top, right, top + 1), selection);
-        fill_rect(bytes, image_width, (left, bottom.saturating_sub(1), right, bottom), selection);
-        fill_rect(bytes, image_width, (left, top, left + 1, bottom), selection);
-        fill_rect(bytes, image_width, (right.saturating_sub(1), top, right, bottom), selection);
-    } else {
-        fill_rect(bytes, image_width, (right.saturating_sub(1), top, right, bottom), line);
-        fill_rect(bytes, image_width, (left, bottom.saturating_sub(1), right, bottom), line);
-    }
+    fill_rect(bytes, image_width, (right.saturating_sub(1), top, right, bottom), line);
+    fill_rect(bytes, image_width, (left, bottom.saturating_sub(1), right, bottom), line);
 }
 
 fn draw_hatch(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32)) {
@@ -273,7 +254,7 @@ impl SunburstSampler {
 
     /// Item under a point given relative to the centre, in pixels; arcs are inset a little so that neighbours get a thin gap.
     /// The centre stays empty, its place is taken by text drawn over the chart.
-    fn item_at(&self, dx: f32, dy: f32) -> Option<ArcHit> {
+    fn item_at(&self, dx: f32, dy: f32) -> Option<usize> {
         let distance = dx.hypot(dy);
         let unit_distance = distance / self.radius_px;
         if unit_distance >= 1.0 {
@@ -292,61 +273,49 @@ impl SunburstSampler {
         let candidate = ring.arcs.partition_point(|(start, _, _)| *start <= angle).checked_sub(1)?;
         let &(start, end, item_index) = ring.arcs.get(candidate)?;
         let (from_start, to_end) = ((angle - start) * distance, (end - angle) * distance);
-        let inside = angle < end && from_start >= GAP_PX / 2.0 && to_end >= GAP_PX / 2.0;
-        let near_edge = from_ring_edge.min(from_start).min(to_end) < OUTLINE_PX;
-        inside.then_some(ArcHit { index: item_index, near_edge })
+        (angle < end && from_start >= GAP_PX / 2.0 && to_end >= GAP_PX / 2.0).then_some(item_index)
     }
-}
-
-/// An item of the sunburst under a point, and whether the point is close to the edge of its arc.
-#[derive(Clone, Copy, PartialEq)]
-struct ArcHit {
-    index: usize,
-    near_edge: bool,
 }
 
 /// Offsets of the samples used to estimate how much of a pixel an item covers, in pixels from its centre.
 const CORNER_OFFSET: f32 = 0.35;
 const SUPERSAMPLE_STEPS: u32 = 4;
 const GAP_PX: f32 = 1.0;
-/// Width of the white outline of the selected arc.
-const OUTLINE_PX: f32 = 2.0;
 
-fn draw_sunburst(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings, is_current: &dyn Fn() -> bool) -> bool {
+fn draw_sunburst(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings, is_current: &(dyn Fn() -> bool + Sync)) -> bool {
     let geometry = settings.geometry;
     let (left, top, side, _) = geometry.drawing_area();
     let radius_px = side as f32 / 2.0;
     let sampler = SunburstSampler::new(layout, settings.levels.max(1), radius_px);
     let center = (left as f32 + radius_px, top as f32 + radius_px);
     let image_width = geometry.width as usize;
-    let colors = |hit: ArcHit| {
-        let item = layout.items.get(hit.index)?;
-        Some(if hit.near_edge && settings.selected == Some(hit.index) {
-            selection_color(settings)
-        } else {
-            item_color(item)
-        })
-    };
+    let colors = |index: usize| layout.items.get(index).map(item_color);
 
-    let rows = bytes.chunks_exact_mut(image_width * 4).enumerate().skip(top as usize).take(side as usize);
-    for (row_index, row) in rows {
-        if row_index % 16 == 0 && !is_current() {
-            return false;
+    let first_row = top as usize;
+    let rows = bytes.chunks_exact_mut(image_width * 4).skip(first_row).take(side as usize);
+    let stale = AtomicBool::new(false);
+    rows.enumerate().par_bridge().for_each(|(offset, row)| {
+        if stale.load(Ordering::Relaxed) {
+            return;
         }
-        let dy = row_index as f32 + 0.5 - center.1;
+        if offset % 16 == 0 && !is_current() {
+            stale.store(true, Ordering::Relaxed);
+            return;
+        }
+        let dy = (first_row + offset) as f32 + 0.5 - center.1;
         for (column_index, pixel) in row.as_chunks_mut::<4>().0.iter_mut().enumerate().skip(left as usize).take(side as usize) {
             let dx = column_index as f32 + 0.5 - center.0;
             if let Some(color) = antialiased_pixel(&sampler, (dx, dy), &colors) {
                 pixel.copy_from_slice(&color);
             }
         }
-    }
-    true
+    });
+    !stale.load(Ordering::Relaxed)
 }
 
 /// `None` means nothing is drawn in the pixel. On an edge the pixel keeps the colour of what covers it and gets transparent
 /// in proportion to how much of it is empty, so it blends with the background of the window in any theme.
-fn antialiased_pixel(sampler: &SunburstSampler, (dx, dy): (f32, f32), colors: &dyn Fn(ArcHit) -> Option<[u8; 4]>) -> Option<[u8; 4]> {
+fn antialiased_pixel(sampler: &SunburstSampler, (dx, dy): (f32, f32), colors: &dyn Fn(usize) -> Option<[u8; 4]>) -> Option<[u8; 4]> {
     let center = sampler.item_at(dx, dy);
     let corners_agree = [(-1.0, -1.0), (1.0, -1.0), (-1.0, 1.0), (1.0, 1.0)]
         .iter()
@@ -415,7 +384,6 @@ mod tests {
         RenderSettings {
             geometry: ChartGeometry { width, height, kind },
             levels,
-            selected: None,
             dark_theme: true,
             nested_borders: false,
         }

@@ -1,6 +1,7 @@
 mod actions;
 mod describe;
 mod render;
+mod selection;
 mod tree_view;
 mod view;
 
