@@ -7,6 +7,7 @@ pub mod duplicate;
 pub mod empty_files;
 pub mod empty_folder;
 pub mod exif_remover;
+pub mod file_repair;
 pub mod invalid_symlinks;
 pub mod same_music;
 pub mod similar_images;

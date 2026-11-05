@@ -119,6 +119,12 @@ pub(crate) fn connect_show_confirmation(app: &MainWindow, shared_models: Arc<Mut
                 base.push_str(format!("\n{}", flk!("rust_clean_exif_confirmation_number_simple", items = res.checked_items_number)).as_str());
                 translation.set_clean_confirmation_text(base.into());
             }
+            PopupRequest::RepairFiles => {
+                let mut base = flk!("rust_repair_confirmation");
+                base.push_str(format!("\n{}", flk!("rust_repair_confirmation_number_simple", items = res.checked_items_number)).as_str());
+                translation.set_repair_confirmation_text(base.into());
+            }
+            PopupRequest::CollectVideoReferences => crate::file_actions::connect_references::prepare_references_popup(&app),
             PopupRequest::Symlink => {
                 let mut base = flk!("rust_symlink_confirmation");
                 base.push_str(format!("\n{}", flk!("rust_symlink_confirmation_number_simple", items = res.checked_items_number)).as_str());

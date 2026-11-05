@@ -236,6 +236,7 @@ pub enum StrDataBrokenFiles {
     Path,
     TypeOfError,
     Size,
+    Repairable,
     ModificationDate,
 }
 pub const MAX_STR_DATA_BROKEN_FILES: usize = StrDataBrokenFiles::ModificationDate as usize + 1;
@@ -429,7 +430,7 @@ impl ActiveTab {
                 }
             },
             Self::BrokenFiles => match StrDataBrokenFiles::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for BrokenFiles")) {
-                StrDataBrokenFiles::Name | StrDataBrokenFiles::Path | StrDataBrokenFiles::TypeOfError => SortIdx::StrIdx(str_idx),
+                StrDataBrokenFiles::Name | StrDataBrokenFiles::Path | StrDataBrokenFiles::TypeOfError | StrDataBrokenFiles::Repairable => SortIdx::StrIdx(str_idx),
                 StrDataBrokenFiles::ModificationDate => SortIdx::IntIdxPair(IntDataBrokenFiles::ModificationDatePart1 as i32, IntDataBrokenFiles::ModificationDatePart2 as i32),
                 StrDataBrokenFiles::Size => SortIdx::IntIdxPair(IntDataBrokenFiles::SizePart1 as i32, IntDataBrokenFiles::SizePart2 as i32),
             },

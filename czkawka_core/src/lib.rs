@@ -1,4 +1,5 @@
 pub mod common;
+pub mod file_fixer;
 pub mod helpers;
 pub mod localizer_core;
 pub mod tools;

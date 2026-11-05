@@ -1,0 +1,11 @@
+default:
+    @just --list
+
+build:
+    cargo build
+
+test *args:
+    cargo test {{args}}
+
+run *args:
+    cargo run --release -- {{args}}

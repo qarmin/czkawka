@@ -29,6 +29,8 @@ import { PopupActionConfirm } from "popups/popup_action_confirm.slint";
 import { PopupCropVideo } from "popups/popup_crop_video.slint";
 import { PopupReencodeVideo } from "popups/popup_optimize.slint";
 import { PopupCleanExif } from "popups/popup_clean_exif.slint";
+import { PopupRepair } from "popups/popup_repair.slint";
+import { PopupVideoReferences } from "popups/popup_video_references.slint";
 import { PopupCleanCache } from "popups/popup_clean_cache.slint";
 import { PopupOtherApps } from "popups/popup_other_apps.slint";
 import { PopupHelp } from "popups/popup_help.slint";
@@ -356,6 +358,19 @@ export component MainWindow inherits Window {
         }
     }
 
+    repair_popup_window := PopupRepair {
+        height: root.height;
+        width: root.width;
+        x: 0.0; y: 0.0;
+        title_text: Translations.repair_text;
+    }
+
+    video_references_popup_window := PopupVideoReferences {
+        height: root.height;
+        width: root.width;
+        x: 0.0; y: 0.0;
+    }
+
     clean_cache_popup_window := PopupCleanCache {
         height: root.height;
         width: root.width;
@@ -509,6 +524,10 @@ export component MainWindow inherits Window {
             trash_popup_window.show_popup();
         } else if (request == PopupRequest.CleanExif) {
             clean_popup_window.show_popup();
+        } else if (request == PopupRequest.RepairFiles) {
+            repair_popup_window.show_popup();
+        } else if (request == PopupRequest.CollectVideoReferences) {
+            video_references_popup_window.show_popup();
         } else if (request == PopupRequest.OptimizeVideo) {
             if (data == "crop") {
                 crop_video_popup_window.show_popup();

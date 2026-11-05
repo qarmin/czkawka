@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use std::thread;
+use std::time::Duration;
 
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::tool_data::CommonData;
@@ -7,6 +8,7 @@ use czkawka_core::common::traits::{ResultEntry, Search};
 use czkawka_core::common::{format_time, split_path, split_path_compare};
 use czkawka_core::tools::broken_files;
 use czkawka_core::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes};
+use czkawka_core::tools::file_repair::{AssessParameters, RepairPreset, Repairability};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
@@ -53,7 +55,14 @@ pub(crate) fn scan_broken_files(a: Weak<MainWindow>, sd: ScanData) {
                 return Ok(());
             }
 
-            let params = BrokenFilesParameters::new(checked_types);
+            let mut params = BrokenFilesParameters::new(checked_types);
+            if sd.custom_settings.broken_files_check_repairable {
+                params = params.with_repair_assessment(AssessParameters {
+                    max_file_size: u64::from(sd.custom_settings.broken_files_repair_max_size_mb) * 1024 * 1024,
+                    time_budget: Duration::from_secs(u64::from(sd.custom_settings.broken_files_repair_time_budget_seconds)),
+                });
+                params = params.with_only_repairable(sd.custom_settings.broken_files_only_repairable);
+            }
             let mut tool = BrokenFiles::new(params);
             set_common_settings(&mut tool, &sd.custom_settings, &sd.stop_flag);
 
@@ -108,6 +117,17 @@ fn write_broken_files_results(app: &MainWindow, vector: Vec<BrokenEntry>, messag
     reset_selection_at_end(app, ActiveTab::BrokenFiles);
 }
 
+pub(crate) fn repairability_text(repairability: Option<Repairability>) -> String {
+    match repairability {
+        Some(Repairability::Repairable(RepairPreset::Safe)) => flk!("repairable_safe"),
+        Some(Repairability::Repairable(RepairPreset::Balanced)) => flk!("repairable_balanced"),
+        Some(Repairability::Repairable(RepairPreset::Aggressive)) => flk!("repairable_aggressive"),
+        Some(Repairability::TimedOut) => flk!("repairable_timed_out"),
+        Some(Repairability::TooLarge) => flk!("repairable_too_large"),
+        Some(Repairability::NotRepairable) | None => String::new(),
+    }
+}
+
 fn prepare_data_model_broken_files(fe: BrokenEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let (directory, file) = split_path(&fe.path);
@@ -116,6 +136,7 @@ fn prepare_data_model_broken_files(fe: BrokenEntry) -> (ModelRc<SharedString>, M
         directory.into(),
         fe.get_error_string().into(),
         format_size(fe.size, BINARY).into(),
+        repairability_text(fe.repairability).into(),
         get_dt_timestamp_string(fe.modified_date).into(),
     ];
     let data_model_str = VecModel::from_slice(&data_model_str_arr);

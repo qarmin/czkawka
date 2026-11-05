@@ -1,0 +1,143 @@
+import { Button, ProgressIndicator, ScrollView } from "std-widgets.slint";
+import { PopupBackdrop } from "../components/popup_backdrop.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+import { Translations } from "../globals/translations.slint";
+import { FontSizes } from "../globals/fonts.slint";
+import { GuiState } from "../globals/gui_state.slint";
+import { Callabler } from "../globals/callabler.slint";
+
+export component PopupVideoReferences inherits Rectangle {
+    callback show_popup();
+
+    private property <length> popup_width: 560px;
+    private property <length> popup_height: 420px;
+
+    popup_window := PopupWindow {
+        width: popup_width;
+        height: popup_height;
+        x: (parent.width - popup_width) / 2.0;
+        y: (parent.height - self.height) / 2.0;
+        close-policy: PopupClosePolicy.no-auto-close;
+
+        PopupBackdrop { }
+
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            border-radius: 10px;
+            border-color: ColorPalette.popup_border_color;
+            border-width: 2px;
+            background: ColorPalette.popup_background;
+            clip: true;
+
+            VerticalLayout {
+                Rectangle {
+                    background: ColorPalette.popup_background_title_line;
+                    Text {
+                        vertical-stretch: 0.0;
+                        min-height: 30px;
+                        text <=> Translations.references_title_text;
+                        vertical-alignment: center;
+                        horizontal-alignment: center;
+                        font-size: FontSizes.normal;
+                    }
+                }
+
+                VerticalLayout {
+                    padding: 15px;
+                    spacing: 10px;
+
+                    Text {
+                        text <=> Translations.references_description_text;
+                        font-size: FontSizes.small;
+                        wrap: word-wrap;
+                    }
+
+                    ScrollView {
+                        VerticalLayout {
+                            spacing: 4px;
+                            for folder[index] in GuiState.references_folders: HorizontalLayout {
+                                spacing: 5px;
+                                Text {
+                                    text: folder;
+                                    font-size: FontSizes.small;
+                                    vertical-alignment: center;
+                                    overflow: elide;
+                                }
+                                Button {
+                                    text: "X";
+                                    enabled: GuiState.references_state != 1;
+                                    clicked => {
+                                        Callabler.remove_references_folder(index);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if GuiState.references_state == 1: ProgressIndicator {
+                        height: 10px;
+                        progress: GuiState.references_progress;
+                    }
+
+                    Text {
+                        text: GuiState.references_status_text;
+                        font-size: FontSizes.normal;
+                        wrap: word-wrap;
+                    }
+                }
+
+                HorizontalLayout {
+                    padding: 10px;
+                    spacing: 10px;
+
+                    Button {
+                        text <=> Translations.references_add_folder_text;
+                        enabled: GuiState.references_state != 1;
+                        clicked => {
+                            Callabler.choose_references_folder();
+                        }
+                    }
+
+                    if GuiState.references_state != 1: Button {
+                        text <=> Translations.references_start_text;
+                        primary: true;
+                        enabled: GuiState.references_folders.length > 0;
+                        clicked => {
+                            Callabler.start_collect_references();
+                        }
+                    }
+
+                    if GuiState.references_state == 1: Button {
+                        text <=> Translations.stop_text;
+                        clicked => {
+                            Callabler.stop_collect_references();
+                        }
+                    }
+
+                    Button {
+                        text <=> Translations.references_clear_text;
+                        enabled: GuiState.references_state != 1;
+                        clicked => {
+                            Callabler.clear_video_profiles();
+                        }
+                    }
+
+                    Rectangle { }
+
+                    Button {
+                        enabled: GuiState.references_state != 1;
+                        text <=> Translations.cancel_button_text;
+                        clicked => {
+                            popup_window.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    show_popup() => {
+        popup_window.show();
+    }
+}

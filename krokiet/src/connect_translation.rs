@@ -400,6 +400,30 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_video_thumbnails_number_size_text("".into());
     translation.set_settings_log_number_size_text("".into());
     translation.set_clean_exif_overwrite_files_text(flk!("clean_exif_overwrite_files_text").into());
+    translation.set_fix_button_text(flk!("fix_button_text").into());
+    translation.set_find_references_button_text(flk!("find_references_button_text").into());
+    translation.set_repair_text(flk!("repair_text").into());
+    translation.set_repair_confirmation_text(flk!("repair_confirmation_text").into());
+    translation.set_repair_level_text(flk!("repair_level_text").into());
+    translation.set_repair_level_safe_hint(flk!("repair_level_safe_hint").into());
+    translation.set_repair_output_dir_text(flk!("repair_output_dir_text").into());
+    translation.set_repair_reference_file_text(flk!("repair_reference_file_text").into());
+    translation.set_repair_replace_original_text(flk!("repair_replace_original_text").into());
+    translation.set_repair_choose_button_text(flk!("repair_choose_button_text").into());
+    translation.set_references_title_text(flk!("references_title_text").into());
+    translation.set_references_description_text(flk!("references_description_text").into());
+    translation.set_references_add_folder_text(flk!("references_add_folder_text").into());
+    translation.set_references_start_text(flk!("references_start_text").into());
+    translation.set_references_clear_text(flk!("references_clear_text").into());
+    translation.set_repair_level_safe(flk!("repairable_safe").into());
+    translation.set_repair_level_balanced(flk!("repairable_balanced").into());
+    translation.set_repair_level_aggressive(flk!("repairable_aggressive").into());
+    translation.set_subsettings_broken_files_repairable_text(flk!("subsettings_broken_files_repairable_text").into());
+    translation.set_subsettings_broken_files_repairable_info_text(flk!("subsettings_broken_files_repairable_info_text").into());
+    translation.set_subsettings_broken_files_only_repairable_text(flk!("subsettings_broken_files_only_repairable_text").into());
+    translation.set_subsettings_broken_files_only_repairable_info_text(flk!("subsettings_broken_files_only_repairable_info_text").into());
+    translation.set_subsettings_broken_files_repair_max_size_text(flk!("subsettings_broken_files_repair_max_size_text").into());
+    translation.set_subsettings_broken_files_repair_time_text(flk!("subsettings_broken_files_repair_time_text").into());
     translation.set_stop_text(flk!("stop_text").into());
     translation.set_settings_cache_header_text(flk!("settings_cache_header_text").into());
     translation.set_settings_select_header_text(flk!("settings_select_header_text").into());
@@ -532,6 +556,7 @@ fn translate_items(app: &MainWindow) {
     let codec = flk!("column_codec");
     let duration = flk!("column_duration");
     let type_of_error = flk!("column_type_of_error");
+    let repairable = flk!("column_repairable");
     let symlink_name = flk!("column_symlink_name");
     let symlink_folder = flk!("column_symlink_folder");
     let destination_path = flk!("column_destination_path");
@@ -555,7 +580,7 @@ fn translate_items(app: &MainWindow) {
     settings.set_similar_videos_column_name(fnm(&[&selection, &size, &file_name, &path, &dimensions, &duration, &bitrate, &fps, &codec, &mod_date]));
     settings.set_similar_music_column_name(fnm(&[&selection, &size, &file_name, &title, &artist, &year, &bitrate, &length, &genre, &path, &mod_date]));
     settings.set_invalid_symlink_column_name(fnm(&[&selection, &symlink_name, &symlink_folder, &destination_path, &mod_date]));
-    settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));
+    settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &repairable, &mod_date]));
     settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
     settings.set_exif_remover_column_name(fnm(&[&selection, &size, &file_name, &path, &exif_tags, &mod_date]));
     settings.set_video_optimizer_column_name(fnm(&[

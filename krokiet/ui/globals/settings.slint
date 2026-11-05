@@ -170,6 +170,10 @@ export global Settings {
     in-out property <bool> broken_files_sub_video_ffmpeg: false;
     in-out property <bool> broken_files_sub_font: true;
     in-out property <bool> broken_files_sub_markup: true;
+    in-out property <bool> broken_files_check_repairable: true;
+    in-out property <bool> broken_files_only_repairable: false;
+    in-out property <string> broken_files_repair_max_size_mb: "4096";
+    in-out property <string> broken_files_repair_time_budget_seconds: "20";
 
     // Bad Names
     in-out property <bool> bad_names_sub_uppercase_extension: true;
@@ -310,8 +314,8 @@ export global Settings {
     in-out property <[length]> similar_music_column_size: [35px, size_px, name_px, 80px, 80px, 80px, 80px, 80px, 80px, path_px, mod_px];
     in-out property <[string]> invalid_symlink_column_name: ["Selection", "Symlink Name", "Symlink Folder", "Destination Path", "Modification Date"];
     in-out property <[length]> invalid_symlink_column_size: [35px, name_px, path_px, path_px, mod_px];
-    in-out property <[string]> broken_files_column_name: ["Selection", "File Name", "Path", "Type of Error", "Size", "Modification Date"];
-    in-out property <[length]> broken_files_column_size: [35px, name_px, path_px, 200px, size_px, mod_px];
+    in-out property <[string]> broken_files_column_name: ["Selection", "File Name", "Path", "Type of Error", "Size", "Repairable", "Modification Date"];
+    in-out property <[length]> broken_files_column_size: [35px, name_px, path_px, 200px, size_px, 100px, mod_px];
     in-out property <[string]> bad_extensions_column_name: ["Selection", "File Name", "Path", "Current Extension", "Proper Extension"];
     in-out property <[length]> bad_extensions_column_size: [35px, name_px, path_px, 40px, 200px];
     in-out property <[string]> bad_names_column_name: ["Selection", "File Name", "New Name", "Path"];

@@ -74,6 +74,14 @@ export global Callabler {
     callback crop_video_items();
     callback reencode_video_items();
     callback clean_exif_items();
+    callback repair_items(int, bool);
+    callback choose_repair_output_dir();
+    callback choose_repair_reference_file();
+    callback start_collect_references();
+    callback stop_collect_references();
+    callback choose_references_folder();
+    callback remove_references_folder(int);
+    callback clear_video_profiles();
     callback hardlink_items();
     callback softlink_items();
 

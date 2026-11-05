@@ -26,7 +26,9 @@ use crate::common::progress_stop_handler::{check_if_stop_received, prepare_threa
 use crate::common::tool_data::CommonToolData;
 use crate::common::{create_crash_message_generic, normalize_error_string};
 use crate::helpers::audio_checker;
+use crate::tools::broken_files::repair::assess_broken_entries;
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, CheckedTypesSingle, Info, TypeOfFile};
+use crate::tools::file_repair::Repairability;
 
 impl BrokenFiles {
     pub fn new(params: BrokenFilesParameters) -> Self {
@@ -559,9 +561,21 @@ impl BrokenFiles {
         // Just connect loaded results with already calculated
         vec_file_entry.extend(records_already_cached.into_values());
 
-        self.save_to_cache(&vec_file_entry, loaded_hash_map);
+        let assessment_finished = self
+            .params
+            .repair_assessment
+            .is_none_or(|params| assess_broken_entries(&mut vec_file_entry, &params, stop_flag, progress_sender));
 
-        self.broken_files = vec_file_entry.into_iter().filter(|f| f.has_errors()).collect();
+        self.save_to_cache(&vec_file_entry, loaded_hash_map);
+        if !assessment_finished {
+            return WorkContinueStatus::Stop;
+        }
+
+        let only_repairable = self.params.only_repairable && self.params.repair_assessment.is_some();
+        self.broken_files = vec_file_entry
+            .into_iter()
+            .filter(|f| f.has_errors() && (!only_repairable || matches!(f.repairability, Some(Repairability::Repairable(_)))))
+            .collect();
 
         self.information.number_of_broken_files = self.broken_files.len();
         debug!("Found {} broken files.", self.information.number_of_broken_files);

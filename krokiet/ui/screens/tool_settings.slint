@@ -652,6 +652,47 @@ export component ToolSettings inherits ScrollView {
                 checked <=> Settings.broken_files_sub_markup;
             }
 
+            CheckBoxWrapper {
+                text: Translations.subsettings_broken_files_repairable_text;
+                checked <=> Settings.broken_files_check_repairable;
+            }
+
+            HintText {
+                width: root.hint_width;
+                hint_text: Translations.subsettings_broken_files_repairable_info_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.subsettings_broken_files_only_repairable_text;
+                checked <=> Settings.broken_files_only_repairable;
+                enabled: Settings.broken_files_check_repairable;
+            }
+
+            HintText {
+                width: root.hint_width;
+                hint_text: Translations.subsettings_broken_files_only_repairable_info_text;
+            }
+
+            if Settings.broken_files_check_repairable: VerticalLayout {
+                spacing: 5px;
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_broken_files_repair_max_size_text;
+                        vertical-alignment: center;
+                    }
+                    LineEdit { text <=> Settings.broken_files_repair_max_size_mb; }
+                }
+                HorizontalLayout {
+                    spacing: 5px;
+                    Text {
+                        text: Translations.subsettings_broken_files_repair_time_text;
+                        vertical-alignment: center;
+                    }
+                    LineEdit { text <=> Settings.broken_files_repair_time_budget_seconds; }
+                }
+            }
+
             Rectangle { }
         }
 

@@ -158,6 +158,12 @@ export global GuiState {
     in-out property <bool> file_dialog_open: false;
 
     in-out property <bool> cache_cleaning_is_cleaning: false;
+    in-out property <string> repair_output_dir: "";
+    in-out property <string> repair_reference_file: "";
+    in-out property <[string]> references_folders: [];
+    in-out property <int> references_state: 0;
+    in-out property <float> references_progress: 0.0;
+    in-out property <string> references_status_text: "";
     in-out property <bool> cache_cleaning_finished: false;
     in-out property <CacheCleaningProgress> cache_cleaning_progress: {
         current_cache_file: 0,

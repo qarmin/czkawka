@@ -1,0 +1,97 @@
+import { PopupBase } from "../components/popup_base.slint";
+import { Translations } from "../globals/translations.slint";
+import { Callabler } from "../globals/callabler.slint";
+import { GuiState } from "../globals/gui_state.slint";
+import { FontSizes } from "../globals/fonts.slint";
+import { Button, CheckBox, ComboBox, LineEdit } from "std-widgets.slint";
+import { PopupCenteredText } from "../components/popup_centered_text.slint";
+
+export component PopupRepair inherits Rectangle {
+    in-out property <string> title_text;
+
+    callback show_popup();
+
+    private property <length> popup_width: 560px;
+    private property <length> popup_min_height: 300px;
+    private property <int> level_index: 0;
+    private property <bool> replace_original: false;
+
+    popup_window := PopupBase {
+        width: popup_width;
+        popup_min_height: popup_min_height;
+        x: (parent.width - popup_width) / 2.0;
+        y: (parent.height - self.height) / 2.0;
+        title_text <=> root.title_text;
+
+        VerticalLayout {
+            padding: 10px;
+            spacing: 8px;
+
+            PopupCenteredText { text: Translations.repair_confirmation_text; }
+
+            Text {
+                text: Translations.repair_level_text;
+                font-size: FontSizes.normal;
+            }
+
+            ComboBox {
+                model: [Translations.repair_level_safe, Translations.repair_level_balanced, Translations.repair_level_aggressive];
+                current-index <=> root.level_index;
+            }
+
+            Text {
+                text: Translations.repair_level_safe_hint;
+                font-size: FontSizes.small;
+                wrap: word-wrap;
+            }
+
+            Text {
+                text: Translations.repair_output_dir_text;
+                font-size: FontSizes.normal;
+            }
+
+            HorizontalLayout {
+                spacing: 5px;
+                LineEdit { text <=> GuiState.repair_output_dir; }
+                Button {
+                    text: Translations.repair_choose_button_text;
+                    clicked => {
+                        Callabler.choose_repair_output_dir();
+                    }
+                }
+            }
+
+            Text {
+                text: Translations.repair_reference_file_text;
+                font-size: FontSizes.normal;
+            }
+
+            HorizontalLayout {
+                spacing: 5px;
+                LineEdit { text <=> GuiState.repair_reference_file; }
+                Button {
+                    text: Translations.repair_choose_button_text;
+                    clicked => {
+                        Callabler.choose_repair_reference_file();
+                    }
+                }
+            }
+
+            CheckBox {
+                text: Translations.repair_replace_original_text;
+                checked <=> root.replace_original;
+            }
+        }
+
+        ok_clicked => {
+            Callabler.repair_items(root.level_index, root.replace_original);
+        }
+
+        cancel_clicked => {
+        }
+    }
+
+    show_popup() => {
+        popup_window.show();
+    }
+}
