@@ -34,6 +34,7 @@ pub enum MessageType {
     Symlink,
     OptimizeVideo,
     CleanExif,
+    Repair,
 }
 
 impl MessageType {
@@ -46,6 +47,7 @@ impl MessageType {
             Self::Symlink => flk!("rust_no_files_symlinked"),
             Self::OptimizeVideo => flk!("rust_no_videos_optimized"),
             Self::CleanExif => flk!("rust_no_exif_cleaned"),
+            Self::Repair => flk!("rust_no_files_repaired"),
         }
     }
     fn get_summary_message(self, processed: usize, failed: usize, total: usize) -> String {
@@ -57,6 +59,7 @@ impl MessageType {
             Self::Symlink => flk!("rust_symlink_summary", symlinked = processed, failed = failed, total = total),
             Self::OptimizeVideo => flk!("rust_optimize_video_summary", optimized = processed, failed = failed, total = total),
             Self::CleanExif => flk!("rust_clean_exif_summary", cleaned = processed, failed = failed, total = total),
+            Self::Repair => flk!("rust_repair_summary", repaired = processed, failed = failed, total = total),
         }
     }
     fn get_base_progress(self) -> ProgressData {
@@ -68,6 +71,7 @@ impl MessageType {
             Self::Symlink => ToolStage::SymlinkingFiles,
             Self::OptimizeVideo => ToolStage::OptimizingVideos,
             Self::CleanExif => ToolStage::CleaningExif,
+            Self::Repair => ToolStage::RepairingFiles,
         };
         ProgressData::new(stage, 0, 0)
     }
@@ -80,6 +84,7 @@ impl MessageType {
             Self::Symlink => "symlink",
             Self::OptimizeVideo => "optimize_video",
             Self::CleanExif => "clean_exif",
+            Self::Repair => "repair",
         }
     }
 }

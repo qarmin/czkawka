@@ -120,6 +120,12 @@ checks, and a favorable cost model.
 
 ---
 
+## Cache versions
+
+Cache version constants (`czkawka_core/src/common/cache.rs`) are not incremented by one. When a cache format changes, jump to the next release's version number times 10: a cache at `120` (release 12.x) becomes `130` for release 13.x, and a cache at `50` (release 5.x) also becomes `130`. Every bump therefore belongs to an unreleased version - if the crate is at 12.x, the new value is `130`. Caches already at the target value for the upcoming release are left unchanged.
+
+---
+
 ## Project Goals
 
 Two properties are non-negotiable across every sub-project:

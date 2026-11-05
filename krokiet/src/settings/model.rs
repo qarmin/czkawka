@@ -161,6 +161,14 @@ pub struct SettingsCustom {
     #[serde(default = "ttrue")]
     pub broken_files_sub_markup: bool,
     #[serde(default = "ttrue")]
+    pub broken_files_check_repairable: bool,
+    #[serde(default)]
+    pub broken_files_only_repairable: bool,
+    #[serde(default = "default_repair_max_size_mb")]
+    pub broken_files_repair_max_size_mb: u32,
+    #[serde(default = "default_repair_time_budget_seconds")]
+    pub broken_files_repair_time_budget_seconds: u32,
+    #[serde(default = "ttrue")]
     pub bad_names_sub_uppercase_extension: bool,
     #[serde(default = "ttrue")]
     pub bad_names_sub_emoji_used: bool,
@@ -519,6 +527,12 @@ fn maximum_file_size() -> i32 {
 }
 fn ttrue() -> bool {
     true
+}
+fn default_repair_max_size_mb() -> u32 {
+    4096
+}
+fn default_repair_time_budget_seconds() -> u32 {
+    20
 }
 fn minimal_hash_cache_size() -> i32 {
     DEFAULT_MINIMUM_CACHE_SIZE

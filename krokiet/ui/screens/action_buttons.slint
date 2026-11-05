@@ -231,6 +231,28 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
+    if lists_enabled && GuiState.active_tab == ActiveTab.BrokenFiles: repair_button := Button {
+        height: parent.height;
+        enabled: base_buttons_may_be_available && self.visible && checked_anything;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.fix_button_text;
+        icon: @image-url("../../icons/krokiet_optimize.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.RepairFiles);
+        }
+    }
+
+    if lists_enabled && GuiState.active_tab == ActiveTab.BrokenFiles: find_references_button := Button {
+        height: parent.height;
+        enabled: !scanning && !processing;
+        text: self.visible && Settings.show_only_icons ? "" : Translations.find_references_button_text;
+        icon: @image-url("../../icons/krokiet_search.svg");
+        colorize-icon: true;
+        clicked => {
+            show_action_popup(PopupRequest.CollectVideoReferences);
+        }
+    }
+
     if lists_enabled && GuiState.active_tab == ActiveTab.SimilarImages && results_available: compare_button := Button {
         height: parent.height;
         enabled: base_buttons_may_be_available && self.visible;

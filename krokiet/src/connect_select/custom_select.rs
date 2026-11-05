@@ -90,6 +90,7 @@ pub(super) fn build_custom_select_columns(active_tab: ActiveTab) -> Vec<CustomSe
     let codec = flk!("column_codec");
     let duration = flk!("column_duration");
     let type_of_error = flk!("column_type_of_error");
+    let repairable = flk!("column_repairable");
     let symlink_name = flk!("column_symlink_name");
     let symlink_folder = flk!("column_symlink_folder");
     let destination_path = flk!("column_destination_path");
@@ -179,6 +180,7 @@ pub(super) fn build_custom_select_columns(active_tab: ActiveTab) -> Vec<CustomSe
             col_str!(&path, StrDataBrokenFiles::Path),
             col_str!(&type_of_error, StrDataBrokenFiles::TypeOfError),
             col_int_pair!(format!("{} [KB]", size), IntDataBrokenFiles::SizePart1),
+            col_str!(&repairable, StrDataBrokenFiles::Repairable),
             col_date!(&mod_date, IntDataBrokenFiles::ModificationDatePart1),
         ],
         ActiveTab::BadExtensions => vec![

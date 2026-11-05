@@ -88,6 +88,8 @@ pub enum ToolStage {
     SymlinkingFiles,
     OptimizingVideos,
     CleaningExif,
+    RepairingFiles,
+    CollectingVideoReferences,
 
     Duplicate(DuplicateStage),
     SameMusic(SameMusicMode, SameMusicStage),
@@ -97,6 +99,7 @@ pub enum ToolStage {
     VideoOptimizer(VideoOptimizerStage),
 
     BrokenFilesChecking,
+    BrokenFilesAssessingRepair,
     BadExtensionsChecking,
     BadNamesChecking,
     EmptyFilesCheckingContent,
@@ -106,7 +109,15 @@ impl ToolStage {
     pub fn is_special_non_tool_stage(self) -> bool {
         matches!(
             self,
-            Self::DeletingFiles | Self::RenamingFiles | Self::MovingFiles | Self::HardlinkingFiles | Self::SymlinkingFiles | Self::OptimizingVideos | Self::CleaningExif
+            Self::DeletingFiles
+                | Self::RenamingFiles
+                | Self::MovingFiles
+                | Self::HardlinkingFiles
+                | Self::SymlinkingFiles
+                | Self::OptimizingVideos
+                | Self::CleaningExif
+                | Self::RepairingFiles
+                | Self::CollectingVideoReferences
         )
     }
 
@@ -166,6 +177,8 @@ impl ToolStage {
                 | Self::SimilarVideos(_, SimilarVideosStage::CalculatingAudioFingerprints)
                 | Self::ExifRemover(ExifRemoverStage::ExtractingTags)
                 | Self::BrokenFilesChecking
+                | Self::RepairingFiles
+                | Self::CollectingVideoReferences
                 | Self::EmptyFilesCheckingContent
                 | Self::VideoOptimizer(VideoOptimizerStage::ProcessingVideos)
         )
@@ -181,7 +194,9 @@ impl ToolStage {
             | Self::HardlinkingFiles
             | Self::SymlinkingFiles
             | Self::OptimizingVideos
-            | Self::CleaningExif => 0,
+            | Self::CleaningExif
+            | Self::RepairingFiles
+            | Self::CollectingVideoReferences => 0,
 
             Self::Duplicate(s) => match s {
                 DuplicateStage::HidingHardLinks => 1,
@@ -236,7 +251,7 @@ impl ToolStage {
                 VideoOptimizerStage::CreatingThumbnails => 2,
             },
 
-            Self::BrokenFilesChecking | Self::BadExtensionsChecking | Self::BadNamesChecking | Self::EmptyFilesCheckingContent => 1,
+            Self::BrokenFilesChecking | Self::BrokenFilesAssessingRepair | Self::BadExtensionsChecking | Self::BadNamesChecking | Self::EmptyFilesCheckingContent => 1,
         }
     }
 
@@ -250,13 +265,15 @@ impl ToolStage {
             | Self::HardlinkingFiles
             | Self::SymlinkingFiles
             | Self::OptimizingVideos
-            | Self::CleaningExif => 0,
+            | Self::CleaningExif
+            | Self::RepairingFiles
+            | Self::CollectingVideoReferences => 0,
             Self::Duplicate(_) | Self::SameMusic(SameMusicMode::AudioContent, _) => 7,
             Self::SameMusic(SameMusicMode::AudioTags, _) => 4,
             Self::SimilarImages(_) | Self::ExifRemover(_) | Self::SimilarVideos(SimilarVideosMode::VisualHash, _) => 3,
             Self::SimilarVideos(SimilarVideosMode::AudioContent, _) => 6,
             Self::VideoOptimizer(_) => 2,
-            Self::BrokenFilesChecking | Self::BadExtensionsChecking | Self::BadNamesChecking | Self::EmptyFilesCheckingContent => 1,
+            Self::BrokenFilesChecking | Self::BrokenFilesAssessingRepair | Self::BadExtensionsChecking | Self::BadNamesChecking | Self::EmptyFilesCheckingContent => 1,
         }
     }
 }
@@ -408,6 +425,7 @@ impl ProgressData {
             ToolStage::VideoOptimizer(VideoOptimizerStage::ProcessingVideos) => flc!("stage_checked_videos", items_stats = items_stats, size_stats = size_stats),
             ToolStage::ExifRemover(ExifRemoverStage::ExtractingTags) => flc!("stage_extracted_exif_tags", items_stats = items_stats, size_stats = size_stats),
             ToolStage::BrokenFilesChecking => flc!("stage_checked_files", items_stats = items_stats, size_stats = size_stats),
+            ToolStage::BrokenFilesAssessingRepair => flc!("stage_checked_repairability", items_stats = items_stats, size_stats = size_stats),
             ToolStage::BadExtensionsChecking => flc!("stage_checked_files_bad_extensions", items_stats = items_stats),
             ToolStage::BadNamesChecking => flc!("stage_checked_files_bad_names", items_stats = items_stats),
             ToolStage::EmptyFilesCheckingContent => flc!("stage_checking_empty_files_content", items_stats = items_stats, size_stats = size_stats),
@@ -426,6 +444,9 @@ impl ProgressData {
             ToolStage::OptimizingVideos => flc!("stage_optimizing_no_size_videos", items_stats = items_stats),
             ToolStage::CleaningExif if has_size => flc!("stage_cleaning_exif", items_stats = items_stats, size_stats = size_stats),
             ToolStage::CleaningExif => flc!("stage_cleaning_no_size_exif", items_stats = items_stats),
+            ToolStage::RepairingFiles if has_size => flc!("stage_repairing_files", items_stats = items_stats, size_stats = size_stats),
+            ToolStage::RepairingFiles => flc!("stage_repairing_no_size_files", items_stats = items_stats),
+            ToolStage::CollectingVideoReferences => flc!("stage_collecting_video_references", items_stats = items_stats, size_stats = size_stats),
         }
     }
 }

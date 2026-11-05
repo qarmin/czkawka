@@ -1,0 +1,31 @@
+[package]
+name = "file_fixer_dev"
+version = "0.1.0"
+edition = "2024"
+description = "Fast build and test harness for czkawka_core/src/file_fixer without compiling the rest of czkawka"
+publish = false
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+crc32fast = "1.5"
+handsome_logger = "0.9"
+jwalk = "0.8"
+log = "0.4.34"
+memmap2 = "0.9"
+miniz_oxide = "0.9"
+png = "0.18"
+rand = "0.10.3"
+rand_chacha = "0.10"
+rayon = "1.12"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tempfile = "3.27"
+thiserror = "2"
+zune-jpeg = "0.5"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[[bin]]
+name = "file_fixer"
+path = "src/main.rs"

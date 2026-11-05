@@ -29,7 +29,7 @@ pub(crate) const CACHE_DUPLICATE_VERSION: u8 = 120;
 pub(crate) const CACHE_DUPLICATE_PREHASH_VERSION: u8 = 120;
 pub(crate) const CACHE_IMAGE_VERSION: u8 = 120;
 pub(crate) const CACHE_VIDEO_VERSION: u8 = 120;
-pub(crate) const CACHE_BROKEN_FILES_VERSION: u8 = 120;
+pub(crate) const CACHE_BROKEN_FILES_VERSION: u8 = 130;
 pub(crate) const CACHE_VIDEO_OPTIMIZE_VERSION: u8 = 130;
 
 const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;

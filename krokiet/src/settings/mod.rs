@@ -564,6 +564,10 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_broken_files_sub_video_ffmpeg(custom_settings.broken_files_sub_video_ffmpeg);
     settings.set_broken_files_sub_font(custom_settings.broken_files_sub_font);
     settings.set_broken_files_sub_markup(custom_settings.broken_files_sub_markup);
+    settings.set_broken_files_check_repairable(custom_settings.broken_files_check_repairable);
+    settings.set_broken_files_only_repairable(custom_settings.broken_files_only_repairable);
+    settings.set_broken_files_repair_max_size_mb(custom_settings.broken_files_repair_max_size_mb.to_string().into());
+    settings.set_broken_files_repair_time_budget_seconds(custom_settings.broken_files_repair_time_budget_seconds.to_string().into());
 
     settings.set_bad_names_sub_uppercase_extension(custom_settings.bad_names_sub_uppercase_extension);
     settings.set_bad_names_sub_emoji_used(custom_settings.bad_names_sub_emoji_used);
@@ -637,7 +641,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_similar_videos_column_size(fnm(&[sel_px, size_px, name_px, path_px, 80.0, 80.0, 80.0, 80.0, 80.0, mod_px], "similar_videos"));
         settings.set_similar_music_column_size(fnm(&[sel_px, size_px, name_px, 80.0, 80.0, 80.0, 80.0, 80.0, 80.0, path_px, mod_px], "similar_music"));
         settings.set_invalid_symlink_column_size(fnm(&[sel_px, name_px, path_px, path_px, mod_px], "invalid_symlink"));
-        settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
+        settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, 100.0, mod_px], "broken_files"));
         settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
         settings.set_exif_remover_column_size(fnm(&[sel_px, size_px, name_px, path_px, 300.0, mod_px], "exif_remover"));
         settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, 160.0, 90.0, 100.0, mod_px], "video_optimizer"));
@@ -751,6 +755,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
     let broken_files_sub_video_ffmpeg = settings.get_broken_files_sub_video_ffmpeg();
     let broken_files_sub_font = settings.get_broken_files_sub_font();
     let broken_files_sub_markup = settings.get_broken_files_sub_markup();
+    let broken_files_check_repairable = settings.get_broken_files_check_repairable();
+    let broken_files_only_repairable = settings.get_broken_files_only_repairable();
+    let broken_files_repair_max_size_mb = settings.get_broken_files_repair_max_size_mb().parse::<u32>().unwrap_or(4096);
+    let broken_files_repair_time_budget_seconds = settings.get_broken_files_repair_time_budget_seconds().parse::<u32>().unwrap_or(20);
 
     let bad_names_sub_uppercase_extension = settings.get_bad_names_sub_uppercase_extension();
     let bad_names_sub_emoji_used = settings.get_bad_names_sub_emoji_used();
@@ -887,6 +895,10 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         broken_files_sub_video_ffmpeg,
         broken_files_sub_font,
         broken_files_sub_markup,
+        broken_files_check_repairable,
+        broken_files_only_repairable,
+        broken_files_repair_max_size_mb,
+        broken_files_repair_time_budget_seconds,
         bad_names_sub_uppercase_extension,
         bad_names_sub_emoji_used,
         bad_names_sub_space_at_start_end,

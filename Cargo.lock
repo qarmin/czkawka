@@ -1698,12 +1698,16 @@ dependencies = [
  "log-panics",
  "lopdf",
  "lzma-rs",
+ "memmap2",
  "mime_guess",
+ "miniz_oxide 0.9.1",
  "once_cell",
  "open",
  "os_info",
+ "png",
  "quick-xml 0.42.0",
  "rand 0.10.3",
+ "rand_chacha 0.10.0",
  "rawler",
  "rayon",
  "rust-embed",
@@ -1718,6 +1722,7 @@ dependencies = [
  "symphonia 0.6.1",
  "tar",
  "tempfile",
+ "thiserror 2.0.21",
  "toml 1.1.8+spec-1.1.0",
  "trash",
  "ttf-parser",
@@ -1725,6 +1730,7 @@ dependencies = [
  "xxhash-rust",
  "yaml-rust2",
  "zip",
+ "zune-jpeg",
 ]
 
 [[package]]
@@ -6400,7 +6406,7 @@ version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9ef1d0d795eb7d84685bca4f72f3649f064e6641543d3a8c415898726a57b41"
 dependencies = [
- "rand_chacha",
+ "rand_chacha 0.9.0",
  "rand_core 0.9.5",
 ]
 
@@ -6423,6 +6429,16 @@ checksum = "d3022b5f1df60f26e1ffddd6c66e8aa15de382ae63b3a0c1bfc0e4d3e3f325cb"
 dependencies = [
  "ppv-lite86",
  "rand_core 0.9.5",
+]
+
+[[package]]
+name = "rand_chacha"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e6af7f3e25ded52c41df4e0b1af2d047e45896c2f3281792ed68a1c243daedb"
+dependencies = [
+ "ppv-lite86",
+ "rand_core 0.10.1",
 ]
 
 [[package]]
@@ -6480,7 +6496,7 @@ dependencies = [
  "paste",
  "profiling",
  "rand 0.9.5",
- "rand_chacha",
+ "rand_chacha 0.9.0",
  "simd_helpers",
  "thiserror 2.0.21",
  "v_frame",

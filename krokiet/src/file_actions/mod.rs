@@ -3,5 +3,7 @@ pub mod connect_delete;
 pub mod connect_hardlink;
 pub mod connect_move;
 pub mod connect_optimize_video;
+pub mod connect_references;
 pub mod connect_rename;
+pub mod connect_repair;
 pub mod connect_symlink;

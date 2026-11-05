@@ -22,7 +22,9 @@ use file_actions::connect_delete::{connect_delete_button, connect_trash_button};
 use file_actions::connect_hardlink::connect_hardlink;
 use file_actions::connect_move::connect_move;
 use file_actions::connect_optimize_video::connect_optimize_video;
+use file_actions::connect_references::connect_references;
 use file_actions::connect_rename::connect_rename;
+use file_actions::connect_repair::connect_repair;
 use file_actions::connect_symlink::connect_symlink;
 use log::{error, info};
 use slint::{Timer, TimerMode, VecModel};
@@ -200,6 +202,8 @@ fn main() {
     connect_rename(&app, progress_sender.clone(), stop_flag.clone());
     connect_optimize_video(&app, progress_sender.clone(), stop_flag.clone());
     connect_clean(&app, progress_sender.clone(), stop_flag.clone());
+    connect_repair(&app, progress_sender.clone(), stop_flag.clone());
+    connect_references(&app);
     connect_hardlink(&app, progress_sender.clone(), stop_flag.clone());
     connect_symlink(&app, progress_sender, stop_flag);
     connect_save(&app, Arc::clone(&shared_models));

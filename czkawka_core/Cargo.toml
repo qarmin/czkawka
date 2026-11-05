@@ -57,6 +57,14 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 
 tempfile = "3.27"
 
+# Needed by file_fixer
+memmap2 = "0.9"
+miniz_oxide = "0.9"
+png = "0.18"
+rand_chacha = "0.10"
+thiserror = "2"
+zune-jpeg = "0.5"
+
 # Video Duplicates
 similario_core = "0.2.1"
 filetime = "0.2.29"

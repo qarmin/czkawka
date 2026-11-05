@@ -329,6 +329,8 @@ fn make_broken_entry(name: &str, errors: &[(CheckedTypesSingle, Option<&str>)]) 
         modified_date: 0,
         size: 0,
         errors: errors.iter().map(|(k, v)| (*k, v.map(str::to_string))).collect(),
+        repairability: None,
+        profiles_when_assessed: 0,
     }
 }
 
@@ -438,4 +440,118 @@ fn test_multiple_avif_valid_and_broken() {
     let results = run_check(&temp_dir, CheckedTypes::IMAGE);
     assert_eq!(results.len(), 1, "Only the corrupted AVIF should be detected");
     assert!(results[0].has_errors());
+}
+
+//  Repairability
+
+fn write_truncated_noisy_png(path: &PathBuf) {
+    use std::io::Cursor;
+
+    use png::{BitDepth, ColorType, Encoder};
+
+    use crate::file_fixer::corrupt::{DamageKind, DamageSpec, Fraction, apply_damage};
+    use crate::file_fixer::formats::png_chunks::split_idat;
+
+    let mut state = 12345u32;
+    let pixels: Vec<u8> = (0..64 * 200 * 3)
+        .map(|_| {
+            state = state.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+            (state >> 24) as u8
+        })
+        .collect();
+    let mut encoded = Vec::new();
+    let mut encoder = Encoder::new(Cursor::new(&mut encoded), 64, 200);
+    encoder.set_color(ColorType::Rgb);
+    encoder.set_depth(BitDepth::Eight);
+    let mut writer = encoder.write_header().unwrap();
+    writer.write_image_data(&pixels).unwrap();
+    writer.finish().unwrap();
+
+    let keep = Fraction::new(0.6).unwrap();
+    let damaged = apply_damage(&split_idat(&encoded, 2048), &DamageSpec::new(DamageKind::TruncateTail { keep }, 1));
+    fs::write(path, damaged.data).unwrap();
+}
+
+#[test]
+fn test_scan_reports_repairability_only_when_asked() {
+    use crate::tools::file_repair::{AssessParameters, RepairPreset, Repairability};
+
+    let temp_dir = TempDir::new().unwrap();
+    crate::common::config_cache_path::set_config_cache_path_test(temp_dir.path().join("cache"), temp_dir.path().join("config"));
+    let scanned = temp_dir.path().join("scanned");
+    fs::create_dir(&scanned).unwrap();
+    write_truncated_noisy_png(&scanned.join("photo.png"));
+
+    let mut finder = BrokenFiles::new(BrokenFilesParameters::new(CheckedTypes::IMAGE).with_repair_assessment(AssessParameters::default()));
+    finder.set_included_paths(vec![scanned.clone()]);
+    finder.set_recursive_search(true);
+    finder.set_use_cache(false);
+    finder.search(&Arc::new(AtomicBool::new(false)), None);
+    assert_eq!(finder.get_broken_files().len(), 1);
+    assert_eq!(finder.get_broken_files()[0].repairability, Some(Repairability::Repairable(RepairPreset::Balanced)));
+
+    let mut plain_finder = BrokenFiles::new(BrokenFilesParameters::new(CheckedTypes::IMAGE));
+    plain_finder.set_included_paths(vec![scanned]);
+    plain_finder.set_recursive_search(true);
+    plain_finder.set_use_cache(false);
+    plain_finder.search(&Arc::new(AtomicBool::new(false)), None);
+    assert_eq!(plain_finder.get_broken_files().len(), 1);
+    assert_eq!(plain_finder.get_broken_files()[0].repairability, None);
+}
+
+#[test]
+fn test_assessment_is_redone_only_when_the_verdict_may_have_changed() {
+    use crate::tools::broken_files::repair::needs_assessment;
+    use crate::tools::file_repair::{AssessParameters, RepairPreset, Repairability};
+
+    let params = AssessParameters::default();
+    let mut entry = make_broken_entry("photo.png", &[(CheckedTypesSingle::Image, Some("broken"))]);
+    assert!(needs_assessment(&entry, &params, 0), "never assessed");
+
+    entry.repairability = Some(Repairability::Repairable(RepairPreset::Safe));
+    assert!(!needs_assessment(&entry, &params, 5), "a found repair stays valid");
+
+    entry.repairability = Some(Repairability::NotRepairable);
+    entry.profiles_when_assessed = 3;
+    assert!(!needs_assessment(&entry, &params, 3), "nothing new to learn from");
+    assert!(needs_assessment(&entry, &params, 4), "new camera profiles may help");
+
+    entry.repairability = Some(Repairability::TooLarge);
+    entry.size = 100;
+    assert!(needs_assessment(&entry, &AssessParameters { max_file_size: 1000, ..params }, 3), "limit was raised");
+    assert!(!needs_assessment(&entry, &AssessParameters { max_file_size: 10, ..params }, 3), "still too large");
+
+    let healthy = make_broken_entry("photo.png", &[(CheckedTypesSingle::Image, None)]);
+    assert!(!needs_assessment(&healthy, &params, 0), "healthy files are never assessed");
+}
+
+#[test]
+fn test_only_repairable_drops_files_that_cannot_be_fixed() {
+    use crate::tools::file_repair::AssessParameters;
+
+    let temp_dir = TempDir::new().unwrap();
+    crate::common::config_cache_path::set_config_cache_path_test(temp_dir.path().join("cache"), temp_dir.path().join("config"));
+    let scanned = temp_dir.path().join("scanned");
+    fs::create_dir(&scanned).unwrap();
+    write_truncated_noisy_png(&scanned.join("fixable.png"));
+    fs::write(scanned.join("hopeless.png"), b"this is not an image at all").unwrap();
+
+    let scan = |only_repairable: bool| {
+        let params = BrokenFilesParameters::new(CheckedTypes::IMAGE)
+            .with_repair_assessment(AssessParameters::default())
+            .with_only_repairable(only_repairable);
+        let mut finder = BrokenFiles::new(params);
+        finder.set_included_paths(vec![scanned.clone()]);
+        finder.set_recursive_search(true);
+        finder.set_use_cache(false);
+        finder.search(&Arc::new(AtomicBool::new(false)), None);
+        finder
+            .get_broken_files()
+            .iter()
+            .map(|entry| entry.path.file_name().unwrap().to_string_lossy().to_string())
+            .collect::<Vec<_>>()
+    };
+
+    assert_eq!(scan(false), vec!["fixable.png", "hopeless.png"]);
+    assert_eq!(scan(true), vec!["fixable.png"]);
 }
