@@ -30,7 +30,7 @@ case "$DISTRO" in
     fedora)
         BASE="ffmpeg"
         INSTALL_CMD="dnf install -y"
-        UPDATE_CMD="dnf check-update || true"
+        UPDATE_CMD="dnf check-update"
         ;;
     arch)
         BASE="ffmpeg"
@@ -55,7 +55,12 @@ if [[ "$answer" =~ ^[Nn]$ ]]; then
     exit 0
 fi
 
-$UPDATE_CMD
+$UPDATE_CMD || {
+    update_status=$?
+    if [[ "$DISTRO" != "fedora" || "$update_status" -ne 100 ]]; then
+        exit "$update_status"
+    fi
+}
 
 $INSTALL_CMD $BASE
 
