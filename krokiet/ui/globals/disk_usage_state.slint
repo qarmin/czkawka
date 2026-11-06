@@ -18,9 +18,22 @@ export struct DiskUsageTreeRow {
     color: color,
 }
 
+// Outline of the selected item, drawn over the chart image in physical pixels; `path` is only used for arcs
+export struct DiskUsageSelection {
+    visible: bool,
+    is_arc: bool,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    border: float,
+    path: string,
+}
+
 // Transient state of the disk usage tool; its options are not saved in presets
 export global DiskUsageState {
     in-out property <image> chart_image;
+    in-out property <DiskUsageSelection> selection;
     in-out property <bool> has_results;
     in-out property <bool> rendering;
     in-out property <DiskUsageMode> mode: DiskUsageMode.Treemap;

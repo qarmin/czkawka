@@ -5,8 +5,8 @@ use czkawka_core::tools::disk_usage::tree::DiskNode;
 use humansize::{BINARY, format_size};
 use slint::{ComponentHandle, Model, ModelRc, VecModel};
 
-use crate::disk_usage::view::{ChartContext, describe_address, request_render};
-use crate::disk_usage::{actions, describe};
+use crate::disk_usage::view::{ChartContext, describe_address};
+use crate::disk_usage::{actions, describe, selection};
 use crate::{DiskUsageState, DiskUsageTreeRow, MainWindow};
 
 const MAX_ROWS_PER_DIRECTORY: usize = 300;
@@ -147,7 +147,7 @@ pub(super) fn select_row(app: &MainWindow, context: &Arc<ChartContext>, row: i32
     context.view.lock().expect("View mutex poisoned").selected = Some(address);
     describe::show_selection(app, info.as_ref());
     mark_selected_rows(app, context);
-    request_render(app, context);
+    selection::update_overlay(app, context);
 }
 
 /// Updates the highlight in place; replacing the whole model would drop the row under the cursor in the middle of a double click.

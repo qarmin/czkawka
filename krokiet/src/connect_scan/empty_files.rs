@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use std::thread;
 
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
@@ -10,10 +9,12 @@ use czkawka_core::tools::empty_files;
 use czkawka_core::tools::empty_files::{EmptyFiles, EmptyFilesParameters};
 use humansize::{BINARY, format_size};
 use rayon::prelude::*;
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
+use slint::{ComponentHandle, SharedString, Weak};
 
 use crate::common::{MAX_INT_DATA_EMPTY_FILES, MAX_STR_DATA_EMPTY_FILES, split_u64_into_i32s};
-use crate::connect_scan::{MessagesData, ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
+use crate::connect_scan::{
+    MessagesData, PlainRow, RowContent, ScanData, flat_rows, get_dt_timestamp_string, get_text_messages, reset_selection_at_end, rows_into_model, set_common_settings,
+};
 use crate::{ActiveTab, GuiState, MainWindow, flk};
 
 pub(crate) fn scan_empty_files(a: Weak<MainWindow>, sd: ScanData) {
@@ -39,22 +40,18 @@ pub(crate) fn scan_empty_files(a: Weak<MainWindow>, sd: ScanData) {
 
             let messages_data = MessagesData { critical, messages };
 
+            let rows = flat_rows(vector, prepare_data_model_empty_files);
             a.upgrade_in_event_loop(move |app| {
-                write_empty_files_results(&app, vector, messages_data, info, sd, stopped_search);
+                write_empty_files_results(&app, rows, messages_data, info, sd, stopped_search);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages_data: MessagesData, info: empty_files::Info, sd: ScanData, stopped_search: bool) {
+fn write_empty_files_results(app: &MainWindow, rows: Vec<PlainRow>, messages_data: MessagesData, info: empty_files::Info, sd: ScanData, stopped_search: bool) {
     let scanning_time_str = format_time(info.scanning_time);
     let items_found = info.number_of_empty_files;
 
-    let items = Rc::new(VecModel::default());
-    for fe in vector {
-        let (data_model_str, data_model_int) = prepare_data_model_empty_files(fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, None);
-    }
-    app.set_empty_files_model(items.into());
+    app.set_empty_files_model(rows_into_model(rows));
     if let Some(critical) = messages_data.critical {
         app.invoke_scan_ended(critical.into());
     } else {
@@ -71,7 +68,7 @@ fn write_empty_files_results(app: &MainWindow, vector: Vec<FileEntry>, messages_
     reset_selection_at_end(app, ActiveTab::EmptyFiles);
 }
 
-fn prepare_data_model_empty_files(fe: FileEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn prepare_data_model_empty_files(fe: FileEntry) -> RowContent {
     let (directory, file) = split_path(fe.get_path());
     let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FILES] = [
         format_size(fe.size, BINARY).into(),
@@ -79,10 +76,10 @@ fn prepare_data_model_empty_files(fe: FileEntry) -> (ModelRc<SharedString>, Mode
         directory.into(),
         get_dt_timestamp_string(fe.get_modified_date()).into(),
     ];
-    let data_model_str = VecModel::from_slice(&data_model_str_arr);
+    let data_model_str = data_model_str_arr.to_vec();
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let size_split = split_u64_into_i32s(fe.size);
     let data_model_int_arr: [i32; MAX_INT_DATA_EMPTY_FILES] = [modification_split.0, modification_split.1, size_split.0, size_split.1];
-    let data_model_int = VecModel::from_slice(&data_model_int_arr);
+    let data_model_int = data_model_int_arr.to_vec();
     (data_model_str, data_model_int)
 }

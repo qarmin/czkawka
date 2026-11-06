@@ -201,6 +201,26 @@ export component DiskUsageView inherits Rectangle {
                     visible: DiskUsageState.has_results;
                 }
 
+                if DiskUsageState.selection.visible && !DiskUsageState.selection.is_arc: Rectangle {
+                    x: DiskUsageState.selection.x * 1phx;
+                    y: DiskUsageState.selection.y * 1phx;
+                    width: DiskUsageState.selection.width * 1phx;
+                    height: DiskUsageState.selection.height * 1phx;
+                    border-width: DiskUsageState.selection.border * 1phx;
+                    border-color: Settings.dark_theme ? #ffffff : #141414;
+                }
+
+                if DiskUsageState.selection.visible && DiskUsageState.selection.is_arc: Path {
+                    width: chart_area.physical_width * 1phx;
+                    height: chart_area.physical_height * 1phx;
+                    viewbox-width: chart_area.physical_width;
+                    viewbox-height: chart_area.physical_height;
+                    commands: DiskUsageState.selection.path;
+                    fill: transparent;
+                    stroke: Settings.dark_theme ? #ffffff : #141414;
+                    stroke-width: DiskUsageState.selection.border * 1phx;
+                }
+
                 Text {
                     visible: !DiskUsageState.has_results;
                     text: Translations.disk_usage_no_results_text;

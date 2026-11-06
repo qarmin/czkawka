@@ -10,13 +10,13 @@ mod empty_files;
 mod empty_folders;
 mod exif_remover;
 mod invalid_symlinks;
+mod rows;
 mod same_music;
 mod similar_images;
 mod similar_videos;
 mod temporary_files;
 mod video_optimizer;
 
-use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
@@ -26,7 +26,7 @@ use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::helpers::messages::MessageLimit;
 use czkawka_core::tools::disk_usage::ContentDetection;
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
+use slint::ComponentHandle;
 
 use crate::audio_player::AudioPlayer;
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders};
@@ -42,6 +42,7 @@ use crate::connect_scan::empty_files::scan_empty_files;
 use crate::connect_scan::empty_folders::scan_empty_folders;
 use crate::connect_scan::exif_remover::scan_exif_remover;
 use crate::connect_scan::invalid_symlinks::scan_invalid_symlinks;
+pub(crate) use crate::connect_scan::rows::{PlainRow, RowContent, flat_rows, grouped_rows, rows_into_model};
 use crate::connect_scan::same_music::scan_similar_music;
 use crate::connect_scan::similar_images::scan_similar_images;
 use crate::connect_scan::similar_videos::scan_similar_videos;
@@ -50,7 +51,7 @@ use crate::connect_scan::video_optimizer::scan_video_optimizer;
 use crate::settings::model::{BasicSettings, ComboBoxItems, SettingsCustom};
 use crate::settings::{collect_base_settings, collect_combo_box_settings, collect_settings};
 use crate::shared_models::SharedModels;
-use crate::{ActiveTab, DiskUsageState, GuiState, MainWindow, ProgressToSend, SingleMainListModel, flk};
+use crate::{ActiveTab, DiskUsageState, GuiState, MainWindow, ProgressToSend, flk};
 
 pub struct ScanData {
     pub progress_sender: Sender<ProgressData>,
@@ -156,18 +157,6 @@ fn get_dt_timestamp_string(timestamp: u64) -> String {
 fn reset_selection_at_end(app: &MainWindow, active_tab: ActiveTab) {
     reset_selection(app, active_tab, true);
     set_number_of_enabled_items(app, active_tab, 0);
-}
-
-fn insert_data_to_model(items: &Rc<VecModel<SingleMainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, filled_header_row: Option<bool>) {
-    let main = SingleMainListModel {
-        checked: false,
-        header_row: filled_header_row.is_some(),
-        filled_header_row: filled_header_row.unwrap_or(false),
-        focused_row: false,
-        val_str: ModelRc::new(data_model_str),
-        val_int: ModelRc::new(data_model_int),
-    };
-    items.push(main);
 }
 
 fn get_text_messages<T>(component: &T) -> (Option<String>, String)

@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use std::thread;
 
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
@@ -8,10 +7,12 @@ use czkawka_core::common::{format_time, split_path, split_path_compare};
 use czkawka_core::tools::empty_folder;
 use czkawka_core::tools::empty_folder::{EmptyFolder, FolderEntry};
 use rayon::prelude::*;
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
+use slint::{ComponentHandle, SharedString, Weak};
 
 use crate::common::{MAX_INT_DATA_EMPTY_FOLDERS, MAX_STR_DATA_EMPTY_FOLDERS, split_u64_into_i32s};
-use crate::connect_scan::{MessagesData, ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
+use crate::connect_scan::{
+    MessagesData, PlainRow, RowContent, ScanData, flat_rows, get_dt_timestamp_string, get_text_messages, reset_selection_at_end, rows_into_model, set_common_settings,
+};
 use crate::{ActiveTab, GuiState, MainWindow, flk};
 
 pub(crate) fn scan_empty_folders(a: Weak<MainWindow>, sd: ScanData) {
@@ -33,22 +34,18 @@ pub(crate) fn scan_empty_folders(a: Weak<MainWindow>, sd: ScanData) {
 
             let messages_data = MessagesData { critical, messages };
 
+            let rows = flat_rows(vector, prepare_data_model_empty_folders);
             a.upgrade_in_event_loop(move |app| {
-                write_empty_folders_results(&app, vector, messages_data, info, sd, stopped_search);
+                write_empty_folders_results(&app, rows, messages_data, info, sd, stopped_search);
             })
         })
         .expect("Cannot start thread - not much we can do here");
 }
-fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messages_data: MessagesData, info: empty_folder::Info, sd: ScanData, stopped_search: bool) {
+fn write_empty_folders_results(app: &MainWindow, rows: Vec<PlainRow>, messages_data: MessagesData, info: empty_folder::Info, sd: ScanData, stopped_search: bool) {
     let scanning_time_str = format_time(info.scanning_time);
     let items_found = info.number_of_empty_folders;
 
-    let items = Rc::new(VecModel::default());
-    for fe in vector {
-        let (data_model_str, data_model_int) = prepare_data_model_empty_folders(fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, None);
-    }
-    app.set_empty_folder_model(items.into());
+    app.set_empty_folder_model(rows_into_model(rows));
     if let Some(critical) = messages_data.critical {
         app.invoke_scan_ended(critical.into());
     } else {
@@ -65,12 +62,12 @@ fn write_empty_folders_results(app: &MainWindow, vector: Vec<FolderEntry>, messa
     reset_selection_at_end(app, ActiveTab::EmptyFolders);
 }
 
-fn prepare_data_model_empty_folders(fe: FolderEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn prepare_data_model_empty_folders(fe: FolderEntry) -> RowContent {
     let (directory, file) = split_path(&fe.path);
     let data_model_str_arr: [SharedString; MAX_STR_DATA_EMPTY_FOLDERS] = [file.into(), directory.into(), get_dt_timestamp_string(fe.modified_date).into()];
-    let data_model_str = VecModel::from_slice(&data_model_str_arr);
+    let data_model_str = data_model_str_arr.to_vec();
     let modification_split = split_u64_into_i32s(fe.get_modified_date());
     let data_model_int_arr: [i32; MAX_INT_DATA_EMPTY_FOLDERS] = [modification_split.0, modification_split.1];
-    let data_model_int = VecModel::from_slice(&data_model_int_arr);
+    let data_model_int = data_model_int_arr.to_vec();
     (data_model_str, data_model_int)
 }
