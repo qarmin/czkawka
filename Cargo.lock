@@ -780,16 +780,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bk-tree"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8283fb8e64b873918f8bc527efa6aff34956296e48ea750a9c909cd47c01546"
-dependencies = [
- "fnv",
- "triple_accel",
-]
-
-[[package]]
 name = "blake3"
 version = "1.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1643,16 +1633,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f"
 
 [[package]]
-name = "czkawka_bk_tree"
-version = "0.5.0"
-dependencies = [
- "bk-tree",
- "criterion",
- "hamming-bitwise-fast",
- "rand 0.10.3",
-]
-
-[[package]]
 name = "czkawka_cli"
 version = "12.0.2"
 dependencies = [
@@ -1678,7 +1658,6 @@ dependencies = [
  "crc32fast",
  "criterion",
  "crossbeam-channel",
- "czkawka_bk_tree",
  "deunicode",
  "directories-next",
  "dunce",
@@ -8477,12 +8456,6 @@ dependencies = [
  "nom 8.0.0",
  "petgraph",
 ]
-
-[[package]]
-name = "triple_accel"
-version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "622b09ce2fe2df4618636fb92176d205662f59803f39e70d1c333393082de96c"
 
 [[package]]
 name = "ttf-parser"

@@ -5,7 +5,6 @@ use std::sync::atomic::AtomicBool;
 use std::{mem, panic};
 
 use crossbeam_channel::Sender;
-use czkawka_bk_tree::BKTree;
 use fun_time::fun_time;
 use image::GenericImageView;
 use image_hasher::{FilterType, HashAlg, HasherConfig};
@@ -13,6 +12,7 @@ use indexmap::{IndexMap, IndexSet};
 use log::{debug, error};
 use rayon::prelude::*;
 
+use crate::common::bk_tree::BKTree;
 use crate::common::cache::{CACHE_IMAGE_VERSION, load_and_split_cache_generalized_by_path, save_and_connect_cache_generalized_by_path};
 use crate::common::dir_traversal::{DirTraversalBuilder, DirTraversalResult, inode, take_1_per_inode};
 use crate::common::image::get_dynamic_image_from_path;
@@ -916,13 +916,13 @@ mod tests {
     use std::path::PathBuf;
     use std::sync::Arc;
 
-    use czkawka_bk_tree::BKTree;
     use image::imageops::FilterType;
     use image_hasher::HashAlg;
     use indexmap::IndexMap;
     use rand::RngExt;
 
     use super::*;
+    use crate::common::bk_tree::BKTree;
     use crate::common::tool_data::CommonData;
     use crate::tools::similar_images::{GeometricInvariance, Hamming, ImHash, ImagesEntry, SimilarImages, SimilarImagesParameters};
 

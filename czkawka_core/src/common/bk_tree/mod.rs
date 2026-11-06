@@ -1,3 +1,4 @@
+// Based on bk-tree 0.5.0 by Eugene Bulkin (MIT), https://github.com/eugene-bulkin/rust-bk-tree
 use std::borrow::Borrow;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 
@@ -149,67 +150,4 @@ where
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    struct ByteHamming;
-
-    impl Metric<Vec<u8>> for ByteHamming {
-        fn distance(&self, a: &Vec<u8>, b: &Vec<u8>) -> u32 {
-            a.iter().zip(b).map(|(x, y)| (x ^ y).count_ones()).sum()
-        }
-
-        fn threshold_distance(&self, a: &Vec<u8>, b: &Vec<u8>, threshold: u32) -> Option<u32> {
-            Some(self.distance(a, b)).filter(|distance| *distance <= threshold)
-        }
-    }
-
-    fn tree_with(keys: &[[u8; 2]]) -> BKTree<Vec<u8>, ByteHamming> {
-        let mut tree = BKTree::new(ByteHamming);
-        tree.extend(keys.iter().map(|key| key.to_vec()));
-        tree
-    }
-
-    fn sorted_find(tree: &BKTree<Vec<u8>, ByteHamming>, key: [u8; 2], tolerance: u32) -> Vec<(u32, Vec<u8>)> {
-        let mut found: Vec<_> = tree.find(&key.to_vec(), tolerance).map(|(distance, key)| (distance, key.clone())).collect();
-        found.sort();
-        found
-    }
-
-    #[test]
-    fn empty_tree_finds_nothing() {
-        let tree: BKTree<Vec<u8>, ByteHamming> = BKTree::new(ByteHamming);
-        assert_eq!(tree.find(&vec![0, 0], 100).count(), 0);
-        assert_eq!(tree.find_exact(&vec![0, 0]), None);
-    }
-
-    #[test]
-    fn first_key_becomes_root() {
-        let tree = tree_with(&[[1, 0], [3, 0]]);
-        assert_eq!(tree.nodes.first().map(|node| node.key.clone()), Some(vec![1, 0]));
-        assert_eq!(tree.nodes.first().map(|node| node.children.clone()), Some(vec![(1, 1)]));
-        assert_eq!(tree.nodes.get(1).map(|node| node.key.clone()), Some(vec![3, 0]));
-    }
-
-    #[test]
-    fn duplicate_keys_are_ignored() {
-        let tree = tree_with(&[[1, 1], [1, 1]]);
-        assert_eq!(tree.nodes.len(), 1);
-    }
-
-    #[test]
-    fn find_respects_tolerance() {
-        let tree = tree_with(&[[0, 0], [1, 0], [3, 0], [255, 255], [0, 7]]);
-        assert_eq!(sorted_find(&tree, [0, 0], 0), vec![(0, vec![0, 0])]);
-        assert_eq!(sorted_find(&tree, [0, 0], 1), vec![(0, vec![0, 0]), (1, vec![1, 0])]);
-        assert_eq!(sorted_find(&tree, [0, 0], 3), vec![(0, vec![0, 0]), (1, vec![1, 0]), (2, vec![3, 0]), (3, vec![0, 7])]);
-        assert_eq!(sorted_find(&tree, [255, 0], 0), vec![]);
-    }
-
-    #[test]
-    fn find_exact_returns_only_equal_key() {
-        let tree = tree_with(&[[0, 0], [1, 0], [3, 0]]);
-        assert_eq!(tree.find_exact(&vec![3, 0]), Some(&vec![3, 0]));
-        assert_eq!(tree.find_exact(&vec![2, 0]), None);
-    }
-}
+mod tests;
