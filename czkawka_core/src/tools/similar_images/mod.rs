@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use bk_tree::BKTree;
+use czkawka_bk_tree::BKTree;
 use hamming_bitwise_fast::hamming_bitwise_fast;
 use image_hasher::{FilterType, HashAlg};
 use indexmap::IndexMap;
@@ -98,13 +98,13 @@ pub enum SimilarityPreset {
 
 struct Hamming;
 
-impl bk_tree::Metric<ImHash> for Hamming {
+impl czkawka_bk_tree::Metric<ImHash> for Hamming {
     fn distance(&self, a: &ImHash, b: &ImHash) -> u32 {
         hamming_bitwise_fast(a, b)
     }
 
     // Returning None when distance exceeds the threshold lets BKTree::find skip
-    // the entire subtree under this node (see bk_tree::find::Find::next). The
+    // the entire subtree under this node (see czkawka_bk_tree::Find::next). The
     // distance itself is still computed in full because hamming_bitwise_fast is
     // already very fast - a chunked early-exit was measurably slower.
     fn threshold_distance(&self, a: &ImHash, b: &ImHash, threshold: u32) -> Option<u32> {
