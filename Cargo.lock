@@ -1648,7 +1648,6 @@ version = "0.5.0"
 dependencies = [
  "bk-tree",
  "criterion",
- "fnv",
  "hamming-bitwise-fast",
  "rand 0.10.3",
 ]
