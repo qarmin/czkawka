@@ -15,7 +15,7 @@ use rayon::prelude::*;
 
 use crate::common::directories::Directories;
 use crate::common::extensions::Extensions;
-use crate::common::items::ExcludedItems;
+use crate::common::items::{ExcludedItems, ScopedExcludedItems};
 use crate::common::model::{CheckingMethod, FileEntry, ToolType};
 use crate::common::progress_data::{ProgressData, ToolStage};
 use crate::common::progress_stop_handler::{check_if_stop_received, prepare_thread_handler_common};
@@ -62,7 +62,7 @@ pub struct DirTraversal<'b, F> {
     progress_sender: Option<&'b Sender<ProgressData>>,
     recursive_search: bool,
     directories: Directories,
-    excluded_items: ExcludedItems,
+    excluded_items: ScopedExcludedItems,
     extensions: Extensions,
     minimal_file_size: u64,
     maximal_file_size: u64,
@@ -167,6 +167,8 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
     }
 
     pub(crate) fn build(self) -> DirTraversal<'b, F> {
+        let included_roots: Vec<PathBuf> = self.root_dirs.iter().chain(&self.root_files).cloned().collect();
+        let excluded_items = ScopedExcludedItems::new(self.excluded_items.expect("could not build"), &included_roots);
         DirTraversal {
             group_by: self.group_by.expect("could not build"),
             root_dirs: self.root_dirs,
@@ -177,7 +179,7 @@ impl<'b, F> DirTraversalBuilder<'b, F> {
             maximal_file_size: self.maximal_file_size.unwrap_or(u64::MAX),
             collect: self.collect,
             directories: self.directories.expect("could not build"),
-            excluded_items: self.excluded_items.expect("could not build"),
+            excluded_items,
             extensions: self.extensions.unwrap_or_default(),
             recursive_search: self.recursive_search,
             tool_type: self.tool_type,
@@ -392,7 +394,7 @@ fn process_file_in_file_mode(
     fe_result: &mut Vec<FileEntry>,
     extensions: &Extensions,
     directories: &Directories,
-    excluded_items: &ExcludedItems,
+    excluded_items: &ScopedExcludedItems,
     minimal_file_size: u64,
     maximal_file_size: u64,
 ) {
@@ -448,7 +450,7 @@ fn process_file_in_file_mode_path_check(
     warnings: &mut Vec<String>,
     fe_result: &mut Vec<FileEntry>,
     extensions: &Extensions,
-    excluded_items: &ExcludedItems,
+    excluded_items: &ScopedExcludedItems,
     directories: &Directories,
     minimal_file_size: u64,
     maximal_file_size: u64,
@@ -494,7 +496,7 @@ fn process_dir_in_file_symlink_mode(
     directories: &Directories,
     dir_result: &mut Vec<PathBuf>,
     warnings: &mut Vec<String>,
-    excluded_items: &ExcludedItems,
+    excluded_items: &ScopedExcludedItems,
 ) {
     if !recursive_search {
         return;
@@ -530,7 +532,7 @@ fn process_symlink_in_symlink_mode(
     fe_result: &mut Vec<FileEntry>,
     extensions: &Extensions,
     directories: &Directories,
-    excluded_items: &ExcludedItems,
+    excluded_items: &ScopedExcludedItems,
 ) {
     if !extensions.check_if_entry_have_valid_extension(&entry_data.file_name()) {
         return;
@@ -576,7 +578,7 @@ fn process_symlink_in_symlink_mode_path_check(
     warnings: &mut Vec<String>,
     fe_result: &mut Vec<FileEntry>,
     extensions: &Extensions,
-    excluded_items: &ExcludedItems,
+    excluded_items: &ScopedExcludedItems,
 ) {
     let Some(file_name) = path.file_name() else {
         return;
