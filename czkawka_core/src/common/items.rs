@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::common::regex_check;
 use crate::flc;
@@ -105,21 +105,106 @@ impl ExcludedItems {
     pub(crate) fn get_excluded_items(&self) -> &Vec<String> {
         &self.expressions
     }
+    /// `root` must already be normalized; returns (kept, lifted) or `None` when no pattern matches the root
+    fn split_by_root(&self, root: &Path) -> Option<(Self, Self)> {
+        let root_str = root.to_string_lossy();
+        // The trailing separator lets patterns like `*/.git/*` match the root itself
+        let root_with_separator = format!("{root_str}{}", std::path::MAIN_SEPARATOR);
+        let (lifted, kept): (Vec<_>, Vec<_>) = self
+            .connected_expressions
+            .iter()
+            .cloned()
+            .partition(|item| regex_check(item, &root_str) || regex_check(item, &root_with_separator));
+        if lifted.is_empty() {
+            return None;
+        }
+        Some((Self::from_connected(kept), Self::from_connected(lifted)))
+    }
+
+    fn from_connected(connected_expressions: Vec<SingleExcludedItem>) -> Self {
+        Self {
+            expressions: connected_expressions.iter().map(|item| item.expression.clone()).collect(),
+            connected_expressions,
+        }
+    }
+
+    fn matches_normalized(&self, path: &Path) -> bool {
+        let path_str = path.to_string_lossy();
+        self.connected_expressions.iter().any(|expression| regex_check(expression, &path_str))
+    }
+
     pub(crate) fn is_excluded(&self, path: &Path) -> bool {
         if self.connected_expressions.is_empty() {
             return false;
         }
         #[cfg(target_family = "windows")]
         let path = crate::common::normalize_windows_path(path);
+        #[cfg(target_family = "windows")]
+        let path = path.as_path();
 
-        let path_str = path.to_string_lossy();
+        self.matches_normalized(path)
+    }
+}
 
-        for expression in &self.connected_expressions {
-            if regex_check(expression, &path_str) {
-                return true;
-            }
+const NEUTRAL_ROOT_NAME: &str = "_root_";
+
+#[derive(Debug, Clone)]
+struct RootScope {
+    root: PathBuf,
+    kept: ExcludedItems,
+    lifted: ExcludedItems,
+}
+
+impl RootScope {
+    fn is_excluded(&self, path: &Path) -> bool {
+        if self.kept.matches_normalized(path) {
+            return true;
         }
-        false
+        let relative = path.strip_prefix(&self.root).unwrap_or(path);
+        let neutral_path = Path::new(std::path::MAIN_SEPARATOR_STR).join(NEUTRAL_ROOT_NAME).join(relative);
+        self.lifted.matches_normalized(&neutral_path)
+    }
+}
+
+/// Like `ExcludedItems`, but a pattern matching an included root does not exclude the root itself,
+/// so a hidden folder added by the user is not skipped by e.g. `/home/*/.*`.
+/// Inside that root such a pattern is still checked on the path below the root, so `/x/.A/.b` stays excluded.
+#[derive(Debug, Clone, Default)]
+pub struct ScopedExcludedItems {
+    default_items: ExcludedItems,
+    // Normalized roots, longest first, so the most specific scope wins
+    scopes: Vec<RootScope>,
+}
+
+impl ScopedExcludedItems {
+    pub(crate) fn new(default_items: ExcludedItems, included_roots: &[PathBuf]) -> Self {
+        let mut scopes: Vec<RootScope> = included_roots
+            .iter()
+            .filter_map(|root| {
+                #[cfg(target_family = "windows")]
+                let root = crate::common::normalize_windows_path(root);
+                #[cfg(not(target_family = "windows"))]
+                let root = root.clone();
+                default_items.split_by_root(&root).map(|(kept, lifted)| RootScope { root, kept, lifted })
+            })
+            .collect();
+        scopes.sort_by_key(|scope| std::cmp::Reverse(scope.root.components().count()));
+        Self { default_items, scopes }
+    }
+
+    pub(crate) fn is_excluded(&self, path: &Path) -> bool {
+        if self.default_items.connected_expressions.is_empty() {
+            return false;
+        }
+        #[cfg(target_family = "windows")]
+        let path = crate::common::normalize_windows_path(path);
+        #[cfg(target_family = "windows")]
+        let path = path.as_path();
+
+        match self.scopes.iter().find(|scope| path.starts_with(&scope.root)) {
+            Some(scope) => scope.is_excluded(path),
+            None => self.default_items.matches_normalized(path),
+        }
     }
 }
 
@@ -208,6 +293,109 @@ mod tests {
         // Empty items - nothing excluded
         let items_empty = ExcludedItems::new();
         assert!(!items_empty.is_excluded(Path::new("/any/path")));
+    }
+
+    #[test]
+    fn test_included_hidden_directory_is_not_excluded_by_default_pattern() {
+        let items = ExcludedItems::new_from(vec!["*/.git/*".to_string(), "/home/*/.*".to_string()]);
+        let hidden_root = PathBuf::from("/home/user/X/.A");
+        let scoped = ScopedExcludedItems::new(items, &[hidden_root, PathBuf::from("/home/user/X/B")]);
+
+        assert!(!scoped.is_excluded(Path::new("/home/user/X/.A/file.txt")));
+        assert!(!scoped.is_excluded(Path::new("/home/user/X/.A/sub/file.txt")));
+        assert!(scoped.is_excluded(Path::new("/home/user/X/.A/.git/config")));
+        assert!(scoped.is_excluded(Path::new("/home/user/X/B/.hidden/file.txt")));
+        assert!(scoped.is_excluded(Path::new("/home/user/X/.other/file.txt")));
+        assert!(!scoped.is_excluded(Path::new("/home/user/X/B/file.txt")));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_scoped_without_matching_roots_behaves_like_plain_items() {
+        let patterns = vec!["*/.*".to_string(), "*/target/*".to_string()];
+        let plain = ExcludedItems::new_from(patterns.clone());
+        let scoped = ScopedExcludedItems::new(ExcludedItems::new_from(patterns), &[PathBuf::from("/home/user/normal")]);
+
+        for path in ["/home/user/normal/a.txt", "/home/user/normal/.h/a.txt", "/home/user/other/target/a", "/home/user/.cfg/a"] {
+            assert_eq!(scoped.is_excluded(Path::new(path)), plain.is_excluded(Path::new(path)), "{path}");
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_scoped_empty_patterns_and_empty_roots() {
+        let scoped = ScopedExcludedItems::new(ExcludedItems::new(), &[PathBuf::from("/a/.b")]);
+        assert!(!scoped.is_excluded(Path::new("/a/.b/c")));
+
+        let scoped = ScopedExcludedItems::new(ExcludedItems::new_from(vec!["*/.*".to_string()]), &[]);
+        assert!(scoped.is_excluded(Path::new("/a/.b/c")));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_scope_does_not_leak_to_sibling_with_common_name_prefix() {
+        let items = ExcludedItems::new_from(vec!["*/.*".to_string()]);
+        let scoped = ScopedExcludedItems::new(items, &[PathBuf::from("/x/.A")]);
+
+        assert!(!scoped.is_excluded(Path::new("/x/.A/f")));
+        assert!(scoped.is_excluded(Path::new("/x/.AB/f")));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_nested_roots_most_specific_scope_wins() {
+        let items = ExcludedItems::new_from(vec!["*/.outer*".to_string(), "*/.inner*".to_string(), "*/.x/*".to_string()]);
+        let scoped = ScopedExcludedItems::new(items, &[PathBuf::from("/r/.outer"), PathBuf::from("/r/.outer/.inner")]);
+
+        assert!(!scoped.is_excluded(Path::new("/r/.outer/a")));
+        assert!(scoped.is_excluded(Path::new("/r/.outer/.x/a")));
+        assert!(!scoped.is_excluded(Path::new("/r/.outer/.inner/a")));
+        assert!(scoped.is_excluded(Path::new("/r/other/.inner/a")));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_pattern_with_trailing_wildcard_is_lifted_for_root() {
+        let items = ExcludedItems::new_from(vec!["*/.git/*".to_string()]);
+        let scoped = ScopedExcludedItems::new(items, &[PathBuf::from("/x/.git")]);
+
+        assert!(!scoped.is_excluded(Path::new("/x/.git/config")));
+        assert!(scoped.is_excluded(Path::new("/y/.git/config")));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_root_matching_several_patterns_lifts_all_of_them() {
+        let items = ExcludedItems::new_from(vec!["*/.*".to_string(), "*/.A*".to_string(), "*/zzz/*".to_string()]);
+        let scoped = ScopedExcludedItems::new(items, &[PathBuf::from("/x/.A")]);
+
+        assert!(!scoped.is_excluded(Path::new("/x/.A/f")));
+        assert!(!scoped.is_excluded(Path::new("/x/.A/sub/f")));
+        assert!(scoped.is_excluded(Path::new("/x/.A/zzz/f")));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_hidden_subdirs_inside_included_hidden_root_stay_excluded() {
+        let scoped = ScopedExcludedItems::new(ExcludedItems::new_from(vec!["*/.*".to_string()]), &[PathBuf::from("/x/.A")]);
+
+        assert!(!scoped.is_excluded(Path::new("/x/.A")));
+        assert!(!scoped.is_excluded(Path::new("/x/.A/sub/f.txt")));
+        assert!(!scoped.is_excluded(Path::new("/x/.A/file.tar.gz")));
+        assert!(scoped.is_excluded(Path::new("/x/.A/.b/f")));
+        assert!(scoped.is_excluded(Path::new("/x/.A/sub/.b/f")));
+        assert!(scoped.is_excluded(Path::new("/x/.A/.hidden_file")));
+    }
+
+    #[cfg(target_family = "windows")]
+    #[test]
+    fn test_included_hidden_directory_windows_case_insensitive() {
+        let items = ExcludedItems::new_from(vec!["*\\.GIT\\*".to_string(), "*\\.Hidden*".to_string()]);
+        let scoped = ScopedExcludedItems::new(items, &[PathBuf::from("C:\\Users\\Me\\.Hidden")]);
+
+        assert!(!scoped.is_excluded(Path::new("C:\\Users\\Me\\.HIDDEN\\sub\\file.txt")));
+        assert!(scoped.is_excluded(Path::new("C:\\Users\\Me\\.hidden\\.git\\config")));
+        assert!(scoped.is_excluded(Path::new("C:\\Users\\Other\\.hidden\\file.txt")));
     }
 
     #[cfg(target_family = "windows")]
