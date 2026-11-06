@@ -70,7 +70,7 @@ mod taskbar_progress_dummy;
 #[cfg(target_os = "windows")]
 mod taskbar_progress_win;
 
-pub const CZKAWKA_GTK_TOOL_NUMBER: usize = TOOLS_NUMBER - 3; // Missing exif, video optimizer, bad names tools
+pub const CZKAWKA_GTK_TOOL_NUMBER: usize = TOOLS_NUMBER - 4; // Missing exif, video optimizer, bad names, folder compare tools
 
 fn main() {
     register_image_decoding_hooks();

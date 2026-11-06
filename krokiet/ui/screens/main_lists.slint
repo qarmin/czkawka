@@ -40,6 +40,7 @@ export component MainList {
     in-out property <[SingleMainListModel]> bad_names_model: [];
     in-out property <[SingleMainListModel]> exif_remover_model: [];
     in-out property <[SingleMainListModel]> video_optimizer_model: [];
+    in-out property <[SingleMainListModel]> folder_compare_model: [];
 
     callback changed_active_tab();
 
@@ -58,6 +59,24 @@ export component MainList {
         topLeftCropIdx: GuiState.duplicate_data_idx[3];
         originalWidthIdx: GuiState.duplicate_data_idx[4];
         originalHeightIdx: GuiState.duplicate_data_idx[5];
+        sort_available: !working;
+    }
+
+    folder_compare := SelectableTableView {
+        main_window_width: root.main_window_width;
+        main_window_height: root.main_window_height;
+        visible: GuiState.active_tab == ActiveTab.FolderCompare;
+        min-width: 200px;
+        height: parent.height;
+        columns <=> Settings.folder_compare_column_name;
+        column_sizes <=> Settings.folder_compare_column_size;
+        values <=> folder_compare_model;
+        parentPathIdx: GuiState.folder_compare_data_idx[0];
+        fileNameIdx: GuiState.folder_compare_data_idx[1];
+        previewImageIdx: GuiState.folder_compare_data_idx[2];
+        topLeftCropIdx: GuiState.folder_compare_data_idx[3];
+        originalWidthIdx: GuiState.folder_compare_data_idx[4];
+        originalHeightIdx: GuiState.folder_compare_data_idx[5];
         sort_available: !working;
     }
 
@@ -340,6 +359,8 @@ export component MainList {
             video_optimizer.reset_selection();
         } else if (active_tab == ActiveTab.BadNames) {
             bad_names.reset_selection();
+        } else if (active_tab == ActiveTab.FolderCompare) {
+            folder_compare.reset_selection();
         } else {
              debug("Non handled reset selection in main_lists.slint");
         }
@@ -374,6 +395,8 @@ export component MainList {
             video_optimizer.scan_started();
         } else if (GuiState.active_tab == ActiveTab.BadNames) {
             bad_names.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.FolderCompare) {
+            folder_compare.scan_started();
         } else {
              debug("Non handled reset selection in main_lists.slint");
         }

@@ -20,7 +20,7 @@ done
 
 # Names of the tools in the order of the list on the left; every row is 25 px high
 TOOLS=(duplicate_files empty_folders big_files empty_files temporary_files similar_images similar_videos music_duplicates
-    invalid_symlinks broken_files bad_extensions bad_names exif_remover video_optimizer disk_usage)
+    invalid_symlinks broken_files bad_extensions bad_names exif_remover video_optimizer folder_compare disk_usage)
 FIRST_TOOL_Y=108
 TOOL_ROW_HEIGHT=25
 # Positions of controls that are anchored to the bottom of the window
@@ -37,6 +37,8 @@ make_fixture() {
     for i in $(seq 1 60); do printf 'fn main() {}\n// %s\n' "$i" > "$FIXTURE/src/file_$i.rs"; done
     for i in $(seq 1 4); do truncate -s $((i * 9000000)) "$FIXTURE/archives/backup_$i.zip"; done
     cp "$FIXTURE/docs/document_1.pdf" "$FIXTURE/docs/copy_of_document_1.pdf"
+    cp -r "$FIXTURE/src" "$FIXTURE/src_backup"
+    cp -r "$FIXTURE/src" "$FIXTURE/src_newer" && printf 'extra' > "$FIXTURE/src_newer/extra.rs"
     : > "$FIXTURE/docs/empty.txt"
     : > "$FIXTURE/downloads/video.mp4.part"
     printf 'cache' > "$FIXTURE/downloads/data.tmp"
@@ -136,7 +138,7 @@ capture_theme() {
 
 # The disk usage tool is already open and scanned: its views, the nested borders, the menu and the settings window
 capture_disk_usage_views() {
-    click 100 $((FIRST_TOOL_Y + TOOL_ROW_HEIGHT * 14)) 1 1
+    click 100 $((FIRST_TOOL_Y + TOOL_ROW_HEIGHT * 15)) 1 1
     click 251 31 1 1.5
     shot disk_usage_rings
     click 179 31 1 1.5

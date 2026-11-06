@@ -262,6 +262,13 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_video_optimizer_generate_template_text(flk!("subsettings_video_optimizer_generate_template").into());
     translation.set_subsettings_reset_text(flk!("subsettings_reset").into());
     translation.set_tool_disk_usage_text(flk!("tool_disk_usage").into());
+    translation.set_tool_folder_compare_text(flk!("tool_folder_compare").into());
+    translation.set_folder_compare_ignore_names_text(flk!("folder_compare_ignore_names").into());
+    translation.set_folder_compare_ignore_names_hint_text(flk!("folder_compare_ignore_names_hint").into());
+    translation.set_folder_compare_find_subsets_text(flk!("folder_compare_find_subsets").into());
+    translation.set_folder_compare_find_subsets_hint_text(flk!("folder_compare_find_subsets_hint").into());
+    translation.set_folder_compare_min_files_text(flk!("folder_compare_min_files").into());
+    translation.set_folder_compare_mode_hint_text(flk!("folder_compare_mode_hint").into());
     translation.set_disk_usage_mode_treemap_text(flk!("disk_usage_mode_treemap").into());
     translation.set_disk_usage_mode_sunburst_text(flk!("disk_usage_mode_sunburst").into());
     translation.set_disk_usage_zoom_out_text(flk!("disk_usage_zoom_out").into());
@@ -496,6 +503,7 @@ fn translate_items(app: &MainWindow) {
         (flk!("tool_bad_names").into(), ActiveTab::BadNames),
         (flk!("tool_exif_remover").into(), ActiveTab::ExifRemover),
         (flk!("tool_video_optimizer").into(), ActiveTab::VideoOptimizer),
+        (flk!("tool_folder_compare").into(), ActiveTab::FolderCompare),
     ];
     let mut tools = list_tools_model.to_vec();
     tools.push((flk!("tool_disk_usage").into(), ActiveTab::DiskUsage));
@@ -543,12 +551,16 @@ fn translate_items(app: &MainWindow) {
     let exif_tags = flk!("column_exif_tags");
     let new_dimensions = flk!("column_new_dimensions");
     let new_name = flk!("column_new_name");
+    let status = flk!("column_status");
+    let files = flk!("column_files");
+    let name = flk!("column_name");
 
     let fnm = |model: &[&str]| {
         let shared_string = model.iter().map(|s| (*s).into()).collect::<Vec<SharedString>>();
         ModelRc::new(VecModel::from(shared_string))
     };
 
+    settings.set_folder_compare_column_name(fnm(&[&selection, &status, &size, &files, &name, &path]));
     settings.set_duplicates_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));
     settings.set_empty_folders_column_name(fnm(&[&selection, &file_name, &path, &mod_date]));
     settings.set_empty_files_column_name(fnm(&[&selection, &size, &file_name, &path, &mod_date]));

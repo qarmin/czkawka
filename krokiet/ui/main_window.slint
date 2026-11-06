@@ -88,6 +88,7 @@ export component MainWindow inherits Window {
     in-out property <[SingleMainListModel]> bad_names_model: [];
     in-out property <[SingleMainListModel]> exif_remover_model: [];
     in-out property <[SingleMainListModel]> video_optimizer_model: [];
+    in-out property <[SingleMainListModel]> folder_compare_model: [];
 
     VerticalBox {
         HorizontalBox {
@@ -138,6 +139,7 @@ export component MainWindow inherits Window {
                         bad_names_model <=> root.bad_names_model;
                         exif_remover_model <=> root.exif_remover_model;
                         video_optimizer_model <=> root.video_optimizer_model;
+                        folder_compare_model <=> root.folder_compare_model;
 
                         show_clean_cache_popup() => {
                             clean_cache_popup_window.show_popup();
@@ -197,6 +199,7 @@ export component MainWindow inherits Window {
             bad_names_model <=> root.bad_names_model;
             exif_remover_model <=> root.exif_remover_model;
             video_optimizer_model <=> root.video_optimizer_model;
+            folder_compare_model <=> root.folder_compare_model;
 
             vertical-stretch: 0.0;
             scanning <=> root.scanning;

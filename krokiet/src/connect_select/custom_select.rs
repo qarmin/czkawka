@@ -2,10 +2,10 @@ use chrono::{NaiveDate, Utc};
 use slint::{Model, ModelRc, SharedString, VecModel};
 
 use crate::common::{
-    IntDataBigFiles, IntDataBrokenFiles, IntDataDuplicateFiles, IntDataEmptyFiles, IntDataEmptyFolders, IntDataExifRemover, IntDataInvalidSymlinks, IntDataSimilarImages,
-    IntDataSimilarMusic, IntDataSimilarVideos, IntDataTemporaryFiles, IntDataVideoOptimizer, StrDataBadExtensions, StrDataBadNames, StrDataBigFiles, StrDataBrokenFiles,
-    StrDataDuplicateFiles, StrDataEmptyFiles, StrDataEmptyFolders, StrDataExifRemover, StrDataInvalidSymlinks, StrDataSimilarImages, StrDataSimilarMusic, StrDataSimilarVideos,
-    StrDataTemporaryFiles, StrDataVideoOptimizer, connect_i32_into_u64,
+    IntDataBigFiles, IntDataBrokenFiles, IntDataDuplicateFiles, IntDataEmptyFiles, IntDataEmptyFolders, IntDataExifRemover, IntDataFolderCompare, IntDataInvalidSymlinks,
+    IntDataSimilarImages, IntDataSimilarMusic, IntDataSimilarVideos, IntDataTemporaryFiles, IntDataVideoOptimizer, StrDataBadExtensions, StrDataBadNames, StrDataBigFiles,
+    StrDataBrokenFiles, StrDataDuplicateFiles, StrDataEmptyFiles, StrDataEmptyFolders, StrDataExifRemover, StrDataFolderCompare, StrDataInvalidSymlinks, StrDataSimilarImages,
+    StrDataSimilarMusic, StrDataSimilarVideos, StrDataTemporaryFiles, StrDataVideoOptimizer, connect_i32_into_u64,
 };
 use crate::{ActiveTab, ColumnType, CustomSelectColumnModel, SingleMainListModel, flk};
 pub(super) type SelectionResult = (u64, u64, ModelRc<SingleMainListModel>);
@@ -106,6 +106,12 @@ pub(super) fn build_custom_select_columns(active_tab: ActiveTab) -> Vec<CustomSe
             col_str!(&path, StrDataDuplicateFiles::Path),
             col_int_pair!(format!("{} [KB]", size), IntDataDuplicateFiles::SizePart1),
             col_date!(&mod_date, IntDataDuplicateFiles::ModificationDatePart1),
+        ],
+        ActiveTab::FolderCompare => vec![
+            col_full_path!(&full_path),
+            col_str!(&file_name, StrDataFolderCompare::Name),
+            col_str!(&path, StrDataFolderCompare::Path),
+            col_int_pair!(format!("{} [KB]", size), IntDataFolderCompare::SizePart1),
         ],
         ActiveTab::EmptyFolders => vec![
             col_full_path!(&full_path),

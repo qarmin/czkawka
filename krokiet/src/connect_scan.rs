@@ -9,6 +9,7 @@ mod duplicate;
 mod empty_files;
 mod empty_folders;
 mod exif_remover;
+mod folder_compare;
 mod invalid_symlinks;
 mod same_music;
 mod similar_images;
@@ -41,6 +42,7 @@ use crate::connect_scan::duplicate::scan_duplicates;
 use crate::connect_scan::empty_files::scan_empty_files;
 use crate::connect_scan::empty_folders::scan_empty_folders;
 use crate::connect_scan::exif_remover::scan_exif_remover;
+use crate::connect_scan::folder_compare::scan_folder_compare;
 use crate::connect_scan::invalid_symlinks::scan_invalid_symlinks;
 use crate::connect_scan::same_music::scan_similar_music;
 use crate::connect_scan::similar_images::scan_similar_images;
@@ -63,6 +65,9 @@ pub struct ScanData {
     pub disk_usage_content_detection: ContentDetection,
     pub disk_usage_ignore_excluded_items: bool,
     pub disk_usage_ignore_excluded_directories: bool,
+    pub folder_compare_ignore_names: bool,
+    pub folder_compare_find_subsets: bool,
+    pub folder_compare_min_files_index: usize,
 }
 
 pub struct MessagesData {
@@ -123,6 +128,9 @@ pub(crate) fn connect_scan_button(
             disk_usage_content_detection: content_detection_from_index(app.global::<DiskUsageState>().get_content_detection_index()),
             disk_usage_ignore_excluded_items: app.global::<DiskUsageState>().get_ignore_excluded_items(),
             disk_usage_ignore_excluded_directories: app.global::<DiskUsageState>().get_ignore_excluded_directories(),
+            folder_compare_ignore_names: app.global::<GuiState>().get_folder_compare_ignore_names(),
+            folder_compare_find_subsets: app.global::<GuiState>().get_folder_compare_find_subsets(),
+            folder_compare_min_files_index: app.global::<GuiState>().get_folder_compare_min_files_index().max(0) as usize,
         };
 
         match active_tab {
@@ -141,6 +149,7 @@ pub(crate) fn connect_scan_button(
             ActiveTab::ExifRemover => scan_exif_remover(a, scan_data),
             ActiveTab::VideoOptimizer => scan_video_optimizer(a, scan_data),
             ActiveTab::DiskUsage => scan_disk_usage(a, scan_data),
+            ActiveTab::FolderCompare => scan_folder_compare(a, scan_data),
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
     });

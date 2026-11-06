@@ -23,6 +23,7 @@ use czkawka_core::tools::duplicate::{DuplicateFinder, DuplicateFinderParameters}
 use czkawka_core::tools::empty_files::{EmptyFiles, EmptyFilesParameters};
 use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::exif_remover::{ExifRemover, ExifRemoverParameters, ExifTagsFixerParams};
+use czkawka_core::tools::folder_compare::{FolderCompare, FolderCompareParameters};
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::{SameMusic, SameMusicParameters};
 use czkawka_core::tools::similar_images::{SimilarImages, SimilarImagesParameters};
@@ -36,7 +37,7 @@ use log::{debug, error, info};
 
 use crate::commands::{
     Args, BadExtensionsArgs, BadNamesArgs, BiggestFilesArgs, BrokenFilesArgs, CommonCliItems, DMethod, DiskUsageArgs, DuplicatesArgs, EmptyFilesArgs, EmptyFoldersArgs,
-    ExifRemoverArgs, InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs, validate_file_sizes,
+    ExifRemoverArgs, FolderCompareArgs, InvalidSymlinksArgs, SDMethod, SameMusicArgs, SimilarImagesArgs, SimilarVideosArgs, TemporaryArgs, VideoOptimizerArgs, validate_file_sizes,
 };
 use crate::progress::connect_progress;
 
@@ -79,6 +80,7 @@ fn main() {
             Commands::EmptyFolders(empty_folders_args) => empty_folders(empty_folders_args, &stop_flag, &progress_sender),
             Commands::BiggestFiles(biggest_files_args) => biggest_files(biggest_files_args, &stop_flag, &progress_sender),
             Commands::DiskUsage(disk_usage_args) => disk_usage(disk_usage_args, &stop_flag, &progress_sender),
+            Commands::FolderCompare(folder_compare_args) => folder_compare(folder_compare_args, &stop_flag, &progress_sender),
             Commands::EmptyFiles(empty_files_args) => empty_files(empty_files_args, &stop_flag, &progress_sender),
             Commands::Temporary(temporary_args) => temporary(temporary_args, &stop_flag, &progress_sender),
             Commands::SimilarImages(similar_images_args) => similar_images(similar_images_args, &stop_flag, &progress_sender),
@@ -209,6 +211,34 @@ fn disk_usage(disk_usage: DiskUsageArgs, stop_flag: &Arc<AtomicBool>, progress_s
     let mut tool = DiskUsage::new(params);
 
     set_common_settings(&mut tool, &common_cli_items, None);
+
+    tool.search(stop_flag, Some(progress_sender));
+
+    save_and_write_results_to_writer(&tool, &common_cli_items)
+}
+
+fn folder_compare(folder_compare: FolderCompareArgs, stop_flag: &Arc<AtomicBool>, progress_sender: &Sender<ProgressData>) -> CliOutput {
+    let FolderCompareArgs {
+        common_cli_items,
+        reference_directories,
+        hash_type,
+        ignore_names,
+        min_files,
+        min_size,
+        no_subsets,
+    } = folder_compare;
+
+    let params = FolderCompareParameters {
+        ignore_names,
+        min_files,
+        min_size,
+        find_subsets: !no_subsets,
+        ..FolderCompareParameters::new(hash_type)
+    };
+    let mut tool = FolderCompare::new(params);
+
+    set_common_settings(&mut tool, &common_cli_items, None);
+    tool.set_reference_paths(reference_directories);
 
     tool.search(stop_flag, Some(progress_sender));
 

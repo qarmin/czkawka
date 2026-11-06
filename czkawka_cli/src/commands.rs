@@ -10,6 +10,7 @@ use czkawka_core::common::tool_data::DeleteMethod;
 use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
 use czkawka_core::tools::disk_usage::{ContentDetection, DiskUsageParameters};
+use czkawka_core::tools::folder_compare::FolderCompareParameters;
 use czkawka_core::tools::same_music::MusicSimilarity;
 use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_videos::{
@@ -85,6 +86,12 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka disk-usage -d /home/rafal -e /home/rafal/Obrazy --depth 3 --top 15 -f results.txt"
     )]
     DiskUsage(DiskUsageArgs),
+    #[clap(
+        name = "folder-compare",
+        about = "Finds identical or contained folders, or compares two sides folder by folder",
+        after_help = "EXAMPLE:\n    czkawka folder-compare -d /home/rafal/Backup -f results.txt\n    czkawka folder-compare -d /home/rafal/Photos -r /mnt/disk/Photos --ignore-names"
+    )]
+    FolderCompare(FolderCompareArgs),
     #[clap(
         name = "empty-files",
         about = "Finds empty files",
@@ -293,6 +300,54 @@ pub struct DiskUsageArgs {
         long_help = "Measures also the directories and files given as excluded paths"
     )]
     pub ignore_excluded_directories: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct FolderCompareArgs {
+    #[clap(flatten)]
+    pub common_cli_items: CommonCliItems,
+    #[clap(
+        short,
+        long,
+        help = "Right side directory(ies) to compare the directories with",
+        long_help = "Right side of the comparison. When given, the directories are the left side and the result lists what is only on one side or differs. Without it, identical and contained folders are searched among the directories. Unlike in other tools these do not have to lie inside the directories"
+    )]
+    pub reference_directories: Vec<PathBuf>,
+    #[clap(
+        short = 't',
+        long,
+        default_value = "BLAKE3",
+        value_parser = parse_hash_type,
+        help = "Hash type (BLAKE3, CRC32, XXH3)",
+        long_help = "Hash algorithm used to compare the content of files"
+    )]
+    pub hash_type: HashType,
+    #[clap(
+        long,
+        help = "Ignores file and folder names when looking for identical folders",
+        long_help = "Folders with the same files under different names count as identical. Does not change the comparison of two sides, which always matches entries by name"
+    )]
+    pub ignore_names: bool,
+    #[clap(
+        long,
+        default_value_t = FolderCompareParameters::DEFAULT_MIN_FILES,
+        help = "Minimum number of files in a folder to be reported as a duplicate",
+        long_help = "Folders with fewer files (counted together with all subfolders) are not reported when searching for duplicated folders"
+    )]
+    pub min_files: u64,
+    #[clap(
+        long,
+        default_value_t = 0,
+        help = "Minimum size of a folder in bytes to be reported as a duplicate",
+        long_help = "Folders smaller than this (together with all subfolders) are not reported when searching for duplicated folders"
+    )]
+    pub min_size: u64,
+    #[clap(
+        long,
+        help = "Does not report folders contained in bigger folders",
+        long_help = "Reports only identical folders, without folders whose files all exist in another, bigger folder"
+    )]
+    pub no_subsets: bool,
 }
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]

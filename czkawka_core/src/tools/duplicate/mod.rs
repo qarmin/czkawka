@@ -34,7 +34,7 @@ pub const PREHASHING_BUFFER_SIZE: u64 = 4 * 1024;
 pub const THREAD_BUFFER_SIZE: usize = 2 * 1024 * 1024;
 
 thread_local! {
-    static THREAD_BUFFER: RefCell<Vec<u8>> = RefCell::new(vec![0u8; THREAD_BUFFER_SIZE]);
+    pub(crate) static THREAD_BUFFER: RefCell<Vec<u8>> = RefCell::new(vec![0u8; THREAD_BUFFER_SIZE]);
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]

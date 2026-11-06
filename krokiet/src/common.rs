@@ -261,6 +261,27 @@ pub enum StrDataBadExtensions {
 }
 pub const MAX_STR_DATA_BAD_EXTENSIONS: usize = StrDataBadExtensions::ProperExtension as usize + 1;
 
+// Folder Compare
+#[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
+pub enum IntDataFolderCompare {
+    SizePart1,
+    SizePart2,
+    Files,
+}
+pub const MAX_INT_DATA_FOLDER_COMPARE: usize = IntDataFolderCompare::Files as usize + 1;
+
+#[repr(u8)]
+#[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
+pub enum StrDataFolderCompare {
+    Status,
+    Size,
+    Files,
+    Name,
+    Path,
+}
+pub const MAX_STR_DATA_FOLDER_COMPARE: usize = StrDataFolderCompare::Path as usize + 1;
+
 // Bad Names
 #[repr(u8)]
 #[derive(Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -460,6 +481,11 @@ impl ActiveTab {
                 StrDataVideoOptimizer::Length => SortIdx::IntIdx(IntDataVideoOptimizer::DurationCentiseconds as i32),
                 StrDataVideoOptimizer::Bitrate => SortIdx::IntIdxPair(IntDataVideoOptimizer::BitratePart1 as i32, IntDataVideoOptimizer::BitratePart2 as i32),
             },
+            Self::FolderCompare => match StrDataFolderCompare::try_from(str_idx as u8).unwrap_or_else(|_| panic!("Invalid str idx {str_idx} for FolderCompare")) {
+                StrDataFolderCompare::Status | StrDataFolderCompare::Name | StrDataFolderCompare::Path => SortIdx::StrIdx(str_idx),
+                StrDataFolderCompare::Size => SortIdx::IntIdxPair(IntDataFolderCompare::SizePart1 as i32, IntDataFolderCompare::SizePart2 as i32),
+                StrDataFolderCompare::Files => SortIdx::IntIdx(IntDataFolderCompare::Files as i32),
+            },
             Self::Settings | Self::About | Self::DiskUsage => panic!("Button should be disabled"),
         }
     }
@@ -481,6 +507,7 @@ impl ActiveTab {
             Self::BadNames => StrDataBadNames::Path as usize,
             Self::ExifRemover => StrDataExifRemover::Path as usize,
             Self::VideoOptimizer => StrDataVideoOptimizer::Path as usize,
+            Self::FolderCompare => StrDataFolderCompare::Path as usize,
             Self::Settings | Self::About | Self::DiskUsage => panic!("Button should be disabled"),
         }
     }
@@ -501,6 +528,7 @@ impl ActiveTab {
             Self::BadNames => StrDataBadNames::Name as usize,
             Self::ExifRemover => StrDataExifRemover::Name as usize,
             Self::VideoOptimizer => StrDataVideoOptimizer::Name as usize,
+            Self::FolderCompare => StrDataFolderCompare::Name as usize,
             Self::Settings | Self::About | Self::DiskUsage => panic!("Button should be disabled"),
         }
     }
@@ -528,6 +556,7 @@ impl ActiveTab {
             Self::BadNames => IntDataBadNames::ModificationDatePart1 as usize,
             Self::ExifRemover => IntDataExifRemover::ModificationDatePart1 as usize,
             Self::VideoOptimizer => IntDataVideoOptimizer::ModificationDatePart1 as usize,
+            Self::FolderCompare => panic!("Folder compare has no modification date"),
             Self::Settings | Self::About | Self::DiskUsage => panic!("Button should be disabled"),
         }
     }
@@ -545,6 +574,7 @@ impl ActiveTab {
             Self::BadNames => IntDataBadNames::SizePart1 as usize,
             Self::ExifRemover => IntDataExifRemover::SizePart1 as usize,
             Self::VideoOptimizer => IntDataVideoOptimizer::SizePart1 as usize,
+            Self::FolderCompare => IntDataFolderCompare::SizePart1 as usize,
             Self::Settings | Self::About | Self::DiskUsage | Self::EmptyFolders | Self::InvalidSymlinks => return None,
         };
         Some(res)
@@ -621,7 +651,7 @@ impl ActiveTab {
             | Self::BadNames
             | Self::ExifRemover
             | Self::VideoOptimizer => false,
-            Self::SimilarImages | Self::DuplicateFiles | Self::SimilarVideos | Self::SimilarMusic => true,
+            Self::SimilarImages | Self::DuplicateFiles | Self::SimilarVideos | Self::SimilarMusic | Self::FolderCompare => true,
             Self::Settings | Self::About | Self::DiskUsage => panic!("Button should be disabled"),
         }
     }
@@ -641,6 +671,7 @@ impl ActiveTab {
             Self::BadNames => app.get_bad_names_model(),
             Self::ExifRemover => app.get_exif_remover_model(),
             Self::VideoOptimizer => app.get_video_optimizer_model(),
+            Self::FolderCompare => app.get_folder_compare_model(),
             Self::Settings | Self::About | Self::DiskUsage => panic!("Button should be disabled"),
         }
     }
@@ -661,6 +692,7 @@ impl ActiveTab {
             Self::BadNames => app.set_bad_names_model(model),
             Self::ExifRemover => app.set_exif_remover_model(model),
             Self::VideoOptimizer => app.set_video_optimizer_model(model),
+            Self::FolderCompare => app.set_folder_compare_model(model),
             Self::Settings | Self::About | Self::DiskUsage => panic!("Button should be disabled"),
         }
     }
@@ -681,7 +713,7 @@ impl ActiveTab {
             ToolType::TemporaryFiles => Self::TemporaryFiles,
             ToolType::ExifRemover => Self::ExifRemover,
             ToolType::VideoOptimizer => Self::VideoOptimizer,
-            ToolType::DiskUsage | ToolType::None => panic!("CLI tool parsing never produces {tool:?}"),
+            ToolType::DiskUsage | ToolType::FolderCompare | ToolType::None => panic!("CLI tool parsing never produces {tool:?}"),
         }
     }
 }

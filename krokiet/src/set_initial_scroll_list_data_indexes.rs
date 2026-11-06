@@ -2,8 +2,8 @@ use slint::ComponentHandle;
 
 use crate::common::{
     IntDataVideoOptimizer, StrDataBadExtensions, StrDataBadNames, StrDataBigFiles, StrDataBrokenFiles, StrDataDuplicateFiles, StrDataEmptyFiles, StrDataEmptyFolders,
-    StrDataExifRemover, StrDataInvalidSymlinks, StrDataSimilarImages, StrDataSimilarMusic, StrDataSimilarVideos, StrDataTemporaryFiles, StrDataVideoOptimizer,
-    create_model_from_model_vec,
+    StrDataExifRemover, StrDataFolderCompare, StrDataInvalidSymlinks, StrDataSimilarImages, StrDataSimilarMusic, StrDataSimilarVideos, StrDataTemporaryFiles,
+    StrDataVideoOptimizer, create_model_from_model_vec,
 };
 use crate::{GuiState, MainWindow};
 
@@ -70,4 +70,7 @@ pub(crate) fn set_initial_scroll_list_data_indexes(app: &MainWindow) {
 
     let bad_names_data: DataType = [StrDataBadNames::Path as i32, StrDataBadNames::Name as i32, -1, -1, -1, -1];
     gs.set_bad_names_data_idx(create_model_from_model_vec(&bad_names_data));
+
+    let folder_compare_data: DataType = [StrDataFolderCompare::Path as i32, StrDataFolderCompare::Name as i32, -1, -1, -1, -1];
+    gs.set_folder_compare_data_idx(create_model_from_model_vec(&folder_compare_data));
 }

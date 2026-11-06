@@ -1,5 +1,6 @@
 mod disk_usage;
 mod faq;
+mod folder_compare;
 mod general;
 mod tools_files;
 mod tools_media;
@@ -37,6 +38,7 @@ pub(crate) fn set_help_content(app: &MainWindow) {
         tools_other::exif_remover(),
         tools_other::video_optimizer(),
         disk_usage::section(),
+        folder_compare::section(),
         general::shortcuts(),
         faq::faq(),
     ];

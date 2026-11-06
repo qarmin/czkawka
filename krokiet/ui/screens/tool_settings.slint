@@ -914,6 +914,44 @@ export component ToolSettings inherits ScrollView {
             Rectangle { }
         }
 
+        if GuiState.active_tab == ActiveTab.FolderCompare: VerticalLayout {
+            spacing: 5px;
+            padding: 10px;
+
+            HintText {
+                width: root.hint_width;
+                hint_text: Translations.folder_compare_mode_hint_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.folder_compare_ignore_names_text;
+                checked <=> GuiState.folder_compare_ignore_names;
+            }
+
+            HintText {
+                width: root.hint_width;
+                hint_text: Translations.folder_compare_ignore_names_hint_text;
+            }
+
+            CheckBoxWrapper {
+                text: Translations.folder_compare_find_subsets_text;
+                checked <=> GuiState.folder_compare_find_subsets;
+            }
+
+            HintText {
+                width: root.hint_width;
+                hint_text: Translations.folder_compare_find_subsets_hint_text;
+            }
+
+            ComboBoxWrapper {
+                text: Translations.folder_compare_min_files_text;
+                model: ["1", "2", "3", "5", "10", "50"];
+                current_index <=> GuiState.folder_compare_min_files_index;
+            }
+
+            Rectangle { }
+        }
+
         if GuiState.active_tab == ActiveTab.DiskUsage: VerticalLayout {
             spacing: 5px;
             padding: 10px;

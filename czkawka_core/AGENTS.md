@@ -6,7 +6,7 @@
 dependency. Every scanning tool is implemented here; frontends only configure the
 tool structs and drive them via the `Search` trait.
 
-`TOOLS_NUMBER = 14` (defined in `src/lib.rs`) counts the tools that produce a list of results; `disk_usage` is not included because its result is a size tree.
+`TOOLS_NUMBER = 14` (defined in `src/lib.rs`) counts the tools that produce a list of results; `disk_usage` (a size tree) and `folder_compare` (groups of folders or a diff tree) are not included because their results are not plain file lists.
 
 ---
 
@@ -51,6 +51,7 @@ czkawka_core/src/
 │   ├── empty_folder/
 │   ├── big_file/
 │   ├── disk_usage/                # Size tree + treemap/sunburst layouts (no pixels)
+│   ├── folder_compare/            # Identical/contained folders, or a diff of two sides
 │   ├── similar_images/            # Perceptual hashing (image_hasher)
 │   ├── similar_videos/            # Frame-based video similarity
 │   ├── same_music/                # Audio tag + chromaprint fingerprint
@@ -89,6 +90,24 @@ disk_usage/
 The core has no pixels and no `image` dependency; frontends rasterize a [`Layout`] themselves
 (see `krokiet/src/disk_usage/`). Layout coordinates are on a unit square, so only the aspect ratio of
 the target area matters.
+
+---
+
+## FolderCompare (`src/tools/folder_compare/`)
+
+One tool, two modes chosen by whether reference paths were given: without them it finds identical and contained folders among the included paths ([`FolderGroup`]s); with them the included paths are the left side, the reference paths the right side, and the result is a [`DiffNode`] tree.
+
+```
+folder_compare/
+├── mod.rs, core.rs, traits.rs   # FolderCompare: Search, CommonData, PrintResults; parameters, result types
+├── scan.rs                      # FsNode tree (names, sizes, file counts), honors excluded paths/items/extensions
+├── hashing.rs                   # size -> prehash -> full hash (reuses duplicate's hashing); only files sharing content get a hash
+├── cache.rs                     # Full hashes read from and written to Duplicates' own cache file (same entries, merged on save)
+├── duplicates.rs                # Merkle hash per folder, identical classes, subset search via rarest-key index
+└── diff.rs                      # Entries merged by name, status per node, identical folders collapsed
+```
+
+Unlike other tools it does not call `prepare_items`: `Directories::optimize_directories` requires reference paths inside the included ones and drops excluded paths outside them, which is wrong for a second side. Sides that overlap are rejected. Folders hash over (name, child hash) unless `ignore_names`; files unique by size or prehash get a path-derived hash so they can never match. Groups nested in another group are dropped, so only the top-level copy is reported.
 
 ---
 
@@ -323,7 +342,7 @@ pub enum ToolType {
     Duplicate, EmptyFolders, EmptyFiles, InvalidSymlinks,
     BrokenFiles, BadExtensions, BadNames, BigFile, SameMusic,
     SimilarImages, SimilarVideos, TemporaryFiles, ExifRemover,
-    VideoOptimizer, DiskUsage,
+    VideoOptimizer, DiskUsage, FolderCompare,
     #[default]
     None,
 }

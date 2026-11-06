@@ -21,6 +21,7 @@ core_cannot_start_scan_no_included_paths = Cannot start scan, because there are 
 core_skip_exist_check_all_included_paths_nonexistent = Cannot start scan, because all included paths do not exist
 core_missing_no_chosen_included_path = No valid included path was chosen(excluded paths could have excluded all included paths)
 core_reference_included_paths_same = Cannot start scan where all valid included paths are also referenced paths, try to validate or disable referenced paths
+core_folder_compare_sides_overlap = Cannot compare folders, because a left side path ({ $left }) overlaps with a right side path ({ $right })
 core_path_must_exists = Provided path must exist, ignoring { $path }
 core_must_be_directory_or_file = Provided path must point to a vaild directory or file, ignoring { $path }
 core_excluded_paths_pointless_slash = Excluding / is pointless, because it means no files will be scanned

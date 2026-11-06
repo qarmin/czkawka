@@ -39,55 +39,40 @@ impl DebugPrintModelRc for ModelRc<SingleMainListModel> {
 }
 
 // Removes orphan items in groups
-pub(crate) fn remove_single_items_in_groups(mut items: Vec<SingleMainListModel>, have_header: bool) -> Vec<SingleMainListModel> {
-    // When have header, we must also throw out orphaned items
-    if have_header && !items.is_empty() {
-        // First row must be header
-        // If assert fails, that means, that we checked that for mode that not have headers
-        // or that we somehow removed header row, which cannot happen without serious bug
-        assert!(items[0].header_row);
-        assert!(!items[0].checked);
-        assert!(!items[0].focused_row);
-        let is_filled_header = items[0].filled_header_row;
-
-        if is_filled_header && items.len() <= 2 {
-            if items.len() == 2 {
-                if items[1].header_row {
-                    items.clear();
-                }
-            } else {
-                items.clear();
-            }
-        } else if !is_filled_header && items.len() <= 3 {
-            if items.len() == 3 {
-                if items[1].header_row || items[2].header_row {
-                    items.clear();
-                }
-            } else {
-                items.clear();
-            }
-        } else {
-            let header_step = if is_filled_header { 1 } else { 2 };
-
-            let mut last_header = 0;
-            let mut new_items: Vec<SingleMainListModel> = Vec::new();
-            for i in 1..items.len() {
-                if items[i].header_row {
-                    if i - last_header > header_step {
-                        new_items.extend(items[last_header..i].iter().cloned());
-                    }
-                    last_header = i;
-                }
-            }
-            if items.len() - last_header > header_step {
-                new_items.extend(items[last_header..].iter().cloned());
-            }
-
-            items = new_items;
-        }
+pub(crate) fn remove_single_items_in_groups(items: Vec<SingleMainListModel>, have_header: bool) -> Vec<SingleMainListModel> {
+    if !have_header || items.is_empty() {
+        return items;
     }
+    // First row must be header
+    // If assert fails, that means, that we checked that for mode that not have headers
+    // or that we somehow removed header row, which cannot happen without serious bug
+    assert!(items[0].header_row);
+    assert!(!items[0].checked);
+    assert!(!items[0].focused_row);
 
-    items
+    let mut kept = Vec::with_capacity(items.len());
+    let mut group_start = 0;
+    for next_header in items
+        .iter()
+        .enumerate()
+        .skip(1)
+        .filter(|(_, item)| item.header_row)
+        .map(|(idx, _)| idx)
+        .chain([items.len()])
+    {
+        let group = &items[group_start..next_header];
+        if group.len() > minimal_rows_in_group(&group[0]) {
+            kept.extend(group.iter().cloned());
+        }
+        group_start = next_header;
+    }
+    kept
+}
+
+// A header may carry the minimal number of rows its group needs as its first int value, otherwise a group needs
+// a reference row plus one more (filled header) or two rows (empty header)
+fn minimal_rows_in_group(header: &SingleMainListModel) -> usize {
+    header.val_int.row_data(0).map_or(if header.filled_header_row { 1 } else { 2 }, |rows| rows.max(0) as usize)
 }
 
 pub struct CheckedItemsInfo {

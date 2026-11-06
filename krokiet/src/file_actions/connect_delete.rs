@@ -44,6 +44,7 @@ pub(crate) fn connect_trash_button(app: &MainWindow, progress_sender: Sender<Pro
 impl ModelProcessor {
     fn delete_selected_items(self, remove_to_trash: bool, progress_sender: Sender<ProgressData>, weak_app: Weak<MainWindow>, stop_flag: Arc<AtomicBool>) {
         let is_empty_folder_tab = self.active_tab == ActiveTab::EmptyFolders;
+        let can_be_folder = self.active_tab == ActiveTab::FolderCompare;
         let model = self.active_tab.get_tool_model(&weak_app.upgrade().expect("Failed to upgrade app :("));
         let simpler_model = model.to_simpler_enumerated_vec();
         thread::spawn(move || {
@@ -54,6 +55,7 @@ impl ModelProcessor {
                 remove_single_item(
                     &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
                     is_empty_folder_tab,
+                    can_be_folder,
                     remove_to_trash,
                 )
             };
@@ -72,15 +74,18 @@ impl ModelProcessor {
 }
 
 #[cfg(not(test))]
-fn remove_single_item(full_path: &str, is_folder_tab: bool, remove_to_trash: bool) -> Result<(), String> {
+fn remove_single_item(full_path: &str, is_folder_tab: bool, can_be_folder: bool, remove_to_trash: bool) -> Result<(), String> {
     if is_folder_tab {
         return czkawka_core::common::remove_folder_if_contains_only_empty_folders(full_path, remove_to_trash);
+    }
+    if can_be_folder && std::fs::symlink_metadata(full_path).is_ok_and(|metadata| metadata.is_dir()) {
+        return czkawka_core::common::remove_single_folder(full_path, remove_to_trash);
     }
     czkawka_core::common::remove_single_file(full_path, remove_to_trash)
 }
 
 #[cfg(test)]
-fn remove_single_item(full_path: &str, _is_folder_tab: bool, _remove_to_trash: bool) -> Result<(), String> {
+fn remove_single_item(full_path: &str, _is_folder_tab: bool, _can_be_folder: bool, _remove_to_trash: bool) -> Result<(), String> {
     if full_path.contains("test_error") {
         return Err(format!("Test error for item: {full_path}"));
     }
@@ -119,6 +124,7 @@ mod tests {
                 remove_single_item(
                     &format!("{}{MAIN_SEPARATOR}{}", data.val_str[path_idx], data.val_str[name_idx]),
                     is_empty_folder_tab,
+                    false,
                     remove_to_trash,
                 )
             };

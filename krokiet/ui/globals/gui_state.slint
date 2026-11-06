@@ -30,7 +30,7 @@ export global GuiState {
     in-out property <bool> left_panel_collapsed;
     in-out property <float> preview_width_ratio: 0.5;
 
-    in-out property <bool> available_subsettings: active_tab == ActiveTab.BadNames || active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic || active_tab == ActiveTab.BigFiles || active_tab == ActiveTab.BrokenFiles || active_tab == ActiveTab.VideoOptimizer || active_tab == ActiveTab.ExifRemover || active_tab == ActiveTab.TemporaryFiles || active_tab == ActiveTab.EmptyFiles || active_tab == ActiveTab.DiskUsage;
+    in-out property <bool> available_subsettings: active_tab == ActiveTab.BadNames || active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic || active_tab == ActiveTab.BigFiles || active_tab == ActiveTab.BrokenFiles || active_tab == ActiveTab.VideoOptimizer || active_tab == ActiveTab.ExifRemover || active_tab == ActiveTab.TemporaryFiles || active_tab == ActiveTab.EmptyFiles || active_tab == ActiveTab.FolderCompare || active_tab == ActiveTab.DiskUsage;
     out property <string> active_tool_name: active_tab == ActiveTab.DuplicateFiles ? Translations.tool_duplicate_files_text
         : active_tab == ActiveTab.BigFiles ? Translations.tool_big_files_text
         : active_tab == ActiveTab.EmptyFiles ? Translations.tool_empty_files_text
@@ -42,9 +42,10 @@ export global GuiState {
         : active_tab == ActiveTab.BadNames ? Translations.tool_bad_names_text
         : active_tab == ActiveTab.ExifRemover ? Translations.tool_exif_remover_text
         : active_tab == ActiveTab.VideoOptimizer ? Translations.tool_video_optimizer_text
+        : active_tab == ActiveTab.FolderCompare ? Translations.tool_folder_compare_text
         : active_tab == ActiveTab.DiskUsage ? Translations.tool_disk_usage_text
         : "";
-    in-out property <bool> tool_with_groups: active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic;
+    in-out property <bool> tool_with_groups: active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.FolderCompare || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic;
     in-out property <ActiveTab> active_tab: ActiveTab.DuplicateFiles;
     in-out property <bool> is_tool_tab_active: active_tab != ActiveTab.Settings && active_tab != ActiveTab.About;
 
@@ -77,6 +78,7 @@ export global GuiState {
         { name: Translations.tool_bad_extensions_text, tab: ActiveTab.BadExtensions },
         { name: Translations.tool_exif_remover_text, tab: ActiveTab.ExifRemover },
         { name: Translations.tool_video_optimizer_text, tab: ActiveTab.VideoOptimizer },
+        { name: Translations.tool_folder_compare_text, tab: ActiveTab.FolderCompare },
         { name: Translations.tool_disk_usage_text, tab: ActiveTab.DiskUsage },
         { name: Translations.tool_bad_names_text, tab: ActiveTab.BadNames },
     ];
@@ -112,9 +114,15 @@ export global GuiState {
     in-out property <int> selected_results_video_optimizer2: 0;
     in-out property <int> selected_results_bad_names: 0;
     in-out property <int> selected_results_bad_names2: 0;
+    in-out property <bool> folder_compare_ignore_names: false;
+    in-out property <bool> folder_compare_find_subsets: true;
+    in-out property <int> folder_compare_min_files_index: 1;
+    in-out property <int> selected_results_folder_compare: 0;
+    in-out property <int> selected_results_folder_compare2: 0;
 
     // Data index arrays for lists: [parentPathIdx, fileNameIdx, previewImageIdx]
     in-out property <[int]> duplicate_data_idx: [3, 2, -1, -1];
+    in-out property <[int]> folder_compare_data_idx: [5, 4, -1, -1];
     in-out property <[int]> empty_folders_data_idx: [2, 1, -1, -1];
     in-out property <[int]> big_files_data_idx: [3, 2, -1, -1];
     in-out property <[int]> empty_files_data_idx: [2, 1, -1, -1];

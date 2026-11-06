@@ -90,6 +90,7 @@ pub(crate) fn initialize_selection_struct() {
         ActiveTab::BadNames,
         ActiveTab::ExifRemover,
         ActiveTab::VideoOptimizer,
+        ActiveTab::FolderCompare,
     ];
 
     let map: HashMap<_, _> = tools.into_iter().map(|tool| (tool, SelectionData::default())).collect();

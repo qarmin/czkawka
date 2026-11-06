@@ -41,6 +41,7 @@ export component ActionButtons inherits HorizontalLayout {
     in-out property <[SingleMainListModel]> bad_names_model: [];
     in-out property <[SingleMainListModel]> exif_remover_model: [];
     in-out property <[SingleMainListModel]> video_optimizer_model: [];
+    in-out property <[SingleMainListModel]> folder_compare_model: [];
 
     property <ActiveTab> active_tab: GuiState.active_tab;
 
@@ -65,7 +66,8 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.BadExtensions && (GuiState.selected_results_bad_extensions > 0 || GuiState.selected_results_bad_extensions2 > 0)) ||
         (active_tab == ActiveTab.BadNames && (GuiState.selected_results_bad_names > 0 || GuiState.selected_results_bad_names2 > 0)) ||
         (active_tab == ActiveTab.ExifRemover && (GuiState.selected_results_exif_remover > 0 || GuiState.selected_results_exif_remover2 > 0)) ||
-        (active_tab == ActiveTab.VideoOptimizer && (GuiState.selected_results_video_optimizer > 0 || GuiState.selected_results_video_optimizer2 > 0))
+        (active_tab == ActiveTab.VideoOptimizer && (GuiState.selected_results_video_optimizer > 0 || GuiState.selected_results_video_optimizer2 > 0)) ||
+        (active_tab == ActiveTab.FolderCompare && (GuiState.selected_results_folder_compare > 0 || GuiState.selected_results_folder_compare2 > 0))
     );
     in-out property <bool> results_available: (
         (active_tab == ActiveTab.DuplicateFiles && duplicate_files_model.length > 0) ||
@@ -81,7 +83,8 @@ export component ActionButtons inherits HorizontalLayout {
         (active_tab == ActiveTab.BadExtensions && bad_extensions_model.length > 0) ||
         (active_tab == ActiveTab.BadNames && bad_names_model.length > 0) ||
         (active_tab == ActiveTab.ExifRemover && exif_remover_model.length > 0) ||
-        (active_tab == ActiveTab.VideoOptimizer && video_optimizer_model.length > 0)
+        (active_tab == ActiveTab.VideoOptimizer && video_optimizer_model.length > 0) ||
+        (active_tab == ActiveTab.FolderCompare && folder_compare_model.length > 0)
     );
 
     height: 30px;
@@ -242,7 +245,7 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    if lists_enabled && GuiState.tool_with_groups: hardlink_button := Button {
+    if lists_enabled && GuiState.tool_with_groups && active_tab != ActiveTab.FolderCompare: hardlink_button := Button {
         height: parent.height;
         enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.hardlink_button_text;
@@ -253,7 +256,7 @@ export component ActionButtons inherits HorizontalLayout {
         }
     }
 
-    if lists_enabled && GuiState.tool_with_groups: softlink_button := Button {
+    if lists_enabled && GuiState.tool_with_groups && active_tab != ActiveTab.FolderCompare: softlink_button := Button {
         height: parent.height;
         enabled: base_buttons_may_be_available && self.visible && checked_anything;
         text: self.visible && Settings.show_only_icons ? "" : Translations.softlink_button_text;

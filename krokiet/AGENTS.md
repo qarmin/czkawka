@@ -161,7 +161,14 @@ every callback that needs scan results (preview, compare, save, delete, …).
 Worker threads lock exclusively to **write** results after a scan finishes.
 UI callbacks lock briefly to **read** results for previews / exports.
 
-`VideoOptimizer` is one of the 14 tools but doesn't fit the scan/select/delete
+`FolderCompare` is a list tool in header (group) mode, but its rows can be files or whole folders and its two modes
+share one schema (`StrDataFolderCompare`): duplicates mode shows one group per set of identical or contained folders,
+diff mode shows one group per difference (a lone row for an entry on one side, a left and right row for a changed
+one). Referenced paths are the right side of the comparison. Group headers carry the minimal number of rows a group
+needs as their first `val_int`, so lone diff entries survive `remove_single_items_in_groups`. Its options live in
+`GuiState` (`folder_compare_*`) and are not saved in presets; deleting a row that is a directory removes it recursively.
+
+`VideoOptimizer` is one of the 15 tools but doesn't fit the scan/select/delete
 shape of the others: it has its own `connect_scan/video_optimizer.rs` entry
 point plus a dedicated `file_actions/connect_optimize_video.rs` action, and
 two popups (`popup_optimize.slint` for transcode options,

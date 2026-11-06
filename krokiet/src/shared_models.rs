@@ -11,6 +11,7 @@ use czkawka_core::tools::duplicate::DuplicateFinder;
 use czkawka_core::tools::empty_files::EmptyFiles;
 use czkawka_core::tools::empty_folder::EmptyFolder;
 use czkawka_core::tools::exif_remover::ExifRemover;
+use czkawka_core::tools::folder_compare::FolderCompare;
 use czkawka_core::tools::invalid_symlinks::InvalidSymlinks;
 use czkawka_core::tools::same_music::SameMusic;
 use czkawka_core::tools::similar_images::SimilarImages;
@@ -36,6 +37,7 @@ pub struct SharedModels {
     pub shared_exif_remover_state: Option<ExifRemover>,
     pub shared_video_optimizer_state: Option<VideoOptimizer>,
     pub shared_disk_usage_state: Option<DiskUsage>,
+    pub shared_folder_compare_state: Option<FolderCompare>,
 }
 
 impl SharedModels {
@@ -56,6 +58,7 @@ impl SharedModels {
             shared_exif_remover_state: None,
             shared_video_optimizer_state: None,
             shared_disk_usage_state: None,
+            shared_folder_compare_state: None,
         }
     }
 
@@ -81,6 +84,7 @@ impl SharedModels {
             ActiveTab::ExifRemover => self.shared_exif_remover_state.as_ref().map(|x| x.save_all_in_one(cd, "results_exif_remover")),
             ActiveTab::VideoOptimizer => self.shared_video_optimizer_state.as_ref().map(|x| x.save_all_in_one(cd, "results_video_optimizer")),
             ActiveTab::DiskUsage => self.shared_disk_usage_state.as_ref().map(|x| x.save_all_in_one(cd, "results_disk_usage")),
+            ActiveTab::FolderCompare => self.shared_folder_compare_state.as_ref().map(|x| x.save_all_in_one(cd, "results_folder_compare")),
             ActiveTab::Settings | ActiveTab::About => panic!("Cannot save results for settings or about tab"),
         };
 
@@ -111,7 +115,7 @@ impl SharedModels {
             ActiveTab::BadNames => self.shared_bad_names_state.as_ref().map(|e| e.get_use_reference_folders()),
             ActiveTab::ExifRemover => self.shared_exif_remover_state.as_ref().map(|e| e.get_use_reference_folders()),
             ActiveTab::VideoOptimizer => self.shared_video_optimizer_state.as_ref().map(|e| e.get_use_reference_folders()),
-            ActiveTab::DiskUsage => None,
+            ActiveTab::DiskUsage | ActiveTab::FolderCompare => None,
             ActiveTab::Settings | ActiveTab::About => panic!("Cannot get use reference folders for settings or about tab"),
         }
         .unwrap_or(false);

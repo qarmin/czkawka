@@ -628,6 +628,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     };
 
     if base_settings.settings_load_tabs_sizes_at_startup {
+        settings.set_folder_compare_column_size(fnm(&[sel_px, 110.0, size_px, 60.0, name_px, path_px], "folder_compare"));
         settings.set_duplicates_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "duplicates"));
         settings.set_empty_folders_column_size(fnm(&[sel_px, name_px, path_px, mod_px], "empty_folders"));
         settings.set_empty_files_column_size(fnm(&[sel_px, size_px, name_px, path_px, mod_px], "empty_files"));
@@ -819,6 +820,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         ("exif_remover".to_string(), settings.get_exif_remover_column_size().iter().collect::<Vec<_>>()),
         ("video_optimizer".to_string(), settings.get_video_optimizer_column_size().iter().collect::<Vec<_>>()),
         ("bad_names".to_string(), settings.get_bad_names_column_size().iter().collect::<Vec<_>>()),
+        ("folder_compare".to_string(), settings.get_folder_compare_column_size().iter().collect::<Vec<_>>()),
     ]);
     assert_eq!(column_sizes.len(), TOOLS_NUMBER);
 
