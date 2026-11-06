@@ -21,6 +21,12 @@ GitHub - never omit it, even for small or automatic changes.
 
 ---
 
+## Branches
+
+Always start a new branch from the latest `origin/master` (`git fetch origin` first, then `git switch -c <name> origin/master`). Never stack a branch on top of another unmerged PR/MR branch: chains of dependent MRs are hard to manage and cause conflicts. If a change really depends on an unmerged one, say so and ask instead of building on top of it.
+
+---
+
 ## Changelog
 
 Never edit `Changelog.md` automatically. It is maintained by hand by the author; do not add, update or "complete" entries unless explicitly asked.
