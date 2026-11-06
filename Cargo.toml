@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "czkawka_core",
+    "czkawka_bk_tree",
     "czkawka_cli",
     "czkawka_gui",
     "cedinia",

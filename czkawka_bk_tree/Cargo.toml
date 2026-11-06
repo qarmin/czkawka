@@ -1,0 +1,15 @@
+[package]
+name = "czkawka_bk_tree"
+version = "0.5.0"
+authors = ["Eugene Bulkin <eugene.bulkin2@gmail.com>"]
+edition = "2024"
+rust-version = "1.94.1"
+description = "BK-tree implementation vendored from bk-tree 0.5.0"
+license = "MIT"
+repository = "https://github.com/eugene-bulkin/rust-bk-tree"
+
+[dependencies]
+fnv = "1.0"
+
+[lints]
+workspace = true
