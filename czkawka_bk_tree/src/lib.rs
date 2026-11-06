@@ -129,7 +129,7 @@ where
             let Some(current) = self.nodes.get(candidate as usize) else {
                 continue;
             };
-            let distance_cutoff = current.max_child_distance() + self.tolerance;
+            let distance_cutoff = current.max_child_distance().saturating_add(self.tolerance);
             let Some(distance) = self.metric.threshold_distance(self.key, current.key.borrow(), distance_cutoff) else {
                 continue;
             };

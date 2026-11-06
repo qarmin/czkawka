@@ -9,7 +9,7 @@ license = "MIT"
 repository = "https://github.com/eugene-bulkin/rust-bk-tree"
 
 [dev-dependencies]
-bk-tree = { version = "0.5", default-features = false }
+bk-tree = "0.5"
 criterion = { version = "0.8", default-features = false, features = [] }
 hamming-bitwise-fast = "1.0"
 rand = "0.10.3"
