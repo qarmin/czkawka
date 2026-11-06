@@ -35,6 +35,25 @@ impl czkawka_bk_tree::Metric<Vec<u8>> for Hamming {
     }
 }
 
+struct HammingU64;
+
+impl czkawka_bk_tree::Metric<Vec<u64>> for HammingU64 {
+    fn distance(&self, a: &Vec<u64>, b: &Vec<u64>) -> u32 {
+        a.iter().zip(b).map(|(x, y)| (x ^ y).count_ones()).sum()
+    }
+
+    fn threshold_distance(&self, a: &Vec<u64>, b: &Vec<u64>, threshold: u32) -> Option<u32> {
+        Some(self.distance(a, b)).filter(|distance| *distance <= threshold)
+    }
+}
+
+fn to_words(hashes: &[Vec<u8>]) -> Vec<Vec<u64>> {
+    hashes
+        .iter()
+        .map(|hash| hash.as_chunks::<8>().0.iter().map(|chunk| u64::from_le_bytes(*chunk)).collect())
+        .collect()
+}
+
 /// Random hashes where every base hash is followed by a few slightly modified copies, like similar images.
 fn clustered_hashes(count: usize, byte_size: usize, seed: u64) -> Vec<Vec<u8>> {
     let mut rng = StdRng::seed_from_u64(seed);
@@ -69,6 +88,14 @@ fn bench_build(c: &mut Criterion) {
                 black_box(tree)
             });
         });
+        let hashes_u64 = to_words(&hashes);
+        group.bench_with_input(BenchmarkId::new("vendored_u64", byte_size), &hashes_u64, |b, hashes| {
+            b.iter(|| {
+                let mut tree = czkawka_bk_tree::BKTree::new(HammingU64);
+                tree.extend(hashes.iter().cloned());
+                black_box(tree)
+            });
+        });
         group.bench_with_input(BenchmarkId::new("vendored", byte_size), &hashes, |b, hashes| {
             b.iter(|| {
                 let mut tree = czkawka_bk_tree::BKTree::new(Hamming);
@@ -96,6 +123,14 @@ fn bench_find(c: &mut Criterion) {
 
         let mut vendored = czkawka_bk_tree::BKTree::new(Hamming);
         vendored.extend(hashes.iter().cloned());
+        let hashes_u64 = to_words(&hashes);
+        let queries_u64 = to_words(&queries.iter().map(|query| (*query).clone()).collect::<Vec<_>>());
+        let mut vendored_u64 = czkawka_bk_tree::BKTree::new(HammingU64);
+        vendored_u64.extend(hashes_u64.iter().cloned());
+        group.bench_function(BenchmarkId::new("vendored_u64", byte_size), |b| {
+            b.iter(|| queries_u64.iter().map(|query| vendored_u64.find(black_box(query), tolerance).count()).sum::<usize>());
+        });
+
         group.bench_function(BenchmarkId::new("vendored", byte_size), |b| {
             b.iter(|| queries.iter().map(|query| vendored.find(black_box(*query), tolerance).count()).sum::<usize>());
         });

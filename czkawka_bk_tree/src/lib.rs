@@ -1,8 +1,5 @@
 use std::borrow::Borrow;
-use std::collections::VecDeque;
 use std::fmt::{Debug, Formatter, Result as FmtResult};
-
-use fnv::FnvHashMap;
 
 /// A *metric* (distance function), which should follow the metric axioms:
 ///
@@ -20,24 +17,13 @@ pub trait Metric<K: ?Sized> {
 
 struct BKNode<K> {
     key: K,
-    /// Children indexed by their distance from this node.
-    children: FnvHashMap<u32, Self>,
-    max_child_distance: Option<u32>,
+    /// Pairs of (distance from this node, node index), sorted by distance.
+    children: Vec<(u32, u32)>,
 }
 
 impl<K> BKNode<K> {
-    fn new(key: K) -> Self {
-        Self {
-            key,
-            children: FnvHashMap::default(),
-            max_child_distance: None,
-        }
-    }
-
-    // Does not verify that `distance` really is the metric distance between this node and `key`.
-    fn add_child(&mut self, distance: u32, key: K) {
-        self.children.insert(distance, Self::new(key));
-        self.max_child_distance = self.max_child_distance.max(Some(distance));
+    fn max_child_distance(&self) -> u32 {
+        self.children.last().map_or(0, |(distance, _)| *distance)
     }
 }
 
@@ -47,32 +33,46 @@ impl<K: Debug> Debug for BKNode<K> {
     }
 }
 
-/// A [BK-tree](https://en.wikipedia.org/wiki/BK-tree).
+/// A [BK-tree](https://en.wikipedia.org/wiki/BK-tree) stored in a single arena, the first node is the root.
 pub struct BKTree<K, M> {
-    root: Option<BKNode<K>>,
+    nodes: Vec<BKNode<K>>,
     metric: M,
 }
 
 impl<K, M: Metric<K>> BKTree<K, M> {
     pub fn new(metric: M) -> Self {
-        Self { root: None, metric }
+        Self { nodes: Vec::new(), metric }
     }
 
     /// Adds a key to the tree. A key equal to an already present one is ignored.
     pub fn add(&mut self, key: K) {
-        let Some(root) = &mut self.root else {
-            self.root = Some(BKNode::new(key));
+        let Some(root) = self.nodes.first() else {
+            self.nodes.push(BKNode { key, children: Vec::new() });
             return;
         };
-        let mut current_node = root;
-        let mut current_distance = self.metric.distance(&current_node.key, &key);
-        while current_distance > 0 && current_node.children.contains_key(&current_distance) {
-            let next_node = current_node.children.get_mut(&current_distance).expect("child existence was checked in loop condition");
-            current_node = next_node;
-            current_distance = self.metric.distance(&current_node.key, &key);
-        }
-        if current_distance > 0 {
-            current_node.add_child(current_distance, key);
+        let mut current_index = 0;
+        let mut current_distance = self.metric.distance(&root.key, &key);
+        while current_distance > 0 {
+            let Some(current) = self.nodes.get(current_index) else {
+                return;
+            };
+            match current.children.binary_search_by_key(&current_distance, |(distance, _)| *distance) {
+                Ok(position) => {
+                    current_index = current.children.get(position).map_or(0, |(_, index)| *index as usize);
+                    let Some(next) = self.nodes.get(current_index) else {
+                        return;
+                    };
+                    current_distance = self.metric.distance(&next.key, &key);
+                }
+                Err(position) => {
+                    let new_index = u32::try_from(self.nodes.len()).expect("BK-tree cannot hold more than u32::MAX nodes");
+                    self.nodes.push(BKNode { key, children: Vec::new() });
+                    if let Some(parent) = self.nodes.get_mut(current_index) {
+                        parent.children.insert(position, (current_distance, new_index));
+                    }
+                    return;
+                }
+            }
         }
     }
 
@@ -83,7 +83,8 @@ impl<K, M: Metric<K>> BKTree<K, M> {
         M: Metric<Q>,
     {
         Find {
-            candidates: self.root.iter().collect(),
+            nodes: &self.nodes,
+            candidates: if self.nodes.is_empty() { Vec::new() } else { vec![0] },
             tolerance,
             metric: &self.metric,
             key,
@@ -109,7 +110,8 @@ impl<K, M: Metric<K>> Extend<K> for BKTree<K, M> {
 
 /// Iterator returned by [`BKTree::find`].
 pub struct Find<'a, 'q, K, Q: ?Sized, M> {
-    candidates: VecDeque<&'a BKNode<K>>,
+    nodes: &'a [BKNode<K>],
+    candidates: Vec<u32>,
     tolerance: u32,
     metric: &'a M,
     key: &'q Q,
@@ -123,20 +125,21 @@ where
     type Item = (u32, &'a K);
 
     fn next(&mut self) -> Option<(u32, &'a K)> {
-        while let Some(current) = self.candidates.pop_front() {
-            let distance_cutoff = current.max_child_distance.unwrap_or(0) + self.tolerance;
+        while let Some(candidate) = self.candidates.pop() {
+            let Some(current) = self.nodes.get(candidate as usize) else {
+                continue;
+            };
+            let distance_cutoff = current.max_child_distance() + self.tolerance;
             let Some(distance) = self.metric.threshold_distance(self.key, current.key.borrow(), distance_cutoff) else {
                 continue;
             };
             let min_distance = distance.saturating_sub(self.tolerance);
             let max_distance = distance.saturating_add(self.tolerance);
-            self.candidates.extend(
-                current
-                    .children
-                    .iter()
-                    .filter(|(child_distance, _)| (min_distance..=max_distance).contains(child_distance))
-                    .map(|(_, child_node)| child_node),
-            );
+            let first = current.children.partition_point(|(child_distance, _)| *child_distance < min_distance);
+            let last = current.children.partition_point(|(child_distance, _)| *child_distance <= max_distance);
+            if let Some(matching_children) = current.children.get(first..last) {
+                self.candidates.extend(matching_children.iter().map(|(_, index)| *index));
+            }
             if distance <= self.tolerance {
                 return Some((distance, &current.key));
             }
@@ -183,15 +186,15 @@ mod tests {
     #[test]
     fn first_key_becomes_root() {
         let tree = tree_with(&[[1, 0], [3, 0]]);
-        let root = tree.root.expect("tree has keys");
-        assert_eq!(root.key, vec![1, 0]);
-        assert_eq!(root.children.get(&1).map(|node| node.key.clone()), Some(vec![3, 0]));
+        assert_eq!(tree.nodes.first().map(|node| node.key.clone()), Some(vec![1, 0]));
+        assert_eq!(tree.nodes.first().map(|node| node.children.clone()), Some(vec![(1, 1)]));
+        assert_eq!(tree.nodes.get(1).map(|node| node.key.clone()), Some(vec![3, 0]));
     }
 
     #[test]
     fn duplicate_keys_are_ignored() {
         let tree = tree_with(&[[1, 1], [1, 1]]);
-        assert!(tree.root.expect("tree has keys").children.is_empty());
+        assert_eq!(tree.nodes.len(), 1);
     }
 
     #[test]
