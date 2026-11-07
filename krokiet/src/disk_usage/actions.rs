@@ -28,7 +28,7 @@ pub(super) fn open_address(context: &ChartContext, address: &[u32], parent: bool
         return;
     };
     let target = if parent { path.parent().map_or(path.clone(), Path::to_path_buf) } else { path };
-    if let Err(e) = open::that(&target) {
+    if let Err(e) = open::that_detached(&target) {
         error!("Failed to open \"{}\": {e}", target.to_string_lossy());
     }
 }

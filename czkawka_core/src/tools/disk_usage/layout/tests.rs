@@ -393,3 +393,123 @@ fn nested_padding_can_be_turned_off_so_content_fills_its_directory() {
     assert!((level_one_area - 1.0).abs() < 1e-4, "children cover the whole root, got {level_one_area}");
     assert!(x >= 0.0 && y >= 0.0 && width > 0.0 && height > 0.0);
 }
+
+#[test]
+fn deeply_nested_tree_does_not_overflow_the_stack() {
+    const LEVELS: usize = 2000;
+    let mut node = DiskNode::file("leaf", 1, FileCategory::Other);
+    for level in 0..LEVELS {
+        node = DiskNode::directory(format!("d{level}"), vec![DiskNode::file(format!("f{level}"), 1, FileCategory::Other), node]);
+    }
+    let options = LayoutOptions {
+        nested_padding: 0.0,
+        min_size_fraction: 0.0,
+        ..LayoutOptions::new(LayoutKind::Treemap)
+    };
+
+    let layout = Layout::build(&DiskTree::new(vec![node]), &options);
+
+    assert_eq!(layout.items.iter().map(|item| usize::from(item.depth)).max(), Some(LEVELS));
+    assert!(
+        layout
+            .items
+            .iter()
+            .skip(1)
+            .all(|item| item.parent.is_some_and(|parent| (parent as usize) < layout.items.len()))
+    );
+}
+
+/// Nested directories with entries of very different sizes, so that blocks of omitted entries and empty gaps appear.
+fn varied_tree() -> DiskTree {
+    let mut seed = 7_u64;
+    let mut next = move |limit: u64| {
+        seed = seed.wrapping_mul(6_364_136_223_846_793_005).wrapping_add(1_442_695_040_888_963_407);
+        (seed >> 33) % limit + 1
+    };
+    let roots = (0..2)
+        .map(|root| {
+            let directories = (0..8)
+                .map(|directory| {
+                    let inner = DiskNode::directory(
+                        format!("inner{directory}"),
+                        (0..12).map(|file| DiskNode::file(format!("i{file}"), next(2000).pow(2), FileCategory::Video)).collect(),
+                    );
+                    let files = (0..20).map(|file| DiskNode::file(format!("f{file}"), next(50_000), FileCategory::Audio));
+                    DiskNode::directory(format!("d{directory}"), files.chain([inner]).collect())
+                })
+                .collect();
+            DiskNode::directory(format!("/root{root}"), directories)
+        })
+        .collect();
+    DiskTree::new(roots)
+}
+
+fn linear_hit_test(layout: &Layout, x: f32, y: f32) -> Option<usize> {
+    layout.items.iter().rposition(|item| item.shape.contains(x, y))
+}
+
+fn linear_find_item(layout: &Layout, address: &[u32]) -> Option<usize> {
+    let (&root, rest) = address.split_first()?;
+    let mut current = layout
+        .items
+        .iter()
+        .position(|item| item.parent.is_none() && !item.is_omitted_block() && item.index_in_parent == root)?;
+    for &child in rest {
+        let parent = u32::try_from(current).ok()?;
+        current = layout
+            .items
+            .iter()
+            .position(|item| item.parent == Some(parent) && !item.is_omitted_block() && item.index_in_parent == child)?;
+    }
+    Some(current)
+}
+
+fn varied_layouts() -> Vec<Layout> {
+    let tree = varied_tree();
+    [LayoutKind::Treemap, LayoutKind::Sunburst]
+        .into_iter()
+        .flat_map(|kind| {
+            [0.0, 0.01].map(|padding| LayoutOptions {
+                min_size_fraction: 0.005,
+                nested_padding: padding,
+                max_depth: 4,
+                min_arc_angle: 0.02,
+                ..LayoutOptions::new(kind)
+            })
+        })
+        .map(|options| Layout::build(&tree, &options))
+        .collect()
+}
+
+#[test]
+fn hit_test_going_down_the_tree_gives_the_same_item_as_looking_at_every_item() {
+    for layout in varied_layouts() {
+        assert!(layout.items.iter().any(LayoutItem::is_omitted_block), "the layout should have blocks of omitted entries");
+        for row in 0..=240 {
+            for column in 0..=240 {
+                let (x, y) = (column as f32 / 240.0, row as f32 / 240.0);
+                assert_eq!(layout.hit_test(x, y), linear_hit_test(&layout, x, y), "point {x},{y}");
+            }
+        }
+        for item in layout.items.iter().filter(|item| item.parent.is_none()) {
+            if let Shape::Rect { x, y, width, height } = item.shape {
+                for (px, py) in [(x, y), (x + width, y), (x, y + height), (x + width, y + height), (x + width / 2.0, y)] {
+                    assert_eq!(layout.hit_test(px, py), linear_hit_test(&layout, px, py), "edge point {px},{py}");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn find_item_going_down_the_tree_gives_the_same_item_as_looking_at_every_item() {
+    for layout in varied_layouts() {
+        for (index, item) in layout.items.iter().enumerate().filter(|(_, item)| !item.is_omitted_block()) {
+            let address = layout.address(index).unwrap();
+            assert_eq!(layout.find_item(&address), Some(index));
+            assert_eq!(layout.find_item(&address), linear_find_item(&layout, &address), "{:?}", item.shape);
+        }
+        assert_eq!(layout.find_item(&[]), None);
+        assert_eq!(layout.find_item(&[0, u32::MAX]), None);
+    }
+}
