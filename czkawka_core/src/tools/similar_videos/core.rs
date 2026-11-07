@@ -225,19 +225,20 @@ impl SimilarVideos {
             }
         }
 
-        // Break if stop was clicked after saving to cache
-        if check_if_stop_received(stop_flag) {
-            return WorkContinueStatus::Stop;
-        }
-
         self.match_groups_of_videos(&signatures, &hashmap_with_file_entries);
 
-        if self.create_thumbnails(progress_sender, stop_flag) == WorkContinueStatus::Stop {
-            return WorkContinueStatus::Stop;
-        }
+        // Comparing is fast, so groups are built from already hashed files even after stop; only thumbnails are skipped
+        let stopped = check_if_stop_received(stop_flag) || self.create_thumbnails(progress_sender, stop_flag) == WorkContinueStatus::Stop;
 
         self.remove_from_reference_folders();
+        self.count_groups();
 
+        self.videos_to_check = Default::default();
+
+        if stopped { WorkContinueStatus::Stop } else { WorkContinueStatus::Continue }
+    }
+
+    fn count_groups(&mut self) {
         if self.common_data.use_reference_folders {
             for (_fe, vector) in &self.similar_referenced_vectors {
                 self.information.number_of_duplicates += vector.len();
@@ -249,11 +250,6 @@ impl SimilarVideos {
                 self.information.number_of_groups += 1;
             }
         }
-
-        // Clean unused data
-        self.videos_to_check = Default::default();
-
-        WorkContinueStatus::Continue
     }
 
     #[fun_time(message = "create_thumbnails", level = "debug")]
@@ -583,18 +579,7 @@ impl SimilarVideos {
         self.similar_vectors = similar_vectors;
 
         self.remove_from_reference_folders();
-
-        if self.common_data.use_reference_folders {
-            for (_fe, vector) in &self.similar_referenced_vectors {
-                self.information.number_of_duplicates += vector.len();
-                self.information.number_of_groups += 1;
-            }
-        } else {
-            for vector in &self.similar_vectors {
-                self.information.number_of_duplicates += vector.len() - 1;
-                self.information.number_of_groups += 1;
-            }
-        }
+        self.count_groups();
 
         WorkContinueStatus::Continue
     }
