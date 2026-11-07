@@ -53,6 +53,10 @@ fontique = { version = "=0.11.1", default-features = false, features = ["fontcon
 #slint-build = { git = "https://github.com/slint-ui/slint.git", rev = "fdde7a535305d2ab2d4072dee637bad186a49723" }
 slint-build = "1.18.1"
 
+[[bench]]
+name = "disk_usage_render"
+harness = false
+
 [features]
 default = ["winit_femtovg", "winit_software"]
 
