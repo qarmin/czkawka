@@ -43,11 +43,10 @@ impl Search for SameMusic {
                         return;
                     }
 
-                    if self.read_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
-                        self.common_data.stopped_search = true;
-                        return;
-                    }
-                    if self.check_for_duplicate_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop {
+                    // Comparing tags is fast, so groups are built from already read tags even after stop
+                    let stopped = self.read_tags(stop_flag, progress_sender) == WorkContinueStatus::Stop;
+                    self.check_for_duplicate_tags(progress_sender);
+                    if stopped {
                         self.common_data.stopped_search = true;
                         return;
                     }

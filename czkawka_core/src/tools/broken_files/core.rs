@@ -568,7 +568,11 @@ impl BrokenFiles {
         // Clean unused data
         self.files_to_check = Default::default();
 
-        WorkContinueStatus::Continue
+        if check_if_stop_received(stop_flag) {
+            WorkContinueStatus::Stop
+        } else {
+            WorkContinueStatus::Continue
+        }
     }
 }
 
