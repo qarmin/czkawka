@@ -76,7 +76,7 @@ fn synthetic_directory(name: String, depth: usize, allowance: usize, rng: &mut R
     for index in 0..own_files {
         let bits = rng.below(28);
         let size = (1_u64 << bits) + rng.below(1 << bits.max(1));
-        let category = categories[rng.below(categories.len() as u64) as usize];
+        let category = *categories.get(rng.below(categories.len() as u64) as usize).expect("index is below the length");
         children.push(DiskNode::file(format!("file_{index}.dat"), size, category));
     }
 

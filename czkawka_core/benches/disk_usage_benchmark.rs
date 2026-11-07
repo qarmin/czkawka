@@ -52,6 +52,7 @@ fn screen_treemap_options(max_depth: usize) -> LayoutOptions {
     }
 }
 
+#[expect(clippy::print_stdout, reason = "benchmark reports the generated layout size")]
 fn benchmark_disk_usage(c: &mut Criterion) {
     let (path, generated) = prepare_directory();
 
@@ -77,14 +78,17 @@ fn benchmark_disk_usage(c: &mut Criterion) {
         .map(|index| ((index % 8) as f32 / 8.0 + 0.031, (index / 8) as f32 / 8.0 + 0.047))
         .collect::<Vec<_>>();
     group.bench_function("hit_test", |b| {
-        b.iter(|| points.iter().map(|&(x, y)| black_box(&layout).hit_test(black_box(x), black_box(y))).count());
+        b.iter(|| {
+            for &(x, y) in &points {
+                black_box(black_box(&layout).hit_test(black_box(x), black_box(y)));
+            }
+        });
     });
     group.bench_function("hit_test_looking_at_every_item", |b| {
         b.iter(|| {
-            points
-                .iter()
-                .map(|&(x, y)| black_box(&layout).items.iter().rposition(|item| item.shape.contains(black_box(x), black_box(y))))
-                .count()
+            for &(x, y) in &points {
+                black_box(black_box(&layout).items.iter().rposition(|item| item.shape.contains(black_box(x), black_box(y))));
+            }
         });
     });
     println!("layout of {} items", layout.items.len());

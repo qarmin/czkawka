@@ -662,6 +662,7 @@ mod tests {
 
     #[test]
     #[ignore = "timing only, run with --ignored --nocapture"]
+    #[expect(clippy::print_stdout, reason = "timing output is the purpose of this test")]
     fn timing_of_filling_rectangles() {
         let (width, height) = (1200_u32, 800_u32);
         let mut bytes = vec![0_u8; (width * height * 4) as usize];
@@ -671,7 +672,9 @@ mod tests {
         let mut time = |draw: &dyn Fn(&mut [u8], (u32, u32, u32, u32))| {
             let start = std::time::Instant::now();
             for _ in 0..5 {
-                rects.iter().for_each(|rect| draw(&mut bytes, *rect));
+                for rect in &rects {
+                    draw(&mut bytes, *rect);
+                }
             }
             start.elapsed()
         };
@@ -682,6 +685,7 @@ mod tests {
 
     #[test]
     #[ignore = "timing only, run with --ignored --nocapture"]
+    #[expect(clippy::print_stdout, reason = "timing output is the purpose of this test")]
     fn timing_of_sunburst_pixels() {
         let layout = varied_sunburst_layout();
         let radius_px = 500.0;
