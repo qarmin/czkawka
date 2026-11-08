@@ -183,7 +183,7 @@ czkawka/
 └── misc/           # Scripts: AI translation, validation, benchmarks, CI helpers
 ```
 
-Cargo workspace resolver v3, minimum Rust 1.94.1, edition 2024 throughout.
+Cargo workspace resolver v3, minimum Rust 1.94.1, edition 2024 throughout. The minimum Rust version tracks the latest `rustc` in Debian Sid (https://packages.debian.org/sid/rustc); raise `rust-version` and the CI toolchain when Sid moves ahead.
 
 ---
 
