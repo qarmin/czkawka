@@ -26,7 +26,6 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str, filtering_
         .build();
     let file_config = ConfigBuilder::default()
         .set_level(file_log_level)
-        .set_write_once(true)
         .set_message_filtering(Some(filtering_messages_func))
         .set_time_format(TimeFormat::DateTimeWithMicro, None)
         .set_format_text(FormatText::DefaultWithThreadFile.get(), None)

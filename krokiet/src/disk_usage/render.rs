@@ -126,11 +126,17 @@ fn directory_line(settings: &RenderSettings) -> [u8; 4] {
     }
 }
 
-/// The fill with a `line` along its right and bottom edge.
+/// The fill with a `line` along its right and bottom edge; every pixel is written once.
 fn draw_framed(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), color: [u8; 4], line: [u8; 4]) {
     let (left, top, right, bottom) = rect;
-    fill_rect(bytes, image_width, (left, top, right, bottom), line);
     fill_rect(bytes, image_width, (left, top, right.saturating_sub(1), bottom.saturating_sub(1)), color);
+    fill_rect(bytes, image_width, (right.saturating_sub(1).max(left), top, right, bottom), line);
+    fill_rect(
+        bytes,
+        image_width,
+        (left, bottom.saturating_sub(1).max(top), right.saturating_sub(1).max(left), bottom),
+        line,
+    );
 }
 
 /// Background of a directory that has its entries drawn inside it; deeper directories are a little lighter.
@@ -208,12 +214,12 @@ fn fill_rect(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), col
         return;
     }
     let (left, columns) = (left as usize, (right.min(image_width) as usize).saturating_sub(left as usize));
-    bytes
-        .chunks_exact_mut(image_width as usize * 4)
-        .skip(top as usize)
-        .take((bottom - top) as usize)
-        .flat_map(|row| row.as_chunks_mut::<4>().0.iter_mut().skip(left).take(columns))
-        .for_each(|pixel| pixel.copy_from_slice(&color));
+    let rows = bytes.chunks_exact_mut(image_width as usize * 4).skip(top as usize).take((bottom - top) as usize);
+    for row in rows {
+        if let Some(pixels) = row.as_chunks_mut::<4>().0.get_mut(left..left + columns) {
+            pixels.fill(color);
+        }
+    }
 }
 
 struct Ring {
@@ -255,32 +261,68 @@ impl SunburstSampler {
     /// Item under a point given relative to the centre, in pixels; arcs are inset a little so that neighbours get a thin gap.
     /// The centre stays empty, its place is taken by text drawn over the chart.
     fn item_at(&self, dx: f32, dy: f32) -> Option<usize> {
+        self.locate(dx, dy).item
+    }
+
+    /// The item under a point, and how far in pixels the point is from anything that would change the answer;
+    /// `0.0` when that is not known, so the caller has to check the neighbourhood itself.
+    fn locate(&self, dx: f32, dy: f32) -> Located {
+        let unknown = |item| Located { item, margin_px: 0.0 };
         let distance = dx.hypot(dy);
         let unit_distance = distance / self.radius_px;
         if unit_distance >= 1.0 {
-            return None;
+            return Located {
+                item: None,
+                margin_px: distance - self.radius_px,
+            };
         }
         let (depth, ring_start, ring_end) = self.ring_at(unit_distance);
         if depth == 0 {
-            return None;
+            return Located {
+                item: None,
+                margin_px: ring_end * self.radius_px - distance,
+            };
         }
         let from_ring_edge = ((unit_distance - ring_start).min(ring_end - unit_distance)) * self.radius_px;
         if from_ring_edge < GAP_PX / 2.0 {
-            return None;
+            return unknown(None);
         }
         let angle = dx.atan2(-dy).rem_euclid(TAU);
-        let ring = self.rings.get(depth)?;
-        let candidate = ring.arcs.partition_point(|(start, _, _)| *start <= angle).checked_sub(1)?;
-        let &(start, end, item_index) = ring.arcs.get(candidate)?;
+        let Some(ring) = self.rings.get(depth) else { return unknown(None) };
+        let Some(candidate) = ring.arcs.partition_point(|(start, _, _)| *start <= angle).checked_sub(1) else {
+            return unknown(None);
+        };
+        let Some(&(start, end, item_index)) = ring.arcs.get(candidate) else {
+            return unknown(None);
+        };
         let (from_start, to_end) = ((angle - start) * distance, (end - angle) * distance);
-        (angle < end && from_start >= GAP_PX / 2.0 && to_end >= GAP_PX / 2.0).then_some(item_index)
+        if !(angle < end && from_start >= GAP_PX / 2.0 && to_end >= GAP_PX / 2.0) {
+            return unknown(None);
+        }
+        let margin_px = (from_ring_edge - GAP_PX / 2.0).min(from_start - GAP_PX / 2.0).min(to_end - GAP_PX / 2.0);
+        Located {
+            item: Some(item_index),
+            margin_px: if distance < MIN_FAST_PATH_RADIUS_PX { 0.0 } else { margin_px },
+        }
     }
+}
+
+struct Located {
+    item: Option<usize>,
+    margin_px: f32,
 }
 
 /// Offsets of the samples used to estimate how much of a pixel an item covers, in pixels from its centre.
 const CORNER_OFFSET: f32 = 0.35;
 const SUPERSAMPLE_STEPS: u32 = 4;
 const GAP_PX: f32 = 1.0;
+/// Farthest a sample of the pixel lies from its centre.
+const SAMPLE_REACH_PX: f32 = CORNER_OFFSET * std::f32::consts::SQRT_2;
+/// A pixel at least this far from every edge has the same item at all its samples. The margin is measured along the radius
+/// and at the radius of the pixel, a little more than the reach covers the sample being at a slightly different radius.
+const SAFE_MARGIN_PX: f32 = SAMPLE_REACH_PX + 0.25;
+/// Close to the centre the arcs are so short that the margin above is not a reliable bound.
+const MIN_FAST_PATH_RADIUS_PX: f32 = 16.0;
 
 fn draw_sunburst(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings, is_current: &(dyn Fn() -> bool + Sync)) -> bool {
     let geometry = settings.geometry;
@@ -316,6 +358,15 @@ fn draw_sunburst(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings, i
 /// `None` means nothing is drawn in the pixel. On an edge the pixel keeps the colour of what covers it and gets transparent
 /// in proportion to how much of it is empty, so it blends with the background of the window in any theme.
 fn antialiased_pixel(sampler: &SunburstSampler, (dx, dy): (f32, f32), colors: &dyn Fn(usize) -> Option<[u8; 4]>) -> Option<[u8; 4]> {
+    let located = sampler.locate(dx, dy);
+    if located.margin_px > SAFE_MARGIN_PX {
+        return located.item.and_then(colors);
+    }
+    exact_antialiased_pixel(sampler, (dx, dy), colors)
+}
+
+/// Looks at the corners of the pixel to find out whether it lies on an edge; the slow path that decides the result.
+fn exact_antialiased_pixel(sampler: &SunburstSampler, (dx, dy): (f32, f32), colors: &dyn Fn(usize) -> Option<[u8; 4]>) -> Option<[u8; 4]> {
     let center = sampler.item_at(dx, dy);
     let corners_agree = [(-1.0, -1.0), (1.0, -1.0), (-1.0, 1.0), (1.0, 1.0)]
         .iter()
@@ -363,7 +414,7 @@ mod tests {
     use czkawka_core::tools::disk_usage::layout::{Layout, LayoutKind, LayoutOptions, Shape};
     use czkawka_core::tools::disk_usage::tree::{DiskNode, DiskTree};
 
-    use super::{ChartGeometry, RenderSettings, render_chart};
+    use super::{ChartGeometry, RenderSettings, SunburstSampler, antialiased_pixel, exact_antialiased_pixel, item_color, render_chart};
 
     fn sample_layout(kind: LayoutKind) -> Layout {
         let root = DiskNode::directory(
@@ -521,5 +572,134 @@ mod tests {
             ..geometry
         };
         assert_eq!(flat.to_unit(0.05, 0.5), Some((0.05, 0.5)));
+    }
+
+    /// Directories of every size with files of different sizes, so there are arcs of all widths on every ring.
+    fn varied_sunburst_layout() -> Layout {
+        let mut seed = 12_345_u64;
+        let mut next = move |limit: u64| {
+            seed = seed.wrapping_mul(6_364_136_223_846_793_005).wrapping_add(1_442_695_040_888_963_407);
+            (seed >> 33) % limit + 1
+        };
+        let categories = [FileCategory::Audio, FileCategory::Binary, FileCategory::Document];
+        let directories = (0..14)
+            .map(|directory| {
+                let files = (0..9)
+                    .map(|file| DiskNode::file(format!("f{file}"), next(1000), categories[(file + directory) % categories.len()]))
+                    .collect::<Vec<_>>();
+                let inner = DiskNode::directory(
+                    format!("inner{directory}"),
+                    (0..5).map(|file| DiskNode::file(format!("i{file}"), next(300), FileCategory::Video)).collect(),
+                );
+                DiskNode::directory(format!("d{directory}"), files.into_iter().chain([inner]).collect())
+            })
+            .collect();
+        let options = LayoutOptions {
+            max_depth: 4,
+            min_arc_angle: 0.03,
+            min_size_fraction: 0.0,
+            ..LayoutOptions::new(LayoutKind::Sunburst)
+        };
+        Layout::build(&DiskTree::new(vec![DiskNode::directory("/root", directories)]), &options)
+    }
+
+    #[test]
+    fn skipping_the_corner_check_far_from_edges_gives_the_same_picture() {
+        let layout = varied_sunburst_layout();
+        let radius_px = 150.0;
+        let sampler = SunburstSampler::new(&layout, 4, radius_px);
+        let colors = |index: usize| layout.items.get(index).map(item_color);
+
+        for row in 0..300_u32 {
+            for column in 0..300_u32 {
+                let offset = (column as f32 + 0.5 - radius_px, row as f32 + 0.5 - radius_px);
+                assert_eq!(
+                    antialiased_pixel(&sampler, offset, &colors),
+                    exact_antialiased_pixel(&sampler, offset, &colors),
+                    "pixel {column},{row} differs"
+                );
+            }
+        }
+    }
+
+    /// The way rectangles were drawn before: the whole rectangle in the line colour, then the fill over it.
+    fn old_fill_rect(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), color: [u8; 4]) {
+        let (left, top, right, bottom) = rect;
+        if right <= left || bottom <= top {
+            return;
+        }
+        let (left, columns) = (left as usize, (right.min(image_width) as usize).saturating_sub(left as usize));
+        bytes
+            .chunks_exact_mut(image_width as usize * 4)
+            .skip(top as usize)
+            .take((bottom - top) as usize)
+            .flat_map(|row| row.as_chunks_mut::<4>().0.iter_mut().skip(left).take(columns))
+            .for_each(|pixel| pixel.copy_from_slice(&color));
+    }
+
+    fn old_draw_framed(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), color: [u8; 4], line: [u8; 4]) {
+        let (left, top, right, bottom) = rect;
+        old_fill_rect(bytes, image_width, (left, top, right, bottom), line);
+        old_fill_rect(bytes, image_width, (left, top, right.saturating_sub(1), bottom.saturating_sub(1)), color);
+    }
+
+    #[test]
+    fn framed_rectangle_looks_as_before_for_every_size_including_clipped_and_thin_ones() {
+        let (width, height) = (40_u32, 30_u32);
+        for left in [0, 3, 38] {
+            for top in [0, 2, 29] {
+                for right in [0, 1, 2, 4, 39, 40, 45] {
+                    for bottom in [0, 1, 3, 30, 33] {
+                        let (mut old, mut new) = (vec![9_u8; (width * height * 4) as usize], vec![9_u8; (width * height * 4) as usize]);
+                        old_draw_framed(&mut old, width, (left, top, right, bottom), [10, 20, 30, 255], [1, 2, 3, 255]);
+                        super::draw_framed(&mut new, width, (left, top, right, bottom), [10, 20, 30, 255], [1, 2, 3, 255]);
+                        assert_eq!(old, new, "rect {left},{top},{right},{bottom}");
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    #[ignore = "timing only, run with --ignored --nocapture"]
+    #[expect(clippy::print_stdout, reason = "timing output is the purpose of this test")]
+    fn timing_of_filling_rectangles() {
+        let (width, height) = (1200_u32, 800_u32);
+        let mut bytes = vec![0_u8; (width * height * 4) as usize];
+        let rects = (0..400_u32)
+            .map(|i| ((i * 7) % 600, (i * 3) % 400, 600 + (i * 5) % 600, 400 + (i * 11) % 400))
+            .collect::<Vec<_>>();
+        let mut time = |draw: &dyn Fn(&mut [u8], (u32, u32, u32, u32))| {
+            let start = std::time::Instant::now();
+            for _ in 0..5 {
+                for rect in &rects {
+                    draw(&mut bytes, *rect);
+                }
+            }
+            start.elapsed()
+        };
+        let old = time(&|bytes, rect| old_draw_framed(bytes, width, rect, [10, 20, 30, 255], [1, 2, 3, 255]));
+        let new = time(&|bytes, rect| super::draw_framed(bytes, width, rect, [10, 20, 30, 255], [1, 2, 3, 255]));
+        println!("draw_framed over 2000 big rectangles: old {old:?}, new {new:?}");
+    }
+
+    #[test]
+    #[ignore = "timing only, run with --ignored --nocapture"]
+    #[expect(clippy::print_stdout, reason = "timing output is the purpose of this test")]
+    fn timing_of_sunburst_pixels() {
+        let layout = varied_sunburst_layout();
+        let radius_px = 500.0;
+        let sampler = SunburstSampler::new(&layout, 4, radius_px);
+        let colors = |index: usize| layout.items.get(index).map(item_color);
+        let pixels = || (0..1000_u32).flat_map(|row| (0..1000_u32).map(move |column| (column as f32 + 0.5 - radius_px, row as f32 + 0.5 - radius_px)));
+        let start = std::time::Instant::now();
+        let exact = pixels().filter(|offset| exact_antialiased_pixel(&sampler, *offset, &colors).is_some()).count();
+        let exact_time = start.elapsed();
+        let start = std::time::Instant::now();
+        let fast = pixels().filter(|offset| antialiased_pixel(&sampler, *offset, &colors).is_some()).count();
+        println!(
+            "sunburst 1000x1000 pixels: exact {exact_time:?}, with the fast path {:?} ({exact} and {fast} drawn)",
+            start.elapsed()
+        );
     }
 }

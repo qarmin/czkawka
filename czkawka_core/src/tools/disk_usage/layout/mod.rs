@@ -86,6 +86,11 @@ impl LayoutOptions {
         if self.all_categories_enabled() {
             return node.size;
         }
+        self.measured_size_of_enabled(node)
+    }
+
+    /// Like [`LayoutOptions::measured_size`] for when some categories are disabled; callers that measure many nodes check that once.
+    fn measured_size_of_enabled(&self, node: &DiskNode) -> u64 {
         match (&node.category_sizes, node.kind) {
             (Some(sizes), _) => sizes.iter().zip(&self.enabled_categories).filter(|(_, enabled)| **enabled).map(|(size, _)| *size).sum(),
             (None, NodeKind::File) if self.is_enabled(node.category) => node.size,
@@ -122,6 +127,25 @@ impl Shape {
                 let radius = dx.hypot(dy) * 2.0;
                 let angle = dx.atan2(-dy).rem_euclid(TAU);
                 radius >= inner_radius && radius < outer_radius && angle >= start_angle && angle < end_angle
+            }
+        }
+    }
+
+    /// Whether the point can lie in the shape or in anything below it in the tree. For a rectangle that is the same as
+    /// [`Shape::contains`], but the children of an arc lie in the rings outside of it, within the same angles.
+    fn may_contain_descendant(&self, x: f32, y: f32) -> bool {
+        match *self {
+            Self::Rect { .. } => self.contains(x, y),
+            Self::Arc {
+                start_angle,
+                end_angle,
+                inner_radius,
+                ..
+            } => {
+                let (dx, dy) = (x - 0.5, y - 0.5);
+                let radius = dx.hypot(dy) * 2.0;
+                let angle = dx.atan2(-dy).rem_euclid(TAU);
+                radius >= inner_radius && angle >= start_angle && angle < end_angle
             }
         }
     }
@@ -170,6 +194,9 @@ impl LayoutItem {
 pub struct Layout {
     /// Parents always come before their children, so drawing in order puts children on top.
     pub items: Vec<LayoutItem>,
+    /// For every item, the index after the last item of its subtree; a subtree is the item with all that follow it up to there.
+    /// Lets lookups go down the tree instead of through all the items.
+    subtree_end: Vec<u32>,
 }
 
 impl Layout {
@@ -183,12 +210,43 @@ impl Layout {
             LayoutKind::Treemap => treemap::layout(roots, options),
             LayoutKind::Sunburst => sunburst::layout(roots, options),
         };
-        Self { items }
+        let subtree_end = subtree_ends(&items);
+        Self { items, subtree_end }
     }
 
-    /// Topmost item containing the point, i.e. the deepest one.
+    /// Topmost item containing the point, i.e. the deepest one; when siblings overlap by rounding, the last of them.
     pub fn hit_test(&self, x: f32, y: f32) -> Option<usize> {
-        self.items.iter().rposition(|item| item.shape.contains(x, y))
+        if self.subtree_end.len() != self.items.len() {
+            return self.items.iter().rposition(|item| item.shape.contains(x, y));
+        }
+        let (mut hit, mut parent) = (None, None);
+        while let Some(next) = self
+            .children(parent)
+            .filter(|&child| self.items.get(child).is_some_and(|item| item.shape.may_contain_descendant(x, y)))
+            .last()
+        {
+            if self.items.get(next).is_some_and(|item| item.shape.contains(x, y)) {
+                hit = Some(next);
+            }
+            parent = Some(next);
+        }
+        hit
+    }
+
+    /// Indices of the children of an item, or of the roots; they are not next to each other, because every child is followed by its subtree.
+    fn children(&self, parent: Option<usize>) -> impl Iterator<Item = usize> + '_ {
+        let (mut next, end) = match parent {
+            Some(parent) => (parent + 1, self.subtree_end.get(parent).map_or(0, |end| *end as usize)),
+            None => (0, self.items.len()),
+        };
+        std::iter::from_fn(move || {
+            if next >= end {
+                return None;
+            }
+            let child = next;
+            next = self.subtree_end.get(child).map_or(end, |end| *end as usize);
+            Some(child)
+        })
     }
 
     /// Address of the item in the [`DiskTree`] it was built from; for a block of omitted entries, of the directory that holds them.
@@ -210,20 +268,31 @@ impl Layout {
     }
 
     pub fn find_item(&self, address: &NodeAddress) -> Option<usize> {
-        let (&root, rest) = address.split_first()?;
-        let mut current = self
-            .items
-            .iter()
-            .position(|item| item.parent.is_none() && !item.is_omitted_block() && item.index_in_parent == root)?;
-        for &child in rest {
-            let parent = u32::try_from(current).ok()?;
-            current = self
-                .items
-                .iter()
-                .position(|item| item.parent == Some(parent) && !item.is_omitted_block() && item.index_in_parent == child)?;
+        if address.is_empty() || self.subtree_end.len() != self.items.len() {
+            return None;
         }
-        Some(current)
+        let mut current = None;
+        for &index in address {
+            current = Some(
+                self.children(current)
+                    .find(|&child| self.items.get(child).is_some_and(|item| !item.is_omitted_block() && item.index_in_parent == index))?,
+            );
+        }
+        current
     }
+}
+
+/// Parents come before their children, so going backwards every subtree is complete before its parent is reached.
+fn subtree_ends(items: &[LayoutItem]) -> Vec<u32> {
+    let mut ends = (1..=items.len() as u32).collect::<Vec<_>>();
+    for (index, item) in items.iter().enumerate().rev() {
+        let Some(parent) = item.parent else { continue };
+        let end = ends.get(index).copied().unwrap_or(0);
+        if let Some(parent_end) = ends.get_mut(parent as usize) {
+            *parent_end = (*parent_end).max(end);
+        }
+    }
+    ends
 }
 
 #[derive(Clone, Copy)]
@@ -255,11 +324,21 @@ pub(crate) struct Measured<'a> {
 
 /// Splits the children with a non-zero measured size into those that are big enough compared to their siblings and the rest.
 pub(crate) fn measured_children<'a>(children: &'a [DiskNode], options: &LayoutOptions) -> Measured<'a> {
-    let sizes = children.iter().map(|node| options.measured_size(node)).collect::<Vec<_>>();
-    let min_size = (sizes.iter().sum::<u64>() as f64 * options.min_size_fraction) as u64;
+    // With every category enabled the measured size is the size of the node, so nothing has to be stored or computed twice
+    let filtered_sizes = (!options.all_categories_enabled()).then(|| children.iter().map(|node| options.measured_size_of_enabled(node)).collect::<Vec<_>>());
+    let size_of = |index: usize, node: &DiskNode| match &filtered_sizes {
+        Some(sizes) => sizes.get(index).copied().unwrap_or(0),
+        None => node.size,
+    };
+    let mut total = 0_u64;
+    for (index, node) in children.iter().enumerate() {
+        total += size_of(index, node);
+    }
+    let min_size = (total as f64 * options.min_size_fraction) as u64;
     let mut kept = Vec::new();
     let mut omitted = Omitted::default();
-    for ((index, node), size) in children.iter().enumerate().zip(sizes) {
+    for (index, node) in children.iter().enumerate() {
+        let size = size_of(index, node);
         if size == 0 {
             continue;
         }

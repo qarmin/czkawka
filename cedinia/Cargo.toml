@@ -48,8 +48,8 @@ jni-high = { version = "0.1.0", features = ["native-activity"] }
 android_logger = "0.15.1"
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
-rfd = { version = "0.17", default-features = false, features = ["xdg-portal"] }
-trash = "5.2.9"
+rfd = { version = "0.18", default-features = false, features = ["xdg-portal"] }
+trash = "5.3.0"
 notify-rust = "4"
 #slint = { path = "../test/slint/api/rs/slint", default-features = false, features = [
 #slint = { git = "https://github.com/slint-ui/slint.git", rev = "fdde7a535305d2ab2d4072dee637bad186a49723", default-features = false, features = [

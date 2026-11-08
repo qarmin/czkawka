@@ -26,7 +26,7 @@ i18n-embed = { version = "0.16", features = ["fluent-system", "desktop-requester
 i18n-embed-fl = "0.10"
 rust-embed = { version = "8.13", features = ["debug-embed"] }
 
-log = "0.4.34"
+log = "0.4.35"
 fun_time = { version = "0.3", features = ["log"] }
 rayon = "1.12"
 
