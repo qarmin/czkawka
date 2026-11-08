@@ -40,7 +40,7 @@ jobs:
           
           cargo build --bin czkawka_cli --bin krokiet --release
           mv target/release/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
-          mv target/release/krokiet mac_krokiet_${{ env.ARCHNAME }}
+          mv target/release/krokiet mac_krokiet_femtovg_opengl_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "vello"
           mv target/release/krokiet mac_krokiet_vello_${{ env.ARCHNAME }}
           cargo build --release --bin krokiet --no-default-features --features "femtovg_wgpu"
@@ -60,7 +60,7 @@ jobs:
           
           cargo build --bin czkawka_cli --bin krokiet --profile fastci
           mv target/fastci/czkawka_cli mac_czkawka_cli_${{ env.ARCHNAME }}
-          mv target/fastci/krokiet mac_krokiet_${{ env.ARCHNAME }}
+          mv target/fastci/krokiet mac_krokiet_femtovg_opengl_${{ env.ARCHNAME }}
           cargo build --profile fastci --bin krokiet --no-default-features --features "vello"
           mv target/fastci/krokiet mac_krokiet_vello_${{ env.ARCHNAME }}
           cargo build --profile fastci --bin krokiet --no-default-features --features "femtovg_wgpu"
@@ -68,6 +68,9 @@ jobs:
           cargo build --profile fastci --bin krokiet --no-default-features --features "winit_femtovg,winit_software,femtovg_wgpu,vello"
           mv target/fastci/krokiet mac_krokiet_all_backends_${{ env.ARCHNAME }}
           
+
+      - name: Set default Krokiet backend
+        run: cp mac_krokiet_femtovg_opengl_${{ env.ARCHNAME }} mac_krokiet_${{ env.ARCHNAME }}
 
       - name: Package krokiet with launchers
         run: |
@@ -81,6 +84,7 @@ jobs:
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
+            mac_krokiet_femtovg_opengl_${{ env.ARCHNAME }}
             mac_krokiet_vello_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
 
@@ -93,6 +97,7 @@ jobs:
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
+            mac_krokiet_femtovg_opengl_${{ env.ARCHNAME }}
             mac_krokiet_vello_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_wgpu_${{ env.ARCHNAME }}
           token: ${{ secrets.PAT_REPOSITORY }}
