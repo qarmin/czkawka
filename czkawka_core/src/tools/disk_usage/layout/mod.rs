@@ -41,6 +41,11 @@ pub struct LayoutOptions {
     /// Gap kept around the content of a directory in the treemap, as a share of the height of the area;
     /// `0.0` lets the content fill the directory exactly, so nested directories do not add borders.
     pub nested_padding: f64,
+    /// Height in pixels of the bar with the name and size kept at the top of an opened directory in the treemap;
+    /// `0.0` draws no bars. Needs `canvas_size_px`.
+    pub folder_header_px: f32,
+    /// Only directories whose shorter side is at least this many pixels get a header.
+    pub min_header_directory_px: f32,
     /// Only the bytes of enabled categories are measured; indexed by [`FileCategory::index`].
     pub enabled_categories: [bool; CATEGORY_COUNT],
 }
@@ -62,6 +67,8 @@ impl LayoutOptions {
             min_size_fraction: 0.000_001,
             min_expanded_directory_px: 0.0,
             nested_padding: 0.002,
+            folder_header_px: 0.0,
+            min_header_directory_px: 0.0,
             enabled_categories: [true; CATEGORY_COUNT],
         }
     }
@@ -168,6 +175,8 @@ pub struct LayoutItem {
     pub omitted_entries: u32,
     /// Measured bytes per category, only for a directory that is drawn with nothing inside it.
     pub composition: Option<Box<CategorySizes>>,
+    /// Height of the bar along the top edge of a directory that holds its name and size, as a share of the square; `0.0` without one.
+    pub header_height: f32,
 }
 
 impl LayoutItem {
@@ -186,6 +195,7 @@ impl LayoutItem {
             category: FileCategory::Other,
             omitted_entries: omitted.count,
             composition: None,
+            header_height: 0.0,
         }
     }
 }

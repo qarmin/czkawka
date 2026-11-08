@@ -97,6 +97,21 @@ export component DiskUsageView inherits Rectangle {
                     width: 28px;
                     alignment: center;
                     CategoryToggle {
+                        icon: @image-url("../../icons/krokiet_folder_header.svg");
+                        accent: Palette.foreground;
+                        active: DiskUsageState.folder_headers;
+                        tip: Translations.disk_usage_folder_headers_text;
+                        toggled => {
+                            DiskUsageState.folder_headers = !DiskUsageState.folder_headers;
+                            DiskUsageState.options_changed();
+                        }
+                    }
+                }
+
+                VerticalLayout {
+                    width: 28px;
+                    alignment: center;
+                    CategoryToggle {
                         icon: @image-url("../../icons/krokiet_borders.svg");
                         accent: Palette.foreground;
                         active: DiskUsageState.nested_borders;
@@ -199,6 +214,18 @@ export component DiskUsageView inherits Rectangle {
                     image-fit: ImageFit.fill;
                     image-rendering: ImageRendering.pixelated;
                     visible: DiskUsageState.has_results;
+                }
+
+                for label in DiskUsageState.header_labels: Text {
+                    x: label.x * 1phx;
+                    y: label.y * 1phx;
+                    width: label.width * 1phx;
+                    height: label.height * 1phx;
+                    text: label.text;
+                    color: #ffffff;
+                    font-size: FontSizes.small;
+                    vertical-alignment: center;
+                    overflow: elide;
                 }
 
                 if DiskUsageState.selection.visible && !DiskUsageState.selection.is_arc: Rectangle {

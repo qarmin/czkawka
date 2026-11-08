@@ -1,5 +1,6 @@
 mod actions;
 mod describe;
+mod header_labels;
 mod render;
 mod selection;
 mod tree_view;
@@ -9,7 +10,7 @@ use std::sync::atomic::AtomicU64;
 use std::sync::{Arc, Mutex};
 
 use slint::ComponentHandle;
-pub(crate) use view::refresh_category_names;
+pub(crate) use view::{ensure_categories, refresh_category_names};
 
 use crate::disk_usage::view::{ChartContext, ViewState, spawn_render_worker};
 use crate::shared_models::SharedModels;

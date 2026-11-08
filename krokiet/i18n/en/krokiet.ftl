@@ -534,6 +534,7 @@ disk_usage_content_detection_extension = Extension only
 disk_usage_content_detection_large = Content of large files
 disk_usage_content_detection_all = Content of all files
 disk_usage_nested_borders = Nested borders
+disk_usage_folder_headers = Folder headers with name and size
 disk_usage_detail_title = Detail
 disk_usage_detail_hint = Applied to the chart immediately. Showing more entries takes longer to draw.
 disk_usage_group_below = Group entries smaller than

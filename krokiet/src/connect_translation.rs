@@ -276,6 +276,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_disk_usage_content_detection_large_text(flk!("disk_usage_content_detection_large").into());
     translation.set_disk_usage_content_detection_all_text(flk!("disk_usage_content_detection_all").into());
     translation.set_disk_usage_nested_borders_text(flk!("disk_usage_nested_borders").into());
+    translation.set_disk_usage_folder_headers_text(flk!("disk_usage_folder_headers").into());
     translation.set_disk_usage_detail_title_text(flk!("disk_usage_detail_title").into());
     translation.set_disk_usage_detail_hint_text(flk!("disk_usage_detail_hint").into());
     translation.set_disk_usage_group_below_text(flk!("disk_usage_group_below").into());

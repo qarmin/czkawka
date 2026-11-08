@@ -104,11 +104,22 @@ fn draw_rectangles(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings,
             (None, LayoutKind::Treemap) if item.kind == NodeKind::Directory => {
                 let fill = directory_background(settings, usize::from(item.depth));
                 draw_framed(bytes, width, rect, fill, directory_line(settings));
+                draw_header(bytes, width, rect, item, height);
             }
             _ => draw_framed(bytes, width, rect, item_color(item), tile_line(settings)),
         }
     }
     true
+}
+
+/// The bar along the top of a directory that holds its name, coloured like the kind of files that dominate it.
+fn draw_header(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), item: &LayoutItem, image_height: u32) {
+    if item.header_height <= 0.0 {
+        return;
+    }
+    let (left, top, right, bottom) = rect;
+    let header_bottom = (top + (item.header_height * image_height as f32).round() as u32).min(bottom.saturating_sub(1));
+    fill_rect(bytes, image_width, (left, top, right.saturating_sub(1), header_bottom), item_color(item));
 }
 
 /// The line along the right and bottom edge of every rectangle. Neighbours meet in one pixel, whatever their colours,
@@ -443,6 +454,25 @@ mod tests {
     fn pixel(bytes: &[u8], width: u32, x: u32, y: u32) -> [u8; 4] {
         let offset = ((y * width + x) * 4) as usize;
         [bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]]
+    }
+
+    #[test]
+    fn folder_header_is_painted_in_the_colour_of_the_dominant_category() {
+        let root = DiskNode::directory("/root", vec![DiskNode::file("song.mp3", 300, FileCategory::Audio)]);
+        let options = LayoutOptions {
+            canvas_size_px: (200.0, 200.0),
+            folder_header_px: 20.0,
+            min_item_size_px: 0.0,
+            nested_padding: 0.0,
+            ..LayoutOptions::new(LayoutKind::Treemap)
+        };
+        let layout = Layout::build(&DiskTree::new(vec![root]), &options);
+        let buffer = render_chart(&layout, &settings(200, 200, LayoutKind::Treemap, usize::MAX), &|| true).unwrap();
+
+        let directory = layout.items.iter().find(|item| item.depth == 0).unwrap();
+        let file = layout.items.iter().find(|item| item.depth == 1).unwrap();
+        assert_eq!(pixel(buffer.as_bytes(), 200, 100, 5), item_color(directory));
+        assert_eq!(pixel(buffer.as_bytes(), 200, 100, 100), item_color(file));
     }
 
     #[test]
