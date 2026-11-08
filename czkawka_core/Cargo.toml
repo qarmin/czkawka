@@ -109,6 +109,7 @@ glibc_musl_version = "0.1.0"
 
 rand = "0.10.3"
 
+ntfs-mft = { version = "0.1.0", optional = true }
 ashpd = { version = "0.14.0", optional = true, default-features = false, features = ["async-io", "trash"] }
 async-io = { version = "2.6.0", optional = true }
 
@@ -135,6 +136,11 @@ name = "disk_usage_benchmark"
 harness = false
 
 [[bench]]
+name = "disk_usage_ntfs_benchmark"
+harness = false
+required-features = ["ntfs_mft"]
+
+[[bench]]
 name = "bk_tree_benchmark"
 harness = false
 
@@ -148,5 +154,7 @@ blake_pure = ["blake3/pure"]
 # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails
 # No-op on other OSes, it is slower and provides less helpful error messages
 xdg_portal_trash = ["ashpd", "async-io"]
+# Reads the NTFS master file table instead of walking directories in disk usage; works only on Windows with administrator privileges
+ntfs_mft = ["dep:ntfs-mft"]
 [lints]
 workspace = true

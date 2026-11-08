@@ -1688,6 +1688,7 @@ dependencies = [
  "lopdf",
  "lzma-rs",
  "mime_guess",
+ "ntfs-mft",
  "once_cell",
  "open",
  "os_info",
@@ -5212,6 +5213,21 @@ dependencies = [
  "serde",
  "tauri-winrt-notification",
  "zbus 5.19.0",
+]
+
+[[package]]
+name = "ntfs-mft"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1378f68110f13e8a0a5c56f521721b5dded69bb263dd7551784d0c98335945f"
+dependencies = [
+ "bitflags 2.13.2",
+ "libc",
+ "log",
+ "rustc-hash 2.1.3",
+ "thiserror 2.0.21",
+ "windows",
+ "zerocopy 0.8.63",
 ]
 
 [[package]]

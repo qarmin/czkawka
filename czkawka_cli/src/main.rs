@@ -197,6 +197,7 @@ fn disk_usage(disk_usage: DiskUsageArgs, stop_flag: &Arc<AtomicBool>, progress_s
         detect_by_content,
         ignore_excluded_items,
         ignore_excluded_directories,
+        ntfs_mft,
     } = disk_usage;
 
     let params = DiskUsageParameters {
@@ -204,6 +205,7 @@ fn disk_usage(disk_usage: DiskUsageArgs, stop_flag: &Arc<AtomicBool>, progress_s
         report_entries_per_directory: top,
         ignore_excluded_items,
         ignore_excluded_directories,
+        read_ntfs_mft: ntfs_mft,
         ..DiskUsageParameters::new(detect_by_content.into())
     };
     let mut tool = DiskUsage::new(params);

@@ -293,6 +293,7 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_use_manual_application_scale(basic_settings.use_manual_application_scale);
     settings.set_play_audio_on_scan_completion(basic_settings.play_audio_on_scan_completion);
     settings.set_show_notification_on_scan_completion(basic_settings.show_notification_on_scan_completion);
+    settings.set_read_ntfs_mft(basic_settings.read_ntfs_mft);
 
     settings.set_select_show_oldest(basic_settings.select_show_oldest);
     settings.set_select_show_newest(basic_settings.select_show_newest);
@@ -1019,6 +1020,7 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         use_manual_application_scale,
         play_audio_on_scan_completion,
         show_notification_on_scan_completion,
+        read_ntfs_mft: settings.get_read_ntfs_mft(),
         select_show_oldest: settings.get_select_show_oldest(),
         select_show_newest: settings.get_select_show_newest(),
         select_show_smallest_size: settings.get_select_show_smallest_size(),

@@ -16,6 +16,7 @@ pub(crate) fn scan_disk_usage(a: Weak<MainWindow>, sd: ScanData) {
         .stack_size(DEFAULT_THREAD_SIZE)
         .spawn(move || {
             let params = DiskUsageParameters {
+                read_ntfs_mft: sd.basic_settings.read_ntfs_mft,
                 ignore_excluded_items: sd.disk_usage_ignore_excluded_items,
                 ignore_excluded_directories: sd.disk_usage_ignore_excluded_directories,
                 ..DiskUsageParameters::new(sd.disk_usage_content_detection)

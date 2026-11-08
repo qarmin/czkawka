@@ -399,6 +399,9 @@ fn translate_items(app: &MainWindow) {
     translation.set_settings_audio_env_variable_hint_text(flk!("settings_audio_env_variable_hint_text").into());
     translation.set_settings_show_notification_on_scan_completion_text(flk!("settings_show_notification_on_scan_completion_text").into());
     translation.set_settings_notification_feature_hint_text(flk!("settings_notification_feature_hint_text").into());
+    translation.set_settings_read_ntfs_mft_text(flk!("settings_read_ntfs_mft_text").into());
+    translation.set_settings_read_ntfs_mft_elevated_hint_text(flk!("settings_read_ntfs_mft_elevated_hint_text").into());
+    translation.set_settings_read_ntfs_mft_not_elevated_hint_text(flk!("settings_read_ntfs_mft_not_elevated_hint_text").into());
     translation.set_settings_notification_focused_hint_text(flk!("settings_notification_focused_hint_text").into());
     translation.set_settings_cache_number_size_text("".into());
     translation.set_settings_video_thumbnails_number_size_text("".into());

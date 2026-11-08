@@ -3,6 +3,7 @@ pub mod core;
 pub mod layout;
 pub mod report;
 pub(crate) mod scan;
+pub use scan::{NtfsMftAvailability, ntfs_mft_availability};
 #[cfg(test)]
 mod tests;
 pub mod traits;
@@ -20,6 +21,8 @@ pub struct Info {
     pub number_of_inaccessible_entries: usize,
     pub total_size: u64,
     pub scanning_time: Duration,
+    /// Set when reading the NTFS master file table was requested but at least one path had to be scanned the ordinary way.
+    pub ntfs_mft_fallback: Option<String>,
 }
 
 /// How files with an unknown extension are categorized.
@@ -57,6 +60,8 @@ pub struct DiskUsageParameters {
     pub report_depth: usize,
     /// How many of the biggest entries of every directory the reports contain.
     pub report_entries_per_directory: usize,
+    /// Reads sizes from the NTFS master file table (Windows, administrator privileges) instead of walking directories.
+    pub read_ntfs_mft: bool,
 }
 
 impl DiskUsageParameters {
@@ -70,6 +75,7 @@ impl DiskUsageParameters {
             ignore_excluded_directories: false,
             report_depth: Self::DEFAULT_REPORT_DEPTH,
             report_entries_per_directory: Self::DEFAULT_REPORT_ENTRIES,
+            read_ntfs_mft: false,
         }
     }
 }
