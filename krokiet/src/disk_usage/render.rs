@@ -16,6 +16,9 @@ const LINE_DARK: [u8; 4] = [52, 56, 64, 255];
 const LINE_LIGHT: [u8; 4] = [255, 255, 255, 255];
 /// Directory frames, when nested borders are on, are this much darker than the lines between rectangles.
 const NESTED_FRAME_BRIGHTNESS: f32 = 0.4;
+const HEADER_BASE_GREY: u32 = 52;
+const HEADER_GREY_STEP: u32 = 9;
+const HEADER_MAX_GREY: u32 = 140;
 const HATCH_SPACING_PX: usize = 9;
 const HATCH_THICKNESS_PX: usize = 2;
 const HATCH_BRIGHTNESS: f32 = 0.7;
@@ -80,23 +83,9 @@ fn draw_rectangles(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings,
         if index % 512 == 0 && !is_current() {
             return false;
         }
-        let Shape::Rect {
-            x,
-            y,
-            width: item_width,
-            height: item_height,
-        } = item.shape
-        else {
+        let Some(rect) = pixel_rect(item, width, height) else {
             continue;
         };
-        let left = (x * width as f32).round() as u32;
-        let top = (y * height as f32).round() as u32;
-        let right = ((x + item_width) * width as f32).round() as u32;
-        let bottom = ((y + item_height) * height as f32).round() as u32;
-        if right <= left || bottom <= top {
-            continue;
-        }
-        let rect = (left, top, right, bottom);
         match (&item.composition, settings.geometry.kind) {
             (Some(composition), LayoutKind::Treemap) => {
                 draw_directory_block(bytes, width, rect, composition, usize::from(item.depth), directory_line(settings));
@@ -109,17 +98,55 @@ fn draw_rectangles(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings,
             _ => draw_framed(bytes, width, rect, item_color(item), tile_line(settings)),
         }
     }
+    draw_directory_frames(bytes, layout, settings);
     true
 }
 
-/// The bar along the top of a directory that holds its name, coloured like the kind of files that dominate it.
+fn pixel_rect(item: &LayoutItem, image_width: u32, image_height: u32) -> Option<(u32, u32, u32, u32)> {
+    let Shape::Rect { x, y, width, height } = item.shape else {
+        return None;
+    };
+    let left = (x * image_width as f32).round() as u32;
+    let top = (y * image_height as f32).round() as u32;
+    let right = ((x + width) * image_width as f32).round() as u32;
+    let bottom = ((y + height) * image_height as f32).round() as u32;
+    (right > left && bottom > top).then_some((left, top, right, bottom))
+}
+
+/// Draws the sides of every opened directory over what is inside, in the grey of its level, so the whole group is
+/// outlined and the outline gets lighter with every level; deeper directories come later and win at shared edges.
+/// With a header the top side is the header itself.
+fn draw_directory_frames(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings) {
+    let (width, height) = (settings.geometry.width, settings.geometry.height);
+    let opened = layout.items.iter().filter(|item| item.kind == NodeKind::Directory && item.composition.is_none());
+    for item in opened {
+        let Some((left, top, right, bottom)) = pixel_rect(item, width, height) else {
+            continue;
+        };
+        let color = header_color(item.depth);
+        fill_rect(bytes, width, (left, top, left + 1, bottom), color);
+        fill_rect(bytes, width, (right.saturating_sub(1).max(left), top, right, bottom), color);
+        fill_rect(bytes, width, (left, bottom.saturating_sub(1).max(top), right, bottom), color);
+        if item.header_height <= 0.0 {
+            fill_rect(bytes, width, (left, top, right, top + 1), color);
+        }
+    }
+}
+
+/// The bar along the top of a directory that holds its name: grey, lighter with every level, so the white text stays readable.
+fn header_color(depth: u16) -> [u8; 4] {
+    let level = (HEADER_BASE_GREY + u32::from(depth) * HEADER_GREY_STEP).min(HEADER_MAX_GREY) as u8;
+    [level, level, level, 255]
+}
+
+/// The bar along the top of a directory that holds its name.
 fn draw_header(bytes: &mut [u8], image_width: u32, rect: (u32, u32, u32, u32), item: &LayoutItem, image_height: u32) {
     if item.header_height <= 0.0 {
         return;
     }
     let (left, top, right, bottom) = rect;
     let header_bottom = (top + (item.header_height * image_height as f32).round() as u32).min(bottom.saturating_sub(1));
-    fill_rect(bytes, image_width, (left, top, right.saturating_sub(1), header_bottom), item_color(item));
+    fill_rect(bytes, image_width, (left, top, right.saturating_sub(1), header_bottom), header_color(item.depth));
 }
 
 /// The line along the right and bottom edge of every rectangle. Neighbours meet in one pixel, whatever their colours,
@@ -425,7 +452,7 @@ mod tests {
     use czkawka_core::tools::disk_usage::layout::{Layout, LayoutKind, LayoutOptions, Shape};
     use czkawka_core::tools::disk_usage::tree::{DiskNode, DiskTree};
 
-    use super::{ChartGeometry, RenderSettings, SunburstSampler, antialiased_pixel, exact_antialiased_pixel, item_color, render_chart};
+    use super::{ChartGeometry, RenderSettings, SunburstSampler, antialiased_pixel, exact_antialiased_pixel, header_color, item_color, render_chart};
 
     fn sample_layout(kind: LayoutKind) -> Layout {
         let root = DiskNode::directory(
@@ -457,7 +484,29 @@ mod tests {
     }
 
     #[test]
-    fn folder_header_is_painted_in_the_colour_of_the_dominant_category() {
+    fn group_outline_without_headers_gets_lighter_on_deeper_levels() {
+        let inner = DiskNode::directory("inner", vec![DiskNode::file("song.mp3", 300, FileCategory::Audio)]);
+        let root = DiskNode::directory("/root", vec![inner]);
+        let options = LayoutOptions {
+            canvas_size_px: (200.0, 200.0),
+            min_item_size_px: 0.0,
+            nested_padding: 0.0,
+            ..LayoutOptions::new(LayoutKind::Treemap)
+        };
+        let layout = Layout::build(&DiskTree::new(vec![root]), &options);
+        let buffer = render_chart(&layout, &settings(200, 200, LayoutKind::Treemap, usize::MAX), &|| true).unwrap();
+
+        assert_eq!(
+            pixel(buffer.as_bytes(), 200, 100, 0),
+            header_color(1),
+            "the inner directory covers the whole chart and wins"
+        );
+        assert_eq!(pixel(buffer.as_bytes(), 200, 199, 100), header_color(1));
+        assert!(header_color(1)[0] > header_color(0)[0]);
+    }
+
+    #[test]
+    fn folder_header_is_grey_and_lighter_on_deeper_levels() {
         let root = DiskNode::directory("/root", vec![DiskNode::file("song.mp3", 300, FileCategory::Audio)]);
         let options = LayoutOptions {
             canvas_size_px: (200.0, 200.0),
@@ -469,9 +518,13 @@ mod tests {
         let layout = Layout::build(&DiskTree::new(vec![root]), &options);
         let buffer = render_chart(&layout, &settings(200, 200, LayoutKind::Treemap, usize::MAX), &|| true).unwrap();
 
-        let directory = layout.items.iter().find(|item| item.depth == 0).unwrap();
         let file = layout.items.iter().find(|item| item.depth == 1).unwrap();
-        assert_eq!(pixel(buffer.as_bytes(), 200, 100, 5), item_color(directory));
+        assert_eq!(pixel(buffer.as_bytes(), 200, 100, 5), header_color(0));
+        assert_eq!(pixel(buffer.as_bytes(), 200, 199, 100), header_color(0), "right side of the group");
+        assert_eq!(pixel(buffer.as_bytes(), 200, 100, 199), header_color(0), "bottom of the group");
+        assert_eq!(pixel(buffer.as_bytes(), 200, 0, 100), header_color(0), "left side of the group");
+        assert!(header_color(1)[0] > header_color(0)[0]);
+        assert_eq!(header_color(100), [140, 140, 140, 255]);
         assert_eq!(pixel(buffer.as_bytes(), 200, 100, 100), item_color(file));
     }
 

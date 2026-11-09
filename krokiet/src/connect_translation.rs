@@ -264,8 +264,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_disk_usage_text(flk!("tool_disk_usage").into());
     translation.set_disk_usage_mode_treemap_text(flk!("disk_usage_mode_treemap").into());
     translation.set_disk_usage_mode_sunburst_text(flk!("disk_usage_mode_sunburst").into());
-    translation.set_disk_usage_zoom_out_text(flk!("disk_usage_zoom_out").into());
-    translation.set_disk_usage_no_results_text(flk!("disk_usage_no_results").into());
+    translation.set_disk_usage_zoom_up_text(flk!("disk_usage_zoom_up").into());
+    translation.set_disk_usage_zoom_reset_text(flk!("disk_usage_zoom_reset").into());
     translation.set_disk_usage_depth_text(flk!("disk_usage_depth").into());
     translation.set_disk_usage_ignore_excluded_items_text(flk!("disk_usage_ignore_excluded_items").into());
     translation.set_disk_usage_ignore_excluded_directories_text(flk!("disk_usage_ignore_excluded_directories").into());

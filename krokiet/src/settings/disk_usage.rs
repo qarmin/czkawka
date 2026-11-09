@@ -17,7 +17,7 @@ pub struct DiskUsageSettings {
     pub ignore_excluded_directories: bool,
     #[serde(default)]
     pub nested_borders: bool,
-    #[serde(default)]
+    #[serde(default = "ttrue")]
     pub folder_headers: bool,
     #[serde(default = "default_group_exponent")]
     pub group_exponent: u32,
@@ -115,7 +115,7 @@ mod tests {
         assert_eq!(settings.depth, 6);
         assert_eq!(settings.content_detection_index, 1);
         assert!(settings.ignore_excluded_items);
-        assert!(!settings.folder_headers);
+        assert!(settings.folder_headers);
         assert!(settings.disabled_categories.is_empty());
     }
 

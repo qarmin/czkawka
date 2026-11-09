@@ -53,7 +53,7 @@ export global DiskUsageState {
     // Every level of directories keeps a frame of its own, so the lines pile up with nesting
     in-out property <bool> nested_borders: false;
     // Opened folders get a bar on top with their name and size
-    in-out property <bool> folder_headers: false;
+    in-out property <bool> folder_headers: true;
     in-out property <[DiskUsageHeaderLabel]> header_labels: [];
     // Entries smaller than 1 / 10^group_exponent of their folder are grouped into one block of small entries
     in-out property <float> group_exponent: 6;
@@ -96,6 +96,7 @@ export global DiskUsageState {
     callback results_changed();
     callback category_toggled(int, bool);
     callback zoom_out();
+    callback zoom_reset();
     callback tree_row_toggled(int);
     callback tree_row_clicked(int);
     callback tree_row_right_clicked(int);

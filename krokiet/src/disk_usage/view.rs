@@ -415,6 +415,17 @@ pub(super) fn zoom_out(app: &MainWindow, context: &Arc<ChartContext>) {
     refresh_after_zoom(app, context);
 }
 
+pub(super) fn zoom_reset(app: &MainWindow, context: &Arc<ChartContext>) {
+    {
+        let mut view = context.view.lock().expect("View mutex poisoned");
+        if view.zoom.is_empty() {
+            return;
+        }
+        view.zoom.clear();
+    }
+    refresh_after_zoom(app, context);
+}
+
 pub(super) fn update_zoom_state(app: &MainWindow, context: &ChartContext) {
     let zoom = context.view.lock().expect("View mutex poisoned").zoom.clone();
     let text = if zoom.is_empty() {

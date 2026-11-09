@@ -166,11 +166,27 @@ export component DiskUsageView inherits Rectangle {
                     max-width: max(120px, root.width - 180px);
                 }
 
-                Button {
-                    text: Translations.disk_usage_zoom_out_text;
-                    enabled: DiskUsageState.can_zoom_out;
-                    clicked => {
-                        DiskUsageState.zoom_out();
+                CategoryToggle {
+                    icon: @image-url("../../icons/krokiet_zoom_up.svg");
+                    accent: Palette.foreground;
+                    active: DiskUsageState.can_zoom_out;
+                    tip: Translations.disk_usage_zoom_up_text;
+                    toggled => {
+                        if (DiskUsageState.can_zoom_out) {
+                            DiskUsageState.zoom_out();
+                        }
+                    }
+                }
+
+                CategoryToggle {
+                    icon: @image-url("../../icons/krokiet_zoom_reset.svg");
+                    accent: Palette.foreground;
+                    active: DiskUsageState.can_zoom_out;
+                    tip: Translations.disk_usage_zoom_reset_text;
+                    toggled => {
+                        if (DiskUsageState.can_zoom_out) {
+                            DiskUsageState.zoom_reset();
+                        }
                     }
                 }
             }
@@ -246,17 +262,6 @@ export component DiskUsageView inherits Rectangle {
                     fill: transparent;
                     stroke: Settings.dark_theme ? #ffffff : #141414;
                     stroke-width: DiskUsageState.selection.border * 1phx;
-                }
-
-                Text {
-                    visible: !DiskUsageState.has_results;
-                    text: Translations.disk_usage_no_results_text;
-                    font-size: FontSizes.normal;
-                    color: ColorPalette.hint_color;
-                    horizontal-alignment: center;
-                    vertical-alignment: center;
-                    width: parent.width;
-                    height: parent.height;
                 }
 
                 if DiskUsageState.mode == DiskUsageMode.Sunburst && DiskUsageState.has_results: VerticalLayout {

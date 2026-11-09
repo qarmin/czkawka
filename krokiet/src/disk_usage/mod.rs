@@ -96,6 +96,12 @@ fn connect_view_callbacks(app: &MainWindow, context: &Arc<ChartContext>) {
     });
 
     let (weak, ctx) = (app.as_weak(), Arc::clone(context));
+    state.on_zoom_reset(move || {
+        let app = weak.upgrade().expect("MainWindow dropped while callback is still live");
+        view::zoom_reset(&app, &ctx);
+    });
+
+    let (weak, ctx) = (app.as_weak(), Arc::clone(context));
     state.on_tree_row_toggled(move |row| {
         let app = weak.upgrade().expect("MainWindow dropped while callback is still live");
         tree_view::toggle_row(&app, &ctx, row);
