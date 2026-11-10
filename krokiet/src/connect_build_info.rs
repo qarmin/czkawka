@@ -95,11 +95,11 @@ fn connect_test_image_file(app: &MainWindow) {
                     let file_name = path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
                     let ext = path.extension().unwrap_or_default().to_string_lossy().to_lowercase();
                     let decoder = if RAW_IMAGE_EXTENSIONS.contains(&ext.as_str()) {
-                        if cfg!(feature = "libraw") { "LibRAW" } else { "rawler" }
+                        "rawler"
                     } else if HEIC_EXTENSIONS.contains(&ext.as_str()) {
-                        "libheif"
+                        "imgalifier-heif"
                     } else if ext == "avif" {
-                        if cfg!(feature = "libavif") { "libavif" } else { "image-rs" }
+                        "imgalifier-avif"
                     } else {
                         "image-rs"
                     };
@@ -132,13 +132,6 @@ fn connect_test_image_file(app: &MainWindow) {
 }
 
 fn set_all_build_info_properties(gs: &GuiState, info: &BuildRuntimeInfo) {
-    gs.set_build_info_heif_build(info.heif_build);
-    gs.set_build_info_libraw_build(info.libraw_build);
-    gs.set_build_info_libavif_build(info.libavif_build);
-    gs.set_build_info_heif_runtime_hevc(info.heif_runtime_hevc);
-    gs.set_build_info_heif_runtime_av1(info.heif_runtime_av1);
-    gs.set_build_info_libraw_runtime(info.libraw_runtime);
-    gs.set_build_info_libavif_runtime(info.libavif_runtime);
     gs.set_build_info_ffmpeg_runtime(info.ffmpeg_runtime);
     gs.set_build_info_ffprobe_runtime(info.ffprobe_runtime);
     gs.set_build_info_probes_complete(info.probes_complete);

@@ -1,0 +1,26 @@
+import { GuiState } from "../globals/gui_state.slint";
+import { Translations } from "../globals/translations.slint";
+import { PopupBase } from "../components/popup_base.slint";
+import { ToolSettings } from "../screens/tool_settings.slint";
+
+export component PopupToolSettings inherits Rectangle {
+    private property <length> popup_width: min(520px, root.width - 20px);
+    private property <length> chrome_height: 110px;
+    callback show_popup();
+
+    popup_window := PopupBase {
+        width: popup_width;
+        x: round(((root.width - self.width) / 2.0) / 1px) * 1px;
+        y: round(((root.height - self.height) / 2.0) / 1px) * 1px;
+        title_text: Translations.subsettings_text + " - " + GuiState.active_tool_name;
+        show_cancel_button: false;
+
+        ToolSettings {
+            limit_height: root.height - 20px - chrome_height;
+        }
+    }
+
+    show_popup() => {
+        popup_window.show();
+    }
+}

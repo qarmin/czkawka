@@ -15,13 +15,6 @@ export global GuiState {
     in-out property <bool> audio_feature_enabled: false;
     in-out property <bool> notifications_feature_enabled: false;
 
-    in-out property <bool> build_info_heif_build: false;
-    in-out property <bool> build_info_libraw_build: false;
-    in-out property <bool> build_info_libavif_build: false;
-    in-out property <bool> build_info_heif_runtime_hevc: false;
-    in-out property <bool> build_info_heif_runtime_av1: false;
-    in-out property <bool> build_info_libraw_runtime: false;
-    in-out property <bool> build_info_libavif_runtime: false;
     in-out property <bool> build_info_ffmpeg_runtime: false;
     in-out property <bool> build_info_ffprobe_runtime: false;
     in-out property <string> build_info_diagnostic_text: "";
@@ -34,9 +27,23 @@ export global GuiState {
     in-out property <float> maximum_threads: 40;
 
     in-out property <bool> choosing_include_directories;
-    in-out property <bool> visible_tool_settings;
+    in-out property <bool> left_panel_collapsed;
+    in-out property <float> preview_width_ratio: 0.5;
 
-    in-out property <bool> available_subsettings: active_tab == ActiveTab.BadNames || active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic || active_tab == ActiveTab.BigFiles || active_tab == ActiveTab.BrokenFiles || active_tab == ActiveTab.VideoOptimizer || active_tab == ActiveTab.ExifRemover || active_tab == ActiveTab.TemporaryFiles || active_tab == ActiveTab.EmptyFiles;
+    in-out property <bool> available_subsettings: active_tab == ActiveTab.BadNames || active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic || active_tab == ActiveTab.BigFiles || active_tab == ActiveTab.BrokenFiles || active_tab == ActiveTab.VideoOptimizer || active_tab == ActiveTab.ExifRemover || active_tab == ActiveTab.TemporaryFiles || active_tab == ActiveTab.EmptyFiles || active_tab == ActiveTab.DiskUsage;
+    out property <string> active_tool_name: active_tab == ActiveTab.DuplicateFiles ? Translations.tool_duplicate_files_text
+        : active_tab == ActiveTab.BigFiles ? Translations.tool_big_files_text
+        : active_tab == ActiveTab.EmptyFiles ? Translations.tool_empty_files_text
+        : active_tab == ActiveTab.TemporaryFiles ? Translations.tool_temporary_files_text
+        : active_tab == ActiveTab.SimilarImages ? Translations.tool_similar_images_text
+        : active_tab == ActiveTab.SimilarVideos ? Translations.tool_similar_videos_text
+        : active_tab == ActiveTab.SimilarMusic ? Translations.tool_music_duplicates_text
+        : active_tab == ActiveTab.BrokenFiles ? Translations.tool_broken_files_text
+        : active_tab == ActiveTab.BadNames ? Translations.tool_bad_names_text
+        : active_tab == ActiveTab.ExifRemover ? Translations.tool_exif_remover_text
+        : active_tab == ActiveTab.VideoOptimizer ? Translations.tool_video_optimizer_text
+        : active_tab == ActiveTab.DiskUsage ? Translations.tool_disk_usage_text
+        : "";
     in-out property <bool> tool_with_groups: active_tab == ActiveTab.SimilarImages || active_tab == ActiveTab.DuplicateFiles || active_tab == ActiveTab.SimilarVideos || active_tab == ActiveTab.SimilarMusic;
     in-out property <ActiveTab> active_tab: ActiveTab.DuplicateFiles;
     in-out property <bool> is_tool_tab_active: active_tab != ActiveTab.Settings && active_tab != ActiveTab.About;
@@ -70,6 +77,7 @@ export global GuiState {
         { name: Translations.tool_bad_extensions_text, tab: ActiveTab.BadExtensions },
         { name: Translations.tool_exif_remover_text, tab: ActiveTab.ExifRemover },
         { name: Translations.tool_video_optimizer_text, tab: ActiveTab.VideoOptimizer },
+        { name: Translations.tool_disk_usage_text, tab: ActiveTab.DiskUsage },
         { name: Translations.tool_bad_names_text, tab: ActiveTab.BadNames },
     ];
 

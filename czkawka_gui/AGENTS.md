@@ -198,7 +198,7 @@ language preference.
 | `crossbeam-channel` | Result + progress channels |
 | `czkawka_core` | Scanning engine |
 
-Optional features (forwarded to core): `heif`, `libraw`, `libavif`,
+Optional features (forwarded to core): `heif`, `libavif`,
 `xdg_portal_trash`.
 
 ---

@@ -29,6 +29,10 @@ krokiet/
 │   ├── clear_outdated_video_thumbnails.rs
 │   ├── connect_scan.rs               # Routes scan to per-tool functions
 │   ├── connect_scan/                 # One file per tool (duplicate.rs, …)
+│   ├── disk_usage/                   # Disk usage chart: view.rs (state, render worker, callbacks),
+│   │                                  #   render.rs (CPU rasterizer), describe.rs (tooltip/selection text),
+│   │                                  #   tree_view.rs (expandable list next to the rings),
+│   │                                  #   actions.rs (open/copy/trash stub)
 │   ├── connect_progress_receiver.rs  # Receives ProgressData → updates UI bar
 │   ├── connect_row_selection/        # Row checkbox logic, group handling
 │   │   ├── mod.rs
@@ -75,6 +79,7 @@ krokiet/
     │   ├── settings.slint            # Global Settings (persisted)
     │   ├── translations.slint        # Global Translations (all UI strings)
     │   ├── callabler.slint           # Global Callabler (all Rust to UI callbacks)
+    │   ├── disk_usage_state.slint    # Global DiskUsageState (transient; its options are not saved in presets)
     │   ├── fonts.slint               # FontSizes global
     │   ├── color_palette.slint       # Dark-theme color definitions
     │   └── text_size.slint
@@ -87,11 +92,14 @@ krokiet/
     │   ├── image_compare.slint       # Side-by-side image diff overlay
     │   ├── settings_list.slint       # Settings tab form
     │   ├── tool_settings.slint       # Per-tool options (hash alg, threshold, …)
+    │   ├── disk_usage.slint          # Disk usage screen: mode buttons, chart image, context menu
     │   ├── about.slint                # About tab
     │   └── included_paths.slint
     ├── components/
     │   ├── preview.slint             # File preview / thumbnail side panel
     │   ├── selectable_tree_view.slint # Custom tree widget for path lists
+    │   ├── disk_usage_tree.slint     # Expandable directory list shown next to the disk usage rings
+    │   ├── context_menu_parts.slint  # Frame, divider and metrics shared by the right-click menus
     │   ├── hint_text.slint
     │   ├── popup_base.slint
     │   ├── popup_centered_text.slint
@@ -272,8 +280,9 @@ Cross-thread updates use `weak.upgrade_in_event_loop(|app| { … })`.
 
 - `audio` – scan-complete sound via `rodio`
 - Renderer features: `winit_femtovg` (default), `winit_software` (default),
-  `skia_opengl`, `skia_vulkan`, etc. – select GPU backend at compile time
-- `heif`, `libraw`, `libavif`, `xdg_portal_trash` – forwarded to `czkawka_core`
+  `femtovg_wgpu`, `vello` – select GPU backend at compile time. Without `SLINT_BACKEND`, `src/renderer_selection.rs`
+  tries them in the order femtovg, femtovg-wgpu, vello, software and restarts the process with the next one on failure
+- `xdg_portal_trash` – forwarded to `czkawka_core`
 
 ### Build
 

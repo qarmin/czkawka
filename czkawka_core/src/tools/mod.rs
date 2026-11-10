@@ -2,6 +2,7 @@ pub mod bad_extensions;
 pub mod bad_names;
 pub mod big_file;
 pub mod broken_files;
+pub mod disk_usage;
 pub mod duplicate;
 pub mod empty_files;
 pub mod empty_folder;

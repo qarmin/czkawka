@@ -6,6 +6,7 @@ use log::{error, info};
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
 
 use crate::settings::combo_box::{SimilarVideosAudioPreset, SimilarVideosVisualPreset, StringComboBoxItems};
+use crate::tools_visibility::set_tools_names;
 use crate::{ActiveTab, Callabler, GuiState, MainWindow, SelectMode, Settings, SortMode, SortModel, Translations, flk, localizer_krokiet};
 
 pub(crate) fn connect_translations(app: &MainWindow) {
@@ -64,6 +65,7 @@ pub(crate) fn change_language(app: &MainWindow) {
 // To generate this, check misc folder
 // This is ugly workaround for missing fluent language support in slint
 fn translate_items(app: &MainWindow) {
+    crate::help::set_help_content(app);
     let translation = app.global::<Translations>();
     let settings = app.global::<Settings>();
 
@@ -90,12 +92,13 @@ fn translate_items(app: &MainWindow) {
     translation.set_donation_text(flk!("donation").into());
     translation.set_translation_text(flk!("translation").into());
     translation.set_other_apps_text(flk!("other_apps").into());
-    translation.set_build_info_build_text(flk!("build_info_build").into());
+    translation.set_help_title_text(flk!("help_title").into());
+    translation.set_help_tools_text(flk!("help_tools").into());
+    translation.set_help_button_tip_text(flk!("help_button_tip").into());
     translation.set_build_info_runtime_text(flk!("build_info_runtime").into());
     translation.set_build_info_refresh_text(flk!("build_info_refresh").into());
     translation.set_build_info_diagnostic_button_text(flk!("build_info_diagnostic_button").into());
     translation.set_build_info_diagnostic_title_text(flk!("build_info_diagnostic_title").into());
-    translation.set_build_info_library_restart_hint_text(flk!("build_info_library_restart_hint").into());
     translation.set_build_info_test_file_text(flk!("build_info_test_file").into());
     translation.set_other_apps_title_text(flk!("other_apps_title").into());
     translation.set_other_apps_open_source_note_text(flk!("other_apps_open_source_note").into());
@@ -131,6 +134,11 @@ fn translate_items(app: &MainWindow) {
     translation.set_sort_reverse_text(flk!("sort_reverse").into());
     translation.set_settings_dark_theme_text(flk!("settings_dark_theme").into());
     translation.set_settings_show_only_icons_text(flk!("settings_show_only_icons").into());
+    translation.set_settings_section_general_text(flk!("settings_section_general").into());
+    translation.set_settings_section_search_text(flk!("settings_section_search").into());
+    translation.set_settings_section_tools_text(flk!("settings_section_tools").into());
+    translation.set_settings_section_cache_text(flk!("settings_section_cache").into());
+    translation.set_settings_visible_tools_text(flk!("settings_visible_tools").into());
     translation.set_settings_global_settings_text(flk!("settings_global_settings").into());
     translation.set_selection_all_text(flk!("selection_all").into());
     translation.set_selection_deselect_all_text(flk!("selection_deselect_all").into());
@@ -253,6 +261,36 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_video_optimizer_custom_command_hint_text(flk!("subsettings_video_optimizer_custom_command_hint").into());
     translation.set_subsettings_video_optimizer_generate_template_text(flk!("subsettings_video_optimizer_generate_template").into());
     translation.set_subsettings_reset_text(flk!("subsettings_reset").into());
+    translation.set_tool_disk_usage_text(flk!("tool_disk_usage").into());
+    translation.set_disk_usage_mode_treemap_text(flk!("disk_usage_mode_treemap").into());
+    translation.set_disk_usage_mode_sunburst_text(flk!("disk_usage_mode_sunburst").into());
+    translation.set_disk_usage_zoom_out_text(flk!("disk_usage_zoom_out").into());
+    translation.set_disk_usage_no_results_text(flk!("disk_usage_no_results").into());
+    translation.set_disk_usage_depth_text(flk!("disk_usage_depth").into());
+    translation.set_disk_usage_ignore_excluded_items_text(flk!("disk_usage_ignore_excluded_items").into());
+    translation.set_disk_usage_ignore_excluded_directories_text(flk!("disk_usage_ignore_excluded_directories").into());
+    translation.set_disk_usage_ignore_excluded_hint_text(flk!("disk_usage_ignore_excluded_hint").into());
+    translation.set_disk_usage_content_detection_text(flk!("disk_usage_content_detection").into());
+    translation.set_disk_usage_content_detection_hint_text(flk!("disk_usage_content_detection_hint").into());
+    translation.set_disk_usage_content_detection_extension_text(flk!("disk_usage_content_detection_extension").into());
+    translation.set_disk_usage_content_detection_large_text(flk!("disk_usage_content_detection_large").into());
+    translation.set_disk_usage_content_detection_all_text(flk!("disk_usage_content_detection_all").into());
+    translation.set_disk_usage_nested_borders_text(flk!("disk_usage_nested_borders").into());
+    translation.set_disk_usage_detail_title_text(flk!("disk_usage_detail_title").into());
+    translation.set_disk_usage_detail_hint_text(flk!("disk_usage_detail_hint").into());
+    translation.set_disk_usage_group_below_text(flk!("disk_usage_group_below").into());
+    translation.set_disk_usage_min_item_text(flk!("disk_usage_min_item").into());
+    translation.set_disk_usage_folder_block_text(flk!("disk_usage_folder_block").into());
+    translation.set_disk_usage_move_to_trash_text(flk!("disk_usage_move_to_trash").into());
+    translation.set_disk_usage_open_file_text(flk!("disk_usage_open_file").into());
+    translation.set_disk_usage_open_folder_text(flk!("disk_usage_open_folder").into());
+    translation.set_disk_usage_open_parent_text(flk!("disk_usage_open_parent").into());
+    translation.set_disk_usage_copy_path_text(flk!("disk_usage_copy_path").into());
+    crate::disk_usage::refresh_category_names(app);
+    translation.set_subsettings_scan_options_text(flk!("subsettings_scan_options").into());
+    translation.set_subsettings_scan_options_hint_text(flk!("subsettings_scan_options_hint").into());
+    translation.set_subsettings_filter_options_text(flk!("subsettings_filter_options").into());
+    translation.set_subsettings_filter_options_hint_text(flk!("subsettings_filter_options_hint").into());
     translation.set_subsettings_exif_ignored_tags_text(flk!("subsettings_exif_ignored_tags_text").into());
     translation.set_subsettings_exif_ignored_tags_hint_text(flk!("subsettings_exif_ignored_tags_hint_text").into());
     translation.set_subsettings_temporary_files_extensions_text(flk!("subsettings_temporary_files_extensions_text").into());
@@ -271,6 +309,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_optimize_limit_video_size_text(flk!("optimize_limit_video_size_text").into());
     translation.set_optimize_max_width_text(flk!("optimize_max_width_text").into());
     translation.set_optimize_max_height_text(flk!("optimize_max_height_text").into());
+    translation.set_optimize_limit_fps_text(flk!("optimize_limit_fps_text").into());
+    translation.set_optimize_max_fps_text(flk!("optimize_max_fps_text").into());
     translation.set_optimize_crf_hint_text(flk!("optimize_crf_hint").into());
     translation.set_optimize_noise_reduction_hint_text(flk!("optimize_noise_reduction_hint").into());
     translation.set_optimize_noise_reduction_strength_hint_text(flk!("optimize_noise_reduction_strength_hint").into());
@@ -354,7 +394,6 @@ fn translate_items(app: &MainWindow) {
     translation.set_subsettings_videos_window_count_text(flk!("subsettings_videos_window_count").into());
     translation.set_settings_load_tabs_sizes_at_startup_text(flk!("settings_load_tabs_sizes_at_startup").into());
     translation.set_settings_load_windows_size_at_startup_text(flk!("settings_load_windows_size_at_startup").into());
-    translation.set_settings_limit_lines_of_messages_text(flk!("settings_limit_lines_of_messages").into());
     translation.set_settings_play_audio_on_scan_completion_text(flk!("settings_play_audio_on_scan_completion_text").into());
     translation.set_settings_audio_feature_hint_text(flk!("settings_audio_feature_hint_text").into());
     translation.set_settings_audio_env_variable_hint_text(flk!("settings_audio_env_variable_hint_text").into());
@@ -442,7 +481,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_context_menu_copy_full_path_text(flk!("context_menu_copy_full_path_text").into());
     translation.set_context_menu_rename_text(flk!("context_menu_rename_text").into());
 
-    let tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
+    let list_tools_model: [(SharedString, ActiveTab); TOOLS_NUMBER] = [
         (flk!("tool_duplicate_files").into(), ActiveTab::DuplicateFiles),
         (flk!("tool_empty_folders").into(), ActiveTab::EmptyFolders),
         (flk!("tool_big_files").into(), ActiveTab::BigFiles),
@@ -458,8 +497,9 @@ fn translate_items(app: &MainWindow) {
         (flk!("tool_exif_remover").into(), ActiveTab::ExifRemover),
         (flk!("tool_video_optimizer").into(), ActiveTab::VideoOptimizer),
     ];
-    let gui_state = app.global::<GuiState>();
-    gui_state.set_tools_model(ModelRc::new(VecModel::from(tools_model.to_vec())));
+    let mut tools = list_tools_model.to_vec();
+    tools.push((flk!("tool_disk_usage").into(), ActiveTab::DiskUsage));
+    set_tools_names(app, tools);
 
     let sort_model: [SortModel; 3] = [
         SortModel {
@@ -476,7 +516,7 @@ fn translate_items(app: &MainWindow) {
         },
     ];
 
-    gui_state.set_sort_results_list(ModelRc::new(VecModel::from(sort_model.to_vec())));
+    app.global::<GuiState>().set_sort_results_list(ModelRc::new(VecModel::from(sort_model.to_vec())));
 
     let selection = flk!("column_selection");
     let size = flk!("column_size");
@@ -521,7 +561,18 @@ fn translate_items(app: &MainWindow) {
     settings.set_broken_files_column_name(fnm(&[&selection, &file_name, &path, &type_of_error, &size, &mod_date]));
     settings.set_bad_extensions_column_name(fnm(&[&selection, &file_name, &path, &current_extension, &proper_extension]));
     settings.set_exif_remover_column_name(fnm(&[&selection, &size, &file_name, &path, &exif_tags, &mod_date]));
-    settings.set_video_optimizer_column_name(fnm(&[&selection, &size, &file_name, &path, &codec, &dimensions, &new_dimensions, &mod_date]));
+    settings.set_video_optimizer_column_name(fnm(&[
+        &selection,
+        &size,
+        &file_name,
+        &path,
+        &codec,
+        &dimensions,
+        &new_dimensions,
+        &duration,
+        &bitrate,
+        &mod_date,
+    ]));
     settings.set_bad_names_column_name(fnm(&[&selection, &file_name, &new_name, &path]));
 
     crate::set_initial_gui_info::apply_combo_box_translations(app);

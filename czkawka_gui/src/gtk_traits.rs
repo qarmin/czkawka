@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 use std::vec::Vec;
 
-use gtk4::prelude::{ComboBoxExtManual, *};
+use gtk4::prelude::{Cast, ComboBoxExtManual, GtkWindowExt, IsA, WidgetExt};
 use gtk4::{Box as GtkBox, ComboBoxText, Dialog, Widget};
 
 pub trait ComboBoxTraits {
@@ -147,7 +147,7 @@ impl<P: IsA<Widget>> WidgetTraits for P {
 
 #[cfg(test)]
 mod test {
-    use gtk4::prelude::BoxExt;
+    use gtk4::prelude::{BoxExt, OrientableExt};
     use gtk4::{Image, Label, Orientation};
 
     use super::*;

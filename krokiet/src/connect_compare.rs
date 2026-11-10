@@ -346,7 +346,7 @@ fn open_group(app: &MainWindow, header_idx: usize) {
 
             raw_items.push(RawCompareItem {
                 path: full_path,
-                dir: dir.clone(),
+                dir,
                 name,
                 size: strs
                     .get(StrDataSimilarImages::Size as usize)

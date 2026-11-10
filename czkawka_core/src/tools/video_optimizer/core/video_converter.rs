@@ -33,6 +33,7 @@ pub fn check_video(mut entry: VideoTranscodeEntry) -> VideoTranscodeEntry {
 
     entry.codec = current_codec;
     entry.duration = duration;
+    entry.bitrate = metadata.bitrate;
     match (metadata.width, metadata.height) {
         (Some(width), Some(height)) => {
             entry.width = width;
@@ -120,14 +121,26 @@ fn run_standard_command(params: &VideoTranscodeFixParams, video_path: &str, temp
     }
 
     let mut filters: Vec<String> = Vec::new();
-    if params.limit_video_size {
-        filters.push(format!(
-            "scale='min({},iw):min({},ih):force_original_aspect_ratio=decrease'",
-            params.max_width, params.max_height
-        ));
+
+    let needs_probe = params.max_dimensions.is_some() || params.max_fps.is_some();
+    let source_metadata = needs_probe.then(|| VideoMetadata::from_path(Path::new(video_path)).ok()).flatten();
+
+    if let Some((max_width, max_height)) = params.max_dimensions {
+        let exceeds_limit = source_metadata
+            .as_ref()
+            .is_none_or(|m| m.width.is_none_or(|w| w > max_width) || m.height.is_none_or(|h| h > max_height));
+        if exceeds_limit {
+            filters.push(format!("scale='min({max_width},iw):min({max_height},ih):force_original_aspect_ratio=decrease'"));
+        }
     }
     if let Some(nr_filter) = params.noise_reduction.to_ffmpeg_filter(params.noise_reduction_strength) {
         filters.push(nr_filter);
+    }
+    if let Some(max_fps) = params.max_fps {
+        let exceeds_limit = source_metadata.as_ref().is_none_or(|m| m.fps.is_none_or(|fps| fps > f64::from(max_fps)));
+        if exceeds_limit {
+            filters.push(format!("fps={max_fps}"));
+        }
     }
     if using_vaapi {
         // Align dimensions to multiples of 16 before hwupload. VAAPI encoders pad

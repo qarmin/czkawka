@@ -16,6 +16,7 @@ pub enum ToolType {
     BadExtensions,
     BadNames,
     BigFile,
+    DiskUsage,
     SameMusic,
     SimilarImages,
     SimilarVideos,

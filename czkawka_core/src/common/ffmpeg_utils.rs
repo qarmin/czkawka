@@ -44,32 +44,29 @@ fn test_hardware_encoder(encoder: HardwareEncoder) -> bool {
 }
 
 fn test_encoder_simple(encoder_name: &str) -> bool {
+    PROBE_FRAME_SIZES.iter().any(|&size| run_probe(encoder_name, size, None))
+}
+
+fn run_probe(encoder_name: &str, size: u32, vaapi_device: Option<&str>) -> bool {
     let mut cmd = Command::new("ffmpeg");
     disable_windows_console_window(&mut cmd);
-    let Ok(mut child) = cmd
-        .args([
-            "-nostdin",
-            "-f",
-            "lavfi",
-            "-i",
-            // AMF rejects very small frames (Init() error 5 at 64x64); 128x128 matches the VAAPI probe and works for all encoders
-            "color=size=128x128:rate=1",
-            "-frames:v",
-            "1",
-            "-c:v",
-            encoder_name,
-            "-f",
-            "null",
-            "-",
-        ])
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()
-    else {
+    cmd.arg("-nostdin");
+    if let Some(device) = vaapi_device {
+        cmd.args(["-vaapi_device", device]);
+    }
+    cmd.args(["-f", "lavfi", "-i", &format!("color=size={size}x{size}:rate=1")]);
+    if vaapi_device.is_some() {
+        cmd.args(["-vf", "format=nv12,hwupload"]);
+    }
+    cmd.args(["-frames:v", "1", "-c:v", encoder_name, "-f", "null", "-"]);
+    let Ok(mut child) = cmd.stdout(Stdio::null()).stderr(Stdio::null()).spawn() else {
         return false;
     };
     wait_with_timeout(&mut child)
 }
+
+// Encoders have different minimum frame sizes (NVENC rejects 128x128, AMF rejects 64x64), so try big to small
+const PROBE_FRAME_SIZES: [u32; 4] = [512, 256, 128, 64];
 
 const ENCODER_PROBE_TIMEOUT: Duration = Duration::from_secs(5);
 
@@ -102,43 +99,10 @@ pub fn find_vaapi_device() -> Option<String> {
 /// Scan /dev/dri/renderD* in order and return true on the first successful test encode.
 fn test_vaapi_encoder(encoder_name: &str) -> bool {
     // renderD128 is the standard first render node; try up to renderD132 for multi-GPU systems
-    for index in 128..=132u32 {
-        let device = format!("/dev/dri/renderD{index}");
-        if !std::path::Path::new(&device).exists() {
-            continue;
-        }
-        let mut cmd = Command::new("ffmpeg");
-        disable_windows_console_window(&mut cmd);
-        let Ok(mut child) = cmd
-            .args([
-                "-nostdin",
-                "-vaapi_device",
-                &device,
-                "-f",
-                "lavfi",
-                "-i",
-                "color=size=128x128:rate=1",
-                "-vf",
-                "format=nv12,hwupload",
-                "-frames:v",
-                "1",
-                "-c:v",
-                encoder_name,
-                "-f",
-                "null",
-                "-",
-            ])
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn()
-        else {
-            continue;
-        };
-        if wait_with_timeout(&mut child) {
-            return true;
-        }
-    }
-    false
+    (128..=132u32)
+        .map(|index| format!("/dev/dri/renderD{index}"))
+        .filter(|device| std::path::Path::new(device).exists())
+        .any(|device| PROBE_FRAME_SIZES.iter().any(|&size| run_probe(encoder_name, size, Some(&device))))
 }
 
 /// Returns a list of hardware acceleration methods supported by the installed ffmpeg,

@@ -6,7 +6,7 @@
 dependency. Every scanning tool is implemented here; frontends only configure the
 tool structs and drive them via the `Search` trait.
 
-`TOOLS_NUMBER = 14` (defined in `src/lib.rs`).
+`TOOLS_NUMBER = 14` (defined in `src/lib.rs`) counts the tools that produce a list of results; `disk_usage` is not included because its result is a size tree.
 
 ---
 
@@ -50,6 +50,7 @@ czkawka_core/src/
 │   ├── empty_files/
 │   ├── empty_folder/
 │   ├── big_file/
+│   ├── disk_usage/                # Size tree + treemap/sunburst layouts (no pixels)
 │   ├── similar_images/            # Perceptual hashing (image_hasher)
 │   ├── similar_videos/            # Frame-based video similarity
 │   ├── same_music/                # Audio tag + chromaprint fingerprint
@@ -67,6 +68,27 @@ czkawka_core/src/
     ├── ffprobe.rs                 # ffprobe JSON output parsing
     └── debug_timer.rs             # Debug-build timing
 ```
+
+---
+
+## DiskUsage (`src/tools/disk_usage/`)
+
+Not a list-of-results tool: it measures how much space files and directories take.
+
+```
+disk_usage/
+├── mod.rs, core.rs, traits.rs   # DiskUsage: Search, CommonData, PrintResults; Info, DiskUsageParameters
+├── tree.rs                      # DiskTree/DiskNode: compact size tree, NodeAddress, remove() keeps sizes right
+├── category.rs                  # FileCategory (by extension, optionally by content via infer)
+├── scan/                        # TreeSource backend trait + portable rayon backend (room for an NTFS MFT one)
+├── layout/                      # Layout::build: treemap (binary split), sunburst -> same LayoutItem list, hit_test;
+│                                #   entries too small to see become one "omitted" block per directory
+└── report.rs                    # Depth/width-limited text and JSON used by czkawka_cli
+```
+
+The core has no pixels and no `image` dependency; frontends rasterize a [`Layout`] themselves
+(see `krokiet/src/disk_usage/`). Layout coordinates are on a unit square, so only the aspect ratio of
+the target area matters.
 
 ---
 
@@ -301,7 +323,7 @@ pub enum ToolType {
     Duplicate, EmptyFolders, EmptyFiles, InvalidSymlinks,
     BrokenFiles, BadExtensions, BadNames, BigFile, SameMusic,
     SimilarImages, SimilarVideos, TemporaryFiles, ExifRemover,
-    VideoOptimizer,
+    VideoOptimizer, DiskUsage,
     #[default]
     None,
 }
@@ -332,9 +354,6 @@ Tools that support reference directories: `Duplicate`, `SameMusic`,
 | `similario_core` | Video similarity (sibling path-dependency; replaced `vid_dup_finder_lib`) |
 
 Optional (behind features):
-- `heif` → `libheif-rs` – HEIC/HEIF image support
-- `libraw` → `rawler` / `libraw-rs` – RAW photo support
-- `libavif` – AVIF image support
 - `xdg_portal_trash` – FlatPak trash via XDG portal
 - `blake_pure` → `blake3/pure` – pure-Rust Blake3 (no SIMD asm), for targets where the asm
   backend doesn't build

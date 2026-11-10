@@ -185,7 +185,7 @@ export component DirectoriesScreen {
 
         ScrollView {
             vertical-stretch: 1.0;
-            viewport-height: dir_layout.preferred-height;
+            content-height: dir_layout.preferred-height;
 
             dir_layout := VerticalLayout {
                 spacing: 0px;
@@ -330,7 +330,7 @@ export component DirectoriesScreen {
 
             Flickable {
                 vertical-stretch: 1.0;
-                viewport-height: max(vol_list.preferred-height, self.height);
+                content-height: max(vol_list.preferred-height, self.height);
 
                 vol_list := VerticalLayout {
                     spacing: 0px;
@@ -450,7 +450,7 @@ export component DirectoriesScreen {
 
             Flickable {
                 vertical-stretch: 1.0;
-                viewport-height: max(cp_list.preferred-height, self.height);
+                content-height: max(cp_list.preferred-height, self.height);
 
                 cp_list := VerticalLayout {
                     spacing: 0px;

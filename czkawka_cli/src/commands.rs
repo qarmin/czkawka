@@ -9,6 +9,7 @@ use czkawka_core::common::model::{CheckingMethod, HashType};
 use czkawka_core::common::tool_data::DeleteMethod;
 use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::broken_files::CheckedTypes;
+use czkawka_core::tools::disk_usage::{ContentDetection, DiskUsageParameters};
 use czkawka_core::tools::same_music::MusicSimilarity;
 use czkawka_core::tools::similar_images::GeometricInvariance;
 use czkawka_core::tools::similar_videos::{
@@ -78,6 +79,12 @@ pub enum Commands {
         after_help = "EXAMPLE:\n    czkawka big -d /home/rafal/ /home/piszczal -e /home/rafal/Roman -n 25 -J -x VIDEO -f results.txt"
     )]
     BiggestFiles(BiggestFilesArgs),
+    #[clap(
+        name = "disk-usage",
+        about = "Shows how much space directories and files take",
+        after_help = "EXAMPLE:\n    czkawka disk-usage -d /home/rafal -e /home/rafal/Obrazy --depth 3 --top 15 -f results.txt"
+    )]
+    DiskUsage(DiskUsageArgs),
     #[clap(
         name = "empty-files",
         about = "Finds empty files",
@@ -250,6 +257,67 @@ pub struct BiggestFilesArgs {
         long_help = "Switch mode to find smallest files instead of biggest ones"
     )]
     pub smallest_mode: bool,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct DiskUsageArgs {
+    #[clap(flatten)]
+    pub common_cli_items: CommonCliItems,
+    #[clap(
+        long,
+        default_value_t = DiskUsageParameters::DEFAULT_REPORT_DEPTH,
+        help = "Number of directory levels to show",
+        long_help = "Number of directory levels shown in the results, where the given directories are level 1"
+    )]
+    pub depth: usize,
+    #[clap(
+        long,
+        default_value_t = DiskUsageParameters::DEFAULT_REPORT_ENTRIES,
+        help = "Number of biggest entries shown in every directory",
+        long_help = "Number of the biggest files and directories shown inside every directory"
+    )]
+    pub top: usize,
+    #[clap(
+        long,
+        value_enum,
+        default_value_t = ContentDetectionArg::LargeFiles,
+        help = "Detects type of files with unknown extension by reading them",
+        long_help = "Reads the beginning of files with an unknown extension to find out what they contain; `large-files` does it only for files of at least 1 MiB, `all` for every such file (much slower). Only changes how files are categorized"
+    )]
+    pub detect_by_content: ContentDetectionArg,
+    #[clap(
+        long,
+        action = clap::ArgAction::Set,
+        default_value_t = true,
+        help = "Ignores excluded items patterns (true by default)",
+        long_help = "Measures also what the excluded items patterns would skip, e.g. hidden folders, caches and node_modules; the default patterns hide a large part of the disk"
+    )]
+    pub ignore_excluded_items: bool,
+    #[clap(
+        long,
+        action = clap::ArgAction::Set,
+        default_value_t = false,
+        help = "Ignores excluded directories (false by default)",
+        long_help = "Measures also the directories and files given as excluded paths"
+    )]
+    pub ignore_excluded_directories: bool,
+}
+
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+pub enum ContentDetectionArg {
+    ExtensionOnly,
+    LargeFiles,
+    All,
+}
+
+impl From<ContentDetectionArg> for ContentDetection {
+    fn from(value: ContentDetectionArg) -> Self {
+        match value {
+            ContentDetectionArg::ExtensionOnly => Self::ExtensionOnly,
+            ContentDetectionArg::LargeFiles => Self::LargeFiles,
+            ContentDetectionArg::All => Self::AllFiles,
+        }
+    }
 }
 
 #[derive(Debug, clap::Args)]
@@ -770,24 +838,27 @@ pub struct TranscodeArgs {
     pub fail_if_not_smaller: bool,
     #[clap(long, help = "Overwrite original files", long_help = "Overwrite original video files with optimized versions")]
     pub overwrite_original: bool,
-    #[clap(long, help = "Limit video size", long_help = "Limit maximum video dimensions")]
-    pub limit_video_size: bool,
     #[clap(
         long,
-        default_value = "1920",
         value_parser = clap::value_parser!(u32),
         help = "Maximum video width",
-        long_help = "Maximum video width in pixels when limit_video_size is enabled"
+        long_help = "Maximum video width in pixels; the video is only rescaled if it actually exceeds this (requires --max-height too)"
     )]
-    pub max_width: u32,
+    pub max_width: Option<u32>,
     #[clap(
         long,
-        default_value = "1080",
         value_parser = clap::value_parser!(u32),
         help = "Maximum video height",
-        long_help = "Maximum video height in pixels when limit_video_size is enabled"
+        long_help = "Maximum video height in pixels; the video is only rescaled if it actually exceeds this (requires --max-width too)"
     )]
-    pub max_height: u32,
+    pub max_height: Option<u32>,
+    #[clap(
+        long,
+        value_parser = clap::value_parser!(u32),
+        help = "Maximum video fps",
+        long_help = "Maximum video frame rate in frames per second; the fps filter is only applied if the video actually exceeds this"
+    )]
+    pub max_fps: Option<u32>,
     #[clap(
         long,
         default_value = "none",

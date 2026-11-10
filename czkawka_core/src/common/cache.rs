@@ -30,7 +30,7 @@ pub(crate) const CACHE_DUPLICATE_PREHASH_VERSION: u8 = 120;
 pub(crate) const CACHE_IMAGE_VERSION: u8 = 120;
 pub(crate) const CACHE_VIDEO_VERSION: u8 = 120;
 pub(crate) const CACHE_BROKEN_FILES_VERSION: u8 = 120;
-pub(crate) const CACHE_VIDEO_OPTIMIZE_VERSION: u8 = 110;
+pub(crate) const CACHE_VIDEO_OPTIMIZE_VERSION: u8 = 130;
 
 const MEMORY_LIMIT: u64 = 8 * 1024 * 1024 * 1024;
 const CLEANING_TIMESTAMPS_FILE: &str = "cleaning_timestamps.json";
@@ -384,11 +384,11 @@ where
     }
     let mut all_results: BTreeMap<String, K> = Default::default();
 
-    for file_entry in vec_file_entry.iter().cloned() {
-        all_results.insert(file_entry.get_path().to_string_lossy().to_string(), file_entry);
-    }
     for (name, file_entry) in loaded_hash_map {
         all_results.insert(name, file_entry);
+    }
+    for file_entry in vec_file_entry.iter().cloned() {
+        all_results.insert(file_entry.get_path().to_string_lossy().to_string(), file_entry);
     }
 
     let messages = save_cache_to_file_generalized(cache_file_name, &all_results, common_data.get_save_also_as_json(), 0);

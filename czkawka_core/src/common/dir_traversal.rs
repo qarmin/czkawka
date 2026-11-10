@@ -206,6 +206,14 @@ fn entry_type(file_type: FileType) -> EntryType {
     }
 }
 
+fn has_valid_utf8_path(path: &Path, warnings: &mut Vec<String>) -> bool {
+    if path.to_str().is_some() {
+        return true;
+    }
+    warnings.push(flc!("core_skipping_non_utf8_path", path = path.to_string_lossy().to_string()));
+    false
+}
+
 impl<F, T> DirTraversal<'_, F>
 where
     F: Fn(&FileEntry) -> T,
@@ -275,7 +283,7 @@ where
                 }
             }
         }
-        file_results.sort_by_cached_key(|fe| fe.path.to_string_lossy().to_string());
+        file_results.sort_by_cached_key(|fe| fe.path.to_str().expect("path validated as UTF-8 while collecting file entries").to_owned());
         for fe in file_results {
             let key = (self.group_by)(&fe);
             grouped_file_entries.entry(key).or_default().push(fe);
@@ -357,7 +365,7 @@ where
             for (segment, warnings, mut fe_result) in segments {
                 folders_to_check.extend(segment);
                 all_warnings.extend(warnings);
-                fe_result.sort_by_cached_key(|fe| fe.path.to_string_lossy().to_string());
+                fe_result.sort_by_cached_key(|fe| fe.path.to_str().expect("path validated as UTF-8 while collecting file entries").to_owned());
                 for fe in fe_result {
                     let key = (self.group_by)(&fe);
                     grouped_file_entries.entry(key).or_default().push(fe);
@@ -417,6 +425,10 @@ fn process_file_in_file_mode(
         return;
     };
 
+    if !has_valid_utf8_path(&current_file_name, warnings) {
+        return;
+    }
+
     if (minimal_file_size..=maximal_file_size).contains(&metadata.len()) {
         // Creating new file entry
         let fe: FileEntry = FileEntry {
@@ -456,6 +468,10 @@ fn process_file_in_file_mode_path_check(
     }
 
     if excluded_items.is_excluded(path) {
+        return;
+    }
+
+    if !has_valid_utf8_path(path, warnings) {
         return;
     }
 
@@ -541,6 +557,10 @@ fn process_symlink_in_symlink_mode(
         return;
     };
 
+    if !has_valid_utf8_path(&current_file_name, warnings) {
+        return;
+    }
+
     // Creating new file entry
     let fe: FileEntry = FileEntry {
         size: metadata.len(),
@@ -566,6 +586,10 @@ fn process_symlink_in_symlink_mode_path_check(
     }
 
     if excluded_items.is_excluded(path) {
+        return;
+    }
+
+    if !has_valid_utf8_path(path, warnings) {
         return;
     }
 
@@ -1039,6 +1063,34 @@ mod tests {
                 panic!("Expect SuccessFiles.");
             }
         }
+        Ok(())
+    }
+
+    #[cfg(target_family = "unix")]
+    #[test]
+    fn test_traversal_skips_non_utf8_path() -> io::Result<()> {
+        use std::ffi::OsStr;
+        use std::os::unix::ffi::OsStrExt;
+
+        let dir = tempfile::Builder::new().tempdir()?;
+        let dir_path = normalize_path(dir.path());
+
+        let valid_file = dir_path.join("valid.txt");
+        fs::write(&valid_file, CONTENT)?;
+
+        let invalid_name = OsStr::from_bytes(b"invalid_\xFF_name.txt");
+        let invalid_file = dir_path.join(invalid_name);
+        fs::write(&invalid_file, CONTENT)?;
+
+        let mut common_data = CommonToolData::new(ToolType::SimilarImages);
+        common_data.directories.set_included_paths([dir.path().to_owned()].to_vec());
+        common_data.set_minimal_file_size(0);
+
+        let actual = run_traversal(&common_data);
+
+        assert_eq!(actual.len(), 1, "Only the valid UTF-8 named file should be collected");
+        assert_eq!(actual[0].path.file_name(), Some(OsStr::new("valid.txt")));
+
         Ok(())
     }
 }

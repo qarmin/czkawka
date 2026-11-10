@@ -13,8 +13,14 @@ export enum ActiveTab {
     BadNames,
     ExifRemover,
     VideoOptimizer,
+    DiskUsage,
     Settings,
     About
+}
+
+export enum DiskUsageMode {
+    Treemap,
+    Sunburst,
 }
 
 export enum PopupRequest {
@@ -130,6 +136,12 @@ export enum SortMode {
 export struct SortModel {
     data: SortMode,
     name: string
+}
+
+export struct ToolVisibilityModel {
+    name: string,
+    tab: ActiveTab,
+    visible: bool
 }
 
 export struct CacheCleaningProgress {

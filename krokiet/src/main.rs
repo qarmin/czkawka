@@ -46,6 +46,8 @@ use crate::connect_stop::connect_stop_button;
 use crate::connect_tab_changed::connect_tab_changed;
 use crate::connect_translation::connect_translations;
 use crate::create_calculate_task_size::create_calculate_task_size;
+use crate::disk_usage::connect_disk_usage;
+use crate::help::connect_help;
 use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::set_initial_scroll_list_data_indexes::set_initial_scroll_list_data_indexes;
 // TODO - at start this should be used, to be sure that rust models are in sync with slint models
@@ -53,6 +55,7 @@ use crate::set_initial_scroll_list_data_indexes::set_initial_scroll_list_data_in
 // use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::settings::{connect_changing_settings_preset, create_default_settings_files, load_initial_settings_from_file, save_all_settings_to_file, set_initial_settings_to_gui};
 use crate::shared_models::SharedModels;
+use crate::tools_visibility::connect_tools_visibility;
 
 mod audio_player;
 mod clear_outdated_video_thumbnails;
@@ -75,10 +78,14 @@ mod connect_stop;
 mod connect_tab_changed;
 mod connect_translation;
 mod create_calculate_task_size;
+mod disk_usage;
 mod file_actions;
+mod gpu_info;
+mod help;
 mod localizer_krokiet;
 mod model_operations;
 mod notification_manager;
+mod renderer_selection;
 mod set_initial_gui_info;
 mod set_initial_scroll_list_data_indexes;
 mod settings;
@@ -86,6 +93,7 @@ mod shared_models;
 mod simpler_model;
 #[cfg(test)]
 mod test_common;
+mod tools_visibility;
 
 // Slint's generated code triggers many clippy lints (unwrap_used, indexing_slicing, ...)
 // that we enforce ourselves but cannot influence in third-party generated code.
@@ -96,6 +104,7 @@ mod ui {
 pub use ui::*;
 
 fn main() {
+    renderer_selection::apply_preferred_renderer();
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
     let cli_args = process_cli_args("Krokiet", "krokiet_gui", std::env::args().skip(1).collect());
@@ -113,6 +122,7 @@ fn main() {
     print_version_mode("Krokiet");
     print_infos_and_warnings(config_cache_path_set_result.infos, config_cache_path_set_result.warnings);
     print_krokiet_features();
+    gpu_info::log_session_info();
 
     create_default_settings_files();
 
@@ -120,10 +130,15 @@ fn main() {
         Ok(app) => app,
         Err(e) => {
             error!("Error during creating main window: {e}");
+            if let Some(exit_code) = renderer_selection::restart_with_next_renderer() {
+                process::exit(exit_code);
+            }
             show_critical_error(e.to_string());
             return;
         }
     };
+
+    gpu_info::log_graphics_info_on_renderer_setup(app.window());
 
     #[cfg(feature = "audio")]
     app.global::<GuiState>().set_audio_feature_enabled(true);
@@ -169,6 +184,7 @@ fn main() {
     connect_delete_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_trash_button(&app, progress_sender.clone(), stop_flag.clone());
     connect_scan_button(&app, progress_sender.clone(), stop_flag.clone(), Arc::clone(&shared_models), Arc::clone(&audio_player));
+    connect_disk_usage(&app, Arc::clone(&shared_models));
     connect_stop_button(&app, stop_flag.clone());
     connect_open_items(&app);
     connect_progress_gathering(&app, progress_receiver);
@@ -176,6 +192,8 @@ fn main() {
     connect_show_preview(&app, Arc::clone(&shared_models));
     connect_compare(&app, Arc::clone(&shared_models));
     connect_translations(&app);
+    connect_tools_visibility(&app);
+    connect_help(&app);
     connect_changing_settings_preset(&app);
     connect_select(&app, &shared_models);
     connect_move(&app, progress_sender.clone(), stop_flag.clone());
@@ -305,24 +323,18 @@ pub(crate) fn print_krokiet_features() {
 
     #[cfg(feature = "audio")]
     features.push("audio");
-    #[cfg(feature = "skia_opengl")]
-    features.push("skia_opengl");
-    #[cfg(feature = "skia_vulkan")]
-    features.push("skia_vulkan");
     #[cfg(feature = "software")]
     features.push("software");
     #[cfg(feature = "femtovg")]
     features.push("femtovg");
     #[cfg(feature = "winit_femtovg")]
     features.push("winit_femtovg");
-    #[cfg(feature = "winit_skia_opengl")]
-    features.push("winit_skia_opengl");
-    #[cfg(feature = "winit_skia_vulkan")]
-    features.push("winit_skia_vulkan");
     #[cfg(feature = "winit_software")]
     features.push("winit_software");
     #[cfg(feature = "femtovg_wgpu")]
     features.push("femtovg_wgpu");
+    #[cfg(feature = "vello")]
+    features.push("vello");
 
     info!("Krokiet features({}): [{}]", features.len(), features.join(", "));
 }

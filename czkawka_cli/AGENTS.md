@@ -155,9 +155,6 @@ and stop gracefully when it is `true`.
 
 ### Optional features (forwarded to `czkawka_core`)
 
-- `heif` – HEIF/HEIC image support (requires libheif)
-- `libraw` – RAW image support (requires libraw)
-- `libavif` – AVIF image support (requires libavif)
 - `xdg_portal_trash` – FlatPak-compatible trash (XDG portal)
 
 ---

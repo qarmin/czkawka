@@ -77,7 +77,7 @@ impl ExcludedItems {
                 continue;
             }
             if !expression.contains('*') {
-                warnings.push(flc!("core_excluded_items_wildcard_required", expression = expression.clone()));
+                warnings.push(flc!("core_excluded_items_wildcard_required", expression = expression));
                 continue;
             }
 

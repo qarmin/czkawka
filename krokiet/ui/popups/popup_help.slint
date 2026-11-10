@@ -1,0 +1,235 @@
+import { Button, Palette, ScrollView } from "std-widgets.slint";
+import { PopupBackdrop } from "../components/popup_backdrop.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+import { FontSizes } from "../globals/fonts.slint";
+import { HelpBlock, HelpBlockKind, HelpState } from "../globals/help_state.slint";
+import { Translations } from "../globals/translations.slint";
+
+component HelpListItem inherits Rectangle {
+    in property <string> text;
+    in property <bool> selected;
+    in property <length> indent: 0px;
+    callback clicked();
+
+    height: 30px;
+    border-radius: 4px;
+    background: root.selected ? ColorPalette.tab_selected_color : touch_area.has-hover ? ColorPalette.tab_hovered_color : transparent;
+
+    Text {
+        x: 8px + root.indent;
+        width: parent.width - 16px - root.indent;
+        text: root.text;
+        font-size: FontSizes.normal;
+        font-weight: root.selected ? FontSizes.bold_weight : FontSizes.bold_light;
+        vertical-alignment: center;
+        overflow: elide;
+    }
+
+    touch_area := TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+}
+
+component HelpGroupHeader inherits Rectangle {
+    in property <string> text;
+    in property <bool> expanded;
+    callback clicked();
+
+    height: 28px;
+    border-radius: 4px;
+    background: touch_area.has-hover ? ColorPalette.tab_hovered_color : transparent;
+
+    Path {
+        x: 8px;
+        y: round(((parent.height - self.height) / 2) / 1px) * 1px;
+        width: 8px;
+        height: 8px;
+        viewbox-width: 8;
+        viewbox-height: 8;
+        commands: root.expanded ? "M 0 2 L 4 6 L 8 2" : "M 2 0 L 6 4 L 2 8";
+        stroke: Palette.foreground;
+        stroke-width: 1.5px;
+    }
+
+    Text {
+        x: 24px;
+        width: parent.width - 32px;
+        text: root.text;
+        font-size: FontSizes.normal;
+        font-weight: FontSizes.bold_weight;
+        vertical-alignment: center;
+        overflow: elide;
+    }
+
+    touch_area := TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+}
+
+component HelpBlockView inherits HorizontalLayout {
+    in property <HelpBlock> block;
+    private property <bool> is_answer: root.block.kind == HelpBlockKind.Answer;
+    private property <bool> is_heading: root.block.kind == HelpBlockKind.Heading;
+    private property <bool> is_question: root.block.kind == HelpBlockKind.Question;
+
+    spacing: 8px;
+    padding-left: root.block.kind == HelpBlockKind.Bullet ? 10px : root.is_answer ? 14px : 0px;
+    padding-top: root.is_question ? 8px : 0px;
+
+    if root.is_answer: Rectangle {
+        width: 3px;
+        border-radius: 2px;
+        background: Palette.foreground.with-alpha(0.25);
+    }
+    if root.block.kind == HelpBlockKind.Bullet: Text {
+        text: "\u{2022}";
+        font-size: FontSizes.normal;
+        vertical-alignment: top;
+    }
+    Text {
+        horizontal-stretch: 1.0;
+        text: root.block.text;
+        wrap: word-wrap;
+        font-size: root.is_heading ? FontSizes.header : FontSizes.normal;
+        font-weight: root.is_heading || root.is_question ? FontSizes.bold_weight : 400;
+        color: root.is_answer ? Palette.foreground.with-alpha(0.8) : Palette.foreground;
+    }
+}
+
+export component PopupHelp inherits Rectangle {
+    callback show_popup();
+
+    private property <length> popup_width: min(820px, root.width - 40px);
+    private property <length> popup_height: min(560px, root.height - 40px);
+    private property <bool> tools_expanded: false;
+    private property <int> section_idx: max(0, min(HelpState.selected_section, HelpState.sections.length - 1));
+    private property <int> tab_idx: max(0, min(HelpState.selected_tab, HelpState.sections[section_idx].tabs.length - 1));
+
+    popup_window := PopupWindow {
+        width: popup_width;
+        height: popup_height;
+        x: round(((parent.width - popup_width) / 2.0) / 1px) * 1px;
+        y: round(((parent.height - self.height) / 2.0) / 1px) * 1px;
+        close-policy: PopupClosePolicy.no-auto-close;
+
+        PopupBackdrop { }
+
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            border-radius: 10px;
+            border-color: ColorPalette.popup_border_color;
+            border-width: 2px;
+            background: ColorPalette.popup_background;
+
+            VerticalLayout {
+                padding: 2px;
+                Rectangle {
+                    background: ColorPalette.popup_background_title_line;
+                    border-top-left-radius: 8px;
+                    border-top-right-radius: 8px;
+                    height: 36px;
+                    Text {
+                        text <=> Translations.help_title_text;
+                        vertical-alignment: center;
+                        horizontal-alignment: center;
+                        font-size: FontSizes.normal;
+                    }
+                }
+
+                HorizontalLayout {
+                    vertical-stretch: 1.0;
+
+                    ScrollView {
+                        width: 210px;
+                        VerticalLayout {
+                            padding: 8px;
+                            spacing: 0px;
+                            alignment: start;
+                            for section[idx] in HelpState.sections: VerticalLayout {
+                                spacing: 0px;
+                                if section.is_tool && (idx == 0 || !HelpState.sections[idx - 1].is_tool): HelpGroupHeader {
+                                    text <=> Translations.help_tools_text;
+                                    expanded: root.tools_expanded;
+                                    clicked => {
+                                        root.tools_expanded = !root.tools_expanded;
+                                    }
+                                }
+                                if !section.is_tool || root.tools_expanded: HelpListItem {
+                                    text: section.title;
+                                    indent: section.is_tool ? 16px : 0px;
+                                    selected: idx == root.section_idx;
+                                    clicked => {
+                                        HelpState.selected_section = idx;
+                                        HelpState.selected_tab = 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        width: 1px;
+                        background: ColorPalette.popup_border_color;
+                    }
+
+                    VerticalLayout {
+                        horizontal-stretch: 1.0;
+                        padding: 10px;
+                        spacing: 8px;
+
+                        if HelpState.sections[root.section_idx].tabs.length > 1: HorizontalLayout {
+                            spacing: 5px;
+                            alignment: start;
+                            for tab[idx] in HelpState.sections[root.section_idx].tabs: Button {
+                                text: tab.title;
+                                primary: idx == root.tab_idx;
+                                clicked => {
+                                    HelpState.selected_tab = idx;
+                                }
+                            }
+                        }
+
+                        ScrollView {
+                            vertical-stretch: 1.0;
+                            VerticalLayout {
+                                spacing: 6px;
+                                padding-right: 12px;
+                                alignment: start;
+                                for block in HelpState.sections[root.section_idx].tabs[root.tab_idx].blocks: HelpBlockView {
+                                    block: block;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    background: ColorPalette.popup_background_footer;
+                    border-bottom-left-radius: 8px;
+                    border-bottom-right-radius: 8px;
+
+                    HorizontalLayout {
+                        padding: 10px;
+                        Rectangle { }
+                        Button {
+                            text <=> Translations.cancel_button_text;
+                            clicked => {
+                                popup_window.close();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    show_popup() => {
+        root.tools_expanded = HelpState.sections[root.section_idx].is_tool;
+        popup_window.show();
+    }
+}

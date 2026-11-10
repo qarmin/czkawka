@@ -1,0 +1,30 @@
+import { Palette } from "std-widgets.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+
+export component PanelSplitter inherits Rectangle {
+    // x position of the cursor in the coordinates of this element's parent
+    callback dragged(length);
+
+    private property <bool> active: touch_area.has-hover || touch_area.pressed;
+    private property <length> grab_offset;
+
+    background: root.active ? Palette.accent-background.with-alpha(0.35) : ColorPalette.splitter_color;
+
+    Rectangle {
+        x: (parent.width - self.width) / 2;
+        width: 2px;
+        background: root.active ? Palette.accent-background : ColorPalette.splitter_line_color;
+    }
+
+    touch_area := TouchArea {
+        mouse-cursor: MouseCursor.col-resize;
+        pointer-event(event) => {
+            if (event.kind == PointerEventKind.down) {
+                root.grab_offset = self.mouse-x;
+            }
+        }
+        moved => {
+            root.dragged(root.x + self.mouse-x - root.grab_offset);
+        }
+    }
+}

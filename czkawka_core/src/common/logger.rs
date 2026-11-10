@@ -26,7 +26,6 @@ pub fn setup_logger(disabled_terminal_printing: bool, app_name: &str, filtering_
         .build();
     let file_config = ConfigBuilder::default()
         .set_level(file_log_level)
-        .set_write_once(true)
         .set_message_filtering(Some(filtering_messages_func))
         .set_time_format(TimeFormat::DateTimeWithMicro, None)
         .set_format_text(FormatText::DefaultWithThreadFile.get(), None)
@@ -97,12 +96,6 @@ pub fn format_version_string(app: &str) -> String {
     let info = os_info::get();
 
     let mut features: Vec<&str> = Vec::new();
-    #[cfg(feature = "heif")]
-    features.push("heif");
-    #[cfg(feature = "libavif")]
-    features.push("libavif");
-    #[cfg(feature = "libraw")]
-    features.push("libraw");
 
     let mut app_cpu_version = "Baseline";
     let mut os_cpu_version = "Baseline";

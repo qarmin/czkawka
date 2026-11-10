@@ -3,7 +3,6 @@
 cmds=(
     "python3 misc/delete_unused_krokiet_slint_imports.py krokiet"
     "python3 misc/delete_unused_krokiet_slint_imports.py cedinia"
-    "python3 misc/find_unused_fluent_translations.py czkawka_gui"
     "python3 misc/find_unused_fluent_translations.py krokiet"
     "python3 misc/find_unused_fluent_translations.py cedinia"
     "python3 misc/find_unused_fluent_translations.py czkawka_core"
