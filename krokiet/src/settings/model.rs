@@ -344,6 +344,8 @@ pub struct BasicSettings {
     pub play_audio_on_scan_completion: bool,
     #[serde(default)]
     pub show_notification_on_scan_completion: bool,
+    #[serde(default)]
+    pub read_ntfs_mft: bool,
 
     // Select popup visibility - global (not per-preset)
     #[serde(default)]

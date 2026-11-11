@@ -19,6 +19,9 @@ crossbeam-channel = { version = "0.5", features = [] }
 ctrlc = { version = "3.5", features = ["termination"] }
 humansize = "2.1"
 
+[target.'cfg(windows)'.dependencies]
+czkawka_core = { path = "../czkawka_core", version = "12.0.2", features = ["ntfs_mft"] }
+
 [features]
 default = []
 # Allows to use trash on Linux when using xdg-portal, needed by e.g. flatpak where normal trash access always fails

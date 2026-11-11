@@ -321,6 +321,9 @@ export global Translations {
 
     in-out property <string> settings_show_notification_on_scan_completion_text: "Show notification when scan completes";
     in-out property <string> settings_notification_feature_hint_text: "Available only when compiling with notifications feature";
+    in-out property <string> settings_read_ntfs_mft_text: "Read NTFS master file table in disk usage (Windows only, needs administrator privileges)";
+    in-out property <string> settings_read_ntfs_mft_elevated_hint_text: "The application is running as administrator, so the NTFS master file table can be read";
+    in-out property <string> settings_read_ntfs_mft_not_elevated_hint_text: "The application is NOT running as administrator, so the option will have no effect until the application is restarted as administrator";
     in-out property <string> settings_notification_focused_hint_text: "Notification may not appear as a popup when the app window is focused";
 
     // Popup
