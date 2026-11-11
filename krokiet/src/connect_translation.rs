@@ -264,8 +264,8 @@ fn translate_items(app: &MainWindow) {
     translation.set_tool_disk_usage_text(flk!("tool_disk_usage").into());
     translation.set_disk_usage_mode_treemap_text(flk!("disk_usage_mode_treemap").into());
     translation.set_disk_usage_mode_sunburst_text(flk!("disk_usage_mode_sunburst").into());
-    translation.set_disk_usage_zoom_out_text(flk!("disk_usage_zoom_out").into());
-    translation.set_disk_usage_no_results_text(flk!("disk_usage_no_results").into());
+    translation.set_disk_usage_zoom_up_text(flk!("disk_usage_zoom_up").into());
+    translation.set_disk_usage_zoom_reset_text(flk!("disk_usage_zoom_reset").into());
     translation.set_disk_usage_depth_text(flk!("disk_usage_depth").into());
     translation.set_disk_usage_ignore_excluded_items_text(flk!("disk_usage_ignore_excluded_items").into());
     translation.set_disk_usage_ignore_excluded_directories_text(flk!("disk_usage_ignore_excluded_directories").into());
@@ -276,6 +276,7 @@ fn translate_items(app: &MainWindow) {
     translation.set_disk_usage_content_detection_large_text(flk!("disk_usage_content_detection_large").into());
     translation.set_disk_usage_content_detection_all_text(flk!("disk_usage_content_detection_all").into());
     translation.set_disk_usage_nested_borders_text(flk!("disk_usage_nested_borders").into());
+    translation.set_disk_usage_folder_headers_text(flk!("disk_usage_folder_headers").into());
     translation.set_disk_usage_detail_title_text(flk!("disk_usage_detail_title").into());
     translation.set_disk_usage_detail_hint_text(flk!("disk_usage_detail_hint").into());
     translation.set_disk_usage_group_below_text(flk!("disk_usage_group_below").into());

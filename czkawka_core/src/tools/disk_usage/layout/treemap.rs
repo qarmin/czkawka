@@ -132,13 +132,18 @@ impl<'a> Builder<'a> {
             category: node.category,
             omitted_entries: 0,
             composition: None,
+            header_height: 0.0,
         });
         if !node.is_directory() {
             return;
         }
+        let header = self.header_height(rect);
         let has_content = depth + 1 < self.options.max_depth
             && !self.is_too_small_to_open(rect)
-            && self.schedule(&node.children, Some(item_index), depth + 1, rect.shrink(self.options.nested_padding), stack);
+            && self.schedule(&node.children, Some(item_index), depth + 1, self.content_area(rect, header), stack);
+        if has_content && let Some(item) = self.items.get_mut(item_index as usize) {
+            item.header_height = header as f32;
+        }
         if !has_content && let Some(item) = self.items.get_mut(item_index as usize) {
             item.composition = measured_composition(node, self.options);
         }
@@ -159,6 +164,24 @@ impl<'a> Builder<'a> {
             shown.push(Entry::Other(omitted));
         }
         shown
+    }
+
+    /// Height of the header of a directory in a rectangle of this size, in the units of the layout; `0.0` when it gets none.
+    fn header_height(&self, rect: Rect) -> f64 {
+        let canvas_height = f64::from(self.options.canvas_size_px.1);
+        if self.options.folder_header_px <= 0.0 || canvas_height <= 0.0 || self.pixel_side(rect) < f64::from(self.options.min_header_directory_px) {
+            return 0.0;
+        }
+        (f64::from(self.options.folder_header_px) / canvas_height).min(rect.height / 2.0)
+    }
+
+    fn content_area(&self, rect: Rect, header: f64) -> Rect {
+        let inner = rect.shrink(self.options.nested_padding);
+        Rect {
+            y: inner.y + header,
+            height: (inner.height - header).max(0.0),
+            ..inner
+        }
     }
 
     fn is_too_small_to_open(&self, rect: Rect) -> bool {

@@ -51,6 +51,7 @@ impl Builder<'_> {
                 category: node.category,
                 omitted_entries: 0,
                 composition: None,
+                header_height: 0.0,
             });
             if node.is_directory() && depth + 1 < self.levels {
                 self.place(&node.children, Some(item_index), depth + 1, start, end);

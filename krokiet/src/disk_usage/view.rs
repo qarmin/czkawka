@@ -10,6 +10,7 @@ use czkawka_core::tools::disk_usage::layout::{Layout, LayoutKind, LayoutOptions}
 use slint::{ComponentHandle, Image, Model, ModelRc, VecModel, Weak};
 
 use crate::disk_usage::describe::{self, ItemInfo};
+use crate::disk_usage::header_labels::{self, HeaderLabel};
 use crate::disk_usage::render::{ChartGeometry, RenderSettings, render_chart};
 use crate::disk_usage::{selection, tree_view};
 use crate::shared_models::SharedModels;
@@ -22,6 +23,8 @@ const MIN_DEPTH: usize = 2;
 const MAX_DEPTH: usize = 8;
 /// Gap around the content of a directory when nested borders are on.
 const NESTED_PADDING_PX: f64 = 2.0;
+const FOLDER_HEADER_LOGICAL_PX: f32 = 18.0;
+const MIN_HEADER_FOLDER_LOGICAL_PX: f32 = 70.0;
 const MIN_ARC_ANGLE: f32 = 0.03;
 
 #[derive(Default)]
@@ -44,6 +47,7 @@ pub(super) struct RenderedChart {
     pub geometry: ChartGeometry,
     pub zoom: Vec<u32>,
     total_size: u64,
+    header_labels: Vec<HeaderLabel>,
 }
 
 pub(super) struct ChartContext {
@@ -151,13 +155,25 @@ fn build_and_render(
     };
     let buffer = render_chart(&layout, &settings, &|| is_current(context, request.generation))?;
     let total_size = layout.items.iter().filter(|item| item.parent.is_none()).map(|item| item.size).sum();
+    let header_labels = header_labels_for(context, &layout, request);
     let chart = RenderedChart {
         layout,
         geometry: request.geometry,
         zoom: request.zoom.clone(),
         total_size,
+        header_labels,
     };
     Some((chart, buffer))
+}
+
+fn header_labels_for(context: &ChartContext, layout: &Layout, request: &RenderRequest) -> Vec<HeaderLabel> {
+    if request.options.folder_header_px <= 0.0 {
+        return Vec::new();
+    }
+    let models = context.shared_models.lock().expect("Mutex poisoned");
+    models.shared_disk_usage_state.as_ref().map_or_else(Vec::new, |tool| {
+        header_labels::collect(tool.get_tree(), layout, &request.zoom, (request.geometry.width, request.geometry.height))
+    })
 }
 
 fn publish(weak: &Weak<MainWindow>, context: &Arc<ChartContext>, generation: u64, chart: RenderedChart, buffer: slint::SharedPixelBuffer<slint::Rgba8Pixel>) {
@@ -169,6 +185,7 @@ fn publish(weak: &Weak<MainWindow>, context: &Arc<ChartContext>, generation: u64
         let state = app.global::<DiskUsageState>();
         state.set_chart_image(Image::from_rgba8(buffer));
         state.set_rendering(false);
+        state.set_header_labels(header_labels::to_model(&chart.header_labels));
         state.set_center_size(describe::format_total(chart.total_size).into());
         let title = context
             .shared_models
@@ -192,7 +209,7 @@ fn publish(weak: &Weak<MainWindow>, context: &Arc<ChartContext>, generation: u64
 }
 
 /// Address of the item in the full tree, given its address inside a layout that may start at the zoomed directory.
-fn absolute_address(zoom: &[u32], relative: &[u32]) -> Vec<u32> {
+pub(super) fn absolute_address(zoom: &[u32], relative: &[u32]) -> Vec<u32> {
     if zoom.is_empty() {
         relative.to_vec()
     } else {
@@ -212,6 +229,11 @@ fn layout_options(app: &MainWindow, size_px: (u32, u32)) -> LayoutOptions {
     options.min_expanded_directory_px = state.get_folder_block_px().round();
     if kind == LayoutKind::Treemap {
         options.aspect_ratio = size_px.0 as f32 / size_px.1.max(1) as f32;
+        if state.get_folder_headers() {
+            let scale = app.window().scale_factor();
+            options.folder_header_px = (FOLDER_HEADER_LOGICAL_PX * scale).round();
+            options.min_header_directory_px = (MIN_HEADER_FOLDER_LOGICAL_PX * scale).round();
+        }
         options.nested_padding = if state.get_nested_borders() { NESTED_PADDING_PX / size_px.1.max(1) as f64 } else { 0.0 };
     } else {
         // Level 0 is the centre, so the rings come on top of it
@@ -393,6 +415,17 @@ pub(super) fn zoom_out(app: &MainWindow, context: &Arc<ChartContext>) {
     refresh_after_zoom(app, context);
 }
 
+pub(super) fn zoom_reset(app: &MainWindow, context: &Arc<ChartContext>) {
+    {
+        let mut view = context.view.lock().expect("View mutex poisoned");
+        if view.zoom.is_empty() {
+            return;
+        }
+        view.zoom.clear();
+    }
+    refresh_after_zoom(app, context);
+}
+
 pub(super) fn update_zoom_state(app: &MainWindow, context: &ChartContext) {
     let zoom = context.view.lock().expect("View mutex poisoned").zoom.clone();
     let text = if zoom.is_empty() {
@@ -458,6 +491,12 @@ pub(super) fn set_category_enabled(app: &MainWindow, index: i32, enabled: bool) 
     };
     category.enabled = enabled;
     categories.set_row_data(row, category);
+}
+
+pub(crate) fn ensure_categories(app: &MainWindow) {
+    if app.global::<DiskUsageState>().get_categories().row_count() == 0 {
+        refresh_category_names(app);
+    }
 }
 
 /// Rebuilds the list of file types after a language change, keeping which ones are enabled.

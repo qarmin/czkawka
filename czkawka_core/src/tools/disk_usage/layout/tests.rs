@@ -513,3 +513,73 @@ fn find_item_going_down_the_tree_gives_the_same_item_as_looking_at_every_item() 
         assert_eq!(layout.find_item(&[0, u32::MAX]), None);
     }
 }
+
+fn header_options() -> LayoutOptions {
+    LayoutOptions {
+        canvas_size_px: (1000.0, 500.0),
+        folder_header_px: 25.0,
+        min_header_directory_px: 50.0,
+        nested_padding: 0.0,
+        ..options(LayoutKind::Treemap)
+    }
+}
+
+#[test]
+fn directories_get_a_header_that_their_content_does_not_cover() {
+    let layout = Layout::build(&sample_tree(), &header_options());
+
+    let directories = layout.items.iter().enumerate().filter(|(_, item)| item.kind == NodeKind::Directory).collect::<Vec<_>>();
+    assert_eq!(directories.len(), 3);
+    for (index, directory) in directories {
+        assert_eq!(directory.header_height, 0.05);
+        let Shape::Rect { y, .. } = directory.shape else {
+            panic!("not a rectangle");
+        };
+        for child in layout.items.iter().filter(|child| child.parent == Some(index as u32)) {
+            let Shape::Rect { y: child_y, .. } = child.shape else {
+                panic!("not a rectangle");
+            };
+            assert!(child_y >= y + directory.header_height - 1e-6, "content starts below the header");
+        }
+    }
+}
+
+#[test]
+fn no_headers_without_the_option_or_a_canvas_size() {
+    let without_option = LayoutOptions {
+        folder_header_px: 0.0,
+        ..header_options()
+    };
+    let without_canvas = LayoutOptions {
+        canvas_size_px: (0.0, 0.0),
+        ..header_options()
+    };
+    for options in [without_option, without_canvas] {
+        let layout = Layout::build(&sample_tree(), &options);
+        assert!(layout.items.iter().all(|item| item.header_height == 0.0));
+    }
+}
+
+#[test]
+fn small_directories_get_no_header() {
+    let options = LayoutOptions {
+        min_header_directory_px: 10_000.0,
+        ..header_options()
+    };
+    let layout = Layout::build(&sample_tree(), &options);
+    assert!(layout.items.iter().all(|item| item.header_height == 0.0));
+}
+
+#[test]
+fn headers_keep_the_areas_of_siblings_proportional() {
+    let layout = Layout::build(&sample_tree(), &header_options());
+    let files = layout.items.iter().filter(|item| item.depth == 1 && item.kind == NodeKind::File).collect::<Vec<_>>();
+    assert_eq!(files.len(), 1);
+    let binary_area = rect_area(files[0]);
+    let music = layout
+        .items
+        .iter()
+        .find(|item| item.depth == 1 && item.size == 400 && item.kind == NodeKind::Directory)
+        .unwrap();
+    assert!((rect_area(music) - binary_area).abs() < 1e-4);
+}

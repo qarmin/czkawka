@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::connect_translation::find_the_closest_language_idx_to_system;
 use crate::settings::combo_box::StringComboBoxItem;
+use crate::settings::disk_usage::DiskUsageSettings;
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
 pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX;
@@ -290,6 +291,9 @@ pub struct SettingsCustom {
 
     #[serde(default)]
     pub popup_custom_select_save_restore: bool,
+
+    #[serde(default)]
+    pub disk_usage: DiskUsageSettings,
 }
 
 impl Default for SettingsCustom {
