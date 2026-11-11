@@ -1,8 +1,11 @@
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::Ordering;
+use std::thread;
 
-use log::{error, info};
+use czkawka_core::common::fs_ops::trash_delete;
+use log::error;
+use slint::ComponentHandle;
 
 use crate::MainWindow;
 use crate::connect_row_selection::clipboard::set_clipboard;
@@ -43,18 +46,37 @@ pub(super) fn move_selected_to_trash(app: &MainWindow, context: &Arc<ChartContex
     let Some(address) = selected_address(context) else {
         return;
     };
-    {
+    let Some(path) = path_of(context, &address) else {
+        return;
+    };
+    let (weak, context) = (app.as_weak(), Arc::clone(context));
+    let spawned = thread::Builder::new().name("disk-usage-trash".into()).spawn(move || {
+        if let Err(e) = trash_delete(&path) {
+            error!("Failed to move \"{}\" to the trash: {e}", path.to_string_lossy());
+            return;
+        }
+        let removed = weak.upgrade_in_event_loop(move |app| remove_from_chart(&app, &context, &path));
+        if let Err(e) = removed {
+            error!("Failed to update the disk usage chart: {e}");
+        }
+    });
+    if let Err(e) = spawned {
+        error!("Failed to start the thread moving an item to the trash: {e}");
+    }
+}
+
+fn remove_from_chart(app: &MainWindow, context: &Arc<ChartContext>, path: &Path) {
+    let address = {
         let mut models = context.shared_models.lock().expect("Mutex poisoned");
         let Some(tool) = models.shared_disk_usage_state.as_mut() else {
             return;
         };
-        let Some(path) = tool.get_tree().path(&address) else {
+        let Some(address) = tool.get_tree().address_of_path(path) else {
             return;
         };
-        // TODO: really move the item to the trash; for now it is only removed from the chart
-        info!("Moving \"{}\" to the trash (not implemented yet, hidden from the chart only)", path.to_string_lossy());
         tool.get_tree_mut().remove(&address);
-    }
+        address
+    };
     context.tree_version.fetch_add(1, Ordering::Relaxed);
     {
         let mut view = context.view.lock().expect("View mutex poisoned");

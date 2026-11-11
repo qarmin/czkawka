@@ -1,5 +1,6 @@
 pub mod category;
 pub mod core;
+pub mod extensions;
 pub mod layout;
 pub mod report;
 pub(crate) mod scan;

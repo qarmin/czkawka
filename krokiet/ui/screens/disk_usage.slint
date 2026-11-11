@@ -1,4 +1,4 @@
-import { Button, Palette, Slider } from "std-widgets.slint";
+import { Button, ListView, Palette, Slider } from "std-widgets.slint";
 import { Settings } from "../globals/settings.slint";
 import { DiskUsageMode } from "../globals/common.slint";
 import { DiskUsageState } from "../globals/disk_usage_state.slint";
@@ -120,6 +120,21 @@ export component DiskUsageView inherits Rectangle {
                             DiskUsageState.nested_borders = !DiskUsageState.nested_borders;
                             DiskUsageState.options_changed();
                         }
+                    }
+                }
+            }
+
+            VerticalLayout {
+                width: 28px;
+                alignment: center;
+                CategoryToggle {
+                    icon: @image-url("../../icons/krokiet_extensions.svg");
+                    accent: Palette.foreground;
+                    active: DiskUsageState.extensions_open;
+                    tip: Translations.disk_usage_extensions_text;
+                    toggled => {
+                        DiskUsageState.extensions_open = !DiskUsageState.extensions_open;
+                        DiskUsageState.extensions_toggled();
                     }
                 }
             }
@@ -392,6 +407,66 @@ export component DiskUsageView inherits Rectangle {
                             color: Palette.foreground.with-alpha(0.65);
                             overflow: elide;
                             max-width: hover_card.text_width;
+                        }
+                    }
+                }
+            }
+
+            if DiskUsageState.extensions_open: Rectangle {
+                horizontal-stretch: 0;
+                width: 260px;
+                clip: true;
+                border-width: 1px;
+                border-color: Palette.foreground.with-alpha(0.18);
+
+                ListView {
+                    for row[index] in DiskUsageState.extension_rows: Rectangle {
+                        height: 26px;
+                        background: row.selected ? row.color.with-alpha(0.3) : row_touch.has-hover ? ColorPalette.tab_hovered_color : transparent;
+
+                        HorizontalLayout {
+                            padding-left: 6px;
+                            padding-right: 6px;
+                            spacing: 6px;
+                            Rectangle {
+                                width: 10px;
+                                height: 10px;
+                                y: (parent.height - self.height) / 2;
+                                border-radius: 2px;
+                                background: row.color;
+                            }
+
+                            Text {
+                                text: row.name;
+                                font-size: FontSizes.normal;
+                                font-weight: row.selected ? FontSizes.bold_light : 400;
+                                vertical-alignment: center;
+                                overflow: elide;
+                                horizontal-stretch: 1;
+                            }
+
+                            Text {
+                                text: row.size_text;
+                                font-size: FontSizes.small;
+                                vertical-alignment: center;
+                                horizontal-alignment: right;
+                                min-width: 62px;
+                            }
+
+                            Text {
+                                text: row.count_text;
+                                font-size: FontSizes.small;
+                                color: ColorPalette.hint_color;
+                                vertical-alignment: center;
+                                horizontal-alignment: right;
+                                min-width: 40px;
+                            }
+                        }
+
+                        row_touch := TouchArea {
+                            clicked => {
+                                DiskUsageState.extension_clicked(index);
+                            }
                         }
                     }
                 }

@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::tools::disk_usage::category::{CATEGORY_COUNT, FileCategory};
 
@@ -156,6 +156,22 @@ impl DiskTree {
             path.push(&*node.name);
         }
         Some(path)
+    }
+
+    /// Address of the node with the given full path; the inverse of [`DiskTree::path`].
+    pub fn address_of_path(&self, path: &Path) -> Option<Vec<u32>> {
+        self.roots.iter().enumerate().find_map(|(root_index, root)| {
+            let mut components = path.strip_prefix(&*root.name).ok()?.components();
+            let mut address = vec![root_index as u32];
+            let mut node = root;
+            for component in components.by_ref() {
+                let name = component.as_os_str();
+                let child_index = node.children.iter().position(|child| name == std::ffi::OsStr::new(&*child.name))?;
+                address.push(child_index as u32);
+                node = node.children.get(child_index)?;
+            }
+            Some(address)
+        })
     }
 
     /// Detaches the node from the tree and subtracts its size from all ancestors, without touching the disk.

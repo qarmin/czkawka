@@ -15,6 +15,16 @@ export struct DiskUsageHeaderLabel {
     text: string,
 }
 
+export struct DiskUsageExtensionRow {
+    name: string,
+    size_text: string,
+    count_text: string,
+    // Share of all files in the chart, 0 to 100
+    percent: float,
+    selected: bool,
+    color: color,
+}
+
 export struct DiskUsageTreeRow {
     name: string,
     size_text: string,
@@ -62,6 +72,9 @@ export global DiskUsageState {
     // Folders narrower than this many pixels are drawn as one block; 0 means never
     in-out property <float> folder_block_px: 0;
     in-out property <[DiskUsageCategory]> categories: [];
+    // The list of extensions beside the chart; the selected one is highlighted in the chart
+    in-out property <bool> extensions_open: false;
+    in-out property <[DiskUsageExtensionRow]> extension_rows: [];
     in-out property <[DiskUsageTreeRow]> tree_rows: [];
     in-out property <int> tree_selected_row: -1;
     // The item under the cursor, shown in a tooltip; empty title means nothing is hovered
@@ -97,6 +110,8 @@ export global DiskUsageState {
     callback category_toggled(int, bool);
     callback zoom_out();
     callback zoom_reset();
+    callback extensions_toggled();
+    callback extension_clicked(int);
     callback tree_row_toggled(int);
     callback tree_row_clicked(int);
     callback tree_row_right_clicked(int);

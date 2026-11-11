@@ -19,6 +19,7 @@ const NESTED_FRAME_BRIGHTNESS: f32 = 0.4;
 const HEADER_BASE_GREY: u32 = 52;
 const HEADER_GREY_STEP: u32 = 9;
 const HEADER_MAX_GREY: u32 = 140;
+const FADED_AMOUNT: f32 = 0.82;
 const HATCH_SPACING_PX: usize = 9;
 const HATCH_THICKNESS_PX: usize = 2;
 const HATCH_BRIGHTNESS: f32 = 0.7;
@@ -62,6 +63,8 @@ pub(crate) struct RenderSettings {
     /// A directory keeps its own frame around what is inside, so the lines pile up with every level of nesting;
     /// without it, entries fill their directory and only the faint border of each rectangle is left.
     pub nested_borders: bool,
+    /// For every layout item whether it has the highlighted extension; files that do not are drawn faded.
+    pub highlight: Option<Vec<bool>>,
 }
 
 /// Returns `None` when `is_current` reports that the result is no longer wanted.
@@ -95,7 +98,7 @@ fn draw_rectangles(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings,
                 draw_framed(bytes, width, rect, fill, directory_line(settings));
                 draw_header(bytes, width, rect, item, height);
             }
-            _ => draw_framed(bytes, width, rect, item_color(item), tile_line(settings)),
+            _ => draw_framed(bytes, width, rect, tile_color(item, index, settings), tile_line(settings)),
         }
     }
     draw_directory_frames(bytes, layout, settings);
@@ -369,7 +372,7 @@ fn draw_sunburst(bytes: &mut [u8], layout: &Layout, settings: &RenderSettings, i
     let sampler = SunburstSampler::new(layout, settings.levels.max(1), radius_px);
     let center = (left as f32 + radius_px, top as f32 + radius_px);
     let image_width = geometry.width as usize;
-    let colors = |index: usize| layout.items.get(index).map(item_color);
+    let colors = |index: usize| layout.items.get(index).map(|item| tile_color(item, index, settings));
 
     let first_row = top as usize;
     let rows = bytes.chunks_exact_mut(image_width * 4).skip(first_row).take(side as usize);
@@ -441,6 +444,19 @@ fn item_color(item: &LayoutItem) -> [u8; 4] {
     [red, green, blue, 255]
 }
 
+fn tile_color(item: &LayoutItem, index: usize, settings: &RenderSettings) -> [u8; 4] {
+    let color = item_color(item);
+    let faded = settings
+        .highlight
+        .as_ref()
+        .is_some_and(|mask| item.kind == NodeKind::File && !mask.get(index).copied().unwrap_or(false));
+    if !faded {
+        return color;
+    }
+    let background = if settings.dark_theme { [38, 38, 38, 255] } else { [232, 232, 232, 255] };
+    blend(color, background, FADED_AMOUNT)
+}
+
 fn scale_color(color: [u8; 4], factor: f32) -> [u8; 4] {
     let [red, green, blue, alpha] = color;
     [(f32::from(red) * factor) as u8, (f32::from(green) * factor) as u8, (f32::from(blue) * factor) as u8, alpha]
@@ -475,6 +491,7 @@ mod tests {
             levels,
             dark_theme: true,
             nested_borders: false,
+            highlight: None,
         }
     }
 
@@ -548,6 +565,22 @@ mod tests {
         let [red, green, blue] = FileCategory::Audio.color();
         let middle = pixel(buffer.as_bytes(), 100, ((x + width / 2.0) * 100.0) as u32, ((y + height / 2.0) * 100.0) as u32);
         assert_eq!(middle, [red, green, blue, 255]);
+    }
+
+    #[test]
+    fn files_outside_the_highlight_are_faded() {
+        let layout = sample_layout(LayoutKind::Treemap);
+        let mut faded_settings = settings(100, 100, LayoutKind::Treemap, usize::MAX);
+        faded_settings.highlight = Some(vec![false; layout.items.len()]);
+        let buffer = render_chart(&layout, &faded_settings, &|| true).unwrap();
+
+        let audio = layout.items.iter().find(|item| item.category == FileCategory::Audio && item.depth == 1).unwrap();
+        let Shape::Rect { x, y, width, height } = audio.shape else {
+            panic!("treemap uses rectangles")
+        };
+        let [red, green, blue] = FileCategory::Audio.color();
+        let middle = pixel(buffer.as_bytes(), 100, ((x + width / 2.0) * 100.0) as u32, ((y + height / 2.0) * 100.0) as u32);
+        assert_ne!(middle, [red, green, blue, 255]);
     }
 
     #[test]

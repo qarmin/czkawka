@@ -272,3 +272,14 @@ fn excluded_items_and_paths_can_be_ignored_independently() {
     assert_eq!(scan_with_excluded_items(true, true), 100 + 10 + 5 + 20 + 1000);
     assert_eq!(scan_with_excluded_items(false, true), 100 + 10 + 5 + 20);
 }
+
+#[test]
+fn address_of_path_is_the_inverse_of_path() {
+    let temp_dir = sample_tree();
+    let tool = scan(temp_dir.path(), Vec::new());
+    let tree = tool.get_tree();
+    let path = temp_dir.path().join("docs/nested/notes.md");
+    let address = tree.address_of_path(&path).unwrap();
+    assert_eq!(tree.path(&address).unwrap(), path);
+    assert_eq!(tree.address_of_path(&temp_dir.path().join("missing")), None);
+}

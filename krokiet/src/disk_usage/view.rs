@@ -6,13 +6,14 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use czkawka_core::tools::disk_usage::category::{CATEGORY_COUNT, FileCategory};
+use czkawka_core::tools::disk_usage::extensions::items_with_extension;
 use czkawka_core::tools::disk_usage::layout::{Layout, LayoutKind, LayoutOptions};
 use slint::{ComponentHandle, Image, Model, ModelRc, VecModel, Weak};
 
 use crate::disk_usage::describe::{self, ItemInfo};
 use crate::disk_usage::header_labels::{self, HeaderLabel};
 use crate::disk_usage::render::{ChartGeometry, RenderSettings, render_chart};
-use crate::disk_usage::{selection, tree_view};
+use crate::disk_usage::{extensions, selection, tree_view};
 use crate::shared_models::SharedModels;
 use crate::{DiskUsageCategory, DiskUsageMode, DiskUsageState, MainWindow, Settings, flk};
 
@@ -40,6 +41,9 @@ pub(super) struct ViewState {
     pub last_scroll_step: Option<Instant>,
     /// Last position of the pointer over the chart, to describe the item under it again after the chart is redrawn.
     pub last_hover: Option<(f32, f32)>,
+    pub highlighted_extension: Option<String>,
+    /// Extension shown in every row of the extension list.
+    pub extension_names: Vec<String>,
 }
 
 pub(super) struct RenderedChart {
@@ -57,6 +61,7 @@ pub(super) struct ChartContext {
     pub generation: AtomicU64,
     /// Changes whenever the tree itself does (a new scan, a removed item), so a layout built before is not reused.
     pub tree_version: AtomicU64,
+    pub extensions_generation: AtomicU64,
     pub requests: Sender<RenderRequest>,
 }
 
@@ -76,6 +81,7 @@ pub(super) struct RenderRequest {
     options: LayoutOptions,
     dark_theme: bool,
     nested_borders: bool,
+    highlight_extension: Option<String>,
 }
 
 pub(super) struct HitItem {
@@ -152,6 +158,10 @@ fn build_and_render(
         levels: request.options.max_depth,
         dark_theme: request.dark_theme,
         nested_borders: request.nested_borders,
+        highlight: request
+            .highlight_extension
+            .as_deref()
+            .and_then(|extension| highlight_mask(context, request, &layout, extension)),
     };
     let buffer = render_chart(&layout, &settings, &|| is_current(context, request.generation))?;
     let total_size = layout.items.iter().filter(|item| item.parent.is_none()).map(|item| item.size).sum();
@@ -164,6 +174,17 @@ fn build_and_render(
         header_labels,
     };
     Some((chart, buffer))
+}
+
+fn highlight_mask(context: &ChartContext, request: &RenderRequest, layout: &Layout, extension: &str) -> Option<Vec<bool>> {
+    let models = context.shared_models.lock().expect("Mutex poisoned");
+    let tree = models.shared_disk_usage_state.as_ref()?.get_tree();
+    let roots = if request.zoom.is_empty() {
+        &tree.roots[..]
+    } else {
+        std::slice::from_ref(tree.node(&request.zoom)?)
+    };
+    Some(items_with_extension(layout, roots, extension))
 }
 
 fn header_labels_for(context: &ChartContext, layout: &Layout, request: &RenderRequest) -> Vec<HeaderLabel> {
@@ -252,9 +273,9 @@ pub(super) fn request_render(app: &MainWindow, context: &Arc<ChartContext>) {
     if !state.get_has_results() {
         return;
     }
-    let (size_px, zoom) = {
+    let (size_px, zoom, highlight_extension) = {
         let view = context.view.lock().expect("View mutex poisoned");
-        (view.size_px, view.zoom.clone())
+        (view.size_px, view.zoom.clone(), view.highlighted_extension.clone())
     };
     if size_px.0 == 0 || size_px.1 == 0 {
         return;
@@ -272,6 +293,7 @@ pub(super) fn request_render(app: &MainWindow, context: &Arc<ChartContext>) {
         options,
         dark_theme: app.global::<Settings>().get_dark_theme(),
         nested_borders: state.get_nested_borders(),
+        highlight_extension,
     };
     state.set_rendering(true);
     if context.requests.send(request).is_err() {
@@ -285,6 +307,7 @@ pub(super) fn reset_view(app: &MainWindow, context: &Arc<ChartContext>) {
         let mut view = context.view.lock().expect("View mutex poisoned");
         view.zoom.clear();
         view.selected = None;
+        view.highlighted_extension = None;
     }
     refresh_after_zoom(app, context);
 }
@@ -294,6 +317,7 @@ pub(super) fn refresh_after_zoom(app: &MainWindow, context: &Arc<ChartContext>) 
     update_zoom_state(app, context);
     tree_view::reset_expanded(context);
     tree_view::rebuild(app, context);
+    extensions::refresh(app, context);
     request_render(app, context);
 }
 
