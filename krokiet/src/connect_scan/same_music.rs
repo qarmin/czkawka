@@ -27,6 +27,9 @@ pub(crate) fn scan_similar_music(a: Weak<MainWindow>, sd: ScanData) {
             if sd.custom_settings.similar_music_sub_artist {
                 music_similarity |= MusicSimilarity::TRACK_ARTIST;
             }
+            if sd.custom_settings.similar_music_sub_album {
+                music_similarity |= MusicSimilarity::TRACK_ALBUM;
+            }
             if sd.custom_settings.similar_music_sub_bitrate {
                 music_similarity |= MusicSimilarity::BITRATE;
             }
@@ -120,6 +123,7 @@ fn prepare_data_model_similar_music(fe: MusicEntry) -> RowContent {
         file.into(),
         fe.track_title.clone().into(),
         fe.track_artist.clone().into(),
+        fe.track_album.clone().into(),
         fe.year.clone().into(),
         fe.bitrate.to_string().into(),
         format_audio_duration(fe.length).into(),

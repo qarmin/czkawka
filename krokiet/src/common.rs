@@ -189,6 +189,7 @@ pub enum StrDataSimilarMusic {
     Name,
     Title,
     Artist,
+    Album,
     Year,
     Bitrate,
     Length,
@@ -413,6 +414,7 @@ impl ActiveTab {
                 | StrDataSimilarMusic::Path
                 | StrDataSimilarMusic::Title
                 | StrDataSimilarMusic::Artist
+                | StrDataSimilarMusic::Album
                 | StrDataSimilarMusic::Year
                 | StrDataSimilarMusic::Bitrate
                 | StrDataSimilarMusic::Length
