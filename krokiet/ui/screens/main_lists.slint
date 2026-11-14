@@ -376,8 +376,10 @@ export component MainList {
             video_optimizer.scan_started();
         } else if (GuiState.active_tab == ActiveTab.BadNames) {
             bad_names.scan_started();
+        } else if (GuiState.active_tab == ActiveTab.DiskUsage || GuiState.active_tab == ActiveTab.Settings || GuiState.active_tab == ActiveTab.About) {
+            // These tabs have no results list
         } else {
-             debug("Non handled reset selection in main_lists.slint");
+            debug("Non handled scan started in main_lists.slint");
         }
     }
 

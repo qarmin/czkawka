@@ -1,4 +1,4 @@
-import { Button, ListView, Palette, Slider } from "std-widgets.slint";
+import { Button, ListView, Palette, Slider, Spinner } from "std-widgets.slint";
 import { Settings } from "../globals/settings.slint";
 import { DiskUsageMode } from "../globals/common.slint";
 import { DiskUsageState } from "../globals/disk_usage_state.slint";
@@ -92,41 +92,32 @@ export component DiskUsageView inherits Rectangle {
                     text: Translations.disk_usage_mode_sunburst_text;
                     target_mode: DiskUsageMode.Sunburst;
                 }
-
-                VerticalLayout {
-                    width: 28px;
-                    alignment: center;
-                    CategoryToggle {
-                        icon: @image-url("../../icons/krokiet_folder_header.svg");
-                        accent: Palette.foreground;
-                        active: DiskUsageState.folder_headers;
-                        tip: Translations.disk_usage_folder_headers_text;
-                        toggled => {
-                            DiskUsageState.folder_headers = !DiskUsageState.folder_headers;
-                            DiskUsageState.options_changed();
-                        }
-                    }
-                }
-
-                VerticalLayout {
-                    width: 28px;
-                    alignment: center;
-                    CategoryToggle {
-                        icon: @image-url("../../icons/krokiet_borders.svg");
-                        accent: Palette.foreground;
-                        active: DiskUsageState.nested_borders;
-                        tip: Translations.disk_usage_nested_borders_text;
-                        toggled => {
-                            DiskUsageState.nested_borders = !DiskUsageState.nested_borders;
-                            DiskUsageState.options_changed();
-                        }
-                    }
-                }
             }
 
-            VerticalLayout {
-                width: 28px;
-                alignment: center;
+            HorizontalLayout {
+                spacing: 2px;
+                CategoryToggle {
+                    icon: @image-url("../../icons/krokiet_folder_header.svg");
+                    accent: Palette.foreground;
+                    active: DiskUsageState.folder_headers;
+                    tip: Translations.disk_usage_folder_headers_text;
+                    toggled => {
+                        DiskUsageState.folder_headers = !DiskUsageState.folder_headers;
+                        DiskUsageState.options_changed();
+                    }
+                }
+
+                CategoryToggle {
+                    icon: @image-url("../../icons/krokiet_borders.svg");
+                    accent: Palette.foreground;
+                    active: DiskUsageState.nested_borders;
+                    tip: Translations.disk_usage_nested_borders_text;
+                    toggled => {
+                        DiskUsageState.nested_borders = !DiskUsageState.nested_borders;
+                        DiskUsageState.options_changed();
+                    }
+                }
+
                 CategoryToggle {
                     icon: @image-url("../../icons/krokiet_extensions.svg");
                     accent: Palette.foreground;
@@ -137,6 +128,12 @@ export component DiskUsageView inherits Rectangle {
                         DiskUsageState.extensions_toggled();
                     }
                 }
+            }
+
+            Rectangle {
+                width: 1px;
+                height: 20px;
+                background: Palette.foreground.with-alpha(0.25);
             }
 
             HorizontalLayout {
@@ -171,8 +168,41 @@ export component DiskUsageView inherits Rectangle {
                 }
             }
 
+            Rectangle {
+                width: 1px;
+                height: 20px;
+                background: Palette.foreground.with-alpha(0.25);
+            }
+
             HorizontalLayout {
                 spacing: 8px;
+                HorizontalLayout {
+                    spacing: 2px;
+                    CategoryToggle {
+                        icon: @image-url("../../icons/krokiet_zoom_up.svg");
+                        accent: Palette.foreground;
+                        active: DiskUsageState.can_zoom_out;
+                        tip: Translations.disk_usage_zoom_up_text;
+                        toggled => {
+                            if (DiskUsageState.can_zoom_out) {
+                                DiskUsageState.zoom_out();
+                            }
+                        }
+                    }
+
+                    CategoryToggle {
+                        icon: @image-url("../../icons/krokiet_zoom_reset.svg");
+                        accent: Palette.foreground;
+                        active: DiskUsageState.can_zoom_out;
+                        tip: Translations.disk_usage_zoom_reset_text;
+                        toggled => {
+                            if (DiskUsageState.can_zoom_out) {
+                                DiskUsageState.zoom_reset();
+                            }
+                        }
+                    }
+                }
+
                 Text {
                     text: DiskUsageState.zoom_text;
                     font-size: FontSizes.normal;
@@ -181,27 +211,13 @@ export component DiskUsageView inherits Rectangle {
                     max-width: max(120px, root.width - 180px);
                 }
 
-                CategoryToggle {
-                    icon: @image-url("../../icons/krokiet_zoom_up.svg");
-                    accent: Palette.foreground;
-                    active: DiskUsageState.can_zoom_out;
-                    tip: Translations.disk_usage_zoom_up_text;
-                    toggled => {
-                        if (DiskUsageState.can_zoom_out) {
-                            DiskUsageState.zoom_out();
-                        }
-                    }
-                }
-
-                CategoryToggle {
-                    icon: @image-url("../../icons/krokiet_zoom_reset.svg");
-                    accent: Palette.foreground;
-                    active: DiskUsageState.can_zoom_out;
-                    tip: Translations.disk_usage_zoom_reset_text;
-                    toggled => {
-                        if (DiskUsageState.can_zoom_out) {
-                            DiskUsageState.zoom_reset();
-                        }
+                VerticalLayout {
+                    width: 18px;
+                    alignment: center;
+                    if DiskUsageState.rendering: Spinner {
+                        indeterminate: true;
+                        width: 18px;
+                        height: 18px;
                     }
                 }
             }
@@ -239,8 +255,10 @@ export component DiskUsageView inherits Rectangle {
                 }
 
                 Image {
-                    width: chart_area.physical_width * 1phx;
-                    height: chart_area.physical_height * 1phx;
+                    x: 0px;
+                    y: 0px;
+                    width: DiskUsageState.chart_image.width * 1phx;
+                    height: DiskUsageState.chart_image.height * 1phx;
                     source: DiskUsageState.chart_image;
                     image-fit: ImageFit.fill;
                     image-rendering: ImageRendering.pixelated;

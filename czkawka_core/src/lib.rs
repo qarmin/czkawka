@@ -1,3 +1,7 @@
+// The portal implementation replaces trash::delete on Linux, leaving the dependency unused there
+#[cfg(all(feature = "xdg_portal_trash", target_os = "linux"))]
+use trash as _;
+
 pub mod common;
 pub mod helpers;
 pub mod localizer_core;

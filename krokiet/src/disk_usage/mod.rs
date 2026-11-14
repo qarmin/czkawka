@@ -87,7 +87,7 @@ fn connect_view_callbacks(app: &MainWindow, context: &Arc<ChartContext>) {
     state.on_chart_scrolled(move |delta| {
         let app = weak.upgrade().expect("MainWindow dropped while callback is still live");
         if delta != 0.0 {
-            view::scroll_step(&app, &ctx, delta > 0.0);
+            view::scroll_step(&app, &ctx, delta);
         }
     });
 

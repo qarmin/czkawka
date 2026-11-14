@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::sync::atomic::Ordering;
+use std::sync::mpsc::{Sender, channel};
+use std::sync::{Arc, OnceLock};
 use std::thread;
 
 use czkawka_core::common::fs_ops::trash_delete;
@@ -31,9 +32,34 @@ pub(super) fn open_address(context: &ChartContext, address: &[u32], parent: bool
         return;
     };
     let target = if parent { path.parent().map_or(path.clone(), Path::to_path_buf) } else { path };
-    if let Err(e) = open::that_detached(&target) {
-        error!("Failed to open \"{}\": {e}", target.to_string_lossy());
+    if let Some(queue) = open_queue()
+        && let Err(e) = queue.send(target)
+    {
+        error!("Failed to queue opening \"{}\": worker stopped", e.0.to_string_lossy());
     }
+}
+
+fn open_queue() -> Option<&'static Sender<PathBuf>> {
+    static QUEUE: OnceLock<Option<Sender<PathBuf>>> = OnceLock::new();
+    QUEUE
+        .get_or_init(|| {
+            let (sender, receiver) = channel::<PathBuf>();
+            let spawned = thread::Builder::new().name("disk-usage-open".into()).spawn(move || {
+                while let Ok(target) = receiver.recv() {
+                    if let Err(e) = open::that_detached(&target) {
+                        error!("Failed to open \"{}\": {e}", target.to_string_lossy());
+                    }
+                }
+            });
+            match spawned {
+                Ok(_) => Some(sender),
+                Err(e) => {
+                    error!("Failed to start the thread opening items: {e}");
+                    None
+                }
+            }
+        })
+        .as_ref()
 }
 
 pub(super) fn copy_selected_path(context: &ChartContext) {

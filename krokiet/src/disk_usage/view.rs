@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use czkawka_core::tools::disk_usage::category::{CATEGORY_COUNT, FileCategory};
 use czkawka_core::tools::disk_usage::extensions::items_with_extension;
@@ -18,8 +18,8 @@ use crate::shared_models::SharedModels;
 use crate::{DiskUsageCategory, DiskUsageMode, DiskUsageState, MainWindow, Settings, flk};
 
 const RESIZE_DEBOUNCE: Duration = Duration::from_millis(40);
-/// A wheel gesture produces many events; only one of them moves the view by a level.
-const SCROLL_STEP_INTERVAL: Duration = Duration::from_millis(250);
+/// Wheel delta that has to pile up in one direction before the view moves by a level.
+const SCROLL_STEP_DELTA: f32 = 60.0;
 const MIN_DEPTH: usize = 2;
 const MAX_DEPTH: usize = 8;
 /// Gap around the content of a directory when nested borders are on.
@@ -38,7 +38,7 @@ pub(super) struct ViewState {
     pub expanded: HashSet<Vec<u32>>,
     /// Address of the node shown in every row of the tree list.
     pub tree_addresses: Vec<Vec<u32>>,
-    pub last_scroll_step: Option<Instant>,
+    pub scroll_accumulator: f32,
     /// Last position of the pointer over the chart, to describe the item under it again after the chart is redrawn.
     pub last_hover: Option<(f32, f32)>,
     pub highlighted_extension: Option<String>,
@@ -313,7 +313,24 @@ pub(super) fn reset_view(app: &MainWindow, context: &Arc<ChartContext>) {
 }
 
 /// Brings the labels, the tree list and the chart in line with the zoom stored in the view.
+fn has_single_root(context: &ChartContext) -> bool {
+    let models = context.shared_models.lock().expect("Mutex poisoned");
+    models.shared_disk_usage_state.as_ref().is_some_and(|tool| tool.get_tree().roots.len() == 1)
+}
+
+/// With one root, zooming into it shows the same as the whole scan, so that level is dropped.
+fn drop_redundant_root_zoom(context: &ChartContext) {
+    if !has_single_root(context) {
+        return;
+    }
+    let mut view = context.view.lock().expect("View mutex poisoned");
+    if view.zoom == [0] {
+        view.zoom.clear();
+    }
+}
+
 pub(super) fn refresh_after_zoom(app: &MainWindow, context: &Arc<ChartContext>) {
+    drop_redundant_root_zoom(context);
     update_zoom_state(app, context);
     tree_view::reset_expanded(context);
     tree_view::rebuild(app, context);
@@ -379,15 +396,19 @@ pub(super) fn address_at(context: &ChartContext, x: f32, y: f32) -> Option<Vec<u
     hit_item(context, x, y).map(|hit| hit.address)
 }
 
-/// Moves the view by one level: towards the selected item when scrolling up, back out when scrolling down.
-pub(super) fn scroll_step(app: &MainWindow, context: &Arc<ChartContext>, towards_selection: bool) {
+/// Moves the view by one level once enough wheel delta piled up: towards the selected item when scrolling up, back out when scrolling down.
+pub(super) fn scroll_step(app: &MainWindow, context: &Arc<ChartContext>, delta: f32) {
+    let towards_selection = delta > 0.0;
     {
         let mut view = context.view.lock().expect("View mutex poisoned");
-        let now = Instant::now();
-        if view.last_scroll_step.is_some_and(|last| now.duration_since(last) < SCROLL_STEP_INTERVAL) {
+        if view.scroll_accumulator.signum() != delta.signum() {
+            view.scroll_accumulator = 0.0;
+        }
+        view.scroll_accumulator += delta;
+        if view.scroll_accumulator.abs() < SCROLL_STEP_DELTA {
             return;
         }
-        view.last_scroll_step = Some(now);
+        view.scroll_accumulator = 0.0;
     }
     if towards_selection {
         zoom_towards_selection(app, context);
@@ -452,14 +473,16 @@ pub(super) fn zoom_reset(app: &MainWindow, context: &Arc<ChartContext>) {
 
 pub(super) fn update_zoom_state(app: &MainWindow, context: &ChartContext) {
     let zoom = context.view.lock().expect("View mutex poisoned").zoom.clone();
-    let text = if zoom.is_empty() {
+    let single_root = has_single_root(context);
+    let text = if zoom.is_empty() && !single_root {
         flk!("disk_usage_whole_scan")
     } else {
+        let address = if zoom.is_empty() { &[0][..] } else { &zoom[..] };
         let models = context.shared_models.lock().expect("Mutex poisoned");
         models
             .shared_disk_usage_state
             .as_ref()
-            .and_then(|tool| tool.get_tree().path(&zoom))
+            .and_then(|tool| tool.get_tree().path(address))
             .map_or_else(String::new, |path| path.to_string_lossy().into_owned())
     };
     let state = app.global::<DiskUsageState>();
