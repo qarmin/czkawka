@@ -605,7 +605,7 @@ mod tests {
     }
 
     #[test]
-    fn nested_borders_make_the_line_around_a_directory_darker() {
+    fn opened_directory_is_outlined_in_the_grey_of_its_level_with_or_without_nested_borders() {
         let root = DiskNode::directory(
             "/root",
             vec![
@@ -626,11 +626,8 @@ mod tests {
             pixel(buffer.as_bytes(), 100, 99, 50)
         };
 
-        assert_eq!(edge(false), super::LINE_DARK);
-        assert!(
-            edge(true)[0] < super::LINE_DARK[0],
-            "the frame of the directory is darker than the lines between rectangles"
-        );
+        assert_eq!(edge(false), super::header_color(0));
+        assert_eq!(edge(true), super::header_color(0));
     }
 
     #[test]
@@ -648,11 +645,11 @@ mod tests {
 
         let buffer = render_chart(&layout, &settings(60, 60, LayoutKind::Treemap, usize::MAX), &|| true).unwrap();
 
-        let mut line_pixels = 0;
-        for x in 0..60 {
-            line_pixels += usize::from(pixel(buffer.as_bytes(), 60, x, 59) == super::LINE_DARK);
-        }
-        assert!(line_pixels > 0, "tiny rectangles still leave their line");
+        let column_colors = (1..59).map(|y| pixel(buffer.as_bytes(), 60, 59, y)).collect::<Vec<_>>();
+        assert!(
+            column_colors.iter().all(|color| *color == super::header_color(0)),
+            "sub-pixel rectangles leave only the frame of the directory in the last column"
+        );
     }
 
     #[test]
