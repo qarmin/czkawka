@@ -126,7 +126,7 @@ fn draw_directory_frames(bytes: &mut [u8], layout: &Layout, settings: &RenderSet
         let Some((left, top, right, bottom)) = pixel_rect(item, width, height) else {
             continue;
         };
-        let color = header_color(item.depth);
+        let color = frame_color(item.depth, settings);
         fill_rect(bytes, width, (left, top, left + 1, bottom), color);
         fill_rect(bytes, width, (right.saturating_sub(1).max(left), top, right, bottom), color);
         fill_rect(bytes, width, (left, bottom.saturating_sub(1).max(top), right, bottom), color);
@@ -134,6 +134,12 @@ fn draw_directory_frames(bytes: &mut [u8], layout: &Layout, settings: &RenderSet
             fill_rect(bytes, width, (left, top, right, top + 1), color);
         }
     }
+}
+
+/// Outline of an opened directory: the grey of its level, darker with nested borders so it stands out from its content.
+fn frame_color(depth: u16, settings: &RenderSettings) -> [u8; 4] {
+    let color = header_color(depth);
+    if settings.nested_borders { scale_color(color, NESTED_FRAME_BRIGHTNESS) } else { color }
 }
 
 /// The bar along the top of a directory that holds its name: grey, lighter with every level, so the white text stays readable.
@@ -605,7 +611,7 @@ mod tests {
     }
 
     #[test]
-    fn opened_directory_is_outlined_in_the_grey_of_its_level_with_or_without_nested_borders() {
+    fn nested_borders_make_the_frame_around_a_directory_darker() {
         let root = DiskNode::directory(
             "/root",
             vec![
@@ -627,7 +633,7 @@ mod tests {
         };
 
         assert_eq!(edge(false), super::header_color(0));
-        assert_eq!(edge(true), super::header_color(0));
+        assert!(edge(true)[0] < edge(false)[0], "the frame of the directory is darker than without nested borders");
     }
 
     #[test]

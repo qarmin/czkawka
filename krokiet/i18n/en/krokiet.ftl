@@ -524,6 +524,7 @@ disk_usage_mode_sunburst = Rings
 disk_usage_zoom_up = Up one level
 disk_usage_zoom_reset = Back to the whole scan
 disk_usage_whole_scan = Whole scan
+disk_usage_trash_failed = Failed to move "{ $path }" to the trash: { $reason }
 disk_usage_depth = Levels
 disk_usage_ignore_excluded_items = Ignore excluded items
 disk_usage_ignore_excluded_directories = Ignore excluded folders

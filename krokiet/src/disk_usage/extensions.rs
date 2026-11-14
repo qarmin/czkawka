@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::thread;
@@ -11,6 +12,44 @@ use crate::disk_usage::view::{ChartContext, request_render};
 use crate::{DiskUsageExtensionRow, DiskUsageState, MainWindow, flk};
 
 const MAX_ROWS: usize = 300;
+
+/// Statistics of the zoomed directories seen since the tree last changed, so going back to one does not walk it again.
+#[derive(Default)]
+pub(super) struct ExtensionCache {
+    tree_version: u64,
+    by_zoom: HashMap<Vec<u32>, Arc<Vec<ExtensionStat>>>,
+}
+
+fn stats_for_zoom(context: &ChartContext, zoom: &[u32]) -> Arc<Vec<ExtensionStat>> {
+    let tree_version = context.tree_version.load(Ordering::Relaxed);
+    {
+        let mut cache = context.extension_cache.lock().expect("Extension cache mutex poisoned");
+        if cache.tree_version != tree_version {
+            cache.by_zoom.clear();
+            cache.tree_version = tree_version;
+        }
+        if let Some(stats) = cache.by_zoom.get(zoom) {
+            return Arc::clone(stats);
+        }
+    }
+    let stats = {
+        let models = context.shared_models.lock().expect("Mutex poisoned");
+        models.shared_disk_usage_state.as_ref().map_or_else(Vec::new, |tool| {
+            let tree = tool.get_tree();
+            if zoom.is_empty() {
+                extension_stats(&tree.roots)
+            } else {
+                tree.node(zoom).map_or_else(Vec::new, |node| extension_stats(std::slice::from_ref(node)))
+            }
+        })
+    };
+    let stats = Arc::new(stats);
+    let mut cache = context.extension_cache.lock().expect("Extension cache mutex poisoned");
+    if cache.tree_version == tree_version {
+        cache.by_zoom.insert(zoom.to_vec(), Arc::clone(&stats));
+    }
+    stats
+}
 
 pub(super) fn toggled(app: &MainWindow, context: &Arc<ChartContext>) {
     if app.global::<DiskUsageState>().get_extensions_open() {
@@ -32,17 +71,7 @@ pub(super) fn refresh(app: &MainWindow, context: &Arc<ChartContext>) {
     let zoom = context.view.lock().expect("View mutex poisoned").zoom.clone();
     let (weak, context) = (app.as_weak(), Arc::clone(context));
     let spawned = thread::Builder::new().name("disk-usage-extensions".into()).spawn(move || {
-        let stats = {
-            let models = context.shared_models.lock().expect("Mutex poisoned");
-            models.shared_disk_usage_state.as_ref().map_or_else(Vec::new, |tool| {
-                let tree = tool.get_tree();
-                if zoom.is_empty() {
-                    extension_stats(&tree.roots)
-                } else {
-                    tree.node(&zoom).map_or_else(Vec::new, |node| extension_stats(std::slice::from_ref(node)))
-                }
-            })
-        };
+        let stats = stats_for_zoom(&context, &zoom);
         let published = weak.upgrade_in_event_loop(move |app| publish(&app, &context, generation, &stats));
         if let Err(e) = published {
             error!("Failed to show the extension list: {e}");

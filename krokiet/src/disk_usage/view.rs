@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -62,6 +62,8 @@ pub(super) struct ChartContext {
     /// Changes whenever the tree itself does (a new scan, a removed item), so a layout built before is not reused.
     pub tree_version: AtomicU64,
     pub extensions_generation: AtomicU64,
+    pub extension_cache: Mutex<extensions::ExtensionCache>,
+    pub trash_in_progress: AtomicBool,
     pub requests: Sender<RenderRequest>,
 }
 
@@ -312,7 +314,6 @@ pub(super) fn reset_view(app: &MainWindow, context: &Arc<ChartContext>) {
     refresh_after_zoom(app, context);
 }
 
-/// Brings the labels, the tree list and the chart in line with the zoom stored in the view.
 fn has_single_root(context: &ChartContext) -> bool {
     let models = context.shared_models.lock().expect("Mutex poisoned");
     models.shared_disk_usage_state.as_ref().is_some_and(|tool| tool.get_tree().roots.len() == 1)
@@ -329,6 +330,7 @@ fn drop_redundant_root_zoom(context: &ChartContext) {
     }
 }
 
+/// Brings the labels, the tree list and the chart in line with the zoom stored in the view.
 pub(super) fn refresh_after_zoom(app: &MainWindow, context: &Arc<ChartContext>) {
     drop_redundant_root_zoom(context);
     update_zoom_state(app, context);

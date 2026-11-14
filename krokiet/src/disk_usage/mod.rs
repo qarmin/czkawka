@@ -7,7 +7,7 @@ mod selection;
 mod tree_view;
 mod view;
 
-use std::sync::atomic::AtomicU64;
+use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::{Arc, Mutex};
 
 use slint::ComponentHandle;
@@ -26,6 +26,8 @@ pub(crate) fn connect_disk_usage(app: &MainWindow, shared_models: Arc<Mutex<Shar
         generation: AtomicU64::new(0),
         tree_version: AtomicU64::new(0),
         extensions_generation: AtomicU64::new(0),
+        extension_cache: Mutex::default(),
+        trash_in_progress: AtomicBool::new(false),
         requests,
     });
     spawn_render_worker(receiver, Arc::clone(&context), app.as_weak());

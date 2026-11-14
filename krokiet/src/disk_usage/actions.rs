@@ -8,9 +8,9 @@ use czkawka_core::common::fs_ops::trash_delete;
 use log::error;
 use slint::ComponentHandle;
 
-use crate::MainWindow;
 use crate::connect_row_selection::clipboard::set_clipboard;
 use crate::disk_usage::view::{ChartContext, refresh_after_zoom, selected_address};
+use crate::{GuiState, MainWindow, flk};
 
 fn path_of(context: &ChartContext, address: &[u32]) -> Option<PathBuf> {
     let models = context.shared_models.lock().expect("Mutex poisoned");
@@ -75,19 +75,29 @@ pub(super) fn move_selected_to_trash(app: &MainWindow, context: &Arc<ChartContex
     let Some(path) = path_of(context, &address) else {
         return;
     };
+    if context.trash_in_progress.swap(true, Ordering::AcqRel) {
+        return;
+    }
     let (weak, context) = (app.as_weak(), Arc::clone(context));
+    let trash_flag = Arc::clone(&context);
     let spawned = thread::Builder::new().name("disk-usage-trash".into()).spawn(move || {
-        if let Err(e) = trash_delete(&path) {
-            error!("Failed to move \"{}\" to the trash: {e}", path.to_string_lossy());
-            return;
-        }
-        let removed = weak.upgrade_in_event_loop(move |app| remove_from_chart(&app, &context, &path));
-        if let Err(e) = removed {
+        let result = trash_delete(&path);
+        context.trash_in_progress.store(false, Ordering::Release);
+        let shown = weak.upgrade_in_event_loop(move |app| match result {
+            Ok(()) => remove_from_chart(&app, &context, &path),
+            Err(e) => {
+                error!("Failed to move \"{}\" to the trash: {e}", path.to_string_lossy());
+                app.global::<GuiState>()
+                    .set_info_text(flk!("disk_usage_trash_failed", path = path.to_string_lossy(), reason = e).into());
+            }
+        });
+        if let Err(e) = shown {
             error!("Failed to update the disk usage chart: {e}");
         }
     });
     if let Err(e) = spawned {
         error!("Failed to start the thread moving an item to the trash: {e}");
+        trash_flag.trash_in_progress.store(false, Ordering::Release);
     }
 }
 

@@ -531,7 +531,7 @@ fn directories_get_a_header_that_their_content_does_not_cover() {
     let directories = layout.items.iter().enumerate().filter(|(_, item)| item.kind == NodeKind::Directory).collect::<Vec<_>>();
     assert_eq!(directories.len(), 3);
     for (index, directory) in directories {
-        assert_eq!(directory.header_height, 0.05);
+        assert!((directory.header_height - 0.05).abs() < 1e-6);
         let Shape::Rect { y, .. } = directory.shape else {
             panic!("not a rectangle");
         };
