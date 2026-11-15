@@ -1,27 +1,31 @@
 use std::collections::HashSet;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use czkawka_core::tools::disk_usage::category::{CATEGORY_COUNT, FileCategory};
+use czkawka_core::tools::disk_usage::extensions::items_with_extension;
 use czkawka_core::tools::disk_usage::layout::{Layout, LayoutKind, LayoutOptions};
 use slint::{ComponentHandle, Image, Model, ModelRc, VecModel, Weak};
 
 use crate::disk_usage::describe::{self, ItemInfo};
+use crate::disk_usage::header_labels::{self, HeaderLabel};
 use crate::disk_usage::render::{ChartGeometry, RenderSettings, render_chart};
-use crate::disk_usage::{selection, tree_view};
+use crate::disk_usage::{extensions, selection, tree_view};
 use crate::shared_models::SharedModels;
 use crate::{DiskUsageCategory, DiskUsageMode, DiskUsageState, MainWindow, Settings, flk};
 
 const RESIZE_DEBOUNCE: Duration = Duration::from_millis(40);
-/// A wheel gesture produces many events; only one of them moves the view by a level.
-const SCROLL_STEP_INTERVAL: Duration = Duration::from_millis(250);
+/// Wheel delta that has to pile up in one direction before the view moves by a level.
+const SCROLL_STEP_DELTA: f32 = 60.0;
 const MIN_DEPTH: usize = 2;
 const MAX_DEPTH: usize = 8;
 /// Gap around the content of a directory when nested borders are on.
 const NESTED_PADDING_PX: f64 = 2.0;
+const FOLDER_HEADER_LOGICAL_PX: f32 = 18.0;
+const MIN_HEADER_FOLDER_LOGICAL_PX: f32 = 70.0;
 const MIN_ARC_ANGLE: f32 = 0.03;
 
 #[derive(Default)]
@@ -34,9 +38,12 @@ pub(super) struct ViewState {
     pub expanded: HashSet<Vec<u32>>,
     /// Address of the node shown in every row of the tree list.
     pub tree_addresses: Vec<Vec<u32>>,
-    pub last_scroll_step: Option<Instant>,
+    pub scroll_accumulator: f32,
     /// Last position of the pointer over the chart, to describe the item under it again after the chart is redrawn.
     pub last_hover: Option<(f32, f32)>,
+    pub highlighted_extension: Option<String>,
+    /// Extension shown in every row of the extension list.
+    pub extension_names: Vec<String>,
 }
 
 pub(super) struct RenderedChart {
@@ -44,6 +51,7 @@ pub(super) struct RenderedChart {
     pub geometry: ChartGeometry,
     pub zoom: Vec<u32>,
     total_size: u64,
+    header_labels: Vec<HeaderLabel>,
 }
 
 pub(super) struct ChartContext {
@@ -53,6 +61,9 @@ pub(super) struct ChartContext {
     pub generation: AtomicU64,
     /// Changes whenever the tree itself does (a new scan, a removed item), so a layout built before is not reused.
     pub tree_version: AtomicU64,
+    pub extensions_generation: AtomicU64,
+    pub extension_cache: Mutex<extensions::ExtensionCache>,
+    pub trash_in_progress: AtomicBool,
     pub requests: Sender<RenderRequest>,
 }
 
@@ -72,6 +83,7 @@ pub(super) struct RenderRequest {
     options: LayoutOptions,
     dark_theme: bool,
     nested_borders: bool,
+    highlight_extension: Option<String>,
 }
 
 pub(super) struct HitItem {
@@ -148,16 +160,43 @@ fn build_and_render(
         levels: request.options.max_depth,
         dark_theme: request.dark_theme,
         nested_borders: request.nested_borders,
+        highlight: request
+            .highlight_extension
+            .as_deref()
+            .and_then(|extension| highlight_mask(context, request, &layout, extension)),
     };
     let buffer = render_chart(&layout, &settings, &|| is_current(context, request.generation))?;
     let total_size = layout.items.iter().filter(|item| item.parent.is_none()).map(|item| item.size).sum();
+    let header_labels = header_labels_for(context, &layout, request);
     let chart = RenderedChart {
         layout,
         geometry: request.geometry,
         zoom: request.zoom.clone(),
         total_size,
+        header_labels,
     };
     Some((chart, buffer))
+}
+
+fn highlight_mask(context: &ChartContext, request: &RenderRequest, layout: &Layout, extension: &str) -> Option<Vec<bool>> {
+    let models = context.shared_models.lock().expect("Mutex poisoned");
+    let tree = models.shared_disk_usage_state.as_ref()?.get_tree();
+    let roots = if request.zoom.is_empty() {
+        &tree.roots[..]
+    } else {
+        std::slice::from_ref(tree.node(&request.zoom)?)
+    };
+    Some(items_with_extension(layout, roots, extension))
+}
+
+fn header_labels_for(context: &ChartContext, layout: &Layout, request: &RenderRequest) -> Vec<HeaderLabel> {
+    if request.options.folder_header_px <= 0.0 {
+        return Vec::new();
+    }
+    let models = context.shared_models.lock().expect("Mutex poisoned");
+    models.shared_disk_usage_state.as_ref().map_or_else(Vec::new, |tool| {
+        header_labels::collect(tool.get_tree(), layout, &request.zoom, (request.geometry.width, request.geometry.height))
+    })
 }
 
 fn publish(weak: &Weak<MainWindow>, context: &Arc<ChartContext>, generation: u64, chart: RenderedChart, buffer: slint::SharedPixelBuffer<slint::Rgba8Pixel>) {
@@ -169,6 +208,7 @@ fn publish(weak: &Weak<MainWindow>, context: &Arc<ChartContext>, generation: u64
         let state = app.global::<DiskUsageState>();
         state.set_chart_image(Image::from_rgba8(buffer));
         state.set_rendering(false);
+        state.set_header_labels(header_labels::to_model(&chart.header_labels));
         state.set_center_size(describe::format_total(chart.total_size).into());
         let title = context
             .shared_models
@@ -192,7 +232,7 @@ fn publish(weak: &Weak<MainWindow>, context: &Arc<ChartContext>, generation: u64
 }
 
 /// Address of the item in the full tree, given its address inside a layout that may start at the zoomed directory.
-fn absolute_address(zoom: &[u32], relative: &[u32]) -> Vec<u32> {
+pub(super) fn absolute_address(zoom: &[u32], relative: &[u32]) -> Vec<u32> {
     if zoom.is_empty() {
         relative.to_vec()
     } else {
@@ -212,6 +252,11 @@ fn layout_options(app: &MainWindow, size_px: (u32, u32)) -> LayoutOptions {
     options.min_expanded_directory_px = state.get_folder_block_px().round();
     if kind == LayoutKind::Treemap {
         options.aspect_ratio = size_px.0 as f32 / size_px.1.max(1) as f32;
+        if state.get_folder_headers() {
+            let scale = app.window().scale_factor();
+            options.folder_header_px = (FOLDER_HEADER_LOGICAL_PX * scale).round();
+            options.min_header_directory_px = (MIN_HEADER_FOLDER_LOGICAL_PX * scale).round();
+        }
         options.nested_padding = if state.get_nested_borders() { NESTED_PADDING_PX / size_px.1.max(1) as f64 } else { 0.0 };
     } else {
         // Level 0 is the centre, so the rings come on top of it
@@ -230,9 +275,9 @@ pub(super) fn request_render(app: &MainWindow, context: &Arc<ChartContext>) {
     if !state.get_has_results() {
         return;
     }
-    let (size_px, zoom) = {
+    let (size_px, zoom, highlight_extension) = {
         let view = context.view.lock().expect("View mutex poisoned");
-        (view.size_px, view.zoom.clone())
+        (view.size_px, view.zoom.clone(), view.highlighted_extension.clone())
     };
     if size_px.0 == 0 || size_px.1 == 0 {
         return;
@@ -250,6 +295,7 @@ pub(super) fn request_render(app: &MainWindow, context: &Arc<ChartContext>) {
         options,
         dark_theme: app.global::<Settings>().get_dark_theme(),
         nested_borders: state.get_nested_borders(),
+        highlight_extension,
     };
     state.set_rendering(true);
     if context.requests.send(request).is_err() {
@@ -263,15 +309,34 @@ pub(super) fn reset_view(app: &MainWindow, context: &Arc<ChartContext>) {
         let mut view = context.view.lock().expect("View mutex poisoned");
         view.zoom.clear();
         view.selected = None;
+        view.highlighted_extension = None;
     }
     refresh_after_zoom(app, context);
 }
 
+fn has_single_root(context: &ChartContext) -> bool {
+    let models = context.shared_models.lock().expect("Mutex poisoned");
+    models.shared_disk_usage_state.as_ref().is_some_and(|tool| tool.get_tree().roots.len() == 1)
+}
+
+/// With one root, zooming into it shows the same as the whole scan, so that level is dropped.
+fn drop_redundant_root_zoom(context: &ChartContext) {
+    if !has_single_root(context) {
+        return;
+    }
+    let mut view = context.view.lock().expect("View mutex poisoned");
+    if view.zoom == [0] {
+        view.zoom.clear();
+    }
+}
+
 /// Brings the labels, the tree list and the chart in line with the zoom stored in the view.
 pub(super) fn refresh_after_zoom(app: &MainWindow, context: &Arc<ChartContext>) {
+    drop_redundant_root_zoom(context);
     update_zoom_state(app, context);
     tree_view::reset_expanded(context);
     tree_view::rebuild(app, context);
+    extensions::refresh(app, context);
     request_render(app, context);
 }
 
@@ -333,15 +398,19 @@ pub(super) fn address_at(context: &ChartContext, x: f32, y: f32) -> Option<Vec<u
     hit_item(context, x, y).map(|hit| hit.address)
 }
 
-/// Moves the view by one level: towards the selected item when scrolling up, back out when scrolling down.
-pub(super) fn scroll_step(app: &MainWindow, context: &Arc<ChartContext>, towards_selection: bool) {
+/// Moves the view by one level once enough wheel delta piled up: towards the selected item when scrolling up, back out when scrolling down.
+pub(super) fn scroll_step(app: &MainWindow, context: &Arc<ChartContext>, delta: f32) {
+    let towards_selection = delta > 0.0;
     {
         let mut view = context.view.lock().expect("View mutex poisoned");
-        let now = Instant::now();
-        if view.last_scroll_step.is_some_and(|last| now.duration_since(last) < SCROLL_STEP_INTERVAL) {
+        if view.scroll_accumulator.signum() != delta.signum() {
+            view.scroll_accumulator = 0.0;
+        }
+        view.scroll_accumulator += delta;
+        if view.scroll_accumulator.abs() < SCROLL_STEP_DELTA {
             return;
         }
-        view.last_scroll_step = Some(now);
+        view.scroll_accumulator = 0.0;
     }
     if towards_selection {
         zoom_towards_selection(app, context);
@@ -393,16 +462,29 @@ pub(super) fn zoom_out(app: &MainWindow, context: &Arc<ChartContext>) {
     refresh_after_zoom(app, context);
 }
 
+pub(super) fn zoom_reset(app: &MainWindow, context: &Arc<ChartContext>) {
+    {
+        let mut view = context.view.lock().expect("View mutex poisoned");
+        if view.zoom.is_empty() {
+            return;
+        }
+        view.zoom.clear();
+    }
+    refresh_after_zoom(app, context);
+}
+
 pub(super) fn update_zoom_state(app: &MainWindow, context: &ChartContext) {
     let zoom = context.view.lock().expect("View mutex poisoned").zoom.clone();
-    let text = if zoom.is_empty() {
+    let single_root = has_single_root(context);
+    let text = if zoom.is_empty() && !single_root {
         flk!("disk_usage_whole_scan")
     } else {
+        let address = if zoom.is_empty() { &[0][..] } else { &zoom[..] };
         let models = context.shared_models.lock().expect("Mutex poisoned");
         models
             .shared_disk_usage_state
             .as_ref()
-            .and_then(|tool| tool.get_tree().path(&zoom))
+            .and_then(|tool| tool.get_tree().path(address))
             .map_or_else(String::new, |path| path.to_string_lossy().into_owned())
     };
     let state = app.global::<DiskUsageState>();
@@ -458,6 +540,12 @@ pub(super) fn set_category_enabled(app: &MainWindow, index: i32, enabled: bool) 
     };
     category.enabled = enabled;
     categories.set_row_data(row, category);
+}
+
+pub(crate) fn ensure_categories(app: &MainWindow) {
+    if app.global::<DiskUsageState>().get_categories().row_count() == 0 {
+        refresh_category_names(app);
+    }
 }
 
 /// Rebuilds the list of file types after a language change, keeping which ones are enabled.

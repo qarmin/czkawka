@@ -6,6 +6,25 @@ export struct DiskUsageCategory {
     enabled: bool,
 }
 
+// Name and size written on the header bar of a folder, in physical pixels of the chart
+export struct DiskUsageHeaderLabel {
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    text: string,
+}
+
+export struct DiskUsageExtensionRow {
+    name: string,
+    size_text: string,
+    count_text: string,
+    // Share of all files in the chart, 0 to 100
+    percent: float,
+    selected: bool,
+    color: color,
+}
+
 export struct DiskUsageTreeRow {
     name: string,
     size_text: string,
@@ -30,7 +49,7 @@ export struct DiskUsageSelection {
     path: string,
 }
 
-// Transient state of the disk usage tool; its options are not saved in presets
+// State of the disk usage tool; its options are saved in the presets (settings/disk_usage.rs)
 export global DiskUsageState {
     in-out property <image> chart_image;
     in-out property <DiskUsageSelection> selection;
@@ -43,6 +62,9 @@ export global DiskUsageState {
     in-out property <bool> ignore_excluded_directories: false;
     // Every level of directories keeps a frame of its own, so the lines pile up with nesting
     in-out property <bool> nested_borders: false;
+    // Opened folders get a bar on top with their name and size
+    in-out property <bool> folder_headers: true;
+    in-out property <[DiskUsageHeaderLabel]> header_labels: [];
     // Entries smaller than 1 / 10^group_exponent of their folder are grouped into one block of small entries
     in-out property <float> group_exponent: 6;
     // Entries and folders narrower than this many pixels are not drawn
@@ -50,6 +72,9 @@ export global DiskUsageState {
     // Folders narrower than this many pixels are drawn as one block; 0 means never
     in-out property <float> folder_block_px: 0;
     in-out property <[DiskUsageCategory]> categories: [];
+    // The list of extensions beside the chart; the selected one is highlighted in the chart
+    in-out property <bool> extensions_open: false;
+    in-out property <[DiskUsageExtensionRow]> extension_rows: [];
     in-out property <[DiskUsageTreeRow]> tree_rows: [];
     in-out property <int> tree_selected_row: -1;
     // The item under the cursor, shown in a tooltip; empty title means nothing is hovered
@@ -84,6 +109,9 @@ export global DiskUsageState {
     callback results_changed();
     callback category_toggled(int, bool);
     callback zoom_out();
+    callback zoom_reset();
+    callback extensions_toggled();
+    callback extension_clicked(int);
     callback tree_row_toggled(int);
     callback tree_row_clicked(int);
     callback tree_row_right_clicked(int);

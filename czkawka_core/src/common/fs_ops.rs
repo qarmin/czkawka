@@ -61,7 +61,7 @@ pub fn check_if_folder_contains_only_empty_folders<P: AsRef<Path>>(path: P) -> R
 /// (Android, iOS), this function will always return an [`Error`]. When the `xdg_portal_trash` feature is
 /// enabled, the portal-based implementation will only be used on Linux; on other desktop OSes the
 /// regular `trash::delete` fallback will be used instead.
-fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
+pub fn trash_delete<P: AsRef<Path>>(path: P) -> Result<(), String> {
     let path = path.as_ref();
 
     #[cfg(not(any(target_os = "android", target_os = "ios", all(feature = "xdg_portal_trash", target_os = "linux"))))]

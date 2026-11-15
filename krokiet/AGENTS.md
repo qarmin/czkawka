@@ -79,7 +79,7 @@ krokiet/
     │   ├── settings.slint            # Global Settings (persisted)
     │   ├── translations.slint        # Global Translations (all UI strings)
     │   ├── callabler.slint           # Global Callabler (all Rust to UI callbacks)
-    │   ├── disk_usage_state.slint    # Global DiskUsageState (transient; its options are not saved in presets)
+    │   ├── disk_usage_state.slint    # Global DiskUsageState (its options are saved per preset)
     │   ├── fonts.slint               # FontSizes global
     │   ├── color_palette.slint       # Dark-theme color definitions
     │   └── text_size.slint

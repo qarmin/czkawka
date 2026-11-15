@@ -1,4 +1,5 @@
 pub(crate) mod combo_box;
+pub(crate) mod disk_usage;
 pub(crate) mod model;
 
 use std::cmp::{max, min};
@@ -20,6 +21,7 @@ use slint::{ComponentHandle, LogicalSize, Model, ModelRc, VecModel, WindowSize};
 use crate::common::{create_excluded_paths_model_from_pathbuf, create_included_paths_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::change_language;
 use crate::settings::combo_box::StringComboBoxItems;
+use crate::settings::disk_usage::{collect_disk_usage_settings, set_disk_usage_settings_to_gui};
 use crate::settings::model::{
     BasicSettings, ComboBoxItems, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT,
     DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX,
@@ -609,6 +611,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_popup_crop_video_reencode(custom_settings.popup_crop_video_reencode);
     settings.set_popup_crop_video_quality(custom_settings.popup_crop_video_quality as f32);
     settings.set_popup_custom_select_save_restore(custom_settings.popup_custom_select_save_restore);
+    set_disk_usage_settings_to_gui(app, &custom_settings.disk_usage);
 
     let sel_px = 35.0;
     let path_px = 350.0;
@@ -945,6 +948,7 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         popup_crop_video_reencode: settings.get_popup_crop_video_reencode(),
         popup_crop_video_quality: settings.get_popup_crop_video_quality().round() as u32,
         popup_custom_select_save_restore: settings.get_popup_custom_select_save_restore(),
+        disk_usage: collect_disk_usage_settings(app),
     }
 }
 

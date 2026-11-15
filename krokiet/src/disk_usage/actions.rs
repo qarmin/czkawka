@@ -1,12 +1,16 @@
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::sync::atomic::Ordering;
+use std::sync::mpsc::{Sender, channel};
+use std::sync::{Arc, OnceLock};
+use std::thread;
 
-use log::{error, info};
+use czkawka_core::common::fs_ops::trash_delete;
+use log::error;
+use slint::ComponentHandle;
 
-use crate::MainWindow;
 use crate::connect_row_selection::clipboard::set_clipboard;
 use crate::disk_usage::view::{ChartContext, refresh_after_zoom, selected_address};
+use crate::{GuiState, MainWindow, flk};
 
 fn path_of(context: &ChartContext, address: &[u32]) -> Option<PathBuf> {
     let models = context.shared_models.lock().expect("Mutex poisoned");
@@ -28,9 +32,34 @@ pub(super) fn open_address(context: &ChartContext, address: &[u32], parent: bool
         return;
     };
     let target = if parent { path.parent().map_or(path.clone(), Path::to_path_buf) } else { path };
-    if let Err(e) = open::that_detached(&target) {
-        error!("Failed to open \"{}\": {e}", target.to_string_lossy());
+    if let Some(queue) = open_queue()
+        && let Err(e) = queue.send(target)
+    {
+        error!("Failed to queue opening \"{}\": worker stopped", e.0.to_string_lossy());
     }
+}
+
+fn open_queue() -> Option<&'static Sender<PathBuf>> {
+    static QUEUE: OnceLock<Option<Sender<PathBuf>>> = OnceLock::new();
+    QUEUE
+        .get_or_init(|| {
+            let (sender, receiver) = channel::<PathBuf>();
+            let spawned = thread::Builder::new().name("disk-usage-open".into()).spawn(move || {
+                while let Ok(target) = receiver.recv() {
+                    if let Err(e) = open::that_detached(&target) {
+                        error!("Failed to open \"{}\": {e}", target.to_string_lossy());
+                    }
+                }
+            });
+            match spawned {
+                Ok(_) => Some(sender),
+                Err(e) => {
+                    error!("Failed to start the thread opening items: {e}");
+                    None
+                }
+            }
+        })
+        .as_ref()
 }
 
 pub(super) fn copy_selected_path(context: &ChartContext) {
@@ -43,18 +72,47 @@ pub(super) fn move_selected_to_trash(app: &MainWindow, context: &Arc<ChartContex
     let Some(address) = selected_address(context) else {
         return;
     };
-    {
+    let Some(path) = path_of(context, &address) else {
+        return;
+    };
+    if context.trash_in_progress.swap(true, Ordering::AcqRel) {
+        return;
+    }
+    let (weak, context) = (app.as_weak(), Arc::clone(context));
+    let trash_flag = Arc::clone(&context);
+    let spawned = thread::Builder::new().name("disk-usage-trash".into()).spawn(move || {
+        let result = trash_delete(&path);
+        context.trash_in_progress.store(false, Ordering::Release);
+        let shown = weak.upgrade_in_event_loop(move |app| match result {
+            Ok(()) => remove_from_chart(&app, &context, &path),
+            Err(e) => {
+                error!("Failed to move \"{}\" to the trash: {e}", path.to_string_lossy());
+                app.global::<GuiState>()
+                    .set_info_text(flk!("disk_usage_trash_failed", path = path.to_string_lossy(), reason = e).into());
+            }
+        });
+        if let Err(e) = shown {
+            error!("Failed to update the disk usage chart: {e}");
+        }
+    });
+    if let Err(e) = spawned {
+        error!("Failed to start the thread moving an item to the trash: {e}");
+        trash_flag.trash_in_progress.store(false, Ordering::Release);
+    }
+}
+
+fn remove_from_chart(app: &MainWindow, context: &Arc<ChartContext>, path: &Path) {
+    let address = {
         let mut models = context.shared_models.lock().expect("Mutex poisoned");
         let Some(tool) = models.shared_disk_usage_state.as_mut() else {
             return;
         };
-        let Some(path) = tool.get_tree().path(&address) else {
+        let Some(address) = tool.get_tree().address_of_path(path) else {
             return;
         };
-        // TODO: really move the item to the trash; for now it is only removed from the chart
-        info!("Moving \"{}\" to the trash (not implemented yet, hidden from the chart only)", path.to_string_lossy());
         tool.get_tree_mut().remove(&address);
-    }
+        address
+    };
     context.tree_version.fetch_add(1, Ordering::Relaxed);
     {
         let mut view = context.view.lock().expect("View mutex poisoned");

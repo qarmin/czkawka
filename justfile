@@ -289,10 +289,10 @@ bench:
 bench_clean:
     rm -rf target/criterion
 
-# Bumps version requirements in Cargo.toml, including incompatible ones (needs cargo-edit, see `doctor`)
+# Bumps only incompatible (major) version requirements in Cargo.toml, compatible ones are left to `cargo update` (needs cargo-edit, see `doctor`)
 [group('install')]
 upgrade:
-    cargo upgrade -i
+    cargo upgrade --compatible ignore --incompatible allow
     cargo update
 
 [group('fix')]

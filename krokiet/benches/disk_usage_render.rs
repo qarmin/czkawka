@@ -158,6 +158,7 @@ fn measure_chart(tree: &DiskTree, kind: LayoutKind, size: (u32, u32), runs: usiz
         levels: options.max_depth,
         dark_theme: true,
         nested_borders: false,
+        highlight: None,
     };
 
     let (mut layout_times, mut render_times, mut total_times) = (Vec::new(), Vec::new(), Vec::new());

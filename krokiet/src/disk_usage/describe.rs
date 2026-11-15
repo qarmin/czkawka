@@ -74,6 +74,13 @@ pub(super) fn format_total(size: u64) -> String {
     format_size(size, BINARY)
 }
 
+/// Last component of the name of a node; of a root, the path it was given.
+pub(super) fn node_name(node: &DiskNode) -> String {
+    std::path::Path::new(&*node.name)
+        .file_name()
+        .map_or_else(|| node.name.to_string(), |name| name.to_string_lossy().into_owned())
+}
+
 fn display_name(node: &DiskNode, path: &std::path::Path) -> String {
     path.file_name().map_or_else(|| node.name.to_string(), |name| name.to_string_lossy().into_owned())
 }

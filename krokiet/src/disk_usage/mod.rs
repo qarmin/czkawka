@@ -1,15 +1,17 @@
 mod actions;
 mod describe;
+mod extensions;
+mod header_labels;
 mod render;
 mod selection;
 mod tree_view;
 mod view;
 
-use std::sync::atomic::AtomicU64;
+use std::sync::atomic::{AtomicBool, AtomicU64};
 use std::sync::{Arc, Mutex};
 
 use slint::ComponentHandle;
-pub(crate) use view::refresh_category_names;
+pub(crate) use view::{ensure_categories, refresh_category_names};
 
 use crate::disk_usage::view::{ChartContext, ViewState, spawn_render_worker};
 use crate::shared_models::SharedModels;
@@ -23,6 +25,9 @@ pub(crate) fn connect_disk_usage(app: &MainWindow, shared_models: Arc<Mutex<Shar
         chart: Mutex::new(None),
         generation: AtomicU64::new(0),
         tree_version: AtomicU64::new(0),
+        extensions_generation: AtomicU64::new(0),
+        extension_cache: Mutex::default(),
+        trash_in_progress: AtomicBool::new(false),
         requests,
     });
     spawn_render_worker(receiver, Arc::clone(&context), app.as_weak());
@@ -84,7 +89,7 @@ fn connect_view_callbacks(app: &MainWindow, context: &Arc<ChartContext>) {
     state.on_chart_scrolled(move |delta| {
         let app = weak.upgrade().expect("MainWindow dropped while callback is still live");
         if delta != 0.0 {
-            view::scroll_step(&app, &ctx, delta > 0.0);
+            view::scroll_step(&app, &ctx, delta);
         }
     });
 
@@ -92,6 +97,12 @@ fn connect_view_callbacks(app: &MainWindow, context: &Arc<ChartContext>) {
     state.on_zoom_out(move || {
         let app = weak.upgrade().expect("MainWindow dropped while callback is still live");
         view::zoom_out(&app, &ctx);
+    });
+
+    let (weak, ctx) = (app.as_weak(), Arc::clone(context));
+    state.on_zoom_reset(move || {
+        let app = weak.upgrade().expect("MainWindow dropped while callback is still live");
+        view::zoom_reset(&app, &ctx);
     });
 
     let (weak, ctx) = (app.as_weak(), Arc::clone(context));
@@ -120,6 +131,18 @@ fn connect_view_callbacks(app: &MainWindow, context: &Arc<ChartContext>) {
         let app = weak.upgrade().expect("MainWindow dropped while callback is still live");
         view::set_category_enabled(&app, index, enabled);
         view::after_category_change(&app, &ctx);
+    });
+
+    let (weak, ctx) = (app.as_weak(), Arc::clone(context));
+    state.on_extensions_toggled(move || {
+        let app = weak.upgrade().expect("MainWindow dropped while callback is still live");
+        extensions::toggled(&app, &ctx);
+    });
+
+    let (weak, ctx) = (app.as_weak(), Arc::clone(context));
+    state.on_extension_clicked(move |row| {
+        let app = weak.upgrade().expect("MainWindow dropped while callback is still live");
+        extensions::clicked(&app, &ctx, row);
     });
 }
 
