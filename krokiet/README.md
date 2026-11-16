@@ -46,7 +46,7 @@ cargo install krokiet --locked
 
 which will install, the latest and optimized version of Krokiet.
 
-Compilation with `cargo build --release` should produce a working binary, that without any additional dependencies should run on user os.
+Compilation with `cargo build --release` (run from project root) should produce a working binary, that without any additional dependencies should run on user os.
 
 If you have installed new `cargo`, you can easily compile and install it via `cargo install krokiet`
 
