@@ -271,7 +271,8 @@ fn select_by_property(model: &ModelRc<SingleMainListModel>, active_tab: ActiveTa
     if select_max {
         for i in 0..(headers_idx.len() - 1) {
             let mut max_item = 0;
-            let mut max_item_idx = 1;
+            // A fixed index of 1 points outside this group when every value is 0.
+            let mut max_item_idx = headers_idx[i] + 1;
             #[expect(clippy::needless_range_loop)]
             for j in (headers_idx[i] + 1)..headers_idx[i + 1] {
                 let item = extract_comparable_field(&old_data[j], property, active_tab);
@@ -606,6 +607,36 @@ mod tests {
         assert_eq!(unchecked_items, 0);
         assert!(!new_model.row_data(0).unwrap().checked);
         assert!(!new_model.row_data(2).unwrap().checked);
+    }
+
+    #[test]
+    fn select_biggest_size_stays_inside_a_zero_size_group() {
+        // Group a is 10 then 20. Group b is two empty files.
+        // An all-zero group must not keep the sentinel index 1 (the smaller file of group a).
+        let mut header_a = crate::test_common::get_main_list_model();
+        header_a.header_row = true;
+        let mut header_b = crate::test_common::get_main_list_model();
+        header_b.header_row = true;
+        let items = vec![
+            header_a,
+            make_item_with_size(10),
+            make_item_with_size(20),
+            header_b,
+            make_item_with_size(0),
+            make_item_with_size(0),
+        ];
+        let model = create_model_from_model_vec(&items);
+
+        let (checked_items, unchecked_items, new_model) = select_by_property(&model, ActiveTab::DuplicateFiles, Property::Size, true);
+
+        assert_eq!(checked_items, 2);
+        assert_eq!(unchecked_items, 0);
+        assert!(!new_model.row_data(0).unwrap().checked); // header a
+        assert!(!new_model.row_data(1).unwrap().checked); // 10
+        assert!(new_model.row_data(2).unwrap().checked); // 20, biggest in group a
+        assert!(!new_model.row_data(3).unwrap().checked); // header b
+        assert!(new_model.row_data(4).unwrap().checked); // first empty file of group b
+        assert!(!new_model.row_data(5).unwrap().checked);
     }
 
     //  select_all_except_by_property
