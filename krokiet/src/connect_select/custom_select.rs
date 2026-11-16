@@ -82,6 +82,7 @@ pub(super) fn build_custom_select_columns(active_tab: ActiveTab) -> Vec<CustomSe
     let dimensions = flk!("column_dimensions");
     let title = flk!("column_title");
     let artist = flk!("column_artist");
+    let album = flk!("column_album");
     let year = flk!("column_year");
     let bitrate = flk!("column_bitrate");
     let length = flk!("column_length");
@@ -159,6 +160,7 @@ pub(super) fn build_custom_select_columns(active_tab: ActiveTab) -> Vec<CustomSe
             col_str!(&path, StrDataSimilarMusic::Path),
             col_str!(&title, StrDataSimilarMusic::Title),
             col_str!(&artist, StrDataSimilarMusic::Artist),
+            col_str!(&album, StrDataSimilarMusic::Album),
             col_str!(&year, StrDataSimilarMusic::Year),
             col_str!(&genre, StrDataSimilarMusic::Genre),
             col_int_pair!(format!("{} [KB]", size), IntDataSimilarMusic::SizePart1),
