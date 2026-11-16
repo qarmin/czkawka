@@ -57,6 +57,9 @@ slint-build = "1.18.1"
 name = "disk_usage_render"
 harness = false
 
+[target.'cfg(windows)'.dependencies]
+czkawka_core = { version = "12.0.2", path = "../czkawka_core", features = ["ntfs_mft"] }
+
 [features]
 default = ["winit_femtovg", "winit_software"]
 

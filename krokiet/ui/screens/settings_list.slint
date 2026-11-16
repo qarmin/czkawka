@@ -518,6 +518,15 @@ export component SettingsList inherits VerticalLayout {
                 hint_text: Translations.settings_notification_focused_hint_text;
             }
 
+            if GuiState.ntfs_mft_supported: CheckBoxComponent {
+                name <=> Translations.settings_read_ntfs_mft_text;
+                model <=> Settings.read_ntfs_mft;
+            }
+
+            if GuiState.ntfs_mft_supported: HintText {
+                hint_text: GuiState.ntfs_mft_elevated ? Translations.settings_read_ntfs_mft_elevated_hint_text : Translations.settings_read_ntfs_mft_not_elevated_hint_text;
+            }
+
             }
 
             if root.section == 1: VerticalLayout {

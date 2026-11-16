@@ -301,6 +301,12 @@ pub struct DiskUsageArgs {
         long_help = "Measures also the directories and files given as excluded paths"
     )]
     pub ignore_excluded_directories: bool,
+    #[clap(
+        long,
+        help = "Reads the NTFS master file table instead of walking directories (Windows only)",
+        long_help = "Reads sizes straight from the NTFS master file table, which is much faster than walking directories. Works only on Windows and needs administrator privileges; paths that cannot be read this way are scanned the ordinary way"
+    )]
+    pub ntfs_mft: bool,
 }
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]

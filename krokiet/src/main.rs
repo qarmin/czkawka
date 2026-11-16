@@ -16,6 +16,7 @@ use czkawka_core::common::ffmpeg_utils::{check_if_ffprobe_ffmpeg_exists, get_wor
 use czkawka_core::common::image::register_image_decoding_hooks;
 use czkawka_core::common::logger::{filtering_messages, print_version_mode, setup_logger};
 use czkawka_core::common::progress_data::ProgressData;
+use czkawka_core::tools::disk_usage::{NtfsMftAvailability, ntfs_mft_availability};
 use czkawka_core::tools::video_optimizer::HardwareEncoder;
 use file_actions::connect_clean_exif::connect_clean;
 use file_actions::connect_delete::{connect_delete_button, connect_trash_button};
@@ -144,6 +145,7 @@ fn main() {
     app.global::<GuiState>().set_audio_feature_enabled(true);
 
     app.global::<GuiState>().set_notifications_feature_enabled(true);
+    set_ntfs_mft_availability(&app);
 
     let (progress_sender, progress_receiver): (Sender<ProgressData>, Receiver<ProgressData>) = unbounded();
     let stop_flag: Arc<AtomicBool> = Arc::default();
@@ -253,6 +255,13 @@ pub fn show_critical_error(error: String) {
         .set_title(flk!("rust_init_error_title"))
         .set_description(&flk!("rust_init_error_message", error_message = error))
         .show();
+}
+
+fn set_ntfs_mft_availability(app: &MainWindow) {
+    let availability = ntfs_mft_availability();
+    let state = app.global::<GuiState>();
+    state.set_ntfs_mft_supported(availability != NtfsMftAvailability::NotSupported);
+    state.set_ntfs_mft_elevated(availability == NtfsMftAvailability::Available);
 }
 
 pub(crate) fn zeroing_all_models(app: &MainWindow) {
