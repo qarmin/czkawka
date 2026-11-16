@@ -31,7 +31,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.94.1
+          rustup default 1.99.0
           rustup target add ${TARGET_DIR#target/}
 
       # Zig links against an old glibc, so the binaries run on older distros
@@ -143,7 +143,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.94.1
+          rustup default 1.99.0
           rustup target add ${{ matrix.target }}
 
       - name: Build Release
@@ -196,7 +196,7 @@ jobs:
 
       - name: Setup rust version and target
         run: |
-          rustup default 1.94.1
+          rustup default 1.99.0
           rustup target add i686-unknown-linux-gnu
 
       - name: Build Debug for 32-bit
@@ -221,8 +221,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # nightly disabled until notify-rust includes https://github.com/hoodie/notify-rust/pull/297
-        toolchain: [1.94.1] # , nightly]
+        toolchain: [1.99.0, nightly]
     steps:
       - uses: actions/checkout@v6
 
@@ -265,7 +264,7 @@ jobs:
         run: sudo apt update || true; sudo apt install libasound2-dev xvfb imagemagick libgl1-mesa-dri mesa-vulkan-drivers libxkbcommon-x11-0 -y
 
       - name: Setup rust version
-        run: rustup default 1.94.1
+        run: rustup default 1.99.0
 
       - name: Test
         run: |
@@ -297,7 +296,7 @@ jobs:
         run: sudo apt update || true; sudo apt install ffmpeg -y
 
       - name: Setup rust version
-        run: rustup default 1.94.1
+        run: rustup default 1.99.0
 
       - name: Build test version
         run: |
@@ -322,7 +321,7 @@ jobs:
 
       - name: Setup rust version and target
         run: |
-          rustup default 1.94.1
+          rustup default 1.99.0
           rustup target add aarch64-linux-android
 
       - name: Check for Android

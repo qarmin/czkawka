@@ -21,7 +21,7 @@ jobs:
 
       - name: Setup rust version
         run: |
-          rustup default 1.94.1
+          rustup default 1.99.0
           rustup component add rustfmt
           rustup component add clippy
 

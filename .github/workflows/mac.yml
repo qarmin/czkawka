@@ -27,7 +27,7 @@ jobs:
           echo "ARCHNAME=$ARCHNAME" >> $GITHUB_ENV
 
       - name: Setup rust version
-        run: rustup default 1.94.1
+        run: rustup default 1.99.0
 
       - name: Build Release
         if: ${{ github.ref == 'refs/heads/master' }}
