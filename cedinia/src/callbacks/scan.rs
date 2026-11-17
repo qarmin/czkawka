@@ -14,8 +14,8 @@ use crate::model::count_checked;
 use crate::scan_runner::{CommonFilters, ScanRequest};
 use crate::settings::gui_settings_values::{AudioPresetParams, StringComboBoxItems};
 use crate::{
-    ActiveTool, AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, FileEntry, GeneralSettings, MainWindow, SameMusicSettings, ScanState,
-    SimilarGroupCard, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings, flc,
+    ActiveTool, AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DiskUsageSettings, DuplicateSettings, FileEntry, GeneralSettings, MainWindow, SameMusicSettings,
+    ScanState, SimilarGroupCard, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings, flc,
 };
 
 pub(crate) fn wire_scan(
@@ -67,7 +67,7 @@ pub(crate) fn wire_scan(
             let win = weak.upgrade().expect("MainWindow dropped in on_tool_changed");
 
             match tool {
-                ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {
+                ActiveTool::Home | ActiveTool::DiskUsage | ActiveTool::Directories | ActiveTool::Settings => {
                     win.global::<AppState>().set_selected_count(0);
                 }
                 _ => {
@@ -102,6 +102,7 @@ fn clear_tool_results(win: &MainWindow, tool: ActiveTool) {
         ActiveTool::BadNames => win.set_bad_names_model(empty_entries()),
         ActiveTool::ExifRemover => win.set_exif_remover_model(empty_entries()),
         ActiveTool::SimilarVideos => win.set_similar_videos_model(empty_entries()),
+        ActiveTool::DiskUsage => crate::disk_usage::clear_results(win),
         ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {}
     }
     win.global::<AppState>().set_selected_count(0);
@@ -291,6 +292,11 @@ fn build_scan_request(win: &MainWindow, tool: ActiveTool, dirs: Vec<PathBuf>, ex
                 audio_min_duration_seconds: preset.min_duration_seconds,
             }
         }
+        ActiveTool::DiskUsage => ScanRequest::DiskUsage {
+            dirs,
+            filters,
+            accurate_categories: win.global::<DiskUsageSettings>().get_accurate_categories(),
+        },
         ActiveTool::Home | ActiveTool::Directories | ActiveTool::Settings => {
             unreachable!("scan cannot be triggered from Home/Directories/Settings tab")
         }

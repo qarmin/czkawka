@@ -10,7 +10,7 @@ pub struct SimplerSingleMainListModel {
     pub header_row: bool,
     pub focused_row: bool,
     pub val_int: Vec<i32>,
-    pub val_str: Vec<String>,
+    pub val_str: Vec<SharedString>,
 }
 
 impl SimplerSingleMainListModel {
@@ -36,7 +36,7 @@ impl From<&SingleMainListModel> for SimplerSingleMainListModel {
             header_row: model.header_row,
             focused_row: model.focused_row,
             val_int: model.val_int.iter().collect(),
-            val_str: model.val_str.iter().map(|e| e.to_string()).collect(),
+            val_str: model.val_str.iter().collect(),
         }
     }
 }
@@ -48,7 +48,7 @@ impl From<SimplerSingleMainListModel> for SingleMainListModel {
             header_row: val.header_row,
             focused_row: val.focused_row,
             val_int: ModelRc::new(VecModel::from(val.val_int)),
-            val_str: ModelRc::new(VecModel::from(val.val_str.into_iter().map(|s| s.into()).collect::<Vec<SharedString>>())),
+            val_str: ModelRc::new(VecModel::from(val.val_str)),
         }
     }
 }

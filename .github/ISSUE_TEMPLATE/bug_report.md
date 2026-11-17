@@ -7,8 +7,6 @@ assignees: ''
 
 ---
 
-<!-- Czkawka GTK GUI is no longer supported - version 12.0 was the last release, no new binaries or fixes will be provided. Issues reported exclusively against Czkawka GTK GUI (not reproducible in Krokiet, Cedinia, the CLI, or czkawka_core) will be closed. Please switch to Krokiet: https://github.com/qarmin/czkawka/tree/master/krokiet -->
-
 **Bug Description**
 
 **Steps to reproduce:**

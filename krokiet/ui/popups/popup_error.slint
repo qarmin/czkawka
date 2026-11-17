@@ -14,8 +14,8 @@ export component PopupError inherits Rectangle {
     popup_window := PopupBase {
         width: popup_width;
         popup_min_height: popup_min_height;
-        x: (parent.width - popup_width) / 2.0;
-        y: (parent.height - self.height) / 2.0;
+        x: round(((parent.width - popup_width) / 2.0) / 1px) * 1px;
+        y: round(((parent.height - self.height) / 2.0) / 1px) * 1px;
         title_text <=> Translations.popup_error_title_text;
         show_cancel_button: false;
 

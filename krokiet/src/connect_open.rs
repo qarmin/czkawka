@@ -10,7 +10,7 @@ pub(crate) fn connect_open_items(app: &MainWindow) {
             error!("Failed to open config folder");
             return;
         };
-        if let Err(e) = open::that(&config_cache.config_folder) {
+        if let Err(e) = open::that_detached(&config_cache.config_folder) {
             error!("Failed to open config folder \"{}\": {e}", config_cache.config_folder.to_string_lossy());
         }
     });
@@ -20,12 +20,12 @@ pub(crate) fn connect_open_items(app: &MainWindow) {
             error!("Failed to open cache folder");
             return;
         };
-        if let Err(e) = open::that(&config_cache.cache_folder) {
+        if let Err(e) = open::that_detached(&config_cache.cache_folder) {
             error!("Failed to open cache folder \"{}\": {e}", config_cache.cache_folder.to_string_lossy());
         }
     });
 
-    app.global::<Callabler>().on_open_link(move |link| match open::that(link.as_str()) {
+    app.global::<Callabler>().on_open_link(move |link| match open::that_detached(link.as_str()) {
         Ok(()) => {}
         Err(e) => {
             error!("Failed to open link: {e}");

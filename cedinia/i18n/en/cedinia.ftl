@@ -13,6 +13,16 @@ tool_same_music = Music Duplicates
 tool_bad_names = Bad Names
 tool_exif_remover = EXIF Data
 tool_similar_videos = Similar Videos (Audio)
+tool_disk_usage = Disk Usage
+home_disk_usage_description = See which folders and files take the most space
+disk_usage_all = All
+disk_usage_others = Other entries ({ $count })
+disk_usage_summary = { $size } in { $files } files
+disk_usage_confirm_delete = Delete "{ $name }"? Folders are deleted with all their contents.
+disk_usage_deleted = Deleted "{ $name }"
+disk_usage_delete_failed = Could not delete "{ $name }": { $error }
+settings_disk_usage_header = DISK USAGE
+settings_disk_usage_accurate_categories = Detect file types by content
 tool_directories = Directories
 tool_settings = Settings
 

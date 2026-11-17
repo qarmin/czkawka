@@ -90,15 +90,15 @@ impl BadNames {
         debug!("look_for_bad_names_files - ended checking for bad names");
         progress_handler.join_thread();
 
-        if check_if_stop_received(stop_flag) {
-            return WorkContinueStatus::Stop;
-        }
-
         self.bad_names_files = bad_names_files;
         self.information.number_of_files_with_bad_names = self.bad_names_files.len();
         debug!("Found {} files with bad names.", self.information.number_of_files_with_bad_names);
 
-        WorkContinueStatus::Continue
+        if check_if_stop_received(stop_flag) {
+            WorkContinueStatus::Stop
+        } else {
+            WorkContinueStatus::Continue
+        }
     }
 
     #[fun_time(message = "fix_bad_names", level = "debug")]

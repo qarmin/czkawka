@@ -5,24 +5,16 @@ Krokiet is a new Czkawka frontend written in Slint.
 
 ![Krokiet](https://github.com/user-attachments/assets/720e98c3-598a-41aa-a04b-0c0c1d8a28e6)
 
-It aims to provide a more consistent experience across all platforms (Linux, Windows, macOS) compared to the previous GTK 4 frontend.
+It aims to provide a more consistent experience across all platforms (Linux, Windows, macOS).
 
 ## How to install?
-Prebuilt binaries are available for Windows 10/11, Mac and Ubuntu 22.04(base)/24.04(with additional libraries) - or distros with same/newer glibc/libraries versions.
+Prebuilt binaries are available for Windows 10/11, Mac and Linux with glibc 2.17 or newer (x86_64 and arm64) - almost every Linux distribution released after 2014 is supported.
 
 You can download them from https://github.com/qarmin/czkawka/releases/, which contains recommendations, which variant to use depending on your needs.
 
 ## Requirements
 
 Prebuilt binaries have no mandatory runtime dependencies.
-
-Optional features require native libraries installed before compilation:
-
-| Feature   | Library               | Purpose                  |
-|-----------|-----------------------|--------------------------|
-| `heif`    | `libheif`             | HEIF/HEIC image support  |
-| `libraw`  | `libraw`              | RAW camera image support |
-| `libavif` | `libavif`, `libdav1d` | AVIF image support       |
 
 The similar videos tool requires **ffmpeg** at runtime.
 
@@ -31,21 +23,17 @@ The similar videos tool requires **ffmpeg** at runtime.
 ```shell
 # Runtime: similar videos
 sudo apt install ffmpeg
-
-# Optional build + runtime: extra image formats
-sudo apt install libheif-dev libraw-dev libavif-dev libdav1d-dev
 ```
 
 ### macOS
 
 ```shell
-brew install ffmpeg libraw libheif libavif dav1d
+brew install ffmpeg
 ```
 
 ### Windows
 
 - ffmpeg: `choco install ffmpeg` or download from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) and place `ffmpeg.exe` in your `PATH`.
-- `heif` and `libraw` features are very hard to set up on Windows and are not available in prebuild binaries(there are some unofficial builds, that enables this features)
 
 ## Compilation
 
@@ -60,18 +48,14 @@ which will install, the latest and optimized version of Krokiet.
 
 Compilation with `cargo build --release` should produce a working binary, that without any additional dependencies should run on user os.
 
-To enable support for extra image formats, compile with optional features:
-
-```shell
-cargo build --release --bin krokiet --features "heif,libraw,libavif"
-```
-
 If you have installed new `cargo`, you can easily compile and install it via `cargo install krokiet`
 
 ## Additional Renderers
 
 By default, only femtovg (OpenGL) and the software renderer are enabled, but you can enable more renderers by compiling the app
-with additional features.
+with additional features (`femtovg_wgpu`, `vello`). Skia is not supported.
+
+When `SLINT_BACKEND` is not set, the first renderer that starts successfully is used, in this order: femtovg (OpenGL), femtovg-wgpu, vello, software.
 
 Most users will want to use the app with a windowing system/compositor, so features starting with `winit` in the name are
 recommended.
@@ -79,7 +63,8 @@ recommended.
 For example:
 
 ```
-cargo build --release --features "winit_skia_opengl"
+cargo build --release --features "femtovg_wgpu"
+cargo build --release --features "vello"
 cargo build --release --features "winit_software"
 ```
 
@@ -88,13 +73,14 @@ To run the app with a different renderer, set the `SLINT_BACKEND` environment va
 ```
 SLINT_BACKEND=winit-femtovg ./target/release/krokiet
 SLINT_BACKEND=software ./target/release/krokiet
-SLINT_BACKEND=skia ./target/release/krokiet
+SLINT_BACKEND=femtovg-wgpu ./target/release/krokiet
+SLINT_BACKEND=vello ./target/release/krokiet
 ```
 
 If you use an invalid or non-existing backend, the app will show a warning:
 
 ```
-slint winit: unrecognized renderer skia, falling back to FemtoVG
+slint winit: unrecognized renderer vello, falling back to FemtoVG
 ```
 
 To check which backend is actually used, add the `SLINT_DEBUG_PERFORMANCE=refresh_lazy,console,overlay` environment variable:
@@ -109,19 +95,6 @@ You should see output like:
 Slint: Build config: debug; Backend: software
 ```
 
-
-## Why create a new frontend instead of improving the existing Czkawka GTK 4 app?
-
-For many, it might seem surprising to abandon the existing GTK 4 frontend of Czkawka especially considering that GTK is one of the most popular GUI frameworks and replace it with a new one based on Slint, which is still relatively unknown.
-
-This decision was driven by several key factors:
-- **GTK on Windows and macOS performs poorly** - There are random bugs that don’t appear on Linux or on other systems with similar environments. Slint, on the other hand, behaves consistently and reliably across all platforms.
-- **Complicated compilation and cross-compilation** - Due to GTK’s complexity on Windows, the easiest way to compile the application is by using a Docker image with Linux. This makes testing and debugging on Windows much more difficult.
-- **External dependencies** - I’m a fan of applications that work right after downloading, without requiring installation. With GTK, this is rarely the case. On Linux and macOS, several dynamically linked libraries must be installed first, and they may exist in different versions across systems. On Windows, you often have to manually include DLLs. This wouldn't be such an issue if the GTK team officially distributed these libraries and maintained a list of required files, but they don’t, so you’re left compiling everything yourself or, like in my case, relying on external Docker images. With Slint, all I need is a single binary file that runs out of the box on almost any system.
-- **GTK version fragmentation across platforms** - On Linux, GTK is dynamically linked, and different versions may introduce unique bugs or inconsistencies. On Windows, the libraries are bundled, but outdated in my app, since newer ones aren’t available in the Docker image I use, and some versions crash on some OSes. macOS (with Homebrew) is in the best position here, as it usually keeps GTK up to date. With Slint, each Krokiet release is bundled with the latest Slint version, ensuring consistency across all systems and reducing platform-specific issues.
-- **Cambalache is the only no-code GUI tool** - While Cambalache itself works reasonably well, it isn’t officially supported or maintained by the GTK team, but by an independent developer. In contrast, while the Slint GUI is mostly created via code, it offers live previews in VS Code/VSCodium, which is extremely convenient.
-- **Difficult to modify built-in widgets** - GTK enforces a specific visual style, which can be very restrictive. In my case, I had to tweak internal widget parameters just to achieve the desired look, something that might cause a lot of issues in the future. Slint takes the opposite approach: its built-in widgets are quite limited, which often makes it easier to build fully custom components from scratch.
-- **GTK is still C code** - Even though the library is wrapped and provides a relatively safe Rust interface, you still occasionally have to work with low-level structures, which have caused issues and crashes for me in the past. Another downside is the large number of warnings printed to the console, even with correct code, due to internal GTK issues. These warnings are often unhelpful and rarely assist in identifying actual bugs.
 
 ## License
 

@@ -6,7 +6,7 @@ Czkawka GUI is a graphical user interface for Czkawka Core, built with GTK 4.
 
 ## Deprecation Notice - 12.0 is the Last Version
 
-**Version 12.0 is the last released version of Czkawka GTK.** No new binaries will be provided. All users are encouraged to migrate to [Krokiet](../krokiet/README.md), the new Slint-based GUI.
+**Version 12.0 is the last released version of Czkawka GTK.** No new binaries, packages, or crates.io/Flathub releases will be provided; CI only verifies that the crate compiles. All users are encouraged to migrate to [Krokiet](../krokiet/README.md), the new Slint-based GUI.
 
 The source code remains in the repository and compatibility with `czkawka_core` will be maintained for some time, so the application can still be built manually. However, all issues and feature requests specific to Czkawka GTK will be closed, except for critical problems affecting widely used unofficial builds such as Debian or Docker packages.
 
@@ -16,20 +16,20 @@ Requirements depend on your platform.
 
 Prebuilt binaries are available here: https://github.com/qarmin/czkawka/releases/
 
-Additional features such as HEIF, libraw, and libavif require extra libraries to be installed, which may increase the number of dependencies.
+Additional features such as HEIF and libavif require extra libraries to be installed, which may increase the number of dependencies.
 
 ### Linux
 
 #### Prebuilt binaries / Self-compiled
 
 Ubuntu:  
-`sudo apt install libgtk-4-bin libheif1 libraw-bin ffmpeg -y`
+`sudo apt install libgtk-4-bin libheif1 ffmpeg -y`
 
 ### Mac
 
 ```
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install gtk4 ffmpeg librsvg libheif libraw dav1d
+brew install gtk4 ffmpeg librsvg libheif dav1d
 ```
 
 ### Windows
@@ -100,21 +100,21 @@ The Rust version corresponds to the latest rustc available in Debian Sid: https:
 
 ```shell
 sudo apt install libgtk-4-dev -y # Base
-sudo apt install libgtk-4-dev libheif-dev libraw-dev libavif-dev libdav1d-dev -y # With features
+sudo apt install libgtk-4-dev libheif-dev libavif-dev libdav1d-dev -y # With features
 cargo run --release --bin czkawka_gui
-# Or with support for heif, libraw, libavif
-cargo run --release --bin czkawka_gui --features "heif,libraw,libavif"
+# Or with support for heif, libavif
+cargo run --release --bin czkawka_gui --features "heif,libavif"
 ```
 
 ### Mac
 
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install rustup gtk4 adwaita-icon-theme ffmpeg librsvg libheif libraw dav1d pkg-config
+brew install rustup gtk4 adwaita-icon-theme ffmpeg librsvg libheif dav1d pkg-config
 rustup-init
 cargo run --release --bin czkawka_gui
-# Or with support for heif, libraw, libavif
-cargo run --release --bin czkawka_gui --features "heif,libraw,libavif"
+# Or with support for heif, libavif
+cargo run --release --bin czkawka_gui --features "heif,libavif"
 ```
 
 ### Windows

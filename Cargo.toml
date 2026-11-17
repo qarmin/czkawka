@@ -11,6 +11,7 @@ exclude = [
     "misc/test_image_perf",
     "misc/test_compilation_speed_size",
     "ci_tester",
+    "e2e",
     "test"
 ]
 resolver = "3"

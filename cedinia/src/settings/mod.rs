@@ -159,6 +159,9 @@ pub struct CediniaSettings {
     pub bad_names_non_ascii_graphical: bool,
     #[serde(default = "ttrue")]
     pub bad_names_remove_duplicated_non_alpha: bool,
+
+    #[serde(default)]
+    pub disk_usage_accurate_categories: bool,
 }
 
 impl Default for CediniaSettings {
@@ -297,7 +300,8 @@ pub fn save_settings(settings: &CediniaSettings) {
 use slint::ComponentHandle;
 
 use crate::{
-    BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings,
+    BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DiskUsageSettings, DuplicateSettings, GeneralSettings, MainWindow, SameMusicSettings, SimilarImagesSettings,
+    SimilarVideosSettings,
 };
 
 pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
@@ -390,6 +394,8 @@ pub fn apply_settings_to_gui(win: &MainWindow, s: &CediniaSettings) {
     bn.set_non_ascii_graphical(s.bad_names_non_ascii_graphical);
     bn.set_remove_duplicated_non_alpha(s.bad_names_remove_duplicated_non_alpha);
 
+    win.global::<DiskUsageSettings>().set_accurate_categories(s.disk_usage_accurate_categories);
+
     let sv_idx = StringComboBoxItems::idx_from_config_name(&s.similar_videos_audio_preset, &items.similar_videos_audio_preset);
     win.global::<SimilarVideosSettings>().set_audio_preset_idx(sv_idx as i32);
     win.global::<SimilarVideosSettings>().set_audio_preset_value(s.similar_videos_audio_preset.clone().into());
@@ -481,6 +487,7 @@ pub fn collect_settings_from_gui(win: &MainWindow) -> CediniaSettings {
         bad_names_space_at_start_or_end: bn.get_space_at_start_or_end(),
         bad_names_non_ascii_graphical: bn.get_non_ascii_graphical(),
         bad_names_remove_duplicated_non_alpha: bn.get_remove_duplicated_non_alpha(),
+        disk_usage_accurate_categories: win.global::<DiskUsageSettings>().get_accurate_categories(),
         similar_videos_audio_preset: StringComboBoxItems::config_name_from_idx(&items.similar_videos_audio_preset, sv.get_audio_preset_idx(), "clip_in_longer"),
     }
 }

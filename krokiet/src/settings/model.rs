@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::connect_translation::find_the_closest_language_idx_to_system;
 use crate::settings::combo_box::StringComboBoxItem;
+use crate::settings::disk_usage::DiskUsageSettings;
 
 pub const DEFAULT_MINIMUM_SIZE_KB: i32 = 16;
 pub const DEFAULT_MAXIMUM_SIZE_KB: i32 = i32::MAX;
@@ -278,6 +279,10 @@ pub struct SettingsCustom {
     #[serde(default = "default_video_optimizer_max_height")]
     pub popup_reencode_video_max_height: u32,
     #[serde(default)]
+    pub popup_reencode_video_limit_fps: bool,
+    #[serde(default = "default_video_optimizer_max_fps")]
+    pub popup_reencode_video_max_fps: u32,
+    #[serde(default)]
     pub popup_crop_video_overwrite_files: bool,
     #[serde(default)]
     pub popup_crop_video_reencode: bool,
@@ -286,6 +291,9 @@ pub struct SettingsCustom {
 
     #[serde(default)]
     pub popup_custom_select_save_restore: bool,
+
+    #[serde(default)]
+    pub disk_usage: DiskUsageSettings,
 }
 
 impl Default for SettingsCustom {
@@ -326,12 +334,12 @@ pub struct BasicSettings {
     pub dark_theme: bool,
     #[serde(default)]
     pub show_only_icons: bool,
+    #[serde(default)]
+    pub hidden_tools: Vec<String>,
     #[serde(default = "ttrue")]
     pub settings_load_windows_size_at_startup: bool,
     #[serde(default = "ttrue")]
     pub settings_load_tabs_sizes_at_startup: bool,
-    #[serde(default = "ttrue")]
-    pub settings_limit_lines_of_messages: bool,
     #[serde(default = "default_manual_application_scale")]
     pub manual_application_scale: f32,
     #[serde(default = "default_use_manual_application_scale")]
@@ -573,6 +581,9 @@ pub(crate) fn default_video_optimizer_max_width() -> u32 {
 }
 pub(crate) fn default_video_optimizer_max_height() -> u32 {
     1920
+}
+pub(crate) fn default_video_optimizer_max_fps() -> u32 {
+    60
 }
 pub(crate) fn default_video_optimizer_image_threshold() -> u8 {
     1

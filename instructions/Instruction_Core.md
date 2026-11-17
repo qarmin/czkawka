@@ -556,7 +556,7 @@ for entry in tool.get_video_optimizer_entries() {
 
 ## Cache
 
-Cache files are stored in the shared czkawka cache directory. All frontends (CLI, Krokiet, GTK) read and write the same cache.
+Cache files are stored in the shared czkawka cache directory. All frontends (CLI and Krokiet) read and write the same cache.
 
 Notable files:
 - `cache_duplicates_<HASH>.bin/.json` - per-hash-type duplicate cache
@@ -581,14 +581,6 @@ czkawka_core = { path = "../czkawka_core" }
 # OR from git:
 # czkawka_core = { git = "https://github.com/qarmin/czkawka" }
 ```
-
-Optional features (require native libraries installed at build and runtime):
-
-| Feature | Library | Purpose |
-|---------|---------|---------|
-| `heif` | `libheif` | HEIF/HEIC image support |
-| `libraw` | `libraw` | RAW camera image support |
-| `libavif` | `libavif`, `libdav1d` | AVIF image support |
 
 The `similar_videos` tool requires **ffmpeg** at runtime only (not a build dependency).
 
@@ -742,7 +734,7 @@ Paths depend on the `cache_name` and `config_name` strings passed to `set_config
 | Frontend | `cache_name` | `config_name` |
 |----------|-------------|---------------|
 | Krokiet | `"Czkawka"` | `"Krokiet"` |
-| GTK / CLI | `"Czkawka"` | `"Czkawka"` |
+| CLI | `"Czkawka"` | `"Czkawka"` |
 | Cedinia | `"cedinia"` | `"cedinia"` |
 
 Resulting paths (Linux example, using `directories_next::ProjectDirs`):

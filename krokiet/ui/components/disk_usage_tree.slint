@@ -1,0 +1,127 @@
+import { ListView, Palette } from "std-widgets.slint";
+import { DiskUsageState, DiskUsageTreeRow } from "../globals/disk_usage_state.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+import { FontSizes } from "../globals/fonts.slint";
+
+component Chevron inherits Path {
+    in property <bool> expanded;
+    width: 10px;
+    height: 10px;
+    viewbox-width: 10;
+    viewbox-height: 10;
+    commands: root.expanded ? "M 1 3 L 5 8 L 9 3" : "M 3 1 L 8 5 L 3 9";
+    stroke: Palette.foreground;
+    stroke-width: 1.5px;
+}
+
+component TreeRowItem inherits Rectangle {
+    in property <DiskUsageTreeRow> data;
+    in property <int> index;
+    // Where the menu of the row should open, in window coordinates
+    callback menu_requested(length, length);
+    private property <length> bar_width: 56px;
+
+    height: 24px;
+    background: root.data.selected ? ColorPalette.list_view_item_selected_color : row_touch.has-hover ? ColorPalette.list_view_item_hovered_color : transparent;
+
+    row_touch := TouchArea {
+        pointer-event(event) => {
+            if (event.kind == PointerEventKind.down && event.button == PointerEventButton.right) {
+                DiskUsageState.tree_row_right_clicked(root.index);
+                root.menu_requested(self.absolute-position.x + self.mouse-x, self.absolute-position.y + self.mouse-y);
+            }
+        }
+        clicked => {
+            DiskUsageState.tree_row_clicked(root.index);
+        }
+        double-clicked => {
+            DiskUsageState.tree_row_activated(root.index);
+        }
+    }
+
+    HorizontalLayout {
+        padding-left: 6px + root.data.depth * 14px;
+        padding-right: 8px;
+        spacing: 6px;
+
+        Rectangle {
+            width: 16px;
+            if root.data.expandable: Chevron {
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                expanded: root.data.expanded;
+            }
+
+            if root.data.expandable: TouchArea {
+                clicked => {
+                    DiskUsageState.tree_row_toggled(root.index);
+                }
+            }
+        }
+
+        Rectangle {
+            width: 8px;
+            height: 8px;
+            y: (parent.height - self.height) / 2;
+            border-radius: 2px;
+            background: root.data.color;
+        }
+
+        Text {
+            text: root.data.name;
+            font-size: FontSizes.normal;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+
+        Rectangle {
+            width: root.bar_width;
+            height: 6px;
+            y: (parent.height - self.height) / 2;
+            background: ColorPalette.line_item_color;
+            Rectangle {
+                x: 0;
+                width: parent.width * root.data.percent / 100;
+                background: root.data.color;
+            }
+        }
+
+        Text {
+            width: 64px;
+            text: root.data.size_text;
+            font-size: FontSizes.normal;
+            horizontal-alignment: right;
+            vertical-alignment: center;
+        }
+    }
+}
+
+export component DiskUsageTree inherits Rectangle {
+    callback menu_requested(length, length);
+
+    private property <length> row_height: 24px;
+    private property <int> selected_row: DiskUsageState.tree_selected_row;
+
+    changed selected_row => {
+        if (root.selected_row < 0) {
+            return;
+        }
+        let top = root.selected_row * root.row_height;
+        let bottom = top + root.row_height;
+        if (top < -tree_list.content-y) {
+            tree_list.content-y = -top;
+        } else if (bottom > -tree_list.content-y + tree_list.visible-height) {
+            tree_list.content-y = -(bottom - tree_list.visible-height);
+        }
+    }
+
+    tree_list := ListView {
+        for item[index] in DiskUsageState.tree_rows: TreeRowItem {
+            data: item;
+            index: index;
+            menu_requested(x, y) => {
+                root.menu_requested(x, y);
+            }
+        }
+    }
+}

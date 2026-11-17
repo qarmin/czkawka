@@ -13,7 +13,7 @@ if ! command -v brew &>/dev/null; then
     fi
 fi
 
-PACKAGES="ffmpeg libheif libraw libavif"
+PACKAGES="ffmpeg"
 
 echo "The following packages will be installed via Homebrew:"
 for pkg in $PACKAGES; do echo "  $pkg"; done

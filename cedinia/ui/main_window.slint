@@ -1,20 +1,22 @@
 import { Fonts } from "globals/fonts.slint";
 import { CediniaColors } from "globals/colors.slint";
 import { ActiveTool, DirectoryEntry, FileEntry, ScanState, SimilarGroupCard } from "globals/common.slint";
-import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "globals/app_state.slint";
+import { AppState, BadNamesSettings, BigFilesSettings, BrokenFilesSettings, DiskUsageSettings, DuplicateSettings, GeneralSettings, SameMusicSettings, SimilarImagesSettings, SimilarVideosSettings, TemporaryFilesSettings } from "globals/app_state.slint";
 import { TopAppBar } from "screens/top_bar.slint";
 import { BottomNavBar } from "screens/bottom_nav.slint";
 import { ScanProgressBar } from "screens/scan_progress.slint";
 import { ResultsList } from "screens/results_list.slint";
 import { SimilarImagesGallery } from "screens/similar_images_gallery.slint";
 import { ImageCompareOverlay } from "screens/image_compare.slint";
+import { DiskUsageScreen } from "screens/disk_usage_screen.slint";
+import { DiskUsageRow, DiskUsageState } from "globals/disk_usage_state.slint";
 import { SettingsScreen } from "screens/settings_screen.slint";
 import { HomeScreen } from "screens/home_screen.slint";
 import { DirectoriesScreen } from "screens/directories_screen.slint";
 import { TouchButton } from "components/buttons/touch_button.slint";
 import { Translations } from "globals/translations.slint";
 
-export { AppState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, TemporaryFilesSettings, SimilarVideosSettings, Translations }
+export { AppState, DiskUsageRow, DiskUsageSettings, DiskUsageState, GeneralSettings, DuplicateSettings, SimilarImagesSettings, BigFilesSettings, SameMusicSettings, BrokenFilesSettings, BadNamesSettings, TemporaryFilesSettings, SimilarVideosSettings, Translations }
 export component MainWindow inherits Window {
     title: "Cedinia";
     background: CediniaColors.bg_primary;
@@ -60,6 +62,7 @@ export component MainWindow inherits Window {
                  : AppState.active_tool == ActiveTool.BadNames         ? Translations.tool_bad_names_text
                  : AppState.active_tool == ActiveTool.ExifRemover      ? Translations.tool_exif_remover_text
                  : AppState.active_tool == ActiveTool.SimilarVideos    ? Translations.tool_similar_videos_text
+                 : AppState.active_tool == ActiveTool.DiskUsage        ? Translations.tool_disk_usage_text
                  : AppState.active_tool == ActiveTool.Directories      ? Translations.tool_directories_text
                  : AppState.active_tool == ActiveTool.Settings         ? Translations.tool_settings_text
                  : "Cedinia";
@@ -196,6 +199,11 @@ export component MainWindow inherits Window {
                 tool_emoji: "📷";
                 can_delete: false;
                 can_clean_exif: true;
+            }
+
+            if AppState.active_tool == ActiveTool.DiskUsage : DiskUsageScreen {
+                height: parent.height;
+                width: parent.width;
             }
 
             if AppState.active_tool == ActiveTool.SimilarVideos : ResultsList {

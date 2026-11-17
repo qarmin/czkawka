@@ -1,0 +1,32 @@
+import { ActiveTab } from "common.slint";
+
+export enum HelpBlockKind {
+    Heading,
+    Paragraph,
+    Bullet,
+    Question,
+    Answer,
+}
+
+export struct HelpBlock {
+    kind: HelpBlockKind,
+    text: string,
+}
+
+export struct HelpTab {
+    title: string,
+    blocks: [HelpBlock],
+}
+
+export struct HelpSection {
+    title: string,
+    tool: ActiveTab,
+    is_tool: bool,
+    tabs: [HelpTab],
+}
+
+export global HelpState {
+    in property <[HelpSection]> sections;
+    in-out property <int> selected_section;
+    in-out property <int> selected_tab;
+}

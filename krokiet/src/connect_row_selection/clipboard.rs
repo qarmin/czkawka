@@ -1,6 +1,6 @@
 use log::warn;
 
-pub(super) fn set_clipboard(text: String) {
+pub(crate) fn set_clipboard(text: String) {
     // X11/Wayland clipboard ownership must be held until another app reads the content.
     // SetExtLinux::wait() blocks the thread until that happens, so we run it in the background.
     std::thread::spawn(move || {

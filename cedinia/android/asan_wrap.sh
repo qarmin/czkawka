@@ -15,7 +15,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 
 # detect_leaks is off: LSan is noisy and slow under a GUI/JNI process and we
 # care about heap-overflow / use-after-free here, not leaks.
-# allow_user_segv_handler keeps Slint/Skia signal handling working.
+# allow_user_segv_handler keeps Slint signal handling working.
 export ASAN_OPTIONS=log_to_syslog=false,allow_user_segv_handler=1,detect_leaks=0,abort_on_error=1
 
 ASAN_LIB=$(ls "$HERE"/libclang_rt.asan-*-android.so)

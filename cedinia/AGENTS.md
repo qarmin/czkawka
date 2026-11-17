@@ -55,6 +55,7 @@ cedinia/src/
 ├── common.rs                      # Column index enums (StrData*, IntData*)
 ├── model.rs                       # FileEntry toggle/count logic
 ├── compare.rs                     # Image comparison overlay (cancel token, resize, diff)
+├── disk_usage/                    # Disk Usage tool: list_model.rs (rows, breadcrumb), scan.rs, mod.rs (view state + callbacks)
 ├── file_actions.rs                # delete_path() (trash on desktop, permanent on Android) + DeleteEvent
 ├── scan_runner.rs                 # Worker thread + ScanRequest/ScanResult
 ├── scanners.rs                    # Tool-specific scan builders
@@ -191,6 +192,14 @@ Inline accordion, **not** a `PopupWindow`:
 - Each option row tracks pointer movement (`_opt_moved`) so a scroll-drag that
   ends over an option doesn't register as a selection tap.
 
+## Disk Usage
+
+Result is a `DiskTree` (`ScanResult::DiskUsage`), not a list, so it has its own screen (`ui/screens/disk_usage_screen.slint`) and global (`DiskUsageState`). The view state lives in a `thread_local!` in `disk_usage/mod.rs` (UI thread only). The list shows the biggest 200 entries of a directory plus one "other entries" row; tapping a directory enters it, the breadcrumb goes back.
+
+Tapping a file or the three-dot button of a row opens a menu (open item, open parent folder, delete; `disk_usage/actions.rs`). Delete goes through `file_actions::delete_path` on a worker thread, then removes the node from the in-memory `DiskTree` (`DiskTree::remove` fixes ancestor sizes) without rescanning.
+
+There is deliberately no chart (a sunburst was tried and was unreadable on a phone) and no copy-path or free-space display.
+
 ## Translation System
 
 Same workaround as krokiet:
@@ -324,7 +333,7 @@ does not include it - a pre-existing inconsistency in the repo, not a doc bug.
 
 ## Optional Features (forwarded to czkawka_core)
 
-`heif`, `libraw`, `libavif`, `xdg_portal_trash`
+`xdg_portal_trash`
 
 ---
 

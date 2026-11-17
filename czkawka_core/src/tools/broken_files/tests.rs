@@ -6,6 +6,7 @@ use std::sync::atomic::AtomicBool;
 
 use tempfile::TempDir;
 
+use crate::common::image::register_image_decoding_hooks;
 use crate::common::tool_data::CommonData;
 use crate::common::traits::Search;
 use crate::tools::broken_files::{BrokenEntry, BrokenFiles, BrokenFilesParameters, CheckedTypes, CheckedTypesSingle};
@@ -371,16 +372,38 @@ fn test_move_cached_video_entries_promotes_only_entries_missing_required_checks(
     assert!(!promoted.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg));
 }
 
-#[cfg(feature = "libavif")]
+#[test]
+fn test_non_video_entry_never_needs_recheck_when_video_modes_enabled() {
+    let entry = make_broken_entry("image.jpg", &[(CheckedTypesSingle::Image, None)]);
+    let both = CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
+    assert!(!BrokenFiles::video_entry_missing_required_checks(&entry, both));
+}
+
+#[test]
+fn test_move_cached_entries_keeps_non_video_entries_cached_when_video_modes_enabled() {
+    let mut records_already_cached = BTreeMap::from([
+        ("image.jpg".to_string(), make_broken_entry("image.jpg", &[(CheckedTypesSingle::Image, None)])),
+        ("archive.zip".to_string(), make_broken_entry("archive.zip", &[(CheckedTypesSingle::Archive, None)])),
+    ]);
+    let mut non_cached_files_to_check = BTreeMap::new();
+
+    let both = CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
+    BrokenFiles::move_cached_entries_missing_required_checks(&mut records_already_cached, &mut non_cached_files_to_check, both);
+
+    assert!(records_already_cached.contains_key("image.jpg"), "non-video entries should stay cached");
+    assert!(records_already_cached.contains_key("archive.zip"), "non-video entries should stay cached");
+    assert!(non_cached_files_to_check.is_empty(), "no non-video entry should be promoted for recheck");
+}
+
 fn get_heif_images_path() -> std::path::PathBuf {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources").join("heif_images");
     assert!(path.exists(), "HEIF test resources not found at \"{}\"", path.to_string_lossy());
     path
 }
 
-#[cfg(feature = "libavif")]
 #[test]
 fn test_valid_avif_not_flagged_as_broken() {
+    register_image_decoding_hooks();
     let temp_dir = TempDir::new().unwrap();
     let src = get_heif_images_path().join("small_red.avif");
     fs::copy(&src, temp_dir.path().join("small_red.avif")).unwrap();
@@ -389,9 +412,9 @@ fn test_valid_avif_not_flagged_as_broken() {
     assert_eq!(results.len(), 0, "Valid AVIF should not be flagged as broken");
 }
 
-#[cfg(feature = "libavif")]
 #[test]
 fn test_corrupt_avif_is_flagged_as_broken() {
+    register_image_decoding_hooks();
     let temp_dir = TempDir::new().unwrap();
     let src = get_heif_images_path().join("small_red.avif");
     let dest = temp_dir.path().join("broken.avif");
@@ -402,9 +425,9 @@ fn test_corrupt_avif_is_flagged_as_broken() {
     assert!(results[0].has_errors(), "Broken AVIF entry should have errors");
 }
 
-#[cfg(feature = "libavif")]
 #[test]
 fn test_multiple_avif_valid_and_broken() {
+    register_image_decoding_hooks();
     let temp_dir = TempDir::new().unwrap();
     let heif_path = get_heif_images_path();
 

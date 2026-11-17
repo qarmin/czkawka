@@ -1,4 +1,5 @@
 pub(crate) mod combo_box;
+pub(crate) mod disk_usage;
 pub(crate) mod model;
 
 use std::cmp::{max, min};
@@ -15,17 +16,19 @@ use czkawka_core::tools::similar_videos::{
 };
 use log::{debug, error, info};
 use serde::{Deserialize, Serialize};
-use slint::{ComponentHandle, Model, ModelRc, PhysicalSize, VecModel, WindowSize};
+use slint::{ComponentHandle, LogicalSize, Model, ModelRc, VecModel, WindowSize};
 
 use crate::common::{create_excluded_paths_model_from_pathbuf, create_included_paths_model_from_pathbuf, create_vec_model_from_vec_string};
 use crate::connect_translation::change_language;
 use crate::settings::combo_box::StringComboBoxItems;
+use crate::settings::disk_usage::{collect_disk_usage_settings, set_disk_usage_settings_to_gui};
 use crate::settings::model::{
     BasicSettings, ComboBoxItems, DEFAULT_BIGGEST_FILES, DEFAULT_MAX_VIDEO_THUMBNAIL_POSITION_PERCENT, DEFAULT_MAXIMUM_SIZE_KB, DEFAULT_MIN_VIDEO_THUMBNAIL_POSITION_PERCENT,
     DEFAULT_MINIMUM_CACHE_SIZE, DEFAULT_MINIMUM_PREHASH_CACHE_SIZE, DEFAULT_MINIMUM_SIZE_KB, MAX_HASH_SIZE, PRESET_NAME_RESERVED, PRESET_NUMBER, RESERVER_PRESET_IDX,
     SettingsCustom, default_video_optimizer_black_bar_min_percentage, default_video_optimizer_black_pixel_threshold, default_video_optimizer_max_samples,
     default_video_optimizer_min_crop_size,
 };
+use crate::tools_visibility::{apply_hidden_tools, collect_hidden_tools};
 use crate::{Callabler, GuiState, MainWindow, Settings, flk};
 
 pub(crate) fn connect_changing_settings_preset(app: &MainWindow) {
@@ -276,18 +279,18 @@ pub(crate) fn set_base_settings_to_gui(app: &MainWindow, basic_settings: &BasicS
     settings.set_settings_preset_idx(preset_idx);
     settings.set_settings_presets(ModelRc::new(create_vec_model_from_vec_string(basic_settings.preset_names.clone())));
 
-    let width = basic_settings.window_width.clamp(100, 1920 * 4);
-    let height = basic_settings.window_height.clamp(100, 1080 * 4);
+    let width = basic_settings.window_width.clamp(100, 1920 * 4) as f32;
+    let height = basic_settings.window_height.clamp(100, 1080 * 4) as f32;
 
     if basic_settings.settings_load_windows_size_at_startup {
-        app.window().set_size(WindowSize::Physical(PhysicalSize { width, height }));
+        app.window().set_size(WindowSize::Logical(LogicalSize { width, height }));
     }
     settings.set_dark_theme(basic_settings.dark_theme);
     settings.set_show_only_icons(basic_settings.show_only_icons);
+    apply_hidden_tools(app, &basic_settings.hidden_tools);
     app.global::<Callabler>().invoke_theme_changed();
     settings.set_load_tabs_sizes_at_startup(basic_settings.settings_load_tabs_sizes_at_startup);
     settings.set_load_windows_size_at_startup(basic_settings.settings_load_windows_size_at_startup);
-    settings.set_limit_messages_lines(basic_settings.settings_limit_lines_of_messages);
     settings.set_manual_application_scale(basic_settings.manual_application_scale);
     settings.set_use_manual_application_scale(basic_settings.use_manual_application_scale);
     settings.set_play_audio_on_scan_completion(basic_settings.play_audio_on_scan_completion);
@@ -602,10 +605,13 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
     settings.set_popup_reencode_video_limit_video_size(custom_settings.popup_reencode_video_limit_video_size);
     settings.set_popup_reencode_video_max_width(custom_settings.popup_reencode_video_max_width.to_string().into());
     settings.set_popup_reencode_video_max_height(custom_settings.popup_reencode_video_max_height.to_string().into());
+    settings.set_popup_reencode_video_limit_fps(custom_settings.popup_reencode_video_limit_fps);
+    settings.set_popup_reencode_video_max_fps(custom_settings.popup_reencode_video_max_fps.to_string().into());
     settings.set_popup_crop_video_overwrite_files(custom_settings.popup_crop_video_overwrite_files);
     settings.set_popup_crop_video_reencode(custom_settings.popup_crop_video_reencode);
     settings.set_popup_crop_video_quality(custom_settings.popup_crop_video_quality as f32);
     settings.set_popup_custom_select_save_restore(custom_settings.popup_custom_select_save_restore);
+    set_disk_usage_settings_to_gui(app, &custom_settings.disk_usage);
 
     let sel_px = 35.0;
     let path_px = 350.0;
@@ -637,7 +643,7 @@ pub(crate) fn set_settings_to_gui(app: &MainWindow, custom_settings: &SettingsCu
         settings.set_broken_files_column_size(fnm(&[sel_px, name_px, path_px, 200.0, size_px, mod_px], "broken_files"));
         settings.set_bad_extensions_column_size(fnm(&[sel_px, name_px, path_px, 40.0, 200.0], "bad_extensions"));
         settings.set_exif_remover_column_size(fnm(&[sel_px, size_px, name_px, path_px, 300.0, mod_px], "exif_remover"));
-        settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, 160.0, mod_px], "video_optimizer"));
+        settings.set_video_optimizer_column_size(fnm(&[sel_px, size_px, name_px, path_px, 100.0, 120.0, 160.0, 90.0, 100.0, mod_px], "video_optimizer"));
         settings.set_bad_names_column_size(fnm(&[sel_px, name_px, 250.0, path_px], "bad_names"));
     }
 
@@ -936,10 +942,13 @@ pub(crate) fn collect_settings(app: &MainWindow) -> SettingsCustom {
         popup_reencode_video_limit_video_size: settings.get_popup_reencode_video_limit_video_size(),
         popup_reencode_video_max_width: settings.get_popup_reencode_video_max_width().parse::<u32>().unwrap_or(1920),
         popup_reencode_video_max_height: settings.get_popup_reencode_video_max_height().parse::<u32>().unwrap_or(1920),
+        popup_reencode_video_limit_fps: settings.get_popup_reencode_video_limit_fps(),
+        popup_reencode_video_max_fps: settings.get_popup_reencode_video_max_fps().parse::<u32>().unwrap_or(60),
         popup_crop_video_overwrite_files: settings.get_popup_crop_video_overwrite_files(),
         popup_crop_video_reencode: settings.get_popup_crop_video_reencode(),
         popup_crop_video_quality: settings.get_popup_crop_video_quality().round() as u32,
         popup_custom_select_save_restore: settings.get_popup_custom_select_save_restore(),
+        disk_usage: collect_disk_usage_settings(app),
     }
 }
 
@@ -995,7 +1004,6 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
 
     let settings_load_tabs_sizes_at_startup = settings.get_load_tabs_sizes_at_startup();
     let settings_load_windows_size_at_startup = settings.get_load_windows_size_at_startup();
-    let settings_limit_lines_of_messages = settings.get_limit_messages_lines();
     let manual_application_scale = settings.get_manual_application_scale().clamp(0.5, 3.0);
     let use_manual_application_scale = settings.get_use_manual_application_scale();
     let play_audio_on_scan_completion = settings.get_play_audio_on_scan_completion();
@@ -1008,9 +1016,9 @@ pub(crate) fn collect_base_settings(app: &MainWindow) -> BasicSettings {
         window_height,
         dark_theme,
         show_only_icons,
+        hidden_tools: collect_hidden_tools(app),
         settings_load_tabs_sizes_at_startup,
         settings_load_windows_size_at_startup,
-        settings_limit_lines_of_messages,
         manual_application_scale,
         use_manual_application_scale,
         play_audio_on_scan_completion,

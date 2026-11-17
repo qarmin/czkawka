@@ -1,0 +1,11 @@
+[package]
+name = "e2e"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+x11rb = "0.14"
+
+[profile.release]
+debug-assertions = true
+overflow-checks = true

@@ -343,6 +343,7 @@ fn extract_video_metadata_for_crop(entry: &mut VideoCropEntry) -> Result<(u32, u
     };
 
     entry.duration = duration;
+    entry.bitrate = metadata.bitrate;
 
     let fps = metadata.fps.unwrap_or(25.0);
 

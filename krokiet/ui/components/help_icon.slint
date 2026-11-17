@@ -1,0 +1,32 @@
+import { Palette } from "std-widgets.slint";
+import { ColorPalette } from "../globals/color_palette.slint";
+import { Translations } from "../globals/translations.slint";
+
+export component HelpIcon inherits Rectangle {
+    callback clicked();
+
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: Palette.foreground.with-alpha(touch_area.has-hover ? 0.55 : 0.2);
+    background: touch_area.has-hover ? ColorPalette.tab_hovered_color : transparent;
+
+    Image {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        width: parent.width * 0.6;
+        height: self.width;
+        source: @image-url("../../icons/krokiet_help.svg");
+        colorize: Palette.foreground.with-alpha(touch_area.has-hover ? 1.0 : 0.6);
+    }
+
+    touch_area := TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    Tooltip {
+        text: @markdown("\{Translations.help_button_tip_text}");
+    }
+}

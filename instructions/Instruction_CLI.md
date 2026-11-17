@@ -46,11 +46,10 @@ For shared concepts (reference paths, cache, prehash, hard links) see [Terminolo
 
 ## Requirements
 
-Prebuilt binaries work on Linux (Ubuntu 22.04+), Windows 10+, and macOS 10.15+.
+Prebuilt binaries work on Linux (glibc 2.17+, so almost every distribution released after 2014), Windows 10+, and macOS 10.15+.
 
 Optional runtime dependencies:
 - **ffmpeg** - required for `video` (similar videos) and `video-optimizer`
-- **libheif / libraw / libavif** - only if compiled from source with those features
 
 Install ffmpeg:
 
@@ -63,8 +62,6 @@ Install ffmpeg:
 Compile from source:
 ```shell
 cargo build --release --bin czkawka_cli
-# With optional image format support:
-cargo build --release --bin czkawka_cli --features "heif,libraw,libavif"
 ```
 
 ---

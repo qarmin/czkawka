@@ -418,6 +418,9 @@ impl BrokenFiles {
     }
 
     pub(crate) fn video_entry_missing_required_checks(file_entry: &BrokenEntry, checked_types: CheckedTypes) -> bool {
+        if check_extension_availability(&file_entry.path) != Some(TypeOfFile::Video) {
+            return false;
+        }
         (checked_types.contains(CheckedTypes::VIDEO_FFPROBE) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfprobe))
             || (checked_types.contains(CheckedTypes::VIDEO_FFMPEG) && !file_entry.errors.contains_key(&CheckedTypesSingle::VideoFfmpeg))
     }
@@ -565,7 +568,11 @@ impl BrokenFiles {
         // Clean unused data
         self.files_to_check = Default::default();
 
-        WorkContinueStatus::Continue
+        if check_if_stop_received(stop_flag) {
+            WorkContinueStatus::Stop
+        } else {
+            WorkContinueStatus::Continue
+        }
     }
 }
 

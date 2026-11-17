@@ -126,7 +126,7 @@ pub(crate) fn rebuild_similar_images_after_delete(win: &MainWindow, deleted: &st
             }
 
             new_groups.push(SimilarGroupCard {
-                label: group.label.clone(),
+                label: group.label,
                 items: ModelRc::new(VecModel::from(final_items)),
             });
         }

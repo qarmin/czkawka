@@ -23,11 +23,7 @@ impl Search for SimilarImages {
         let start_time = Instant::now();
 
         let () = (|| {
-            let extensions = if cfg!(feature = "heif") {
-                [IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat()
-            } else {
-                [IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS].concat()
-            };
+            let extensions = [IMAGE_RS_SIMILAR_IMAGES_EXTENSIONS, RAW_IMAGE_EXTENSIONS, HEIC_EXTENSIONS].concat();
 
             if self.prepare_items(Some(&extensions)).is_err() {
                 return;

@@ -230,9 +230,9 @@ impl SameMusic {
     }
 
     #[fun_time(message = "check_for_duplicate_tags", level = "debug")]
-    pub(crate) fn check_for_duplicate_tags(&mut self, stop_flag: &Arc<AtomicBool>, progress_sender: Option<&Sender<ProgressData>>) -> WorkContinueStatus {
+    pub(crate) fn check_for_duplicate_tags(&mut self, progress_sender: Option<&Sender<ProgressData>>) {
         if self.music_entries.is_empty() {
-            return WorkContinueStatus::Continue;
+            return;
         }
         let mode = match self.get_params().check_type {
             CheckingMethod::AudioTags => SameMusicMode::AudioTags,
@@ -254,18 +254,10 @@ impl SameMusic {
         ];
         for (flag, get_item, approximate_comparison) in tag_checks {
             if (self.params.music_similarity & flag) == flag {
-                if check_if_stop_received(stop_flag) {
-                    progress_handler.join_thread();
-                    return WorkContinueStatus::Stop;
-                }
                 old_duplicates = self.check_music_item(old_duplicates, progress_handler.items_counter(), get_item, approximate_comparison);
             }
         }
         if (self.params.music_similarity & MusicSimilarity::BITRATE) == MusicSimilarity::BITRATE {
-            if check_if_stop_received(stop_flag) {
-                progress_handler.join_thread();
-                return WorkContinueStatus::Stop;
-            }
             let old_duplicates_len = old_duplicates.len();
             for vec_file_entry in old_duplicates {
                 let mut hash_map: BTreeMap<String, Vec<MusicEntry>> = Default::default();
@@ -305,8 +297,6 @@ impl SameMusic {
                 self.information.number_of_groups += 1;
             }
         }
-
-        WorkContinueStatus::Continue
     }
 
     fn split_fingerprints_to_base_and_files_to_compare(&self, music_data: Vec<MusicEntry>) -> (Vec<MusicEntry>, Vec<MusicEntry>) {

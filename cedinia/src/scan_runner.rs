@@ -9,6 +9,8 @@ use czkawka_core::common::progress_data::ProgressData as CoreProgress;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::re_exported::{FilterType, HashAlg};
 use czkawka_core::tools::big_file::SearchMode;
+use czkawka_core::tools::disk_usage::Info as DiskUsageInfo;
+use czkawka_core::tools::disk_usage::tree::DiskTree;
 use czkawka_core::tools::similar_images::{GeometricInvariance, SimilarityPreset};
 
 use crate::scanners::{
@@ -136,6 +138,11 @@ pub enum ScanRequest {
         audio_length_ratio: f64,
         audio_min_duration_seconds: u32,
     },
+    DiskUsage {
+        dirs: Vec<PathBuf>,
+        filters: CommonFilters,
+        accurate_categories: bool,
+    },
     Stop,
 }
 
@@ -163,6 +170,7 @@ pub enum ScanResult {
     BadNames(Vec<FileItem>),
     ExifRemover(Vec<FileItem>),
     SimilarVideos(Vec<FileItem>),
+    DiskUsage(Arc<DiskTree>, DiskUsageInfo),
     Finished(u32),
 }
 
@@ -353,6 +361,15 @@ fn worker_loop<H: ScanResultHandler + Sync>(req_rx: &Receiver<ScanRequest>, hand
                     scan_id,
                 );
                 handler.on_result(ScanResult::SimilarVideos(items));
+                handler.on_result(ScanResult::Finished(scan_id));
+            }
+            ScanRequest::DiskUsage {
+                dirs,
+                filters,
+                accurate_categories,
+            } => {
+                let (tree, info) = crate::disk_usage::scan_disk_usage(dirs, accurate_categories, &filters, stop_flag, &handler, scan_id);
+                handler.on_result(ScanResult::DiskUsage(Arc::new(tree), info));
                 handler.on_result(ScanResult::Finished(scan_id));
             }
         }

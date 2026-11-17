@@ -167,10 +167,6 @@ impl ExifRemover {
 
         self.save_to_cache(&vec_file_entry, loaded_hash_map, stop_flag, progress_sender);
 
-        if check_if_stop_received(stop_flag) {
-            return WorkContinueStatus::Stop;
-        }
-
         // After saving to cache, remove ignored tags - because in cache we need to store full info about tags
         for entry in &mut vec_file_entry {
             let extension = entry.path.extension().and_then(|ext| ext.to_str()).unwrap_or("").to_lowercase();
@@ -192,7 +188,11 @@ impl ExifRemover {
 
         self.files_to_check = Default::default();
 
-        WorkContinueStatus::Continue
+        if check_if_stop_received(stop_flag) {
+            WorkContinueStatus::Stop
+        } else {
+            WorkContinueStatus::Continue
+        }
     }
 
     #[fun_time(message = "fix_files", level = "debug")]

@@ -1,20 +1,23 @@
-use std::rc::Rc;
 use std::thread;
 
 use czkawka_core::common::consts::DEFAULT_THREAD_SIZE;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::common::traits::Search;
 use czkawka_core::common::{format_time, split_path};
+use czkawka_core::tools::similar_videos::core::{format_bitrate_opt, format_duration_opt};
 use czkawka_core::tools::video_optimizer;
 use czkawka_core::tools::video_optimizer::{
     VideoCropEntry, VideoCropParams, VideoOptimizer, VideoOptimizerMode, VideoOptimizerParameters, VideoTranscodeEntry, VideoTranscodeParams,
 };
 use humansize::{BINARY, format_size};
 use log::error;
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
+use rayon::prelude::*;
+use slint::{ComponentHandle, SharedString, Weak};
 
 use crate::common::{MAX_INT_DATA_VIDEO_OPTIMIZER, MAX_STR_DATA_VIDEO_OPTIMIZER, split_u64_into_i32s};
-use crate::connect_scan::{MessagesData, ScanData, get_dt_timestamp_string, get_text_messages, insert_data_to_model, reset_selection_at_end, set_common_settings};
+use crate::connect_scan::{
+    MessagesData, PlainRow, RowContent, ScanData, flat_rows, get_dt_timestamp_string, get_text_messages, reset_selection_at_end, rows_into_model, set_common_settings,
+};
 use crate::{ActiveTab, GuiState, MainWindow, flk};
 
 pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
@@ -61,7 +64,7 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
 
             tool.search(&sd.stop_flag, Some(&sd.progress_sender));
 
-            let (critical, messages) = get_text_messages(&tool, &sd.basic_settings);
+            let (critical, messages) = get_text_messages(&tool);
 
             let info = tool.get_information();
             let stopped_search = tool.get_stopped_search();
@@ -72,8 +75,9 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
 
                 let messages_data = MessagesData { critical, messages };
 
+                let rows = video_crop_rows(video_crop_entries);
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_crop_results(&app, video_crop_entries, messages_data, info, sd, stopped_search);
+                    write_video_optimizer_crop_results(&app, rows, messages_data, info, sd, stopped_search);
                 })
             } else {
                 let video_transcode_entries = tool.get_video_transcode_entries().clone();
@@ -81,33 +85,20 @@ pub(crate) fn scan_video_optimizer(a: Weak<MainWindow>, sd: ScanData) {
 
                 let messages_data = MessagesData { critical, messages };
 
+                let rows = flat_rows(video_transcode_entries, prepare_data_model_video_optimizer_transcode);
                 a.upgrade_in_event_loop(move |app| {
-                    write_video_optimizer_transcode_results(&app, video_transcode_entries, messages_data, info, sd, stopped_search);
+                    write_video_optimizer_transcode_results(&app, rows, messages_data, info, sd, stopped_search);
                 })
             }
         })
         .expect("Cannot start thread - not much we can do here");
 }
 
-fn write_video_optimizer_transcode_results(
-    app: &MainWindow,
-    video_transcode_entries: Vec<VideoTranscodeEntry>,
-    messages_data: MessagesData,
-    info: video_optimizer::Info,
-    sd: ScanData,
-    stopped_search: bool,
-) {
+fn write_video_optimizer_transcode_results(app: &MainWindow, rows: Vec<PlainRow>, messages_data: MessagesData, info: video_optimizer::Info, sd: ScanData, stopped_search: bool) {
     let scanning_time_str = format_time(info.scanning_time);
     let items_found = info.number_of_videos_to_transcode;
 
-    let items = Rc::new(VecModel::default());
-
-    for fe in video_transcode_entries {
-        let (data_model_str, data_model_int) = prepare_data_model_video_optimizer_transcode(fe);
-        insert_data_to_model(&items, data_model_str, data_model_int, None);
-    }
-
-    app.set_video_optimizer_model(items.into());
+    app.set_video_optimizer_model(rows_into_model(rows));
     if let Some(critical) = messages_data.critical {
         app.invoke_scan_ended(critical.into());
     } else {
@@ -124,27 +115,11 @@ fn write_video_optimizer_transcode_results(
     reset_selection_at_end(app, ActiveTab::VideoOptimizer);
 }
 
-fn write_video_optimizer_crop_results(
-    app: &MainWindow,
-    video_crop_entries: Vec<VideoCropEntry>,
-    messages_data: MessagesData,
-    info: video_optimizer::Info,
-    sd: ScanData,
-    stopped_search: bool,
-) {
+fn write_video_optimizer_crop_results(app: &MainWindow, rows: Vec<PlainRow>, messages_data: MessagesData, info: video_optimizer::Info, sd: ScanData, stopped_search: bool) {
     let scanning_time_str = format_time(info.scanning_time);
     let items_found = info.number_of_videos_to_crop;
 
-    let items = Rc::new(VecModel::default());
-
-    for fe in video_crop_entries {
-        let Some((data_model_str, data_model_int)) = prepare_data_model_video_optimizer_crop(fe) else {
-            continue;
-        };
-        insert_data_to_model(&items, data_model_str, data_model_int, None);
-    }
-
-    app.set_video_optimizer_model(items.into());
+    app.set_video_optimizer_model(rows_into_model(rows));
     if let Some(critical) = messages_data.critical {
         app.invoke_scan_ended(critical.into());
     } else {
@@ -161,7 +136,11 @@ fn write_video_optimizer_crop_results(
     reset_selection_at_end(app, ActiveTab::VideoOptimizer);
 }
 
-fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (ModelRc<SharedString>, ModelRc<i32>) {
+fn video_crop_rows(entries: Vec<VideoCropEntry>) -> Vec<PlainRow> {
+    entries.into_par_iter().filter_map(prepare_data_model_video_optimizer_crop).map(PlainRow::item).collect()
+}
+
+fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> RowContent {
     let (directory, file) = split_path(&fe.path);
     let data_model_str_arr: [SharedString; MAX_STR_DATA_VIDEO_OPTIMIZER] = [
         format_size(fe.size, BINARY).into(),
@@ -170,12 +149,16 @@ fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (Mod
         fe.codec.into(),
         format!("{}x{}", fe.width, fe.height).into(),
         "-".into(),
+        format_duration_opt(Some(fe.duration)).into(),
+        format_bitrate_opt(fe.bitrate).into(),
         get_dt_timestamp_string(fe.modified_date).into(),
         fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default().into(),
     ];
-    let data_model_str = VecModel::from_slice(&data_model_str_arr);
+    let data_model_str = data_model_str_arr.to_vec();
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
+    let bitrate_split = split_u64_into_i32s(fe.bitrate.unwrap_or(0));
+    let duration_centiseconds = (fe.duration * 100.0) as i32;
     let dimension = fe.width as i32 * fe.height as i32; // Video dimension, limited to 16K vs 16K, so no overflow
     let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
         modification_split.0,
@@ -190,12 +173,15 @@ fn prepare_data_model_video_optimizer_transcode(fe: VideoTranscodeEntry) -> (Mod
         0,
         0,
         0,
+        duration_centiseconds,
+        bitrate_split.0,
+        bitrate_split.1,
     ];
-    let data_model_int = VecModel::from_slice(&data_model_int_arr);
+    let data_model_int = data_model_int_arr.to_vec();
     (data_model_str, data_model_int)
 }
 
-fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> Option<(ModelRc<SharedString>, ModelRc<i32>)> {
+fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> Option<RowContent> {
     let (directory, file) = split_path(&fe.path);
     let (left, top, right, bottom) = fe.new_image_dimensions;
 
@@ -228,12 +214,16 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> Option<(ModelR
         fe.codec.into(),
         format!("{}x{}", fe.width, fe.height).into(),
         dim_string.into(),
+        format_duration_opt(Some(fe.duration)).into(),
+        format_bitrate_opt(fe.bitrate).into(),
         get_dt_timestamp_string(fe.modified_date).into(),
         fe.thumbnail_path.as_ref().map(|e| e.to_string_lossy().to_string()).unwrap_or_default().into(),
     ];
-    let data_model_str = VecModel::from_slice(&data_model_str_arr);
+    let data_model_str = data_model_str_arr.to_vec();
     let modification_split = split_u64_into_i32s(fe.modified_date);
     let size_split = split_u64_into_i32s(fe.size);
+    let bitrate_split = split_u64_into_i32s(fe.bitrate.unwrap_or(0));
+    let duration_centiseconds = (fe.duration * 100.0) as i32;
     let dimension = fe.width as i32 * fe.height as i32;
     let data_model_int_arr: [i32; MAX_INT_DATA_VIDEO_OPTIMIZER] = [
         modification_split.0,
@@ -248,7 +238,10 @@ fn prepare_data_model_video_optimizer_crop(fe: VideoCropEntry) -> Option<(ModelR
         top as i32,
         right as i32,
         bottom as i32,
+        duration_centiseconds,
+        bitrate_split.0,
+        bitrate_split.1,
     ];
-    let data_model_int = VecModel::from_slice(&data_model_int_arr);
+    let data_model_int = data_model_int_arr.to_vec();
     Some((data_model_str, data_model_int))
 }

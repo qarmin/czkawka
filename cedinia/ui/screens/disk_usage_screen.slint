@@ -1,0 +1,326 @@
+import { Fonts } from "../globals/fonts.slint";
+import { CediniaColors } from "../globals/colors.slint";
+import { ScanState } from "../globals/common.slint";
+import { AppState } from "../globals/app_state.slint";
+import { DiskUsageRow, DiskUsageState } from "../globals/disk_usage_state.slint";
+import { Translations } from "../globals/translations.slint";
+import { EmptyState } from "../components/empty_state.slint";
+import { ScanFab } from "../components/scan_fab.slint";
+import { TouchButton } from "../components/buttons/touch_button.slint";
+import { ScrimDialog } from "../components/scrim_dialog.slint";
+import { ListView } from "std-widgets.slint";
+
+component DiskUsageRowItem {
+    in property <DiskUsageRow> entry;
+    in property <bool> is_even;
+    callback tapped();
+    callback menu_requested();
+
+    // Same order as FileCategory::ALL
+    property <[image]> icons: [
+        @image-url("../../icons/cedinia_folder.svg"),
+        @image-url("../../../krokiet/icons/krokiet_type_audio.svg"),
+        @image-url("../../../krokiet/icons/krokiet_type_video.svg"),
+        @image-url("../../../krokiet/icons/krokiet_type_image.svg"),
+        @image-url("../../../krokiet/icons/krokiet_type_archive.svg"),
+        @image-url("../../../krokiet/icons/krokiet_type_document.svg"),
+        @image-url("../../../krokiet/icons/krokiet_type_code.svg"),
+        @image-url("../../../krokiet/icons/krokiet_type_disk_image.svg"),
+        @image-url("../../../krokiet/icons/krokiet_type_binary.svg"),
+        @image-url("../../../krokiet/icons/krokiet_type_other.svg"),
+    ];
+
+    height: 56px;
+
+    Rectangle {
+        background: root.is_even ? CediniaColors.bg_card : CediniaColors.bg_primary;
+
+        Rectangle {
+            x: 0px;
+            width: parent.width * root.entry.fraction;
+            background: root.entry.color.with-alpha(0.28);
+        }
+
+        HorizontalLayout {
+            padding-left: 12px;
+            padding-right: root.entry.has_menu ? 44px : 12px;
+            spacing: 10px;
+
+            Image {
+                source: root.icons[root.entry.category];
+                colorize: root.entry.is_directory ? CediniaColors.accent : root.entry.color;
+                width: 26px;
+                height: 26px;
+                y: (parent.height - self.height) / 2;
+            }
+
+            VerticalLayout {
+                horizontal-stretch: 1.0;
+                alignment: LayoutAlignment.center;
+                spacing: 2px;
+
+                Text {
+                    text: root.entry.name;
+                    color: CediniaColors.text_primary;
+                    font-size: Fonts.label_lg;
+                    overflow: elide;
+                }
+                Text {
+                    text: root.entry.detail_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: Fonts.body;
+                    overflow: elide;
+                }
+            }
+
+            Text {
+                text: root.entry.size_text;
+                color: CediniaColors.text_primary;
+                font-size: Fonts.body_lg;
+                font-weight: Fonts.bold;
+                vertical-alignment: TextVerticalAlignment.center;
+            }
+
+        }
+
+        TouchArea { clicked => { root.tapped(); } }
+
+        if root.entry.has_menu : Rectangle {
+            x: parent.width - self.width;
+            width: 44px;
+
+            VerticalLayout {
+                alignment: LayoutAlignment.center;
+                spacing: 4px;
+
+                for _dot in 3 : Rectangle {
+                    width: 4px;
+                    height: 4px;
+                    x: (parent.width - self.width) / 2;
+                    border-radius: 2px;
+                    background: CediniaColors.accent;
+                }
+            }
+
+            TouchArea { clicked => { root.menu_requested(); } }
+        }
+    }
+}
+
+component Breadcrumb {
+    height: 44px;
+
+    Rectangle {
+        background: CediniaColors.bg_surface;
+
+        Flickable {
+            content-width: segments.preferred-width;
+            interactive: segments.preferred-width > self.width;
+
+            segments := HorizontalLayout {
+                padding-left: 8px;
+                padding-right: 8px;
+                spacing: 2px;
+
+                for segment[level] in DiskUsageState.breadcrumb : TouchArea {
+                    clicked => { DiskUsageState.breadcrumb_tapped(level); }
+                    min-width: label.preferred-width + 16px;
+
+                    label := Text {
+                        x: 8px;
+                        text: (level == 0 ? "" : "› ") + segment;
+                        color: level == DiskUsageState.breadcrumb.length - 1 ? CediniaColors.accent_light : CediniaColors.text_secondary;
+                        font-size: Fonts.body_lg;
+                        font-weight: level == DiskUsageState.breadcrumb.length - 1 ? Fonts.bold : Fonts.regular;
+                        vertical-alignment: TextVerticalAlignment.center;
+                        height: parent.height;
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component DiskUsageScreen {
+    VerticalLayout {
+        spacing: 0px;
+
+        if DiskUsageState.has_results : Rectangle {
+            height: 52px;
+            background: CediniaColors.bg_elevated;
+            border-width: 1px;
+            border-color: CediniaColors.divider;
+
+            HorizontalLayout {
+                padding: 8px;
+                padding-left: 12px;
+                spacing: 8px;
+
+                Text {
+                    text: DiskUsageState.summary_text;
+                    color: CediniaColors.text_secondary;
+                    font-size: Fonts.body_lg;
+                    horizontal-stretch: 1.0;
+                    vertical-alignment: TextVerticalAlignment.center;
+                    overflow: elide;
+                }
+
+            }
+        }
+
+        if DiskUsageState.has_results : Breadcrumb {}
+
+        if DiskUsageState.has_results : ListView {
+            vertical-stretch: 1.0;
+
+            for entry[idx] in DiskUsageState.rows : DiskUsageRowItem {
+                entry: entry;
+                is_even: mod(idx, 2) == 0;
+                tapped => { DiskUsageState.row_tapped(idx); }
+                menu_requested => { DiskUsageState.row_menu_requested(idx); }
+            }
+        }
+
+        if !DiskUsageState.has_results : Rectangle {
+            vertical-stretch: 1.0;
+            background: CediniaColors.bg_primary;
+
+            EmptyState {
+                emoji: "📊";
+                emoji_size: 56px;
+                message: AppState.scan_state == ScanState.Scanning
+                    ? Translations.scanning_text
+                    : AppState.scan_state == ScanState.Stopping
+                        ? Translations.stopping_text
+                        : AppState.scan_state == ScanState.Done
+                            ? Translations.no_results_text
+                            : Translations.press_start_text;
+                message_font_size: 15px;
+            }
+        }
+    }
+
+    if DiskUsageState.menu_visible : ScrimDialog {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 55;
+        card_max_width: 320px;
+        card_radius: 14px;
+        card_padding: 14px;
+        card_spacing: 6px;
+        dismissed => { DiskUsageState.menu_visible = false; }
+
+        Text {
+            text: DiskUsageState.menu_name;
+            color: CediniaColors.text_primary;
+            font-size: Fonts.body_lg;
+            font-weight: Fonts.bold;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            wrap: word-wrap;
+        }
+        Text {
+            text: DiskUsageState.menu_parent;
+            color: CediniaColors.text_disabled;
+            font-size: Fonts.micro;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            wrap: word-wrap;
+        }
+        TouchButton {
+            label: Translations.ctx_open_file_text;
+            min_h: 44px;
+            bg: CediniaColors.bg_surface;
+            fg: CediniaColors.text_primary;
+            horizontal-stretch: 1.0;
+            clicked => {
+                DiskUsageState.menu_visible = false;
+                if (DiskUsageState.menu_is_directory) {
+                    AppState.open_parent_folder(DiskUsageState.menu_path);
+                } else {
+                    AppState.open_path(DiskUsageState.menu_path);
+                }
+            }
+        }
+        TouchButton {
+            label: Translations.ctx_open_folder_text;
+            min_h: 44px;
+            bg: CediniaColors.bg_surface;
+            fg: CediniaColors.accent_light;
+            horizontal-stretch: 1.0;
+            clicked => {
+                DiskUsageState.menu_visible = false;
+                AppState.open_parent_folder(DiskUsageState.menu_parent);
+            }
+        }
+        TouchButton {
+            label: Translations.delete_text;
+            min_h: 44px;
+            bg: CediniaColors.danger;
+            fg: CediniaColors.fg_on_danger;
+            horizontal-stretch: 1.0;
+            clicked => {
+                DiskUsageState.menu_visible = false;
+                DiskUsageState.confirm_visible = true;
+            }
+        }
+        TouchButton {
+            label: Translations.close_text;
+            min_h: 40px;
+            bg: CediniaColors.bg_elevated;
+            fg: CediniaColors.text_disabled;
+            horizontal-stretch: 1.0;
+            clicked => { DiskUsageState.menu_visible = false; }
+        }
+    }
+
+    if DiskUsageState.confirm_visible : ScrimDialog {
+        x: 0; y: 0;
+        width: root.width;
+        height: root.height;
+        z: 56;
+        strong_scrim: true;
+        dismissible: false;
+        card_max_width: 400px;
+        side_margin: 32px;
+        card_radius: 14px;
+        card_padding: 20px;
+        card_spacing: 12px;
+
+        Text {
+            text: DiskUsageState.confirm_message;
+            color: CediniaColors.text_primary;
+            font-size: Fonts.label_lg;
+            font-weight: Fonts.semibold;
+            wrap: word-wrap;
+            horizontal-alignment: TextHorizontalAlignment.center;
+        }
+        HorizontalLayout {
+            spacing: 8px;
+            TouchButton {
+                label: Translations.cancel_text;
+                horizontal-stretch: 1.0;
+                min_h: 44px;
+                bg: CediniaColors.bg_surface;
+                fg: CediniaColors.text_secondary;
+                clicked => { DiskUsageState.confirm_visible = false; }
+            }
+            TouchButton {
+                label: Translations.delete_text;
+                horizontal-stretch: 1.0;
+                min_h: 44px;
+                bg: CediniaColors.danger;
+                fg: CediniaColors.fg_on_danger;
+                clicked => {
+                    DiskUsageState.confirm_visible = false;
+                    DiskUsageState.delete_confirmed();
+                }
+            }
+        }
+    }
+
+    ScanFab {
+        x: root.width - self.width - 16px;
+        y: root.height - self.height - 16px;
+        z: 20;
+    }
+}

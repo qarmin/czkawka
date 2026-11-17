@@ -187,10 +187,10 @@ fn group_by_header(model: &ModelRc<SingleMainListModel>) -> Vec<(SingleMainListM
             } else {
                 assert!(current_group.is_empty());
             }
-            current_header = Some(item.clone());
+            current_header = Some(item);
         } else {
             assert!(current_header.is_some());
-            current_group.push(item.clone());
+            current_group.push(item);
         }
     }
 

@@ -16,7 +16,7 @@ pub(crate) fn connect_on_open_item(app: &MainWindow) {
 }
 
 fn open_item_simple(path_to_open: &str) {
-    if let Err(e) = open::that(path_to_open) {
+    if let Err(e) = open::that_detached(path_to_open) {
         error!("Failed to open file: {e}");
     }
 }

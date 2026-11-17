@@ -4,18 +4,19 @@ mod bad_extensions;
 mod bad_names;
 mod big_files;
 mod broken_files;
+mod disk_usage;
 mod duplicate;
 mod empty_files;
 mod empty_folders;
 mod exif_remover;
 mod invalid_symlinks;
+mod rows;
 mod same_music;
 mod similar_images;
 mod similar_videos;
 mod temporary_files;
 mod video_optimizer;
 
-use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
@@ -24,7 +25,8 @@ use crossbeam_channel::Sender;
 use czkawka_core::common::progress_data::ProgressData;
 use czkawka_core::common::tool_data::CommonData;
 use czkawka_core::helpers::messages::MessageLimit;
-use slint::{ComponentHandle, ModelRc, SharedString, VecModel};
+use czkawka_core::tools::disk_usage::ContentDetection;
+use slint::ComponentHandle;
 
 use crate::audio_player::AudioPlayer;
 use crate::common::{check_if_all_included_dirs_are_referenced, check_if_there_are_any_included_folders};
@@ -34,11 +36,13 @@ use crate::connect_scan::bad_extensions::scan_bad_extensions;
 use crate::connect_scan::bad_names::scan_bad_names;
 use crate::connect_scan::big_files::scan_big_files;
 use crate::connect_scan::broken_files::scan_broken_files;
+use crate::connect_scan::disk_usage::scan_disk_usage;
 use crate::connect_scan::duplicate::scan_duplicates;
 use crate::connect_scan::empty_files::scan_empty_files;
 use crate::connect_scan::empty_folders::scan_empty_folders;
 use crate::connect_scan::exif_remover::scan_exif_remover;
 use crate::connect_scan::invalid_symlinks::scan_invalid_symlinks;
+pub(crate) use crate::connect_scan::rows::{PlainRow, RowContent, flat_rows, grouped_rows, rows_into_model};
 use crate::connect_scan::same_music::scan_similar_music;
 use crate::connect_scan::similar_images::scan_similar_images;
 use crate::connect_scan::similar_videos::scan_similar_videos;
@@ -47,7 +51,7 @@ use crate::connect_scan::video_optimizer::scan_video_optimizer;
 use crate::settings::model::{BasicSettings, ComboBoxItems, SettingsCustom};
 use crate::settings::{collect_base_settings, collect_combo_box_settings, collect_settings};
 use crate::shared_models::SharedModels;
-use crate::{ActiveTab, GuiState, MainWindow, ProgressToSend, SingleMainListModel, flk};
+use crate::{ActiveTab, DiskUsageState, GuiState, MainWindow, ProgressToSend, flk};
 
 pub struct ScanData {
     pub progress_sender: Sender<ProgressData>,
@@ -57,6 +61,9 @@ pub struct ScanData {
     pub combo_box_items: ComboBoxItems,
     pub shared_models: Arc<Mutex<SharedModels>>,
     pub audio_player: Arc<AudioPlayer>,
+    pub disk_usage_content_detection: ContentDetection,
+    pub disk_usage_ignore_excluded_items: bool,
+    pub disk_usage_ignore_excluded_directories: bool,
 }
 
 pub struct MessagesData {
@@ -114,6 +121,9 @@ pub(crate) fn connect_scan_button(
             combo_box_items,
             shared_models: cloned_model,
             audio_player: audio_player_clone,
+            disk_usage_content_detection: content_detection_from_index(app.global::<DiskUsageState>().get_content_detection_index()),
+            disk_usage_ignore_excluded_items: app.global::<DiskUsageState>().get_ignore_excluded_items(),
+            disk_usage_ignore_excluded_directories: app.global::<DiskUsageState>().get_ignore_excluded_directories(),
         };
 
         match active_tab {
@@ -131,6 +141,7 @@ pub(crate) fn connect_scan_button(
             ActiveTab::TemporaryFiles => scan_temporary_files(a, scan_data),
             ActiveTab::ExifRemover => scan_exif_remover(a, scan_data),
             ActiveTab::VideoOptimizer => scan_video_optimizer(a, scan_data),
+            ActiveTab::DiskUsage => scan_disk_usage(a, scan_data),
             ActiveTab::Settings | ActiveTab::About => panic!("Button should be disabled"),
         }
     });
@@ -148,30 +159,12 @@ fn reset_selection_at_end(app: &MainWindow, active_tab: ActiveTab) {
     set_number_of_enabled_items(app, active_tab, 0);
 }
 
-fn insert_data_to_model(items: &Rc<VecModel<SingleMainListModel>>, data_model_str: ModelRc<SharedString>, data_model_int: ModelRc<i32>, filled_header_row: Option<bool>) {
-    let main = SingleMainListModel {
-        checked: false,
-        header_row: filled_header_row.is_some(),
-        filled_header_row: filled_header_row.unwrap_or(false),
-        focused_row: false,
-        val_str: ModelRc::new(data_model_str),
-        val_int: ModelRc::new(data_model_int),
-    };
-    items.push(main);
-}
-
-fn get_text_messages<T>(component: &T, basic_settings: &BasicSettings) -> (Option<String>, String)
+fn get_text_messages<T>(component: &T) -> (Option<String>, String)
 where
     T: CommonData,
 {
-    let limit = if basic_settings.settings_limit_lines_of_messages {
-        MessageLimit::Lines(500)
-    } else {
-        MessageLimit::NoLimit
-    };
-
     let text_messages = component.get_text_messages();
-    (text_messages.critical.clone(), text_messages.create_messages_text(limit))
+    (text_messages.critical.clone(), text_messages.create_messages_text(MessageLimit::NoLimit))
 }
 
 fn set_common_settings<T>(component: &mut T, custom_settings: &SettingsCustom, stop_flag: &Arc<AtomicBool>)
@@ -194,4 +187,12 @@ where
     component.set_save_also_as_json(custom_settings.save_also_as_json);
     component.set_delete_outdated_cache(custom_settings.delete_outdated_cache_entries);
     component.set_hide_hard_links(custom_settings.hide_hard_links);
+}
+
+fn content_detection_from_index(index: i32) -> ContentDetection {
+    match index {
+        0 => ContentDetection::ExtensionOnly,
+        2 => ContentDetection::AllFiles,
+        _ => ContentDetection::LargeFiles,
+    }
 }

@@ -3,14 +3,12 @@ import { Callabler } from "../globals/callabler.slint";
 import { Translations } from "../globals/translations.slint";
 import { FontSizes } from "../globals/fonts.slint";
 import { GuiState } from "../globals/gui_state.slint";
+import { PopupBackdrop } from "../components/popup_backdrop.slint";
 import { ColorPalette } from "../globals/color_palette.slint";
 
-// One row in the feature table: label | build | runtime
+// One row in the feature table: label | runtime
 component FeatureRow {
     in property <string> label;
-    // When false, the build column shows "-" and runtime color uses simpler logic (FFmpeg/FFprobe).
-    in property <bool> has-build: true;
-    in property <bool> build-ok: false;
     in property <bool> runtime-ok: false;
 
     HorizontalLayout {
@@ -24,23 +22,13 @@ component FeatureRow {
         }
 
         Text {
-            text: root.has-build ? (root.build-ok ? Translations.yes_text : Translations.no_text) : "-";
-            min-width: 70px;
-            horizontal-alignment: center;
-            font-size: FontSizes.normal;
-            color: root.has-build
-                ? (root.build-ok ? ColorPalette.feature_ok_color : ColorPalette.hint_color)
-                : ColorPalette.hint_color;
-        }
-
-        Text {
             text: root.runtime-ok ? Translations.yes_text : Translations.no_text;
             min-width: 70px;
             horizontal-alignment: center;
             font-size: FontSizes.normal;
             color: root.runtime-ok
                 ? ColorPalette.feature_ok_color
-                : (root.has-build && root.build-ok ? ColorPalette.feature_fail_color : ColorPalette.hint_color);
+                : ColorPalette.feature_fail_color;
         }
     }
 }
@@ -56,6 +44,8 @@ export component About inherits VerticalLayout {
         width: root.width - 80px;
         height: root.height - 80px;
         close-policy: PopupClosePolicy.no-auto-close;
+
+        PopupBackdrop { }
 
         Rectangle {
             background: ColorPalette.popup_background;
@@ -91,55 +81,17 @@ export component About inherits VerticalLayout {
                         spacing: 8px;
                         alignment: center;
                         Text { text: ""; min-width: 80px; font-size: FontSizes.normal; font-weight: FontSizes.bold_weight; }
-                        Text { text <=> Translations.build_info_build_text; min-width: 70px; horizontal-alignment: center; font-size: FontSizes.normal; font-weight: FontSizes.bold_weight; }
                         Text { text <=> Translations.build_info_runtime_text; min-width: 70px; horizontal-alignment: center; font-size: FontSizes.normal; font-weight: FontSizes.bold_weight; }
                     }
 
                     FeatureRow {
-                        label: "HEIF HEVC";
-                        has-build: true;
-                        build-ok: GuiState.build_info_heif_build;
-                        runtime-ok: GuiState.build_info_heif_runtime_hevc;
-                    }
-
-                    FeatureRow {
-                        label: "HEIF AV1";
-                        has-build: true;
-                        build-ok: GuiState.build_info_heif_build;
-                        runtime-ok: GuiState.build_info_heif_runtime_av1;
-                    }
-
-                    FeatureRow {
-                        label: "LibRAW";
-                        has-build: true;
-                        build-ok: GuiState.build_info_libraw_build;
-                        runtime-ok: GuiState.build_info_libraw_runtime;
-                    }
-
-                    FeatureRow {
-                        label: "AVIF";
-                        has-build: true;
-                        build-ok: GuiState.build_info_libavif_build;
-                        runtime-ok: GuiState.build_info_libavif_runtime;
-                    }
-
-                    FeatureRow {
                         label: "FFmpeg";
-                        has-build: false;
                         runtime-ok: GuiState.build_info_ffmpeg_runtime;
                     }
 
                     FeatureRow {
                         label: "FFprobe";
-                        has-build: false;
                         runtime-ok: GuiState.build_info_ffprobe_runtime;
-                    }
-
-                    Text {
-                        text <=> Translations.build_info_library_restart_hint_text;
-                        font-size: FontSizes.small;
-                        color: ColorPalette.hint_color;
-                        wrap: word-wrap;
                     }
 
                     if GuiState.build_info_test_file_result != "" : Text {

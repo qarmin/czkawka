@@ -541,7 +541,7 @@ export component ImageCompareOverlay inherits Rectangle {
             ScrollView {
                 y: 1px;
                 height: parent.height - 1px;
-                viewport-width: AppState.compare_images.length * 96px + 8px;
+                content-width: AppState.compare_images.length * 96px + 8px;
 
                 HorizontalLayout {
                     width: AppState.compare_images.length * 96px + 8px;

@@ -6,6 +6,7 @@ use image::{DynamicImage, ImageBuffer, Rgba};
 use image_hasher::{FilterType, HashAlg};
 use tempfile::TempDir;
 
+use crate::common::image::register_image_decoding_hooks;
 use crate::common::tool_data::CommonData;
 use crate::common::traits::Search;
 use crate::tools::similar_images::{GeometricInvariance, SimilarImages, SimilarImagesParameters};
@@ -282,16 +283,15 @@ fn test_similar_images_reference_mode_deletes_only_non_reference() {
     assert!(!duplicate.exists(), "Non-reference duplicate must be deleted (#1643)");
 }
 
-#[cfg(feature = "libavif")]
 fn get_heif_images_path() -> PathBuf {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_resources").join("heif_images");
     assert!(path.exists(), "HEIF test resources not found at \"{}\"", path.to_string_lossy());
     path
 }
 
-#[cfg(feature = "libavif")]
 #[test]
 fn test_similar_images_avif_files_are_found() {
+    register_image_decoding_hooks();
     let test_path = get_heif_images_path();
 
     let params = SimilarImagesParameters::new(30, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false, GeometricInvariance::Off);
@@ -307,9 +307,9 @@ fn test_similar_images_avif_files_are_found() {
     assert_eq!(info.initial_found_files, 3, "Should find all 3 AVIF test files");
 }
 
-#[cfg(feature = "libavif")]
 #[test]
 fn test_similar_images_avif_striped_pattern_are_all_similar_under_gradient_hash() {
+    register_image_decoding_hooks();
     let test_path = get_heif_images_path();
 
     let params = SimilarImagesParameters::new(0, 8, HashAlg::Gradient, FilterType::Lanczos3, false, false, GeometricInvariance::Off);
