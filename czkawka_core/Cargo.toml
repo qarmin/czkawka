@@ -33,7 +33,7 @@ lofty = "0.25"
 # Needed by broken files
 zip = { version = "9.4", features = ["aes-crypto", "bzip2", "deflate", "time"], default-features = false }
 lopdf = "0.47.0"
-sevenz-rust2 = "0.25.0"
+sevenz-rust2 = "0.26.0"
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
 tar = { version = "0.4", default-features = false }
 ruzstd = "0.9"
@@ -99,7 +99,7 @@ handsome_logger = "0.10"
 fun_time = { version = "0.3", features = ["log"] }
 itertools = "0.15"
 static_assertions = "1.1.0"
-file-rotate = "0.8.0"
+file-rotate = "0.9.0"
 
 open = "5.4"
 
