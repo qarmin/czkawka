@@ -48,6 +48,7 @@ use crate::connect_translation::connect_translations;
 use crate::create_calculate_task_size::create_calculate_task_size;
 use crate::disk_usage::connect_disk_usage;
 use crate::help::connect_help;
+use crate::save_on_exit::SaveOnExit;
 use crate::set_initial_gui_info::set_initial_gui_infos;
 use crate::set_initial_scroll_list_data_indexes::set_initial_scroll_list_data_indexes;
 // TODO - at start this should be used, to be sure that rust models are in sync with slint models
@@ -83,9 +84,12 @@ mod file_actions;
 mod gpu_info;
 mod help;
 mod localizer_krokiet;
+#[cfg(target_os = "macos")]
+mod macos_path;
 mod model_operations;
 mod notification_manager;
 mod renderer_selection;
+mod save_on_exit;
 mod set_initial_gui_info;
 mod set_initial_scroll_list_data_indexes;
 mod settings;
@@ -104,6 +108,10 @@ mod ui {
 pub use ui::*;
 
 fn main() {
+    #[cfg(target_os = "macos")]
+    macos_path::add_homebrew_to_path();
+    #[cfg(target_os = "macos")]
+    notification_manager::set_macos_notification_sender();
     renderer_selection::apply_preferred_renderer();
     register_image_decoding_hooks();
     let config_cache_path_set_result = set_config_cache_path("Czkawka", "Krokiet");
@@ -125,6 +133,17 @@ fn main() {
     gpu_info::log_session_info();
 
     create_default_settings_files();
+
+    let save_on_exit = SaveOnExit::default();
+    #[cfg(target_os = "macos")]
+    if let Err(e) = save_on_exit::install_quit_hook(&save_on_exit) {
+        error!("Error during selecting Slint backend: {e}");
+        if let Some(exit_code) = renderer_selection::restart_with_next_renderer() {
+            process::exit(exit_code);
+        }
+        show_critical_error(e.to_string());
+        return;
+    }
 
     let app = match MainWindow::new() {
         Ok(app) => app,
@@ -237,15 +256,20 @@ fn main() {
         app.invoke_scan_starting(active_tab);
     }
 
+    let app_weak = app.as_weak();
+    save_on_exit.set(move || {
+        let app = app_weak.upgrade().expect("MainWindow dropped before settings were saved");
+        save_all_settings_to_file(&app, original_preset_idx, explicit_cli_preset_used);
+    });
+
     match app.run() {
-        Ok(()) => {
-            save_all_settings_to_file(&app, original_preset_idx, explicit_cli_preset_used);
-        }
+        Ok(()) => save_on_exit.run(),
         Err(e) => {
             error!("Error during running the application: {e}");
             show_critical_error(e.to_string());
         }
     }
+    notification_manager::wait_for_pending_notifications();
 }
 
 pub fn show_critical_error(error: String) {

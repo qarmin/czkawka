@@ -76,12 +76,17 @@ jobs:
         run: |
           bash misc/pack_all_backends.sh mac_krokiet_all_backends_${{ env.ARCHNAME }} mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
 
+      - name: Package krokiet as DMG
+        run: |
+          bash misc/pack_macos_dmg.sh mac_krokiet_all_backends_${{ env.ARCHNAME }} mac_krokiet_${{ env.ARCHNAME }}.dmg
+
       - name: Store MacOS
         uses: actions/upload-artifact@v6
         with:
           name: all-${{ runner.os }}-${{ runner.arch }}-${{ env.VERS }}
           path: |
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_${{ env.ARCHNAME }}.dmg
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_opengl_${{ env.ARCHNAME }}
@@ -95,6 +100,7 @@ jobs:
           tag_name: "Nightly"
           files: |
             mac_krokiet_all_backends_${{ env.ARCHNAME }}.zip
+            mac_krokiet_${{ env.ARCHNAME }}.dmg
             mac_czkawka_cli_${{ env.ARCHNAME }}
             mac_krokiet_${{ env.ARCHNAME }}
             mac_krokiet_femtovg_opengl_${{ env.ARCHNAME }}
