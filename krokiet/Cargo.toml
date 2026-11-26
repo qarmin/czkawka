@@ -39,6 +39,7 @@ slint = { version = "1.18.1", default-features = false, features = [
     "std",
     "backend-winit",
     "compat-1-2",
+    "unstable-fontique-010",
 ] }
 
 rodio = { version = "0.23.0", default-features = false, features = ["playback", "symphonia-all"], optional = true }
