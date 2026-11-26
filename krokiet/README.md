@@ -31,6 +31,8 @@ sudo apt install ffmpeg
 brew install ffmpeg
 ```
 
+On macOS Krokiet is also available as `mac_krokiet_arm64.dmg` - open it and drag `Krokiet.app` to `Applications`. The app is not signed with an Apple Developer certificate, so the first start must be allowed in System Settings -> Privacy & Security -> "Open Anyway". The app finds `ffmpeg` installed by Homebrew in `/opt/homebrew/bin` or `/usr/local/bin`. To scan protected locations (e.g. the Photos library), add `Krokiet.app` in System Settings -> Privacy & Security -> Full Disk Access. Pre-built macOS builds are Apple Silicon only - on Intel Macs use `brew install czkawka` or `cargo install krokiet --locked`.
+
 ### Windows
 
 - ffmpeg: `choco install ffmpeg` or download from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) and place `ffmpeg.exe` in your `PATH`.

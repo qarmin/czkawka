@@ -93,7 +93,7 @@ Yes. Nightly builds compiled from the latest master branch commits are published
 
 - **Linux**: any distribution with glibc 2.17 or newer (x86_64 and arm64) - almost every Linux distribution released after 2014 (e.g. RHEL/CentOS 7, Debian 8, Ubuntu 14.04 and newer) meets this. The pre-built binaries are built with `cargo zigbuild` against glibc 2.17, so they do not depend on a newer system glibc.
 - **Windows**: Windows 10 or newer. Krokiet binaries are self-contained.
-- **macOS**: Krokiet binaries are available for both Intel (x86_64) and Apple Silicon (ARM64).
+- **macOS**: macOS 11 or newer. Pre-built Krokiet binaries and the DMG are available for Apple Silicon (ARM64) only. On Intel Macs install it with Homebrew (`brew install czkawka`, which also installs `krokiet`) or compile it (`cargo install krokiet --locked`).
 
 ### Q: How do I run it, and what do I need to install? (Linux / Windows / macOS)
 
@@ -108,14 +108,16 @@ Per platform:
 
 - **Linux**: download `linux_krokiet_x86_64` (or `_arm64`), `chmod +x` it, and run. To install `ffmpeg` you can run `sudo misc/install_scripts/install_linux.sh`.
 - **Windows**: download a `windows_krokiet_on_*` build and run the `.exe` - no runtime to install for the core app. Install `ffmpeg` (e.g. `winget install Gyan.FFmpeg` or `misc/install_scripts/install_windows.bat`) only if you need Similar Videos.
-- **macOS**: download `mac_krokiet_arm64` (Apple Silicon) or `mac_krokiet_x86_64` (Intel), then:
+- **macOS**: download `mac_krokiet_arm64.dmg`, open it and drag `Krokiet.app` to `Applications`. The app is not signed with an Apple Developer certificate, so on the first start macOS refuses to open it - go to System Settings -> Privacy & Security and click "Open Anyway" (or run `xattr -dr com.apple.quarantine /Applications/Krokiet.app`). The app contains the all-backends build, which picks a working renderer by itself. Raw binaries are still available - download `mac_krokiet_arm64`, then:
 
   ```bash
   chmod +x mac_krokiet_arm64
   ./mac_krokiet_arm64
   ```
 
-  If macOS says "cannot be opened because it is from an unidentified developer", right-click the file and choose "Open", then confirm. If it opens as text in TextEdit, the executable bit is not set - run `chmod +x` first. To install `ffmpeg` use `brew install ffmpeg` (or run `misc/install_scripts/install_macos.sh`).
+  If macOS says "cannot be opened because it is from an unidentified developer", allow it in System Settings -> Privacy & Security -> "Open Anyway". If it opens as text in TextEdit, the executable bit is not set - run `chmod +x` first. To install `ffmpeg` use `brew install ffmpeg` (or run `misc/install_scripts/install_macos.sh`); `Krokiet.app` started from Finder finds it in `/opt/homebrew/bin` and `/usr/local/bin`.
+
+  To scan protected locations (e.g. the Photos or Mail library, other users' folders, Time Machine backups), add `Krokiet.app` in System Settings -> Privacy & Security -> Full Disk Access. With the raw binary the permission belongs to the terminal app it is started from (e.g. Terminal or iTerm), not to the binary itself.
 
 ### Q: Which Linux packages are available?
 
@@ -126,12 +128,12 @@ Per platform:
 
 ### Q: Similar Videos does not work - ffmpeg not found
 
-The **Similar Videos** tool requires `ffmpeg` to be installed separately and available in `PATH`. Krokiet and czkawka_cli do not bundle ffmpeg.
+The **Similar Videos** tool requires both `ffmpeg` and `ffprobe` to be installed separately and available in `PATH`. Krokiet and czkawka_cli do not bundle them. Package managers install both, but standalone downloads (e.g. the macOS builds from evermeet.cx) ship `ffprobe` as a separate file - with only `ffmpeg` installed the tool still reports that FFmpeg/FFprobe is missing.
 
 | OS      | Installation                                                                                                                                                                                                           |
 |---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Linux   | `sudo apt install ffmpeg` (Debian/Ubuntu), `sudo pacman -S ffmpeg` (Arch)                                                                                                                                              |
-| macOS   | `brew install ffmpeg`                                                                                                                                                                                                  |
+| macOS   | `brew install ffmpeg` (installs both `ffmpeg` and `ffprobe`)                                                                                                                                                           |
 | Windows | Install from [ffmpeg.org](https://ffmpeg.org/download.html) and add the folder containing `ffmpeg.exe` to the system `PATH`. On Windows, you can also place `ffmpeg.exe` in the same folder as the Krokiet executable. |
 
 After installation, restart Krokiet or the CLI. On Windows, a new terminal session (or system restart) may be required for the PATH change to take effect.

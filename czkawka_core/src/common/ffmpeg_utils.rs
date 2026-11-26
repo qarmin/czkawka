@@ -2,28 +2,71 @@ use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
 use crate::common::process_utils::disable_windows_console_window;
+use crate::flc;
+use crate::helpers::messages::Messages;
 use crate::tools::video_optimizer::{HardwareEncoder, VideoCodec};
 
+/// Whether the external programs needed by the video tools can be started from `PATH`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FfmpegAvailability {
+    Available,
+    MissingFfmpeg,
+    MissingFfprobe,
+    MissingFfmpegAndFfprobe,
+}
+
+impl FfmpegAvailability {
+    fn from_probes(ffmpeg_starts: bool, ffprobe_starts: bool) -> Self {
+        match (ffmpeg_starts, ffprobe_starts) {
+            (true, true) => Self::Available,
+            (false, true) => Self::MissingFfmpeg,
+            (true, false) => Self::MissingFfprobe,
+            (false, false) => Self::MissingFfmpegAndFfprobe,
+        }
+    }
+
+    /// Names of the programs that cannot be started, empty when everything is available.
+    pub fn missing_programs(self) -> &'static str {
+        match self {
+            Self::Available => "",
+            Self::MissingFfmpeg => "ffmpeg",
+            Self::MissingFfprobe => "ffprobe",
+            Self::MissingFfmpegAndFfprobe => "ffmpeg, ffprobe",
+        }
+    }
+}
+
+fn program_starts(name: &str) -> bool {
+    let mut command = Command::new(name);
+    disable_windows_console_window(&mut command);
+    command.arg("-version").stdout(Stdio::null()).stderr(Stdio::null()).status().is_ok_and(|s| s.success())
+}
+
+/// Checks which of `ffmpeg` and `ffprobe` can be started from `PATH`.
+pub fn check_ffmpeg_availability() -> FfmpegAvailability {
+    FfmpegAvailability::from_probes(program_starts("ffmpeg"), program_starts("ffprobe"))
+}
+
+/// `true` when both `ffmpeg` and `ffprobe` can be started from `PATH`.
 pub fn check_if_ffprobe_ffmpeg_exists() -> bool {
-    let mut ffmpeg_command = Command::new("ffmpeg");
-    disable_windows_console_window(&mut ffmpeg_command);
-    let ffmpeg_ok = ffmpeg_command
-        .arg("-version")
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .is_ok_and(|s| s.success());
+    check_ffmpeg_availability() == FfmpegAvailability::Available
+}
 
-    let mut ffprobe_command = Command::new("ffprobe");
-    disable_windows_console_window(&mut ffprobe_command);
-    let ffprobe_ok = ffprobe_command
-        .arg("-version")
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .is_ok_and(|s| s.success());
-
-    ffprobe_ok && ffmpeg_ok
+/// Returns `false` and sets a critical message naming the missing programs when `ffmpeg` or `ffprobe`
+/// cannot be started.
+pub(crate) fn ensure_ffmpeg_programs_available(messages: &mut Messages) -> bool {
+    let availability = check_ffmpeg_availability();
+    if availability == FfmpegAvailability::Available {
+        return true;
+    }
+    messages.critical = Some(format!(
+        "{}\n{}",
+        flc!("core_ffmpeg_not_found"),
+        flc!("core_ffmpeg_missing_programs", programs = availability.missing_programs())
+    ));
+    #[cfg(target_os = "windows")]
+    messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
+    false
 }
 
 /// Returns the subset of hardware encoders that actually work on this machine.
@@ -122,4 +165,17 @@ pub fn get_available_hw_accelerations() -> Vec<String> {
         .filter(|l| !l.is_empty())
         .map(str::to_string)
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn availability_from_probes() {
+        assert_eq!(FfmpegAvailability::from_probes(true, true), FfmpegAvailability::Available);
+        assert_eq!(FfmpegAvailability::from_probes(false, true), FfmpegAvailability::MissingFfmpeg);
+        assert_eq!(FfmpegAvailability::from_probes(true, false), FfmpegAvailability::MissingFfprobe);
+        assert_eq!(FfmpegAvailability::from_probes(false, false), FfmpegAvailability::MissingFfmpegAndFfprobe);
+    }
 }

@@ -11,7 +11,7 @@ use crate::common::consts::{
     PDF_FILES_EXTENSIONS, SEVENZ_FILES_EXTENSIONS, SVG_FILES_EXTENSIONS, TAR_FILES_EXTENSIONS, TOML_FILES_EXTENSIONS, VIDEO_FILES_EXTENSIONS, XML_FILES_EXTENSIONS,
     XZ_FILES_EXTENSIONS, YAML_FILES_EXTENSIONS, ZIP_FILES_EXTENSIONS, ZST_FILES_EXTENSIONS,
 };
-use crate::common::ffmpeg_utils::check_if_ffprobe_ffmpeg_exists;
+use crate::common::ffmpeg_utils::ensure_ffmpeg_programs_available;
 use crate::common::model::WorkContinueStatus;
 use crate::common::progress_data::ProgressData;
 use crate::common::tool_data::{CommonData, CommonToolData, DeleteItemType, DeleteMethod};
@@ -28,10 +28,7 @@ impl Search for BrokenFiles {
 
         let () = (|| {
             let video_types = CheckedTypes::VIDEO_FFPROBE | CheckedTypes::VIDEO_FFMPEG;
-            if self.params.checked_types.intersects(video_types) && !check_if_ffprobe_ffmpeg_exists() {
-                self.common_data.text_messages.critical = Some(flc!("core_ffmpeg_not_found"));
-                #[cfg(target_os = "windows")]
-                self.common_data.text_messages.errors.push(flc!("core_ffmpeg_not_found_windows"));
+            if self.params.checked_types.intersects(video_types) && !ensure_ffmpeg_programs_available(&mut self.common_data.text_messages) {
                 return;
             }
 

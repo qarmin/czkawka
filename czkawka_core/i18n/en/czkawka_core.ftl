@@ -34,6 +34,7 @@ core_needs_to_set_at_least_one_bad_name_option = Cannot start scan, when there i
 
 core_ffmpeg_not_found = Cannot find a proper installation of FFmpeg or FFprobe. These are external programs that must be installed manually.
 core_ffmpeg_not_found_windows = Be sure that ffmpeg.exe and ffprobe.exe are available in PATH or are placed directly in the same folder as the app executable
+core_ffmpeg_missing_programs = Missing programs: { $programs }
 
 core_invalid_symlink_infinite_recursion = Infinite recursion
 core_invalid_symlink_non_existent_destination = Non-existent destination file
