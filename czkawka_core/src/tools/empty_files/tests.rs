@@ -2,7 +2,7 @@ use std::fs;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use tempfile::TempDir;
+use tempfile::{Builder, TempDir};
 
 use crate::common::tool_data::CommonData;
 use crate::common::traits::Search;
@@ -114,4 +114,143 @@ fn test_find_whitespace_content_files() {
 
     // whitespace.txt + null.txt (null is a subset of whitespace) + truly_empty.txt
     assert_eq!(finder.get_empty_files().len(), 3, "Should find whitespace, null, and zero-size files");
+}
+
+#[cfg(unix)]
+mod included_hidden_dirs {
+    use std::path::{Path, PathBuf};
+
+    use super::*;
+
+    fn visible_temp_dir() -> TempDir {
+        Builder::new().prefix("czk_hidden_test_").tempdir().unwrap()
+    }
+
+    fn create_empty(path: &Path) {
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(path, b"").unwrap();
+    }
+
+    fn scan(included: Vec<PathBuf>, excluded_items: &[&str]) -> Vec<String> {
+        let mut finder = EmptyFiles::default();
+        finder.set_included_paths(included);
+        finder.set_excluded_items(excluded_items.iter().map(ToString::to_string).collect());
+        finder.set_recursive_search(true);
+        finder.search(&Arc::new(AtomicBool::new(false)), None);
+
+        let mut names: Vec<String> = finder.get_empty_files().iter().map(|e| e.path.to_string_lossy().into_owned()).collect();
+        names.sort();
+        names
+    }
+
+    fn relative(base: &Path, found: Vec<String>) -> Vec<String> {
+        let prefix = format!("{}/", base.display());
+        found.into_iter().map(|p| p.strip_prefix(&prefix).unwrap_or(&p).to_string()).collect()
+    }
+
+    #[test]
+    fn included_hidden_root_is_scanned_despite_hidden_pattern() {
+        let tmp = visible_temp_dir();
+        let hidden = tmp.path().join(".A");
+        create_empty(&hidden.join("file.txt"));
+        create_empty(&hidden.join("sub/deep/file.txt"));
+
+        let found = relative(tmp.path(), scan(vec![hidden], &["*/.*"]));
+        assert_eq!(found, vec![".A/file.txt", ".A/sub/deep/file.txt"]);
+    }
+
+    #[test]
+    fn hidden_root_with_default_preset_is_scanned() {
+        let tmp = visible_temp_dir();
+        let hidden = tmp.path().join(".A");
+        create_empty(&hidden.join("file.txt"));
+
+        let found = relative(tmp.path(), scan(vec![hidden], &["DEFAULT"]));
+        assert_eq!(found, vec![".A/file.txt"]);
+    }
+
+    #[test]
+    fn hidden_subdir_inside_included_hidden_root_is_still_excluded() {
+        let tmp = visible_temp_dir();
+        let hidden = tmp.path().join(".A");
+        create_empty(&hidden.join("file.txt"));
+        create_empty(&hidden.join("sub/file.txt"));
+        create_empty(&hidden.join(".b/file.txt"));
+        create_empty(&hidden.join("sub/.c/file.txt"));
+
+        let found = relative(tmp.path(), scan(vec![hidden], &["*/.*"]));
+        assert_eq!(found, vec![".A/file.txt", ".A/sub/file.txt"]);
+    }
+
+    #[test]
+    fn hidden_dir_inside_normal_root_is_still_excluded() {
+        let tmp = visible_temp_dir();
+        let root = tmp.path().join("B");
+        create_empty(&root.join("visible.txt"));
+        create_empty(&root.join(".hidden/file.txt"));
+
+        let found = relative(tmp.path(), scan(vec![root], &["*/.*"]));
+        assert_eq!(found, vec!["B/visible.txt"]);
+    }
+
+    #[test]
+    fn hidden_sibling_not_included_stays_excluded() {
+        let tmp = visible_temp_dir();
+        let included = tmp.path().join(".A");
+        create_empty(&included.join("file.txt"));
+        create_empty(&tmp.path().join(".other/file.txt"));
+        let normal = tmp.path().join("B");
+        create_empty(&normal.join("file.txt"));
+        create_empty(&normal.join(".hidden/file.txt"));
+
+        let found = relative(tmp.path(), scan(vec![included, normal], &["*/.*"]));
+        assert_eq!(found, vec![".A/file.txt", "B/file.txt"]);
+    }
+
+    #[test]
+    fn unrelated_pattern_still_applies_inside_included_hidden_root() {
+        let tmp = visible_temp_dir();
+        let hidden = tmp.path().join(".A");
+        create_empty(&hidden.join("file.txt"));
+        create_empty(&hidden.join(".git/config"));
+        create_empty(&hidden.join("sub/.git/config"));
+
+        let found = relative(tmp.path(), scan(vec![hidden], &["*/.*", "*/.git/*"]));
+        assert_eq!(found, vec![".A/file.txt"]);
+    }
+
+    #[test]
+    fn hidden_root_nested_in_included_normal_root_is_dropped_as_redundant_and_excluded() {
+        let tmp = visible_temp_dir();
+        let parent = tmp.path().join("P");
+        create_empty(&parent.join("file.txt"));
+        create_empty(&parent.join(".h/file.txt"));
+        let nested_hidden = parent.join(".h");
+
+        let found = relative(tmp.path(), scan(vec![parent, nested_hidden], &["*/.*"]));
+        assert_eq!(found, vec!["P/file.txt"]);
+    }
+
+    #[test]
+    fn pattern_with_trailing_wildcard_is_lifted_for_included_root() {
+        let tmp = visible_temp_dir();
+        let root = tmp.path().join("node_modules");
+        create_empty(&root.join("a.txt"));
+        let normal = tmp.path().join("N");
+        create_empty(&normal.join("node_modules/a.txt"));
+        create_empty(&normal.join("b.txt"));
+
+        let found = relative(tmp.path(), scan(vec![root, normal], &["*/node_modules/*"]));
+        assert_eq!(found, vec!["N/b.txt", "node_modules/a.txt"]);
+    }
+
+    #[test]
+    fn without_excluded_items_hidden_dirs_are_scanned() {
+        let tmp = visible_temp_dir();
+        create_empty(&tmp.path().join(".A/file.txt"));
+        create_empty(&tmp.path().join("B/.c/file.txt"));
+
+        let found = relative(tmp.path(), scan(vec![tmp.path().to_path_buf()], &[]));
+        assert_eq!(found, vec![".A/file.txt", "B/.c/file.txt"]);
+    }
 }
