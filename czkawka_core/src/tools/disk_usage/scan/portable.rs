@@ -67,7 +67,7 @@ fn scan_directory(path: &Path, name: &str, context: &ScanContext) -> DiskNode {
     DiskNode::directory(name, children)
 }
 
-fn is_excluded(path: &Path, is_directory: bool, context: &ScanContext) -> bool {
+pub(super) fn is_excluded(path: &Path, is_directory: bool, context: &ScanContext) -> bool {
     if !context.ignore_excluded_items && context.excluded_items.is_excluded(path) {
         return true;
     }
